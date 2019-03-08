@@ -4,21 +4,21 @@ import okhttp3.*;
 
 import java.net.URL;
 
-public class ApiRequest{
+public class ApiRequest {
 
-    public static String executeQuery(String endPoint, String request, String query, boolean api){
+    public static String executeQuery(String endPoint, String request, String query, boolean api) {
         String result = null;
-        try{
+        try {
             String baseURL = "";
-            if(api){
-                baseURL+="http://192.168.1.69/DiscordBotAPI/public/index.php/api/";
+            if (api) {
+                baseURL += "http://192.168.1.69/DiscordBotAPI/public/index.php/api/";
             }
             URL url = new URL(baseURL + endPoint);
             OkHttpClient client = new OkHttpClient();
             Request.Builder builder = new Request.Builder().url(url);
             RequestBody body;
 
-            switch(request){
+            switch (request) {
                 case "GET":
                     break;
                 case "ADD":
@@ -28,7 +28,7 @@ public class ApiRequest{
                     builder.post(body);
                     break;
                 case "UPDATE":
-                    if(query == null){
+                    if (query == null) {
                         query = "{}";
                     }
                     body = RequestBody.create(
@@ -41,18 +41,16 @@ public class ApiRequest{
                     break;
             }
             Response response = client.newCall(builder.build()).execute();
-            if(response.code() == 200){
+            if (response.code() == 200) {
                 result = response.body().string();
-            }
-            else{
+            } else {
                 System.out.println("FAILURE");
                 System.out.println(response.body().string());
                 System.out.println(url);
 
             }
 
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
