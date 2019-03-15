@@ -2,13 +2,16 @@ package Bot;
 
 import Audio.AudioPlayerSendHandler;
 import Audio.TrackEndListener;
+
 import static Bot.DiscordBot.*;
+
 import Exchange.ExchangeData;
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
 import static net.dv8tion.jda.core.Permission.BAN_MEMBERS;
 
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -24,8 +27,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+/**
+ * CommandExecution.java holds methods of INTERACTIVE type commands invoked via reflection
+ *
+ * @author Ricky Loader
+ * @version 5000.0
+ */
 public class CommandExecution{
 
+    // Information relating to the guild, user, and message which invoked the method
     private GuildMessageReceivedEvent e;
     private MessageChannel chan;
     private DiscordCommand c;
@@ -33,7 +43,13 @@ public class CommandExecution{
     private GuildController admin;
     private String msg;
 
-
+    /**
+     * Constructor takes a message event and a command object. Command object holds information relevant to the
+     * command and the event holds information about the user, guild, and message.
+     *
+     * @param e Message event
+     * @param c Command that was called
+     */
     public CommandExecution(GuildMessageReceivedEvent e, DiscordCommand c){
         this.e = e;
         this.chan = e.getChannel();
@@ -41,16 +57,13 @@ public class CommandExecution{
         this.self = e.getGuild().getSelfMember().getUser();
         this.admin = e.getGuild().getController();
         this.msg = e.getMessage().getContentDisplay();
-
     }
 
-    private void brewCount(){
-        String num = e.getMessage().getContentDisplay().split(" ")[0];
-        String author = e.getAuthor().getAsMention();
-        String result = "Hey @everyone my name is " + author + " and I have had " + num + " brews!";
-        chan.sendMessage(result).queue();
-    }
-
+    /**
+     * Sends the user a message with an invite back to the server, apologises for banning them.
+     *
+     * @param loser The user to be banned
+     */
     private void comfortBan(User loser){
         if(loser.isBot() || loser.isFake()){
             return;
@@ -64,42 +77,80 @@ public class CommandExecution{
         pc.close();
     }
 
+    /**
+     * Generates an invite to the guild where the message was received.
+     *
+     * @return The generated invite
+     */
     private String getInvite(){
         Invite invite = e.getChannel().createInvite().complete();
         String result = invite.getURL();
         return result;
     }
 
+    /**
+     * Alcoholic command
+     */
     private void alcoholic(){
         String user = e.getAuthor().getAsMention();
         String result = "Hey @everyone my name is " + user + " and I am an alcoholic";
         chan.sendMessage(result).queue();
     }
 
+    /**
+     * Invite! command
+     */
     private void invite(){
         send(getInvite());
     }
 
+    /**
+     * Brews command
+     */
+    private void brewCount(){
+        String num = e.getMessage().getContentDisplay().split(" ")[0];
+        String author = e.getAuthor().getAsMention();
+        String result = "Hey @everyone my name is " + author + " and I have had " + num + " brews!";
+        send(result);
+    }
+
+    /**
+     * New name command. Generates a random name up to 15 characters in length.
+     */
     private void randomName(){
         Random rand = new Random();
         int attempts = 0;
         String name = "";
         int maxLength = 15;
 
+        // 3 attempts
         while(attempts <= 2){
+
+            // Get a random word
             String word = c.getLink();
+
+            // Append it to the current name if it can fit
             if(name.length() + word.length() <= maxLength){
                 name += word;
             }
+
+            // Either way the attempts increment
             attempts++;
         }
+
+        // How many characters left to to make the max length
         int charToMax = (maxLength - name.length());
+
+        // Generate a number from 0 to the maximum number that could fit in that space. E.g (10^5)-1 = 99,999 (5 chars)
         if(charToMax > 0){
             name += rand.nextInt(10 ^ charToMax);
         }
         chan.sendMessage(name).queue();
     }
 
+    /**
+     * TODO implement
+     */
     private void flagImage(){
       /*  Message m = getLastMessage(1);
         if(m.getAuthor() == self){
@@ -113,12 +164,20 @@ public class CommandExecution{
         }*/
     }
 
-
-    private Message getLastMessage(int index){
-        Message m = chan.getHistory().retrievePast(index + 1).complete().get(index);
+    /**
+     * Get the message n+1 messages back in the current channel. 0 will be the message used to invoke the command.
+     *
+     * @param n The index of the message to obtain, 0 being the most recent.
+     * @return The message at the given index.
+     */
+    private Message getLastMessage(int n){
+        Message m = chan.getHistory().retrievePast(n + 1).complete().get(n);
         return m;
     }
 
+    /**
+     * TODO implement
+     */
     private void tagImage(){
         String tag = e.getMessage().getContentDisplay().toLowerCase().replace("tag: ", "");
         Message last = getLastMessage(1);
@@ -129,9 +188,14 @@ public class CommandExecution{
         DiscordCommand.addCommand(c, commands);
     }
 
+    /**
+     * Send a message containing the marked targets to the user if they have permission, mark them if they don't.
+     */
     private void killList(){
         String summary;
         User author = e.getAuthor();
+
+        // Authorised user
         if(isAuthorised(author)){
             if(targets.isEmpty()){
                 summary = "There are no targets sir";
@@ -153,15 +217,21 @@ public class CommandExecution{
             pm.sendMessage(summary).queue();
             pm.close();
         }
+
+        // Mark the unauthorised user
         else{
             send(unauthReact(author));
         }
     }
 
+    /**
+     * Pardon all targets if the user has permission, mark them if they don't.
+     */
     private void pardonAll(){
         User author = e.getAuthor();
         String msg = "There are no targets bro fuck off";
 
+        // Authorised user
         if(isAuthorised(author)){
             if(targets.isEmpty()){
                 return;
@@ -180,11 +250,15 @@ public class CommandExecution{
             targets = new ArrayList<>();
             send(msg);
         }
+        // Mark the unauthorised user
         else{
             send(unauthReact(author));
         }
     }
 
+    /**
+     * Ban all targets on the kill list and send a summary of the operation.
+     */
     private void purgeTargets(){
         int killed = 0;
         String msg;
@@ -220,33 +294,59 @@ public class CommandExecution{
         targets = new ArrayList<>();
     }
 
+    /**
+     * Delete the given message
+     *
+     * @param m Message to be deleted
+     */
     private void deleteMessage(Message m){
         chan.deleteMessageById(m.getId()).complete();
     }
 
+    /**
+     * !play command. Plays the given youtube URL in the voice channel
+     */
     private void play(){
         String audio = e.getMessage().getContentDisplay().replace("!play ", "");
         deleteMessage(getLastMessage(0));
         playAudio(audio, new TrackEndListener(null, e.getGuild()));
     }
 
+    /**
+     * Plays the given audio in the voice channel.
+     *
+     * @param audio    The URL to be played
+     * @param listener The instance of TrackEndListener to be used
+     */
     private void playAudio(String audio, TrackEndListener listener){
         VoiceChannel vc = e.getMember().getVoiceState().getChannel();
-        if(vc==null){
+
+        // User is not in a voice channel
+        if(vc == null){
             send(e.getAuthor().getAsMention() + " join a voice channel first cunt");
             return;
         }
+        // Initialise audio player
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioPlayer player = playerManager.createPlayer();
         player.addListener(listener);
         e.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
+
+        // Join the voice channel
         e.getGuild().getAudioManager().openAudioConnection(vc);
 
+        // Load the URL in to the player
         playerManager.loadItem(audio, new AudioLoadResultHandler(){
+
+            /**
+             * Play the audio once loaded
+             *
+             * @param audioTrack Track loaded in to player
+             */
             @Override
             public void trackLoaded(AudioTrack audioTrack){
-                System.out.println(audioTrack.getIdentifier()+" loaded!");
+                System.out.println(audioTrack.getIdentifier() + " loaded!");
                 player.playTrack(audioTrack);
             }
 
@@ -267,22 +367,32 @@ public class CommandExecution{
         });
     }
 
+    /**
+     * Returns whether a user has the permissions to execute a ban related command. Bot perms must be checked as it does
+     * the banning, user perms checked to stop users using the bot to ban people if they can't.
+     *
+     * @param killer User attempting to call a ban related command
+     * @return Boolean authorised to ban users
+     */
     private boolean isAuthorised(User killer){
         boolean userPerm = admin.getGuild().getMember(killer).hasPermission(BAN_MEMBERS);
         boolean botPerm = admin.getGuild().getMember(self).hasPermission(BAN_MEMBERS);
         return userPerm && botPerm;
     }
 
+    /**
+     * Adds the user to the kill list if they aren't already on it, warns them otherwise.
+     *
+     * @param author User who called a command they weren't authorised for
+     * @return The reply to be sent to the User
+     */
     private String unauthReact(User author){
         DiscordUser authorObj = findUser(author.getAsMention());
-        String reply;
+        String reply = "";
         if(!targets.contains(author)){
             if(authorObj.markUser()){
                 targets.add(author);
                 reply = author.getAsMention() + " You think I wouldn't notice you aren't authorised to do that?\nNow YOU'RE on the kill list cunt";
-            }
-            else{
-                reply = author.getAsMention() + " You're not authorised to do that cunt";
             }
         }
         else{
@@ -292,6 +402,10 @@ public class CommandExecution{
         return reply;
     }
 
+    /**
+     * Unban all banned users
+     * TODO check
+     */
     private void clearBanList(){
         User author = e.getAuthor();
         String summary = "";
@@ -315,6 +429,9 @@ public class CommandExecution{
 
     }
 
+    /**
+     * Show a table containing all the banned users
+     */
     private void showBans(){
         List<User> targets = getBans();
         User author = e.getAuthor();
@@ -339,58 +456,33 @@ public class CommandExecution{
         send(summary);
     }
 
-    private void mark(){
-        String targetName = msg.replace("mark @", "");
-        User target = getServerUser(targetName);
-        User author = e.getAuthor();
-        String reply;
-        String mention = author.getAsMention();
-
-        if(isAuthorised(author)){
-            if(target != null){
-                if(!targets.contains(target)){
-                    DiscordUser authorObj = findUser(target.getAsMention());
-                    if(authorObj.markUser()){
-                        targets.add(target);
-                        reply = mention + " " + targetName + " has been added to the kill list! Congratulations sir!";
-                    }
-                    else{
-                        reply = mention + " I was unable to add " + targetName + " to the kill list, but now he knows you want to dumbass";
-                    }
-                }
-                else{
-                    reply = author.getAsMention() + " " + target.getName() + " is already on the kill list, now he knows cunt, better execute order 66 real quick";
-                }
-            }
-            else{
-                reply = author.getAsMention() + " that cunt doesn't exist, fuck off";
-            }
-        }
-        else{
-            reply = unauthReact(author);
-        }
-        send(reply);
-    }
-
-    private void logTTS(String msg,User author) {
+    /**
+     * Log a TTS call in a dedicated channel.
+     *
+     * @param msg    The content that was converted from text to speech
+     * @param author The user who called TTS
+     */
+    private void logTTS(String msg, User author){
         MessageChannel log = e.getGuild().getTextChannelsByName("tts-log", true).get(0);
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
-        builder.setDescription("**Author**: "+author.getAsMention() + " **Submitted At**: "+new Date());
+        builder.setDescription("**Author**: " + author.getAsMention() + " **Submitted At**: " + new Date());
         builder.setTitle("**TTS Log**");
-        builder.addField("Contents:",msg,false);
+        builder.addField("Contents:", msg, false);
         log.sendMessage(builder.build()).queue();
     }
 
-
+    /**
+     * .command (TTS) Play the given text in the voice channel, delete the message, log the result.
+     */
     private void chatTime(){
         try{
-            String base = "https://talk.moustacheminer.com/api/gen.wav?dectalk=";
+            String base = "http://192.168.1.69/DiscordBotAPI/public/index.php/api/dectalk/";
             String content = msg.replaceFirst(".", "");
             String url = URLEncoder.encode(content, "UTF-8");
             String audio = base + url;
-            logTTS(content,e.getAuthor());
-            playAudio(audio,null);
+            logTTS(content, e.getAuthor());
+            playAudio(audio, new TrackEndListener(null, e.getGuild()));
             deleteMessage(getLastMessage(0));
         }
         catch(UnsupportedEncodingException e){
@@ -398,6 +490,59 @@ public class CommandExecution{
         }
     }
 
+    /**
+     * Mark a user for extermination by the bot
+     */
+    private void mark(){
+        String targetName = msg.replace("mark @", "");
+        User target = getServerUser(targetName);
+        User author = e.getAuthor();
+        String reply;
+        String mention = author.getAsMention();
+
+        // Authorised user
+        if(isAuthorised(author)){
+
+            // Target is provided
+            if(target != null){
+
+                // Target is not on the kill list
+                if(!targets.contains(target)){
+                    DiscordUser authorObj = findUser(target.getAsMention());
+
+                    // Successfully marked the target
+                    if(authorObj.markUser()){
+                        targets.add(target);
+                        reply = mention + " " + targetName + " has been added to the kill list! Congratulations sir!";
+                    }
+
+                    // Marking target failed for API related reason
+                    else{
+                        reply = mention + " I was unable to add " + targetName + " to the kill list, but now he knows you want to dumbass";
+                    }
+                }
+
+                // Target is already on the kill list
+                else{
+                    reply = author.getAsMention() + " " + target.getName() + " is already on the kill list, now he knows cunt, better execute order 66 real quick";
+                }
+            }
+
+            // Target is not provided
+            else{
+                reply = author.getAsMention() + " that cunt doesn't exist, fuck off";
+            }
+        }
+        // Unauthorised user
+        else{
+            reply = unauthReact(author);
+        }
+        send(reply);
+    }
+
+    /**
+     *
+     */
     private void pardon(){
         String targetName = msg.replace("pardon @", "");
         User target = getServerUser(targetName);
@@ -405,27 +550,42 @@ public class CommandExecution{
         String reply;
         String mention = "@everyone ";
 
+        // Authorised user
         if(isAuthorised(author)){
+
+            // Target is currently marked
             if(targets.contains(target)){
                 DiscordUser targetObj = findUser(target.getAsMention());
+
+                // Successfully pardoned the target
                 if(targetObj.pardonUser()){
                     targets.remove(target);
                     reply = mention + target.getName() + " was successfully pardoned, congratulations sir";
                 }
+                // Pardon failed for API related reason
                 else{
                     reply = mention + target.getName() + " was not pardoned";
                 }
             }
+            // Target is not marked
             else{
                 reply = author.getAsMention() + " Nobody by that name is on the kill list cunt";
             }
         }
+        // Unauthorised user
         else{
             reply = unauthReact(author);
         }
         send(reply);
     }
 
+    /**
+     * Ban or unban a given user.
+     *
+     * @param ban    Boolean true = ban false = unban
+     * @param target The user for the action to be performed on
+     * @return A String result of the action
+     */
     private String adminAction(boolean ban, User target){
         String all = "@everyone";
         String result = all + " Ladies and gentlemen, we got him.";
@@ -442,59 +602,22 @@ public class CommandExecution{
         return result;
     }
 
+    /**
+     * Obtain a list of user objects from the list of banned member objects
+     *
+     * @return A list of all banned users of the current guild
+     */
     private List<User> getBans(){
         Guild server = e.getGuild();
         return server.getBanList().complete().stream().map(ban -> ban.getUser()).collect(Collectors.toList());
     }
 
-    private void adminCommand(){
-        boolean ban = !msg.contains("unban");
-        String target;
-        User user;
-        if(ban){
-            target = msg.replace("ban @", "");
-            user = getServerUser(target);
-        }
-        else{
-            target = msg.replace("unban ", "");
-            user = getBannedUser(target);
-        }
-
-        Guild server = admin.getGuild();
-        String mention = e.getAuthor().getAsMention();
-        String result = mention + " HOW DARE YOU DISRESPECT ME, I'M NOT ALLOWED TO DO THAT";
-        boolean userPerm = server.getMember(e.getAuthor()).hasPermission(BAN_MEMBERS);
-        boolean botPerm = server.getSelfMember().hasPermission(BAN_MEMBERS);
-
-        if(userPerm && botPerm){
-            if(user == null){
-                result = mention + " That cunt doesn't exist you fucking idiot.";
-            }
-            else{
-                try{
-                    result = adminAction(ban, user);
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-        chan.sendMessage(result).queue();
-    }
-
-    public User getBannedUser(String target){
-        Guild server = e.getGuild();
-        User result = null;
-        List<User> bannedUsers = getBans();
-        for(User u : bannedUsers){
-            if(u.getName().equalsIgnoreCase(target)){
-                result = u;
-                break;
-            }
-        }
-        return result;
-    }
-
+    /**
+     * Get the user object of a given @mention
+     *
+     * @param target String containing thr @mention of a user
+     * @return The user object or null if the target does not exist
+     */
     public User getServerUser(String target){
         Guild server = e.getGuild();
         User result = null;
@@ -509,6 +632,9 @@ public class CommandExecution{
         return result;
     }
 
+    /**
+     * Scull command
+     */
     private void scull(){
         msg = msg.toLowerCase();
         String target = msg.replace(" scull!", "");
@@ -524,6 +650,9 @@ public class CommandExecution{
         chan.sendMessage(result).queue();
     }
 
+    /**
+     * :alias command. Updates the user's alias.
+     */
     private void updateAlias(){
         msg = msg.toLowerCase();
         String desiredAlias = msg.split(":alias ")[1];
@@ -534,15 +663,19 @@ public class CommandExecution{
         if(old.equals(desiredAlias)){
             chan.sendMessage(id + " " + desiredAlias + " is already your alias cunt, fuck off").queue();
         }
-        else if(targetUser.setAlias(desiredAlias)){
-            chan.sendMessage(id + " Your alias was successfully updated from " + old + " to " + targetUser.getAlias() + "!").queue();
-            DiscordBot.refactorUsers();
-        }
-        else{
-            chan.sendMessage(id + " I couldn't update your alias cunt").queue();
-        }
+        else
+            if(targetUser.setAlias(desiredAlias)){
+                chan.sendMessage(id + " Your alias was successfully updated from " + old + " to " + targetUser.getAlias() + "!").queue();
+                DiscordBot.refactorUsers();
+            }
+            else{
+                chan.sendMessage(id + " I couldn't update your alias cunt").queue();
+            }
     }
 
+    /**
+     * :ANY EXISTING COMMAND - shows the number of times the given command has been called
+     */
     private void commandStats(){
         msg = msg.toLowerCase();
         String targetTrigger = DiscordBot.getTrigger(msg.replaceFirst(":", ""));
@@ -554,13 +687,21 @@ public class CommandExecution{
         chan.sendMessage(result).queue();
     }
 
+    /**
+     * !ITEM command - Find the price of an item in the grand exchange
+     */
     private void grandExchange(){
+
+        // Object containing exchange data is read in on start up. If the data is > 15 minutes old, refresh it
         if((System.currentTimeMillis() - exchangeData.getLastCalled()) > 900000){
             exchangeData = new ExchangeData();
         }
         chan.sendMessage(exchangeData.requestItem(e.getMessage().getContentDisplay().split("!")[1])).queue();
     }
 
+    /**
+     * Searches the commands for any containing a given term.
+     */
     private void findCommand(){
         msg = msg.toLowerCase();
         String query = msg.replace("find: ", "");
@@ -572,7 +713,7 @@ public class CommandExecution{
             String help = c.getHelpName();
             String desc = c.getDesc();
             String info = "";
-            switch(c.getType()){
+            switch(c.getType()) {
                 case "LINK":
                     info = c.getImage().getDesc();
                     break;
@@ -598,6 +739,9 @@ public class CommandExecution{
         chan.sendMessage(result.toString()).queue();
     }
 
+    /**
+     * Searches the text of all images in RANDOM type commands for a term.
+     */
     private void search(){
         String cleared = msg.replace("search ", "");
         String target = cleared.split(" ")[0];
@@ -666,80 +810,129 @@ public class CommandExecution{
         }
     }
 
+    /**
+     * Send a message to the current text channel
+     *
+     * @param msg String message to be sent
+     */
     private void send(String msg){
         chan.sendMessage(msg).queue();
     }
 
+    /**
+     * Bans every user on the kill list and resets the list. Plays audio prior to firing.
+     */
     private void executeOrder66(){
+
+        // Pick between a tactical nuke or that wrinkly cunt
         String[] tracks = new String[]{
                 "https://youtu.be/rV2l_WNd7Wo",
                 "https://www.youtube.com/watch?v=rAfFSu-_3cA"
         };
         Random rand = new Random();
         String audio = tracks[rand.nextInt(tracks.length)];
-        System.out.println(audio);
+
         String message = "YES SIR, STAND BY.";
 
+        // Delete the message which activated the command (snitches get stitches)
         deleteMessage(getLastMessage(0));
+
+        // User is authorised
         if(isAuthorised(e.getAuthor())){
+
+            // There are targets to be exterminated
             if(!targets.isEmpty()){
+
+                // Implement the Response interface method to purge the kill list after the track finishes
                 TrackEndListener.Response method = () -> new Thread(() -> purgeTargets()).start();
                 TrackEndListener listener = new TrackEndListener(method, e.getGuild());
+
+                // Play thr track
                 playAudio(audio, listener);
             }
+
+            // No targets
             else{
                 message = "TARGET SECTORS ARE ALREADY CLEAR SIR, OVER";
             }
         }
+        // User is not authorised, add him to the kill list too
         else{
             message = unauthReact(e.getAuthor());
         }
+
         User author = e.getAuthor();
         PrivateChannel pm = author.openPrivateChannel().complete();
         pm.sendMessage(message).queue();
         pm.close();
     }
 
+    /**
+     * Drop a tactical nuke on the server, ban everyone
+     */
     private void nuke(){
         String audio = "https://youtu.be/rV2l_WNd7Wo";
         User author = e.getAuthor();
         deleteMessage(getLastMessage(0));
+
+        // User is authorised
         if(isAuthorised(author)){
+            // Implement the Response interface method to drop the nuke after the track finishes
             TrackEndListener.Response method = () -> new Thread(() -> deployNuke()).start();
             TrackEndListener listener = new TrackEndListener(method, e.getGuild());
+
+            // Play the track
             playAudio(audio, listener);
         }
+
+        // User unauthorised, add him to the kill list
         else{
             String message = unauthReact(author);
             send(author.getAsMention() + " " + message);
         }
     }
 
+    /**
+     * Unban the given user
+     *
+     * @param loser A banned user
+     */
     private void unban(User loser){
         admin.unban(loser).complete();
     }
 
+    /**
+     * Deploy the nuke and ban everyone
+     */
     private void deployNuke(){
         Guild server = e.getGuild();
         List<Member> targets = server.getMembers();
         User owner = server.getOwner().getUser();
         Role botRole = server.getSelfMember().getRoles().get(0);
 
+        // All server members
         for(Member target : targets){
             User user = target.getUser();
+
+            // Ignore self and the server owner
             if(user.equals(self) || user.equals(owner)){
                 continue;
             }
+
+            // Compare the role of the bot to the role of the target
             if(target.getRoles().size() > 0){
                 Role userRole = target.getRoles().get(0);
+
+                // Skip if the person cannot be banned by the bot
                 if(botRole.getPosition() <= userRole.getPosition()){
                     continue;
                 }
             }
+
+            // Ban the user
             comfortBan(user);
             admin.ban(user, 7).complete();
             unban(user);
         }
-
     }
 }

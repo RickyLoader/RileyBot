@@ -4,23 +4,41 @@ import okhttp3.*;
 
 import java.net.URL;
 
-public class ApiRequest {
+/**
+ * ApiRequest.java handles making HTTP requests to the bot's API.
+ *
+ * @author Ricky Loader
+ * @version 5000.0
+ */
+public class ApiRequest{
 
-    public static String executeQuery(String endPoint, String request, String query, boolean api) {
+    /**
+     * Make a request to the API and return the JSON response.
+     *
+     * @param endPoint Endpoint of the API to access
+     * @param request  Request type
+     * @param query    JSON query to be appended to the request (may be null e.g GET)
+     * @param api      Boolean for accessing the bot's API or a different API
+     * @return String JSON response from the API
+     */
+    public static String executeQuery(String endPoint, String request, String query, boolean api){
         String result = null;
-        try {
+        try{
+
+            // If accessing the bot's API, the endpoint is appended to the baseURL, otherwise the endpoint is the url
             String baseURL = "";
-            if (api) {
+            if(api){
                 baseURL += "http://192.168.1.69/DiscordBotAPI/public/index.php/api/";
             }
+
+            // Initialise the URL, client, and Request
             URL url = new URL(baseURL + endPoint);
             OkHttpClient client = new OkHttpClient();
             Request.Builder builder = new Request.Builder().url(url);
             RequestBody body;
 
-            switch (request) {
-                case "GET":
-                    break;
+            // Add the request type and body if required
+            switch(request) {
                 case "ADD":
                     body = RequestBody.create(
                             MediaType.parse("application/json; charset=utf-8"), query
@@ -28,7 +46,7 @@ public class ApiRequest {
                     builder.post(body);
                     break;
                 case "UPDATE":
-                    if (query == null) {
+                    if(query == null){
                         query = "{}";
                     }
                     body = RequestBody.create(
@@ -40,17 +58,21 @@ public class ApiRequest {
                     builder.delete();
                     break;
             }
+
+            // Execute the request and receive a response
             Response response = client.newCall(builder.build()).execute();
-            if (response.code() == 200) {
+
+            // Successful request
+            if(response.code() == 200){
                 result = response.body().string();
-            } else {
+            }
+            else{
                 System.out.println("FAILURE");
                 System.out.println(response.body().string());
                 System.out.println(url);
-
             }
-
-        } catch (Exception e) {
+        }
+        catch(Exception e){
             e.printStackTrace();
         }
         return result;

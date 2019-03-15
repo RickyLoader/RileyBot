@@ -6,11 +6,25 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-
+/**
+ * DiscordUser.java Object for holding information about a user, stored in a database and used to locate the user
+ * when the bot is activated.
+ *
+ * @author Ricky Loader
+ * @version 5000.0
+ */
 public class DiscordUser {
+
+    // Name the user goes by, by default their current nickname but can be changed by the user
     private String alias;
+
+    // getAsMention() value of a User object
     private String id;
+
+    // API endpoint
     private static String endPoint = "users";
+
+    // Marked status of the user
     private boolean target;
 
     public DiscordUser(String alias, String id, boolean target) {
@@ -19,6 +33,11 @@ public class DiscordUser {
         this.target = target;
     }
 
+    /**
+     * Returns whether the user is marked for extermination.
+     *
+     * @return boolean target
+     */
     public boolean isTarget() {
         return target;
     }
@@ -31,11 +50,20 @@ public class DiscordUser {
         return id;
     }
 
+    /**
+     * Updates the user's alias, a user's alias is used to @ them without using @. User may be "bob" in discord
+     * but want the bot to respond to "dave".
+     *
+     * @param alias The desired new alias
+     * @return The result of updating the alias
+     */
     public boolean setAlias(String alias) {
         boolean result = false;
         String query = updateRequest(alias);
         String endpoint = endPoint + "/update";
         String json = ApiRequest.executeQuery(endpoint, "UPDATE", query, true);
+
+        // Only considered updated if the database update was successful
         if (json.contains("Updated!")) {
             result = true;
             this.alias = alias;
@@ -43,6 +71,11 @@ public class DiscordUser {
         return result;
     }
 
+    /**
+     * Deletes a user from the database.
+     * TODO fix
+     * @return The result of deleting the user.
+     */
     public boolean remove() {
         boolean result = false;
         String deleteEndpoint = endPoint + "/delete/" + "\"" + id + "\"";
@@ -58,6 +91,13 @@ public class DiscordUser {
         return result;
     }
 
+    /**
+     * Process to occur when a user has joined any of the bot's guilds. Add them to the database and create an object
+     * containing their information if it does not already exist.
+     *
+     * @param user The joined user
+     * @return The new user object to be stored with the others, or null if they exist
+     */
     public static DiscordUser userJoined(User user) {
         DiscordUser newUser = null;
         String url = (endPoint + "/add");
@@ -69,6 +109,7 @@ public class DiscordUser {
         return newUser;
     }
 
+    //TODO something
     private static String banRequest(String id, String name, String image) {
         String quote = "\"";
         StringBuilder result = new StringBuilder("{");
@@ -87,6 +128,13 @@ public class DiscordUser {
         return result.toString();
     }
 
+    /**
+     * Creates the JSON body required for adding a user to the database.
+     *
+     * @param id The unique id of the user
+     * @param name The current name of the user (can be updated later)
+     * @return A JSON body containing the user's information to be sent to the API
+     */
     private static String addRequest(String id, String name) {
         String quote = "\"";
         StringBuilder result = new StringBuilder("{");
@@ -101,14 +149,12 @@ public class DiscordUser {
         return result.toString();
     }
 
-    public static String getEndPoint() {
-        return endPoint;
-    }
-
-    public void setID(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Creates the JSON body required for updating a user's alias in the database.
+     *
+     * @param desiredAlias The desired new alias
+     * @return A JSON body containing the user's information to be sent to the API
+     */
     private String updateRequest(String desiredAlias) {
         String quote = "\"";
         StringBuilder result = new StringBuilder("{");
@@ -123,6 +169,11 @@ public class DiscordUser {
         return result.toString();
     }
 
+    /**
+     * Read in Users from the API and create objects for each.
+     *
+     * @return A HashMap of users, mapped alias->object
+     */
     public static HashMap<String, DiscordUser> getUsers() {
         String json = ApiRequest.executeQuery(endPoint, "GET", null, true);
         HashMap<String, DiscordUser> users = new HashMap<>();
@@ -137,6 +188,8 @@ public class DiscordUser {
                 String discordID = jObject.getString("discord_id");
                 String alias = jObject.getString("name");
                 int target = jObject.getInt("target");
+
+                // SQL uses bit data type for boolean. 0 considered false, 1 considered true for this scenario
                 users.put(
                         alias,
                         new DiscordUser(alias, discordID, target == 1)
@@ -148,6 +201,11 @@ public class DiscordUser {
         return users;
     }
 
+    /**
+     * Mark an existing user for extermination. Update the database.
+     *
+     * @return Boolean success of marking the user.
+     */
     public boolean markUser() {
         String query = "{}";
         boolean result = false;
@@ -160,6 +218,11 @@ public class DiscordUser {
         return result;
     }
 
+    /**
+     * Pardon the user from extermination. Update the database.
+     *
+     * @return Boolean success of pardoning the user.
+     */
     public boolean pardonUser() {
         boolean result = false;
         String endpoint = endPoint + "/pardon/" + id;
