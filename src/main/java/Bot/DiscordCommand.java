@@ -97,7 +97,7 @@ public class DiscordCommand{
                 String image = postData.getString("url");
                 if(!postData.getBoolean("is_self") && !memeCommand.getLinks().contains(image)){
                     updates.add(image);
-                    memeCommand.getImages().add(new DiscordImage(image, "null"));
+                    memeCommand.getImages().add(new DiscordImage(image));
                 }
             }
             if(updates.size() > 0){
@@ -155,7 +155,7 @@ public class DiscordCommand{
                         command.setInteractiveType(ApiRequest.executeQuery(endPoint + "/interactive", "GET", null, true));
                         break;
                     case "RANDOM":
-                        command.setRandomType(ApiRequest.executeQuery(endPoint + "/data", "GET", null, true));
+                        command.setRandomType(ApiRequest.executeQuery(endPoint + "/random", "GET", null, true));
                         break;
                 }
                 updates.add(command);
@@ -180,7 +180,7 @@ public class DiscordCommand{
         // JSON containing command info related to a specific type
         String interactiveJSON = ApiRequest.executeQuery(endPoint + "/interactive", "GET", null, true);
         String linkJSON = ApiRequest.executeQuery(endPoint + "/link", "GET", null, true);
-        String randomJSON = ApiRequest.executeQuery(endPoint + "/data", "GET", null, true);
+        String randomJSON = ApiRequest.executeQuery(endPoint + "/random", "GET", null, true);
 
         HashMap<String, DiscordCommand> commands = new HashMap<>();
 
@@ -255,9 +255,8 @@ public class DiscordCommand{
                 // Found this command
                 if(this.id == id){
                     String image = o.getString("possibility");
-                    String data = o.getString("info").toLowerCase();
                     test = o;
-                    links.add(new DiscordImage(image, data));
+                    links.add(new DiscordImage(image));
                 }
             }
         }
@@ -285,8 +284,7 @@ public class DiscordCommand{
                 // Found this command
                 if(this.id == id){
                     String image = o.getString("link");
-                    String data = o.getString("info").toLowerCase();
-                    link = new DiscordImage(image, data);
+                    link = new DiscordImage(image);
                 }
             }
         }
@@ -420,6 +418,6 @@ public class DiscordCommand{
     }
 
     public void setImage(String image){
-        this.image = new DiscordImage(image, "");
+        this.image = new DiscordImage(image);
     }
 }

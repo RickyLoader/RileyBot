@@ -13,6 +13,7 @@ import net.dv8tion.jda.core.events.guild.GuildBanEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.core.requests.Route;
 
 /**
  * DiscordBot.java A bot for Discord posts images and bans cunts.
@@ -37,6 +38,8 @@ public class DiscordBot extends ListenerAdapter{
 
     // Cached Grand Exchange data
     public static ExchangeData exchangeData = new ExchangeData();
+
+    private static long lastUpdate;
 
     /**
      * Accepts a Discord token as an argument to link the bot to a Discord application
@@ -65,7 +68,7 @@ public class DiscordBot extends ListenerAdapter{
         botName = self.getName();
 
         // Begin listening on new thread for updates
-        new Thread(() -> checkForUpdates()).start();
+        //new Thread(() -> checkForUpdates()).start();
     }
 
     /**
@@ -106,15 +109,16 @@ public class DiscordBot extends ListenerAdapter{
      * new sick memes on reddit that have been posted. Refreshes the appropriate commands.
      */
     private static void checkForUpdates(){
+        /*lastUpdate = System.currentTimeMillis();
         ArrayList<DiscordCommand> updates = DiscordCommand.getUpdates();
         if(!updates.isEmpty()){
             for(DiscordCommand c : updates){
                 update(c);
             }
             System.out.println("\nUpdates complete\n");
-        }
-        DiscordCommand.getNewMemes(commands.get("meme ?\\d?"));
-        checkForUpdates();
+        }*/
+        //DiscordCommand.getNewMemes(commands.get("meme ?\\d?"));
+        //checkForUpdates();
     }
 
     /**
@@ -246,7 +250,7 @@ public class DiscordBot extends ListenerAdapter{
                     if(pendingTargets.containsKey(user.getAsMention())){
                         targets.add(user);
                         pendingTargets.remove(user.getAsMention());
-                        System.out.println("FOUND " + user.getName() + " in " + g.getName());
+                        System.out.println("FOUND user: " + user.getName() + " in server: " + g.getName());
                     }
                 }
             }
@@ -274,7 +278,6 @@ public class DiscordBot extends ListenerAdapter{
      */
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent e){
-
         // Store information about the current message (for use by the command if required)
         currentChan = e.getChannel();
         User author = e.getAuthor();
@@ -603,7 +606,6 @@ public class DiscordBot extends ListenerAdapter{
     private void help(User author){
         PrivateChannel pc = author.openPrivateChannel().complete();
         HashMap<String, ArrayList<DiscordCommand>> categories = new HashMap<>();
-
         // Find the longest helpName of the commands and store each command by their category
         int longest = 0;
         for(String s : commands.keySet()){

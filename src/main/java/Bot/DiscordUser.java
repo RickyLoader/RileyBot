@@ -215,6 +215,7 @@ public class DiscordUser {
             result = true;
             this.target = true;
         }
+        System.out.println(json);
         return result;
     }
 

@@ -42,6 +42,7 @@ public class CommandExecution{
     private User self;
     private GuildController admin;
     private String msg;
+    private Message rawMsg;
 
     /**
      * Constructor takes a message event and a command object. Command object holds information relevant to the
@@ -57,6 +58,7 @@ public class CommandExecution{
         this.self = e.getGuild().getSelfMember().getUser();
         this.admin = e.getGuild().getController();
         this.msg = e.getMessage().getContentDisplay();
+        this.rawMsg = e.getMessage();
     }
 
     /**
@@ -472,15 +474,46 @@ public class CommandExecution{
         log.sendMessage(builder.build()).queue();
     }
 
+    private void pewds(){
+        System.out.println("yo");
+        send(e.getAuthor().getAsMention() + " NO");
+    }
+
     /**
      * .command (TTS) Play the given text in the voice channel, delete the message, log the result.
      */
     private void chatTime(){
         try{
-            String base = "http://192.168.1.69/DiscordBotAPI/public/index.php/api/dectalk/";
+            String base = "http://192.168.1.69/DiscordBotAPI/api/dectalk/";
             String content = msg.replaceFirst(".", "");
+            if(content.isEmpty()){
+                content = "Give me something to say cunt";
+            }
             String url = URLEncoder.encode(content, "UTF-8");
             String audio = base + url;
+            System.out.println(audio);
+            logTTS(content, e.getAuthor());
+            playAudio(audio, new TrackEndListener(null, e.getGuild()));
+            deleteMessage(getLastMessage(0));
+
+
+        }
+        catch(UnsupportedEncodingException e){
+            System.out.println("cunt");
+        }
+    }
+
+
+    /**
+     * survivor command
+     */
+    private void survivor(){
+        try{
+            String base = "http://192.168.1.69/DiscordBotAPI/api/survivor/";
+            String content = msg.replaceFirst(".survivor ", "");
+            String url = URLEncoder.encode(content, "UTF-8");
+            String audio = base + url;
+            System.out.println(audio);
             logTTS(content, e.getAuthor());
             playAudio(audio, new TrackEndListener(null, e.getGuild()));
             deleteMessage(getLastMessage(0));
@@ -505,7 +538,6 @@ public class CommandExecution{
 
             // Target is provided
             if(target != null){
-
                 // Target is not on the kill list
                 if(!targets.contains(target)){
                     DiscordUser authorObj = findUser(target.getAsMention());
@@ -624,7 +656,7 @@ public class CommandExecution{
         List<Member> serverMembers = server.getMembers();
 
         for(Member m : serverMembers){
-            if(m.getEffectiveName().equals(target) && !m.getUser().isBot()){
+            if(m.getEffectiveName().equals(target)){
                 result = m.getUser();
                 break;
             }
@@ -677,6 +709,9 @@ public class CommandExecution{
      * :ANY EXISTING COMMAND - shows the number of times the given command has been called
      */
     private void commandStats(){
+        if(rawMsg.getEmotes().size() > 0){
+            return;
+        }
         msg = msg.toLowerCase();
         String targetTrigger = DiscordBot.getTrigger(msg.replaceFirst(":", ""));
         DiscordCommand targetCommand = commands.get(targetTrigger);
@@ -712,14 +747,8 @@ public class CommandExecution{
             DiscordCommand c = commands.get(trigger);
             String help = c.getHelpName();
             String desc = c.getDesc();
-            String info = "";
-            switch(c.getType()) {
-                case "LINK":
-                    info = c.getImage().getDesc();
-                    break;
-            }
 
-            String searchable = trigger + " " + desc + " " + help + " " + info;
+            String searchable = trigger + " " + desc + " " + help;
             if(searchable.contains(query)){
                 count++;
                 commandsFound
@@ -739,76 +768,6 @@ public class CommandExecution{
         chan.sendMessage(result.toString()).queue();
     }
 
-    /**
-     * Searches the text of all images in RANDOM type commands for a term.
-     */
-    private void search(){
-        String cleared = msg.replace("search ", "");
-        String target = cleared.split(" ")[0];
-        String search = cleared.replace(target + " ", "");
-        DiscordCommand targetCommand = commands.get(getTrigger(target));
-        ArrayList<DiscordImage> images = new ArrayList<>();
-        int longestImage = 0;
-
-        if(targetCommand == null || !targetCommand.getType().equals("RANDOM")){
-            send("That command does not exist or is not of type RANDOM, take a look at the help! command next time cunt");
-        }
-        else{
-            for(DiscordImage i : targetCommand.getImages()){
-                if(i.getDesc().contains(search)){
-                    images.add(i);
-                    int imageLength = i.getImage().length();
-
-                    if(imageLength > longestImage){
-                        longestImage = imageLength;
-                    }
-                }
-            }
-        }
-
-        if(images.size() > 0){
-            int longestNum = String.valueOf(images.size()).length() + 1;
-            String header = "```"
-                    + "NUMBER"
-                    + getSpaces(longestNum)
-                    + "IMAGE"
-                    + getSpaces(longestImage)
-                    + "DESCRIPTION"
-                    + "```";
-
-            String result = "I found " + images.size() + " images in the " + targetCommand.getHelpName() + " command matching your search query cunt:\n\n";
-
-            StringBuilder block = new StringBuilder(result + header + "```");
-
-            int index = 1;
-            for(DiscordImage i : images){
-                String image = i.getImage();
-                String desc = i.getDesc();
-                if(desc.length() > 90){
-                    desc = desc.substring(0, 90);
-                }
-
-                if(block.toString().length() > 1500){
-                    send(block.toString() + "```");
-                    block = new StringBuilder("```");
-                }
-
-                int numToImage = ("NUMBER".length() + longestNum) - (index + ".").length();
-                int imageToDesc = longestImage - image.length() + "IMAGE".length();
-                block
-                        .append(index + ".")
-                        .append(getSpaces(numToImage) + image)
-                        .append(getSpaces(imageToDesc) + desc.trim())
-                        .append("\n");
-
-                index++;
-            }
-            send(block.toString() + "```");
-        }
-        else{
-            send("There are no images in the " + targetCommand.getHelpName() + " command that match your search query of " + search);
-        }
-    }
 
     /**
      * Send a message to the current text channel
@@ -819,6 +778,10 @@ public class CommandExecution{
         chan.sendMessage(msg).queue();
     }
 
+    private Member getMember(User target){
+        return admin.getGuild().getMember(target);
+    }
+
     /**
      * Bans every user on the kill list and resets the list. Plays audio prior to firing.
      */
@@ -827,7 +790,8 @@ public class CommandExecution{
         // Pick between a tactical nuke or that wrinkly cunt
         String[] tracks = new String[]{
                 "https://youtu.be/rV2l_WNd7Wo",
-                "https://www.youtube.com/watch?v=rAfFSu-_3cA"
+                "https://www.youtube.com/watch?v=rAfFSu-_3cA",
+                "https://www.youtube.com/watch?v=b_KYjfYjk0Q"
         };
         Random rand = new Random();
         String audio = tracks[rand.nextInt(tracks.length)];
@@ -842,11 +806,13 @@ public class CommandExecution{
 
             // There are targets to be exterminated
             if(!targets.isEmpty()){
-
+                if(targets.size() == 1){
+                    String name = getMember(targets.get(0)).getEffectiveName();
+                    audio = "http://192.168.1.69/DiscordBotAPI/api/survivor/" + name;
+                }
                 // Implement the Response interface method to purge the kill list after the track finishes
                 TrackEndListener.Response method = () -> new Thread(() -> purgeTargets()).start();
                 TrackEndListener listener = new TrackEndListener(method, e.getGuild());
-
                 // Play thr track
                 playAudio(audio, listener);
             }

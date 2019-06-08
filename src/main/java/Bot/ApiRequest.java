@@ -28,7 +28,7 @@ public class ApiRequest{
             // If accessing the bot's API, the endpoint is appended to the baseURL, otherwise the endpoint is the url
             String baseURL = "";
             if(api){
-                baseURL += "http://192.168.1.69/DiscordBotAPI/public/index.php/api/";
+                baseURL += "http://192.168.1.22/DiscordBotAPI/api/";
             }
 
             // Initialise the URL, client, and Request
