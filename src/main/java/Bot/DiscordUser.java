@@ -13,7 +13,7 @@ import java.util.HashMap;
  * @author Ricky Loader
  * @version 5000.0
  */
-public class DiscordUser {
+public class DiscordUser{
 
     // Name the user goes by, by default their current nickname but can be changed by the user
     private String alias;
@@ -27,7 +27,7 @@ public class DiscordUser {
     // Marked status of the user
     private boolean target;
 
-    public DiscordUser(String alias, String id, boolean target) {
+    public DiscordUser(String alias, String id, boolean target){
         this.alias = alias;
         this.id = id;
         this.target = target;
@@ -38,15 +38,15 @@ public class DiscordUser {
      *
      * @return boolean target
      */
-    public boolean isTarget() {
+    public boolean isTarget(){
         return target;
     }
 
-    public String getAlias() {
+    public String getAlias(){
         return alias;
     }
 
-    public String getID() {
+    public String getID(){
         return id;
     }
 
@@ -57,14 +57,14 @@ public class DiscordUser {
      * @param alias The desired new alias
      * @return The result of updating the alias
      */
-    public boolean setAlias(String alias) {
+    public boolean setAlias(String alias){
         boolean result = false;
         String query = updateRequest(alias);
         String endpoint = endPoint + "/update";
         String json = ApiRequest.executeQuery(endpoint, "UPDATE", query, true);
 
         // Only considered updated if the database update was successful
-        if (json.contains("Updated!")) {
+        if(json.contains("Updated!")){
             result = true;
             this.alias = alias;
         }
@@ -74,9 +74,10 @@ public class DiscordUser {
     /**
      * Deletes a user from the database.
      * TODO fix
+     *
      * @return The result of deleting the user.
      */
-    public boolean remove() {
+    public boolean remove(){
         boolean result = false;
         String deleteEndpoint = endPoint + "/delete/" + "\"" + id + "\"";
         String json = ApiRequest.executeQuery(deleteEndpoint, "DELETE", null, true);
@@ -98,19 +99,19 @@ public class DiscordUser {
      * @param user The joined user
      * @return The new user object to be stored with the others, or null if they exist
      */
-    public static DiscordUser userJoined(User user) {
+    public static DiscordUser userJoined(User user){
         DiscordUser newUser = null;
         String url = (endPoint + "/add");
         String query = addRequest(user.getAsMention(), user.getName());
         String json = ApiRequest.executeQuery(url, "ADD", query, true);
-        if (!json.contains("Failed")) {
+        if(!json.contains("Failed")){
             newUser = new DiscordUser(user.getName(), user.getAsMention(), true);
         }
         return newUser;
     }
 
     //TODO something
-    private static String banRequest(String id, String name, String image) {
+    private static String banRequest(String id, String name, String image){
         String quote = "\"";
         StringBuilder result = new StringBuilder("{");
         result.append(quote + "user_id" + quote);
@@ -131,11 +132,11 @@ public class DiscordUser {
     /**
      * Creates the JSON body required for adding a user to the database.
      *
-     * @param id The unique id of the user
+     * @param id   The unique id of the user
      * @param name The current name of the user (can be updated later)
      * @return A JSON body containing the user's information to be sent to the API
      */
-    private static String addRequest(String id, String name) {
+    private static String addRequest(String id, String name){
         String quote = "\"";
         StringBuilder result = new StringBuilder("{");
         result.append(quote + "discord_id" + quote);
@@ -155,7 +156,7 @@ public class DiscordUser {
      * @param desiredAlias The desired new alias
      * @return A JSON body containing the user's information to be sent to the API
      */
-    private String updateRequest(String desiredAlias) {
+    private String updateRequest(String desiredAlias){
         String quote = "\"";
         StringBuilder result = new StringBuilder("{");
         result.append(quote + "discord_id" + quote);
@@ -174,15 +175,15 @@ public class DiscordUser {
      *
      * @return A HashMap of users, mapped alias->object
      */
-    public static HashMap<String, DiscordUser> getUsers() {
-        String json = ApiRequest.executeQuery(endPoint, "GET", null, true);
+    public static HashMap<String, DiscordUser> getUsers(){
         HashMap<String, DiscordUser> users = new HashMap<>();
 
-        try {
+        try{
+            String json = ApiRequest.executeQuery(endPoint, "GET", null, true);
             JSONArray ja = new JSONArray(json);
             int length = ja.length();
-            System.out.println("\n" + length + " users found, please wait...");
-            for (int i = 0; i < length; i++) {
+            System.out.println("\n" + length + " users found, please wait...\n\n");
+            for(int i = 0; i < length; i++){
                 System.out.println("Creating user " + (i + 1) + "/" + length + "...");
                 JSONObject jObject = (JSONObject) ja.get(i);
                 String discordID = jObject.getString("discord_id");
@@ -195,8 +196,9 @@ public class DiscordUser {
                         new DiscordUser(alias, discordID, target == 1)
                 );
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch(Exception e){
+            return null;
         }
         return users;
     }
@@ -206,12 +208,12 @@ public class DiscordUser {
      *
      * @return Boolean success of marking the user.
      */
-    public boolean markUser() {
+    public boolean markUser(){
         String query = "{}";
         boolean result = false;
         String endpoint = endPoint + "/target/" + id;
         String json = ApiRequest.executeQuery(endpoint, "UPDATE", query, true);
-        if (json.contains("Targeted!")) {
+        if(json.contains("Targeted!")){
             result = true;
             this.target = true;
         }
@@ -224,13 +226,13 @@ public class DiscordUser {
      *
      * @return Boolean success of pardoning the user.
      */
-    public boolean pardonUser() {
+    public boolean pardonUser(){
         boolean result = false;
         String endpoint = endPoint + "/pardon/" + id;
         String query = "{}";
         String json = ApiRequest.executeQuery(endpoint, "UPDATE", query, true);
         System.out.println(json);
-        if (json.contains("Pardoned!")) {
+        if(json.contains("Pardoned!")){
             result = true;
             this.target = false;
         }

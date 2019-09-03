@@ -13,7 +13,6 @@ import net.dv8tion.jda.core.events.guild.GuildBanEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import net.dv8tion.jda.core.requests.Route;
 
 /**
  * DiscordBot.java A bot for Discord posts images and bans cunts.
@@ -50,7 +49,8 @@ public class DiscordBot extends ListenerAdapter{
         if(args.length == 1){
             String token = args[0];
             login(token);
-        } else{
+        }
+        else{
             System.out.println("No discord token specified, please try again using the token as an argument.");
         }
     }
@@ -78,11 +78,10 @@ public class DiscordBot extends ListenerAdapter{
      */
     private static void login(String token){
         try{
-
-            // Read in commands/user information from the API
-            getInfo();
-
-            // Initialise bot
+            while(!getInfo()){
+                System.out.println("\n\nUnable to reach API, trying again in 5 seconds...\n\n");
+                Thread.sleep(5000);
+            }
             JDA bot = new JDABuilder(AccountType.BOT).setToken(token).build();
             bot.addEventListener(new DiscordBot());
         }
@@ -97,60 +96,12 @@ public class DiscordBot extends ListenerAdapter{
      * Commands = trigger->command
      * Users = alias->user
      */
-    private static void getInfo(){
+    private static boolean getInfo(){
         System.out.println("\nFetching users from database...\n");
         users = DiscordUser.getUsers();
         System.out.println("\nFetching commands from database...\n");
         commands = DiscordCommand.getCommands();
-    }
-
-    /**
-     * Recursively monitors the API for commands that have been updated and
-     * new sick memes on reddit that have been posted. Refreshes the appropriate commands.
-     */
-    private static void checkForUpdates(){
-        /*lastUpdate = System.currentTimeMillis();
-        ArrayList<DiscordCommand> updates = DiscordCommand.getUpdates();
-        if(!updates.isEmpty()){
-            for(DiscordCommand c : updates){
-                update(c);
-            }
-            System.out.println("\nUpdates complete\n");
-        }*/
-        //DiscordCommand.getNewMemes(commands.get("meme ?\\d?"));
-        //checkForUpdates();
-    }
-
-    /**
-     * Updates the given command's information which has changed in the database.
-     *
-     * @param update The command to be updated
-     */
-    private static void update(DiscordCommand update){
-        HashMap<String, DiscordCommand> updates = new HashMap<>();
-
-        // Put all commands not matching the updated command in to a new HashMap
-        for(String trigger : commands.keySet()){
-            DiscordCommand c = commands.get(trigger);
-            if(c.getID() != update.getID()){
-                updates.put(c.getTrigger(), c);
-            }
-
-            // Post a message detailing the changes of the command to all Guilds the bot is a member of
-            else{
-                for(Guild guild : self.getJDA().getGuilds()){
-                    MessageChannel chan = guild.getDefaultChannel();
-                    chan.sendMessage(getChanges(c, update)).queue();
-                }
-            }
-        }
-
-        // Add the updated command to the new HashMap and replace the current map of commands
-        updates.put(update.getTrigger(), update);
-        commands = updates;
-
-        // Mark the update as seen
-        DiscordCommand.finishedUpdate();
+        return commands != null && users != null;
     }
 
     /**
@@ -175,38 +126,6 @@ public class DiscordBot extends ListenerAdapter{
 
 
         return summary;
-    }
-
-    /**
-     * Creates a table of command updates displaying the values which have changed.
-     *
-     * @param old    Original command
-     * @param update Updated command
-     * @return String table of updates to a command
-     */
-    private static String getChanges(DiscordCommand old, DiscordCommand update){
-        String intro = "@everyone\n __**COMMAND UPDATED:**__\n";
-        String codeBlock = "```";
-        ArrayList<DiscordCommand> compare = new ArrayList<>();
-        compare.add(old);
-        compare.add(update);
-        int longestTrigger = calculateLongest(compare, 2, "name");
-        int longestDesc = calculateLongest(compare, 2, "desc");
-
-        String summary = commandToRow(old, longestDesc, longestTrigger, "OLD")
-                + commandToRow(update, longestDesc, longestTrigger, "NEW");
-
-        String header = codeBlock
-                + "IDENTIFIER"
-                + getSpaces((3 - "IDENTIFIER".length()) + 10)
-                + "TRIGGER"
-                + getSpaces((longestTrigger - "Trigger".length()) + 10)
-                + "DESCRIPTION"
-                + getSpaces((longestDesc - "DESCRIPTION".length()) + 10)
-                + "CALLS"
-                + codeBlock;
-
-        return intro + header + codeBlock + summary + codeBlock;
     }
 
     /**
@@ -296,16 +215,17 @@ public class DiscordBot extends ListenerAdapter{
             currentChan.sendMessage("Hey " + users.get(message).getID() + " bro you there?").queue();
         }
         // Help command
-        else if(message.equals("help!")){
-            help(author);
-        }
-        // Compare the message to command triggers and proceed accordingly
-        else{
-            String trigger = getTrigger(message);
-            if(trigger != null){
-                executeCommand(commands.get(trigger));
+        else
+            if(message.equals("help!")){
+                help(author);
             }
-        }
+            // Compare the message to command triggers and proceed accordingly
+            else{
+                String trigger = getTrigger(message);
+                if(trigger != null){
+                    executeCommand(commands.get(trigger));
+                }
+            }
     }
 
     /**
@@ -360,35 +280,6 @@ public class DiscordBot extends ListenerAdapter{
     }
 
     /**
-     * Fired when a user is banned. Remove the stored information
-     * TODO remove the user from the database
-     *
-     * @param e Event used to obtain the user
-     */
-    @Override
-    public void onGuildBan(GuildBanEvent e){
-        removeUser(e.getUser());
-        //DiscordUser.remove(e.getUser());
-    }
-
-    /**
-     * Locate and remove a banned user from the stored users
-     *
-     * @param target User to be removed
-     * @return boolean success
-     */
-    private boolean removeUser(User target){
-        for(String name : users.keySet()){
-            DiscordUser u = users.get(name);
-            if(u.getID().equals(target.getAsMention())){
-                users.remove(u.getAlias());
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Checks if a message received is a trigger to a command, returns the trigger. Trigger commonly contains REGEX
      * which containsKey() does not compare, a search is required.
      *
@@ -414,7 +305,6 @@ public class DiscordBot extends ListenerAdapter{
     private void executeCommand(DiscordCommand command){
         String type = command.getType();
 
-        // Increment the number of calls for the given command
         command.updateCalls();
 
         switch(type) {
@@ -467,7 +357,7 @@ public class DiscordBot extends ListenerAdapter{
      * @param c The link type command
      */
     private void linkCommand(DiscordCommand c){
-        currentChan.sendMessage(c.getImage().getImage()).queue();
+        currentChan.sendMessage(c.getImage()).queue();
     }
 
     /**
@@ -635,7 +525,8 @@ public class DiscordBot extends ListenerAdapter{
                 if(help.length() + temp.length() + codeBlock.length() > 1900){
                     pc.sendMessage(help + codeBlock).queue();
                     help = codeBlock + temp;
-                } else{
+                }
+                else{
                     help += temp;
                 }
             }

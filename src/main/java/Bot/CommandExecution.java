@@ -178,19 +178,6 @@ public class CommandExecution{
     }
 
     /**
-     * TODO implement
-     */
-    private void tagImage(){
-        String tag = e.getMessage().getContentDisplay().toLowerCase().replace("tag: ", "");
-        Message last = getLastMessage(1);
-        String URL = last.getContentDisplay();
-        String description = "A meme that was tagged as " + tag + ".";
-        DiscordCommand c = new DiscordCommand("LINK", tag, description);
-        c.setImage(URL);
-        DiscordCommand.addCommand(c, commands);
-    }
-
-    /**
      * Send a message containing the marked targets to the user if they have permission, mark them if they don't.
      */
     private void killList(){
@@ -348,7 +335,6 @@ public class CommandExecution{
              */
             @Override
             public void trackLoaded(AudioTrack audioTrack){
-                System.out.println(audioTrack.getIdentifier() + " loaded!");
                 player.playTrack(audioTrack);
             }
 
@@ -465,13 +451,16 @@ public class CommandExecution{
      * @param author The user who called TTS
      */
     private void logTTS(String msg, User author){
-        MessageChannel log = e.getGuild().getTextChannelsByName("tts-log", true).get(0);
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(15655767);
-        builder.setDescription("**Author**: " + author.getAsMention() + " **Submitted At**: " + new Date());
-        builder.setTitle("**TTS Log**");
-        builder.addField("Contents:", msg, false);
-        log.sendMessage(builder.build()).queue();
+        List<TextChannel> channels = e.getGuild().getTextChannelsByName("tts-log", true);
+        if(!channels.isEmpty()){
+            MessageChannel log = channels.get(0);
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(15655767);
+            builder.setDescription("**Author**: " + author.getAsMention() + " **Submitted At**: " + new Date());
+            builder.setTitle("**TTS Log**");
+            builder.addField("Contents:", msg, false);
+            log.sendMessage(builder.build()).queue();
+        }
     }
 
     private void pewds(){
@@ -479,24 +468,27 @@ public class CommandExecution{
         send(e.getAuthor().getAsMention() + " NO");
     }
 
+    private void briscoesSale(){
+        String[] params = msg.toLowerCase().replace("briscoes: ", "").split("\\|");
+        send("BRISCOES SALE ON TODAY ONLY! " + params[0].toUpperCase().trim() + " $" + params[1].toUpperCase().trim() + " CHEAP CHEAP CHEAP! GET IN QUICK!");
+    }
+
     /**
      * .command (TTS) Play the given text in the voice channel, delete the message, log the result.
      */
     private void chatTime(){
         try{
-            String base = "http://192.168.1.69/DiscordBotAPI/api/dectalk/";
+            String base = "http://192.168.1.73/DiscordBotAPI/api/dectalk/";
             String content = msg.replaceFirst(".", "");
             if(content.isEmpty()){
                 content = "Give me something to say cunt";
             }
+
             String url = URLEncoder.encode(content, "UTF-8");
             String audio = base + url;
-            System.out.println(audio);
+            deleteMessage(getLastMessage(0));
             logTTS(content, e.getAuthor());
             playAudio(audio, new TrackEndListener(null, e.getGuild()));
-            deleteMessage(getLastMessage(0));
-
-
         }
         catch(UnsupportedEncodingException e){
             System.out.println("cunt");
@@ -509,11 +501,10 @@ public class CommandExecution{
      */
     private void survivor(){
         try{
-            String base = "http://192.168.1.69/DiscordBotAPI/api/survivor/";
+            String base = "http://192.168.1.73/DiscordBotAPI/api/survivor/";
             String content = msg.replaceFirst(".survivor ", "");
             String url = URLEncoder.encode(content, "UTF-8");
             String audio = base + url;
-            System.out.println(audio);
             logTTS(content, e.getAuthor());
             playAudio(audio, new TrackEndListener(null, e.getGuild()));
             deleteMessage(getLastMessage(0));
@@ -528,6 +519,7 @@ public class CommandExecution{
      */
     private void mark(){
         String targetName = msg.replace("mark @", "");
+        System.out.println(targetName);
         User target = getServerUser(targetName);
         User author = e.getAuthor();
         String reply;
@@ -726,12 +718,15 @@ public class CommandExecution{
      * !ITEM command - Find the price of an item in the grand exchange
      */
     private void grandExchange(){
-
+        String item = e.getMessage().getContentDisplay().split("!")[1];
+        if(item.equalsIgnoreCase("rank")){
+            return;
+        }
         // Object containing exchange data is read in on start up. If the data is > 15 minutes old, refresh it
         if((System.currentTimeMillis() - exchangeData.getLastCalled()) > 900000){
             exchangeData = new ExchangeData();
         }
-        chan.sendMessage(exchangeData.requestItem(e.getMessage().getContentDisplay().split("!")[1])).queue();
+        chan.sendMessage(exchangeData.requestItem(item)).queue();
     }
 
     /**
@@ -768,7 +763,11 @@ public class CommandExecution{
         chan.sendMessage(result.toString()).queue();
     }
 
-
+    private void sandCasino(){
+        Random rand = new Random();
+        String[] result = {"WON","LOST"};
+        send(e.getAuthor().getAsMention()+" YOU HAVE "+result[rand.nextInt(2)] + " THIS DUEL!");
+    }
     /**
      * Send a message to the current text channel
      *
@@ -789,10 +788,12 @@ public class CommandExecution{
 
         // Pick between a tactical nuke or that wrinkly cunt
         String[] tracks = new String[]{
+                "https://www.youtube.com/watch?v=A8ZZmU8orvg",
                 "https://youtu.be/rV2l_WNd7Wo",
                 "https://www.youtube.com/watch?v=rAfFSu-_3cA",
                 "https://www.youtube.com/watch?v=b_KYjfYjk0Q"
         };
+
         Random rand = new Random();
         String audio = tracks[rand.nextInt(tracks.length)];
 
@@ -806,10 +807,10 @@ public class CommandExecution{
 
             // There are targets to be exterminated
             if(!targets.isEmpty()){
-                if(targets.size() == 1){
+                /*if(targets.size() == 1){
                     String name = getMember(targets.get(0)).getEffectiveName();
-                    audio = "http://192.168.1.69/DiscordBotAPI/api/survivor/" + name;
-                }
+                    audio = "http://192.168.1.73/DiscordBotAPI/api/survivor/" + name;
+                }*/
                 // Implement the Response interface method to purge the kill list after the track finishes
                 TrackEndListener.Response method = () -> new Thread(() -> purgeTargets()).start();
                 TrackEndListener listener = new TrackEndListener(method, e.getGuild());

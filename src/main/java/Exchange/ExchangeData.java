@@ -95,7 +95,7 @@ public class ExchangeData{
     }
 
     private static boolean isLong(String query){
-        Boolean result = false;
+        boolean result = false;
         try{
             Long.parseLong(query);
             result = true;
