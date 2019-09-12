@@ -463,11 +463,6 @@ public class CommandExecution{
         }
     }
 
-    private void pewds(){
-        System.out.println("yo");
-        send(e.getAuthor().getAsMention() + " NO");
-    }
-
     private void briscoesSale(){
         String[] params = msg.toLowerCase().replace("briscoes: ", "").split("\\|");
         send("BRISCOES SALE ON TODAY ONLY! " + params[0].toUpperCase().trim() + " $" + params[1].toUpperCase().trim() + " CHEAP CHEAP CHEAP! GET IN QUICK!");
@@ -765,9 +760,10 @@ public class CommandExecution{
 
     private void sandCasino(){
         Random rand = new Random();
-        String[] result = {"WON","LOST"};
-        send(e.getAuthor().getAsMention()+" YOU HAVE "+result[rand.nextInt(2)] + " THIS DUEL!");
+        String[] result = {"WON", "LOST"};
+        send(e.getAuthor().getAsMention() + " YOU HAVE " + result[rand.nextInt(2)] + " THIS DUEL!");
     }
+
     /**
      * Send a message to the current text channel
      *
@@ -838,25 +834,15 @@ public class CommandExecution{
      * Drop a tactical nuke on the server, ban everyone
      */
     private void nuke(){
-        String audio = "https://youtu.be/rV2l_WNd7Wo";
-        User author = e.getAuthor();
+        String audio = "https://www.youtube.com/watch?v=b_KYjfYjk0Q";
         deleteMessage(getLastMessage(0));
 
-        // User is authorised
-        if(isAuthorised(author)){
-            // Implement the Response interface method to drop the nuke after the track finishes
-            TrackEndListener.Response method = () -> new Thread(() -> deployNuke()).start();
-            TrackEndListener listener = new TrackEndListener(method, e.getGuild());
+        // Implement the Response interface method to drop the nuke after the track finishes
+        TrackEndListener.Response method = () -> new Thread(() -> admin.kick(e.getMember())).start();
+        TrackEndListener listener = new TrackEndListener(method, e.getGuild());
 
-            // Play the track
-            playAudio(audio, listener);
-        }
-
-        // User unauthorised, add him to the kill list
-        else{
-            String message = unauthReact(author);
-            send(author.getAsMention() + " " + message);
-        }
+        // Play the track
+        playAudio(audio, listener);
     }
 
     /**
