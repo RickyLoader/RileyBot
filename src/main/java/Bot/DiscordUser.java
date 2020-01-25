@@ -184,11 +184,11 @@ public class DiscordUser{
             int length = ja.length();
             System.out.println("\n" + length + " users found, please wait...\n\n");
             for(int i = 0; i < length; i++){
-                System.out.println("Creating user " + (i + 1) + "/" + length + "...");
                 JSONObject jObject = (JSONObject) ja.get(i);
                 String discordID = jObject.getString("discord_id");
                 String alias = jObject.getString("name");
                 int target = jObject.getInt("target");
+                System.out.println("Creating user " + (i + 1) + "/" + length + "... Name = " + alias);
 
                 // SQL uses bit data type for boolean. 0 considered false, 1 considered true for this scenario
                 users.put(
@@ -214,10 +214,10 @@ public class DiscordUser{
         String endpoint = endPoint + "/target/" + id;
         String json = ApiRequest.executeQuery(endpoint, "UPDATE", query, true);
         if(json.contains("Targeted!")){
+            System.out.println(alias + " has been marked in the database\n\n");
             result = true;
             this.target = true;
         }
-        System.out.println(json);
         return result;
     }
 
@@ -231,7 +231,6 @@ public class DiscordUser{
         String endpoint = endPoint + "/pardon/" + id;
         String query = "{}";
         String json = ApiRequest.executeQuery(endpoint, "UPDATE", query, true);
-        System.out.println(json);
         if(json.contains("Pardoned!")){
             result = true;
             this.target = false;

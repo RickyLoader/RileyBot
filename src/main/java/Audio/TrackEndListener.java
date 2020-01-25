@@ -35,7 +35,7 @@ public class TrackEndListener extends AudioEventAdapter{
      */
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason){
-        System.out.println("\nTrack ended\n");
+        //System.out.println("\nTrack ended\n");
 
         // Leave the voice channel
         new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();

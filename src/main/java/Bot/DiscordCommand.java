@@ -11,7 +11,7 @@ import java.util.*;
  * @author Ricky Loader
  * @version 5000.0
  */
-public class DiscordCommand{
+public class DiscordCommand implements Comparable<DiscordCommand>{
 
     // Trigger to activate command
     private String trigger;
@@ -55,24 +55,22 @@ public class DiscordCommand{
      */
     public static HashMap<String, DiscordCommand> getCommands(){
         HashMap<String, DiscordCommand> commands = new HashMap<>();
-        HashMap<String, String> typeInfo = new HashMap<>();
+
         try{
             String commandJSON = ApiRequest.executeQuery(endPoint, "GET", null, true);
+            String randomJSON = ApiRequest.executeQuery(endPoint + "/" + "random", "GET", null, true);
+            String linkJSON = ApiRequest.executeQuery(endPoint + "/" + "link", "GET", null, true);
+            String interactiveJSON = ApiRequest.executeQuery(endPoint + "/" + "interactive", "GET", null, true);
+
             JSONArray ja = new JSONArray(commandJSON);
             int length = ja.length();
             System.out.println(length + " commands found, please wait...\n\n");
             for(int i = 0; i < length; i++){
                 JSONObject jObject = (JSONObject) ja.get(i);
-                System.out.println("Creating command " + (i + 1) + "/" + length + "... Trigger = " + jObject.getString("trigger"));
+                System.out.println("Creating command " + (i + 1) + "/" + length + "... Trigger = " + jObject.getString("helpname"));
 
                 DiscordCommand command = jsonToCommand(jObject);
-                String json = typeInfo.get(command.getType());
-                if(json == null){
-                    String location = endPoint + "/" + command.getType().toLowerCase();
-                    json = ApiRequest.executeQuery(location, "GET", null, true);
-                    typeInfo.put(command.getType(), json);
-                }
-                command.getInfo(json);
+                command.setType(randomJSON, linkJSON, interactiveJSON);
                 commands.put(command.getTrigger(), command);
             }
         }
@@ -82,16 +80,18 @@ public class DiscordCommand{
         return commands;
     }
 
-    private void getInfo(String json){
+    private void setType(String random, String link, String interactive){
         switch(type) {
-            case "INTERACTIVE":
-                setInteractiveType(json);
+            case "RANDOM":
+                setRandomType(random);
                 break;
             case "LINK":
-                setLinkType(json);
+                setLinkType(link);
                 break;
-            case "RANDOM":
-                setRandomType(json);
+            case "INTERACTIVE":
+                setInteractiveType(interactive);
+                setRandomType(random);
+                break;
         }
     }
 
@@ -128,7 +128,11 @@ public class DiscordCommand{
     private void setRandomType(String json){
         ArrayList<String> links = new ArrayList<>();
         try{
-            JSONArray ja = new JSONObject(json).getJSONArray(String.valueOf(id));
+            JSONObject jo = new JSONObject(json);
+            if(!jo.has(String.valueOf(id))){
+                return;
+            }
+            JSONArray ja = jo.getJSONArray(String.valueOf(id));
             for(int i = 0; i < ja.length(); i++){
                 JSONObject o = (JSONObject) ja.get(i);
                 links.add(o.getString("possibility"));
@@ -192,8 +196,13 @@ public class DiscordCommand{
     }
 
     public void updateCalls(){
-        calls++;
-        ApiRequest.executeQuery(endPoint+"/update/calls/"+id, "UPDATE", null, true);
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                ApiRequest.executeQuery(endPoint + "/update/calls/" + id, "UPDATE", null, true);
+                calls++;
+            }
+        }).start();
     }
 
     public String getDesc(){
@@ -241,5 +250,10 @@ public class DiscordCommand{
 
     public void setImage(String image){
         this.image = image;
+    }
+
+    @Override
+    public int compareTo(DiscordCommand o){
+        return getTrigger().compareTo(o.getTrigger());
     }
 }

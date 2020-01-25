@@ -3,16 +3,27 @@ package Bot;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import Audio.TrackEndListener;
 import Exchange.ExchangeData;
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.audit.AuditLogEntry;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.ReadyEvent;
+import net.dv8tion.jda.core.events.emote.EmoteAddedEvent;
 import net.dv8tion.jda.core.events.guild.GuildBanEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent;
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMuteEvent;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.core.managers.GuildController;
+import org.json.JSONObject;
 
 /**
  * DiscordBot.java A bot for Discord posts images and bans cunts.
@@ -20,7 +31,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
  * @author Ricky Loader
  * @version 5000.0
  */
-public class DiscordBot extends ListenerAdapter{
+public class DiscordBot extends ListenerAdapter {
 
     // Holds command and user information during runtime
     public static HashMap<String, DiscordCommand> commands;
@@ -31,6 +42,7 @@ public class DiscordBot extends ListenerAdapter{
     // Holds most recent message information
     private static MessageChannel currentChan;
     private GuildMessageReceivedEvent messageEvent;
+    private static JDA jda;
 
     // Current targets for execute order 66
     public static ArrayList<User> targets;
@@ -38,19 +50,21 @@ public class DiscordBot extends ListenerAdapter{
     // Cached Grand Exchange data
     public static ExchangeData exchangeData = new ExchangeData();
 
-    private static long lastUpdate;
+    private HashMap<String, Message> messageHistory = new HashMap<>();
+
+    private Gunfight gunfight;
 
     /**
      * Accepts a Discord token as an argument to link the bot to a Discord application
      *
      * @param args String Discord token used to log bot in
      */
-    public static void main(String[] args){
-        if(args.length == 1){
+    public static void main(String[] args) {
+        if(args.length == 1) {
             String token = args[0];
             login(token);
         }
-        else{
+        else {
             System.out.println("No discord token specified, please try again using the token as an argument.");
         }
     }
@@ -62,11 +76,11 @@ public class DiscordBot extends ListenerAdapter{
      * @param e Event
      */
     @Override
-    public void onReady(ReadyEvent e){
-        targets = getTargets(e.getJDA().getGuilds());
+    public void onReady(ReadyEvent e) {
+        jda = e.getJDA();
+        targets = getTargets();
         self = e.getJDA().getSelfUser();
         botName = self.getName();
-
         // Begin listening on new thread for updates
         //new Thread(() -> checkForUpdates()).start();
     }
@@ -76,16 +90,16 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @param token Discord token to link bot to application
      */
-    private static void login(String token){
-        try{
-            while(!getInfo()){
+    private static void login(String token) {
+        try {
+            while(!getInfo()) {
                 System.out.println("\n\nUnable to reach API, trying again in 5 seconds...\n\n");
                 Thread.sleep(5000);
             }
             JDA bot = new JDABuilder(AccountType.BOT).setToken(token).build();
             bot.addEventListener(new DiscordBot());
         }
-        catch(Exception e){
+        catch(Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -96,7 +110,7 @@ public class DiscordBot extends ListenerAdapter{
      * Commands = trigger->command
      * Users = alias->user
      */
-    private static boolean getInfo(){
+    private static boolean getInfo() {
         System.out.println("\nFetching users from database...\n");
         users = DiscordUser.getUsers();
         System.out.println("\nFetching commands from database...\n");
@@ -114,7 +128,7 @@ public class DiscordBot extends ListenerAdapter{
      * @param identifier     Row value for "IDENTIFIER" column header.
      * @return String row for displaying in a command update table
      */
-    private static String commandToRow(DiscordCommand c, int longestDesc, int longestTrigger, String identifier){
+    private static String commandToRow(DiscordCommand c, int longestDesc, int longestTrigger, String identifier) {
         String summary = "";
 
         summary += identifier + getSpaces((3 - identifier.length()) + 10) +
@@ -128,45 +142,55 @@ public class DiscordBot extends ListenerAdapter{
         return summary;
     }
 
+    @Override
+    public void onGuildMessageDelete(GuildMessageDeleteEvent e) {
+        System.out.println("\nEvent:\n    Guild: " + e.getGuild().getName() + "\n    Event: MESSAGE DELETED:");
+        Message m = messageHistory.get(e.getMessageId());
+        List<AuditLogEntry> logs = e.getGuild().getAuditLogs().complete();
+        String name = logs.get(0).getUser().getName();
+        System.out.println(m == null
+                ? "        Message not found:\n            Admin: " + name
+                : "        Message found:\n            Admin: " + name + "\n            Author: " + m.getAuthor().getName() + "\n            Contents: " + m.getContentDisplay()
+        );
+    }
+
     /**
      * Attempts to locate and store targets marked for slamming. Searches all guilds the bot is a member of,
      * if the target cannot be found (marked but no longer a member of any mutual guilds) they are unmarked.
-     * TODO do this for all users on startup as the user object will make shit easier
      *
-     * @param guilds Discord servers that the bot belongs to
      * @return List of marked users
      */
-    private static ArrayList<User> getTargets(List<Guild> guilds){
+    private static ArrayList<User> getTargets() {
+        List<Guild> guilds = jda.getGuilds();
         System.out.println("\n\nMarking targets for extermination...\n");
         ArrayList<User> targets = new ArrayList<>();
         HashMap<String, DiscordUser> pendingTargets = new HashMap<>();
 
         // Store all marked users by their unique id
-        for(String name : users.keySet()){
+        for(String name : users.keySet()) {
             DiscordUser user = users.get(name);
-            if(user.isTarget()){
+            if(user.isTarget()) {
                 pendingTargets.put(user.getID(), user);
-                System.out.println(user.getAlias() + " is marked!");
+                System.out.println(user.getAlias() + " added to the kill list!");
             }
         }
 
         // No targets
-        if(pendingTargets.isEmpty()){
-            System.out.println("No targets located!\n");
+        if(pendingTargets.isEmpty()) {
+            System.out.println("No targets located!\n\n");
         }
         // Some targets
-        else{
-
+        else {
             // Get a list of members from every guild
-            for(Guild g : guilds){
+            for(Guild g : guilds) {
                 List<Member> members = g.getMembers();
 
                 // Search the members for marked users
-                for(Member m : members){
+                for(Member m : members) {
                     User user = m.getUser();
 
                     // User is found
-                    if(pendingTargets.containsKey(user.getAsMention())){
+                    if(pendingTargets.containsKey(user.getAsMention())) {
                         targets.add(user);
                         pendingTargets.remove(user.getAsMention());
                         System.out.println("FOUND user: " + user.getName() + " in server: " + g.getName());
@@ -175,17 +199,17 @@ public class DiscordBot extends ListenerAdapter{
             }
 
             // Not all pending targets were located
-            if(!pendingTargets.isEmpty()){
+            if(!pendingTargets.isEmpty()) {
 
                 // Remove the users from the database
-                for(String key : pendingTargets.keySet()){
+                for(String key : pendingTargets.keySet()) {
                     pendingTargets.get(key).remove();
                     users.remove(key);
                     System.out.println(pendingTargets.get(key).getAlias() + " was unable to be located, they are free to go!\n");
                 }
             }
         }
-        System.out.println("\nDiscordBot is now running!");
+        System.out.println("DiscordBot is now running!\n");
         return targets;
     }
 
@@ -196,36 +220,86 @@ public class DiscordBot extends ListenerAdapter{
      * @param e Event used to obtain message, user, and guild information.
      */
     @Override
-    public void onGuildMessageReceived(GuildMessageReceivedEvent e){
+    public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
+
         // Store information about the current message (for use by the command if required)
         currentChan = e.getChannel();
         User author = e.getAuthor();
+        messageHistory.put(e.getMessage().getId(), e.getMessage());
         messageEvent = e;
-
         // Strip the message to an appropriate format for comparison to command triggers
         String message = e.getMessage().getContentDisplay().toLowerCase().replace("\n", "").replace("\r", "");
 
+
         // Bot doesn't respond to itself
-        if(author == self){
+        if(author == self) {
             return;
         }
 
+        System.out.println("\nMessage: \n    Guild: " +
+                e.getGuild().getName() + "\n    Author: " + author.getName() + "\n    Content: " + message);
+
         // Message was the alias of a stored user, @mention the user
-        if(users.containsKey(message)){
+        if(users.containsKey(message)) {
             currentChan.sendMessage("Hey " + users.get(message).getID() + " bro you there?").queue();
         }
         // Help command
-        else
-            if(message.equals("help!")){
-                help(author);
-            }
+        else if(message.equals("help!")) {
+            help(author);
+        }
+        else if(message.contains("poll: ")) {
+            createPoll(message.replaceFirst("poll: ", ""));
+        }
+        else if(message.equals("gunfight!")) {
+            gunfight = new Gunfight(currentChan, e.getGuild());
+        }
+        else if(message.contains("playing: ")){
+            setPresence(e.getMessage().getContentDisplay());
+        }
+        else {
             // Compare the message to command triggers and proceed accordingly
-            else{
-                String trigger = getTrigger(message);
-                if(trigger != null){
-                    executeCommand(commands.get(trigger));
-                }
+            DiscordCommand command = getCommand(message);
+            if(command != null) {
+                executeCommand(command);
             }
+        }
+    }
+
+    private void setPresence(String msg){
+        String presence = msg.replace("playingu: ","");
+        jda.getPresence().setGame(Game.playing(presence));
+    }
+
+    @Override
+    public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
+        if(gunfight == null || event.getUser() == self) {
+            return;
+        }
+        if(event.getMessageIdLong() == gunfight.getGameId()) {
+            gunfight.reactionAdded(event.getReaction());
+        }
+    }
+
+    @Override
+    public void onMessageReactionAdd(MessageReactionAddEvent event) {
+        if(gunfight == null || event.getUser() == self) {
+            return;
+        }
+        if(event.getMessageIdLong() == gunfight.getGameId()) {
+            gunfight.reactionAdded(event.getReaction());
+        }
+    }
+
+    private static void createPoll(String title) {
+        String query = "{" + "\"title\":\"" + title + "\",\"options\":[\"YES\",\"NO\"],\"multi\":\"false\"}";
+        String json = ApiRequest.executeQuery("https://www.strawpoll.me/api/v2/polls", "ADD", query, false);
+        try {
+            JSONObject o = new JSONObject(json);
+            currentChan.sendMessage("@everyone https://www.strawpoll.me/" + o.getLong("id")).queue();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -234,26 +308,14 @@ public class DiscordBot extends ListenerAdapter{
      * @param userID The getAsMention() value of a User object
      * @return The User or null if not found
      */
-    public static DiscordUser findUser(String userID){
-        for(String name : users.keySet()){
+    public static DiscordUser findUser(String userID) {
+        for(String name : users.keySet()) {
             DiscordUser user = users.get(name);
-            if(user.getID().equals(userID)){
+            if(user.getID().equals(userID)) {
                 return user;
             }
         }
         return null;
-    }
-
-    /**
-     * Updates the stored users when a user changes their alias.
-     */
-    public static void refactorUsers(){
-        HashMap<String, DiscordUser> temp = new HashMap<>();
-        for(String name : users.keySet()){
-            DiscordUser user = users.get(name);
-            temp.put(user.getAlias(), user);
-        }
-        users = temp;
     }
 
     /**
@@ -262,38 +324,42 @@ public class DiscordBot extends ListenerAdapter{
      * @param e Event used to obtain user and guild information
      */
     @Override
-    public void onGuildMemberJoin(GuildMemberJoinEvent e){
+    public void onGuildMemberJoin(GuildMemberJoinEvent e) {
         User author = e.getUser();
 
         // If the user is not already marked for execution, mark them (marked user may have left and joined back later)
-        if(!targets.contains(author)){
+        if(!targets.contains(author)) {
+            System.out.println(author.getName() + " has joined " + e.getGuild().getName() + ", marking\n\n");
             targets.add(author);
         }
 
         // Create an object to hold the new user and store them in the database if they don't exist
         DiscordUser newUser = DiscordUser.userJoined(author);
-        if(newUser != null && !users.containsKey(newUser.getAlias())){
+        if(newUser != null && !users.containsKey(newUser.getAlias())) {
             users.put(newUser.getAlias(), newUser);
         }
         // Send a message to the guild containing a breakdown of popular commands
         e.getGuild().getDefaultChannel().sendMessage(quickCommand(author)).queue();
     }
 
+
     /**
      * Checks if a message received is a trigger to a command, returns the trigger. Trigger commonly contains REGEX
      * which containsKey() does not compare, a search is required.
      *
      * @param msg The message received
-     * @return The trigger of a command if found, null if not
+     * @return Command if found, null if not
      */
-    public static String getTrigger(String msg){
-        String trigger = null;
-        for(String t : commands.keySet()){
-            if(msg.matches(t)){
-                trigger = t;
+    public static DiscordCommand getCommand(String msg) {
+        DiscordCommand command = commands.get(msg);
+        if(command == null) {
+            for(String trigger : commands.keySet()) {
+                if(msg.matches(trigger)) {
+                    command = commands.get(trigger);
+                }
             }
         }
-        return trigger;
+        return command;
     }
 
     /**
@@ -302,11 +368,11 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @param command The command to be executed
      */
-    private void executeCommand(DiscordCommand command){
+    private void executeCommand(DiscordCommand command) {
         String type = command.getType();
 
         command.updateCalls();
-
+        System.out.println("    Command: " + command.getHelpName().toUpperCase());
         switch(type) {
             case "RANDOM":
                 randomCommand(command);
@@ -328,8 +394,8 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @param c The random type command
      */
-    private void randomCommand(DiscordCommand c){
-        for(int i = 0; i < getQuantity(); i++){
+    private void randomCommand(DiscordCommand c) {
+        for(int i = 0; i < getQuantity(); i++) {
             String link = c.getLink();
             currentChan.sendMessage(link).queue();
         }
@@ -340,13 +406,13 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @return The integer or 1 if not found. Determines how many times to repeat the command
      */
-    private int getQuantity(){
+    private int getQuantity() {
         String text = messageEvent.getMessage().getContentDisplay();
-        try{
+        try {
             int quantity = Integer.valueOf(text.split(" ")[1]);
             return quantity;
         }
-        catch(Exception e){
+        catch(Exception e) {
             return 1;
         }
     }
@@ -356,7 +422,7 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @param c The link type command
      */
-    private void linkCommand(DiscordCommand c){
+    private void linkCommand(DiscordCommand c) {
         currentChan.sendMessage(c.getImage()).queue();
     }
 
@@ -366,17 +432,16 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @param c The interactive type command
      */
-    private void interactiveCommand(DiscordCommand c){
+    private void interactiveCommand(DiscordCommand c) {
         String methodName = c.getMethod();
-        try{
+        try {
             CommandExecution interactive = new CommandExecution(messageEvent, c);
             Method method = interactive.getClass().getDeclaredMethod(methodName);
             method.setAccessible(true);
             method.invoke(interactive);
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
-            System.out.println(c.getMethod() + " does not exist!");
         }
 
     }
@@ -387,9 +452,9 @@ public class DiscordBot extends ListenerAdapter{
      * @param n The number of spaces desired
      * @return A String containing n spaces
      */
-    public static String getSpaces(int n){
+    public static String getSpaces(int n) {
         String spaces = "";
-        while(spaces.length() < n){
+        while(spaces.length() < n) {
             spaces += " ";
         }
         return spaces;
@@ -401,13 +466,13 @@ public class DiscordBot extends ListenerAdapter{
      * @param author The user who has joined the server and will be provided the information
      * @return A column separated table containing information about the most popular commands
      */
-    private String quickCommand(User author){
+    private String quickCommand(User author) {
         ArrayList<DiscordCommand> topCommands = new ArrayList<>();
         String codeBlock = "```";
         String intro = "Hello " + author.getAsMention() + "! How's your day been bro?\n\nHere are my top 5 commands:\n\n";
 
         // Create a list of all commands
-        for(String key : commands.keySet()){
+        for(String key : commands.keySet()) {
             DiscordCommand c = commands.get(key);
             topCommands.add(c);
         }
@@ -422,7 +487,7 @@ public class DiscordBot extends ListenerAdapter{
         String summary = codeBlock;
 
         // Create a row for each of the top 5 commands containing the name, description, and number of calls
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < 5; i++) {
             DiscordCommand c = topCommands.get(i);
             String name = c.getHelpName();
             String desc = c.getDesc();
@@ -448,7 +513,7 @@ public class DiscordBot extends ListenerAdapter{
         // Header of the table, spacing of the columns calculated the same way to line up with the row values.
         String header = codeBlock
                 + "TRIGGER"
-                + getSpaces((longestName - "Trigger".length()) + 10)
+                + getSpaces((longestName - "TRIGGER".length()) + 10)
                 + "DESCRIPTION"
                 + getSpaces((longestDesc - "DESCRIPTION".length()) + 10)
                 + "CALLS"
@@ -467,9 +532,9 @@ public class DiscordBot extends ListenerAdapter{
      * @param type  The attribute to be compared
      * @return The length of the longest attribute
      */
-    private static int calculateLongest(ArrayList<DiscordCommand> list, int bound, String type){
+    private static int calculateLongest(ArrayList<DiscordCommand> list, int bound, String type) {
         int longest = 0;
-        for(int i = 0; i < bound; i++){
+        for(int i = 0; i < bound; i++) {
             DiscordCommand c = list.get(i);
             int toCompare = 0;
 
@@ -481,7 +546,7 @@ public class DiscordBot extends ListenerAdapter{
                     toCompare = c.getDesc().length();
                     break;
             }
-            if(toCompare > longest){
+            if(toCompare > longest) {
                 longest = toCompare;
             }
         }
@@ -493,19 +558,18 @@ public class DiscordBot extends ListenerAdapter{
      *
      * @param author The user who called the "help!" command
      */
-    private void help(User author){
+    private void help(User author) {
         PrivateChannel pc = author.openPrivateChannel().complete();
         HashMap<String, ArrayList<DiscordCommand>> categories = new HashMap<>();
+
         // Find the longest helpName of the commands and store each command by their category
-        int longest = 0;
-        for(String s : commands.keySet()){
+        ArrayList<DiscordCommand> helpCommands = new ArrayList<>(commands.values());
+        int longestName = calculateLongest(helpCommands, helpCommands.size(), "name");
+        int longestDesc = calculateLongest(helpCommands, helpCommands.size(), "desc");
+
+        for(String s : commands.keySet()) {
             DiscordCommand com = commands.get(s);
-            String temp = com.getHelpName() + "                    " + com.getDesc();
-            int length = temp.length();
-            if(length > longest){
-                longest = length;
-            }
-            if(!categories.containsKey(com.getType())){
+            if(!categories.containsKey(com.getType())) {
                 categories.put(com.getType(), new ArrayList<>());
             }
             categories.get(com.getType()).add(com);
@@ -515,18 +579,33 @@ public class DiscordBot extends ListenerAdapter{
         String codeBlock = "```";
 
         // Create a separate block with a header for each type of command
-        for(String category : categories.keySet()){
+        for(String category : categories.keySet()) {
             help += "\n__**" + category + " COMMANDS:**__\n\n";
+            String header = codeBlock
+                    + "TRIGGER"
+                    + getSpaces((longestName - "TRIGGER".length()) + 5)
+                    + "DESCRIPTION"
+                    + getSpaces((longestDesc - "DESCRIPTION".length()) + 5)
+                    + "CALLS"
+                    + codeBlock;
+            help += header;
             help += codeBlock;
-            for(DiscordCommand com : categories.get(category)){
-                String temp = buildString(longest, "\"" + com.getHelpName() + "\"", com.getDesc() + "\n\n");
+            ArrayList<DiscordCommand> commands = categories.get(category);
+            Collections.sort(commands);
+            for(DiscordCommand com : commands) {
+                String temp = com.getHelpName()
+                        + getSpaces((longestName - com.getHelpName().length()) + 5)
+                        + com.getDesc()
+                        + getSpaces((longestDesc - com.getDesc().length()) + 5)
+                        + com.getCalls()
+                        + "\n\n";
 
                 // Send the current block if it exceeds the character limit
-                if(help.length() + temp.length() + codeBlock.length() > 1900){
+                if(help.length() + temp.length() + codeBlock.length() > 1900) {
                     pc.sendMessage(help + codeBlock).queue();
                     help = codeBlock + temp;
                 }
-                else{
+                else {
                     help += temp;
                 }
             }
@@ -534,27 +613,23 @@ public class DiscordBot extends ListenerAdapter{
         }
         pc.sendMessage(help).queue();
         pc.close();
-        String msg;
-        msg = "I've gone ahead and sent you my commands, you can fuck off now cunt.";
-        currentChan.sendMessage(msg).queue();
+        currentChan.sendMessage("I've gone ahead and sent you my commands, you can fuck off now cunt.").queue();
     }
 
-    /**
-     * Inserts a line between the trigger and description of a command for readability. Calculates where to place the
-     * line as to be even throughout the table.
-     *
-     * @param longest     Longest trigger length
-     * @param trigger     Trigger of the command
-     * @param description Description of the command
-     * @return A String row containing the trigger and description of a command, separated by a line
-     */
-    private static String buildString(int longest, String trigger, String description){
-        int splitPoint = (longest / 2);
-        while(trigger.length() < splitPoint){
-            trigger += " ";
+    @Override
+    public void onGuildVoiceMute(GuildVoiceMuteEvent event) {
+        if(event.getMember() == event.getGuild().getMember(self)) {
+            System.out.println("Someone muted me, attempting to unmute");
+            event.getGuild().getController().setMute(event.getMember(), false);
         }
-        trigger += "|           ";
-        trigger += description;
-        return trigger;
+    }
+
+    @Override
+    public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
+        if(event.getMember() == event.getGuild().getMember(self)) {
+            System.out.println("I was moved, coming back!");
+            System.out.println(event.getResponseNumber());
+            event.getGuild().getController().moveVoiceMember(event.getMember(), event.getChannelLeft());
+        }
     }
 }
