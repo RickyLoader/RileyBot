@@ -2,9 +2,11 @@ package Bot;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import Audio.TrackEndListener;
 import Exchange.ExchangeData;
+import net.dv8tion.jda.client.events.message.group.react.GenericGroupMessageReactionEvent;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
@@ -43,6 +45,7 @@ public class DiscordBot extends ListenerAdapter {
     private static MessageChannel currentChan;
     private GuildMessageReceivedEvent messageEvent;
     private static JDA jda;
+    private Guild guild;
 
     // Current targets for execute order 66
     public static ArrayList<User> targets;
@@ -213,6 +216,17 @@ public class DiscordBot extends ListenerAdapter {
         return targets;
     }
 
+    private void logMessage(GuildMessageReceivedEvent e) {
+        Message message = e.getMessage();
+        String reply = "\nMessage: \n    Guild: " +
+                e.getGuild().getName() + "\n    Author: " + e.getAuthor().getName();
+        List<Message.Attachment> attachments = message.getAttachments();
+        String content = message.getContentDisplay();
+        reply = (content.isEmpty()) ? reply : reply + "\n    Content: " + content;
+        reply = (attachments.isEmpty()) ? reply : reply + "\n    Attachment: " + attachments.get(0).getUrl();
+        System.out.println(reply);
+    }
+
     /**
      * Core listener of the bot, fires when a message is received on any guild the bot belongs to. Checks if the
      * message is a command and responds appropriately.
@@ -227,17 +241,17 @@ public class DiscordBot extends ListenerAdapter {
         User author = e.getAuthor();
         messageHistory.put(e.getMessage().getId(), e.getMessage());
         messageEvent = e;
+        guild = e.getGuild();
         // Strip the message to an appropriate format for comparison to command triggers
         String message = e.getMessage().getContentDisplay().toLowerCase().replace("\n", "").replace("\r", "");
 
 
         // Bot doesn't respond to itself
-        if(author == self) {
+        if(author.isBot()) {
             return;
         }
 
-        System.out.println("\nMessage: \n    Guild: " +
-                e.getGuild().getName() + "\n    Author: " + author.getName() + "\n    Content: " + message);
+        logMessage(e);
 
         // Message was the alias of a stored user, @mention the user
         if(users.containsKey(message)) {
@@ -251,10 +265,13 @@ public class DiscordBot extends ListenerAdapter {
             createPoll(message.replaceFirst("poll: ", ""));
         }
         else if(message.equals("gunfight!")) {
-            gunfight = new Gunfight(currentChan, e.getGuild());
+            gunfight = new Gunfight(currentChan, e.getGuild(), e.getAuthor());
         }
-        else if(message.contains("playing: ")){
+        else if(message.contains("playing: ")) {
             setPresence(e.getMessage().getContentDisplay());
+        }
+        else if(message.equals("sloth raid")) {
+           slothRaid();
         }
         else {
             // Compare the message to command triggers and proceed accordingly
@@ -265,9 +282,25 @@ public class DiscordBot extends ListenerAdapter {
         }
     }
 
-    private void setPresence(String msg){
-        String presence = msg.replace("playingu: ","");
+    private void slothRaid(){
+        String sloth = "<:SLOTH:609570842589790224> SLOTH RAID <:SLOTH:609570842589790224>\n";
+        StringBuilder msg= new StringBuilder();
+        while(msg.length()<1900){
+            msg.append(sloth);
+        }
+        for(int i = 0;i<10;i++){
+            currentChan.sendMessage(msg).queue();
+        }
+    }
+
+    private void setPresence(String msg) {
+        String presence = msg.replace("playing: ", "");
         jda.getPresence().setGame(Game.playing(presence));
+    }
+
+    @Override
+    public void onGenericGroupMessageReaction(GenericGroupMessageReactionEvent event) {
+        super.onGenericGroupMessageReaction(event);
     }
 
     @Override
@@ -275,7 +308,7 @@ public class DiscordBot extends ListenerAdapter {
         if(gunfight == null || event.getUser() == self) {
             return;
         }
-        if(event.getMessageIdLong() == gunfight.getGameId()) {
+        if(event.getMessageIdLong() == gunfight.getGameId() && event.getUser() == gunfight.getOwner()) {
             gunfight.reactionAdded(event.getReaction());
         }
     }
@@ -285,7 +318,7 @@ public class DiscordBot extends ListenerAdapter {
         if(gunfight == null || event.getUser() == self) {
             return;
         }
-        if(event.getMessageIdLong() == gunfight.getGameId()) {
+        if(event.getMessageIdLong() == gunfight.getGameId() && event.getUser() == gunfight.getOwner()) {
             gunfight.reactionAdded(event.getReaction());
         }
     }
@@ -395,10 +428,26 @@ public class DiscordBot extends ListenerAdapter {
      * @param c The random type command
      */
     private void randomCommand(DiscordCommand c) {
+        messageEvent.getMessage().delete().complete();
+        MessageChannel memeChannel = findMemeChannel();
+
+        if(memeChannel == null){
+            currentChan.sendMessage("I need a channel with 'meme' in the name cunt.").queue();
+            return;
+        }
         for(int i = 0; i < getQuantity(); i++) {
             String link = c.getLink();
-            currentChan.sendMessage(link).queue();
+            memeChannel.sendMessage(link).queue();
         }
+    }
+
+    private MessageChannel findMemeChannel(){
+        for(MessageChannel chan:guild.getTextChannels()){
+            if(chan.getName().toLowerCase().contains("meme")){
+                return chan;
+            }
+        }
+        return null;
     }
 
     /**
@@ -520,7 +569,7 @@ public class DiscordBot extends ListenerAdapter {
                 + codeBlock;
 
         return intro + header + summary + "\n If you'd like the rest just type help! " +
-                "(you're probably used to screaming that when grandad comes around anyway)\n\n" +
+                "(you're probably used to screaming that when grandad comes around)\n\n" +
                 " Enjoy cunt.";
     }
 

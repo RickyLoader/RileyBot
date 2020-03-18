@@ -196,12 +196,9 @@ public class DiscordCommand implements Comparable<DiscordCommand>{
     }
 
     public void updateCalls(){
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                ApiRequest.executeQuery(endPoint + "/update/calls/" + id, "UPDATE", null, true);
-                calls++;
-            }
+        new Thread(() -> {
+            ApiRequest.executeQuery(endPoint + "/update/calls/" + id, "UPDATE", null, true);
+            calls++;
         }).start();
     }
 
