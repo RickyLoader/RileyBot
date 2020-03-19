@@ -15,6 +15,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import static net.dv8tion.jda.core.Permission.BAN_MEMBERS;
 
 import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.managers.GuildController;
@@ -44,6 +45,7 @@ public class CommandExecution {
     private String msg;
     private Message rawMsg;
     private Guild guild;
+    private JDA jda;
 
     /**
      * Constructor takes a message event and a command object. Command object holds information relevant to the
@@ -52,7 +54,7 @@ public class CommandExecution {
      * @param e Message event
      * @param c Command that was called
      */
-    public CommandExecution(GuildMessageReceivedEvent e, DiscordCommand c) {
+    public CommandExecution(GuildMessageReceivedEvent e, DiscordCommand c, JDA jda) {
         this.e = e;
         this.chan = e.getChannel();
         this.c = c;
@@ -61,10 +63,7 @@ public class CommandExecution {
         this.msg = e.getMessage().getContentDisplay();
         this.rawMsg = e.getMessage();
         this.guild = e.getGuild();
-    }
-
-    public CommandExecution(Guild guild) {
-        this.guild = guild;
+        this.jda = jda;
     }
 
     /**
@@ -173,6 +172,7 @@ public class CommandExecution {
     private void killList() {
         String summary;
         User author = e.getAuthor();
+        ArrayList<Member> targets = TargetUser.getTargets(jda.getGuilds());
 
         if(targets.isEmpty()) {
             summary = "There are no targets sir";
@@ -182,8 +182,8 @@ public class CommandExecution {
             String intro = "Hello sir, here are the pending targets:\n";
             summary = codeBlock;
             int i = 1;
-            for(User target : targets) {
-                summary += i + getSpaces(5) + target.getName() + "\n";
+            for(Member target : targets) {
+                summary += i + getSpaces(5) + target.getUser().getName() + "\n";
                 i++;
             }
             summary += codeBlock;
@@ -196,51 +196,47 @@ public class CommandExecution {
     }
 
     /**
-     * Pardon all targets if the user has permission, mark them if they don't.
+     * Pardon everyone on the kill list
      */
     private void pardonAll() {
-        User author = e.getAuthor();
         String msg = "There are no targets bro fuck off";
+        ArrayList<Member> targets = TargetUser.getTargets(jda.getGuilds());
         if(targets.isEmpty()) {
             return;
         }
         else {
-            for(User target : targets) {
-                DiscordUser container = findUser(target.getAsMention());
-                if(container.pardonUser()) {
-                    msg = "@everyone " + target.getName() + " was successfully pardoned, congratulations sir";
+            for(Member target : targets) {
+                boolean success = TargetUser.deleteTarget(target.getAsMention());
+                if(success) {
+                    msg = "@everyone " + target.getUser().getName() + " was successfully pardoned, congratulations sir";
                 }
                 else {
-                    msg = "@everyone " + target.getName() + " was not pardoned";
+                    msg = "@everyone " + target.getUser().getName() + " was not pardoned";
                 }
             }
         }
-        targets = new ArrayList<>();
         send(msg);
     }
 
     /**
      * Ban all targets on the kill list and send a summary of the operation.
      */
-    private void purgeTargets() {
+    private void purgeTargets(ArrayList<Member> targets) {
         int killed = 0;
-        ArrayList<User> survived = new ArrayList<>();
-        for(User target : targets) {
-            System.out.println("Attempting to ban " + target.getName() + " (" + target.getAsMention() + ") ");
+        for(Member target : targets) {
+            System.out.println("Attempting to ban " + target.getUser().getName() + " (" + target.getAsMention() + ") ");
             try {
-                comfortBan(target);
+                comfortBan(target.getUser());
                 admin.ban(target, 7).complete();
-                unban(target);
+                unban(target.getUser());
                 killed++;
                 System.out.println("Success!");
             }
             catch(Exception e) {
-                survived.add(target);
-                System.out.println(target.getName() + " (" + target.getAsMention() + ") was not banned");
+                System.out.println(target.getUser().getName() + " (" + target.getAsMention() + ") was not banned");
             }
         }
         send(killed + "/" + targets.size() + " targets EXTERMINATED");
-        targets = survived;
     }
 
     /**
@@ -353,13 +349,9 @@ public class CommandExecution {
      * @return The reply to be sent to the User
      */
     private String unauthReact(User author) {
-        DiscordUser authorObj = findUser(author.getAsMention());
         String reply = "";
-        if(!targets.contains(author)) {
-            if(authorObj.markUser()) {
-                targets.add(author);
-                reply = author.getAsMention() + " You think I wouldn't notice you aren't authorised to do that?\nNow YOU'RE on the kill list cunt";
-            }
+        if(TargetUser.addTarget(author)) {
+            reply = author.getAsMention() + " You think I wouldn't notice you aren't authorised to do that?\nNow YOU'RE on the kill list cunt";
         }
         else {
             reply = author.getAsMention() + " Normally this is where i'd add YOU to the kill list for trying to do something you're not allowed to do. " +
@@ -433,78 +425,6 @@ public class CommandExecution {
      */
     private void tagImage() {
 
-    }
-
-    /**
-     * Mark a user for extermination by the bot
-     */
-    private void mark() {
-        String targetName = msg.replace("mark @", "");
-        System.out.println("Beginning mark process:\n\n");
-        System.out.println("Message was: " + msg + "\n\n");
-        System.out.println(targetName);
-        Member targetMember = getServerMember(targetName);
-        User author = e.getAuthor();
-        String reply;
-        String mention = author.getAsMention();
-        System.out.println("Target is: " + targetName + " \n\n");
-
-        if(targetMember == null) {
-            send(author.getAsMention() + " that cunt doesn't exist, fuck off");
-            return;
-        }
-        User target = targetMember.getUser();
-
-        if(isAuthorised(author, targetMember)) {
-            if(targets.contains(target)) {
-                reply = author.getAsMention() + " " + target.getName() + " is already on the kill list, now he knows cunt, better execute order 66 real quick";
-            }
-            else {
-                DiscordUser authorObj = findUser(target.getAsMention());
-                authorObj.markUser();
-                targets.add(target);
-                reply = mention + " " + targetName + " has been added to the kill list! Congratulations sir!";
-            }
-        }
-        else {
-            reply = "One of us isn't allowed to ban that person cunt.";
-        }
-        send(reply);
-    }
-
-
-    private void pardon() {
-        String targetName = msg.replace("pardon @", "");
-        Member targetMember = getServerMember(targetName);
-        User author = e.getAuthor();
-        String reply;
-        String mention = "@everyone ";
-
-        if(targetMember == null) {
-            send("Who the fuck is that?");
-            return;
-        }
-        User target = targetMember.getUser();
-
-        if(targets.contains(target)) {
-            DiscordUser targetObj = findUser(target.getAsMention());
-
-            // Successfully pardoned the target
-            if(targetObj.pardonUser()) {
-                System.out.println("Pardoning " + targetObj.getAlias() + "...\n\n");
-                targets.remove(target);
-                reply = mention + target.getName() + " was successfully pardoned, congratulations sir";
-            }
-            // Pardon failed for API related reason
-            else {
-                reply = mention + target.getName() + " was not pardoned";
-            }
-        }
-        // Target is not marked
-        else {
-            reply = author.getAsMention() + " Nobody by that name is on the kill list cunt";
-        }
-        send(reply);
     }
 
     /**
@@ -647,7 +567,7 @@ public class CommandExecution {
      * Bans every user on the kill list and resets the list. Plays audio prior to firing.
      */
     private void executeOrder66() {
-        System.out.println("Received the order from " + rawMsg.getAuthor().getName() + ", Executing order 66...\n\n");
+        System.out.println("\n\nReceived the order from " + rawMsg.getAuthor().getName() + ", Executing order 66...\n\n");
 
         String[] tracks = new String[]{
                 "https://www.youtube.com/watch?v=A8ZZmU8orvg",
@@ -666,10 +586,12 @@ public class CommandExecution {
         // Delete the message which activated the command (snitches get stitches)
         deleteMessage(getLastMessage(0));
 
+        ArrayList<Member> targets = TargetUser.getTargets(jda.getGuilds());
+
         // There are targets to be exterminated
         if(!targets.isEmpty()) {
             // Implement the Response interface method to purge the kill list after the track finishes
-            TrackEndListener.Response method = () -> new Thread(() -> purgeTargets()).start();
+            TrackEndListener.Response method = () -> new Thread(() -> purgeTargets(targets)).start();
             TrackEndListener listener = new TrackEndListener(method, guild);
             // Play thr track
             playAudio(audio, listener);
@@ -685,21 +607,6 @@ public class CommandExecution {
             pm.sendMessage(message).queue();
             pm.close();
         }
-    }
-
-    /**
-     * Drop a tactical nuke on the server, ban everyone
-     */
-    private void nuke() {
-        String audio = "https://www.youtube.com/watch?v=b_KYjfYjk0Q";
-        deleteMessage(getLastMessage(0));
-
-        // Implement the Response interface method to drop the nuke after the track finishes
-        TrackEndListener.Response method = () -> new Thread(() -> admin.kick(e.getMember())).start();
-        TrackEndListener listener = new TrackEndListener(method, guild);
-
-        // Play the track
-        playAudio(audio, listener);
     }
 
     /**
