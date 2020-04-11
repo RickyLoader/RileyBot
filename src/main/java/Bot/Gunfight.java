@@ -66,11 +66,24 @@ class Gunfight {
         builder.setDescription(desc);
         builder.setThumbnail("https://www.pcgamesn.com/wp-content/uploads/2019/05/modern-warfare-captain-price-900x507.jpg");
         builder.addField("**WIN**", String.valueOf(wins), true);
-        builder.addBlankField(true);
         builder.addField("**LOSS**", String.valueOf(losses), true);
         builder.addField("**STREAK**", streak, false);
         return builder.build();
     }
+
+    /**
+     * Pad out smaller description messages to prevent drastic shifts in game message width
+     *
+     * @param message The message to be padded
+     * @return Message with invisible unicode padding
+     */
+    private String getPadding(String message) {
+        for(int i = message.length(); i < 35; i++) {
+            message += "\u2800";
+        }
+        return message;
+    }
+
 
     /**
      * Send the game message to the channel to begin playing
@@ -78,6 +91,13 @@ class Gunfight {
     private void startGame() {
         MessageEmbed game = buildGameMessage(wins, losses, String.valueOf(streak), createDesc());
         sendGameMessage(game);
+    }
+
+    /**
+     * Remove the game message
+     */
+    void deleteGame() {
+        channel.getMessageById(id).complete().delete().complete();
     }
 
     /**
@@ -164,7 +184,7 @@ class Gunfight {
         // Score is even
         else if(wins == losses) {
             messages = new String[]{
-                    "Neck and neck, pick your game up cunts!",
+                    "Neck and neck, pick up your game cunts!",
                     "You better not fall behind",
                     "Get that lead back!"
             };
@@ -258,7 +278,7 @@ class Gunfight {
                 };
             }
         }
-        return messages[rand.nextInt(messages.length)];
+        return getPadding(messages[rand.nextInt(messages.length)]);
     }
 
     /**

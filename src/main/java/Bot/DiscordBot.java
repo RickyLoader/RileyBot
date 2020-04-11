@@ -85,8 +85,8 @@ public class DiscordBot extends ListenerAdapter {
                 @Override
                 public void run() {
                     Scanner scan = new Scanner(System.in);
-                    while(scan.hasNextLine()){
-                        self.getMutualGuilds().get(0).getTextChannelsByName("cunt",true).get(0).sendMessage(scan.nextLine()).queue();
+                    while(scan.hasNextLine()) {
+                        self.getMutualGuilds().get(0).getTextChannelsByName("cunt", true).get(0).sendMessage(scan.nextLine()).queue();
                     }
                 }
             }).start();
@@ -160,8 +160,31 @@ public class DiscordBot extends ListenerAdapter {
         if(message.equals("help!")) {
             help(author);
         }
-        else if(message.equals("gunfight!")) {
-            gunfight = new Gunfight(currentChan, e.getGuild(), e.getAuthor());
+        else if(message.contains("gunfight")) {
+            if(message.equals("gunfight!")) {
+                messageEvent.getMessage().delete().complete();
+                if(gunfight != null) {
+                    gunfight.deleteGame();
+                }
+                gunfight = new Gunfight(currentChan, e.getGuild(), e.getAuthor());
+            }
+            else {
+                String response = null;
+                switch(message) {
+                    case "gunfight":
+                        response = "Needs an exclamation mark bro";
+                        break;
+                    case "!gunfight":
+                        response = "Try the other side";
+                        break;
+                    case ":gunfight":
+                        response = "Guess again";
+                        break;
+                }
+                if(response!=null){
+                    currentChan.sendMessage(response).queue();
+                }
+            }
         }
         else {
             // Compare the message to command triggers and proceed accordingly
