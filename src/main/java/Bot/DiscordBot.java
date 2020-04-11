@@ -12,6 +12,8 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 
+import net.dv8tion.jda.core.events.guild.member.GuildMemberRoleAddEvent;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
@@ -79,6 +81,15 @@ public class DiscordBot extends ListenerAdapter {
             }
             JDA bot = new JDABuilder(AccountType.BOT).setToken(token).build();
             bot.addEventListener(new DiscordBot());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Scanner scan = new Scanner(System.in);
+                    while(scan.hasNextLine()){
+                        self.getMutualGuilds().get(0).getTextChannelsByName("cunt",true).get(0).sendMessage(scan.nextLine()).queue();
+                    }
+                }
+            }).start();
             System.out.println("\nBot is now running!\n");
         }
         catch(Exception e) {
@@ -189,11 +200,10 @@ public class DiscordBot extends ListenerAdapter {
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent e) {
         User author = e.getUser();
-        System.out.println(author.getName() + " has joined " + e.getGuild().getName() + ", marking\n\n");
-        TargetUser.addTarget(author);
+        System.out.println("\n" + author.getName() + " has joined " + e.getGuild().getName() + ", marking\n\n");
+        DiscordUser.addTarget(author);
         e.getGuild().getDefaultChannel().sendMessage(quickCommand(author)).queue();
     }
-
 
     /**
      * Checks if a message received is a trigger to a command, returns the trigger. Trigger commonly contains REGEX
@@ -256,7 +266,8 @@ public class DiscordBot extends ListenerAdapter {
         }
         for(int i = 0; i < getQuantity(); i++) {
             String link = c.getLink();
-            memeChannel.sendMessage(link).queue();
+            currentChan.sendMessage(link).queue();
+            //memeChannel.sendMessage(link).queue();
         }
     }
 

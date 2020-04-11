@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class TargetUser {
+public class DiscordUser {
 
     private static String endPoint = "users";
 
@@ -21,7 +21,7 @@ public class TargetUser {
 
     public static boolean addTarget(User user) {
         String url = (endPoint + "/add");
-        String query = addRequest(user.getAsMention());
+        String query = addRequest(user.getId());
         return (ApiRequest.executeQuery(url, "ADD", query, true)).equals("User Added!");
     }
 
@@ -32,13 +32,7 @@ public class TargetUser {
      * @return A JSON body containing the user's information to be sent to the API
      */
     private static String addRequest(String id) {
-        String quote = "\"";
-        StringBuilder result = new StringBuilder("{");
-        result.append(quote + "discord_id" + quote);
-        result.append(":");
-        result.append(quote + id + quote);
-        result.append("}");
-        return result.toString();
+        return "{\"discord_id\":\""+id+"\"}";
     }
 
     public static ArrayList<Member> getTargets(List<Guild> guilds) {
@@ -69,15 +63,18 @@ public class TargetUser {
         ArrayList<Member> members = new ArrayList<>();
         for(Guild guild : guilds) {
             for(Member m : guild.getMembers()) {
-                if(wanted.contains(m.getAsMention())) {
+                if(wanted.contains(m.getUser().getId())) {
                     members.add(m);
-                    wanted.remove(m.getAsMention());
+                    System.out.println(m.getEffectiveName() + " found.");
+                    wanted.remove(m.getUser().getId());
                 }
             }
         }
-        System.out.println("Removing " + wanted.size() + " targets, cannot locate\n");
-        for(String id : wanted) {
-            deleteTarget(id);
+        if(wanted.size() > 0) {
+            System.out.println("Removing " + wanted.size() + " targets, cannot locate\n");
+            for(String id : wanted) {
+                deleteTarget(id);
+            }
         }
         return members;
     }

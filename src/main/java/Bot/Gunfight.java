@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
+/**
+ * Interactive win/loss tracker - use emotes to track score
+ */
 class Gunfight {
 
     private long id;
     private MessageChannel channel;
-    private Emote win;
-    private Emote loss;
+    private Emote win, loss;
     private int wins, losses, streak = 0;
     private Guild server;
     private User owner;
@@ -29,10 +31,11 @@ class Gunfight {
         }
     }
 
-    User getOwner(){
-        return owner;
-    }
-
+    /**
+     * Requires emotes named win & loss
+     *
+     * @return Presence of emotes
+     */
     private boolean checkEmotes() {
         List<Emote> victory = server.getEmotesByName("victory", true);
         List<Emote> defeat = server.getEmotesByName("defeat", true);
@@ -44,6 +47,15 @@ class Gunfight {
         return false;
     }
 
+    /**
+     * Builds the game message. Called to begin game and build new messages as score is added.
+     *
+     * @param wins   Wins to display
+     * @param losses Losses to display
+     * @param streak Current streak (negative for loss streak)
+     * @param desc   Feedback message to display based on score
+     * @return Game message
+     */
     private MessageEmbed buildGameMessage(int wins, int losses, String streak, String desc) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
@@ -57,13 +69,12 @@ class Gunfight {
         return builder.build();
     }
 
+    /**
+     * Send the game message to the channel to begin playing
+     */
     private void startGame() {
         MessageEmbed game = buildGameMessage(wins, losses, String.valueOf(streak), createDesc());
         sendGameMessage(game);
-    }
-
-    long getGameId() {
-        return id;
     }
 
     void reactionAdded(MessageReaction reaction) {
@@ -86,16 +97,16 @@ class Gunfight {
         String loss = this.streak == -1 ? " LOSS" : " LOSSES";
         String streak = this.streak < 0 ? Math.abs(this.streak) + loss : this.streak + win;
         MessageEmbed update = buildGameMessage(wins, losses, streak, createDesc());
-        if(channel.getLatestMessageIdLong() != id){
+        if(channel.getLatestMessageIdLong() != id) {
             message.delete().complete();
             sendGameMessage(update);
         }
-        else{
+        else {
             message.editMessage(update).complete();
         }
     }
 
-    private void sendGameMessage(MessageEmbed gameMessage){
+    private void sendGameMessage(MessageEmbed gameMessage) {
         Consumer<Message> addReactionCallback = (response) -> {
             id = response.getIdLong();
             response.addReaction(win).queue();
@@ -177,5 +188,13 @@ class Gunfight {
         }
         losses++;
         streak--;
+    }
+
+    long getGameId() {
+        return id;
+    }
+
+    User getOwner() {
+        return owner;
     }
 }

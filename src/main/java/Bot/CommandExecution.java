@@ -145,12 +145,14 @@ public class CommandExecution {
             attempts++;
         }
 
-        // How many characters left to to make the max length
-        int charToMax = (maxLength - name.length());
+        if(rand.nextInt(2) == 1) {
+            // How many characters left to to make the max length
+            int charToMax = (maxLength - name.length());
 
-        // Generate a number from 0 to the maximum number that could fit in that space. E.g (10^5)-1 = 99,999 (5 chars)
-        if(charToMax > 0) {
-            name += rand.nextInt(10 ^ charToMax);
+            // Generate a number from 0 to the maximum number that could fit in that space. E.g (10^5)-1 = 99,999 (5 chars)
+            if(charToMax > 0) {
+                name += rand.nextInt(10 ^ charToMax);
+            }
         }
         chan.sendMessage(name).queue();
     }
@@ -172,7 +174,7 @@ public class CommandExecution {
     private void killList() {
         String summary;
         User author = e.getAuthor();
-        ArrayList<Member> targets = TargetUser.getTargets(jda.getGuilds());
+        ArrayList<Member> targets = DiscordUser.getTargets(jda.getGuilds());
 
         if(targets.isEmpty()) {
             summary = "There are no targets sir";
@@ -200,13 +202,13 @@ public class CommandExecution {
      */
     private void pardonAll() {
         String msg = "There are no targets bro fuck off";
-        ArrayList<Member> targets = TargetUser.getTargets(jda.getGuilds());
+        ArrayList<Member> targets = DiscordUser.getTargets(jda.getGuilds());
         if(targets.isEmpty()) {
             return;
         }
         else {
             for(Member target : targets) {
-                boolean success = TargetUser.deleteTarget(target.getAsMention());
+                boolean success = DiscordUser.deleteTarget(target.getUser().getId());
                 if(success) {
                     msg = "@everyone " + target.getUser().getName() + " was successfully pardoned, congratulations sir";
                 }
@@ -350,7 +352,7 @@ public class CommandExecution {
      */
     private String unauthReact(User author) {
         String reply = "";
-        if(TargetUser.addTarget(author)) {
+        if(DiscordUser.addTarget(author)) {
             reply = author.getAsMention() + " You think I wouldn't notice you aren't authorised to do that?\nNow YOU'RE on the kill list cunt";
         }
         else {
@@ -384,7 +386,7 @@ public class CommandExecution {
      */
     private void chatTime() {
         try {
-            String base = "http://192.168.1.76/DiscordBotAPI/api/dectalk/";
+            String base = "http://192.168.1.80/DiscordBotAPI/api/dectalk/";
             String content = msg.replaceFirst(".", "");
             if(content.isEmpty()) {
                 content = "Give me something to say cunt";
@@ -407,7 +409,7 @@ public class CommandExecution {
      */
     private void survivor() {
         try {
-            String base = "http://192.168.1.76/DiscordBotAPI/api/survivor/";
+            String base = "http://192.168.1.80/DiscordBotAPI/api/survivor/";
             String content = msg.replaceFirst(".survivor ", "");
             String url = URLEncoder.encode(content, "UTF-8");
             String audio = base + url;
@@ -586,7 +588,7 @@ public class CommandExecution {
         // Delete the message which activated the command (snitches get stitches)
         deleteMessage(getLastMessage(0));
 
-        ArrayList<Member> targets = TargetUser.getTargets(jda.getGuilds());
+        ArrayList<Member> targets = DiscordUser.getTargets(jda.getGuilds());
 
         // There are targets to be exterminated
         if(!targets.isEmpty()) {
