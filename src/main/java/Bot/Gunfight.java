@@ -3,6 +3,7 @@ package Bot;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -18,6 +19,8 @@ class Gunfight {
     private Emote win, loss;
     private int wins, losses, streak = 0;
     private Guild server;
+    private long lastUpdate = 0;
+    private String lastMessage;
 
     // User who started game, only user allowed to register score
     private User owner;
@@ -68,6 +71,11 @@ class Gunfight {
         builder.addField("**WIN**", String.valueOf(wins), true);
         builder.addField("**LOSS**", String.valueOf(losses), true);
         builder.addField("**STREAK**", streak, false);
+
+        if(lastUpdate != 0) {
+            builder.setFooter("Last update at " + getTime(), null);
+        }
+
         return builder.build();
     }
 
@@ -82,6 +90,16 @@ class Gunfight {
             message += "\u2800";
         }
         return message;
+    }
+
+    /**
+     * Get the current time to display on the game message
+     *
+     * @return Current time
+     */
+    private String getTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return sdf.format(lastUpdate);
     }
 
 
@@ -107,9 +125,14 @@ class Gunfight {
      */
     void reactionAdded(MessageReaction reaction) {
         Emote emote = server.getEmotesByName(reaction.getReactionEmote().getName(), true).get(0);
-        if(emote != win && emote != loss) {
+        long currentTime = System.currentTimeMillis();
+
+        if((emote != win && emote != loss) || (currentTime - lastUpdate < 1500)) {
             return;
         }
+
+        lastUpdate = currentTime;
+
         if(emote == win) {
             addWin();
         }
@@ -139,7 +162,6 @@ class Gunfight {
             message.delete().complete();
             sendGameMessage(update);
         }
-        // Edit the message in place
         else {
             message.editMessage(update).complete();
         }
@@ -214,14 +236,17 @@ class Gunfight {
 
             // win streak
             else if(wins - losses > 1) {
-                messages = new String[]{"Nice streak!",
+                System.out.println("yo");
+                String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
+                messages = new String[]{
+                        "Nice streak!",
                         "What a lead!",
                         "Unstoppable!",
                         "They never stood a chance!",
                         "Take it easy on them!",
                         "On a roll!",
                         "HERE COMES JOE",
-                        "Beautiful, I especially enjoyed EdgarStiles' performance, it was incredible!"
+                        "Beautiful, I especially enjoyed " + mvp + " performance, it was incredible!"
                 };
             }
 
@@ -241,21 +266,15 @@ class Gunfight {
             if(losses - wins == 1) {
                 messages = new String[]{
                         "You're behind cunts",
-                        "You better win the fucking next one",
+                        "You're behind, you better win the fucking next one",
+                        "They were terrible, now you're behind, that final killcam was pathetic cunts, pick up your fucking game"
+                };
+            }
+            // loss streak
+            else if(losses - wins >= 2) {
+                messages = new String[]{
                         "What the fuck was that?",
                         "How didn't you kill him?",
-                        "They were terrible, that final killcam was pathetic cunts, pick up your fucking game"
-                };
-            }
-            else if(losses - wins == 2) {
-                messages = new String[]{
-                        "Here we go again you useless cunts, tilt time"
-                };
-            }
-
-            // loss streak
-            else if(losses - wins > 2) {
-                messages = new String[]{
                         "Is this is the fucking special olympics?",
                         "Fucking pistol rounds",
                         "Fucking JOE",
@@ -268,7 +287,6 @@ class Gunfight {
                         "How the fuck are you " + (losses - wins) + " games behind?"
                 };
             }
-
             // still ahead
             else {
                 messages = new String[]{
@@ -278,7 +296,16 @@ class Gunfight {
                 };
             }
         }
-        return getPadding(messages[rand.nextInt(messages.length)]);
+
+        String message = null;
+
+        while(message == null || message.equals(lastMessage)) {
+            message = messages[rand.nextInt(messages.length)];
+        }
+
+        lastMessage = message;
+
+        return getPadding(lastMessage);
     }
 
     /**
