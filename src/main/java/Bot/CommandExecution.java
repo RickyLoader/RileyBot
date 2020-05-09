@@ -6,6 +6,7 @@ import Audio.TrackEndListener;
 import static Bot.DiscordBot.*;
 
 import Exchange.ExchangeData;
+import Network.NetworkInfo;
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -386,7 +387,7 @@ public class CommandExecution {
      */
     private void chatTime() {
         try {
-            String base = "http://192.168.1.80/DiscordBotAPI/api/dectalk/";
+            String base = NetworkInfo.getAddress() + "/DiscordBotAPI/api/dectalk/";
             String content = msg.replaceFirst(".", "");
             if(content.isEmpty()) {
                 content = "Give me something to say cunt";
@@ -409,7 +410,7 @@ public class CommandExecution {
      */
     private void survivor() {
         try {
-            String base = "http://192.168.1.80/DiscordBotAPI/api/survivor/";
+            String base = NetworkInfo.getAddress() + "/DiscordBotAPI/api/survivor/";
             String content = msg.replaceFirst(".survivor ", "");
             String url = URLEncoder.encode(content, "UTF-8");
             String audio = base + url;

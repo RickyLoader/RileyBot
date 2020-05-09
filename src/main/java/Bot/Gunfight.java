@@ -16,7 +16,7 @@ class Gunfight {
     // ID of the game message, used to find the message in the channel
     private long id;
     private MessageChannel channel;
-    private Emote win, loss;
+    private Emote win, loss, stop;
     private int wins, losses, streak = 0;
     private Guild server;
     private long lastUpdate = 0;
@@ -45,9 +45,12 @@ class Gunfight {
     private boolean checkEmotes() {
         List<Emote> victory = server.getEmotesByName("victory", true);
         List<Emote> defeat = server.getEmotesByName("defeat", true);
-        if(victory.size() > 0 && defeat.size() > 0) {
+        List<Emote> stop = server.getEmotesByName("stop", true);
+
+        if(victory.size() > 0 && defeat.size() > 0 && stop.size() > 0) {
             this.win = victory.get(0);
             this.loss = defeat.get(0);
+            this.stop = stop.get(0);
             return true;
         }
         return false;
@@ -98,10 +101,8 @@ class Gunfight {
      * @return Current time
      */
     private String getTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        return sdf.format(lastUpdate);
+        return new SimpleDateFormat("HH:mm:ss").format(lastUpdate);
     }
-
 
     /**
      * Send the game message to the channel to begin playing
@@ -127,10 +128,13 @@ class Gunfight {
         Emote emote = server.getEmotesByName(reaction.getReactionEmote().getName(), true).get(0);
         long currentTime = System.currentTimeMillis();
 
-        if((emote != win && emote != loss) || (currentTime - lastUpdate < 1500)) {
+        if((emote != win && emote != loss && emote != stop) || (currentTime - lastUpdate < 500)) {
             return;
         }
-
+        if(emote == stop) {
+            stopGame();
+            return;
+        }
         lastUpdate = currentTime;
 
         if(emote == win) {
@@ -140,6 +144,13 @@ class Gunfight {
             addLoss();
         }
         updateMessage();
+    }
+
+    /**
+     * Finish the game and commit the score to the database
+     */
+    void stopGame(){
+
     }
 
     /**
@@ -236,7 +247,6 @@ class Gunfight {
 
             // win streak
             else if(wins - losses > 1) {
-                System.out.println("yo");
                 String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
                 messages = new String[]{
                         "Nice streak!",

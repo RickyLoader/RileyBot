@@ -1,5 +1,6 @@
 package Bot;
 
+import Network.ApiRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
