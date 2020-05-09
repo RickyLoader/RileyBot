@@ -1,4 +1,4 @@
-package Bot;
+package COD;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.*;
@@ -11,30 +11,43 @@ import java.util.function.Consumer;
 /**
  * Interactive win/loss tracker - use emotes to track score
  */
-class Gunfight {
+public class Gunfight {
 
     // ID of the game message, used to find the message in the channel
     private long id;
     private MessageChannel channel;
     private Emote win, loss, stop;
-    private int wins, losses, streak = 0;
+    private int wins, losses, streak, longestStreak = 0;
     private Guild server;
-    private long lastUpdate = 0;
-    private String lastMessage;
+    private long lastUpdate, startTime = 0;
+    private String lastMessage, endPoint;
+    private static String thumb = "https://bit.ly/2YTzfTQ";
+    private boolean active;
 
     // User who started game, only user allowed to register score
     private User owner;
 
-    Gunfight(MessageChannel channel, Guild server, User owner) {
+    public Gunfight(MessageChannel channel, Guild server, User owner) {
         this.channel = channel;
         this.server = server;
         this.owner = owner;
+        this.endPoint = "gunfight";
+        this.active = true;
         if(checkEmotes()) {
             startGame();
         }
         else {
-            channel.sendMessage("This server needs an emote named \"victory\" and an emote named \"defeat\" cunt.").queue();
+            channel.sendMessage("This server needs emotes named \"victory\", \"defeat\", and \"stop\" to play gunfight cunt.").queue();
         }
+    }
+
+    /**
+     * Current game state, stop responding to emotes if game has finished
+     *
+     * @return game status
+     */
+    public boolean isActive() {
+        return active;
     }
 
     /**
@@ -59,24 +72,20 @@ class Gunfight {
     /**
      * Builds the game message. Called to begin game and build new messages as score is added.
      *
-     * @param wins   Wins to display
-     * @param losses Losses to display
-     * @param streak Current streak (negative for loss streak)
-     * @param desc   Feedback message to display based on current score
      * @return Game message
      */
-    private MessageEmbed buildGameMessage(int wins, int losses, String streak, String desc) {
+    private MessageEmbed buildGameMessage(String streak) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
         builder.setTitle("GUNFIGHT");
-        builder.setDescription(desc);
-        builder.setThumbnail("https://www.pcgamesn.com/wp-content/uploads/2019/05/modern-warfare-captain-price-900x507.jpg");
+        builder.setDescription(createDesc());
+        builder.setThumbnail(thumb);
         builder.addField("**WIN**", String.valueOf(wins), true);
         builder.addField("**LOSS**", String.valueOf(losses), true);
         builder.addField("**STREAK**", streak, false);
 
         if(lastUpdate != 0) {
-            builder.setFooter("Last update at " + getTime(), null);
+            builder.setFooter("Last update at " + formatUpdateTime(), null);
         }
 
         return builder.build();
@@ -96,11 +105,11 @@ class Gunfight {
     }
 
     /**
-     * Get the current time to display on the game message
+     * Format the last update time to display on the game message
      *
      * @return Current time
      */
-    private String getTime() {
+    private String formatUpdateTime() {
         return new SimpleDateFormat("HH:mm:ss").format(lastUpdate);
     }
 
@@ -108,14 +117,14 @@ class Gunfight {
      * Send the game message to the channel to begin playing
      */
     private void startGame() {
-        MessageEmbed game = buildGameMessage(wins, losses, String.valueOf(streak), createDesc());
-        sendGameMessage(game);
+        sendGameMessage(buildGameMessage(String.valueOf(streak)));
+        startTime = System.currentTimeMillis();
     }
 
     /**
      * Remove the game message
      */
-    void deleteGame() {
+    public void deleteGame() {
         channel.getMessageById(id).complete().delete().complete();
     }
 
@@ -124,7 +133,7 @@ class Gunfight {
      *
      * @param reaction Emote reaction on game message (may be invalid)
      */
-    void reactionAdded(MessageReaction reaction) {
+    public void reactionAdded(MessageReaction reaction) {
         Emote emote = server.getEmotesByName(reaction.getReactionEmote().getName(), true).get(0);
         long currentTime = System.currentTimeMillis();
 
@@ -147,13 +156,6 @@ class Gunfight {
     }
 
     /**
-     * Finish the game and commit the score to the database
-     */
-    void stopGame(){
-
-    }
-
-    /**
      * Update the game message to display new score
      */
     private void updateMessage() {
@@ -166,7 +168,7 @@ class Gunfight {
         // Streak message to display, a negative streak should show as 2 losses not -2 losses
         String streak = this.streak < 0 ? Math.abs(this.streak) + loss : this.streak + win;
 
-        MessageEmbed update = buildGameMessage(wins, losses, streak, createDesc());
+        MessageEmbed update = buildGameMessage(streak);
 
         // If the game message is not the most recent, delete the old and regenerate to make playing easier
         if(channel.getLatestMessageIdLong() != id) {
@@ -184,14 +186,103 @@ class Gunfight {
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
-
         // Callback to add reactions and save message id
         Consumer<Message> addReactionCallback = (response) -> {
             id = response.getIdLong();
             response.addReaction(win).queue();
             response.addReaction(loss).queue();
+            response.addReaction(stop).queue();
         };
         channel.sendMessage(gameMessage).queue(addReactionCallback);
+    }
+
+    /**
+     * Add a win to the scoreboard, reset streak if on a loss streak.
+     */
+    private void addWin() {
+        if(streak < 0) {
+            streak = 0;
+        }
+        wins++;
+        streak++;
+
+        // Keep track of the largest win streak of the session
+        if(streak > longestStreak) {
+            longestStreak = streak;
+        }
+    }
+
+    /**
+     * Add a loss to the scoreboard, reset streak if on a win streak.
+     */
+    private void addLoss() {
+        if(streak > 0) {
+            streak = 0;
+        }
+        losses++;
+        streak--;
+    }
+
+    /**
+     * Get id of the game message
+     *
+     * @return Game message id
+     */
+    public long getGameId() {
+        return id;
+    }
+
+    /**
+     * Get the user who started the game
+     *
+     * @return User who started the game
+     */
+    public User getOwner() {
+        return owner;
+    }
+
+    /**
+     * Get the thumbnail used in the game message
+     *
+     * @return URL of thumbnail
+     */
+    static String getThumb() {
+        return thumb;
+    }
+
+    /**
+     * Finish the game and commit the score to the database
+     */
+    private void stopGame() {
+        active = false;
+        deleteGame();
+
+        // Don't submit empty games
+        if(wins == 0 && losses == 0) {
+            return;
+        }
+        Session session = new Session(startTime, lastUpdate, wins, losses, longestStreak);
+        channel.sendMessage(buildGameSummaryMessage(session)).queue();
+        session.submitGame();
+    }
+
+    /**
+     * Builds the game summary message, display the final results of the game
+     *
+     * @return Game summary message
+     */
+    private MessageEmbed buildGameSummaryMessage(Session session) {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(15655767);
+        builder.setTitle("GUNFIGHT RESULTS #" + Session.getTotalMatches() + 1);
+        builder.setThumbnail(thumb);
+        builder.setDescription("Check out your ranking by calling !history");
+        builder.addField("**DURATION**", session.getDuration(), false);
+        builder.addField("**WINS**", String.valueOf(wins), true);
+        builder.addField("**LOSSES**", String.valueOf(losses), true);
+        builder.addField("**RATIO**", String.valueOf(session.getRatio()), true);
+        builder.addField("**LONGEST STREAK**", session.formatStreak(), false);
+        return builder.build();
     }
 
     /**
@@ -271,7 +362,6 @@ class Gunfight {
 
         // last match lost
         else {
-
             // just fallen behind
             if(losses - wins == 1) {
                 messages = new String[]{
@@ -316,45 +406,5 @@ class Gunfight {
         lastMessage = message;
 
         return getPadding(lastMessage);
-    }
-
-    /**
-     * Add a win to the scoreboard, reset streak if on a loss streak.
-     */
-    private void addWin() {
-        if(streak < 0) {
-            streak = 0;
-        }
-        wins++;
-        streak++;
-    }
-
-    /**
-     * Add a loss to the scoreboard, reset streak if on a win streak.
-     */
-    private void addLoss() {
-        if(streak > 0) {
-            streak = 0;
-        }
-        losses++;
-        streak--;
-    }
-
-    /**
-     * Get id of the game message
-     *
-     * @return Game message id
-     */
-    long getGameId() {
-        return id;
-    }
-
-    /**
-     * Get the user who started the game
-     *
-     * @return User who started the game
-     */
-    User getOwner() {
-        return owner;
     }
 }

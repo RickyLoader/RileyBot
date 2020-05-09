@@ -3,7 +3,9 @@ package Bot;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import COD.History;
 import Exchange.ExchangeData;
+import COD.Gunfight;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -108,14 +110,14 @@ public class DiscordBot extends ListenerAdapter {
 
     @Override
     public void onGuildMessageDelete(GuildMessageDeleteEvent e) {
-        System.out.println("\nEvent:\n    Guild: " + e.getGuild().getName() + "\n    Event: MESSAGE DELETED:");
+        // System.out.println("\nEvent:\n    Guild: " + e.getGuild().getName() + "\n    Event: MESSAGE DELETED:");
         Message m = messageHistory.get(e.getMessageId());
         List<AuditLogEntry> logs = e.getGuild().getAuditLogs().complete();
         String name = logs.get(0).getUser().getName();
-        System.out.println(m == null
+        /*System.out.println(m == null
                 ? "        Message not found:\n            Admin: " + name
                 : "        Message found:\n            Admin: " + name + "\n            Author: " + m.getAuthor().getName() + "\n            Contents: " + m.getContentDisplay()
-        );
+        );*/
     }
 
     private void logMessage(GuildMessageReceivedEvent e) {
@@ -158,10 +160,13 @@ public class DiscordBot extends ListenerAdapter {
         if(message.equals("help!")) {
             help(author);
         }
+        else if(message.equals("!history")) {
+            new History(currentChan);
+        }
         else if(message.contains("gunfight")) {
             if(message.equals("gunfight!")) {
                 messageEvent.getMessage().delete().complete();
-                if(gunfight != null) {
+                if(gunfight != null && gunfight.isActive()) {
                     gunfight.deleteGame();
                 }
                 gunfight = new Gunfight(currentChan, e.getGuild(), e.getAuthor());
@@ -179,7 +184,7 @@ public class DiscordBot extends ListenerAdapter {
                         response = "Guess again";
                         break;
                 }
-                if(response!=null){
+                if(response != null) {
                     currentChan.sendMessage(response).queue();
                 }
             }
@@ -195,21 +200,21 @@ public class DiscordBot extends ListenerAdapter {
 
     @Override
     public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
-        if(gunfight == null || event.getUser() == self) {
-            return;
-        }
-        if(event.getMessageIdLong() == gunfight.getGameId() && event.getUser() == gunfight.getOwner()) {
-            gunfight.reactionAdded(event.getReaction());
-        }
+        reactionAdded(event.getReaction(), event.getUser());
+
     }
 
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
-        if(gunfight == null || event.getUser() == self) {
+        reactionAdded(event.getReaction(), event.getUser());
+    }
+
+    private void reactionAdded(MessageReaction reaction, User user) {
+        if(gunfight == null || user == self) {
             return;
         }
-        if(event.getMessageIdLong() == gunfight.getGameId() && event.getUser() == gunfight.getOwner()) {
-            gunfight.reactionAdded(event.getReaction());
+        if(reaction.getMessageIdLong() == gunfight.getGameId() && gunfight.isActive() && user == gunfight.getOwner()) {
+            gunfight.reactionAdded(reaction);
         }
     }
 
