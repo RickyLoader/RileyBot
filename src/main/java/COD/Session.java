@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -164,6 +165,15 @@ class Session {
     }
 
     /**
+     * Gets the ms date of session
+     *
+     * @return ms date of session
+     */
+    long getDate() {
+        return date;
+    }
+
+    /**
      * Stringify the longest win streak of the session
      *
      * @return String version of win streak
@@ -181,5 +191,32 @@ class Session {
      */
     String formatDate() {
         return new SimpleDateFormat("dd/MM/YY").format(date);
+    }
+
+    /**
+     * Get the rank of the current session within all sessions
+     *
+     * @return Session rank
+     */
+    int getRank() {
+        ArrayList<Session> history = getHistory();
+        int rank = -1;
+        for(int i = 0; i < history.size(); i++) {
+            Session session = history.get(i);
+            if(session.getDate() == date) {
+                rank = i;
+                break;
+            }
+        }
+        return rank + 1;
+    }
+
+    /**
+     * Format the win/loss ratio to 2 decimal places
+     *
+     * @return win/loss ratio truncated to 2 decimal places
+     */
+    String formatRatio() {
+        return wins + "/" + losses + " (" + new DecimalFormat("0.00").format(ratio) + ")";
     }
 }

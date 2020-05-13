@@ -2,32 +2,31 @@ package COD;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.MessageEmbed;
 
 import java.util.ArrayList;
 
 /**
  * Gunfight history message, shows leaderboard of past gunfight sessions
  */
-public class History {
+public class Leaderboard {
     private ArrayList<Session> history;
     private MessageChannel channel;
 
-    public History(MessageChannel channel) {
+    public Leaderboard(MessageChannel channel) {
         this.history = Session.getHistory();
         this.channel = channel;
         if(history.size() > 0) {
-            showHistory();
+            showLeaderboard();
         }
         else {
-            channel.sendMessage("There are gunfight matches in the history!").queue();
+            channel.sendMessage("There are gunfight matches on the leaderboard!").queue();
         }
     }
 
     /**
-     * Builds an embedded message showing the gunfight leaderboards and sends it to the channel
+     * Builds an embedded message showing the gunfight leaderboard and sends it to the channel
      */
-    private void showHistory() {
+    private void showLeaderboard() {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
         builder.setTitle("GUNFIGHT LEADERBOARD");
@@ -35,12 +34,12 @@ public class History {
 
         // Max of 5 matches
         int max = Math.min(history.size(), 5);
-        builder.setDescription("Here are the top " + max + " gunfight performances out of " + Session.getTotalMatches() + "!");
+        builder.setDescription("Here are the top " + max + " gunfight performances!");
         for(int i = 0; i < max; i++) {
             Session session = history.get(i);
-            builder.addField("**RANK/DATE**", "[" + (i + 1) + "] " + session.formatDate(), true);
-            builder.addField("**W/L**", session.getWins() + "/" + session.getLosses() + " (" + session.getRatio() + ")", true);
-            builder.addField("**STREAK**", session.getStreak() + "", true);
+            builder.addField("**RANK**", String.valueOf(i + 1), true);
+            builder.addField("**W/L**", session.formatRatio(), true);
+            builder.addField("**STREAK**", session.formatStreak(), true);
         }
         channel.sendMessage(builder.build()).queue();
     }

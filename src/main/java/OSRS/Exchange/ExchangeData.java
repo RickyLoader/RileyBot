@@ -1,4 +1,4 @@
-package Exchange;
+package OSRS.Exchange;
 
 
 import java.io.BufferedReader;

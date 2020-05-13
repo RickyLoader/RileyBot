@@ -1,11 +1,13 @@
 package Bot;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import COD.History;
-import Exchange.ExchangeData;
+import COD.Leaderboard;
+import OSRS.Exchange.ExchangeData;
 import COD.Gunfight;
+import OSRS.Stats.Hiscores;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -34,8 +36,8 @@ public class DiscordBot extends ListenerAdapter {
     private Guild guild;
 
     // Cached Grand Exchange data
-    public static ExchangeData exchangeData = new ExchangeData();
-
+    static ExchangeData exchangeData = new ExchangeData();
+    static Hiscores hiscores = new Hiscores();
     private HashMap<String, Message> messageHistory = new HashMap<>();
 
     private Gunfight gunfight;
@@ -81,15 +83,6 @@ public class DiscordBot extends ListenerAdapter {
             }
             JDA bot = new JDABuilder(AccountType.BOT).setToken(token).build();
             bot.addEventListener(new DiscordBot());
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Scanner scan = new Scanner(System.in);
-                    while(scan.hasNextLine()) {
-                        self.getMutualGuilds().get(0).getTextChannelsByName("cunt", true).get(0).sendMessage(scan.nextLine()).queue();
-                    }
-                }
-            }).start();
             System.out.println("\nBot is now running!\n");
         }
         catch(Exception e) {
@@ -149,7 +142,6 @@ public class DiscordBot extends ListenerAdapter {
         // Strip the message to an appropriate format for comparison to command triggers
         String message = e.getMessage().getContentDisplay().toLowerCase().replace("\n", "").replace("\r", "");
 
-
         // Bot doesn't respond to itself
         if(author.isBot()) {
             return;
@@ -160,15 +152,34 @@ public class DiscordBot extends ListenerAdapter {
         if(message.equals("help!")) {
             help(author);
         }
-        else if(message.equals("!history")) {
-            new History(currentChan);
+        else if(message.equals("leaderboard!")) {
+            new Leaderboard(currentChan);
+        }
+        else if(message.split(" ")[0].equals("lookup")) {
+            new Thread(() -> {
+                String name = message.replace("lookup ", "");
+                currentChan.sendMessage("Give me a second, their website is slow as fuck").queue();
+                File stats = hiscores.lookupPlayer(name);
+                if(stats == null) {
+                    currentChan.sendMessage(name + " doesn't exist cunt").queue();
+                    return;
+                }
+                currentChan.sendFile(stats).queue();
+            }).start();
         }
         else if(message.contains("gunfight")) {
             if(message.equals("gunfight!")) {
                 messageEvent.getMessage().delete().complete();
                 if(gunfight != null && gunfight.isActive()) {
-                    gunfight.deleteGame();
+                    String warning = "There is already a gunfight session in progress! You can either continue playing or start again by: \n\nHitting the stop button to submit it to the leaderboard\n\nTyping \"new gunfight!\"";
+                    currentChan.sendMessage(warning).queue();
                 }
+                else {
+                    gunfight = new Gunfight(currentChan, e.getGuild(), e.getAuthor());
+                }
+            }
+            else if(message.equals("new gunfight!")) {
+                messageEvent.getMessage().delete().complete();
                 gunfight = new Gunfight(currentChan, e.getGuild(), e.getAuthor());
             }
             else {

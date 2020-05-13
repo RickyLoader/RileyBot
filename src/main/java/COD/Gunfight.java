@@ -14,12 +14,11 @@ import java.util.function.Consumer;
 public class Gunfight {
 
     // ID of the game message, used to find the message in the channel
-    private long id;
     private MessageChannel channel;
     private Emote win, loss, stop;
     private int wins, losses, streak, longestStreak = 0;
     private Guild server;
-    private long lastUpdate, startTime = 0;
+    private long lastUpdate, startTime = 0, gameID;
     private String lastMessage, endPoint;
     private static String thumb = "https://bit.ly/2YTzfTQ";
     private boolean active;
@@ -125,7 +124,7 @@ public class Gunfight {
      * Remove the game message
      */
     public void deleteGame() {
-        channel.getMessageById(id).complete().delete().complete();
+        getGameMessage().delete().complete();
     }
 
     /**
@@ -137,7 +136,7 @@ public class Gunfight {
         Emote emote = server.getEmotesByName(reaction.getReactionEmote().getName(), true).get(0);
         long currentTime = System.currentTimeMillis();
 
-        if((emote != win && emote != loss && emote != stop) || (currentTime - lastUpdate < 500)) {
+        if((emote != win && emote != loss && emote != stop)/* || (currentTime - lastUpdate < 1000)*/) {
             return;
         }
         if(emote == stop) {
@@ -159,7 +158,7 @@ public class Gunfight {
      * Update the game message to display new score
      */
     private void updateMessage() {
-        Message message = channel.getMessageById(id).complete();
+        Message message = getGameMessage();
 
         // Which form of win/wins, loss/losses to use if more than 1
         String win = this.streak == 1 ? " WIN" : " WINS";
@@ -170,14 +169,31 @@ public class Gunfight {
 
         MessageEmbed update = buildGameMessage(streak);
 
-        // If the game message is not the most recent, delete the old and regenerate to make playing easier
-        if(channel.getLatestMessageIdLong() != id) {
-            message.delete().complete();
-            sendGameMessage(update);
-        }
-        else {
+        if(gameFocused()) {
             message.editMessage(update).complete();
         }
+        else {
+            deleteGame();
+            sendGameMessage(update);
+        }
+    }
+
+    /**
+     * Find the game message
+     *
+     * @return Game message
+     */
+    private Message getGameMessage() {
+        return channel.getMessageById(gameID).complete();
+    }
+
+    /**
+     * Game message is the most recent channel message
+     *
+     * @return Game message most recent channel message
+     */
+    private boolean gameFocused() {
+        return channel.getLatestMessageIdLong() == gameID;
     }
 
     /**
@@ -188,7 +204,7 @@ public class Gunfight {
     private void sendGameMessage(MessageEmbed gameMessage) {
         // Callback to add reactions and save message id
         Consumer<Message> addReactionCallback = (response) -> {
-            id = response.getIdLong();
+            gameID = response.getIdLong();
             response.addReaction(win).queue();
             response.addReaction(loss).queue();
             response.addReaction(stop).queue();
@@ -229,7 +245,7 @@ public class Gunfight {
      * @return Game message id
      */
     public long getGameId() {
-        return id;
+        return gameID;
     }
 
     /**
@@ -262,8 +278,8 @@ public class Gunfight {
             return;
         }
         Session session = new Session(startTime, lastUpdate, wins, losses, longestStreak);
-        channel.sendMessage(buildGameSummaryMessage(session)).queue();
         session.submitGame();
+        channel.sendMessage(buildGameSummaryMessage(session)).queue();
     }
 
     /**
@@ -274,15 +290,31 @@ public class Gunfight {
     private MessageEmbed buildGameSummaryMessage(Session session) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
-        builder.setTitle("GUNFIGHT RESULTS #" + Session.getTotalMatches() + 1);
+        builder.setTitle("GUNFIGHT RESULTS #" + (Session.getTotalMatches()));
         builder.setThumbnail(thumb);
-        builder.setDescription("Check out your ranking by calling !history");
+        builder.setDescription(getRanking(session));
+        builder.setFooter("Check out the leaderboard!", null);
         builder.addField("**DURATION**", session.getDuration(), false);
         builder.addField("**WINS**", String.valueOf(wins), true);
         builder.addField("**LOSSES**", String.valueOf(losses), true);
         builder.addField("**RATIO**", String.valueOf(session.getRatio()), true);
         builder.addField("**LONGEST STREAK**", session.formatStreak(), false);
         return builder.build();
+    }
+
+    private String getRanking(Session session) {
+        String result;
+        int rank = session.getRank();
+        if(rank == 1) {
+            result = "That's a new personal best, nice work cunts!";
+        }
+        else if(rank < 5) {
+            result = "Rank " + rank + ", you're now in the top 5!";
+        }
+        else {
+            result = "Rank " + rank + ", terrible job cunts";
+        }
+        return result;
     }
 
     /**

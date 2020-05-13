@@ -5,7 +5,7 @@ import Audio.TrackEndListener;
 
 import static Bot.DiscordBot.*;
 
-import Exchange.ExchangeData;
+import OSRS.Exchange.ExchangeData;
 import Network.NetworkInfo;
 import com.sedmelluq.discord.lavaplayer.player.*;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
@@ -302,33 +302,38 @@ public class CommandExecution {
             vc.getGuild().getController().setMute(vc.getGuild().getMember(self), false);
         }
         // Load the URL in to the player
-        playerManager.loadItem(audio, new AudioLoadResultHandler() {
+        try {
+            playerManager.loadItem(audio, new AudioLoadResultHandler() {
 
-            /**
-             * Play the audio once loaded
-             *
-             * @param audioTrack Track loaded in to player
-             */
-            @Override
-            public void trackLoaded(AudioTrack audioTrack) {
-                player.playTrack(audioTrack);
-            }
+                /**
+                 * Play the audio once loaded
+                 *
+                 * @param audioTrack Track loaded in to player
+                 */
+                @Override
+                public void trackLoaded(AudioTrack audioTrack) {
+                    player.playTrack(audioTrack);
+                }
 
-            @Override
-            public void playlistLoaded(AudioPlaylist audioPlaylist) {
+                @Override
+                public void playlistLoaded(AudioPlaylist audioPlaylist) {
 
-            }
+                }
 
-            @Override
-            public void noMatches() {
+                @Override
+                public void noMatches() {
 
-            }
+                }
 
-            @Override
-            public void loadFailed(FriendlyException e) {
-                e.printStackTrace();
-            }
-        });
+                @Override
+                public void loadFailed(FriendlyException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
