@@ -80,6 +80,7 @@ public class Hiscores {
         File playerStats = null;
         int scale = 5; //204*275
         int fontSize = 13 * scale;
+        long start = System.currentTimeMillis();
         try {
             String imagePath = (resources + "Templates/stats_template.png");
 
@@ -159,6 +160,7 @@ public class Hiscores {
         catch(Exception e) {
             e.printStackTrace();
         }
+        System.out.println("Building image: "+(System.currentTimeMillis()-start)+"ms\n");
         return playerStats;
     }
 
