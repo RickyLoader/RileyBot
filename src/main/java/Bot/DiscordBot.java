@@ -165,7 +165,7 @@ public class DiscordBot extends ListenerAdapter {
                     currentChan.sendMessage(name + " doesn't exist cunt").queue();
                     return;
                 }
-                currentChan.sendFile(stats).queue(fileSent -> stats.delete());
+                currentChan.sendFile(stats).queue(message1 -> stats.delete());
             }).start();
         }
         else if(message.contains("gunfight")) {

@@ -171,8 +171,10 @@ public class Hiscores {
     private File saveImage(BufferedImage image, String name) {
         File file = null;
         try {
-            file = new File(resources + name +".png");
-            new PngEncoder().encode(image, new FileOutputStream(file));
+            file = new File(resources + name + ".png");
+            FileOutputStream output = new FileOutputStream(file);
+            new PngEncoder().encode(image, output);
+            output.close();
         }
         catch(IOException e) {
             e.printStackTrace();
