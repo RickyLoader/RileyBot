@@ -3,6 +3,7 @@ package Bot;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
 import COD.Leaderboard;
 import OSRS.Exchange.ExchangeData;
@@ -164,7 +165,7 @@ public class DiscordBot extends ListenerAdapter {
                     currentChan.sendMessage(name + " doesn't exist cunt").queue();
                     return;
                 }
-                currentChan.sendFile(stats).queue();
+                currentChan.sendFile(stats).queue(fileSent -> stats.delete());
             }).start();
         }
         else if(message.contains("gunfight")) {

@@ -5,6 +5,7 @@ import com.objectplanet.image.PngEncoder;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.NumberFormat;
@@ -80,15 +81,16 @@ public class Hiscores {
         int scale = 5; //204*275
         int fontSize = 13 * scale;
         try {
-            String imagePath = (resources + "Templates/stats_template_") + ((bosses.size() == 0) ? "no_boss_5x" : "5x") + ".png";
+            String imagePath = (resources + "Templates/stats_template.png");
 
             BufferedImage image = ImageIO.read(new File(imagePath));
             Graphics g = image.getGraphics();
-            g.setFont(new Font("RuneScape Chat '07", Font.PLAIN, fontSize));
+            Font runeFont = new Font("RuneScape Chat '07", Font.PLAIN, fontSize);
+            g.setFont(runeFont);
 
             // First skill location
             int x = 40 * scale;
-            int y = 23 * scale;
+            int y = 63 * scale;
 
 
             for(int i = 0; i < skills.length; i++) {
@@ -121,23 +123,38 @@ public class Hiscores {
                     x = x + (63 * scale);
                 }
             }
+
             if(bosses.size() > 0) {
                 int max = Math.min(5, bosses.size());
-                int padding = ((image.getHeight() - 60) - 5 * 220) / 5;
-                y = padding;
-                int mid = (image.getWidth() / 2) + (image.getWidth() / 8); // mid point of boss image section
-
+                int padding = ((image.getHeight() - 260) - 5 * 220) / 5;
+                y = padding + 200;
+                int bossCentre = (int) (image.getWidth() * 0.625); // mid point of boss image section
                 for(int i = 0; i < max; i++) {
                     Boss boss = bosses.get(i);
                     BufferedImage bossImage = ImageIO.read(boss.getImage());
-                    g.drawImage(bossImage, mid - (bossImage.getWidth() / 2), y, null);
-                    g.drawString(boss.formatKills(), (image.getWidth() - (image.getWidth() / 4)) + 100, y + (bossImage.getHeight() / 2) + fontSize / 2);
+                    g.drawImage(bossImage, bossCentre - (bossImage.getWidth() / 2), y, null);
+
+                    g.setColor(Color.YELLOW);
+                    g.setFont(runeFont.deriveFont(runeFont.getSize() * 1.2F));
+                    String kills = boss.formatKills();
+                    int killWidth = g.getFontMetrics().stringWidth(kills);
+                    g.drawString(kills, (int) ((image.getWidth() * 0.875) - killWidth / 2), (y + (bossImage.getHeight() / 2) + (g.getFont().getSize() / 2)));
                     y += 220 + padding;
                 }
             }
+            else {
+                BufferedImage noBoss = ImageIO.read(new File(resources + "no_boss.png"));
+                g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200) / 2) - (noBoss.getHeight() / 2)), null);
+            }
+
+            g.setFont(runeFont.deriveFont(runeFont.getSize() * 3F));
+            int nameWidth = g.getFontMetrics().stringWidth(name);
+            x = (image.getWidth() / 2) - (nameWidth / 2);
+            y = 100 + (g.getFont().getSize() / 2);
+            g.drawString(name.toUpperCase(), x, y);
 
             g.dispose();
-            playerStats = saveImage(image);
+            playerStats = saveImage(image, name);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -151,10 +168,10 @@ public class Hiscores {
      * @param image Image to be saved
      * @return Image file
      */
-    private File saveImage(BufferedImage image) {
+    private File saveImage(BufferedImage image, String name) {
         File file = null;
         try {
-            file = new File(resources + "playerStats.png");
+            file = new File(resources + name +".png");
             new PngEncoder().encode(image, new FileOutputStream(file));
         }
         catch(IOException e) {
