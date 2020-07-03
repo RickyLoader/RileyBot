@@ -1,7 +1,7 @@
 package COD;
 
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.ArrayList;
 
@@ -9,8 +9,8 @@ import java.util.ArrayList;
  * Gunfight history message, shows leaderboard of past gunfight sessions
  */
 public class Leaderboard {
-    private ArrayList<Session> history;
-    private MessageChannel channel;
+    private final ArrayList<Session> history;
+    private final MessageChannel channel;
 
     public Leaderboard(MessageChannel channel) {
         this.history = Session.getHistory();

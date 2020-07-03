@@ -65,11 +65,7 @@ public class ApiRequest{
             if(response.code() == 200){
                 result = response.body().string();
             }
-            else{
-                System.out.println("FAILURE");
-                System.out.println(response.body().string());
-                System.out.println(url);
-            }
+            response.close();
         }
         catch(Exception e){
             return null;

@@ -5,7 +5,6 @@ import com.objectplanet.image.PngEncoder;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.NumberFormat;
@@ -13,8 +12,8 @@ import java.util.*;
 import java.util.List;
 
 public class Hiscores {
-    private String[] bossNames;
-    private String resources = "src/main/resources/OSRS/";
+    private final String[] bossNames;
+    private final String resources = "src/main/resources/OSRS/";
 
     public Hiscores() {
         registerFont();
@@ -22,41 +21,31 @@ public class Hiscores {
     }
 
     /**
-     * Look a player up on the OSRS hiscores and return an embedded message displaying their skills
+     * Look a player up on the OSRS hiscores and return an image displaying their skills
      *
      * @param name Player name
      * @return Image displaying player skills
      */
     public File lookupPlayer(String name) {
         long start = System.currentTimeMillis();
-        String data = fetchPlayerData(name);
-        System.out.println("\nLookup: " + (System.currentTimeMillis() - start) + "ms\n");
+        String[] data = fetchPlayerData(name);
+        System.out.println("Lookup: " + (System.currentTimeMillis() - start) + "ms");
         if(data == null) {
             return null;
         }
-        List<Boss> bossKills = getBossKills(data.replace("\n", ",").split(","));
-        String[] stats = orderSkills(data.split(","));
-        return buildImage(name, stats, bossKills);
-    }
+        List<Boss> bossKills = getBossKills(data);
+        
+        if(bossKills.size() == 0 && name.toLowerCase().equals("hectiserect")) {
+            bossKills.add(new Boss("Butler", 500000));
+            bossKills.add(new Boss("Black dude", 12));
+        }
 
-    /**
-     * Test reading from text file to see if delay comes from server or local side
-     *
-     * @return Image displaying player skills
-     */
-    public File localLookup() {
-        String data = "";
-        String curr;
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(resources + "stats.txt"));
-            while((curr = reader.readLine()) != null) {
-                data += curr;
-            }
+        if(name.toLowerCase().equals("heineken_3")){
+            bossKills.add(new Boss("Harambe", 1));
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return buildImage("test", orderSkills(data.split(",")), null);
+
+        String[] stats = orderSkills(data);
+        return buildImage(name, data[0], stats, bossKills);
     }
 
     /**
@@ -65,9 +54,83 @@ public class Hiscores {
      * @param name Player name
      * @return CSV data from API
      */
-    private String fetchPlayerData(String name) {
-        String url = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=" + name;
-        return ApiRequest.executeQuery(url, "GET", null, false);
+    private String[] fetchPlayerData(String name) {
+        String[] normal = hiscoresRequest(name, "");
+
+        // Player doesn't exist
+        if(normal == null) {
+            return null;
+        }
+
+        normal[0] = null;
+        String[] iron = hiscoresRequest(name, "_ironman");
+
+        // Player is not an ironman
+        if(iron == null) {
+            return normal;
+        }
+
+        iron[0] = "iron";
+
+        long ironXP = Long.parseLong(iron[2]);
+        long normXP = Long.parseLong(normal[2]);
+
+        // Player was some kind of ironman and de-ironed
+        if(normXP > ironXP) {
+            return normal;
+        }
+
+        // Player currently is some kind of ironman
+
+        String[] hardcore = hiscoresRequest(name, "_hardcore_ironman");
+
+        // Player was at some point a hardcore ironman
+        if(hardcore != null) {
+            hardcore[0] = "hardcore";
+            long hcXP = Long.parseLong(hardcore[2]);
+
+            // Player died as a hardcore ironman and is now a normal ironman
+            if(ironXP > hcXP) {
+                return iron;
+            }
+
+            // Player is still a hardcore ironman
+            return hardcore;
+        }
+
+        String[] ultimate = hiscoresRequest(name, "_ultimate");
+
+        // Player was at some point an ultimate ironman
+        if(ultimate != null) {
+            ultimate[0] = "ultimate";
+            long ultXP = Long.parseLong(ultimate[2]);
+
+            // Player downgraded to a normal ironman
+            if(ironXP > ultXP) {
+                return iron;
+            }
+
+            // Player is still an ultimate ironman
+            return ultimate;
+        }
+        return iron;
+    }
+
+
+    /**
+     * Make a request to the OSRS hiscores API
+     *
+     * @param name Name to request from hiscores
+     * @return Response from API
+     */
+    private String[] hiscoresRequest(String name, String type) {
+        String baseURL = "https://secure.runescape.com/m=hiscore_oldschool" + type;
+        String suffix = "/index_lite.ws?player=" + name;
+        String response = ApiRequest.executeQuery(baseURL + suffix, "GET", null, false);
+        if(response == null) {
+            return null;
+        }
+        return response.replace("\n", ",").split(",");
     }
 
     /**
@@ -76,10 +139,9 @@ public class Hiscores {
      * @param skills Skills to display on message
      * @return Embedded message displaying player skills
      */
-    private File buildImage(String name, String[] skills, List<Boss> bosses) {
+    private File buildImage(String name, String type, String[] skills, List<Boss> bosses) {
         File playerStats = null;
-        int scale = 5; //204*275
-        int fontSize = 13 * scale;
+        int fontSize = 65;
         long start = System.currentTimeMillis();
         try {
             String imagePath = (resources + "Templates/stats_template.png");
@@ -90,8 +152,8 @@ public class Hiscores {
             g.setFont(runeFont);
 
             // First skill location
-            int x = 40 * scale;
-            int y = 63 * scale;
+            int x = 200, ogX = 200;
+            int y = 315;
 
 
             for(int i = 0; i < skills.length; i++) {
@@ -100,36 +162,42 @@ public class Hiscores {
                 // total level
                 if(i == skills.length - 1) {
                     g.setColor(Color.YELLOW);
-                    g.drawString(level, x - (14 * scale), y + (12 * scale));
+                    g.drawString(level, x - 70, y + 60);
                     continue;
                 }
 
                 g.setColor(Color.BLACK); // shadow
 
-                g.drawString(level, x + (1 * scale), y + (1 * scale)); // top
-                g.drawString(level, x + (12 + 1) * scale, y + (12 + 1) * scale); // bottom
+                g.drawString(level, x + 5, y + 5); // top
+                g.drawString(level, x + 65, y + 65); // bottom
 
                 g.setColor(Color.YELLOW); // skill
 
                 g.drawString(level, x, y); // top
-                g.drawString(level, x + (12 * scale), y + (12 * scale)); // bottom
+                g.drawString(level, x + 60, y + 60); // bottom
 
                 // Currently 3rd column, reset back to first column and go down a row
                 if((i + 1) % 3 == 0) {
-                    x = (40 * scale);
-                    y = (y + (32 * scale));
+                    x = ogX;
+                    y = (y + 160);
                 }
                 // Move to next column
                 else {
-                    x = x + (63 * scale);
+                    x = (x + 315);
                 }
             }
 
             if(bosses.size() > 0) {
                 int max = Math.min(5, bosses.size());
-                int padding = ((image.getHeight() - 260) - 5 * 220) / 5;
-                y = padding + 200;
+
+                // All images have 220px height, and the top name banner + bottom border has 260px total height
+                int padding = ((image.getHeight() - 260) - (5 * 220)) / 6;
+
+                // Height of top name banner
+                y = 230 + padding;
+
                 int bossCentre = (int) (image.getWidth() * 0.625); // mid point of boss image section
+
                 for(int i = 0; i < max; i++) {
                     Boss boss = bosses.get(i);
                     BufferedImage bossImage = ImageIO.read(boss.getImage());
@@ -144,7 +212,7 @@ public class Hiscores {
                 }
             }
             else {
-                BufferedImage noBoss = ImageIO.read(new File(resources + "no_boss.png"));
+                BufferedImage noBoss = ImageIO.read(new File(resources + "Templates/no_boss.png"));
                 g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200) / 2) - (noBoss.getHeight() / 2)), null);
             }
 
@@ -154,13 +222,18 @@ public class Hiscores {
             y = 100 + (g.getFont().getSize() / 2);
             g.drawString(name.toUpperCase(), x, y);
 
+            if(type != null) {
+                BufferedImage accountType = ImageIO.read(new File(resources + "Accounts/" + type + ".png"));
+                g.drawImage(accountType, x - (int) (accountType.getWidth() * 1.5), 115 - (accountType.getHeight() / 2), null);
+            }
+
             g.dispose();
             playerStats = saveImage(image, name);
         }
         catch(Exception e) {
             e.printStackTrace();
         }
-        System.out.println("Building image: "+(System.currentTimeMillis()-start)+"ms\n");
+        System.out.println("Building image: " + (System.currentTimeMillis() - start) + "ms\n");
         return playerStats;
     }
 
@@ -204,32 +277,56 @@ public class Hiscores {
      * @return Sorted CSV
      */
     private String[] orderSkills(String[] csv) {
-        return new String[]{
-                csv[3],
-                csv[9],
-                csv[31],
-                csv[7],
-                csv[35],
-                csv[29],
-                csv[5],
-                csv[33],
-                csv[23],
-                csv[11],
-                csv[37],
-                csv[17],
-                csv[13],
-                csv[27],
-                csv[25],
-                csv[15],
-                csv[21],
-                csv[19],
-                csv[43],
-                csv[39],
-                csv[41],
-                csv[47],
-                csv[45],
-                csv[1]
+        String[] skills = new String[]{
+                csv[4],     // ATTACK
+                csv[13].equals("1") ? "10" : csv[13],    // HITPOINTS
+                csv[46],    // MINING
+
+                csv[10],    // STRENGTH
+                csv[52],    // AGILITY
+                csv[43],    // SMITHING
+
+                csv[7],     // DEFENCE
+                csv[49],    // HERBLORE
+                csv[34],    // FISHING
+
+                csv[16],    // RANGED
+                csv[55],    // THIEVING
+                csv[25],    // COOKING
+
+                csv[19],    // PRAYER
+                csv[40],    // CRAFTING
+                csv[37],    // FIREMAKING
+
+                csv[22],    // MAGIC
+                csv[31],    // FLETCHING
+                csv[28],    // WOODCUTTING
+
+                csv[64],    // RUNECRAFT
+                csv[58],    // SLAYER
+                csv[61],    // FARMING
+
+                csv[70],    // CONSTRUCTION
+                csv[67],    // HUNTER
+                csv[1],     // TOTAL
         };
+        return getTotal(skills);
+    }
+
+    /**
+     * Total level appears as 0 if not in the top 2,000,000 players
+     *
+     * @param skills Array of skills with total level from hiscores
+     * @return Array of skills with adjusted total level
+     */
+    private String[] getTotal(String[] skills) {
+        int totalLevelIndex = skills.length - 1;
+        if(!skills[totalLevelIndex].equals("0")) {
+            return skills;
+        }
+        String total = "--";
+        skills[totalLevelIndex] = total;
+        return skills;
     }
 
     /**
@@ -260,8 +357,8 @@ public class Hiscores {
      * Hold information about a boss, sortable by kill count
      */
     private class Boss implements Comparable<Boss> {
-        private String name, filename;
-        private int kills;
+        private final String name, filename;
+        private final int kills;
 
         Boss(String name, int kills) {
             this.name = name;
@@ -297,19 +394,21 @@ public class Hiscores {
                 case "Zalcano":
                     type = "Games";
                     break;
+                case "Butler":
+                    type = "Planks";
+                    break;
+                case "Black dude":
+                    type = "Slobbers";
+                    break;
                 default:
-                    type = "Kills";
+                    type = (kills == 1) ? "Kill" : "Kills";
             }
 
             // Comma for large numbers
             return NumberFormat.getNumberInstance().format(kills) + " " + type;
         }
 
-        public String getName() {
-            return name;
-        }
-
-        public File getImage() {
+        File getImage() {
             return new File(resources + "Bosses/" + filename);
         }
 

@@ -56,6 +56,13 @@ class Session {
         }
     }
 
+    static void sortSessions(ArrayList<Session> sessions){
+        sessions.sort(Comparator.comparing(Session::getStreak)
+                .thenComparing(Session::getRatio)
+                .thenComparing(Session::getWins)
+                .reversed());
+    }
+
     /**
      * Submit the gunfight session to the database
      */
@@ -85,12 +92,16 @@ class Session {
      * @return Gunfight history
      */
     static ArrayList<Session> getHistory() {
-        JSONArray matches = new JSONArray(ApiRequest.executeQuery(endPoint + "/fetch", "GET", null, true));
+        String json = ApiRequest.executeQuery(endPoint + "/fetch", "GET", null, true);
+        if(json == null){
+            return null;
+        }
+        JSONArray matches = new JSONArray(json);
         ArrayList<Session> history = new ArrayList<>();
         for(int i = 0; i < matches.length(); i++) {
             history.add(new Session(matches.getJSONObject(i)));
         }
-        Collections.sort(history, Comparator.comparing(Session::getRatio).thenComparing(Session::getStreak).thenComparing(Session::getWins).reversed());
+        Session.sortSessions(history);
         return history;
     }
 
@@ -120,6 +131,9 @@ class Session {
      */
     static int getTotalMatches() {
         String json = ApiRequest.executeQuery(endPoint + "/total", "GET", null, true);
+        if(json == null){
+            return 0;
+        }
         return Integer.parseInt(new JSONObject(json).getString("matches"));
     }
 
@@ -190,7 +204,7 @@ class Session {
      * @return Formatted session date
      */
     String formatDate() {
-        return new SimpleDateFormat("dd/MM/YY").format(date);
+        return new SimpleDateFormat("dd/MM/yy").format(date);
     }
 
     /**
