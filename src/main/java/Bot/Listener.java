@@ -27,8 +27,7 @@ public class Listener extends ListenerAdapter {
         if(event.getAuthor().isBot()) {
             return;
         }
-        //commandManager.handleCommand(event);
-        welcomeCunt(event.getGuild().getSelfMember(), event.getMember(), event.getChannel());
+        commandManager.handleCommand(event);
     }
 
     @Override
@@ -38,7 +37,6 @@ public class Listener extends ListenerAdapter {
             Member author = event.getMember();
             targetCunt(guild, author);
             welcomeCunt(guild.getSelfMember(), author, guild.getDefaultChannel());
-            //TODO guild.getDefaultChannel().sendMessage(quickCommand(author.getUser())).queue();
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -47,9 +45,15 @@ public class Listener extends ListenerAdapter {
 
     private int[] pickRandomCommands(int bound, int size) {
         int[] indexes = new int[bound];
+        ArrayList<Integer> seen = new ArrayList<>();
         Random rand = new Random();
         for(int i = 0; i < bound; i++) {
-            indexes[i] = rand.nextInt(size);
+            int j = rand.nextInt(size);
+            while(seen.contains(j)) {
+                j = rand.nextInt(size);
+            }
+            indexes[i] = j;
+            seen.add(j);
         }
         return indexes;
     }
@@ -58,15 +62,21 @@ public class Listener extends ListenerAdapter {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
         builder.setTitle("Hey " + cunt.getUser().getName() + "!");
-        builder.setAuthor(self.getUser().getName(), self.getUser().getAvatarUrl(), self.getUser().getAvatarUrl());
         builder.setThumbnail(self.getUser().getAvatarUrl());
-        builder.setDescription("Here's some stuff I can do");
+        builder.setDescription("Here's some stuff I can do, now fuck off.");
+
         ArrayList<DiscordCommand> commands = commandManager.getCommands();
-        for(int index : pickRandomCommands(5, commands.size())) {
-            DiscordCommand c = commands.get(index);
-            builder.addField("**Trigger**", c.getHelpName(), true);
-            builder.addField("**Description**", c.getDesc(), true);
+        int[] indexes = pickRandomCommands(5, commands.size());
+
+        builder.addField("**Trigger**", commands.get(indexes[0]).getHelpName(), true);
+        builder.addBlankField(true);
+        builder.addField("**Description**", commands.get(indexes[0]).getDesc(), true);
+
+        for(int i = 1; i < indexes.length; i++) {
+            DiscordCommand c = commands.get(i);
+            builder.addField("\u200B", c.getHelpName(), true);
             builder.addBlankField(true);
+            builder.addField("\u200B", c.getDesc(), true);
         }
         channel.sendMessage(cunt.getAsMention()).queue();
         channel.sendMessage(builder.build()).queue();

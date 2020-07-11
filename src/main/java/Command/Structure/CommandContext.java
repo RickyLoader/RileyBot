@@ -4,13 +4,20 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommandContext {
     private final GuildMessageReceivedEvent event;
+    private final ArrayList<DiscordCommand> commands;
 
-    public CommandContext(GuildMessageReceivedEvent event) {
+    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands) {
         this.event = event;
+        this.commands = commands;
+    }
+
+    public ArrayList<DiscordCommand> getCommands() {
+        return commands;
     }
 
     public Guild getGuild() {
@@ -47,6 +54,10 @@ public class CommandContext {
 
     public String getInvite() {
         return getTextChannel().createInvite().complete().getUrl();
+    }
+
+    public String getLowerCaseMessage(){
+        return getMessageContent().toLowerCase();
     }
 
     /**

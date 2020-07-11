@@ -32,15 +32,13 @@ public class VariableLinkCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        context.getMessageChannel().sendMessage(versions.get(context.getMessageContent())).queue();
+        context.getMessageChannel().sendMessage(versions.get(context.getLowerCaseMessage())).queue();
     }
 
     @Override
     public boolean matches(String query) {
-        for(String variation : versions.keySet()) {
-            if(variation.equalsIgnoreCase(query)) {
-                return true;
-            }
+        if(versions.containsKey(query)){
+            return true;
         }
         return false;
     }

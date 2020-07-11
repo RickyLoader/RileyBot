@@ -8,12 +8,12 @@ public class GrandExchangeLookupCommand extends DiscordCommand {
     private ExchangeData exchangeData = new ExchangeData();
 
     public GrandExchangeLookupCommand() {
-        super("![a-zA-Z:-_() ]+", "Search the OSBuddy Exchange for shit you can't buy!","!OSRS ITEM NAME");
+        super("![a-zA-Z:-_() ]+", "Search the OSBuddy Exchange for shit you can't buy!","![ITEM NAME]");
     }
 
     @Override
     public void execute(CommandContext context) {
-        String item = context.getMessageContent().split("!")[1];
+        String item = context.getLowerCaseMessage().split("!")[1];
 
         // Object containing exchange data is read in on start up. If the data is > 15 minutes old, refresh it
         if((System.currentTimeMillis() - exchangeData.getLastCalled()) > 900000) {

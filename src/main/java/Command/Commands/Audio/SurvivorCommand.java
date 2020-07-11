@@ -17,7 +17,7 @@ public class SurvivorCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         try {
             String location = NetworkInfo.getAddress() + "/DiscordBotApi/api/survivor/";
-            String name = URLEncoder.encode(context.getMessageContent().replace(".survivor ", ""), "UTF-8");
+            String name = URLEncoder.encode(context.getLowerCaseMessage().replaceFirst("survivor ", ""), "UTF-8");
             new DiscordAudioPlayer(context.getMember(), context.getGuild()).play(location+name);
         }
         catch(Exception e){

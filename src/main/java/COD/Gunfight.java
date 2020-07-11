@@ -2,40 +2,46 @@ package COD;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-import javax.annotation.Nonnull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Interactive win/loss tracker - use emotes to track score
+ * Interactive win/loss tracker - use emotes to track score and submit to leaderboard
  */
 public class Gunfight {
 
-    // ID of the game message, used to find the message in the channel
     private MessageChannel channel;
     private Emote win, loss, stop, undo;
-    private int wins, losses, streak, rank = 0, longestStreak = 0;
+    private int wins = 0, losses = 0, currentStreak = 0, rank = 0, longestStreak = 0;
     private Guild server;
     private long lastUpdate = 0, startTime = 0, gameID;
     private String lastMessage;
     private static final String thumb = "https://bit.ly/2YTzfTQ";
-    private boolean active;
     private LinkedList<Gunfight> matchHistory;
+
+    // If !game message has been replaced with game summary message
+    private boolean active;
 
     // User who started game, only user allowed to register score
     private User owner;
 
+    /**
+     * Constructor to begin gunfight session
+     *
+     * @param channel Text channel to play in
+     * @param server  Guild to find emotes
+     * @param owner   User who started game
+     */
     public Gunfight(MessageChannel channel, Guild server, User owner) {
         this.channel = channel;
         this.server = server;
         this.owner = owner;
         this.active = true;
         matchHistory = new LinkedList<>();
+
         if(checkEmotes()) {
             startGame();
         }
@@ -44,9 +50,16 @@ public class Gunfight {
         }
     }
 
+    /**
+     * Constructor for help message
+     *
+     * @param channel Channel to post in
+     * @param server  Guild for emotes
+     */
     public Gunfight(MessageChannel channel, Guild server) {
         this.channel = channel;
         this.server = server;
+
         if(checkEmotes()) {
             showHelpMessage();
         }
@@ -55,15 +68,15 @@ public class Gunfight {
     /**
      * Constructor to keep a history of game score for undo purposes
      *
-     * @param wins       Current wins
-     * @param losses     Current losses
-     * @param streak     Current streak
-     * @param lastUpdate Time of update
+     * @param wins          Current wins
+     * @param losses        Current losses
+     * @param currentStreak Current streak
+     * @param lastUpdate    Time of update
      */
-    public Gunfight(int wins, int losses, int streak, long lastUpdate, int rank, int longestStreak) {
+    public Gunfight(int wins, int losses, int currentStreak, long lastUpdate, int rank, int longestStreak) {
         this.wins = wins;
         this.losses = losses;
-        this.streak = streak;
+        this.currentStreak = currentStreak;
         this.rank = rank;
         this.longestStreak = longestStreak;
         this.lastUpdate = lastUpdate;
@@ -79,7 +92,7 @@ public class Gunfight {
     }
 
     /**
-     * Attempts to locate emotes named win & loss, required for game
+     * Attempts to locate emotes required for game
      *
      * @return Presence of emotes
      */
@@ -104,21 +117,25 @@ public class Gunfight {
      *
      * @return Game message
      */
-    private MessageEmbed buildGameMessage(String streak) {
+    private MessageEmbed buildGameMessage(String streak, String longestStreak) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(65280);
+
         String title = "GUNFIGHT";
         if(rank > 0) {
             title += " RANK " + rank;
         }
+
         builder.setTitle(title);
         builder.setDescription(createDesc());
         builder.setThumbnail(thumb);
-        builder.setImage("https://i.imgur.com/24Xf03H.png");
+        builder.setImage("https://i.imgur.com/24Xf03H.png"); // Going dark cunt
         builder.addField("**WIN**", String.valueOf(wins), true);
         builder.addBlankField(true);
         builder.addField("**LOSS**", String.valueOf(losses), true);
-        builder.addField("**STREAK**", streak, false);
+        builder.addField("**STREAK**", streak, true);
+        builder.addBlankField(true);
+        builder.addField("**LONGEST STREAK**", longestStreak, true);
         String footer;
         String suffix = " -- Checkout 'gunfight help!' for instructions";
 
@@ -129,7 +146,7 @@ public class Gunfight {
             footer = "Last update at " + formatTime(lastUpdate);
         }
 
-        builder.setFooter(footer + suffix, "https://i.imgur.com/rVhdoRs.gif");
+        builder.setFooter(footer + suffix, "https://i.imgur.com/rVhdoRs.gif"); // Spinning clock gif
         return builder.build();
     }
 
@@ -148,7 +165,7 @@ public class Gunfight {
      */
     private void startGame() {
         startTime = System.currentTimeMillis();
-        sendGameMessage(buildGameMessage(String.valueOf(streak)));
+        sendGameMessage(buildGameMessage(String.valueOf(currentStreak), String.valueOf(longestStreak)));
     }
 
     /**
@@ -180,7 +197,12 @@ public class Gunfight {
             undoLast();
             return;
         }
-        matchHistory.push(new Gunfight(wins, losses, streak, lastUpdate, rank, longestStreak));
+
+        // Before adding the win/loss, add to history for undo purposes
+        matchHistory.push(new Gunfight(wins, losses, currentStreak, lastUpdate, rank, longestStreak));
+
+        // Now do update
+
         lastUpdate = currentTime;
 
         if(emote == win) {
@@ -189,12 +211,35 @@ public class Gunfight {
         else {
             addLoss();
         }
+
+        // All previous gunfight sessions
         ArrayList<Session> leaderboard = Session.getHistory();
-        Session current = new Session(startTime, lastUpdate, wins, losses, longestStreak);
-        leaderboard.add(current);
-        Session.sortSessions(leaderboard);
-        rank = (leaderboard.indexOf(current)) + 1;
+
+        // Where does the current session now rank within the leaderboard
+        if(leaderboard != null) {
+            Session current = new Session(startTime, lastUpdate, wins, losses, longestStreak, currentStreak);
+            leaderboard.add(current);
+            Session.sortSessions(leaderboard, true); // Sort exactly as leaderboard does
+            rank = (leaderboard.indexOf(current)) + 1;
+        }
+
         updateMessage();
+    }
+
+    /**
+     * Update the game message to display new score
+     */
+    private void updateMessage() {
+        Message gameMessage = getGameMessage();
+        MessageEmbed updateMessage = createUpdateMessage();
+
+        if(gameFocused()) {
+            gameMessage.editMessage(updateMessage).queue();
+        }
+        else {
+            deleteGame();
+            sendGameMessage(updateMessage);
+        }
     }
 
     /**
@@ -215,29 +260,17 @@ public class Gunfight {
     private MessageEmbed createUpdateMessage() {
 
         // Which form of win/wins, loss/losses to use if more than 1
-        String win = this.streak == 1 ? " WIN" : " WINS";
-        String loss = this.streak == -1 ? " LOSS" : " LOSSES";
+        String win = this.currentStreak == 1 ? " WIN" : " WINS";
+        String loss = this.currentStreak == -1 ? " LOSS" : " LOSSES";
 
         // Streak message to display, a negative streak should show as 2 losses not -2 losses
-        String streak = this.streak < 0 ? Math.abs(this.streak) + loss : this.streak + win;
+        String streak = this.currentStreak < 0 ? Math.abs(this.currentStreak) + loss : this.currentStreak + win;
 
-        return buildGameMessage(streak);
-    }
+        win = this.longestStreak == 1 ? " WIN" : " WINS";
 
-    /**
-     * Update the game message to display new score
-     */
-    private void updateMessage() {
-        Message gameMessage = getGameMessage();
-        MessageEmbed updateMessage = createUpdateMessage();
+        String longestStreak = this.longestStreak + win;
 
-        if(gameFocused()) {
-            gameMessage.editMessage(updateMessage).queue();
-        }
-        else {
-            deleteGame();
-            sendGameMessage(updateMessage);
-        }
+        return buildGameMessage(streak, longestStreak);
     }
 
     /**
@@ -281,15 +314,15 @@ public class Gunfight {
      * Add a win to the scoreboard, reset streak if on a loss streak.
      */
     private void addWin() {
-        if(streak < 0) {
-            streak = 0;
+        if(currentStreak < 0) {
+            currentStreak = 0;
         }
         wins++;
-        streak++;
+        currentStreak++;
 
         // Keep track of the largest win streak of the session
-        if(streak > longestStreak) {
-            longestStreak = streak;
+        if(currentStreak > longestStreak) {
+            longestStreak = currentStreak;
         }
 
         System.out.println("\nWin reaction added: " + formatTime(lastUpdate) + " " + wins + "/" + losses);
@@ -299,11 +332,11 @@ public class Gunfight {
      * Add a loss to the scoreboard, reset streak if on a win streak.
      */
     private void addLoss() {
-        if(streak > 0) {
-            streak = 0;
+        if(currentStreak > 0) {
+            currentStreak = 0;
         }
         losses++;
-        streak--;
+        currentStreak--;
         System.out.println("\nLoss reaction added: " + formatTime(lastUpdate) + " " + wins + "/" + losses);
     }
 
@@ -330,7 +363,7 @@ public class Gunfight {
      *
      * @return URL of thumbnail
      */
-    static String getThumb() {
+    public static String getThumb() {
         return thumb;
     }
 
@@ -345,7 +378,7 @@ public class Gunfight {
         if(wins == 0 && losses == 0) {
             return;
         }
-        Session session = new Session(startTime, lastUpdate, wins, losses, longestStreak);
+        Session session = new Session(startTime, lastUpdate, wins, losses, longestStreak, currentStreak);
         session.submitGame();
         channel.sendMessage(buildGameSummaryMessage(session)).queue();
     }
@@ -415,7 +448,7 @@ public class Gunfight {
         }
 
         // last match won
-        else if(streak >= 1) {
+        else if(currentStreak >= 1) {
 
             // just taken lead and it isn't first match
             if(wins - losses == 1 && losses != 0) {
@@ -437,6 +470,26 @@ public class Gunfight {
             }
 
             // win streak
+            else if(wins - losses >= 5) {
+                String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
+                messages = new String[]{
+                        (wins - losses) + " wins ahead!, amazing work!",
+                        mvp + ", you absolutely carried the team that game! Nice job",
+                        "It's clobbering time!, You clobbered them that game!",
+                        "Beautiful, I especially enjoyed " + mvp + " performance, it was incredible!",
+                        "The guy who made Downturn would be proud",
+                        "The sky is the limit fellas! Great work!",
+                        "What an amazing ratio!",
+                        "Straight to the top of the leaderboard!",
+                        "With these upgrades, they never stood a chance!",
+                        "Joe is reaching for the big red button, stay frosty",
+                        "It's not camping if you're sniping!",
+                        "Riggs would be proud, good job",
+                        "Keep it pure, fantastic work!"
+                };
+            }
+
+            // win streak
             else if(wins - losses > 1) {
                 String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
                 messages = new String[]{
@@ -445,6 +498,9 @@ public class Gunfight {
                         "Unstoppable!",
                         "They never stood a chance!",
                         "Take it easy on them!",
+                        "You clobbered them! Nice job!",
+                        "Beautiful job cunts, I loved that bit where that guy did that thing and you won!",
+                        "That game was intense, fantastic work!",
                         "On a roll!",
                         "HERE COMES JOE",
                         "Beautiful, I especially enjoyed " + mvp + " performance, it was incredible!"
@@ -453,25 +509,47 @@ public class Gunfight {
 
             // still behind
             else {
+                int behind = (losses - wins) + 1;
                 messages = new String[]{
                         "You're still behind cunts, not good enough",
-                        "You still need " + Math.abs(wins - losses) + " " + (Math.abs(wins - losses) == 1 ? "win" : "wins") + " to pass them cunts"
+                        "You still need " + behind + " wins to pass them cunts",
+                        behind + " more of those and you'll be in the lead, great job!",
+                        behind - 1 + " more and you're even, nice work!",
+                        "You can do it! You're beginning to believe!"
                 };
             }
         }
 
         // last match lost
         else {
+
             // just fallen behind
             if(losses - wins == 1) {
                 messages = new String[]{
                         "You're behind cunts",
                         "You're behind, you better win the fucking next one",
-                        "They were terrible, now you're behind, that final killcam was pathetic cunts, pick up your fucking game"
+                        "You've fallen behind, pick up your game cunts",
+                        "Is this the start of a loss streak?",
+                        "Get your lead back cunts"
+                };
+            }
+            else if(losses - wins >= 5) {
+                messages = new String[]{
+                        (losses - wins) + " losses behind, holy fuck",
+                        "Did you spam click the defeat button by accident?",
+                        "Surely you can't be this shit at the game",
+                        "This is an unbelievably shit performance cunts",
+                        "I've never seen such a terrible job",
+                        "Fuck me, aNOTHER one",
+                        "ANOTHER ONE",
+                        "You're gonna wear out the defeat button at this rate",
+                        "Going for the world record?",
+                        "You cunts are getting clobbered",
+                        "Hold on, Guinness is on the line, you've just broken the world record for being shit at the game"
                 };
             }
             // loss streak
-            else if(losses - wins >= 2) {
+            else if(losses - wins > 1) {
                 messages = new String[]{
                         "What the fuck was that?",
                         "How didn't you kill him?",
@@ -484,7 +562,18 @@ public class Gunfight {
                         "Fuck that's embarrassing",
                         "Time to give up?",
                         "Give up now lmao",
-                        "How the fuck are you " + (losses - wins) + " games behind?"
+                        "How the fuck are you " + (losses - wins) + " games behind?",
+                        "I fucking hate aim assist",
+                        "Beep beep downies coming through, shit effort cunts",
+                        "Get your head in the game!",
+                        "I miss chester",
+                        "The more things change the more they stay the same",
+                        "Where's Rory when you need him?",
+                        "Sometimes you just need to swallow your pride and gear up in your M4 & 725 loadout",
+                        "Stop runecrafting and start winning cunts",
+                        "Put the fuckin crossbow away and get out your 725",
+                        "Just remember, chances are they are sober and you are not, don't be too hard on yourselves",
+                        "Time to be tactical cunts, get those broken guns out"
                 };
             }
             // still ahead
@@ -492,7 +581,10 @@ public class Gunfight {
                 messages = new String[]{
                         "Pathetic, but at least you're " + (wins - losses) + (wins - losses == 1 ? " win" : " wins") + " ahead cunts",
                         "Don't you dare fall behind cunts",
-                        "We lost that round but it's not over yet, you get ready for the next one"
+                        "We lost that round but it's not over yet, you get ready for the next one",
+                        "You're still ahead, don't let this be a repeat of last time",
+                        "Oh no here we go again",
+                        "Get the 725 out and get your lead back up"
                 };
             }
         }
@@ -505,7 +597,7 @@ public class Gunfight {
 
         lastMessage = message;
 
-        return lastMessage;
+        return message;
     }
 
     /**
@@ -518,13 +610,14 @@ public class Gunfight {
         Gunfight prev = matchHistory.pop();
         this.wins = prev.getWins();
         this.losses = prev.getLosses();
-        this.streak = prev.getStreak();
+        this.currentStreak = prev.getCurrentStreak();
+        this.longestStreak = prev.getLongestStreak();
         this.lastUpdate = prev.getLastUpdate();
         this.rank = prev.getRank();
         updateMessage();
     }
 
-    public int getRank(){
+    public int getRank() {
         return rank;
     }
 
@@ -551,8 +644,8 @@ public class Gunfight {
      *
      * @return Time of last update
      */
-    public int getStreak() {
-        return streak;
+    public int getCurrentStreak() {
+        return currentStreak;
     }
 
     public long getLastUpdate() {
@@ -620,5 +713,9 @@ public class Gunfight {
             desc = "Nothing you fucking idiot, that's why it isn't on there.";
         }
         return desc;
+    }
+
+    public int getLongestStreak() {
+        return longestStreak;
     }
 }

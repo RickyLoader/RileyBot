@@ -1,6 +1,6 @@
 package Command.Commands.Passive;
 
-import COD.GunfightEmoteListener;
+import Command.Structure.EmoteListener;
 import COD.Gunfight;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.entities.User;
 
 public class GunfightHelpCommand extends DiscordCommand {
     private Gunfight gunfightHelp;
-    private GunfightEmoteListener listener;
+    private EmoteListener listener;
 
     public GunfightHelpCommand() {
         super("gunfight help!", "Get some help playing gunfight!");
@@ -37,8 +37,8 @@ public class GunfightHelpCommand extends DiscordCommand {
         return "gunfight help!";
     }
 
-    private GunfightEmoteListener getEmoteListener() {
-        return new GunfightEmoteListener() {
+    private EmoteListener getEmoteListener() {
+        return new EmoteListener() {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long reactID = reaction.getMessageIdLong();

@@ -1,7 +1,15 @@
 package Network;
 
+import java.net.InetAddress;
+
 public class NetworkInfo {
-    public static String getAddress(){
-        return "http://192.168.1.10";
+    public static String getAddress() {
+        try {
+            return "http://" + InetAddress.getLocalHost().getHostAddress();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

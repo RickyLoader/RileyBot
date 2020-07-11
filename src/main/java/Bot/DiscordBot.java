@@ -1,4 +1,5 @@
 package Bot;
+
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -28,7 +29,13 @@ public class DiscordBot {
     private static void login(String token) {
         try {
             JDABuilder
-                    .create(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
+                    .create(token,
+                            GatewayIntent.GUILD_MESSAGES,
+                            GatewayIntent.GUILD_MEMBERS,
+                            GatewayIntent.GUILD_VOICE_STATES,
+                            GatewayIntent.GUILD_EMOJIS,
+                            GatewayIntent.GUILD_MESSAGE_REACTIONS
+                    )
                     .setActivity(Activity.watching("you sleep cunt"))
                     .addEventListeners(new Listener())
                     .build();

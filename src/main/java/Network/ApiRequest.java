@@ -10,7 +10,7 @@ import java.net.URL;
  * @author Ricky Loader
  * @version 5000.0
  */
-public class ApiRequest{
+public class ApiRequest {
 
     /**
      * Make a request to the API and return the JSON response.
@@ -21,14 +21,14 @@ public class ApiRequest{
      * @param api      Boolean for accessing the bot's API or a different API
      * @return String JSON response from the API
      */
-    public static String executeQuery(String endPoint, String request, String query, boolean api){
+    public static String executeQuery(String endPoint, String request, String query, boolean api) {
         String result = null;
-        try{
+        try {
 
             // If accessing the bot's API, the endpoint is appended to the baseURL, otherwise the endpoint is the url
             String baseURL = "";
-            if(api){
-                baseURL += NetworkInfo.getAddress()+"/DiscordBotAPI/api/";
+            if(api) {
+                baseURL += NetworkInfo.getAddress() + "/DiscordBotAPI/api/";
             }
             // Initialise the URL, client, and Request
             URL url = new URL(baseURL + endPoint);
@@ -45,7 +45,7 @@ public class ApiRequest{
                     builder.post(body);
                     break;
                 case "UPDATE":
-                    if(query == null){
+                    if(query == null) {
                         query = "{}";
                     }
                     body = RequestBody.create(
@@ -60,14 +60,16 @@ public class ApiRequest{
 
             // Execute the request and receive a response
             Response response = client.newCall(builder.build()).execute();
-
             // Successful request
-            if(response.code() == 200){
+            if(response.code() == 200) {
                 result = response.body().string();
+            }
+            else if(response.code() == 404) {
+                result = "err";
             }
             response.close();
         }
-        catch(Exception e){
+        catch(Exception e) {
             return null;
         }
         return result;

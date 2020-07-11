@@ -25,7 +25,7 @@ public class TTSCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         try {
             String location = NetworkInfo.getAddress() + "/DiscordBotApi/api/dectalk/";
-            String content = URLEncoder.encode(context.getMessageContent().replaceFirst(".", ""), "UTF-8");
+            String content = URLEncoder.encode(context.getLowerCaseMessage().replaceFirst(".", ""), "UTF-8");
             new DiscordAudioPlayer(
                     context.getMember(),
                     context.getGuild()

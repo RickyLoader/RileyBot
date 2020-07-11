@@ -40,7 +40,7 @@ public class LinkCommand extends DiscordCommand {
     }
 
     public static String fetchLinks() {
-        System.out.println("Fetching links...\n");
+        System.out.println("Fetching links...\n\n");
         return ApiRequest.executeQuery("commands/link", "GET", null, true);
     }
 }

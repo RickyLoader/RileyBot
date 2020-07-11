@@ -2,9 +2,12 @@ package Bot;
 
 import Command.Commands.*;
 import Command.Commands.Audio.*;
+import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
+import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
 import Command.Commands.Passive.GunfightCommand;
 import Command.Commands.Passive.GunfightHelpCommand;
+import Command.Commands.Passive.LeaderboardCommand;
 import Command.Commands.Random.*;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
@@ -41,7 +44,7 @@ public class DiscordCommandManager {
         if(command == null) {
             return;
         }
-        command.execute(new CommandContext(event));
+        command.execute(new CommandContext(event, commands));
     }
 
     private void addCommands() {
@@ -54,13 +57,13 @@ public class DiscordCommandManager {
         commands.add(new LeaderboardCommand());
 
         // OSRS
-        commands.add(new PlayerLookupCommand());
+        commands.add(new OSRSLookupCommand());
         commands.add(new GrandExchangeLookupCommand());
 
         // audio
         commands.add(new GhostCommand());
         commands.add(new SawCommand());
-        commands.add(new VoiceChannelCommand());
+        //commands.add(new VoiceChannelCommand());
         commands.add(new TTSCommand());
         commands.add(new SurvivorCommand());
         commands.add(new PlayYoutubeCommand());
@@ -70,6 +73,10 @@ public class DiscordCommandManager {
         commands.add(new BrewCountCommand());
         commands.add(new ExecuteOrder66Command());
         commands.add(new KillListCommand());
+        commands.add(new TobinCommand());
+
+        commands.add(new MWLookupCommand());
+        commands.add(new HelpCommand());
     }
 
     private void addRandomCommands() {

@@ -13,7 +13,7 @@ public class VoiceChannelCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         DiscordAudioPlayer discordAudioPlayer = new DiscordAudioPlayer(context.getMember(), context.getGuild());
-        if(context.getMessageContent().equalsIgnoreCase("stop")) {
+        if(context.getLowerCaseMessage().equals("stop")) {
             discordAudioPlayer.leave();
         }
         else {

@@ -57,7 +57,7 @@ public class RandomCommand extends DiscordCommand {
             return quantity == 0 ? 1 : quantity;
         }
         catch(Exception e) {
-            return 1;
+            return 0;
         }
     }
 

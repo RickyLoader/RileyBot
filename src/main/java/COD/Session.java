@@ -8,30 +8,30 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Stores information about a gunfight game session
  */
-class Session {
+public class Session {
     private static String endPoint = "gunfight";
     private long date, duration;
-    private int wins, losses, streak;
+    private int wins, losses, longestStreak, currentStreak;
     private double ratio;
 
     /**
      * Constructor for building a Session instance from a completed Gunfight
      */
-    Session(long startTime, long date, int wins, int losses, int streak) {
+    Session(long startTime, long date, int wins, int losses, int longestStreak, int currentStreak) {
         this.date = date;
         this.wins = wins;
         this.losses = losses;
 
         // calculate win/loss ratio
         this.ratio = getRatio();
-        this.streak = streak;
+        this.longestStreak = longestStreak;
+        this.currentStreak = currentStreak;
 
         // duration of session
         this.duration = date - startTime;
@@ -48,7 +48,7 @@ class Session {
             this.wins = o.getInt("win");
             this.losses = o.getInt("loss");
             this.ratio = o.getDouble("ratio");
-            this.streak = o.getInt("streak");
+            this.longestStreak = o.getInt("streak");
             this.duration = o.getLong("duration");
         }
         catch(JSONException e) {
@@ -56,11 +56,16 @@ class Session {
         }
     }
 
-    static void sortSessions(ArrayList<Session> sessions){
-        sessions.sort(Comparator.comparing(Session::getStreak)
+    static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
+        Comparator<Session> sort = Comparator.comparing(Session::getLongestStreak)
                 .thenComparing(Session::getRatio)
-                .thenComparing(Session::getWins)
-                .reversed());
+                .thenComparing(Session::getWins);
+        if(ascending) {
+            sessions.sort(sort.reversed());
+        }
+        else {
+            sessions.sort(sort);
+        }
     }
 
     /**
@@ -79,7 +84,7 @@ class Session {
         return new JSONObject()
                 .put("win", wins)
                 .put("loss", losses)
-                .put("streak", streak)
+                .put("streak", longestStreak)
                 .put("ratio", ratio)
                 .put("date", date)
                 .put("duration", duration)
@@ -91,9 +96,9 @@ class Session {
      *
      * @return Gunfight history
      */
-    static ArrayList<Session> getHistory() {
+    public static ArrayList<Session> getHistory() {
         String json = ApiRequest.executeQuery(endPoint + "/fetch", "GET", null, true);
-        if(json == null){
+        if(json == null) {
             return null;
         }
         JSONArray matches = new JSONArray(json);
@@ -101,7 +106,7 @@ class Session {
         for(int i = 0; i < matches.length(); i++) {
             history.add(new Session(matches.getJSONObject(i)));
         }
-        Session.sortSessions(history);
+        Session.sortSessions(history, true);
         return history;
     }
 
@@ -131,7 +136,7 @@ class Session {
      */
     static int getTotalMatches() {
         String json = ApiRequest.executeQuery(endPoint + "/total", "GET", null, true);
-        if(json == null){
+        if(json == null) {
             return 0;
         }
         return Integer.parseInt(new JSONObject(json).getString("matches"));
@@ -174,8 +179,12 @@ class Session {
      *
      * @return Longest win streak
      */
-    int getStreak() {
-        return streak;
+    public int getLongestStreak() {
+        return longestStreak;
+    }
+
+    public int getCurrentStreak() {
+        return currentStreak;
     }
 
     /**
@@ -195,7 +204,7 @@ class Session {
     String formatStreak() {
 
         // 1 win vs 2 wins
-        return streak + ((streak == 1) ? " WIN" : " WINS");
+        return longestStreak + ((longestStreak == 1) ? " WIN" : " WINS");
     }
 
     /**
