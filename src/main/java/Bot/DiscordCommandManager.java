@@ -50,7 +50,6 @@ public class DiscordCommandManager {
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
-
         // gunfight
         commands.add(new GunfightCommand());
         commands.add(new GunfightHelpCommand());
@@ -88,6 +87,8 @@ public class DiscordCommandManager {
         commands.add(new ElsaCommand(random));
         commands.add(new SydneyCommand(random));
         commands.add(new GenerateNameCommand(random));
+
+
     }
 
     private void addLinkCommands() {

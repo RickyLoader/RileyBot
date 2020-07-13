@@ -2,6 +2,7 @@ package COD;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -172,7 +173,7 @@ public class Gunfight {
      * Remove the game message
      */
     public void deleteGame() {
-        getGameMessage().delete().complete();
+        channel.retrieveMessageById(gameID).queue(message -> message.delete().queue());
     }
 
     /**
@@ -230,16 +231,16 @@ public class Gunfight {
      * Update the game message to display new score
      */
     private void updateMessage() {
-        Message gameMessage = getGameMessage();
-        MessageEmbed updateMessage = createUpdateMessage();
-
-        if(gameFocused()) {
-            gameMessage.editMessage(updateMessage).queue();
-        }
-        else {
-            deleteGame();
-            sendGameMessage(updateMessage);
-        }
+        channel.retrieveMessageById(gameID).queue(message -> {
+            MessageEmbed updateMessage = createUpdateMessage();
+            if(gameFocused()) {
+                message.editMessage(updateMessage).queue();
+            }
+            else {
+                deleteGame();
+                sendGameMessage(updateMessage);
+            }
+        });
     }
 
     /**
@@ -271,15 +272,6 @@ public class Gunfight {
         String longestStreak = this.longestStreak + win;
 
         return buildGameMessage(streak, longestStreak);
-    }
-
-    /**
-     * Find the game message
-     *
-     * @return Game message
-     */
-    private Message getGameMessage() {
-        return channel.retrieveMessageById(gameID).complete();
     }
 
     /**
@@ -680,11 +672,12 @@ public class Gunfight {
     public void updateHelpMessage(MessageReaction reaction) {
         Emote react = reaction.getReactionEmote().getEmote();
         String purpose = getEmoteFunction(react);
-        Message helpMessage = getGameMessage();
-        EmbedBuilder update = buildHelpMessage();
-        update.addBlankField(false);
-        update.setFooter(purpose, react.getImageUrl());
-        helpMessage.editMessage(update.build()).complete();
+        channel.retrieveMessageById(gameID).queue(message -> {
+            EmbedBuilder update = buildHelpMessage();
+            update.addBlankField(false);
+            update.setFooter(purpose, react.getImageUrl());
+            message.editMessage(update.build()).queue();
+        });
     }
 
     /**

@@ -62,6 +62,9 @@ public class ApiRequest {
             Response response = client.newCall(builder.build()).execute();
             // Successful request
             if(response.code() == 200) {
+                if(response.body() == null){
+                    return null;
+                }
                 result = response.body().string();
             }
             else if(response.code() == 404) {

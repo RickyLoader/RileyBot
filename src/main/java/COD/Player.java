@@ -2,11 +2,14 @@ package COD;
 
 import Network.ApiRequest;
 import Network.NetworkInfo;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class Player {
@@ -15,6 +18,7 @@ public class Player {
     private int streak, spm;
     private SearchAndDestroy searchAndDestroy;
     private Weapon primary, secondary;
+    private AccoladeManager accoladeManager;
 
     public Player(String name, String platform) {
         this.name = name;
@@ -58,6 +62,7 @@ public class Player {
             JSONObject categories = player.getJSONObject("itemData");
             this.primary = getFavourite(categories, true);
             this.secondary = getFavourite(categories, false);
+            this.accoladeManager = new AccoladeManager(player.getJSONObject("accoladeData").getJSONObject("properties"));
         }
         catch(Exception e) {
             return null;
@@ -343,5 +348,200 @@ public class Player {
             names.put("iw8_sn_xmike109", "Rytec AMR");
             return names.get(name);
         }
+    }
+
+    private class AccoladeManager {
+        ArrayList<Accolade> accolades;
+
+        public AccoladeManager(JSONObject o) {
+            for(String accoladeKey : o.keySet()) {
+                if(o.getInt(accoladeKey) == 2){
+                    System.out.println(accoladeKey + ": " + o.getInt(accoladeKey));
+                }
+
+            }
+        }
+
+        private Accolade getAccolade(String iwName) {
+            ArrayList<Accolade> accolades = new ArrayList<>();
+            accolades.add(new Accolade("noDeathsFromBehind", "Sixth Sense", "No deaths from behind"));
+            accolades.add(new Accolade("leastAssists", "Selfish", "Fewest Assists"));
+            accolades.add(new Accolade("highestMultikill", "Devastation", "Highest multikill"));
+            accolades.add(new Accolade("reloads", "Load & Load", "Most reloads"));
+            accolades.add(new Accolade("skippedKillcams", "Starter", "Most killcams skipped"));
+            accolades.add(new Accolade("deadSilenceKills", "Silent But Deadly", "Most kills with dead silence active"));
+            accolades.add(new Accolade("mostDeaths", "Ragdoll", "Most deaths"));
+            accolades.add(new Accolade("mostAssists", "Wingman", "Most assists"));
+            accolades.add(new Accolade("killsFromBehind", "Flanker", "Most kills from behind"));
+            accolades.add(new Accolade("smgDeaths", "Run and Gunner", "Most SMG deaths"));
+            accolades.add(new Accolade("pointBlankKills", "Personal Space", "Most point blank kills"));
+            accolades.add(new Accolade("hipfireKills", "Sprayer", "Most hipfire kills"));
+            accolades.add(new Accolade("highestRankedKills", "Regicide", "Most kills on the highest ranked scoreboard players"));
+            accolades.add(new Accolade("shotsFired", "Trigger Happy", "Most shots fired"));
+            accolades.add(new Accolade("smokesUsed", "Chimney", "Most smoke grenades used"));
+            accolades.add(new Accolade("stimDamageHealed", "Not Today", "Most healing from stim"));
+            accolades.add(new Accolade("arDeaths", "Assaulted", "Most assault rifle deaths"));
+            accolades.add(new Accolade("pistolKills", "Hard Boiled", "Most pistol kills"));
+            accolades.add(new Accolade("longestStreak", "Unstoppable", "Longest killstreak"));
+            accolades.add(new Accolade("leastDeaths", "Juggernaut", "Fewest deaths"));
+            accolades.add(new Accolade("deathsFromBehind", "Blindsided", "Most deaths from behind"));
+            accolades.add(new Accolade("longshotKills", "Marksman", "Most longshots"));
+            accolades.add(new Accolade("higherRankedKills", "Upriser", "Most kills on higher ranked scoreboard players"));
+            accolades.add(new Accolade("mostMultikills", "Genocidal", "Most multikills"));
+            accolades.add(new Accolade("mostKills", "The Feared", "Most kills"));
+            accolades.add(new Accolade("oneShotOneKills", "One Shot Kill", "Most one shot kills"));
+            accolades.add(new Accolade("avengerKills", "Avenger", "Most avenger kills"));
+            accolades.add(new Accolade("sniperDeaths", "Zeroed In", "Most sniper deaths"));
+            accolades.add(new Accolade("comebackKills", "Rally", "Most comebacks"));
+            accolades.add(new Accolade("explosionsSurvived", "Shell Shocked", "Most explosions survived"));
+            accolades.add(new Accolade("lowerRankedKills", "Alpha", "Most kills on lower ranked scoreboard players"));
+            accolades.add(new Accolade("timeProne", "Grassy Knoll", "Most time spent prone"));
+            accolades.add(new Accolade("headshots", "Sharpshooter", "Most headshots"));
+            accolades.add(new Accolade("distanceTravelled", "Nomad", "Longest distance traveled"));
+            accolades.add(new Accolade("longestLife", "Lifer", "Longest life"));
+            accolades.add(new Accolade("leastKills", "The Fearful", "Fewest kills"));
+            accolades.add(new Accolade("riotShieldDamageAbsorbed", "Guardian", "Most damage absorbed with riot shield"));
+            accolades.add(new Accolade("shotgunDeaths", "Clay Pigeon", "Most shotgun deaths"));
+            accolades.add(new Accolade("shotgunKills", "Buckshot", "Most shotgun kills"));
+            accolades.add(new Accolade("sniperKills", "Sniper", "Most sniper kills"));
+            accolades.add(new Accolade("fragKills", "Fragger", "Most frag grenade kills"));
+            accolades.add(new Accolade("penetrationKills", "Blindfire", "Most bullet penetration kills"));
+            accolades.add(new Accolade("classChanges", "Evolver", "Most classes changed"));
+            accolades.add(new Accolade("arKills", "AR Specialist", "Most assault rifle kills"));
+            accolades.add(new Accolade("weaponPickups", "Loaner", "Most kills with picked up weapons"));
+            accolades.add(new Accolade("adsKills", "Hairtrigger", "Most ADS Kills"));
+            accolades.add(new Accolade("highestAvgAltitude", "High Command", "Highest average altitude"));
+            accolades.add(new Accolade("lowestAvgAltitude", "Low Profile", "Lowest average altitude"));
+            accolades.add(new Accolade("shortestLife", "Terminal", "Shortest life"));
+            accolades.add(new Accolade("pistolPeaths", "Hands Up", "Most pistol deaths"));
+            accolades.add(new Accolade("timeCrouched", "Sneaker", "Most time spent crouched"));
+            accolades.add(new Accolade("suicides", "Accident Prone", "Most suicides"));
+            accolades.add(new Accolade("pistolHeadshots", "Smoking Gun", "Most pistol headshots"));
+            accolades.add(new Accolade("smgKills", "CQB", "Most SMG Kills"));
+            accolades.add(new Accolade("revengeKills", "Payback", "Most revenge kills"));
+            accolades.add(new Accolade("claymoreKills", "Ambusher", "Most claymore kills"));
+            accolades.add(new Accolade("mostKillsLongestStreak", "Grim Reaper", "Most kills and longest killstreak"));
+            accolades.add(new Accolade("arHeadshots", "AR Expert", "Most assault rifle headshots"));
+            accolades.add(new Accolade("stunHits", "Stunner", "Most stun grenade hits"));
+            accolades.add(new Accolade("killstreakUAVAssists", "Map Awareness", "Most assists with UAVs"));
+            accolades.add(new Accolade("destroyedKillstreaks", "Scrap Metal", "Most killstreaks destroyed"));
+            accolades.add(new Accolade("sniperHeadshots", "Dead Aim", "Most sniper headshots"));
+            accolades.add(new Accolade("killstreakKills", "Streaker", "Most killstreak kills"));
+            accolades.add(new Accolade("lmgDeaths", "Target Practice", "Most LMG deaths"));
+            accolades.add(new Accolade("meleeKills", "Brawler", "Most melee kills"));
+            accolades.add(new Accolade("defends", "Defense", "Most defend kills"));
+            accolades.add(new Accolade("killEnemyTeam", "None Spared", "Killed entire enemy team"));
+            accolades.add(new Accolade("smgHeadshots", "SMG Expert", "Most SMG headshots"));
+            accolades.add(new Accolade("shotgunHeadshots", "Boomstick", "Most shotgun headshots"));
+            accolades.add(new Accolade("meleeDeaths", "Knocked Out", "Most melee deaths"));
+            accolades.add(new Accolade("flashbangHits", "Blinder", "Most flashbang hits"));
+            accolades.add(new Accolade("mostKillsLeastDeaths", "MVP", "Most kills and fewest deaths"));
+            accolades.add(new Accolade("bombPlanted", "Bomb Expert", "Most plants"));
+            accolades.add(new Accolade("lmgKills", "7.62mm", "Most LMG kills"));
+            accolades.add(new Accolade("killstreakVTOLJetKills", "Guard Dog", "Most VTOL Jet kills"));
+            accolades.add(new Accolade("mostKillsMostHeadshots", "Overkill", "Most kills and most headshots"));
+            accolades.add(new Accolade("lmgHeadshots", "LMG Expert", "Most LMG headshots"));
+            accolades.add(new Accolade("captures", "Captured", "Most captures"));
+            accolades.add(new Accolade("bombDefused", "Defuser", "Most defuses"));
+            accolades.add(new Accolade("killstreakAirstrikeKills", "Thunderstruck", "Most precision airstrike kills"));
+            accolades.add(new Accolade("stoppingPowerKills", "Overpowered", "Most stopping power kills"));
+            accolades.add(new Accolade("executionKills", "Executioner", "Most finishing move kills"));
+            accolades.add(new Accolade("clutch", "Clutched", "Most kills as the last alive"));
+            accolades.add(new Accolade("killstreakCruiseMissileKills", "Cruise Control", "Most cruise missile kills"));
+            accolades.add(new Accolade("thermiteKills", "Red Iron", "Most thermite kills"));
+            accolades.add(new Accolade("carepackagesCaptured", "Hoarder", "Most care packages captured"));
+            accolades.add(new Accolade("killstreakCluserStrikeKills", "Shelled", "Most cluster strike kills"));
+            accolades.add(new Accolade("killstreakGroundKills", "Ground Control", "Most ground based killstreak kills"));
+            accolades.add(new Accolade("bombDetonated", "Destroyer", "Most targets destroyed"));
+            accolades.add(new Accolade("timeWatchingKillcams", "Spy Game", "Most time watching killcams"));
+            accolades.add(new Accolade("throwingKnifeKills", "Butcher", "Most throwing knife kills"));
+            accolades.add(new Accolade("noKillsWithDeath", "Participant", "No kills with at least 1 death"));
+            accolades.add(new Accolade("tagsDenied", "Denied", "Denied the most tags"));
+            accolades.add(new Accolade("semtexKills", "Sticky", "Most semtex kills"));
+            accolades.add(new Accolade("launcherKills", "Explosivo", "Most launcher kills"));
+            accolades.add(new Accolade("killstreakWheelsonKills", "Roll Out", "Most wheelson kills"));
+            accolades.add(new Accolade("killstreakChopperGunnerKills", "Hunter", "Most chopper gunner kills"));
+            accolades.add(new Accolade("killstreakChopperSupportKills", "Twin Cannons", "Most support helo kills"));
+            accolades.add(new Accolade("killstreakCUAVAssists", "Jammed", "Most assists with scrambler drones"));
+            accolades.add(new Accolade("tagsCaptured", "Confirmed Kills", "Collected the most tags"));
+            accolades.add(new Accolade("molotovKills", "Arsonist", "Most molotov kills"));
+            accolades.add(new Accolade("launcherDeaths", "Fubar", "Most launcher deaths"));
+            accolades.add(new Accolade("launcherHeadshots", "Heads Up", "Most launcher headshots"));
+            accolades.add(new Accolade("proximityMineKills", "Trapper", "Most proximity mine kills"));
+            accolades.add(new Accolade("snapshotHits", "Photographer", "Most snapshot grenade hits"));
+            accolades.add(new Accolade("decoyHits", "Made You Look", "Most decoy grenade hits"));
+            accolades.add(new Accolade("noKillNoDeath", "AFK", "No kills and no deaths"));
+            accolades.add(new Accolade("gasHits", "Gaseous", "Most gas grenade hits"));
+            accolades.add(new Accolade("kills10NoDeaths", "The Show", "10 or more kills and no deaths"));
+            accolades.add(new Accolade("killstreakWhitePhosphorousKillsAssists", "Burnout", "Most kills and assists with white phosphorous"));
+            accolades.add(new Accolade("deployableCoverUsed", "Combat Engineer", "Most deployable covers used"));
+            accolades.add(new Accolade("killstreakGunshipKills", "Death From Above", "Most gunship kills"));
+            accolades.add(new Accolade("killstreakPersonalUAVKills", "Nothing Personal", "Most kills with a personal radar active"));
+            accolades.add(new Accolade("killstreakJuggernautKills", "Heavy Metal", "Most juggernaut kills"));
+            accolades.add(new Accolade("timeOnPoint", "King of the Hill", "Most time spent on the objective"));
+            accolades.add(new Accolade("killstreakTankKills", "Bulldozer", "Most infantry assault vehicle kills"));
+            accolades.add(new Accolade("killstreakSentryGunKills", "Proxy Kill", "Most sentry gun kills"));
+            accolades.add(new Accolade("assaults", "Offense", "Most assault kills"));
+            accolades.add(new Accolade("spawnSelectBase", "Home Base", "Most base spawns"));
+            accolades.add(new Accolade("noKill10Deaths", "Mission Failed", "No kills and at least 10 deaths"));
+            accolades.add(new Accolade("returns", "Flag Returner", "Most flags returned"));
+            accolades.add(new Accolade("tagsMegaBanked", "Megabank", "Megabanked Tags"));
+            accolades.add(new Accolade("empDroneHits", "Short Circuit", "Most hits with EMP drone"));
+            accolades.add(new Accolade("ammoBoxUsed", "Provider", "Most munitions boxes used"));
+            accolades.add(new Accolade("carrierKills", "Carrier", "Most kills as carrier"));
+            accolades.add(new Accolade("spawnSelectSquad", "Squad Goals", "Most squadmate spawns"));
+            accolades.add(new Accolade("spawnSelectVehicle", "Oscar Mike", "Most vehicle spawns"));
+            accolades.add(new Accolade("timeSpentAsPassenger", "Navigator", "Most time spent as a passenger"));
+            accolades.add(new Accolade("firstInfected", "Patient Zero", "First infected"));
+            accolades.add(new Accolade("killstreakAUAVAssists", "Target Rich Environment", "Most advanced UAV assists"));
+            accolades.add(new Accolade("infectedKills", "Contagion", "Most kills as infected"));
+            accolades.add(new Accolade("killstreakShieldTurretKills", "Shielded", "Most shield turret kills"));
+            accolades.add(new Accolade("reconDroneMarks", "Fly On The Wall", "Most targets marked with recon drone"));
+            accolades.add(new Accolade("c4Kills", "Handle With Care", "Most C4 kills"));
+            accolades.add(new Accolade("killstreakAirKills", "Air Superiority","Most aerial killstreak kills"));
+            accolades.add(new Accolade("defenderKills", "Savior","Most teammates saved"));
+            HashMap<String, Accolade> test = new HashMap<>();
+            for(Accolade a : accolades) {
+                test.put(a.getIwName(), a);
+            }
+            return test.get(iwName);
+        }
+    }
+
+    private class Accolade implements Comparable<Accolade> {
+        private int quantity;
+        private final String iwName, title, desc;
+
+        public Accolade(String iwName, String title, String desc) {
+            this.iwName = iwName;
+            this.title = title;
+            this.desc = desc;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getIwName() {
+            return iwName;
+        }
+
+        @Override
+        public int compareTo(@NotNull Player.Accolade o) {
+            return o.getQuantity() - this.getQuantity();
+        }
+
     }
 }
