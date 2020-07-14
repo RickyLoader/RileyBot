@@ -467,7 +467,7 @@ public class Hiscores {
 
                 csv[70],    // CONSTRUCTION
                 csv[67],    // HUNTER
-                csv[1],     // TOTAL
+                csv[1].equals("0") ? "---" : csv[1],     // TOTAL
         };
         return getTotal(skills);
     }
