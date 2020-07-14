@@ -40,4 +40,8 @@ public abstract class DiscordCommand {
     public boolean matches(String query) {
         return Pattern.compile(this.getTrigger().toLowerCase()).matcher(query).matches();
     }
+
+    public String getHelpNameCoded() {
+        return "```" + helpName + "```";
+    }
 }

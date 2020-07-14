@@ -55,6 +55,8 @@ public class DiscordCommandManager {
         commands.add(new GunfightHelpCommand());
         commands.add(new LeaderboardCommand());
 
+        commands.add(new MeCommand());
+
         // OSRS
         commands.add(new OSRSLookupCommand());
         commands.add(new GrandExchangeLookupCommand());
@@ -87,8 +89,6 @@ public class DiscordCommandManager {
         commands.add(new ElsaCommand(random));
         commands.add(new SydneyCommand(random));
         commands.add(new GenerateNameCommand(random));
-
-
     }
 
     private void addLinkCommands() {

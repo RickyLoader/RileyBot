@@ -151,8 +151,9 @@ public class Hiscores {
             bossKills.add(new Boss("Harambe", 1));
         }
 
+        String[] clues = getClueScrolls(data);
         String[] stats = orderSkills(data);
-        File playerImage = buildImage(name, data[0], stats, bossKills);
+        File playerImage = buildImage(name, data[0], stats, bossKills, clues);
         showImageBuilt();
         channel.sendFile(playerImage).queue(message -> {
             playerImage.delete();
@@ -160,6 +161,18 @@ public class Hiscores {
             updateLoadingMessage();
         });
         return true;
+    }
+
+    private String[] getClueScrolls(String[] data) {
+        data = Arrays.copyOfRange(data, 80, 93);
+        String[] clues = new String[6];
+        int j = 0;
+        for(int i = 1; i < data.length; i += 2) {
+            int quantity = Integer.parseInt(data[i]);
+            clues[j] = "x" + ((quantity == -1) ? "0" : data[i]);
+            j++;
+        }
+        return clues;
     }
 
     /**
@@ -275,7 +288,7 @@ public class Hiscores {
      * @param skills Skills to display on message
      * @return Embedded message displaying player skills
      */
-    private File buildImage(String name, String type, String[] skills, List<Boss> bosses) {
+    private File buildImage(String name, String type, String[] skills, List<Boss> bosses, String[] clues) {
         File playerStats = null;
         int fontSize = 65;
         try {
@@ -322,11 +335,21 @@ public class Hiscores {
                 }
             }
 
+            // Clues
+            x = 170;
+            y = 1960;
+            g.setFont(runeFont.deriveFont(fontSize));
+            for(String quantity : clues) {
+                int quantityWidth = g.getFontMetrics().stringWidth(quantity) / 2;
+                g.drawString(quantity, x - quantityWidth, y);
+                x += 340;
+            }
+
             if(bosses.size() > 0) {
                 int max = Math.min(5, bosses.size());
 
-                // All images have 220px height, and the top name banner + bottom border has 260px total height
-                int padding = ((image.getHeight() - 260) - (5 * 220)) / 6;
+                // All images have 220px height, and the top name banner + bottom border has 260px total height, clue section has height of 425
+                int padding = ((image.getHeight() - 260 - 425) - (5 * 220)) / 6;
 
                 // Height of top name banner
                 y = 230 + padding;
@@ -348,8 +371,10 @@ public class Hiscores {
             }
             else {
                 BufferedImage noBoss = ImageIO.read(new File(resources + "Templates/no_boss.png"));
-                g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200) / 2) - (noBoss.getHeight() / 2)), null);
+                g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200 - 425) / 2) - (noBoss.getHeight() / 2)), null);
             }
+
+            // Name stuff
 
             g.setFont(runeFont.deriveFont(runeFont.getSize() * 3F));
             int nameWidth = g.getFontMetrics().stringWidth(name);

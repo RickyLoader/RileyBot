@@ -1,21 +1,24 @@
 package Command.Commands;
 
+import Bot.DiscordUser;
 import COD.CombatRecord;
 import COD.Player;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Network.ApiRequest;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MWLookupCommand extends DiscordCommand {
     ArrayList<String> platforms = new ArrayList<>();
 
     public MWLookupCommand() {
-        super("mwlookup [bnet/psn/xbox/acti] [player#1234/me], mwlookup save [player#1234]", "Have a gander at a player's stats!");
+        super("mwlookup [player#1234/me/@someone], mwlookup save [player#1234]", "Have a gander at a player's stats!");
         platforms.add("bnet");
         platforms.add("psn");
         platforms.add("xbox");
@@ -28,52 +31,44 @@ public class MWLookupCommand extends DiscordCommand {
         String[] args = context.getMessageContent().trim().split(" ");
         MessageChannel channel = context.getMessageChannel();
 
-        if(args.length < 3) {
-            channel.sendMessage(getTrigger()).queue();
-            return;
+        if(args.length == 3 && args[1].equals("save")) {
+            DiscordUser.saveMWName(args[2], channel, context.getUser());
         }
-        if(args[1].equals("save")) {
-            savePlayer(args, channel, context.getUser());
+        else if(args.length == 2 || args.length >= 2 && !context.getMessage().getMentionedMembers().isEmpty()) {
+            lookupPlayer(args, channel, context.getUser(), context.getMessage());
         }
         else {
-            lookupPlayer(args, channel, context.getUser());
+            channel.sendMessage(getHelpNameCoded()).queue();
         }
     }
 
-    private void savePlayer(String[] args, MessageChannel channel, User user) {
-        String name = args[2];
+    private void lookupPlayer(String[] args, MessageChannel channel, User user, Message m) {
         long id = user.getIdLong();
-        JSONObject body = new JSONObject().put("discord_id", id).put("table", "MW").put("name", name);
-        ApiRequest.executeQuery("users/submit", "ADD", body.toString(), true);
-        channel.sendMessage(user.getAsMention() + " Your mwlookup name is now " + name).queue();
-    }
 
-    private String getPlayerName(long id) {
-        String json = ApiRequest.executeQuery("users/mw/" + id, "GET", null, true);
-        if(json == null || json.isEmpty()) {
-            return null;
-        }
-        return new JSONObject(json).getString("name");
-    }
-
-    private void lookupPlayer(String[] args, MessageChannel channel, User user) {
-        String platform = args[1];
-        long id = user.getIdLong();
-        if(!platforms.contains(platform)) {
-            channel.sendMessage(getTrigger()).queue();
-        }
-
-        String name = args[2];
+        String name = args[1];
 
         if(name.equals("me")) {
-            name = getPlayerName(id);
+            name = DiscordUser.getMWName(id);
             if(name == null) {
-                channel.sendMessage(user.getAsMention()+" I don't have a name saved for you, try mwlookup save [player#1234]").queue();
+                channel.sendMessage(user.getAsMention() + " I don't have a name saved for you, try: ```mwlookup save [player#1234]```").queue();
                 return;
             }
         }
 
-        Player player = new Player(name, platform);
+        List<User> mentioned = m.getMentionedUsers();
+        if(!mentioned.isEmpty()) {
+            User u = mentioned.get(0);
+            name = DiscordUser.getMWName(u.getIdLong());
+            if(name == null) {
+                channel.sendMessage(user.getAsMention() + " I don't have a name saved for " + u.getAsMention() + " they will need to: ```mwlookup save [their name]```").queue();
+                return;
+            }
+        }
+        if(name.length() > 17) {
+            channel.sendMessage("Maximum username length is 18 characters cunt").queue();
+            return;
+        }
+        Player player = new Player(name, "bnet");
         if(player.getData() == null) {
             channel.sendMessage("I couldn't find " + player.getName() + " on " + player.getPlatform()).queue();
             return;

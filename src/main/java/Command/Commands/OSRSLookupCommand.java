@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Network.ApiRequest;
@@ -9,12 +10,13 @@ import net.dv8tion.jda.api.entities.User;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class OSRSLookupCommand extends DiscordCommand {
     private final ArrayList<String> currentLookups = new ArrayList<>();
 
     public OSRSLookupCommand() {
-        super("osrslookup [player/me], osrslookup save [player]", "Lookup a player on the OSRS Hiscores!");
+        super("osrslookup [player/me/@someone], osrslookup save [player]", "Lookup a player on the OSRS Hiscores!");
     }
 
     @Override
@@ -25,23 +27,38 @@ public class OSRSLookupCommand extends DiscordCommand {
         User user = context.getUser();
 
         if(args.length < 2) {
-            channel.sendMessage(getTrigger()).queue();
+            channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
         if(args[1].equals("save")) {
             String name = msg.replace("osrslookup save ", "");
-            savePlayer(name, channel, user);
+            DiscordUser.saveOSRSName(name, channel, user);
             return;
         }
 
         String name = msg.replace("osrslookup ", "");
 
         if(name.equals("me")) {
-            name = getPlayerName(user.getIdLong());
+            name = DiscordUser.getOSRSName(user.getIdLong());
             if(name == null) {
-                channel.sendMessage(user.getAsMention() + " I don't have a name saved for you, try osrslookup save [player]").queue();
+                channel.sendMessage(user.getAsMention() + " I don't have a name saved for you, try: ```osrslookup save [player]```").queue();
                 return;
             }
+        }
+
+        List<User> mentioned = context.getMessage().getMentionedUsers();
+        if(!mentioned.isEmpty()) {
+            User u = mentioned.get(0);
+            name = DiscordUser.getOSRSName(u.getIdLong());
+            if(name == null) {
+                channel.sendMessage(user.getAsMention() + " I don't have a name saved for " + u.getAsMention() + " they will need to: ```osrslookup save [their name]```").queue();
+                return;
+            }
+        }
+
+        if(name.length()>12){
+            channel.sendMessage("Maximum username length is 12 characters cunt").queue();
+            return;
         }
 
         Hiscores hiscores = new Hiscores(channel);
@@ -60,21 +77,6 @@ public class OSRSLookupCommand extends DiscordCommand {
             }
             currentLookups.remove(finalName);
         }).start();
-    }
-
-    private void savePlayer(String name, MessageChannel channel, User user) {
-        long id = user.getIdLong();
-        JSONObject body = new JSONObject().put("discord_id", id).put("table", "OSRS").put("name", name);
-        ApiRequest.executeQuery("users/submit", "ADD", body.toString(), true);
-        channel.sendMessage(user.getAsMention() + " Your osrslookup name is now " + name).queue();
-    }
-
-    private String getPlayerName(long id) {
-        String json = ApiRequest.executeQuery("users/osrs/" + id, "GET", null, true);
-        if(json == null || json.isEmpty()) {
-            return null;
-        }
-        return new JSONObject(json).getString("name");
     }
 
     @Override
