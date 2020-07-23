@@ -5,11 +5,9 @@ import COD.CombatRecord;
 import COD.Player;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import Network.ApiRequest;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,16 +62,21 @@ public class MWLookupCommand extends DiscordCommand {
                 return;
             }
         }
-        if(name.length() > 17) {
+        if(name.length() > 18) {
             channel.sendMessage("Maximum username length is 18 characters cunt").queue();
             return;
         }
-        Player player = new Player(name, "bnet");
-        if(player.getData() == null) {
-            channel.sendMessage("I couldn't find " + player.getName() + " on " + player.getPlatform()).queue();
-            return;
-        }
-        channel.sendFile(new CombatRecord(player).buildImage()).queue();
+        String finalName = name;
+        channel.sendMessage("One moment please").queue();
+        new Thread(() -> {
+            Player player = new Player(finalName, "bnet");
+            if(!player.exists()) {
+                channel.sendMessage("I couldn't find " + player.getName()).queue();
+                return;
+            }
+            channel.sendFile(new CombatRecord(player).buildImage()).queue();
+        }).start();
+
     }
 
     @Override

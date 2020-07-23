@@ -17,13 +17,13 @@ import java.util.concurrent.TimeUnit;
 public class Session {
     private static String endPoint = "gunfight";
     private long date, duration;
-    private int wins, losses, longestStreak, currentStreak;
+    private int wins, losses, longestStreak;
     private double ratio;
 
     /**
      * Constructor for building a Session instance from a completed Gunfight
      */
-    Session(long startTime, long date, int wins, int losses, int longestStreak, int currentStreak) {
+    Session(long startTime, long date, int wins, int losses, int longestStreak) {
         this.date = date;
         this.wins = wins;
         this.losses = losses;
@@ -31,7 +31,6 @@ public class Session {
         // calculate win/loss ratio
         this.ratio = getRatio();
         this.longestStreak = longestStreak;
-        this.currentStreak = currentStreak;
 
         // duration of session
         this.duration = date - startTime;
@@ -183,10 +182,6 @@ public class Session {
         return longestStreak;
     }
 
-    public int getCurrentStreak() {
-        return currentStreak;
-    }
-
     /**
      * Gets the ms date of session
      *
@@ -202,8 +197,6 @@ public class Session {
      * @return String version of win streak
      */
     String formatStreak() {
-
-        // 1 win vs 2 wins
         return longestStreak + ((longestStreak == 1) ? " WIN" : " WINS");
     }
 

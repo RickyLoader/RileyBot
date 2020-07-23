@@ -73,6 +73,7 @@ public class ApiRequest {
             response.close();
         }
         catch(Exception e) {
+            e.printStackTrace();
             return null;
         }
         return result;

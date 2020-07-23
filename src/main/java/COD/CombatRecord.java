@@ -1,6 +1,5 @@
 package COD;
 
-import OSRS.Stats.Hiscores;
 import com.objectplanet.image.PngEncoder;
 
 import javax.imageio.ImageIO;
@@ -9,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class CombatRecord {
 
@@ -21,13 +21,19 @@ public class CombatRecord {
         registerFont();
     }
 
+    private File getWeaponImage(Player.Weapon.TYPE type) {
+        if(type == Player.Weapon.TYPE.PRIMARY || type == Player.Weapon.TYPE.SECONDARY) {
+            return new File((resources + "Templates/wep_quadrant.png"));
+        }
+        return new File((resources + "Templates/lethal_quadrant.png"));
+    }
+
     private BufferedImage drawWeapon(Player.Weapon weapon) {
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((resources + "Templates/wep_quadrant.png")));
+            image = ImageIO.read(getWeaponImage(weapon.getType()));
             Graphics g = image.getGraphics();
             g.setFont(codFont.deriveFont(50f));
-            g.setColor(Color.decode("#345b78"));
 
             BufferedImage weaponImage = ImageIO.read(weapon.getImage());
             g.drawImage(weaponImage, (image.getWidth() / 2) - (weaponImage.getWidth() / 2), 250, null);
@@ -35,15 +41,16 @@ public class CombatRecord {
             g.drawString(weapon.getName(), (image.getWidth() / 2) - (g.getFontMetrics().stringWidth(weapon.getName()) / 2), 175);
 
             g.drawString(String.valueOf(weapon.getKills()), 277, 490);
-            g.drawString(String.valueOf(weapon.getDeaths()), 277, 590);
-            g.drawString(String.valueOf(weapon.getKd()), 277, 690);
+            if(weapon.getType() != Player.Weapon.TYPE.LETHAL) {
+                g.drawString(String.valueOf(weapon.getDeaths()), 277, 590);
+                g.drawString(String.valueOf(weapon.getKd()), 277, 690);
 
-            g.drawString(String.valueOf(weapon.getShotsHit()), 277, 841);
-            g.drawString(String.valueOf(weapon.getShotsFired()), 277, 941);
-            g.drawString(String.valueOf(weapon.getAccuracy()), 277, 1041);
+                g.drawString(String.valueOf(weapon.getShotsHit()), 277, 841);
+                g.drawString(String.valueOf(weapon.getShotsFired()), 277, 941);
+                g.drawString(String.valueOf(weapon.getAccuracy()), 277, 1041);
+            }
 
             g.setFont(codFont.deriveFont(28f));
-            g.setColor(Color.decode("#5dbcd2"));
             g.drawString(weapon.getImageTitle(), (image.getWidth()) / 2 - (g.getFontMetrics().stringWidth(weapon.getImageTitle())) / 2, 38);
             g.dispose();
         }
@@ -59,7 +66,6 @@ public class CombatRecord {
             image = ImageIO.read(new File((resources + "Templates/wl_quadrant.png")));
             Graphics g = image.getGraphics();
             g.setFont(codFont);
-            g.setColor(Color.decode("#345b78"));
             int x = 288;
             int y = 175;
             g.drawString(String.valueOf(player.getWins()), x, y);
@@ -75,13 +81,54 @@ public class CombatRecord {
         return image;
     }
 
+    private BufferedImage drawCommendations() {
+        ArrayList<Player.Commendation> commendations = player.getCommendations();
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(new File((resources + "Templates/commendations_section.png")));
+            Graphics g = image.getGraphics();
+            g.setFont(codFont);
+            int x = 100;
+            for(int i = 0; i < 5; i++) {
+                g.setFont(codFont.deriveFont(32f));
+                Player.Commendation c = commendations.get(i);
+                BufferedImage icon = ImageIO.read(c.getImage());
+                g.drawImage(icon, x - (icon.getWidth() / 2), 250 - (icon.getHeight() / 2), null);
+                int titleWidth = g.getFontMetrics().stringWidth(c.getTitle()) / 2;
+                g.drawString(c.getTitle(), x - titleWidth, 155);
+
+                String[] descSplit = c.getDesc().split(" ");
+                String desc = "";
+                int y = 350;
+                g.setFont(codFont.deriveFont(25f));
+                for(String word : descSplit) {
+                    String attempt = desc + " " + word;
+                    if(g.getFontMetrics().stringWidth(attempt) > 180) {
+                        g.drawString(desc, x - (g.getFontMetrics().stringWidth(desc)) / 2, y);
+                        y += 35;
+                        desc = word;
+                        continue;
+                    }
+                    desc = attempt;
+                }
+                g.drawString(desc, x - (g.getFontMetrics().stringWidth(desc)) / 2, y);
+                g.setFont(codFont.deriveFont(50f));
+                g.drawString(c.formatQuantity(), x - (g.getFontMetrics().stringWidth(c.formatQuantity())) / 2, 550);
+                x += 210;
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
     private BufferedImage drawKillDeath() {
         BufferedImage image = null;
         try {
             image = ImageIO.read(new File((resources + "Templates/kd_section.png")));
             Graphics g = image.getGraphics();
             g.setFont(codFont);
-            g.setColor(Color.decode("#345b78"));
             g.drawString(String.valueOf(player.getKD()), 282, 200);
             g.drawString(String.valueOf(player.getLongestKillStreak()), 282, 482);
             g.dispose();
@@ -100,15 +147,15 @@ public class CombatRecord {
             BufferedImage main = ImageIO.read(new File((resources + "Templates/template.png")));
             Graphics g = main.getGraphics();
 
-            BufferedImage primaryWeapon = drawWeapon(player.getPrimary());
-            BufferedImage secondaryWeapon = drawWeapon(player.getSecondary());
+            g.drawImage(drawWeapon(player.getPrimary()), 17, 119, null);
 
-            g.drawImage(primaryWeapon, 17, 119, null);
-            g.drawImage(secondaryWeapon, 542, 119, null);
-            g.drawImage(drawWinLoss(), 1067, 119, null);
-            g.drawImage(drawKillDeath(), 1067, 709, null);
+            g.drawImage(drawWeapon(player.getSecondary()), 542, 119, null);
+            g.drawImage(drawWeapon(player.getLethal()), 1067, 119, null);
+            g.drawImage(drawWinLoss(), 1067, 700, null);
+            g.drawImage(drawKillDeath(), 1067, 1290, null);
+            g.drawImage(drawCommendations(), 17, 1290, null);
 
-            g.setFont(codFont.deriveFont(55f));
+            g.setFont(codFont.deriveFont(100f));
             g.setColor(Color.black);
             String name = player.getName().toUpperCase();
             g.drawString(player.getName().toUpperCase(), (main.getWidth() / 2) - (g.getFontMetrics().stringWidth(name) / 2), 100);

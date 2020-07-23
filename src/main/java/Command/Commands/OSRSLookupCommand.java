@@ -3,11 +3,9 @@ package Command.Commands;
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import Network.ApiRequest;
 import OSRS.Stats.Hiscores;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,11 +68,7 @@ public class OSRSLookupCommand extends DiscordCommand {
 
         String finalName = name;
         new Thread(() -> {
-            boolean success = hiscores.lookupPlayer(finalName);
-            if(!success) {
-                currentLookups.remove(finalName);
-                return;
-            }
+            hiscores.lookupPlayer(finalName);
             currentLookups.remove(finalName);
         }).start();
     }

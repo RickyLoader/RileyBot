@@ -14,6 +14,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.LinkCommand;
 import Command.Structure.RandomCommand;
+import Command.Commands.WordCloudCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -54,16 +55,17 @@ public class DiscordCommandManager {
         commands.add(new GunfightCommand());
         commands.add(new GunfightHelpCommand());
         commands.add(new LeaderboardCommand());
-
         commands.add(new MeCommand());
-
         // OSRS
         commands.add(new OSRSLookupCommand());
         commands.add(new GrandExchangeLookupCommand());
 
+        commands.add(new WordCloudCommand());
+
         // audio
         commands.add(new GhostCommand());
         commands.add(new SawCommand());
+        //commands.add(new LOLLookupCommand());
         //commands.add(new VoiceChannelCommand());
         commands.add(new TTSCommand());
         commands.add(new SurvivorCommand());

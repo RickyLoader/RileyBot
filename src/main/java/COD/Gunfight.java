@@ -2,12 +2,11 @@ package COD;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.exceptions.ErrorHandler;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
 
 /**
  * Interactive win/loss tracker - use emotes to track score and submit to leaderboard
@@ -21,7 +20,8 @@ public class Gunfight {
     private long lastUpdate = 0, startTime = 0, gameID;
     private String lastMessage;
     private static final String thumb = "https://bit.ly/2YTzfTQ";
-    private LinkedList<Gunfight> matchHistory;
+    private LinkedList<Gunfight> matchUpdateHistory;
+    private ArrayList<Session> leaderboard;
 
     // If !game message has been replaced with game summary message
     private boolean active;
@@ -41,7 +41,8 @@ public class Gunfight {
         this.server = server;
         this.owner = owner;
         this.active = true;
-        matchHistory = new LinkedList<>();
+        matchUpdateHistory = new LinkedList<>();
+        leaderboard = Session.getHistory();
 
         if(checkEmotes()) {
             startGame();
@@ -114,13 +115,30 @@ public class Gunfight {
     }
 
     /**
+     * Get the colour to use in the embedded message based on score
+     *
+     * @return int decimal colour
+     */
+    private int getColour() {
+        if(wins == losses) {
+            return 16776960; // YELLOW
+        }
+        else if(wins < losses) {
+            return 16711680; // RED
+        }
+        else {
+            return 65280; // Green
+        }
+    }
+
+    /**
      * Builds the game message. Called to begin game and build new messages as score is added.
      *
      * @return Game message
      */
     private MessageEmbed buildGameMessage(String streak, String longestStreak) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(65280);
+        builder.setColor(getColour());
 
         String title = "GUNFIGHT";
         if(rank > 0) {
@@ -166,7 +184,7 @@ public class Gunfight {
      */
     private void startGame() {
         startTime = System.currentTimeMillis();
-        sendGameMessage(buildGameMessage(String.valueOf(currentStreak), String.valueOf(longestStreak)));
+        sendGameMessage(buildGameMessage("0", "0"));
     }
 
     /**
@@ -200,7 +218,7 @@ public class Gunfight {
         }
 
         // Before adding the win/loss, add to history for undo purposes
-        matchHistory.push(new Gunfight(wins, losses, currentStreak, lastUpdate, rank, longestStreak));
+        matchUpdateHistory.push(new Gunfight(wins, losses, currentStreak, lastUpdate, rank, longestStreak));
 
         // Now do update
 
@@ -213,16 +231,12 @@ public class Gunfight {
             addLoss();
         }
 
-        // All previous gunfight sessions
-        ArrayList<Session> leaderboard = Session.getHistory();
-
-        // Where does the current session now rank within the leaderboard
-        if(leaderboard != null) {
-            Session current = new Session(startTime, lastUpdate, wins, losses, longestStreak, currentStreak);
-            leaderboard.add(current);
-            Session.sortSessions(leaderboard, true); // Sort exactly as leaderboard does
-            rank = (leaderboard.indexOf(current)) + 1;
-        }
+        // Make a copy to check current rank
+        ArrayList<Session> leaderboard = new ArrayList<>(this.leaderboard);
+        Session current = new Session(startTime, lastUpdate, wins, losses, longestStreak);
+        leaderboard.add(current);
+        Session.sortSessions(leaderboard, true); // Sort exactly as leaderboard does
+        rank = (leaderboard.indexOf(current)) + 1;
 
         updateMessage();
     }
@@ -280,8 +294,7 @@ public class Gunfight {
      * @return Game message most recent channel message
      */
     private boolean gameFocused() {
-        //Message latest = channel.getHistory().retrievePast(1).complete().get(0);
-        return channel.getLatestMessageIdLong() == gameID; //|| latest.getContentDisplay().isEmpty();
+        return channel.getLatestMessageIdLong() == gameID;
     }
 
     /**
@@ -290,16 +303,13 @@ public class Gunfight {
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
-
-        // Callback to add reactions and save message id
-        Consumer<Message> addReactionCallback = (response) -> {
-            gameID = response.getIdLong();
-            response.addReaction(win).queue();
-            response.addReaction(loss).queue();
-            response.addReaction(undo).queue();
-            response.addReaction(stop).queue();
-        };
-        channel.sendMessage(gameMessage).queue(addReactionCallback);
+        channel.sendMessage(gameMessage).queue(message -> {
+            gameID = message.getIdLong();
+            message.addReaction(win).queue();
+            message.addReaction(loss).queue();
+            message.addReaction(undo).queue();
+            message.addReaction(stop).queue();
+        });
     }
 
     /**
@@ -370,7 +380,7 @@ public class Gunfight {
         if(wins == 0 && losses == 0) {
             return;
         }
-        Session session = new Session(startTime, lastUpdate, wins, losses, longestStreak, currentStreak);
+        Session session = new Session(startTime, lastUpdate, wins, losses, longestStreak);
         session.submitGame();
         channel.sendMessage(buildGameSummaryMessage(session)).queue();
     }
@@ -418,6 +428,7 @@ public class Gunfight {
     private String createDesc() {
         Random rand = new Random();
         String[] messages;
+        String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
 
         // Beginning of game
         if(wins == 0 && losses == 0) {
@@ -463,10 +474,9 @@ public class Gunfight {
 
             // win streak
             else if(wins - losses >= 5) {
-                String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
                 messages = new String[]{
                         (wins - losses) + " wins ahead!, amazing work!",
-                        mvp + ", you absolutely carried the team that game! Nice job",
+                        owner.getName() + ", you absolutely carried the team that game! Nice job",
                         "It's clobbering time!, You clobbered them that game!",
                         "Beautiful, I especially enjoyed " + mvp + " performance, it was incredible!",
                         "The guy who made Downturn would be proud",
@@ -483,7 +493,6 @@ public class Gunfight {
 
             // win streak
             else if(wins - losses > 1) {
-                String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
                 messages = new String[]{
                         "Nice streak!",
                         "What a lead!",
@@ -521,10 +530,10 @@ public class Gunfight {
                         "You're behind cunts",
                         "You're behind, you better win the fucking next one",
                         "You've fallen behind, pick up your game cunts",
-                        "Is this the start of a loss streak?",
-                        "Get your lead back cunts"
+                        "Is this the start of a loss streak?"
                 };
             }
+
             else if(losses - wins >= 5) {
                 messages = new String[]{
                         (losses - wins) + " losses behind, holy fuck",
@@ -596,10 +605,10 @@ public class Gunfight {
      * Undo the last game update
      */
     private void undoLast() {
-        if(matchHistory.size() == 0) {
+        if(matchUpdateHistory.size() == 0) {
             return;
         }
-        Gunfight prev = matchHistory.pop();
+        Gunfight prev = matchUpdateHistory.pop();
         this.wins = prev.getWins();
         this.losses = prev.getLosses();
         this.currentStreak = prev.getCurrentStreak();
