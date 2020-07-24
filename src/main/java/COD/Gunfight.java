@@ -411,7 +411,7 @@ public class Gunfight {
         if(rank == 1) {
             result = "That's a new personal best, nice work cunts!";
         }
-        else if(rank < 5) {
+        else if(rank <= 5) {
             result = "Rank " + rank + ", you're now in the top 5!";
         }
         else {

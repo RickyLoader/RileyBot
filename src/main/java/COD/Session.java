@@ -55,7 +55,7 @@ public class Session {
         }
     }
 
-    static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
+    public static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
         Comparator<Session> sort = Comparator.comparing(Session::getLongestStreak)
                 .thenComparing(Session::getRatio)
                 .thenComparing(Session::getWins);
@@ -196,7 +196,7 @@ public class Session {
      *
      * @return String version of win streak
      */
-    String formatStreak() {
+    public String formatStreak() {
         return longestStreak + ((longestStreak == 1) ? " WIN" : " WINS");
     }
 
@@ -232,7 +232,7 @@ public class Session {
      *
      * @return win/loss ratio truncated to 2 decimal places
      */
-    String formatRatio() {
+    public String formatRatio() {
         return wins + "/" + losses + " (" + new DecimalFormat("0.00").format(ratio) + ")";
     }
 }
