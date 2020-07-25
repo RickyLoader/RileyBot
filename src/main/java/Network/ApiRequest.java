@@ -35,7 +35,6 @@ public class ApiRequest {
             OkHttpClient client = new OkHttpClient();
             Request.Builder builder = new Request.Builder().url(url);
             RequestBody body;
-
             // Add the request type and body if required
             switch(request) {
                 case "ADD":

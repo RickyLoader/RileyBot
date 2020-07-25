@@ -19,7 +19,7 @@ public class Listener extends ListenerAdapter {
 
     @Override
     public void onReady(@Nonnull ReadyEvent event) {
-        System.out.println("Bot is now running!");
+        System.out.println("\n\nBot is now running!");
     }
 
     @Override

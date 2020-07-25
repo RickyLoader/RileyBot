@@ -210,24 +210,6 @@ public class Session {
     }
 
     /**
-     * Get the rank of the current session within all sessions
-     *
-     * @return Session rank
-     */
-    int getRank() {
-        ArrayList<Session> history = getHistory();
-        int rank = -1;
-        for(int i = 0; i < history.size(); i++) {
-            Session session = history.get(i);
-            if(session.getDate() == date) {
-                rank = i;
-                break;
-            }
-        }
-        return rank + 1;
-    }
-
-    /**
      * Format the win/loss ratio to 2 decimal places
      *
      * @return win/loss ratio truncated to 2 decimal places

@@ -1,25 +1,30 @@
 package Command.Structure;
 
-import Network.ApiRequest;
 import net.dv8tion.jda.api.entities.Message;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class RandomCommand extends DiscordCommand {
     String[] possibilities;
+    String filename, root;
 
-    public RandomCommand(String trigger, String desc, String helpName, String json) {
+    public RandomCommand(String trigger, String desc, String helpName, String filename, String root) {
         super(trigger, desc, helpName);
-        this.possibilities = parseJSON(json);
+        this.filename = filename;
+        this.root = root;
+        this.possibilities = parseJSON();
         super.setTrigger(addTriggerRegex(trigger));
     }
 
-    public RandomCommand(String trigger, String desc, String json) {
+    public RandomCommand(String trigger, String desc, String filename, String root) {
         super(trigger, desc);
-        this.possibilities = parseJSON(json);
+        this.filename = filename;
+        this.root = root;
+        this.possibilities = parseJSON();
         super.setTrigger(addTriggerRegex(trigger));
     }
 
@@ -40,7 +45,7 @@ public class RandomCommand extends DiscordCommand {
         }
     }
 
-    public String getLink(){
+    public String getLink() {
         Random rand = new Random();
         return possibilities[rand.nextInt(possibilities.length)];
     }
@@ -61,17 +66,12 @@ public class RandomCommand extends DiscordCommand {
         }
     }
 
-    public static String fetchPossibilities() {
-        System.out.println("Fetching memes...\n");
-        return ApiRequest.executeQuery("commands/random", "GET", null, true);
-    }
-
-    private String[] parseJSON(String json) {
+    private String[] parseJSON() {
         ArrayList<String> links = new ArrayList<>();
+        System.out.println("Loading " + getTrigger() + "...");
         try {
-            JSONObject jo = new JSONObject(json);
-
-            JSONArray ja = jo.getJSONArray(getTrigger());
+            JSONObject jo = readJSONFile(filename);
+            JSONArray ja = jo.getJSONArray(root);
             for(int i = 0; i < ja.length(); i++) {
                 JSONObject o = (JSONObject) ja.get(i);
                 links.add(o.getString("possibility"));

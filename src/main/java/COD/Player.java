@@ -66,6 +66,21 @@ public class Player {
     }
 
     /**
+     * Read a file in as a JSON object
+     *
+     * @param filename Filename
+     * @return JSON object of file
+     */
+    JSONObject readJSONFile(String filename) {
+        try {
+            return new JSONObject(new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8));
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Get the commendations for the player
      *
      * @param items Commendations from API
@@ -121,21 +136,6 @@ public class Player {
             e.printStackTrace();
         }
         return items;
-    }
-
-    /**
-     * Read a file in as a JSON object
-     *
-     * @param path Path to file
-     * @return JSON object of file
-     */
-    private JSONObject readJSONFile(String path) {
-        try {
-            return new JSONObject(new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8));
-        }
-        catch(Exception e) {
-            return null;
-        }
     }
 
     private Weapon getFavourite(JSONObject items, Weapon.TYPE type) {

@@ -3,23 +3,21 @@ package Command.Structure;
 import Network.ApiRequest;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+
 
 public class LinkCommand extends DiscordCommand {
 
     String link;
 
-    public LinkCommand(String trigger, String desc, String helpname, String json) {
+    public LinkCommand(String trigger, String desc, String helpname) {
         super(trigger, desc, helpname);
-        this.link = parseJSON(json);
-    }
-
-    public LinkCommand(String trigger, String desc, String json) {
-        super(trigger, desc);
-        this.link = parseJSON(json);
+        this.link = parseJSON();
     }
 
     public LinkCommand(String trigger, String desc) {
         super(trigger, desc);
+        this.link = parseJSON();
     }
 
     @Override
@@ -27,20 +25,16 @@ public class LinkCommand extends DiscordCommand {
         context.getMessageChannel().sendMessage(link).queue();
     }
 
-    private String parseJSON(String json) {
+    private String parseJSON() {
         String link = null;
+        System.out.println("Loading " + getTrigger() + "...");
         try {
-            JSONObject o = new JSONObject(json).getJSONObject(String.valueOf(getTrigger()));
+            JSONObject o = readJSONFile("links.json").getJSONObject(getTrigger());
             link = o.getString("link");
         }
         catch(Exception e) {
             e.printStackTrace();
         }
         return link;
-    }
-
-    public static String fetchLinks() {
-        System.out.println("Fetching links...\n\n");
-        return ApiRequest.executeQuery("commands/link", "GET", null, true);
     }
 }

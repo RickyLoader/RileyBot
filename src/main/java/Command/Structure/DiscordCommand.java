@@ -1,5 +1,10 @@
 package Command.Structure;
 
+import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 public abstract class DiscordCommand {
@@ -43,5 +48,19 @@ public abstract class DiscordCommand {
 
     public String getHelpNameCoded() {
         return "```" + helpName + "```";
+    }
+
+    /**
+     * Read a file in as a JSON object
+     * @param filename Filename
+     * @return JSON object of file
+     */
+    JSONObject readJSONFile(String filename) {
+        try {
+            return new JSONObject(new String(Files.readAllBytes(Paths.get("src/main/resources/Commands/" + filename)), StandardCharsets.UTF_8));
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 }

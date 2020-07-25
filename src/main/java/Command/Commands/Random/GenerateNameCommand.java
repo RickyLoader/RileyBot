@@ -7,8 +7,8 @@ import java.util.Random;
 
 public class GenerateNameCommand extends RandomCommand {
 
-    public GenerateNameCommand(String json) {
-        super("new name!", "Generate a cool name!", json);
+    public GenerateNameCommand() {
+        super("new name!", "Generate a cool name!", "name_command.json", "names");
     }
 
     @Override

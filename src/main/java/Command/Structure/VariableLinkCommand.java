@@ -2,27 +2,29 @@ package Command.Structure;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class VariableLinkCommand extends DiscordCommand {
     private final HashMap<String, String> versions = new HashMap<>();
 
-    public VariableLinkCommand(String[] variations, String trigger, String desc, String helpname, String json) {
+    public VariableLinkCommand(String[] variations, String trigger, String desc, String helpname) {
         super(trigger, desc, helpname);
-        parseJSON(json, variations);
+        parseJSON(variations);
     }
 
-    public VariableLinkCommand(String[] variations, String trigger, String desc, String json) {
+    public VariableLinkCommand(String[] variations, String trigger, String desc) {
         super(trigger, desc);
-        parseJSON(json, variations);
+        parseJSON(variations);
     }
 
-
-    private void parseJSON(String json, String[] variations) {
+    private void parseJSON(String[] variations) {
+        System.out.println("Loading "+ Arrays.toString(variations)+"...");
         try {
+            JSONObject o = readJSONFile("links.json");
             for(String trigger : variations) {
-                JSONObject o = new JSONObject(json).getJSONObject(trigger);
-                versions.put(trigger, o.getString("link"));
+                JSONObject command = o.getJSONObject(trigger);
+                versions.put(trigger, command.getString("link"));
             }
         }
         catch(Exception e) {
@@ -37,9 +39,6 @@ public class VariableLinkCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query) {
-        if(versions.containsKey(query)){
-            return true;
-        }
-        return false;
+        return versions.containsKey(query);
     }
 }

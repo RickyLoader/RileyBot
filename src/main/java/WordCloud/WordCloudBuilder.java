@@ -1,4 +1,4 @@
-package Command.Commands;
+package WordCloud;
 
 import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
@@ -15,21 +15,32 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 public class WordCloudBuilder {
     private final MessageChannel channel;
     private final ArrayList<String> history;
+    private long id;
 
     public WordCloudBuilder(MessageChannel channel) {
         this.channel = channel;
         this.history = getLastMessages();
     }
 
+    private String getUpdateMessage(int count) {
+        String finding = "Finding words...";
+        if(count > 0) {
+            finding += " " + count + "/5000";
+        }
+        return finding;
+    }
+
     private ArrayList<String> getLastMessages() {
         ArrayList<String> wordList = new ArrayList<>();
         long latest = channel.getLatestMessageIdLong();
-        while(wordList.size()<5000) {
+        channel.sendMessage(getUpdateMessage(0)).queue(message -> id = message.getIdLong());
+        while(wordList.size() <= 5000) {
             List<Message> messages = channel.getHistoryBefore(latest, 100).complete().getRetrievedHistory();
             for(Message m : messages) {
                 String content = m.getContentRaw()
@@ -41,6 +52,7 @@ public class WordCloudBuilder {
                 }
                 String[] words = content.split(" ");
                 wordList.addAll(Arrays.asList(words));
+                channel.retrieveMessageById(id).queue(message -> message.editMessage(getUpdateMessage(wordList.size())).queue());
             }
             System.out.println(wordList.size());
             latest = messages.get(messages.size() - 1).getIdLong();

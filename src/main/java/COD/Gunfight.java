@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Consumer;
 
 
 /**
@@ -19,7 +18,6 @@ public class Gunfight {
     private Guild server;
     private long lastUpdate = 0, startTime = 0, gameID;
     private String lastMessage;
-    private static final String thumb = "https://bit.ly/2YTzfTQ";
     private LinkedList<Gunfight> matchUpdateHistory;
     private ArrayList<Session> leaderboard;
 
@@ -43,13 +41,6 @@ public class Gunfight {
         this.active = true;
         matchUpdateHistory = new LinkedList<>();
         leaderboard = Session.getHistory();
-
-        if(checkEmotes()) {
-            startGame();
-        }
-        else {
-            channel.sendMessage("This server needs emotes named \"victory\", \"defeat\", \"stop\", and \"undo\" to play gunfight cunt.").queue();
-        }
     }
 
     /**
@@ -65,6 +56,25 @@ public class Gunfight {
         if(checkEmotes()) {
             showHelpMessage();
         }
+    }
+
+    /**
+     * Constructor to start a session with given score values
+     *
+     * @param channel       Text channel to play in
+     * @param server        Guild to find emotes
+     * @param owner         User who started game
+     * @param wins          wins to start with
+     * @param losses        losses to start with
+     * @param currentStreak current streak to set
+     * @param longestStreak longest streak to set
+     */
+    public Gunfight(MessageChannel channel, Guild server, User owner, int wins, int losses, int currentStreak, int longestStreak) {
+        this(channel, server, owner);
+        this.wins = wins;
+        this.losses = losses;
+        this.currentStreak = currentStreak;
+        this.longestStreak = longestStreak;
     }
 
     /**
@@ -131,6 +141,33 @@ public class Gunfight {
         }
     }
 
+    private String getThumbnail() {
+
+        String[] goodThumb = new String[]{
+                "https://bit.ly/2YTzfTQ", // Default price
+                "https://bnetcmsus-a.akamaihd.net/cms/blog_header/pv/PV106AQCOXG41591752563326.jpg", // Price in smoke
+                "https://i.imgur.com/W3nY6AF.jpg", // Happy price
+                "https://vignette.wikia.nocookie.net/callofduty/images/7/71/Pillar3.jpg/revision/latest?cb=20191004172714", // Happy price
+                "https://static1.gamerantimages.com/wordpress/wp-content/uploads/2020/05/call-of-duty-modern-warfare-nuke-victory-screen.jpg", // VICTORY
+        };
+
+        String[] badThumb = new String[]{
+                "https://i.imgur.com/AHtBYyn.jpg", // Sad price
+                "https://i.ytimg.com/vi/ONzIHOxtQws/maxresdefault.jpg", // Ghost dying
+                "https://vignette.wikia.nocookie.net/callofduty/images/c/c5/Ghost%27s_death_Shepherd_Loose_Ends_MW2.png/revision/latest?cb=20120121101525", // Ghost dying
+                "https://i.imgur.com/ZgHmHY2.png" // DEFEAT
+        };
+
+        Random rand = new Random();
+        if(wins == 0 && losses == 0) {
+            return "https://bit.ly/2YTzfTQ";// Going dark cunt
+        }
+        if(wins > losses) {
+            return goodThumb[rand.nextInt(goodThumb.length)];
+        }
+        return badThumb[rand.nextInt(badThumb.length)];
+    }
+
     /**
      * Builds the game message. Called to begin game and build new messages as score is added.
      *
@@ -147,8 +184,8 @@ public class Gunfight {
 
         builder.setTitle(title);
         builder.setDescription(createDesc());
-        builder.setThumbnail(thumb);
-        builder.setImage("https://i.imgur.com/24Xf03H.png"); // Going dark cunt
+        builder.setThumbnail(getThumbnail());
+        builder.setImage("https://i.imgur.com/24Xf03H.png");
         builder.addField("**WIN**", String.valueOf(wins), true);
         builder.addBlankField(true);
         builder.addField("**LOSS**", String.valueOf(losses), true);
@@ -182,16 +219,25 @@ public class Gunfight {
     /**
      * Send the game message to the channel to begin playing
      */
-    private void startGame() {
+    public void startGame() {
+        if(!checkEmotes()) {
+            channel.sendMessage("This server needs emotes named \"victory\", \"defeat\", \"stop\", and \"undo\" to play gunfight cunt.").queue();
+            return;
+        }
         startTime = System.currentTimeMillis();
-        sendGameMessage(buildGameMessage("0", "0"));
+        rank = checkRank();
+        sendGameMessage(buildGameMessage(String.valueOf(currentStreak), String.valueOf(longestStreak)));
     }
 
     /**
      * Remove the game message
      */
     public void deleteGame() {
-        channel.retrieveMessageById(gameID).queue(message -> message.delete().queue());
+        System.out.println("Deleting game message...");
+        channel.retrieveMessageById(gameID).queue(message -> {
+            System.out.println("Message has been deleted...");
+            message.delete().queue();
+        });
     }
 
     /**
@@ -230,15 +276,19 @@ public class Gunfight {
         else {
             addLoss();
         }
+        this.rank = checkRank();
+        updateMessage();
+    }
 
-        // Make a copy to check current rank
+    /**
+     * Check the rank of the current session
+     */
+    private int checkRank() {
         ArrayList<Session> leaderboard = new ArrayList<>(this.leaderboard);
         Session current = new Session(startTime, lastUpdate, wins, losses, longestStreak);
         leaderboard.add(current);
         Session.sortSessions(leaderboard, true); // Sort exactly as leaderboard does
-        rank = (leaderboard.indexOf(current)) + 1;
-
-        updateMessage();
+        return (leaderboard.indexOf(current)) + 1;
     }
 
     /**
@@ -261,7 +311,9 @@ public class Gunfight {
      * Move the game back to the most recent message
      */
     public void relocate() {
+        System.out.println("Checking if game is most recent message...");
         if(!gameFocused()) {
+            System.out.println("Game is not most recent message...");
             deleteGame();
             sendGameMessage(createUpdateMessage());
         }
@@ -303,7 +355,9 @@ public class Gunfight {
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
+        System.out.println("Sending game message...");
         channel.sendMessage(gameMessage).queue(message -> {
+            System.out.println("Game message has been sent...\n");
             gameID = message.getIdLong();
             message.addReaction(win).queue();
             message.addReaction(loss).queue();
@@ -366,7 +420,7 @@ public class Gunfight {
      * @return URL of thumbnail
      */
     public static String getThumb() {
-        return thumb;
+        return "https://bit.ly/2YTzfTQ"; // Default price
     }
 
     /**
@@ -394,8 +448,8 @@ public class Gunfight {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
         builder.setTitle("GUNFIGHT RESULTS #" + (Session.getTotalMatches()));
-        builder.setThumbnail(thumb);
-        builder.setDescription(getRanking(session));
+        builder.setThumbnail(getThumbnail());
+        builder.setDescription(getRankingMessage());
         builder.setFooter("Check out the leaderboard!", null);
         builder.addField("**DURATION**", session.getDuration(), false);
         builder.addField("**WINS**", String.valueOf(wins), true);
@@ -405,14 +459,22 @@ public class Gunfight {
         return builder.build();
     }
 
-    private String getRanking(Session session) {
+    /**
+     * Get a message to display in the game summary message based on the rank of the finished session
+     *
+     * @return Congratulatory message based on the rank of the finished session
+     */
+    private String getRankingMessage() {
         String result;
-        int rank = session.getRank();
+        int rank = checkRank();
         if(rank == 1) {
             result = "That's a new personal best, nice work cunts!";
         }
         else if(rank <= 5) {
             result = "Rank " + rank + ", you're now in the top 5!";
+        }
+        else if(rank <= 10) {
+            result = "Rank " + rank + ", you're now in the top 10, who cares!";
         }
         else {
             result = "Rank " + rank + ", terrible job cunts";
@@ -663,8 +725,9 @@ public class Gunfight {
         builder.setColor(65280);
         builder.setTitle("GUNFIGHT HELP");
         builder.addField("BASICS", "Call **gunfight!** to begin a gunfight session.\n\nThe session will run until it is submitted to the **leaderboard!**\n\nOnly the user who called **gunfight!** can control the session.", false);
+        builder.addField("CUSTOM SCORE", "Call **gunfight! [wins] [losses] [current streak] [longest streak]** to begin a gunfight session with a custom score.", false);
         builder.addField("HOW TO USE", "CLICK THE EMOTES", false);
-        builder.setThumbnail(thumb);
+        builder.setThumbnail(getThumb());
         return builder;
     }
 

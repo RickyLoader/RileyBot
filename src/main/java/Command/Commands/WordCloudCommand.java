@@ -2,6 +2,7 @@ package Command.Commands;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import WordCloud.WordCloudBuilder;
 
 public class WordCloudCommand extends DiscordCommand {
     public WordCloudCommand() {
