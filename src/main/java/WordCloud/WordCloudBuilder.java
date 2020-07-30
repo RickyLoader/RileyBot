@@ -2,7 +2,6 @@ package WordCloud;
 
 import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
-import com.kennycason.kumo.WordFrequency;
 import com.kennycason.kumo.bg.CircleBackground;
 import com.kennycason.kumo.font.scale.SqrtFontScalar;
 import com.kennycason.kumo.nlp.FrequencyAnalyzer;
@@ -15,17 +14,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
-
 
 public class WordCloudBuilder {
     private final MessageChannel channel;
-    private final ArrayList<String> history;
+    private ArrayList<String> wordList = new ArrayList<>();
     private long id;
 
     public WordCloudBuilder(MessageChannel channel) {
         this.channel = channel;
-        this.history = getLastMessages();
+        sendStatusMessage();
     }
 
     private String getUpdateMessage(int count) {
@@ -36,28 +33,42 @@ public class WordCloudBuilder {
         return finding;
     }
 
-    private ArrayList<String> getLastMessages() {
-        ArrayList<String> wordList = new ArrayList<>();
-        long latest = channel.getLatestMessageIdLong();
-        channel.sendMessage(getUpdateMessage(0)).queue(message -> id = message.getIdLong());
-        while(wordList.size() <= 5000) {
-            List<Message> messages = channel.getHistoryBefore(latest, 100).complete().getRetrievedHistory();
+    private void sendStatusMessage() {
+        channel.sendMessage(getUpdateMessage(0)).queue(message -> {
+            id = message.getIdLong();
+            getLastMessages(channel.getLatestMessageIdLong());
+        });
+    }
+
+    private void getLastMessages(long last) {
+        if(wordList.size() == 5000) {
+            for(String word : wordList) {
+                System.out.println(word);
+            }
+            channel.sendFile(buildCloud()).queue();
+            return;
+        }
+        channel.getHistoryBefore(last, Math.min(100, 5000 - wordList.size())).queue(messageHistory -> {
+            System.out.println("hello");
+            if(wordList.size() == 5000) {
+                return;
+            }
+            List<Message> messages = messageHistory.getRetrievedHistory();
             for(Message m : messages) {
                 String content = m.getContentRaw()
                         .toLowerCase()
                         .replace(",", "")
                         .replace(".", "");
-                if(m.getAuthor().isBot() || content.contains("http")) {
+                if(m.getAuthor().isBot() || content.contains("http") || !m.getMentionedMembers().isEmpty()) {
                     continue;
                 }
                 String[] words = content.split(" ");
                 wordList.addAll(Arrays.asList(words));
                 channel.retrieveMessageById(id).queue(message -> message.editMessage(getUpdateMessage(wordList.size())).queue());
+                getLastMessages(messages.get(messages.size() - 1).getIdLong());
             }
-            System.out.println(wordList.size());
-            latest = messages.get(messages.size() - 1).getIdLong();
-        }
-        return wordList;
+        });
+
     }
 
     public File buildCloud() {
@@ -68,7 +79,7 @@ public class WordCloudBuilder {
             wordCloud.setBackground(new CircleBackground(300));
             wordCloud.setColorPalette(new ColorPalette(new Color(0x4055F1), new Color(0x408DF1), new Color(0x40AAF1), new Color(0x40C5F1), new Color(0x40D3F1), new Color(0xFFFFFF)));
             wordCloud.setFontScalar(new SqrtFontScalar(10, 40));
-            wordCloud.build(new FrequencyAnalyzer().load(history));
+            wordCloud.build(new FrequencyAnalyzer().load(wordList));
             wordCloud.writeToFile(location);
         }
         catch(Exception e) {

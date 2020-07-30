@@ -71,11 +71,16 @@ public class GunfightCommand extends DiscordCommand {
             int losses = Integer.parseInt(args[1]);
             int currentStreak = Integer.parseInt(args[2]);
             int longestStreak = Integer.parseInt(args[3]);
-
             if(wins < 0 || losses < 0 || longestStreak < 0) {
                 return false;
             }
-            if(longestStreak > wins || currentStreak > wins || currentStreak > longestStreak) {
+            if(longestStreak > wins || currentStreak > longestStreak || (longestStreak != currentStreak) && (longestStreak + currentStreak) > wins) {
+                return false;
+            }
+            if(currentStreak < 0 && currentStreak < -losses || currentStreak > 0 && currentStreak > wins) {
+                return false;
+            }
+            if((wins - losses) > (currentStreak - longestStreak)) {
                 return false;
             }
         }

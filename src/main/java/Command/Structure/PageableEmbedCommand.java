@@ -22,7 +22,6 @@ public abstract class PageableEmbedCommand extends DiscordCommand {
         if(embed != null) {
             embed.delete();
         }
-
         addEmoteListener(context.getJDA());
         embed = getEmbed(context);
     }

@@ -17,16 +17,15 @@ public class DiscordUser {
     }
 
     public static void saveMWName(String name, MessageChannel channel, User user) {
-        if(name.length() > 17) {
-            channel.sendMessage("Maximum username length is 18 characters cunt").queue();
-            return;
+        if(name.length()>17){
+            channel.sendMessage("Maximum username length is 12 characters cunt ()").queue();
         }
         savePlayer(name, user.getIdLong(), "MW");
         channel.sendMessage(user.getAsMention() + " Your mwlookup name is now " + name).queue();
     }
 
     public static void saveOSRSName(String name, MessageChannel channel, User user) {
-        if(name.length() > 12) {
+        if(name.length()>12){
             channel.sendMessage("Maximum username length is 12 characters cunt").queue();
             return;
         }
@@ -48,6 +47,6 @@ public class DiscordUser {
     }
 
     public static String getUserData(long id) {
-        return ApiRequest.executeQuery("users/all/" + id, "GET", null, true);
+        return ApiRequest.executeQuery("users/info/" + id, "GET", null, true);
     }
 }

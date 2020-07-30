@@ -5,6 +5,7 @@ import Command.Commands.Audio.*;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
+import Command.Commands.Passive.BrewTrackerCommand;
 import Command.Commands.Passive.GunfightCommand;
 import Command.Commands.Passive.GunfightHelpCommand;
 import Command.Commands.Passive.LeaderboardCommand;
@@ -12,9 +13,6 @@ import Command.Commands.Random.*;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import Command.Structure.LinkCommand;
-import Command.Structure.RandomCommand;
-import Command.Commands.WordCloudCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -59,9 +57,7 @@ public class DiscordCommandManager {
         // OSRS
         commands.add(new OSRSLookupCommand());
         commands.add(new GrandExchangeLookupCommand());
-
         //commands.add(new WordCloudCommand());
-
         // audio
         commands.add(new GhostCommand());
         commands.add(new SawCommand());
@@ -70,10 +66,9 @@ public class DiscordCommandManager {
         commands.add(new TTSCommand());
         commands.add(new SurvivorCommand());
         commands.add(new PlayYoutubeCommand());
-
         commands.add(new MakeAChoiceCommand());
         commands.add(new InviteCommand());
-        commands.add(new BrewCountCommand());
+        commands.add(new BrewTrackerCommand());
         commands.add(new ExecuteOrder66Command());
         commands.add(new KillListCommand());
         commands.add(new TobinCommand());
@@ -103,6 +98,7 @@ public class DiscordCommandManager {
         commands.add(new MegaCommand());
         commands.add(new PureCommand());
         commands.add(new RememberCommand());
+        commands.add(new BrewTrackerCommand());
         commands.add(new ShrekCommand());
         commands.add(new SmirnyCommand());
         commands.add(new SpidermanCommand());

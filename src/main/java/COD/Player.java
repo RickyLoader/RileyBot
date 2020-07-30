@@ -37,7 +37,6 @@ public class Player {
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
             json = ApiRequest.executeQuery(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/" + name + "/" + platform, "GET", null, false);
-            System.out.println(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/" + name + "/" + platform);
             if(json == null) {
                 return null;
             }

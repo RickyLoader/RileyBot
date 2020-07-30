@@ -11,7 +11,6 @@ public class WordCloudCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        WordCloudBuilder wordCloud = new WordCloudBuilder(context.getMessageChannel());
-        context.getMessageChannel().sendFile(wordCloud.buildCloud()).queue();
+        new WordCloudBuilder(context.getMessageChannel());
     }
 }

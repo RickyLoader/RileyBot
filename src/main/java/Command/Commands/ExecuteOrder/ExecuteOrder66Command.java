@@ -96,7 +96,6 @@ public class ExecuteOrder66Command extends DiscordCommand {
         channel.retrieveMessageById(id).queue(message -> message.editMessage(buildStatusMessage()).queue());
     }
 
-
     private void purgeTargets(CommandContext context) {
         String invite = context.getInvite();
         for(Member target : targets) {

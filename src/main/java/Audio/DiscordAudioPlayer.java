@@ -22,8 +22,7 @@ public class DiscordAudioPlayer {
     public DiscordAudioPlayer(Member member, Guild guild, TrackEndListener listener) {
         this.member = member;
         this.guild = guild;
-
-        manager = new DefaultAudioPlayerManager();
+        this.manager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(manager);
         this.player = manager.createPlayer();
         this.player.addListener(listener);
@@ -66,14 +65,10 @@ public class DiscordAudioPlayer {
                 }
 
                 @Override
-                public void playlistLoaded(AudioPlaylist audioPlaylist) {
-
-                }
+                public void playlistLoaded(AudioPlaylist audioPlaylist) {}
 
                 @Override
-                public void noMatches() {
-
-                }
+                public void noMatches() {}
 
                 @Override
                 public void loadFailed(FriendlyException e) {
@@ -85,5 +80,4 @@ public class DiscordAudioPlayer {
             e.printStackTrace();
         }
     }
-
 }

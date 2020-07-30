@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class LeaderboardCommand extends PageableEmbedCommand {
 
@@ -23,41 +24,30 @@ public class LeaderboardCommand extends PageableEmbedCommand {
                 Session.getHistory(),
                 Gunfight.getThumb(),
                 "GUNFIGHT LEADERBOARD!",
-                "Here are the top gunfight performances!"
+                "Here are the top gunfight performances!",
+                new String[]{"RANK", "W/L", "STREAK"}
         );
     }
-
 
     /**
      * Gunfight history message, shows leaderboard of past gunfight sessions
      */
     public static class Leaderboard extends PageableEmbed {
 
-        public Leaderboard(MessageChannel channel, Guild guild, ArrayList<?> items, String thumb, String title, String desc) {
-            super(channel, guild, items, thumb, title, desc);
+        public Leaderboard(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
+            super(channel, guild, items, thumb, title, desc, columns);
         }
 
         @Override
-        public MessageEmbed.Field[] getField(int index, ArrayList<?> items, boolean header, boolean ascending) {
-            int rank = ascending ? (index + 1) : (items.size() - index);
-            Session session = (Session) items.get(index);
-            if(header) {
-                return new MessageEmbed.Field[]{
-                        getTitleField("**RANK**", String.valueOf(rank), true),
-                        getTitleField("**W/L**", session.formatRatio(), true),
-                        getTitleField("**STREAK**", session.formatStreak(), true)
-                };
-            }
-            return new MessageEmbed.Field[]{
-                    new MessageEmbed.Field(getBlankChar(), String.valueOf(rank), true),
-                    new MessageEmbed.Field(getBlankChar(), session.formatRatio(), true),
-                    new MessageEmbed.Field(getBlankChar(), session.formatStreak(), true)
-            };
-        }
-
-        @Override
-        public void sortItems(ArrayList<?> items, boolean defaultSort) {
+        public void sortItems(List<?> items, boolean defaultSort) {
             Session.sortSessions((ArrayList<Session>) items, defaultSort);
+        }
+
+        @Override
+        public String[] getValues(int index, List<?> items, boolean defaultSort) {
+            int rank = defaultSort ? (index + 1) : (items.size() - index);
+            Session session = (Session) items.get(index);
+            return new String[]{String.valueOf(rank), session.formatRatio(), session.formatStreak()};
         }
     }
 }

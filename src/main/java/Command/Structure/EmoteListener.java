@@ -23,7 +23,6 @@ public abstract class EmoteListener extends ListenerAdapter {
     }
 
     private void reactionAdded(MessageReaction reaction, User user, Guild guild) {
-
         if(user == reaction.getJDA().getSelfUser()) {
             return;
         }

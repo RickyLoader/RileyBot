@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class HelpCommand extends PageableEmbedCommand {
@@ -25,35 +26,19 @@ public class HelpCommand extends PageableEmbedCommand {
                 context.getCommands(),
                 context.getJDA().getSelfUser().getAvatarUrl(),
                 "Help!",
-                "Here's some stuff I can do, now fuck off"
+                "Here's some stuff I can do, now fuck off",
+                new String[]{"Trigger", "Description"}
         );
     }
 
     public static class HelpMessage extends PageableEmbed {
 
-        public HelpMessage(MessageChannel channel, Guild guild, ArrayList<?> items, String thumb, String title, String desc) {
-            super(channel, guild, items, thumb, title, desc);
+        public HelpMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
+            super(channel, guild, items, thumb, title, desc, columns);
         }
 
         @Override
-        public MessageEmbed.Field[] getField(int index, ArrayList<?> items, boolean header, boolean ascending) {
-            DiscordCommand c = (DiscordCommand) items.get(index);
-            if(header) {
-                return new MessageEmbed.Field[]{
-                        getTitleField("**Trigger**", c.getHelpName(), true),
-                        getBlankField(true),
-                        getTitleField("**Description**", c.getDesc(), true)
-                };
-            }
-            return new MessageEmbed.Field[]{
-                    new MessageEmbed.Field(getBlankChar(), c.getHelpName(), true),
-                    getBlankField(true),
-                    new MessageEmbed.Field(getBlankChar(), c.getDesc(), true)
-            };
-        }
-
-        @Override
-        public void sortItems(ArrayList<?> items, boolean defaultSort) {
+        public void sortItems(List<?> items, boolean defaultSort) {
             items.sort((o1, o2) -> {
                 DiscordCommand a = (DiscordCommand) o1;
                 DiscordCommand b = (DiscordCommand) o2;
@@ -62,6 +47,12 @@ public class HelpCommand extends PageableEmbedCommand {
                 }
                 return b.getHelpName().compareTo(a.getHelpName());
             });
+        }
+
+        @Override
+        public String[] getValues(int index, List<?> items, boolean defaultSort) {
+            DiscordCommand command = (DiscordCommand) items.get(index);
+            return new String[]{command.getHelpName(), command.getDesc()};
         }
     }
 }

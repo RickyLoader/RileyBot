@@ -53,10 +53,14 @@ public class CommandContext {
     }
 
     public String getInvite() {
-        return getTextChannel().createInvite().complete().getUrl();
+        return getTextChannel()
+                .createInvite()
+                .setTemporary(true)
+                .complete()
+                .getUrl();
     }
 
-    public String getLowerCaseMessage(){
+    public String getLowerCaseMessage() {
         return getMessageContent().toLowerCase();
     }
 

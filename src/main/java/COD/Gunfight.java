@@ -75,6 +75,7 @@ public class Gunfight {
         this.losses = losses;
         this.currentStreak = currentStreak;
         this.longestStreak = longestStreak;
+        this.lastUpdate = System.currentTimeMillis();
     }
 
     /**
@@ -141,6 +142,11 @@ public class Gunfight {
         }
     }
 
+    /**
+     * Get a thumbnail image based on the current score performance
+     *
+     * @return Thumbnail URL
+     */
     private String getThumbnail() {
 
         String[] goodThumb = new String[]{
@@ -226,7 +232,7 @@ public class Gunfight {
         }
         startTime = System.currentTimeMillis();
         rank = checkRank();
-        sendGameMessage(buildGameMessage(String.valueOf(currentStreak), String.valueOf(longestStreak)));
+        sendGameMessage(createGameMessage());
     }
 
     /**
@@ -296,12 +302,12 @@ public class Gunfight {
      */
     private void updateMessage() {
         channel.retrieveMessageById(gameID).queue(message -> {
-            MessageEmbed updateMessage = createUpdateMessage();
+            MessageEmbed updateMessage = createGameMessage();
             if(gameFocused()) {
                 message.editMessage(updateMessage).queue();
             }
             else {
-                deleteGame();
+                message.delete().queue();
                 sendGameMessage(updateMessage);
             }
         });
@@ -315,16 +321,16 @@ public class Gunfight {
         if(!gameFocused()) {
             System.out.println("Game is not most recent message...");
             deleteGame();
-            sendGameMessage(createUpdateMessage());
+            sendGameMessage(createGameMessage());
         }
     }
 
     /**
-     * Create the updated game message displaying new values
+     * Stringify score values and return game message
      *
-     * @return Updated game message
+     * @return Game message
      */
-    private MessageEmbed createUpdateMessage() {
+    private MessageEmbed createGameMessage() {
 
         // Which form of win/wins, loss/losses to use if more than 1
         String win = this.currentStreak == 1 ? " WIN" : " WINS";
@@ -446,7 +452,7 @@ public class Gunfight {
      */
     private MessageEmbed buildGameSummaryMessage(Session session) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(15655767);
+        builder.setColor(getColour());
         builder.setTitle("GUNFIGHT RESULTS #" + (Session.getTotalMatches()));
         builder.setThumbnail(getThumbnail());
         builder.setDescription(getRankingMessage());
