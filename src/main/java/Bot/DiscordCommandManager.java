@@ -49,20 +49,14 @@ public class DiscordCommandManager {
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
-        // gunfight
         commands.add(new GunfightCommand());
         commands.add(new GunfightHelpCommand());
         commands.add(new LeaderboardCommand());
         commands.add(new MeCommand());
-        // OSRS
         commands.add(new OSRSLookupCommand());
         commands.add(new GrandExchangeLookupCommand());
-        //commands.add(new WordCloudCommand());
-        // audio
         commands.add(new GhostCommand());
         commands.add(new SawCommand());
-        //commands.add(new LOLLookupCommand());
-        //commands.add(new VoiceChannelCommand());
         commands.add(new TTSCommand());
         commands.add(new SurvivorCommand());
         commands.add(new PlayYoutubeCommand());
@@ -72,9 +66,10 @@ public class DiscordCommandManager {
         commands.add(new ExecuteOrder66Command());
         commands.add(new KillListCommand());
         commands.add(new TobinCommand());
-
         commands.add(new MWLookupCommand());
         commands.add(new HelpCommand());
+        //commands.add(new LOLLookupCommand());
+        //commands.add(new VoiceChannelCommand());
     }
 
     private void addRandomCommands() {

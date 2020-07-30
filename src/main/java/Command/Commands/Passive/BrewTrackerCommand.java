@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 
@@ -68,20 +67,40 @@ public class BrewTrackerCommand extends DiscordCommand {
             sendMessage(getEmbed());
         }
 
+        /**
+         * Get the id of the brew tracker message
+         *
+         * @return brew tracker message id
+         */
         public long getId() {
             return id;
         }
 
+        /**
+         * Time out the tracker after 2 hours
+         *
+         * @return Whether it has been 2 hours since the last update
+         */
         public boolean timedOut() {
             return System.currentTimeMillis() - lastUpdate > 7200000;
         }
 
+        /**
+         * Get the member with the current highest brew count
+         *
+         * @return member with highest brew count
+         */
         private Alcoholic getWinner() {
             ArrayList<Alcoholic> sorted = new ArrayList<>(alcoholics.values());
             Collections.sort(sorted);
             return sorted.get(0);
         }
 
+        /**
+         * Build the brew tracker message
+         *
+         * @return brew tracker message
+         */
         private MessageEmbed getEmbed() {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle("Brew Tracker!");
@@ -113,11 +132,25 @@ public class BrewTrackerCommand extends DiscordCommand {
             return builder.build();
         }
 
+        /**
+         * Apply the appropriate suffix to a given number of brews
+         *
+         * @param total brews to apply suffix to
+         * @return Number with " brews" or " brew" attached
+         */
         private String getBrewSummary(int total) {
             String brewSuffix = (total == 1 ? " brew" : " brews");
             return total + brewSuffix;
         }
 
+        /**
+         * Build a string containing the given quantity of beer emojis and pad out the difference to the
+         * highest brew count with a slightly transparent beer emoji
+         *
+         * @param count Number of beer emojis to use
+         * @param max   Current highest brew count
+         * @return String containing beer emojis
+         */
         private String getBrews(int count, int max) {
             StringBuilder brews = new StringBuilder();
             String beer = "\uD83C\uDF7A ";
@@ -131,6 +164,12 @@ public class BrewTrackerCommand extends DiscordCommand {
             return brews.toString();
         }
 
+        /**
+         * Send the brew tracker message with a callback
+         * to apply the reaction emotes and remember the id of the message
+         *
+         * @param message Brew tracker message
+         */
         private void sendMessage(MessageEmbed message) {
             channel.sendMessage(message).queue(response -> {
                 id = response.getIdLong();
@@ -139,6 +178,10 @@ public class BrewTrackerCommand extends DiscordCommand {
             });
         }
 
+        /**
+         * Called when a reaction is received, either delete and resend the brew tracker message if it is not
+         * the most recent message in the channel, or edit the existing message
+         */
         private void updateMessage() {
             channel.retrieveMessageById(id).queue(message -> {
                 MessageEmbed updateMessage = getEmbed();
@@ -152,6 +195,9 @@ public class BrewTrackerCommand extends DiscordCommand {
             });
         }
 
+        /**
+         * Delete the current brew tracker message and resend as to make it the most recent message in the channel
+         */
         public void relocate() {
             channel.retrieveMessageById(id).queue(message -> {
                 message.delete().queue();
@@ -159,6 +205,12 @@ public class BrewTrackerCommand extends DiscordCommand {
             });
         }
 
+        /**
+         * Called when a reaction is added to the brew tracker message, change the quantity of brews for a member
+         *
+         * @param reaction Reaction that was added
+         * @param user     User who added the reaction
+         */
         public void reactionAdded(MessageReaction reaction, User user) {
             Emote emote = reaction.getReactionEmote().getEmote();
             Member member = guild.getMember(user);
@@ -174,7 +226,7 @@ public class BrewTrackerCommand extends DiscordCommand {
                 alcoholic.incrementBrews();
             }
             else {
-                if(alcoholic.decrementBrews()){
+                if(alcoholic.decrementBrews()) {
                     alcoholics.remove(member);
                 }
             }
@@ -182,7 +234,7 @@ public class BrewTrackerCommand extends DiscordCommand {
             updateMessage();
         }
 
-        private class Alcoholic implements Comparable<Alcoholic> {
+        private static class Alcoholic implements Comparable<Alcoholic> {
             private final Member member;
             private int brews = 0;
 
