@@ -76,7 +76,6 @@ public class MWLookupCommand extends DiscordCommand {
             }
             channel.sendFile(new CombatRecord(player).buildImage()).queue();
         }).start();
-
     }
 
     @Override

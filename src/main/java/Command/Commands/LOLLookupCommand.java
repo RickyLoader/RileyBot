@@ -14,14 +14,15 @@ public class LOLLookupCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        String name = context.getMessageContent().replace("lollookup ", "");
+        String name = context.getLowerCaseMessage().replace("lollookup ", "");
         MessageChannel channel = context.getMessageChannel();
         Summoner summoner = new Summoner(name);
         if(!summoner.exists()) {
             channel.sendMessage(name + " doesn't exist on the OCE server cunt").queue();
             return;
         }
-        channel.sendFile(new SummonerImage(summoner).buildImage()).queue();
+        //channel.sendFile(new SummonerImage(summoner).buildImage()).queue();
+        channel.sendMessage("\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7 UNDER CONSTRUCTION BEEP BEEP \uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7").queue();
     }
 
     @Override

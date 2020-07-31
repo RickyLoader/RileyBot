@@ -40,14 +40,28 @@ public class BrewTrackerCommand extends DiscordCommand {
         }
     }
 
-    @Override
-    public void execute(CommandContext context) {
+    private void showBrewTracker(CommandContext context) {
         if(brewsMessage == null || brewsMessage.timedOut()) {
             addEmoteListener(context.getJDA());
             brewsMessage = new BrewsMessage(context.getMessageChannel(), context.getGuild());
             return;
         }
         brewsMessage.relocate();
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return query.contains("brew") && query.contains("!");
+    }
+
+    @Override
+    public void execute(CommandContext context) {
+        String trigger = context.getLowerCaseMessage();
+        if(trigger.equals("brew tracker!")) {
+            showBrewTracker(context);
+            return;
+        }
+        context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
     }
 
     private static class BrewsMessage {
@@ -121,13 +135,11 @@ public class BrewTrackerCommand extends DiscordCommand {
                         builder.addBlankField(true);
                     }
                     index++;
+                }
+                builder.addBlankField(false);
+                builder.addField("Total", getBrewSummary(total), true);
+                builder.addField("Winner? - " + winner.getName(), getBrewSummary(winner.getBrews()), true);
 
-                }
-                if(total > 0) {
-                    builder.addBlankField(false);
-                    builder.addField("Total", getBrewSummary(total), true);
-                    builder.addField("Winner? - " + winner.getName(), getBrewSummary(winner.getBrews()), true);
-                }
             }
             return builder.build();
         }
@@ -250,6 +262,9 @@ public class BrewTrackerCommand extends DiscordCommand {
             }
 
             public boolean decrementBrews() {
+                if(brews == 0){
+                    return true;
+                }
                 this.brews--;
                 return this.brews == 0;
             }

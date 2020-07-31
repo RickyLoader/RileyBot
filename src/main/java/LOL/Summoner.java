@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Summoner {
-    private String id, name, apiKey = "?api_key=RGAPI-000baddb-1303-4f0a-aa14-24bc0cb1f090", res = "src/main/resources/LOL/Summoner/";
+    private String id, name, apiKey = "?api_key=RGAPI-36f73a8c-3f3b-43c0-bc38-05bc1953b08c", res = "src/main/resources/LOL/Summoner/";
     private ArrayList<RankedQueue> queues = new ArrayList<>();
     private ArrayList<Champion> champions = new ArrayList<>();
     private int level;

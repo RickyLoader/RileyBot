@@ -38,6 +38,14 @@ public class DiscordCommandManager {
         return commands;
     }
 
+    private void addCommand(DiscordCommand c) {
+        if(commands.contains(c)) {
+            System.out.println("Duplicate command: " + c.getHelpName());
+            return;
+        }
+        commands.add(c);
+    }
+
     public void handleCommand(GuildMessageReceivedEvent event) {
         DiscordCommand command = getCommand(event.getMessage().getContentRaw());
         if(command == null) {
@@ -49,68 +57,68 @@ public class DiscordCommandManager {
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
-        commands.add(new GunfightCommand());
-        commands.add(new GunfightHelpCommand());
-        commands.add(new LeaderboardCommand());
-        commands.add(new MeCommand());
-        commands.add(new OSRSLookupCommand());
-        commands.add(new GrandExchangeLookupCommand());
-        commands.add(new GhostCommand());
-        commands.add(new SawCommand());
-        commands.add(new TTSCommand());
-        commands.add(new SurvivorCommand());
-        commands.add(new PlayYoutubeCommand());
-        commands.add(new MakeAChoiceCommand());
-        commands.add(new InviteCommand());
-        commands.add(new BrewTrackerCommand());
-        commands.add(new ExecuteOrder66Command());
-        commands.add(new KillListCommand());
-        commands.add(new TobinCommand());
-        commands.add(new MWLookupCommand());
-        commands.add(new HelpCommand());
-        //commands.add(new LOLLookupCommand());
-        //commands.add(new VoiceChannelCommand());
+        addCommand((new GunfightCommand()));
+        addCommand((new GunfightHelpCommand()));
+        addCommand((new LeaderboardCommand()));
+        addCommand((new MeCommand()));
+        addCommand((new OSRSLookupCommand()));
+        addCommand((new GrandExchangeLookupCommand()));
+        addCommand((new GhostCommand()));
+        addCommand((new SawCommand()));
+        addCommand((new TTSCommand()));
+        addCommand((new SurvivorCommand()));
+        addCommand((new PlayYoutubeCommand()));
+        addCommand((new MakeAChoiceCommand()));
+        addCommand((new InviteCommand()));
+        addCommand((new ExecuteOrder66Command()));
+        addCommand((new KillListCommand()));
+        addCommand((new TobinCommand()));
+        addCommand((new MWLookupCommand()));
+        addCommand((new HelpCommand()));
+        addCommand((new LOLLookupCommand()));
+        addCommand(new YoutubeLookupCommand());
+        // addCommand((new VoiceChannelCommand());
     }
 
     private void addRandomCommands() {
-        commands.add(new MemeCommand());
-        commands.add(new RileyCommand());
-        commands.add(new BrockCommand());
-        commands.add(new KimmyCommand());
-        commands.add(new ElsaCommand());
-        commands.add(new SydneyCommand());
-        commands.add(new GenerateNameCommand());
+        addCommand((new MemeCommand()));
+        addCommand((new RileyCommand()));
+        addCommand((new BrockCommand()));
+        addCommand((new KimmyCommand()));
+        addCommand((new ElsaCommand()));
+        addCommand((new SydneyCommand()));
+        addCommand((new GenerateNameCommand()));
     }
 
     private void addLinkCommands() {
-        commands.add(new BrewsCommand());
-        commands.add(new DobroCommand());
-        commands.add(new ExodiaCommand());
-        commands.add(new FriendlyCommand());
-        commands.add(new GothCommand());
-        commands.add(new HagridCommand());
-        commands.add(new MandrillCommand());
-        commands.add(new MegaCommand());
-        commands.add(new PureCommand());
-        commands.add(new RememberCommand());
-        commands.add(new BrewTrackerCommand());
-        commands.add(new ShrekCommand());
-        commands.add(new SmirnyCommand());
-        commands.add(new SpidermanCommand());
-        commands.add(new TrulyCommand());
-        commands.add(new UnderbellyCommand());
-        commands.add(new VapeCommand());
+        addCommand((new BrewsCommand()));
+        addCommand((new DobroCommand()));
+        addCommand((new ExodiaCommand()));
+        addCommand((new FriendlyCommand()));
+        addCommand((new GothCommand()));
+        addCommand((new HagridCommand()));
+        addCommand((new MandrillCommand()));
+        addCommand((new MegaCommand()));
+        addCommand((new PureCommand()));
+        addCommand((new RememberCommand()));
+        addCommand((new BrewTrackerCommand()));
+        addCommand((new ShrekCommand()));
+        addCommand((new SmirnyCommand()));
+        addCommand((new SpidermanCommand()));
+        addCommand((new TrulyCommand()));
+        addCommand((new UnderbellyCommand()));
+        addCommand((new VapeCommand()));
 
-        commands.add(new FishingCommand());
-        commands.add(new NormanCommand());
-        commands.add(new PhotoshopCommand());
-        commands.add(new RaidsCommand());
-        commands.add(new RestingCommand());
-        commands.add(new RiggsCommand());
-        commands.add(new SleepingCommand());
-        commands.add(new TurboCommand());
-        commands.add(new TwitchCommand());
-        commands.add(new VegetableCommand());
-        commands.add(new VodkaCommand());
+        addCommand((new FishingCommand()));
+        addCommand((new NormanCommand()));
+        addCommand((new PhotoshopCommand()));
+        addCommand((new RaidsCommand()));
+        addCommand((new RestingCommand()));
+        addCommand((new RiggsCommand()));
+        addCommand((new SleepingCommand()));
+        addCommand((new TurboCommand()));
+        addCommand((new TwitchCommand()));
+        addCommand((new VegetableCommand()));
+        addCommand((new VodkaCommand()));
     }
 }

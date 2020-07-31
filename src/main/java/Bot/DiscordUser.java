@@ -15,9 +15,12 @@ public class DiscordUser {
     public static String getOSRSName(long id) {
         return getName(id, "osrs");
     }
+    public static String getYTName(long id) {
+        return getName(id, "yt");
+    }
 
     public static void saveMWName(String name, MessageChannel channel, User user) {
-        if(name.length()>17){
+        if(name.length() > 17) {
             channel.sendMessage("Maximum username length is 12 characters cunt ()").queue();
         }
         savePlayer(name, user.getIdLong(), "MW");
@@ -25,12 +28,17 @@ public class DiscordUser {
     }
 
     public static void saveOSRSName(String name, MessageChannel channel, User user) {
-        if(name.length()>12){
+        if(name.length() > 12) {
             channel.sendMessage("Maximum username length is 12 characters cunt").queue();
             return;
         }
         savePlayer(name, user.getIdLong(), "OSRS");
         channel.sendMessage(user.getAsMention() + " Your osrslookup name is now " + name).queue();
+    }
+
+    public static void saveYTName(String name, MessageChannel channel, User user) {
+        savePlayer(name, user.getIdLong(), "YT");
+        channel.sendMessage(user.getAsMention() + " Your ytlookup name is now " + name).queue();
     }
 
     private static void savePlayer(String name, long id, String table) {

@@ -10,8 +10,7 @@ public abstract class PageableEmbed {
     private final MessageChannel channel;
     private final List<?> items;
     private long id;
-    private int index = 0;
-    private int page = 1;
+    private int index = 0, page = 1, bound;
     private final Emote forward, backward, reverse;
     private boolean defaultSort = true;
     private final String title, desc, thumb;
@@ -27,11 +26,16 @@ public abstract class PageableEmbed {
         this.reverse = guild.getEmotesByName("reverse", true).get(0);
         this.thumb = thumb;
         this.columns = columns;
+        this.bound = 5;
         sortItems(items, defaultSort);
-        showMessage();
     }
 
-    private void showMessage() {
+    public PageableEmbed(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns, int bound) {
+        this(channel, guild, items, thumb, title, desc, columns);
+        this.bound = bound;
+    }
+
+    public void showMessage() {
         channel.sendMessage(buildMessage()).queue(message -> {
             id = message.getIdLong();
             message.addReaction(backward).queue();
@@ -62,9 +66,9 @@ public abstract class PageableEmbed {
         builder.setTitle(title);
         builder.setDescription(desc);
         builder.setThumbnail(thumb);
-        builder.setFooter("Page: " + page + "/" + (int) Math.ceil(items.size() / 5.0));
+        builder.setFooter("Page: " + page + "/" + (int) Math.ceil(items.size() / (double) bound));
 
-        int max = Math.min(5, (items.size() - index));
+        int max = Math.min(bound, (items.size() - index));
 
         for(int index = this.index; index < (this.index + max); index++) {
             String[] values = getValues(index, items, defaultSort);
@@ -84,6 +88,7 @@ public abstract class PageableEmbed {
     }
 
     public abstract String[] getValues(int index, List<?> items, boolean defaultSort);
+
     public abstract void sortItems(List<?> items, boolean defaultSort);
 
     public long getId() {
@@ -102,23 +107,23 @@ public abstract class PageableEmbed {
         }
 
         if(emote == forward) {
-            if((items.size() - 1) - index < 5) {
+            if((items.size() - 1) - index < bound) {
                 return;
             }
-            index += 5;
+            index += bound;
         }
         else if(emote == backward) {
             if(index == 0) {
                 return;
             }
-            index -= 5;
+            index -= bound;
         }
         else {
             defaultSort = !defaultSort;
             sortItems(items, defaultSort);
             index = 0;
         }
-        this.page = (index / 5) + 1;
+        this.page = (index / bound) + 1;
         updateMessage();
     }
 }
