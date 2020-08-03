@@ -1,5 +1,6 @@
 package TwitterManager;
 
+import Command.Structure.Secret;
 import net.dv8tion.jda.api.entities.Message;
 
 import twitter4j.*;
@@ -81,10 +82,10 @@ public class TwitterManager {
 
     private void startTwitter() {
         ConfigurationBuilder builder = new ConfigurationBuilder()
-                .setOAuthConsumerKey("mzt8KNbCYdI6pH1lKHrgcbuh0")
-                .setOAuthConsumerSecret("ozrfRru3sjIwGuo4oXIp7FRv268fyUB4f61SGd3ITWlZsHWeK3")
-                .setOAuthAccessToken("1289408044380508160-97kuCnbCj6jIJJN4CaUDy5D5kMq7CP")
-                .setOAuthAccessTokenSecret("oiYdyA52VN9W5TIgnm6Frd1IkAe53q5u1JvGRYkYYfg54");
+                .setOAuthConsumerKey(Secret.getTwitterOAuthConsumerKey())
+                .setOAuthConsumerSecret(Secret.getTwitterOAuthConsumerSecret())
+                .setOAuthAccessToken(Secret.getTwitterOAuthAccessToken())
+                .setOAuthAccessTokenSecret(Secret.getTwitterOAuthAccessTokenSecret());
         this.twitter = new AsyncTwitterFactory(builder.build()).getInstance();
         this.twitter.addListener(listener);
     }

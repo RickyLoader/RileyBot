@@ -1,5 +1,6 @@
 package LOL;
 
+import Command.Structure.Secret;
 import Network.ApiRequest;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Summoner {
-    private String id, name, apiKey = "?api_key=RGAPI-36f73a8c-3f3b-43c0-bc38-05bc1953b08c", res = "src/main/resources/LOL/Summoner/";
+    private String id, name, apiKey = Secret.getLeagueKey(), res = "src/main/resources/LOL/Summoner/";
     private ArrayList<RankedQueue> queues = new ArrayList<>();
     private ArrayList<Champion> champions = new ArrayList<>();
     private int level;

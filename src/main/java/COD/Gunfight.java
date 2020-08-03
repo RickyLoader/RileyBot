@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 
 
 /**
@@ -307,8 +308,7 @@ public class Gunfight {
                 message.editMessage(updateMessage).queue();
             }
             else {
-                message.delete().queue();
-                sendGameMessage(updateMessage);
+                message.delete().queue(aVoid -> sendGameMessage(updateMessage));
             }
         });
     }
