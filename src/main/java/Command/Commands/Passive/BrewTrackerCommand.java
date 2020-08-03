@@ -265,9 +265,6 @@ public class BrewTrackerCommand extends DiscordCommand {
             }
 
             public boolean decrementBrews() {
-                if(brews == 0) {
-                    return true;
-                }
                 this.brews--;
                 return this.brews == 0;
             }
