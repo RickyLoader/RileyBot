@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Listener extends ListenerAdapter {
@@ -24,13 +25,17 @@ public class Listener extends ListenerAdapter {
     @Override
     public void onReady(@Nonnull ReadyEvent event) {
         System.out.println("\n\nBot is now running!");
+        for(Guild g : event.getJDA().getGuilds()) {
+            TextChannel channel = g.getDefaultChannel() == null ? g.getTextChannels().get(0) : g.getDefaultChannel();
+            //channel.sendMessage("I have been restarted").queue();
+        }
     }
 
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if(event.getAuthor().isBot()) {
             return;
-        } 
+        }
         commandManager.handleCommand(event);
     }
 

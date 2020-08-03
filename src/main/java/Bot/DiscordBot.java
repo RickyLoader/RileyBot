@@ -36,7 +36,7 @@ public class DiscordBot {
                             GatewayIntent.GUILD_EMOJIS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS
                     )
-                    .setActivity(Activity.watching("sleep you cunt"))
+                    .setActivity(Activity.watching("kids through my telescope"))
                     .addEventListeners(new Listener())
                     .build();
         }

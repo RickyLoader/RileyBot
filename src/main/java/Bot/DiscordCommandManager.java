@@ -77,7 +77,10 @@ public class DiscordCommandManager {
         addCommand((new HelpCommand()));
         addCommand((new LOLLookupCommand()));
         addCommand(new YoutubeLookupCommand());
-        // addCommand((new VoiceChannelCommand());
+        addCommand(new ImpersonateCommand());
+        addCommand(new TweetCommand());
+        addCommand(new TweetsCommand());
+        //addCommand((new VoiceChannelCommand());
     }
 
     private void addRandomCommands() {

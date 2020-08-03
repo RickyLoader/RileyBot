@@ -6,6 +6,7 @@ import Command.Structure.PageableEmbed;
 import Command.Structure.PageableEmbedCommand;
 import Network.ApiRequest;
 import net.dv8tion.jda.api.entities.*;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -60,7 +61,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
     @Override
     public PageableEmbed getEmbed(CommandContext context) {
         String name = getName(context.getMessage(), context.getUser(), context.getMessageChannel());
-        if(name == null){
+        if(name == null) {
             return null;
         }
         YoutubeChannel channel = new YoutubeChannel(name);
@@ -73,7 +74,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
                 channel.getVideos(),
                 channel.getThumbnail(),
                 channel.getName(),
-                channel.getDesc(),
+                channel.getEmbeddedDescription(),
                 new String[]{"Title", "URL", "Views"}
         );
     }
@@ -84,7 +85,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
     }
 
     private static class YoutubeChannel {
-        private String id, name, thumbnail, desc, link;
+        private String id, name, thumbnail, desc, url;
         private final String key = "AIzaSyCoHcK0485x1Edq_4X1PNJNqaVuHZ11Evg";
         private ArrayList<Video> videos;
 
@@ -109,7 +110,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
             JSONObject snippet = channel.getJSONObject("snippet");
             this.name = snippet.getString("channelTitle");
             this.id = channel.getJSONObject("id").getString("channelId");
-            this.link = "https://www.youtube.com/user/jarvie911/videos";
+            this.url = "https://www.youtube.com/channel/" + id + "/videos";
             this.thumbnail = snippet.getJSONObject("thumbnails").getJSONObject("high").getString("url");
             this.desc = snippet.getString("description");
             return true;
@@ -131,10 +132,11 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
                 }
                 JSONObject snippet = video.getJSONObject("snippet");
                 String id = idSummary.getString("videoId");
+                String title = StringEscapeUtils.unescapeHtml4(snippet.getString("title"));
 
                 videos.put(id, new Video(
                                 id,
-                                snippet.getString("title"),
+                                title,
                                 snippet.getString("description"),
                                 snippet.getJSONObject("thumbnails").getJSONObject("high").getString("url")
                         )
@@ -159,8 +161,16 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
             return id != null;
         }
 
+        public String getUrl() {
+            return url;
+        }
+
         public String getThumbnail() {
             return thumbnail;
+        }
+
+        public String getEmbeddedDescription() {
+            return "[" + desc + "](" + url + ")";
         }
 
         public String getName() {
@@ -175,7 +185,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
             return videos;
         }
 
-        private class Video {
+        private static class Video {
             private final String url, title, desc, thumbnail, id;
             private long views;
 
@@ -217,7 +227,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
         }
     }
 
-    private class YoutubeChannelMessage extends PageableEmbed {
+    private static class YoutubeChannelMessage extends PageableEmbed {
 
         public YoutubeChannelMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
             super(channel, guild, items, thumb, title, desc, columns);

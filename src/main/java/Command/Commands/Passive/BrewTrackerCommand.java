@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.function.Consumer;
 
 
 public class BrewTrackerCommand extends DiscordCommand {
@@ -167,10 +168,11 @@ public class BrewTrackerCommand extends DiscordCommand {
             StringBuilder brews = new StringBuilder();
             String beer = "\uD83C\uDF7A ";
             String emptyBeer = "<:" + this.emptyBeer.getName() + ":" + this.emptyBeer.getId() + "> ";
-            for(int i = 0; i < count; i++) {
-                brews.append(beer);
-            }
-            for(int i = count; i < max; i++) {
+            for(int i = 0; i < max; i++) {
+                if(i < count) {
+                    brews.append(beer);
+                    continue;
+                }
                 brews.append(emptyBeer);
             }
             return brews.toString();
@@ -201,8 +203,10 @@ public class BrewTrackerCommand extends DiscordCommand {
                     message.editMessage(updateMessage).queue();
                 }
                 else {
-                    message.delete().queue();
-                    sendMessage(updateMessage);
+                    message.delete().queue(aVoid -> {
+                        System.out.println("Moving message");
+                        sendMessage(updateMessage);
+                    });
                 }
             });
         }
@@ -212,7 +216,7 @@ public class BrewTrackerCommand extends DiscordCommand {
          */
         public void relocate() {
             channel.retrieveMessageById(id).queue(message -> {
-                message.delete().queue();
+                message.delete().queue(aVoid -> System.out.println("relocating"));
                 sendMessage(getEmbed());
             });
         }
@@ -262,7 +266,7 @@ public class BrewTrackerCommand extends DiscordCommand {
             }
 
             public boolean decrementBrews() {
-                if(brews == 0){
+                if(brews == 0) {
                     return true;
                 }
                 this.brews--;

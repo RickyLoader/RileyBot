@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.User;
 
 public abstract class PageableEmbedCommand extends DiscordCommand {
     private EmoteListener listener;
-    private PageableEmbed embed;
+    public PageableEmbed embed;
 
     public PageableEmbedCommand(String trigger, String desc, String helpName) {
         super(trigger, desc, helpName);
@@ -41,7 +41,7 @@ public abstract class PageableEmbedCommand extends DiscordCommand {
         };
     }
 
-    private void addEmoteListener(JDA jda) {
+    public void addEmoteListener(JDA jda) {
         if(this.listener == null) {
             this.listener = getEmoteListener();
             jda.addEventListener(this.listener);
