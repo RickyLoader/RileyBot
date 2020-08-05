@@ -21,6 +21,7 @@ public class Hiscores {
     private final String resources = "src/main/resources/OSRS/";
     private final MessageChannel channel;
     private EmbedLoadingMessage loading;
+    private boolean timeout = false;
 
     /**
      * Initialise the Hiscores with a channel to send the image to
@@ -54,6 +55,11 @@ public class Hiscores {
         String[] data = fetchPlayerData(name);
 
         if(data == null) {
+            if(timeout) {
+                loading.failLoading("I wasn't able to connect to the Hiscores");
+                return;
+            }
+            loading.failLoading("That player doesn't exist cunt");
             return;
         }
 
@@ -177,11 +183,10 @@ public class Hiscores {
         String suffix = "/index_lite.ws?player=" + name;
         String response = ApiRequest.executeQuery(baseURL + suffix, "GET", null, false);
         if(response == null) {
-            loading.failLoading("I wasn't able to connect to the Hiscores");
+            timeout = true;
             return null;
         }
         if(response.equals("err")) {
-            loading.failLoading("That player doesn't exist cunt");
             return null;
         }
         return response.replace("\n", ",").split(",");
