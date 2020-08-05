@@ -1,10 +1,9 @@
 package OSRS.Stats;
 
+import Command.Structure.EmbedLoadingMessage;
 import Network.ApiRequest;
 import com.objectplanet.image.PngEncoder;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,130 +13,48 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Build an image displaying a player's OSRS stats
+ */
 public class Hiscores {
     private final String[] bossNames;
     private final String resources = "src/main/resources/OSRS/";
-    private String playerName;
-    private String accountType;
-    private String checkBox = "\uD83D\uDDF9";
-    private String neutral = "☐";
-    private long id, startTime, lookupTime, imageTime, accountTypeTime;
-    private MessageChannel channel;
-    private boolean playerExists, imageBuilt, done, fail, accountTypeFound, timeOut;
+    private final MessageChannel channel;
+    private EmbedLoadingMessage loading;
 
+    /**
+     * Initialise the Hiscores with a channel to send the image to
+     *
+     * @param channel Channel to send image to
+     */
     public Hiscores(MessageChannel channel) {
         registerFont();
         bossNames = getBossNames();
         this.channel = channel;
-        this.startTime = System.currentTimeMillis();
-    }
-
-    private void showLoading() {
-        channel.sendMessage(createLoadingMessage()).queue(message -> id = message.getIdLong());
-    }
-
-    private MessageEmbed createLoadingMessage() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("OSRS Hiscores lookup: " + playerName.toUpperCase());
-        builder.setDescription("Give me a second, their website is slow as fuck.");
-        builder.setThumbnail("https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png");
-        builder.setColor(65280);
-        String waiting = neutral + " ---";
-        String playerExistsValue = waiting;
-        String accountTypeValue = waiting;
-        String buildingImageValue = waiting;
-
-        if(playerExists) {
-            playerExistsValue = checkBox + formatTime(lookupTime - startTime);
-        }
-
-        builder.addField("Player exists...", playerExistsValue, false);
-
-        if(accountTypeFound) {
-            accountTypeValue = checkBox + " " + accountType + formatTime(accountTypeTime - lookupTime);
-        }
-        else if(accountType != null) {
-            accountTypeValue = neutral + " " + accountType;
-        }
-        builder.addField("Checking account type...", accountTypeValue, false);
-
-        if(imageBuilt) {
-            buildingImageValue = checkBox + formatTime(imageTime - accountTypeTime);
-        }
-
-        builder.addField("Building image...", buildingImageValue, false);
-
-        if(done) {
-            builder.addField("Done!", checkBox + formatTime(imageTime - startTime), false);
-        }
-        else if(fail) {
-            String value = "That player doesn't exist cunt.";
-            if(timeOut) {
-                value = "I couldn't reach the hiscores cunt.";
-            }
-            builder.addField("FAILED!", value + formatTime(System.currentTimeMillis() - startTime), false);
-
-        }
-        return builder.build();
-    }
-
-    private void updateLoadingMessage() {
-        channel.retrieveMessageById(id).queue(message -> message.editMessage(createLoadingMessage()).queue());
-    }
-
-    private String formatTime(long time) {
-        String seconds = String.format("%.2f", (double) time / 1000);
-        return " (" + seconds + " seconds" + ")";
-    }
-
-    private void failLoading() {
-        this.neutral = "☒";
-        this.fail = true;
-        this.accountType = null;
-    }
-
-    private void showPlayerExists(boolean playerExists) {
-        this.playerExists = playerExists;
-        lookupTime = System.currentTimeMillis();
-        if(!playerExists) {
-            failLoading();
-        }
-        updateLoadingMessage();
-    }
-
-    private void showAccountTypeFound(String accountType) {
-        this.accountType = accountType;
-        accountTypeTime = System.currentTimeMillis();
-        accountTypeFound = true;
-        updateLoadingMessage();
-    }
-
-    private void showImageBuilt() {
-        this.imageBuilt = true;
-        imageTime = System.currentTimeMillis();
-        updateLoadingMessage();
-    }
-
-    private void showCheckingAccountType(String accountType) {
-        this.accountType = accountType;
-        updateLoadingMessage();
     }
 
     /**
      * Look a player up on the OSRS hiscores and return an image displaying their skills
      *
      * @param name Player name
-     * @return Image displaying player skills
      */
-    public boolean lookupPlayer(String name) {
-        this.playerName = name;
-
-        showLoading();
-
+    public void lookupPlayer(String name) {
+        this.loading = new EmbedLoadingMessage(
+                channel,
+                "OSRS Hiscores lookup: " + name.toUpperCase(),
+                "Give me a second, their website is slow as fuck.",
+                "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
+                new String[]{
+                        "Player exists...",
+                        "Checking account type...",
+                        "Building image..."
+                }
+        );
+        loading.showLoading();
         String[] data = fetchPlayerData(name);
 
         if(data == null) {
-            return false;
+            return;
         }
 
         List<Boss> bossKills = getBossKills(data);
@@ -154,15 +71,19 @@ public class Hiscores {
         String[] clues = getClueScrolls(data);
         String[] stats = orderSkills(data);
         File playerImage = buildImage(name, data[0], stats, bossKills, clues);
-        showImageBuilt();
+        loading.completeStage();
         channel.sendFile(playerImage).queue(message -> {
-            playerImage.delete();
-            this.done = true;
-            updateLoadingMessage();
+            final boolean delete = playerImage.delete();
+            loading.completeLoading();
         });
-        return true;
     }
 
+    /**
+     * Parse the player's clue scroll data from the Hiscores CSV
+     *
+     * @param data CSV data from API
+     * @return Clue scroll data
+     */
     private String[] getClueScrolls(String[] data) {
         data = Arrays.copyOfRange(data, 80, 93);
         String[] clues = new String[6];
@@ -184,27 +105,18 @@ public class Hiscores {
     private String[] fetchPlayerData(String name) {
         String[] normal = hiscoresRequest(name, "");
 
-        if(timeOut) {
-            failLoading();
-            updateLoadingMessage();
-            return null;
-        }
-
-        // Player doesn't exist
         if(normal == null) {
-            showPlayerExists(false);
             return null;
         }
 
-        showPlayerExists(true);
+        loading.completeStage();
 
         normal[0] = null;
-        showCheckingAccountType("Player exists, checking ironman hiscores");
+        loading.updateStage("Player exists, checking ironman hiscores");
         String[] iron = hiscoresRequest(name, "_ironman");
 
-        // Player is not an ironman
         if(iron == null) {
-            showAccountTypeFound("Player is a normal account!");
+            loading.completeStage("Player is a normal account!");
             return normal;
         }
 
@@ -213,51 +125,43 @@ public class Hiscores {
         long ironXP = Long.parseLong(iron[2]);
         long normXP = Long.parseLong(normal[2]);
 
-        // Player was some kind of ironman and de-ironed
         if(normXP > ironXP) {
-            showAccountTypeFound("Player is a de-ironed normal account!");
+            loading.completeStage("Player is a de-ironed normal account!");
             return normal;
         }
 
-        // Player currently is some kind of ironman
-        showCheckingAccountType("Player is an Ironman, checking Hardcore Ironman hiscores");
+        loading.updateStage("Player is an Ironman, checking Hardcore Ironman hiscores");
         String[] hardcore = hiscoresRequest(name, "_hardcore_ironman");
 
-        // Player was at some point a hardcore ironman
         if(hardcore != null) {
             hardcore[0] = "hardcore";
             long hcXP = Long.parseLong(hardcore[2]);
 
-            // Player died as a hardcore ironman and is now a normal ironman
             if(ironXP > hcXP) {
-                showAccountTypeFound("Player was a Hardcore Ironman and died! What a loser!");
+                loading.completeStage("Player was a Hardcore Ironman and died! What a loser!");
                 return iron;
             }
 
-            // Player is still a hardcore ironman
-            showAccountTypeFound("Player is a Hardcore Ironman!");
+            loading.completeStage("Player is a Hardcore Ironman!");
             return hardcore;
         }
 
-        showCheckingAccountType("Player is not hardcore, checking Ultimate Ironman hiscores");
+        loading.updateStage("Player is not hardcore, checking Ultimate Ironman hiscores");
         String[] ultimate = hiscoresRequest(name, "_ultimate");
 
-        // Player was at some point an ultimate ironman
         if(ultimate != null) {
             ultimate[0] = "ultimate";
             long ultXP = Long.parseLong(ultimate[2]);
 
-            // Player downgraded to a normal ironman
             if(ironXP > ultXP) {
-                showAccountTypeFound("Player is an Ironman who chickened out of Ultimate Ironman!");
+                loading.completeStage("Player is an Ironman who chickened out of Ultimate Ironman!");
                 return iron;
             }
 
-            // Player is still an ultimate ironman
-            showAccountTypeFound("Player is an Ultimate Ironman!");
+            loading.completeStage("Player is an Ultimate Ironman!");
             return ultimate;
         }
-        showAccountTypeFound("Player is an Ironman!");
+        loading.completeStage("Player is an Ironman!");
         return iron;
     }
 
@@ -273,10 +177,11 @@ public class Hiscores {
         String suffix = "/index_lite.ws?player=" + name;
         String response = ApiRequest.executeQuery(baseURL + suffix, "GET", null, false);
         if(response == null) {
-            timeOut = true;
+            loading.failLoading("I wasn't able to connect to the Hiscores");
             return null;
         }
         if(response.equals("err")) {
+            loading.failLoading("That player doesn't exist cunt");
             return null;
         }
         return response.replace("\n", ",").split(",");

@@ -58,7 +58,6 @@ public class OSRSLookupCommand extends DiscordCommand {
             channel.sendMessage("Maximum username length is 12 characters cunt").queue();
             return;
         }
-
         Hiscores hiscores = new Hiscores(channel);
         if(currentLookups.contains(name)) {
             channel.sendMessage("Oi I told you their website is slow, patience is a virtue cunt").queue();
