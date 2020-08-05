@@ -50,7 +50,6 @@ public class SummonerImage {
             // Draw level circle and border on icon
             BufferedImage profileIcon = ImageIO.read(summoner.getProfileIcon());
             BufferedImage borderOutline = ImageIO.read(summoner.getProfileBorder());
-
             g = profileIcon.getGraphics();
             g.drawImage(borderOutline, getCenterX(profileIcon, borderOutline), getCenterY(profileIcon, borderOutline), null);
             g.drawImage(circle, getCenterX(borderOutline, circle), profileIcon.getHeight() - circle.getHeight(), null);

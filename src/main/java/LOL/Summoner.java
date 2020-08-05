@@ -15,9 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Summoner {
-    private String id, name, apiKey = Secret.getLeagueKey(), res = "src/main/resources/LOL/Summoner/";
-    private ArrayList<RankedQueue> queues = new ArrayList<>();
-    private ArrayList<Champion> champions = new ArrayList<>();
+    private String name;
+    private final String apiKey = Secret.getLeagueKey(),res = "src/main/resources/LOL/Summoner/";
+    private final ArrayList<RankedQueue> queues = new ArrayList<>();
+    private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
     boolean exists;
     private File profileIcon, profileBorder;
@@ -64,7 +65,7 @@ public class Summoner {
             }
 
             JSONObject summoner = new JSONObject(json);
-            this.id = summoner.getString("id");
+            String id = summoner.getString("id");
             this.name = summoner.getString("name");
             this.level = summoner.getInt("summonerLevel");
             this.profileIcon = new File(res + "SummonerIcons/" + summoner.getInt("profileIconId") + ".png");
