@@ -2,9 +2,11 @@ package Command.Commands;
 
 import Bot.DiscordUser;
 import COD.CombatRecord;
+import COD.Gunfight;
 import COD.Player;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedLoadingMessage;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -13,16 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MWLookupCommand extends DiscordCommand {
-    ArrayList<String> platforms = new ArrayList<>();
+    private final ArrayList<String> currentLookups = new ArrayList<>();
 
     public MWLookupCommand() {
         super("mwlookup [player#1234/me/@someone], mwlookup save [player#1234]", "Have a gander at a player's stats!");
-        platforms.add("bnet");
-        platforms.add("psn");
-        platforms.add("xbox");
-        platforms.add("acti");
     }
-
 
     @Override
     public void execute(CommandContext context) {
@@ -66,15 +63,17 @@ public class MWLookupCommand extends DiscordCommand {
             channel.sendMessage("Maximum username length is 18 characters cunt").queue();
             return;
         }
+
         String finalName = name;
-        channel.sendMessage("One moment please").queue();
+        if(currentLookups.contains(name.toLowerCase())) {
+            channel.sendMessage("Patience is a virtue cunt").queue();
+            return;
+        }
+        currentLookups.add(name.toLowerCase());
+        CombatRecord combatRecord = new CombatRecord(channel);
         new Thread(() -> {
-            Player player = new Player(finalName, "bnet");
-            if(!player.exists()) {
-                channel.sendMessage("I couldn't find " + player.getName()).queue();
-                return;
-            }
-            channel.sendFile(new CombatRecord(player).buildImage()).queue();
+            combatRecord.buildImage(finalName);
+            currentLookups.remove(finalName.toLowerCase());
         }).start();
     }
 

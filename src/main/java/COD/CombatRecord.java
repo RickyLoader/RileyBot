@@ -1,6 +1,9 @@
 package COD;
 
+import Command.Structure.EmbedLoadingMessage;
 import com.objectplanet.image.PngEncoder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -9,18 +12,27 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class CombatRecord {
 
-    private final Player player;
+    private Player player;
     private final String resources = "src/main/resources/COD/";
     private Font codFont;
+    private final MessageChannel channel;
+    private EmbedLoadingMessage loading;
 
-    public CombatRecord(Player player) {
-        this.player = player;
+    public CombatRecord(MessageChannel channel) {
         registerFont();
+        this.channel = channel;
     }
 
+    /**
+     * Get the appropriate background image for the given weapon type
+     *
+     * @param type Weapon type
+     * @return Background image for weapon type
+     */
     private File getWeaponImage(Player.Weapon.TYPE type) {
         if(type == Player.Weapon.TYPE.PRIMARY || type == Player.Weapon.TYPE.SECONDARY) {
             return new File((resources + "Templates/wep_quadrant.png"));
@@ -28,6 +40,12 @@ public class CombatRecord {
         return new File((resources + "Templates/lethal_quadrant.png"));
     }
 
+    /**
+     * Draw the weapon stats on to the weapon section
+     *
+     * @param weapon Weapon to draw
+     * @return Weapon section with weapon stats drawn on
+     */
     private BufferedImage drawWeapon(Player.Weapon weapon) {
         BufferedImage image = null;
         try {
@@ -36,11 +54,13 @@ public class CombatRecord {
             g.setFont(codFont.deriveFont(50f));
 
             BufferedImage weaponImage = ImageIO.read(weapon.getImage());
+
+            // Draw the weapon image on to the background and write the name and kills
             g.drawImage(weaponImage, (image.getWidth() / 2) - (weaponImage.getWidth() / 2), 250, null);
-
             g.drawString(weapon.getName(), (image.getWidth() / 2) - (g.getFontMetrics().stringWidth(weapon.getName()) / 2), 175);
-
             g.drawString(String.valueOf(weapon.getKills()), 277, 490);
+
+            // Draw the other weapon stats (lethals only have kills)
             if(weapon.getType() != Player.Weapon.TYPE.LETHAL) {
                 g.drawString(String.valueOf(weapon.getDeaths()), 277, 590);
                 g.drawString(String.valueOf(weapon.getKd()), 277, 690);
@@ -60,6 +80,11 @@ public class CombatRecord {
         return image;
     }
 
+    /**
+     * Draw the win loss ratio on to the win loss section
+     *
+     * @return Win loss section with stats drawn on
+     */
     private BufferedImage drawWinLoss() {
         BufferedImage image = null;
         try {
@@ -81,6 +106,11 @@ public class CombatRecord {
         return image;
     }
 
+    /**
+     * Draw the commendations on to the commendation section
+     *
+     * @return Commendation section with commendations drawn on
+     */
     private BufferedImage drawCommendations() {
         ArrayList<Player.Commendation> commendations = player.getCommendations();
         BufferedImage image = null;
@@ -123,6 +153,11 @@ public class CombatRecord {
         return image;
     }
 
+    /**
+     * Draw the kill death ratio on to the kill death section
+     *
+     * @return Kill death section with stats drawn on
+     */
     private BufferedImage drawKillDeath() {
         BufferedImage image = null;
         try {
@@ -139,16 +174,35 @@ public class CombatRecord {
         return image;
     }
 
-    public File buildImage() {
-        File playerStats = null;
+    /**
+     * Build the various sections of the image and draw them each on to the background image
+     *
+     * @param nameQuery Player name
+     */
+    public void buildImage(String nameQuery) {
+        this.loading = new EmbedLoadingMessage(
+                channel,
+                "MW Player lookup: " + nameQuery.toUpperCase(),
+                "One moment please.",
+                Gunfight.getThumb(),
+                new String[]{
+                        "Fetching player data...",
+                        "Building image..."
+                }
+        );
+        loading.showLoading();
+        this.player = new Player(nameQuery, "bnet");
+        if(!player.exists()) {
+            loading.failLoading("That player doesn't exist cunt");
+            return;
+        }
+        loading.completeStage();
         try {
             codFont = new Font("Eurostile Next LT Pro Semibold", Font.PLAIN, 75);
 
             BufferedImage main = ImageIO.read(new File((resources + "Templates/template.png")));
             Graphics g = main.getGraphics();
-
             g.drawImage(drawWeapon(player.getPrimary()), 17, 119, null);
-
             g.drawImage(drawWeapon(player.getSecondary()), 542, 119, null);
             g.drawImage(drawWeapon(player.getLethal()), 1067, 119, null);
             g.drawImage(drawWinLoss(), 1067, 700, null);
@@ -160,12 +214,12 @@ public class CombatRecord {
             String name = player.getName().toUpperCase();
             g.drawString(player.getName().toUpperCase(), (main.getWidth() / 2) - (g.getFontMetrics().stringWidth(name) / 2), 100);
             g.dispose();
-            playerStats = saveImage(main, player.getName());
+            loading.completeStage();
+            channel.sendFile(saveImage(main, player.getName())).queue(message -> loading.completeLoading());
         }
         catch(Exception e) {
             e.printStackTrace();
         }
-        return playerStats;
     }
 
     /**

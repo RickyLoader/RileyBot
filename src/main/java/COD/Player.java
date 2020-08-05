@@ -126,6 +126,10 @@ public class Player {
                 JSONObject category = items.getJSONObject(categoryName);
                 for(String gunName : category.keySet()) {
                     JSONObject gun = category.getJSONObject(gunName).getJSONObject("properties");
+                    if(!gunNames.getJSONObject(categoryName).has(gunName)) {
+                        System.out.println("MISSING GUN: " + gunName);
+                        continue;
+                    }
                     String realName = gunNames.getJSONObject(categoryName).getJSONObject(gunName).getString("real_name");
                     gun.put("real_name", realName);
                 }
@@ -137,6 +141,13 @@ public class Player {
         return items;
     }
 
+    /**
+     * Get the player's favourite weapon of a given type - PRIMARY, SECONDARY, LETHAL
+     *
+     * @param items JSON weapons from the API
+     * @param type  Weapon type
+     * @return Player's favourite weapon
+     */
     private Weapon getFavourite(JSONObject items, Weapon.TYPE type) {
         String[] desiredCategories = Weapon.getCategories(type);
         Weapon favWeapon = null;
@@ -144,18 +155,13 @@ public class Player {
             JSONObject category = items.getJSONObject(desiredCategory);
             for(String weaponName : category.keySet()) {
                 JSONObject weapon = category.getJSONObject(weaponName).getJSONObject("properties");
-                int kills = weapon.getInt("kills");
-                int deaths = weapon.getInt("deaths");
-                int hits = weapon.getInt("hits");
-                int shots = weapon.getInt("shots");
-                int headshots = (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots");
                 Weapon currentWeapon = new Weapon(
                         weaponName,
-                        weapon.getString("real_name"),
+                        weapon.has("real_name") ? weapon.getString("real_name") : "MISSING NAME",
                         desiredCategory,
-                        new Ratio(kills, deaths),
-                        new Ratio(hits, shots),
-                        headshots,
+                        new Ratio(weapon.getInt("kills"), weapon.getInt("deaths")),
+                        new Ratio(weapon.getInt("hits"), weapon.getInt("shots")),
+                        (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots"),
                         type
                 );
                 if(favWeapon == null || favWeapon.getKills() < currentWeapon.getKills()) {
@@ -235,7 +241,7 @@ public class Player {
      * @return Total wins
      */
     public int getWins() {
-        return wl.getPos();
+        return wl.getNumerator();
     }
 
     /**
@@ -244,7 +250,7 @@ public class Player {
      * @return Total losses
      */
     public int getLosses() {
-        return wl.getNeg();
+        return wl.getDenominator();
     }
 
     /**
@@ -270,20 +276,20 @@ public class Player {
      */
     private static class Ratio {
         private final double ratio;
-        private final int pos, neg, diff;
+        private final int numerator, denominator, diff;
 
-        public Ratio(int pos, int neg) {
-            if(pos == 0 || neg == 0) {
+        public Ratio(int numerator, int denominator) {
+            if(numerator == 0 || denominator == 0) {
                 this.ratio = 0;
             }
             else {
-                this.ratio = (double) pos / (double) neg;
+                this.ratio = (double) numerator / (double) denominator;
             }
-            this.neg = neg;
-            this.pos = pos;
+            this.denominator = denominator;
+            this.numerator = numerator;
 
             // How many ahead/behind
-            this.diff = pos - neg;
+            this.diff = numerator - denominator;
         }
 
         /**
@@ -319,8 +325,8 @@ public class Player {
          *
          * @return Positive value
          */
-        public int getPos() {
-            return pos;
+        public int getNumerator() {
+            return numerator;
         }
 
         /**
@@ -328,8 +334,8 @@ public class Player {
          *
          * @return Negative value
          */
-        public int getNeg() {
-            return neg;
+        public int getDenominator() {
+            return denominator;
         }
     }
 
@@ -350,6 +356,17 @@ public class Player {
             TACTICAL
         }
 
+        /**
+         * Create a weapon
+         *
+         * @param iwName    Infinity Ward name of weapon e.g "iw8_me_akimboblunt"
+         * @param name      Real name of weapon e.g "Kali Sticks"
+         * @param category  Infinity Ward name of weapon category e.g "weapon_melee"
+         * @param kd        Kill/Death ratio of weapon
+         * @param accuracy  Shots Hit/Shots Fired ratio of weapon
+         * @param headshots Number of headshots with weapon
+         * @param type      Type of weapon
+         */
         public Weapon(String iwName, String name, String category, Ratio kd, Ratio accuracy, int headshots, TYPE type) {
             this.iwName = iwName;
             this.category = category;
@@ -386,6 +403,15 @@ public class Player {
                     break;
             }
             return imageTitle;
+        }
+
+        /**
+         * Get the Infinity Ward name of the weapon
+         *
+         * @return Infinity Ward name of weapon
+         */
+        public String getIwName() {
+            return iwName;
         }
 
         /**
@@ -439,7 +465,7 @@ public class Player {
          * @return Shots fired
          */
         public int getShotsFired() {
-            return accuracy.getNeg();
+            return accuracy.getDenominator();
         }
 
         /**
@@ -457,7 +483,7 @@ public class Player {
          * @return Shots hit
          */
         public int getShotsHit() {
-            return accuracy.getPos();
+            return accuracy.getNumerator();
         }
 
         /**
@@ -466,7 +492,7 @@ public class Player {
          * @return Kills
          */
         public int getKills() {
-            return kd.getPos();
+            return kd.getNumerator();
         }
 
         /**
@@ -475,7 +501,7 @@ public class Player {
          * @return Deaths
          */
         public int getDeaths() {
-            return kd.getNeg();
+            return kd.getDenominator();
         }
 
         /**
@@ -504,11 +530,22 @@ public class Player {
         }
     }
 
+    /**
+     * Hold commendation information
+     */
     public static class Commendation implements Comparable<Commendation> {
         private final int quantity;
         private final String iwName, title, desc;
         private final File image;
 
+        /**
+         * Create a commendation
+         *
+         * @param iwName   Infinity Ward of commendation e.g "noDeathsFromBehind"
+         * @param title    Real name of commendation e.g "Sixth Sense"
+         * @param desc     Description of commendation e.g "No deaths from behind"
+         * @param quantity Player quantity of commendation
+         */
         public Commendation(String iwName, String title, String desc, int quantity) {
             this.iwName = iwName;
             this.title = title;
@@ -517,30 +554,54 @@ public class Player {
             this.image = new File("src/main/resources/COD/Accolades/" + iwName + ".png");
         }
 
+        /**
+         * Get the image of the commendation
+         *
+         * @return Commendation image
+         */
         public File getImage() {
             return image;
         }
 
+        /**
+         * Format the quantity from 1 to x1
+         *
+         * @return Formatted quantity
+         */
         public String formatQuantity() {
             return "x" + quantity;
         }
 
+        /**
+         * Get the description of the commendation (what it is awarded for)
+         *
+         * @return Description of commendation
+         */
         public String getDesc() {
             return desc;
         }
 
+        /**
+         * Get the quantity of the commendation
+         *
+         * @return How many have been awarded to the player
+         */
         public int getQuantity() {
             return quantity;
         }
 
+        /**
+         * Get the title of the commendation (The name)
+         *
+         * @return Name of commendation
+         */
         public String getTitle() {
             return title;
         }
 
-        public String getIwName() {
-            return iwName;
-        }
-
+        /**
+         * Sort descending by quantity
+         */
         @Override
         public int compareTo(@NotNull Player.Commendation o) {
             return o.getQuantity() - this.getQuantity();

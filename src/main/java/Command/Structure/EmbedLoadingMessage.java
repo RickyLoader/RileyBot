@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
@@ -40,11 +41,10 @@ public class EmbedLoadingMessage {
      * Send the loading message to the title and save the starting time and message id
      */
     public void showLoading() {
-        channel.sendMessage(createLoadingMessage()).queue(message -> {
-            startTime = System.currentTimeMillis();
-            currentTime = startTime;
-            id = message.getIdLong();
-        });
+        Message message = channel.sendMessage(createLoadingMessage()).complete();
+        startTime = System.currentTimeMillis();
+        currentTime = startTime;
+        id = message.getIdLong();
     }
 
     /**

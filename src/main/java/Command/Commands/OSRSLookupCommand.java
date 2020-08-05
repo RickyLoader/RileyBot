@@ -59,16 +59,16 @@ public class OSRSLookupCommand extends DiscordCommand {
             return;
         }
         Hiscores hiscores = new Hiscores(channel);
-        if(currentLookups.contains(name)) {
+        if(currentLookups.contains(name.toLowerCase())) {
             channel.sendMessage("Oi I told you their website is slow, patience is a virtue cunt").queue();
             return;
         }
-        currentLookups.add(name);
+        currentLookups.add(name.toLowerCase());
 
         String finalName = name;
         new Thread(() -> {
             hiscores.lookupPlayer(finalName);
-            currentLookups.remove(finalName);
+            currentLookups.remove(finalName.toLowerCase());
         }).start();
     }
 

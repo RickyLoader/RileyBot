@@ -56,7 +56,6 @@ public class ApiRequest {
                     builder.delete();
                     break;
             }
-
             // Execute the request and receive a response
             Response response = client.newCall(builder.build()).execute();
             // Successful request
