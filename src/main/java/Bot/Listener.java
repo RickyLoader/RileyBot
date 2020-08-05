@@ -3,6 +3,7 @@ package Bot;
 
 import Command.Structure.DiscordCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -67,7 +68,7 @@ public class Listener extends ListenerAdapter {
             String triggerTitle = "\u200B", descTitle = "\u200B";
             if(i == 0) {
                 triggerTitle = "**Trigger**";
-                descTitle= "**Description**";
+                descTitle = "**Description**";
             }
             builder.addField(triggerTitle, c.getHelpName(), true);
             builder.addBlankField(true);
