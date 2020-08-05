@@ -52,21 +52,6 @@ public class Listener extends ListenerAdapter {
         }
     }
 
-    private int[] pickRandomCommands(int bound, int size) {
-        int[] indexes = new int[bound];
-        ArrayList<Integer> seen = new ArrayList<>();
-        Random rand = new Random();
-        for(int i = 0; i < bound; i++) {
-            int j = rand.nextInt(size);
-            while(seen.contains(j)) {
-                j = rand.nextInt(size);
-            }
-            indexes[i] = j;
-            seen.add(j);
-        }
-        return indexes;
-    }
-
     private void welcomeCunt(Member self, Member cunt, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(15655767);
@@ -74,18 +59,19 @@ public class Listener extends ListenerAdapter {
         builder.setThumbnail(self.getUser().getAvatarUrl());
         builder.setDescription("Here's some stuff I can do, now fuck off.");
 
-        ArrayList<DiscordCommand> commands = commandManager.getCommands();
-        int[] indexes = pickRandomCommands(5, commands.size());
+        DiscordCommand[] random = commandManager.pickRandomCommands(5);
 
-        builder.addField("**Trigger**", commands.get(indexes[0]).getHelpName(), true);
-        builder.addBlankField(true);
-        builder.addField("**Description**", commands.get(indexes[0]).getDesc(), true);
 
-        for(int i = 1; i < indexes.length; i++) {
-            DiscordCommand c = commands.get(i);
-            builder.addField("\u200B", c.getHelpName(), true);
+        for(int i = 0; i < random.length; i++) {
+            DiscordCommand c = random[i];
+            String triggerTitle = "\u200B", descTitle = "\u200B";
+            if(i == 0) {
+                triggerTitle = "**Trigger**";
+                descTitle= "**Description**";
+            }
+            builder.addField(triggerTitle, c.getHelpName(), true);
             builder.addBlankField(true);
-            builder.addField("\u200B", c.getDesc(), true);
+            builder.addField(descTitle, c.getDesc(), true);
         }
         channel.sendMessage(cunt.getAsMention()).queue();
         channel.sendMessage(builder.build()).queue();

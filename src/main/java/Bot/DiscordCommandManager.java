@@ -16,6 +16,7 @@ import Command.Structure.DiscordCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands = new ArrayList<>();
@@ -32,6 +33,21 @@ public class DiscordCommandManager {
             }
         }
         return null;
+    }
+
+    public DiscordCommand[] pickRandomCommands(int bound) {
+        DiscordCommand[] commands = new DiscordCommand[bound];
+        ArrayList<DiscordCommand> seen = new ArrayList<>();
+        Random rand = new Random();
+        for(int i = 0; i < bound; i++) {
+            DiscordCommand j = this.commands.get(rand.nextInt(this.commands.size()));
+            while(seen.contains(j)) {
+                j = this.commands.get(rand.nextInt(this.commands.size()));
+            }
+            commands[i] = j;
+            seen.add(j);
+        }
+        return commands;
     }
 
     public ArrayList<DiscordCommand> getCommands() {
