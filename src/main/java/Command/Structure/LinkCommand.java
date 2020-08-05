@@ -1,9 +1,6 @@
 package Command.Structure;
 
-import Network.ApiRequest;
 import org.json.JSONObject;
-
-import java.util.Arrays;
 
 
 public class LinkCommand extends DiscordCommand {

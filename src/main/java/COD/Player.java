@@ -1,6 +1,6 @@
 package COD;
 
-import Network.ApiRequest;
+import Network.NetworkRequest;
 import Network.NetworkInfo;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -36,7 +36,7 @@ public class Player {
         String json;
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
-            json = ApiRequest.executeQuery(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/" + name + "/" + platform, "GET", null, false);
+            json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/" + name + "/" + platform, false).get();
             if(json == null) {
                 return null;
             }

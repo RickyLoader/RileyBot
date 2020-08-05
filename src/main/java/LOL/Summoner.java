@@ -1,7 +1,7 @@
 package LOL;
 
-import Command.Structure.Secret;
-import Network.ApiRequest;
+import Network.Secret;
+import Network.NetworkRequest;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,7 +16,7 @@ import java.util.Collections;
 
 public class Summoner {
     private String name;
-    private final String apiKey = Secret.getLeagueKey(),res = "src/main/resources/LOL/Summoner/";
+    private final String apiKey = Secret.getLeagueKey(), res = "src/main/resources/LOL/Summoner/";
     private final ArrayList<RankedQueue> queues = new ArrayList<>();
     private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
@@ -59,7 +59,7 @@ public class Summoner {
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
             String url = "https://oc1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + name + apiKey;
-            json = ApiRequest.executeQuery(url, "GET", null, false);
+            json = new NetworkRequest(url, false).get();
             if(json == null) {
                 return false;
             }
@@ -72,7 +72,7 @@ public class Summoner {
             this.profileBorder = new File(res + "SummonerBorders/" + roundLevel(level) + ".png");
 
             url = "https://oc1.api.riotgames.com/lol/league/v4/entries/by-summoner/" + id + apiKey;
-            json = ApiRequest.executeQuery(url, "GET", null, false);
+            json = new NetworkRequest(url, false).get();
             if(json != null) {
                 JSONArray queues = new JSONArray(json);
                 for(int i = 0; i < queues.length(); i++) {
@@ -89,7 +89,7 @@ public class Summoner {
             }
 
             url = "https://oc1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
-            json = ApiRequest.executeQuery(url, "GET", null, false);
+            json = new NetworkRequest(url, false).get();
             if(json != null) {
                 JSONArray champions = new JSONArray(json);
                 for(int i = 0; i < champions.length(); i++) {

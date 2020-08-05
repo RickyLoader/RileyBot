@@ -1,8 +1,8 @@
 package OSRS.Stats;
 
 import Command.Structure.EmbedLoadingMessage;
-import Network.ApiRequest;
-import com.objectplanet.image.PngEncoder;
+import Network.NetworkRequest;
+import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
@@ -48,7 +48,8 @@ public class Hiscores {
                 new String[]{
                         "Player exists...",
                         "Checking account type...",
-                        "Building image..."
+                        "Building image...",
+                        "Uploading image..."
                 }
         );
         loading.showLoading();
@@ -76,12 +77,11 @@ public class Hiscores {
 
         String[] clues = getClueScrolls(data);
         String[] stats = orderSkills(data);
-        File playerImage = buildImage(name, data[0], stats, bossKills, clues);
+        BufferedImage playerImage = buildImage(name, data[0], stats, bossKills, clues);
         loading.completeStage();
-        channel.sendFile(playerImage).queue(message -> {
-            final boolean delete = playerImage.delete();
-            loading.completeLoading();
-        });
+        String url = ImgurManager.uploadImage(playerImage);
+        loading.completeStage();
+        loading.completeLoading(url);
     }
 
     /**
@@ -171,7 +171,6 @@ public class Hiscores {
         return iron;
     }
 
-
     /**
      * Make a request to the OSRS hiscores API
      *
@@ -181,7 +180,7 @@ public class Hiscores {
     private String[] hiscoresRequest(String name, String type) {
         String baseURL = "https://secure.runescape.com/m=hiscore_oldschool" + type;
         String suffix = "/index_lite.ws?player=" + name;
-        String response = ApiRequest.executeQuery(baseURL + suffix, "GET", null, false);
+        String response = new NetworkRequest(baseURL + suffix, false).get();
         if(response == null) {
             timeout = true;
             return null;
@@ -193,18 +192,22 @@ public class Hiscores {
     }
 
     /**
-     * Build an image displaying player skills
+     * Build an image based on the player's stats, boss kills, and clue scrolls
      *
-     * @param skills Skills to display on message
-     * @return Embedded message displaying player skills
+     * @param name   Player name
+     * @param type   Player account type
+     * @param skills Player stats
+     * @param bosses Player boss kills
+     * @param clues  Player clue scroll completions
+     * @return Image showing player stats
      */
-    private File buildImage(String name, String type, String[] skills, List<Boss> bosses, String[] clues) {
-        File playerStats = null;
+    private BufferedImage buildImage(String name, String type, String[] skills, List<Boss> bosses, String[] clues) {
+        BufferedImage image = null;
         int fontSize = 65;
         try {
             String imagePath = (resources + "Templates/stats_template.png");
 
-            BufferedImage image = ImageIO.read(new File(imagePath));
+            image = ImageIO.read(new File(imagePath));
             Graphics g = image.getGraphics();
             Font runeFont = new Font("RuneScape Chat '07", Font.PLAIN, fontSize);
             g.setFont(runeFont);
@@ -296,34 +299,12 @@ public class Hiscores {
                 BufferedImage accountType = ImageIO.read(new File(resources + "Accounts/" + type + ".png"));
                 g.drawImage(accountType, x - (int) (accountType.getWidth() * 1.5), 115 - (accountType.getHeight() / 2), null);
             }
-
             g.dispose();
-            playerStats = saveImage(image, name);
         }
         catch(Exception e) {
             e.printStackTrace();
         }
-        return playerStats;
-    }
-
-    /**
-     * Saves the created image to disk
-     *
-     * @param image Image to be saved
-     * @return Image file
-     */
-    private File saveImage(BufferedImage image, String name) {
-        File file = null;
-        try {
-            file = new File(resources + name + ".png");
-            FileOutputStream output = new FileOutputStream(file);
-            new PngEncoder().encode(image, output);
-            output.close();
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
-        return file;
+        return image;
     }
 
     /**

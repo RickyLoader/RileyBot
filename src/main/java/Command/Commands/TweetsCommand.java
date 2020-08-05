@@ -3,7 +3,7 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.PageableEmbed;
 import Command.Structure.PageableEmbedCommand;
-import TwitterManager.TwitterManager;
+import Network.TwitterManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import twitter4j.ResponseList;

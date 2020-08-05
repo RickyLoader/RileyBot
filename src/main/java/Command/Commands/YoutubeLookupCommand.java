@@ -4,11 +4,12 @@ import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.PageableEmbed;
 import Command.Structure.PageableEmbedCommand;
-import Network.ApiRequest;
+import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.*;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import sun.nio.ch.Net;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,7 +98,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
 
         private boolean getChannelInfo(String query) {
             String searchChannel = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=" + query + "&key=" + key;
-            String json = ApiRequest.executeQuery(searchChannel, "GET", null, false);
+            String json = new NetworkRequest(searchChannel, false).get();
             if(json == null) {
                 return false;
             }
@@ -119,7 +120,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
         private ArrayList<Video> findVideos() {
             HashMap<String, Video> videos = new HashMap<>();
             String videoSearch = "https://www.googleapis.com/youtube/v3/search?channelId=" + id + "&part=snippet,id&order=date&maxResults=50&key=" + key;
-            String json = ApiRequest.executeQuery(videoSearch, "GET", null, false);
+            String json = new NetworkRequest(videoSearch,false).get();
             if(json == null) {
                 return null;
             }
@@ -145,7 +146,7 @@ public class YoutubeLookupCommand extends PageableEmbedCommand {
             ArrayList<String> videoIds = videos.values().stream().map(Video::getId).collect(Collectors.toCollection(ArrayList::new));
             String idList = videoIds.toString().replace("[", "").replace("]", "").replace(" ", "");
             String statSearch = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=" + idList + "&key=" + key;
-            String statInfo = ApiRequest.executeQuery(statSearch, "GET", null, false);
+            String statInfo = new NetworkRequest(statSearch,false).get();
             if(statInfo == null) {
                 return null;
             }

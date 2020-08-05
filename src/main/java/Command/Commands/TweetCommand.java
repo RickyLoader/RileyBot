@@ -2,7 +2,7 @@ package Command.Commands;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import TwitterManager.TwitterManager;
+import Network.TwitterManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;

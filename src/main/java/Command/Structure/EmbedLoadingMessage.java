@@ -16,6 +16,7 @@ public class EmbedLoadingMessage {
     private final String title, thumbnail, desc;
     private final ArrayList<LoadingStage> stages = new ArrayList<>();
     private int currentStep;
+    private String url;
 
     /**
      * Create a loading message
@@ -85,6 +86,16 @@ public class EmbedLoadingMessage {
     }
 
     /**
+     * Complete the loading embed with an image URL to be used
+     *
+     * @param url URL to be used as the image of the embed
+     */
+    public void completeLoading(String url) {
+        this.url = url;
+        completeLoading();
+    }
+
+    /**
      * Add a field showing that the loading has completed
      */
     public void completeLoading() {
@@ -122,6 +133,9 @@ public class EmbedLoadingMessage {
         builder.setColor(65280);
         for(LoadingStage stage : stages) {
             builder.addField(stage.getTitle(), stage.getValue(), false);
+        }
+        if(url != null) {
+            builder.setImage(url);
         }
         return builder.build();
     }

@@ -1,0 +1,235 @@
+{
+    "guns": {
+        "weapon_sniper": {
+            "iw8_sn_alpha50": {
+                "real_name": "AX-50"
+            },
+            "iw8_sn_hdromeo": {
+                "real_name": "HDR"
+            },
+            "iw8_sn_delta": {
+                "real_name": "Dragunov"
+            },
+            "iw8_sn_xmike109": {
+                "real_name": "Rytec AMR"
+            }
+        },
+        "weapon_lmg": {
+            "iw8_lm_kilo121": {
+                "real_name": "Bruen Mk9"
+            },
+            "iw8_lm_mkilo3": {
+                "real_name": "M91"
+            },
+            "iw8_lm_mgolf34": {
+                "real_name": "MG34"
+            },
+            "iw8_lm_lima86": {
+                "real_name": "SA87"
+            },
+            "iw8_lm_pkilo": {
+                "real_name": "PKM"
+            },
+            "iw8_lm_mgolf36": {
+                "real_name": "Holger-26"
+            }
+        },
+        "weapon_launcher": {
+            "iw8_la_gromeo": {
+                "real_name": "PILA"
+            },
+            "iw8_la_rpapa7": {
+                "real_name": "RPG-7"
+            },
+            "iw8_la_juliet": {
+                "real_name": "JOKR"
+            },
+            "iw8_la_kgolf": {
+                "real_name": "Strela-P"
+            },
+            "iw8_la_mike32": {
+                "real_name": "M32 Grenade Launcher"
+            }
+        },
+        "weapon_pistol": {
+            "iw8_pi_cpapa": {
+                "real_name": ".357"
+            },
+            "iw8_pi_mike9": {
+                "real_name": "Renetti"
+            },
+            "iw8_pi_mike1911": {
+                "real_name": "1911"
+            },
+            "iw8_pi_golf21": {
+                "real_name": "X16"
+            },
+            "iw8_pi_decho": {
+                "real_name": ".50 GS"
+            },
+            "iw8_pi_papa320": {
+                "real_name": "M19"
+            }
+        },
+        "weapon_assault_rifle": {
+            "iw8_ar_falima": {
+                "real_name": "FAL"
+            },
+            "iw8_ar_tango21": {
+                "real_name": "RAM-7"
+            },
+            "iw8_ar_mike4": {
+                "real_name": "M4A1"
+            },
+            "iw8_ar_falpha": {
+                "real_name": "FR 5.56"
+            },
+            "iw8_ar_mcharlie": {
+                "real_name": "M13"
+            },
+            "iw8_ar_akilo47": {
+                "real_name": "AK-47"
+            },
+            "iw8_ar_kilo433": {
+                "real_name": "Kilo 141"
+            },
+            "iw8_ar_scharlie": {
+                "real_name": "FN SCAR 17"
+            },
+            "iw8_ar_asierra12": {
+                "real_name": "Oden"
+            },
+            "iw8_ar_galima": {
+                "real_name": "CR-56 AMAX"
+            },
+            "iw8_ar_sierra552": {
+                "real_name": "Grau 5.56"
+            }
+        },
+        "weapon_other": {
+            "iw8_me_riotshield": {
+                "real_name": "Riot Shield"
+            }
+        },
+        "weapon_shotgun": {
+            "iw8_sh_mike26": {
+                "real_name": "VLK Rogue"
+            },
+            "iw8_sh_charlie725": {
+                "real_name": "725"
+            },
+            "iw8_sh_oscar12": {
+                "real_name": "Origin 12 Shotgun"
+            },
+            "iw8_sh_romeo870": {
+                "real_name": "Model 680"
+            },
+            "iw8_sh_dpapa12": {
+                "real_name": "R9-0 Shotgun"
+            }
+        },
+        "weapon_smg": {
+            "iw8_sm_mpapa7": {
+                "real_name": "MP7"
+            },
+            "iw8_sm_augolf": {
+                "real_name": "AUG"
+            },
+            "iw8_sm_papa90": {
+                "real_name": "P90"
+            },
+            "iw8_sm_mpapa5": {
+                "real_name": "MP5"
+            },
+            "iw8_sm_smgolf45": {
+                "real_name": "Striker-45"
+            },
+            "iw8_sm_beta": {
+                "real_name": "PP19 Bizon"
+            },
+            "iw8_sm_victor": {
+                "real_name": "Fennec"
+            },
+            "iw8_sm_uzulu": {
+                "real_name": "Uzi"
+            }
+        },
+        "weapon_marksman": {
+            "iw8_sn_sbeta": {
+                "real_name": "MK2 Carbine"
+            },
+            "iw8_sn_crossbow": {
+                "real_name": "Crossbow"
+            },
+            "iw8_sn_kilo98": {
+                "real_name": "Kar98k"
+            },
+            "iw8_sn_mike14": {
+                "real_name": "EBR-14"
+            },
+            "iw8_sn_sksierra": {
+                "real_name": "SKS"
+            }
+        },
+        "weapon_melee": {
+            "iw8_knife": {
+                "real_name": "Combat Knife"
+            },
+            "iw8_me_akimboblunt": {
+                "real_name": "Kali Sticks"
+            }
+        },
+        "tacticals": {
+            "equip_gas_grenade": {
+                "real_name": "Gas Grenade"
+            },
+            "equip_snapshot_grenade": {
+                "real_name": "Snapshot Grenade"
+            },
+            "equip_decoy": {
+                "real_name": "Decoy Grenade"
+            },
+            "equip_smoke": {
+                "real_name": "Smoke Grenade"
+            },
+            "equip_concussion": {
+                "real_name": "Stun Grenade"
+            },
+            "equip_hb_sensor": {
+                "real_name": "Heartbeat Sensor"
+            },
+            "equip_flash": {
+                "real_name": "Flash Grenade"
+            },
+            "equip_adrenaline": {
+                "real_name": "Stim"
+            }
+        },
+        "lethals": {
+            "equip_frag": {
+                "real_name": "Frag Grenade"
+            },
+            "equip_thermite": {
+                "real_name": "Thermite"
+            },
+            "equip_semtex": {
+                "real_name": "Semtex"
+            },
+            "equip_claymore": {
+                "real_name": "Claymore"
+            },
+            "equip_c4": {
+                "real_name": "C4"
+            },
+            "equip_at_mine": {
+                "real_name": "Proximity Mine"
+            },
+            "equip_throwing_knife": {
+                "real_name": "Throwing Knife"
+            },
+            "equip_molotov": {
+                "real_name": "Molotov Cocktail"
+            }
+        }
+    }
+}

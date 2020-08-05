@@ -1,9 +1,10 @@
 package COD;
 
-import Network.ApiRequest;
+import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import sun.nio.ch.Net;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -71,7 +72,7 @@ public class Session {
      * Submit the gunfight session to the database
      */
     void submitGame() {
-        ApiRequest.executeQuery(endPoint + "/submit", "ADD", getGameSummary(), true);
+        new NetworkRequest(endPoint + "/submit", true).post(getGameSummary(), null);
     }
 
     /**
@@ -96,7 +97,7 @@ public class Session {
      * @return Gunfight history
      */
     public static ArrayList<Session> getHistory() {
-        String json = ApiRequest.executeQuery(endPoint + "/fetch", "GET", null, true);
+        String json = new NetworkRequest(endPoint + "/fetch", true).get();
         if(json == null) {
             return null;
         }
@@ -134,7 +135,7 @@ public class Session {
      * @return Total match numbers
      */
     static int getTotalMatches() {
-        String json = ApiRequest.executeQuery(endPoint + "/total", "GET", null, true);
+        String json = new NetworkRequest(endPoint + "/total", true).get();
         if(json == null) {
             return 0;
         }

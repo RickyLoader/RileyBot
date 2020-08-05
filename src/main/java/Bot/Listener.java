@@ -2,6 +2,7 @@ package Bot;
 
 
 import Command.Structure.DiscordCommand;
+import Network.ImgurManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.OnlineStatus;

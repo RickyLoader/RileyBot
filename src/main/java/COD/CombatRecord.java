@@ -1,18 +1,14 @@
 package COD;
 
 import Command.Structure.EmbedLoadingMessage;
-import com.objectplanet.image.PngEncoder;
-import net.dv8tion.jda.api.entities.Message;
+import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 public class CombatRecord {
 
@@ -187,7 +183,8 @@ public class CombatRecord {
                 Gunfight.getThumb(),
                 new String[]{
                         "Fetching player data...",
-                        "Building image..."
+                        "Building image...",
+                        "Uploading image..."
                 }
         );
         loading.showLoading();
@@ -215,31 +212,13 @@ public class CombatRecord {
             g.drawString(player.getName().toUpperCase(), (main.getWidth() / 2) - (g.getFontMetrics().stringWidth(name) / 2), 100);
             g.dispose();
             loading.completeStage();
-            channel.sendFile(saveImage(main, player.getName())).queue(message -> loading.completeLoading());
+            String url = ImgurManager.uploadImage(main);
+            loading.completeStage();
+            loading.completeLoading(url);
         }
         catch(Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Saves the created image to disk
-     *
-     * @param image Image to be saved
-     * @return Image file
-     */
-    private File saveImage(BufferedImage image, String name) {
-        File file = null;
-        try {
-            file = new File(resources + name + ".png");
-            FileOutputStream output = new FileOutputStream(file);
-            new PngEncoder().encode(image, output);
-            output.close();
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
-        return file;
     }
 
     /**
