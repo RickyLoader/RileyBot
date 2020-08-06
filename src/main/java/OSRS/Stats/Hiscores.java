@@ -4,6 +4,7 @@ import Command.Structure.EmbedLoadingMessage;
 import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
 import Network.ImgurManager;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
@@ -23,16 +24,18 @@ public class Hiscores {
     private final MessageChannel channel;
     private ImageLoadingMessage loading;
     private boolean timeout = false;
+    private final Guild guild;
 
     /**
      * Initialise the Hiscores with a channel to send the image to
      *
      * @param channel Channel to send image to
      */
-    public Hiscores(MessageChannel channel) {
+    public Hiscores(MessageChannel channel, Guild guild) {
         registerFont();
         bossNames = getBossNames();
         this.channel = channel;
+        this.guild = guild;
     }
 
     /**
@@ -43,6 +46,7 @@ public class Hiscores {
     public void lookupPlayer(String name) {
         this.loading = new ImageLoadingMessage(
                 channel,
+                guild,
                 "OSRS Hiscores lookup: " + name.toUpperCase(),
                 "Give me a second, their website is slow as fuck.",
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",

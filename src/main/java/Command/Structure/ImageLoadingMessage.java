@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
@@ -16,8 +17,8 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
      * @param thumbnail    Embed thumbnail
      * @param loadingSteps List of titles for loading fields
      */
-    public ImageLoadingMessage(MessageChannel channel, String title, String desc, String thumbnail, String[] loadingSteps) {
-        super(channel, title, desc, thumbnail, loadingSteps);
+    public ImageLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String[] loadingSteps) {
+        super(channel, guild, title, desc, thumbnail, loadingSteps);
     }
 
     /**

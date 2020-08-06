@@ -2,6 +2,7 @@ package COD;
 
 import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
@@ -19,11 +20,12 @@ public class CombatRecord {
     private final String resources = "src/main/resources/COD/";
     private Font codFont;
     private final MessageChannel channel;
-    private ImageLoadingMessage loading;
+    private final Guild guild;
 
-    public CombatRecord(MessageChannel channel) {
+    public CombatRecord(MessageChannel channel, Guild guild) {
         registerFont();
         this.channel = channel;
+        this.guild = guild;
     }
 
     /**
@@ -179,8 +181,9 @@ public class CombatRecord {
      * @param nameQuery Player name
      */
     public void buildImage(String nameQuery) {
-        this.loading = new ImageLoadingMessage(
+        ImageLoadingMessage loading = new ImageLoadingMessage(
                 channel,
+                guild,
                 "MW Player lookup: " + nameQuery.toUpperCase(),
                 "One moment please.",
                 Gunfight.getThumb(),

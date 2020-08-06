@@ -1,12 +1,11 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -17,6 +16,7 @@ public abstract class EmbedLoadingMessage {
     private long id, startTime, currentTime;
     private final String title, thumbnail;
     private String desc;
+    private final Guild guild;
     private final ArrayList<LoadingStage> stages;
     private int currentStep;
 
@@ -29,8 +29,9 @@ public abstract class EmbedLoadingMessage {
      * @param thumbnail    Embed thumbnail
      * @param loadingSteps List of titles for loading fields
      */
-    public EmbedLoadingMessage(MessageChannel channel, String title, String desc, String thumbnail, String[] loadingSteps) {
+    public EmbedLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String[] loadingSteps) {
         this.channel = channel;
+        this.guild = guild;
         this.title = title;
         this.thumbnail = thumbnail;
         this.desc = desc;
@@ -67,7 +68,7 @@ public abstract class EmbedLoadingMessage {
      * @return Loading stages
      */
     private ArrayList<LoadingStage> getStages(String[] loadingSteps) {
-        return Arrays.stream(loadingSteps).map(LoadingStage::new).collect(Collectors.toCollection(ArrayList::new));
+        return Arrays.stream(loadingSteps).map(step -> new LoadingStage(step, guild)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -157,7 +158,7 @@ public abstract class EmbedLoadingMessage {
      * Add a field showing that the loading has completed
      */
     public void completeLoading() {
-        LoadingStage done = new LoadingStage("Done!");
+        LoadingStage done = new LoadingStage("Done!", guild);
         done.complete(startTime);
         getStages().add(done);
         updateLoadingMessage();
@@ -169,7 +170,7 @@ public abstract class EmbedLoadingMessage {
      * @param reason Reason for failure - "That player doesn't exist"
      */
     public void failLoading(String reason) {
-        LoadingStage fail = new LoadingStage("FAIL!");
+        LoadingStage fail = new LoadingStage("FAIL!", guild);
         fail.fail(reason, startTime);
         stages.add(fail);
         for(int i = currentStep; i < stages.size(); i++) {
@@ -198,18 +199,44 @@ public abstract class EmbedLoadingMessage {
     static class LoadingStage {
 
         private final String title;
+        private String neutral, fail, complete;
         private String status, value;
         private long duration;
+        private final Guild guild;
 
         /**
          * Create a default incomplete loading stage
          *
          * @param title Title to show in the embed - "Checking account type"
          */
-        public LoadingStage(String title) {
-            this.status = "☐";
+        public LoadingStage(String title, Guild guild) {
+            this.guild = guild;
+            getEmotes();
+            this.status = neutral;
             this.value = "---";
             this.title = title;
+        }
+
+        /**
+         * Use the guild emotes for completion status if available otherwise standard emoji
+         */
+        private void getEmotes() {
+            List<Emote> neutral = guild.getEmotesByName("neutral", true);
+            List<Emote> fail = guild.getEmotesByName("fail", true);
+            List<Emote> complete = guild.getEmotesByName("complete", true);
+            this.neutral = neutral.isEmpty() ? "☐" : formatEmote(neutral.get(0));
+            this.fail = fail.isEmpty() ? "☒" : formatEmote(fail.get(0));
+            this.complete = complete.isEmpty() ? "\uD83D\uDDF9" : formatEmote(complete.get(0));
+        }
+
+        /**
+         * Format emote for use in embed
+         *
+         * @param e Emote to format
+         * @return Formatted emote
+         */
+        private String formatEmote(Emote e) {
+            return "<:" + e.getName() + ":" + e.getId() + "> ";
         }
 
         /**
@@ -229,7 +256,7 @@ public abstract class EmbedLoadingMessage {
          */
         public void complete(long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
-            this.status = "\uD83D\uDDF9";
+            this.status = complete;
             this.value = "";
         }
 
@@ -243,7 +270,7 @@ public abstract class EmbedLoadingMessage {
          */
         public void complete(String value, long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
-            this.status = "\uD83D\uDDF9";
+            this.status = complete;
             this.value = value;
         }
 
@@ -251,7 +278,7 @@ public abstract class EmbedLoadingMessage {
          * Fail a stage where the previous step was not completed
          */
         public void fail() {
-            this.status = "☒";
+            this.status = fail;
         }
 
         /**
@@ -263,7 +290,7 @@ public abstract class EmbedLoadingMessage {
         public void fail(String value, long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
             this.value = value;
-            this.status = "☒";
+            this.status = fail;
         }
 
         /**

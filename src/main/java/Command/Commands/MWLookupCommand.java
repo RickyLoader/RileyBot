@@ -7,6 +7,7 @@ import COD.Player;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedLoadingMessage;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -30,14 +31,14 @@ public class MWLookupCommand extends DiscordCommand {
             DiscordUser.saveMWName(args[2], channel, context.getUser());
         }
         else if(args.length == 2 || args.length >= 2 && !context.getMessage().getMentionedMembers().isEmpty()) {
-            lookupPlayer(args, channel, context.getUser(), context.getMessage());
+            lookupPlayer(args, channel, context.getUser(), context.getMessage(), context.getGuild());
         }
         else {
             channel.sendMessage(getHelpNameCoded()).queue();
         }
     }
 
-    private void lookupPlayer(String[] args, MessageChannel channel, User user, Message m) {
+    private void lookupPlayer(String[] args, MessageChannel channel, User user, Message m, Guild g) {
         long id = user.getIdLong();
 
         String name = args[1];
@@ -70,7 +71,7 @@ public class MWLookupCommand extends DiscordCommand {
             return;
         }
         currentLookups.add(name.toLowerCase());
-        CombatRecord combatRecord = new CombatRecord(channel);
+        CombatRecord combatRecord = new CombatRecord(channel, g);
         new Thread(() -> {
             combatRecord.buildImage(finalName);
             currentLookups.remove(finalName.toLowerCase());
