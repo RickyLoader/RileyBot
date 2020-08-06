@@ -14,7 +14,7 @@ import java.util.List;
 
 public class TwitterManager {
     private AsyncTwitter twitter;
-    private TwitterListener listener;
+    private final TwitterListener listener;
 
     public TwitterManager(TwitterListener listener) {
         this.listener = listener;

@@ -6,17 +6,19 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * An embed to track the progress of a given task
  */
-public class EmbedLoadingMessage {
+public abstract class EmbedLoadingMessage {
     private final MessageChannel channel;
     private long id, startTime, currentTime;
-    private final String title, thumbnail, desc;
-    private final ArrayList<LoadingStage> stages = new ArrayList<>();
+    private final String title, thumbnail;
+    private String desc;
+    private final ArrayList<LoadingStage> stages;
     private int currentStep;
-    private String url;
 
     /**
      * Create a loading message
@@ -32,10 +34,76 @@ public class EmbedLoadingMessage {
         this.title = title;
         this.thumbnail = thumbnail;
         this.desc = desc;
-        for(String key : loadingSteps) {
-            stages.add(new LoadingStage(key));
-        }
+        this.stages = getStages(loadingSteps);
         this.currentStep = 0;
+    }
+
+    /**
+     * Create an embed builder with the provided values
+     *
+     * @return Embed builder
+     */
+    public EmbedBuilder getEmbedBuilder() {
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle(getTitle());
+        builder.setDescription(getDesc());
+        builder.setThumbnail(getThumbnail());
+        builder.setColor(65280);
+        return builder;
+    }
+
+    /**
+     * Set the description
+     *
+     * @param desc New description
+     */
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    /**
+     * Create loading stage objects from given values
+     *
+     * @return Loading stages
+     */
+    private ArrayList<LoadingStage> getStages(String[] loadingSteps) {
+        return Arrays.stream(loadingSteps).map(LoadingStage::new).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Get the embed title
+     *
+     * @return Embed title
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Get the embed description
+     *
+     * @return Embed description
+     */
+    public String getDesc() {
+        return desc;
+    }
+
+    /**
+     * Get the loading stages
+     *
+     * @return Loading stages
+     */
+    public ArrayList<LoadingStage> getStages() {
+        return stages;
+    }
+
+    /**
+     * Get the embed thumbnail
+     *
+     * @return Embed thumbnail
+     */
+    public String getThumbnail() {
+        return thumbnail;
     }
 
     /**
@@ -86,22 +154,12 @@ public class EmbedLoadingMessage {
     }
 
     /**
-     * Complete the loading embed with an image URL to be used
-     *
-     * @param url URL to be used as the image of the embed
-     */
-    public void completeLoading(String url) {
-        this.url = url;
-        completeLoading();
-    }
-
-    /**
      * Add a field showing that the loading has completed
      */
     public void completeLoading() {
         LoadingStage done = new LoadingStage("Done!");
         done.complete(startTime);
-        stages.add(done);
+        getStages().add(done);
         updateLoadingMessage();
     }
 
@@ -125,32 +183,19 @@ public class EmbedLoadingMessage {
      *
      * @return Message embed
      */
-    private MessageEmbed createLoadingMessage() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(this.title);
-        builder.setDescription(this.desc);
-        builder.setThumbnail(this.thumbnail);
-        builder.setColor(65280);
-        for(LoadingStage stage : stages) {
-            builder.addField(stage.getTitle(), stage.getValue(), false);
-        }
-        if(url != null) {
-            builder.setImage(url);
-        }
-        return builder.build();
-    }
+    public abstract MessageEmbed createLoadingMessage();
 
     /**
      * Edit the loading message
      */
-    private void updateLoadingMessage() {
+    void updateLoadingMessage() {
         channel.retrieveMessageById(id).queue(message -> message.editMessage(createLoadingMessage()).queue());
     }
 
     /**
      * Hold information on loading stages
      */
-    private static class LoadingStage {
+    static class LoadingStage {
 
         private final String title;
         private String status, value;

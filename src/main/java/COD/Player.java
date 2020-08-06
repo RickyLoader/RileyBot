@@ -14,6 +14,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Hold information on user's Modern Warfare stats
+ */
 public class Player {
     private final String name, platform, data;
     private Ratio wl, kd;

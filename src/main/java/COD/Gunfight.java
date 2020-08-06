@@ -5,11 +5,10 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Consumer;
 
 
 /**
- * Interactive win/loss tracker - use emotes to track score and submit to leaderboard
+ * Interactive win/loss tracker for Modern Warfare - use emotes to track score and submit to leaderboard
  */
 public class Gunfight {
 

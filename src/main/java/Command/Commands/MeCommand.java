@@ -38,13 +38,13 @@ public class MeCommand extends DiscordCommand {
             if(first) {
                 builder.addField("**Command**", command, true);
                 builder.addBlankField(true);
-                builder.addField("**Data**", value.toString(), true);
+                builder.addField("**Data**", value, true);
                 first = false;
                 continue;
             }
             builder.addField("\u200e", command, true);
             builder.addBlankField(true);
-            builder.addField("\u200e", value.toString(), true);
+            builder.addField("\u200e", value, true);
         }
 
 

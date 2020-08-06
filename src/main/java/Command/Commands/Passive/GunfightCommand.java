@@ -10,6 +10,9 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.User;
 
+/**
+ * Track Modern Warfare wins/losses with an embedded message
+ */
 public class GunfightCommand extends DiscordCommand {
     private Gunfight gunfight;
     private EmoteListener listener;
@@ -18,6 +21,11 @@ public class GunfightCommand extends DiscordCommand {
         super("gunfight!", "Play a fun game of gunfight!");
     }
 
+    /**
+     * Start the gunfight tracking or relocate the current message
+     *
+     * @param context Context of command
+     */
     @Override
     public void execute(CommandContext context) {
 
@@ -113,6 +121,11 @@ public class GunfightCommand extends DiscordCommand {
         gunfight.startGame();
     }
 
+    /**
+     * Get an emote listener for calling the Gunfight instance when emotes are clicked
+     *
+     * @return Emote listener
+     */
     private EmoteListener getEmoteListener() {
         return new EmoteListener() {
             @Override
@@ -125,6 +138,11 @@ public class GunfightCommand extends DiscordCommand {
         };
     }
 
+    /**
+     * Add an emote listener to listen for gunfight emotes if there isn't one already
+     *
+     * @param jda BOT
+     */
     private void addEmoteListener(JDA jda) {
         if(this.listener == null) {
             this.listener = getEmoteListener();

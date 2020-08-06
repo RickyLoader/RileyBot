@@ -4,6 +4,9 @@ import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
+/**
+ * Play a spooky ghost noise in the voice channel of the user
+ */
 public class GhostCommand extends DiscordCommand {
 
     public GhostCommand() {

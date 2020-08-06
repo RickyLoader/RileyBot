@@ -6,6 +6,9 @@ import net.dv8tion.jda.api.entities.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static Command.Structure.EmbedHelper.getTitleField;
+import static Command.Structure.EmbedHelper.getValueField;
+
 public abstract class PageableEmbed {
     private final MessageChannel channel;
     private final List<?> items;
@@ -42,18 +45,6 @@ public abstract class PageableEmbed {
             message.addReaction(forward).queue();
             message.addReaction(reverse).queue();
         });
-    }
-
-    private MessageEmbed.Field getValueField(String value) {
-        return new MessageEmbed.Field(getBlankChar(), value, true);
-    }
-
-    private MessageEmbed.Field getTitleField(String title, String value) {
-        return new MessageEmbed.Field("**" + title + "**", value, true);
-    }
-
-    private String getBlankChar() {
-        return "\u200e";
     }
 
     public void delete() {

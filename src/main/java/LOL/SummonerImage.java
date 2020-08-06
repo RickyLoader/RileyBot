@@ -1,7 +1,5 @@
 package LOL;
 
-import com.objectplanet.image.PngEncoder;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -40,7 +38,7 @@ public class SummonerImage {
     private BufferedImage buildProfileImage() {
         try {
             // Level circle
-            BufferedImage circle = ImageIO.read(new File(res + "level_circle.png"));
+            BufferedImage circle = ImageIO.read(new File(res + "SummonerBorders/level_circle.png"));
             Graphics g = circle.getGraphics();
             g.setColor(Color.decode("#e3ddc6"));
             String level = String.valueOf(summoner.getLevel());
@@ -99,24 +97,11 @@ public class SummonerImage {
                 g.drawImage(champImage, x, y, null);
             }
             g.dispose();
-            return saveImage(background);
+            //return saveImage(background);
         }
         catch(Exception e) {
             return null;
         }
+        return null;
     }
-
-    private File saveImage(BufferedImage image) {
-        try {
-            File save = new File(res + summoner.getName() + ".png");
-            FileOutputStream output = new FileOutputStream(save);
-            new PngEncoder().encode(image, output);
-            output.close();
-            return save;
-        }
-        catch(Exception e) {
-            return null;
-        }
-    }
-
 }

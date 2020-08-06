@@ -7,16 +7,29 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
+import java.time.chrono.MinguoDate;
 import java.util.List;
 
+import static Command.Commands.ExecuteOrder.ExecuteOrder66Command.getName;
+import static Command.Structure.EmbedHelper.getTitleField;
+import static Command.Structure.EmbedHelper.getValueField;
+
+/**
+ * Get a message displaying everyone on the kill list
+ */
 public class KillListCommand extends DiscordCommand {
-    private ExecutorHandler executorHandler;
+    private final ExecutorHandler executorHandler;
 
     public KillListCommand() {
         super("kill list", "Check out who is on the kill list!");
         this.executorHandler = new ExecutorHandler();
     }
 
+    /**
+     * Send a message to the user displaying all members with the 'target' role
+     *
+     * @param context Context of command
+     */
     @Override
     public void execute(CommandContext context) {
         context.getMessage().delete().queue();
@@ -33,37 +46,36 @@ public class KillListCommand extends DiscordCommand {
             return;
         }
 
-        String desc = "There are " + targets.size() + " targets waiting for your order sir.";
-        if(targets.size() == 1) {
-            desc = "There is 1 target waiting for your order sir.";
-        }
-
+        String desc = targets.size() == 1 ? "There is 1 target waiting for your order sir." : "There are " + targets.size() + " targets waiting for your order sir.";
         builder.setDescription(desc);
-        builder.addField("#", "1", true);
-        builder.addBlankField(true);
-        builder.addField("TARGET", getName(targets.get(0)), true);
 
-        for(int i = 1; i < targets.size(); i++) {
+
+        for(int i = 0; i < targets.size(); i++) {
             Member target = targets.get(i);
-            builder.addField("\u200B", String.valueOf(i + 1), true);
+            String name = getName(target);
+            String number = String.valueOf(i + 1);
+
+            if(i == 0) {
+                builder.addField(getTitleField("#", number));
+                builder.addBlankField(true);
+                builder.addField(getTitleField("TARGET", name));
+                continue;
+            }
+            builder.addField(getValueField(number));
             builder.addBlankField(true);
-            builder.addField("\u200B", getName(target), true);
+            builder.addField(getValueField(name));
         }
 
         builder.setFooter("Execute order 66 when you're ready.");
         privateMessage(context.getUser(), builder.build());
     }
 
-    private String getName(Member m) {
-        StringBuilder builder = new StringBuilder();
-        if(m.getNickname() != null) {
-            builder.append(m.getNickname());
-            builder.append("/");
-        }
-        builder.append(m.getUser().getName());
-        return builder.toString();
-    }
-
+    /**
+     * Send the embed to the user
+     *
+     * @param user  User who called command
+     * @param embed Embed displaying the kill list
+     */
     private void privateMessage(User user, MessageEmbed embed) {
         user.openPrivateChannel().queue(privateChannel -> {
             privateChannel.sendMessage(embed).queue();

@@ -10,15 +10,30 @@ import net.dv8tion.jda.api.entities.*;
 import java.util.HashMap;
 import java.util.List;
 
+import static Command.Structure.EmbedHelper.getTitleField;
+import static Command.Structure.EmbedHelper.getValueField;
+
+/**
+ * Kick all members with the 'target' role
+ */
 public class ExecuteOrder66Command extends DiscordCommand {
 
+    // Map enum name to emoji for displaying on embed
     enum STATUS {
-        EXECUTED,
-        FAILED,
-        PENDING
+        EXECUTED("\uD83D\uDDF9"),
+        FAILED("☒"),
+        PENDING("☐");
+        public final String emoji;
+
+        STATUS(String emoji) {
+            this.emoji = emoji;
+        }
+
+        public String getEmoji() {
+            return emoji;
+        }
     }
 
-    private final HashMap<STATUS, String> status = new HashMap<>();
     private HashMap<Member, STATUS> targetStatus;
     private List<Member> targets;
     private long id;
@@ -27,11 +42,14 @@ public class ExecuteOrder66Command extends DiscordCommand {
 
     public ExecuteOrder66Command() {
         super("execute order 66", "Execute targets on the kill list!");
-        status.put(STATUS.EXECUTED, "\uD83D\uDDF9");
-        status.put(STATUS.FAILED, "☒");
-        status.put(STATUS.PENDING, "☐");
     }
 
+    /**
+     * Map the targets to the pending status
+     *
+     * @param targets Members with 'target' role
+     * @return Map of member->status
+     */
     private HashMap<Member, STATUS> getTargetStatus(List<Member> targets) {
         HashMap<Member, STATUS> targetStatus = new HashMap<>();
         for(Member target : targets) {
@@ -40,13 +58,22 @@ public class ExecuteOrder66Command extends DiscordCommand {
         return targetStatus;
     }
 
+    /**
+     * Kick all members with the 'target' role, apologise in a private message and give them an invite
+     *
+     * @param context Context of command
+     */
     @Override
     public void execute(CommandContext context) {
         context.getMessage().delete().complete();
+
+        // Impatient, command is currently in progress
         if(executor != null) {
             return;
         }
         executor = new ExecutorHandler().getRandomExecutor();
+
+        // Image is randomly selected, save to variable to use the same image in private message
         image = executor.getImage();
         targets = context.getTargets();
 
@@ -59,8 +86,6 @@ public class ExecuteOrder66Command extends DiscordCommand {
 
         context.getMessageChannel().sendMessage(buildStatusMessage()).queue(message -> {
             id = message.getIdLong();
-
-            // Implement the Response interface method to purge the kill list after the track finishes
             TrackEndListener.Response method = new Thread(() -> {
                 purgeTargets(context);
                 executor = null;
@@ -72,30 +97,53 @@ public class ExecuteOrder66Command extends DiscordCommand {
         });
     }
 
+    /**
+     * Build the status embed displaying the targets and the current status of their kick
+     *
+     * @return Status embed
+     */
     private MessageEmbed buildStatusMessage() {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("EXECUTING ORDER 66");
         builder.setColor(16711680);
         builder.setThumbnail(image);
-        builder.addField("#", "1", true);
-        builder.addField("TARGET", getName(targets.get(0)), true);
-        builder.addField("EXECUTED", status.get(targetStatus.get(targets.get(0))), true);
 
         long executed = targetStatus.entrySet().stream().filter(x -> x.getValue() == STATUS.EXECUTED).count();
         builder.setDescription(executed + "/" + targets.size() + " targets exterminated.");
-        for(int i = 1; i < targets.size(); i++) {
+
+        for(int i = 0; i < targets.size(); i++) {
             Member target = targets.get(i);
-            builder.addField("\u200B", String.valueOf(i + 1), true);
-            builder.addField("\u200B", getName(target), true);
-            builder.addField("\u200B", status.get(targetStatus.get(target)), true);
+            String number = String.valueOf(i + 1);
+            String name = getName(target);
+            STATUS status = targetStatus.get(target);
+            if(i == 0) {
+                builder.addField(getTitleField("#", number));
+                builder.addField(getTitleField("TARGET", name));
+                builder.addField(getTitleField("EXECUTED", status.getEmoji()));
+                continue;
+            }
+            builder.addField(getValueField(number));
+            builder.addField(getValueField(name));
+            builder.addField(getValueField(status.getEmoji()));
+
         }
         return builder.build();
     }
 
+    /**
+     * Edit the status message
+     *
+     * @param channel Channel to find status message
+     */
     private void updateStatusMessage(MessageChannel channel) {
         channel.retrieveMessageById(id).queue(message -> message.editMessage(buildStatusMessage()).queue());
     }
 
+    /**
+     * Kick all members of the 'target' role
+     *
+     * @param context Context of command
+     */
     private void purgeTargets(CommandContext context) {
         String invite = context.getInvite();
         for(Member target : targets) {
@@ -111,6 +159,12 @@ public class ExecuteOrder66Command extends DiscordCommand {
         }
     }
 
+    /**
+     * Attempt to private message the user before they are kicked
+     *
+     * @param loser  User about to be kicked
+     * @param invite An invite back to the server
+     */
     private void apologise(User loser, String invite) {
         try {
             EmbedBuilder builder = new EmbedBuilder();
@@ -126,7 +180,13 @@ public class ExecuteOrder66Command extends DiscordCommand {
         }
     }
 
-    private String getName(Member m) {
+    /**
+     * Create the name used in the status message Either name or nickname/name
+     *
+     * @param m Member to get name for
+     * @return Formatted name for status message
+     */
+    static String getName(Member m) {
         StringBuilder builder = new StringBuilder();
         if(m.getNickname() != null) {
             builder.append(m.getNickname());

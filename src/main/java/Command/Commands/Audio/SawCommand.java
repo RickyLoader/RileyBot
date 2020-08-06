@@ -4,6 +4,9 @@ import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
+/**
+ * Play the Saw theme in the voice chat of the user
+ */
 public class SawCommand extends DiscordCommand {
 
     public SawCommand() {

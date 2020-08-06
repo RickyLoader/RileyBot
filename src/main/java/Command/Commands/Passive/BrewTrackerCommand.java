@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
-
+/**
+ * Track alcohol consumption with cool emotes
+ */
 public class BrewTrackerCommand extends DiscordCommand {
     private BrewsMessage brewsMessage;
     private EmoteListener listener;
@@ -21,6 +23,11 @@ public class BrewTrackerCommand extends DiscordCommand {
         super("brew tracker!", "A tracker for alcoholism!");
     }
 
+    /**
+     * Get an emote listener for calling the BrewsMessage instance when emotes are clicked
+     *
+     * @return Emote listener
+     */
     private EmoteListener getEmoteListener() {
         return new EmoteListener() {
             @Override
@@ -33,6 +40,11 @@ public class BrewTrackerCommand extends DiscordCommand {
         };
     }
 
+    /**
+     * Add an emote listener to listen for brew emotes if there isn't one already
+     *
+     * @param jda BOT
+     */
     private void addEmoteListener(JDA jda) {
         if(this.listener == null) {
             this.listener = getEmoteListener();
@@ -40,6 +52,11 @@ public class BrewTrackerCommand extends DiscordCommand {
         }
     }
 
+    /**
+     * Send the brew tracker message to the channel or relocate it if it has moved
+     *
+     * @param context Context of command
+     */
     private void showBrewTracker(CommandContext context) {
         if(brewsMessage == null || brewsMessage.timedOut()) {
             addEmoteListener(context.getJDA());
@@ -54,6 +71,11 @@ public class BrewTrackerCommand extends DiscordCommand {
         return query.contains("brew") && query.contains("!");
     }
 
+    /**
+     * Begin tracking brews, notify of incorrect trigger
+     *
+     * @param context Context of command
+     */
     @Override
     public void execute(CommandContext context) {
         String trigger = context.getLowerCaseMessage();
@@ -64,6 +86,9 @@ public class BrewTrackerCommand extends DiscordCommand {
         context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
     }
 
+    /**
+     * Embedded message for tracking brews with cool emotes
+     */
     private static class BrewsMessage {
         private final MessageChannel channel;
         private long id, lastUpdate;
@@ -71,6 +96,12 @@ public class BrewTrackerCommand extends DiscordCommand {
         private final LinkedHashMap<Member, Alcoholic> alcoholics = new LinkedHashMap<>();
         private final Emote increment, decrement, emptyBeer;
 
+        /**
+         * Initialise the brew tracker
+         *
+         * @param channel Channel to send message to
+         * @param guild   Guild to search for emotes
+         */
         public BrewsMessage(MessageChannel channel, Guild guild) {
             this.channel = channel;
             this.guild = guild;
@@ -131,6 +162,7 @@ public class BrewTrackerCommand extends DiscordCommand {
                     builder.addField(alcoholic.getName(), getBrews(alcoholic.getBrews(), winner.getBrews()), true);
                     total += alcoholic.getBrews();
 
+                    // Embed wraps after 3 inline fields, add a blank field after the first on each line to have only 2 on each
                     if(((index + 2) % 2 == 0)) {
                         builder.addBlankField(true);
                     }
@@ -249,14 +281,25 @@ public class BrewTrackerCommand extends DiscordCommand {
             updateMessage();
         }
 
+        /**
+         * Wrap user in class to track their brews
+         */
         private static class Alcoholic implements Comparable<Alcoholic> {
             private final Member member;
             private int brews = 0;
 
+            /**
+             * Create a new member to track
+             *
+             * @param member Member to track
+             */
             public Alcoholic(Member member) {
                 this.member = member;
             }
 
+            /**
+             * Increment the member's brews if they are < 24
+             */
             public void incrementBrews() {
                 if(this.brews == 24) {
                     return;
@@ -264,19 +307,40 @@ public class BrewTrackerCommand extends DiscordCommand {
                 this.brews++;
             }
 
+            /**
+             * Decrement the member's brews and return if they have 0 or fewer
+             *
+             * @return Whether member now has 0 or fewer brews
+             */
             public boolean decrementBrews() {
                 this.brews--;
                 return this.brews <= 0;
             }
 
+            /**
+             * Get the quantity of brews
+             *
+             * @return Quantity of brews
+             */
             public int getBrews() {
                 return brews;
             }
 
+            /**
+             * Get the member's name
+             *
+             * @return Member name
+             */
             public String getName() {
-                return member.getNickname() == null ? member.getUser().getName() : member.getNickname();
+                return member.getEffectiveName();
             }
 
+            /**
+             * Sort members in descending order brew quantity
+             *
+             * @param o member to compare to current
+             * @return Sort value
+             */
             @Override
             public int compareTo(@NotNull BrewTrackerCommand.BrewsMessage.Alcoholic o) {
                 return o.getBrews() - this.getBrews();

@@ -1,7 +1,6 @@
 package Command.Commands.Audio;
 
 import Audio.DiscordAudioPlayer;
-import Audio.TrackEndListener;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Network.NetworkInfo;
@@ -15,6 +14,9 @@ import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Text to speech command to play in the voice channel of the user
+ */
 public class TTSCommand extends DiscordCommand {
 
     public TTSCommand() {
@@ -37,6 +39,13 @@ public class TTSCommand extends DiscordCommand {
         }
     }
 
+    /**
+     * If the server has a tts-log channel, send an embed containing what was requested to say
+     *
+     * @param msg    String message from user
+     * @param author User who requested TTS
+     * @param guild  Guild to search for tts-log channel
+     */
     private void logTTS(String msg, User author, Guild guild) {
         List<TextChannel> channels = guild.getTextChannelsByName("tts-log", true);
         if(!channels.isEmpty()) {

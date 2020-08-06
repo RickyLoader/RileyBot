@@ -1,6 +1,6 @@
 package COD;
 
-import Command.Structure.EmbedLoadingMessage;
+import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -10,13 +10,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * Build an image containing the user's Modern Warfare stats
+ */
 public class CombatRecord {
 
     private Player player;
     private final String resources = "src/main/resources/COD/";
     private Font codFont;
     private final MessageChannel channel;
-    private EmbedLoadingMessage loading;
+    private ImageLoadingMessage loading;
 
     public CombatRecord(MessageChannel channel) {
         registerFont();
@@ -176,7 +179,7 @@ public class CombatRecord {
      * @param nameQuery Player name
      */
     public void buildImage(String nameQuery) {
-        this.loading = new EmbedLoadingMessage(
+        this.loading = new ImageLoadingMessage(
                 channel,
                 "MW Player lookup: " + nameQuery.toUpperCase(),
                 "One moment please.",

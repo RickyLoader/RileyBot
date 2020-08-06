@@ -18,13 +18,25 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Hold a list of commands and handle incoming text input to check for command triggers
+ */
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands = new ArrayList<>();
 
+    /**
+     * Add the commands to the list
+     */
     public DiscordCommandManager() {
         addCommands();
     }
 
+    /**
+     * Check a given query against the matches method of each command
+     *
+     * @param query String query from chat
+     * @return Command if found or null
+     */
     private DiscordCommand getCommand(String query) {
         query = query.toLowerCase();
         for(DiscordCommand c : commands) {
@@ -35,6 +47,12 @@ public class DiscordCommandManager {
         return null;
     }
 
+    /**
+     * Randomly select the given number of commands
+     *
+     * @param bound How many commands to return
+     * @return An array of random commands
+     */
     public DiscordCommand[] pickRandomCommands(int bound) {
         DiscordCommand[] commands = new DiscordCommand[bound];
         ArrayList<DiscordCommand> seen = new ArrayList<>();
@@ -50,10 +68,20 @@ public class DiscordCommandManager {
         return commands;
     }
 
+    /**
+     * Get the list of commands
+     *
+     * @return List of commands
+     */
     public ArrayList<DiscordCommand> getCommands() {
         return commands;
     }
 
+    /**
+     * Add a command to the list and alert if the command is a duplicate
+     *
+     * @param c Command to be added
+     */
     private void addCommand(DiscordCommand c) {
         if(commands.contains(c)) {
             System.out.println("Duplicate command: " + c.getHelpName());
@@ -62,6 +90,11 @@ public class DiscordCommandManager {
         commands.add(c);
     }
 
+    /**
+     * Get the command from a message event and execute it
+     *
+     * @param event MessageReceivedEvent
+     */
     public void handleCommand(GuildMessageReceivedEvent event) {
         DiscordCommand command = getCommand(event.getMessage().getContentRaw());
         if(command == null) {
@@ -70,6 +103,9 @@ public class DiscordCommandManager {
         command.execute(new CommandContext(event, commands));
     }
 
+    /**
+     * Add all of the commands to the list
+     */
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
@@ -78,7 +114,6 @@ public class DiscordCommandManager {
         addCommand((new LeaderboardCommand()));
         addCommand((new MeCommand()));
         addCommand((new OSRSLookupCommand()));
-        addCommand((new GrandExchangeLookupCommand()));
         addCommand((new GhostCommand()));
         addCommand((new SawCommand()));
         addCommand((new TTSCommand()));
@@ -99,6 +134,9 @@ public class DiscordCommandManager {
         //addCommand((new VoiceChannelCommand());
     }
 
+    /**
+     * Commands which return a random element from a list
+     */
     private void addRandomCommands() {
         addCommand((new MemeCommand()));
         addCommand((new RileyCommand()));
@@ -109,6 +147,9 @@ public class DiscordCommandManager {
         addCommand((new GenerateNameCommand()));
     }
 
+    /**
+     * Commands which return a single image
+     */
     private void addLinkCommands() {
         addCommand((new BrewsCommand()));
         addCommand((new DobroCommand()));

@@ -7,6 +7,10 @@ import Network.NetworkInfo;
 
 import java.net.URLEncoder;
 
+/**
+ * Play a hyper realistic custom Survivor voice clip in the voice channel of the user.
+ * 'Dave, put your torch out..'
+ */
 public class SurvivorCommand extends DiscordCommand {
 
     public SurvivorCommand() {
@@ -18,9 +22,9 @@ public class SurvivorCommand extends DiscordCommand {
         try {
             String location = NetworkInfo.getAddress() + "/DiscordBotApi/api/survivor/";
             String name = URLEncoder.encode(context.getLowerCaseMessage().replaceFirst("survivor ", ""), "UTF-8");
-            new DiscordAudioPlayer(context.getMember(), context.getGuild()).play(location+name);
+            new DiscordAudioPlayer(context.getMember(), context.getGuild()).play(location + name);
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
         }
     }

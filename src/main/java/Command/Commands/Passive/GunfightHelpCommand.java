@@ -9,6 +9,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.User;
 
+/**
+ * Show a message explaining how to use the gunfight command
+ */
 public class GunfightHelpCommand extends DiscordCommand {
     private Gunfight gunfightHelp;
     private EmoteListener listener;
@@ -17,6 +20,11 @@ public class GunfightHelpCommand extends DiscordCommand {
         super("gunfight help!", "Get some help playing gunfight!");
     }
 
+    /**
+     * Show the help message or relocate the current message
+     *
+     * @param context Command context
+     */
     @Override
     public void execute(CommandContext context) {
 
@@ -32,11 +40,11 @@ public class GunfightHelpCommand extends DiscordCommand {
         }
     }
 
-    @Override
-    public String getTrigger() {
-        return "gunfight help!";
-    }
-
+    /**
+     * Get an emote listener for calling the Gunfight instance when emotes are clicked
+     *
+     * @return Emote listener
+     */
     private EmoteListener getEmoteListener() {
         return new EmoteListener() {
             @Override
@@ -50,6 +58,11 @@ public class GunfightHelpCommand extends DiscordCommand {
         };
     }
 
+    /**
+     * Add an emote listener to listen for gunfight emotes if there isn't one already
+     *
+     * @param jda BOT
+     */
     private void addEmoteListener(JDA jda) {
         if(this.listener == null) {
             this.listener = getEmoteListener();

@@ -1,6 +1,7 @@
 package OSRS.Stats;
 
 import Command.Structure.EmbedLoadingMessage;
+import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -20,7 +21,7 @@ public class Hiscores {
     private final String[] bossNames;
     private final String resources = "src/main/resources/OSRS/";
     private final MessageChannel channel;
-    private EmbedLoadingMessage loading;
+    private ImageLoadingMessage loading;
     private boolean timeout = false;
 
     /**
@@ -40,7 +41,7 @@ public class Hiscores {
      * @param name Player name
      */
     public void lookupPlayer(String name) {
-        this.loading = new EmbedLoadingMessage(
+        this.loading = new ImageLoadingMessage(
                 channel,
                 "OSRS Hiscores lookup: " + name.toUpperCase(),
                 "Give me a second, their website is slow as fuck.",

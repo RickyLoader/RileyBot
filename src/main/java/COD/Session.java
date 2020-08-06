@@ -13,10 +13,10 @@ import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Stores information about a gunfight game session
+ * Stores information about a previous gunfight game session
  */
 public class Session {
-    private static String endPoint = "gunfight";
+    private static final String endPoint = "gunfight";
     private long date, duration;
     private int wins, losses, longestStreak;
     private double ratio;
@@ -56,6 +56,12 @@ public class Session {
         }
     }
 
+    /**
+     * Sort the gunfight sessions for leaderboard purposes
+     *
+     * @param sessions  Sessions to sort
+     * @param ascending Ascending rank or not
+     */
     public static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
         Comparator<Session> sort = Comparator.comparing(Session::getLongestStreak)
                 .thenComparing(Session::getRatio)

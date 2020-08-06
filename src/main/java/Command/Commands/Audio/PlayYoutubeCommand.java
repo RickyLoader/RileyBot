@@ -4,6 +4,9 @@ import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
+/**
+ * Play a given youtube video in the voice chat of the user
+ */
 public class PlayYoutubeCommand extends DiscordCommand {
 
     public PlayYoutubeCommand() {

@@ -3,6 +3,9 @@ package Command.Commands.ExecuteOrder;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Hold a list of executors and methods to randomly select one
+ */
 public class ExecutorHandler {
     private final ArrayList<Executor> executors;
 
@@ -10,10 +13,20 @@ public class ExecutorHandler {
         this.executors = createExecutors();
     }
 
+    /**
+     * Get a random Executor
+     *
+     * @return Random Executor
+     */
     public Executor getRandomExecutor() {
         return executors.get(new Random().nextInt(executors.size()));
     }
 
+    /**
+     * Create a list of Executors
+     *
+     * @return List of Executors
+     */
     private ArrayList<Executor> createExecutors() {
         ArrayList<Executor> executors = new ArrayList<>();
 
@@ -78,19 +91,39 @@ public class ExecutorHandler {
         return executors;
     }
 
+    /**
+     * Hold information on an Executor for execute order 66 command
+     * Hold an audio track and various images to be randomly selected
+     */
     static class Executor {
         private final String track;
         private final String[] images;
 
+        /**
+         * Create an Executor
+         *
+         * @param track  Audio track url
+         * @param images List of images to use
+         */
         public Executor(String track, String[] images) {
             this.track = track;
             this.images = images;
         }
 
+        /**
+         * Get the audio track url
+         *
+         * @return Track url
+         */
         public String getTrack() {
             return track;
         }
 
+        /**
+         * Get a random image of the Executor
+         *
+         * @return Random image of the executor
+         */
         public String getImage() {
             return images[new Random().nextInt(images.length)];
         }

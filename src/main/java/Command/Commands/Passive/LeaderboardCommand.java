@@ -10,12 +10,21 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Show the gunfight leaderboard
+ */
 public class LeaderboardCommand extends PageableEmbedCommand {
 
     public LeaderboardCommand() {
         super("leaderboard!", "Have a gander at the gunfight leaderboard!");
     }
 
+    /**
+     * Create the leaderboard embed
+     *
+     * @param context Context of command
+     * @return Leaderboard embed
+     */
     @Override
     public PageableEmbed getEmbed(CommandContext context) {
         return new Leaderboard(

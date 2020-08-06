@@ -175,7 +175,8 @@ public class Summoner {
 
     public static class Champion implements Comparable<Champion> {
         private final int id, level, points;
-        private String name, res = "src/main/resources/LOL/";
+        private String name;
+        private final String res = "src/main/resources/LOL/";
         private File image;
 
         public Champion(int id, int level, int points) {
