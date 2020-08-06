@@ -20,6 +20,10 @@ public class CommandContext {
         return commands;
     }
 
+    public List<Member> getMembers() {
+        return new ArrayList<>(getGuild().getMembers());
+    }
+
     public Guild getGuild() {
         return event.getGuild();
     }

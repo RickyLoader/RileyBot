@@ -75,6 +75,9 @@
             "iw8_ar_falima": {
                 "real_name": "FAL"
             },
+            "iw8_ar_anovember94": {
+                "real_name": "A9-94"
+            },
             "iw8_ar_tango21": {
                 "real_name": "RAM-7"
             },
@@ -132,6 +135,9 @@
             "iw8_sm_mpapa7": {
                 "real_name": "MP7"
             },
+            "iw8_sm_charlie9": {
+                "real_name": "ISO"
+            },
             "iw8_sm_augolf": {
                 "real_name": "AUG"
             },
@@ -177,6 +183,9 @@
             },
             "iw8_me_akimboblunt": {
                 "real_name": "Kali Sticks"
+            },
+            "iw8_me_akimboblades": {
+                "real_name": "Dual Kodachis"
             }
         },
         "tacticals": {

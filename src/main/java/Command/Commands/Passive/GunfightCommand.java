@@ -28,7 +28,6 @@ public class GunfightCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-
         if(gunfight != null && gunfight.isActive()) {
             gunfight.relocate();
             return;
