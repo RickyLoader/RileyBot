@@ -10,6 +10,7 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
 
     /**
      * Create a loading message
+     * Create a loading message
      *
      * @param channel      Channel to send the message to
      * @param title        Embed title

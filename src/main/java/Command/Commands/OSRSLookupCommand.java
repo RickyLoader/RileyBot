@@ -1,79 +1,35 @@
 package Command.Commands;
 
 import Bot.DiscordUser;
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
+import Command.Structure.ImageBuilderCommand;
+import Command.Structure.LookupCommand;
+import Command.Structure.UserLookupBuilder;
 import OSRS.Stats.Hiscores;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class OSRSLookupCommand extends DiscordCommand {
-    private final ArrayList<String> currentLookups = new ArrayList<>();
+/**
+ * Look up a OSRS player and build an image with their stats
+ */
+public class OSRSLookupCommand extends ImageBuilderCommand {
 
     public OSRSLookupCommand() {
-        super("osrslookup [player/me/@someone], osrslookup save [player]", "Lookup a player on the OSRS Hiscores!");
+        super("osrslookup", "Check out someone's stats on OSRS!", 12);
     }
 
     @Override
-    public void execute(CommandContext context) {
-        String msg = context.getLowerCaseMessage().trim();
-        String[] args = msg.split(" ");
-        MessageChannel channel = context.getMessageChannel();
-        User user = context.getUser();
-
-        if(args.length < 2) {
-            channel.sendMessage(getHelpNameCoded()).queue();
-            return;
-        }
-        if(args[1].equals("save")) {
-            String name = msg.replace("osrslookup save ", "");
-            DiscordUser.saveOSRSName(name, channel, user);
-            return;
-        }
-
-        String name = msg.replace("osrslookup ", "");
-
-        if(name.equals("me")) {
-            name = DiscordUser.getOSRSName(user.getIdLong());
-            if(name == null) {
-                channel.sendMessage(user.getAsMention() + " I don't have a name saved for you, try: ```osrslookup save [player]```").queue();
-                return;
-            }
-        }
-
-        List<User> mentioned = context.getMessage().getMentionedUsers();
-        if(!mentioned.isEmpty()) {
-            User u = mentioned.get(0);
-            name = DiscordUser.getOSRSName(u.getIdLong());
-            if(name == null) {
-                channel.sendMessage(user.getAsMention() + " I don't have a name saved for " + u.getAsMention() + " they will need to: ```osrslookup save [their name]```").queue();
-                return;
-            }
-        }
-
-        if(name.length() > 12) {
-            channel.sendMessage("Maximum username length is 12 characters cunt").queue();
-            return;
-        }
-        Hiscores hiscores = new Hiscores(channel, context.getGuild());
-        if(currentLookups.contains(name)) {
-            channel.sendMessage("Oi I told you their website is slow, patience is a virtue cunt").queue();
-            return;
-        }
-        currentLookups.add(name);
-
-        String finalName = name;
-        new Thread(() -> {
-            hiscores.lookupPlayer(finalName);
-            currentLookups.remove(finalName);
-        }).start();
+    public UserLookupBuilder getImageBuilder(MessageChannel channel, Guild guild) {
+        return new Hiscores(channel, guild, "src/main/resources/OSRS/", "osrs.ttf");
     }
 
     @Override
-    public boolean matches(String query) {
-        return query.startsWith("osrslookup");
+    public String getSavedName(long id) {
+        return DiscordUser.getOSRSName(id);
+    }
+
+    @Override
+    public void saveName(String name, MessageChannel channel, User user) {
+        DiscordUser.saveOSRSName(name, channel, user);
     }
 }

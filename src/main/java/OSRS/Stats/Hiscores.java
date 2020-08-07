@@ -1,7 +1,7 @@
 package OSRS.Stats;
 
-import Command.Structure.EmbedLoadingMessage;
 import Command.Structure.ImageLoadingMessage;
+import Command.Structure.UserLookupBuilder;
 import Network.NetworkRequest;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,36 +18,27 @@ import java.util.List;
 /**
  * Build an image displaying a player's OSRS stats
  */
-public class Hiscores {
+public class Hiscores extends UserLookupBuilder {
     private final String[] bossNames;
-    private final String resources = "src/main/resources/OSRS/";
-    private final MessageChannel channel;
     private ImageLoadingMessage loading;
     private boolean timeout = false;
-    private final Guild guild;
 
-    /**
-     * Initialise the Hiscores with a channel to send the image to
-     *
-     * @param channel Channel to send image to
-     */
-    public Hiscores(MessageChannel channel, Guild guild) {
-        registerFont();
+    public Hiscores(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
+        super(channel, guild, resourcePath, fontName);
         bossNames = getBossNames();
-        this.channel = channel;
-        this.guild = guild;
     }
+
 
     /**
      * Look a player up on the OSRS hiscores and return an image displaying their skills
      *
-     * @param name Player name
+     * @param nameQuery Player name
      */
-    public void lookupPlayer(String name) {
+    public void buildImage(String nameQuery) {
         this.loading = new ImageLoadingMessage(
-                channel,
-                guild,
-                "OSRS Hiscores lookup: " + name.toUpperCase(),
+                getChannel(),
+                getGuild(),
+                "OSRS Hiscores lookup: " + nameQuery.toUpperCase(),
                 "Give me a second, their website is slow as fuck.",
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 new String[]{
@@ -58,7 +49,7 @@ public class Hiscores {
                 }
         );
         loading.showLoading();
-        String[] data = fetchPlayerData(name);
+        String[] data = fetchPlayerData(nameQuery);
 
         if(data == null) {
             if(timeout) {
@@ -71,18 +62,18 @@ public class Hiscores {
 
         List<Boss> bossKills = getBossKills(data);
 
-        if(bossKills.size() == 0 && name.toLowerCase().equals("hectiserect")) {
+        if(bossKills.size() == 0 && nameQuery.toLowerCase().equals("hectiserect")) {
             bossKills.add(new Boss("Butler", 500000));
             bossKills.add(new Boss("Black dude", 12));
         }
 
-        if(name.toLowerCase().equals("heineken_3")) {
+        if(nameQuery.toLowerCase().equals("heineken_3")) {
             bossKills.add(new Boss("Harambe", 1));
         }
 
         String[] clues = getClueScrolls(data);
         String[] stats = orderSkills(data);
-        BufferedImage playerImage = buildImage(name, data[0], stats, bossKills, clues);
+        BufferedImage playerImage = buildImage(nameQuery, data[0], stats, bossKills, clues);
         loading.completeStage();
         String url = ImgurManager.uploadImage(playerImage);
         loading.completeStage();
@@ -210,7 +201,7 @@ public class Hiscores {
         BufferedImage image = null;
         int fontSize = 65;
         try {
-            String imagePath = (resources + "Templates/stats_template.png");
+            String imagePath = (getResourcePath() + "Templates/stats_template.png");
 
             image = ImageIO.read(new File(imagePath));
             Graphics g = image.getGraphics();
@@ -288,7 +279,7 @@ public class Hiscores {
                 }
             }
             else {
-                BufferedImage noBoss = ImageIO.read(new File(resources + "Templates/no_boss.png"));
+                BufferedImage noBoss = ImageIO.read(new File(getResourcePath() + "Templates/no_boss.png"));
                 g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200 - 425) / 2) - (noBoss.getHeight() / 2)), null);
             }
 
@@ -301,7 +292,7 @@ public class Hiscores {
             g.drawString(name.toUpperCase(), x, y);
 
             if(type != null) {
-                BufferedImage accountType = ImageIO.read(new File(resources + "Accounts/" + type + ".png"));
+                BufferedImage accountType = ImageIO.read(new File(getResourcePath() + "Accounts/" + type + ".png"));
                 g.drawImage(accountType, x - (int) (accountType.getWidth() * 1.5), 115 - (accountType.getHeight() / 2), null);
             }
             g.dispose();
@@ -310,19 +301,6 @@ public class Hiscores {
             e.printStackTrace();
         }
         return image;
-    }
-
-    /**
-     * Register the OSRS font with the graphics environment
-     */
-    private void registerFont() {
-        try {
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File(resources + "osrs.ttf")));
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -464,7 +442,7 @@ public class Hiscores {
         }
 
         File getImage() {
-            return new File(resources + "Bosses/" + filename);
+            return new File(getResourcePath() + "Bosses/" + filename);
         }
 
         @Override

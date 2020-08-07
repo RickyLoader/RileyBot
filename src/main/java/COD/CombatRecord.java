@@ -1,5 +1,6 @@
 package COD;
 
+import Command.Structure.UserLookupBuilder;
 import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.Guild;
@@ -14,18 +15,12 @@ import java.util.ArrayList;
 /**
  * Build an image containing the user's Modern Warfare stats
  */
-public class CombatRecord {
+public class CombatRecord extends UserLookupBuilder {
 
     private Player player;
-    private final String resources = "src/main/resources/COD/";
-    private Font codFont;
-    private final MessageChannel channel;
-    private final Guild guild;
 
-    public CombatRecord(MessageChannel channel, Guild guild) {
-        registerFont();
-        this.channel = channel;
-        this.guild = guild;
+    public CombatRecord(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
+        super(channel, guild, resourcePath, fontName);
     }
 
     /**
@@ -36,9 +31,9 @@ public class CombatRecord {
      */
     private File getWeaponImage(Player.Weapon.TYPE type) {
         if(type == Player.Weapon.TYPE.PRIMARY || type == Player.Weapon.TYPE.SECONDARY) {
-            return new File((resources + "Templates/wep_quadrant.png"));
+            return new File((getResourcePath() + "Templates/wep_quadrant.png"));
         }
-        return new File((resources + "Templates/lethal_quadrant.png"));
+        return new File((getResourcePath() + "Templates/lethal_quadrant.png"));
     }
 
     /**
@@ -52,7 +47,7 @@ public class CombatRecord {
         try {
             image = ImageIO.read(getWeaponImage(weapon.getType()));
             Graphics g = image.getGraphics();
-            g.setFont(codFont.deriveFont(50f));
+            g.setFont(getGameFont().deriveFont(50f));
 
             BufferedImage weaponImage = ImageIO.read(weapon.getImage());
 
@@ -71,7 +66,7 @@ public class CombatRecord {
                 g.drawString(String.valueOf(weapon.getAccuracy()), 277, 1041);
             }
 
-            g.setFont(codFont.deriveFont(28f));
+            g.setFont(getGameFont().deriveFont(28f));
             g.drawString(weapon.getImageTitle(), (image.getWidth()) / 2 - (g.getFontMetrics().stringWidth(weapon.getImageTitle())) / 2, 38);
             g.dispose();
         }
@@ -89,9 +84,9 @@ public class CombatRecord {
     private BufferedImage drawWinLoss() {
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((resources + "Templates/wl_quadrant.png")));
+            image = ImageIO.read(new File((getResourcePath() + "Templates/wl_quadrant.png")));
             Graphics g = image.getGraphics();
-            g.setFont(codFont);
+            g.setFont(getGameFont());
             int x = 288;
             int y = 175;
             g.drawString(String.valueOf(player.getWins()), x, y);
@@ -116,12 +111,12 @@ public class CombatRecord {
         ArrayList<Player.Commendation> commendations = player.getCommendations();
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((resources + "Templates/commendations_section.png")));
+            image = ImageIO.read(new File((getResourcePath() + "Templates/commendations_section.png")));
             Graphics g = image.getGraphics();
-            g.setFont(codFont);
+            g.setFont(getGameFont());
             int x = 100;
             for(int i = 0; i < 5; i++) {
-                g.setFont(codFont.deriveFont(32f));
+                g.setFont(getGameFont().deriveFont(32f));
                 Player.Commendation c = commendations.get(i);
                 BufferedImage icon = ImageIO.read(c.getImage());
                 g.drawImage(icon, x - (icon.getWidth() / 2), 250 - (icon.getHeight() / 2), null);
@@ -131,7 +126,7 @@ public class CombatRecord {
                 String[] descSplit = c.getDesc().split(" ");
                 String desc = "";
                 int y = 350;
-                g.setFont(codFont.deriveFont(25f));
+                g.setFont(getGameFont().deriveFont(25f));
                 for(String word : descSplit) {
                     String attempt = desc + " " + word;
                     if(g.getFontMetrics().stringWidth(attempt) > 180) {
@@ -143,7 +138,7 @@ public class CombatRecord {
                     desc = attempt;
                 }
                 g.drawString(desc, x - (g.getFontMetrics().stringWidth(desc)) / 2, y);
-                g.setFont(codFont.deriveFont(50f));
+                g.setFont(getGameFont().deriveFont(50f));
                 g.drawString(c.formatQuantity(), x - (g.getFontMetrics().stringWidth(c.formatQuantity())) / 2, 550);
                 x += 210;
             }
@@ -162,9 +157,9 @@ public class CombatRecord {
     private BufferedImage drawKillDeath() {
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((resources + "Templates/kd_section.png")));
+            image = ImageIO.read(new File((getResourcePath() + "Templates/kd_section.png")));
             Graphics g = image.getGraphics();
-            g.setFont(codFont);
+            g.setFont(getGameFont());
             g.drawString(String.valueOf(player.getKD()), 282, 200);
             g.drawString(String.valueOf(player.getLongestKillStreak()), 282, 482);
             g.dispose();
@@ -182,8 +177,8 @@ public class CombatRecord {
      */
     public void buildImage(String nameQuery) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
-                channel,
-                guild,
+                getChannel(),
+                getGuild(),
                 "MW Player lookup: " + nameQuery.toUpperCase(),
                 "One moment please.",
                 Gunfight.getThumb(),
@@ -201,9 +196,9 @@ public class CombatRecord {
         }
         loading.completeStage();
         try {
-            codFont = new Font("Eurostile Next LT Pro Semibold", Font.PLAIN, 75);
+            setGameFont(new Font("Eurostile Next LT Pro Semibold", Font.PLAIN, 75));
 
-            BufferedImage main = ImageIO.read(new File((resources + "Templates/template.png")));
+            BufferedImage main = ImageIO.read(new File((getResourcePath() + "Templates/template.png")));
             Graphics g = main.getGraphics();
             g.drawImage(drawWeapon(player.getPrimary()), 17, 119, null);
             g.drawImage(drawWeapon(player.getSecondary()), 542, 119, null);
@@ -212,7 +207,7 @@ public class CombatRecord {
             g.drawImage(drawKillDeath(), 1067, 1290, null);
             g.drawImage(drawCommendations(), 17, 1290, null);
 
-            g.setFont(codFont.deriveFont(100f));
+            g.setFont(getGameFont().deriveFont(100f));
             g.setColor(Color.black);
             String name = player.getName().toUpperCase();
             g.drawString(player.getName().toUpperCase(), (main.getWidth() / 2) - (g.getFontMetrics().stringWidth(name) / 2), 100);
@@ -221,19 +216,6 @@ public class CombatRecord {
             String url = ImgurManager.uploadImage(main);
             loading.completeStage();
             loading.completeLoading(url);
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Register the COD font with the graphics environment
-     */
-    private void registerFont() {
-        try {
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File(resources + "ModernWarfare.otf")));
         }
         catch(Exception e) {
             e.printStackTrace();

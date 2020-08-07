@@ -93,6 +93,7 @@ public class NetworkRequest {
             else if(response.code() == 404) {
                 data = "err";
             }
+            response.close();
         }
         catch(Exception e) {
             e.printStackTrace();
