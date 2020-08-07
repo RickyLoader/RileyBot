@@ -2,8 +2,7 @@ package Command.Commands;
 
 import Bot.DiscordUser;
 import Command.Structure.ImageBuilderCommand;
-import Command.Structure.LookupCommand;
-import Command.Structure.UserLookupBuilder;
+import Command.Structure.ImageBuilder;
 import OSRS.Stats.Hiscores;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -19,7 +18,7 @@ public class OSRSLookupCommand extends ImageBuilderCommand {
     }
 
     @Override
-    public UserLookupBuilder getImageBuilder(MessageChannel channel, Guild guild) {
+    public ImageBuilder getImageBuilder(MessageChannel channel, Guild guild) {
         return new Hiscores(channel, guild, "src/main/resources/OSRS/", "osrs.ttf");
     }
 

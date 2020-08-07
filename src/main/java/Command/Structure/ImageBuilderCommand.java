@@ -31,5 +31,5 @@ public abstract class ImageBuilderCommand extends LookupCommand {
      * @param guild   Guild to find emotes
      * @return Image builder
      */
-    public abstract UserLookupBuilder getImageBuilder(MessageChannel channel, Guild guild);
+    public abstract ImageBuilder getImageBuilder(MessageChannel channel, Guild guild);
 }

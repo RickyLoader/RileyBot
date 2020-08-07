@@ -1,6 +1,6 @@
 package COD;
 
-import Command.Structure.UserLookupBuilder;
+import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * Build an image containing the user's Modern Warfare stats
  */
-public class CombatRecord extends UserLookupBuilder {
+public class CombatRecord extends ImageBuilder {
 
     private Player player;
 

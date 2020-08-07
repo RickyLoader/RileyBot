@@ -3,7 +3,7 @@ package Command.Commands;
 import Bot.DiscordUser;
 import COD.CombatRecord;
 import Command.Structure.ImageBuilderCommand;
-import Command.Structure.UserLookupBuilder;
+import Command.Structure.ImageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -18,7 +18,7 @@ public class MWLookupCommand extends ImageBuilderCommand {
     }
 
     @Override
-    public UserLookupBuilder getImageBuilder(MessageChannel channel, Guild guild) {
+    public ImageBuilder getImageBuilder(MessageChannel channel, Guild guild) {
         return new CombatRecord(channel, guild, "src/main/resources/COD/", "ModernWarfare.otf");
     }
 

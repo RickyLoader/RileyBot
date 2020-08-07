@@ -1,7 +1,7 @@
 package OSRS.Stats;
 
 import Command.Structure.ImageLoadingMessage;
-import Command.Structure.UserLookupBuilder;
+import Command.Structure.ImageBuilder;
 import Network.NetworkRequest;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Build an image displaying a player's OSRS stats
  */
-public class Hiscores extends UserLookupBuilder {
+public class Hiscores extends ImageBuilder {
     private final String[] bossNames;
     private ImageLoadingMessage loading;
     private boolean timeout = false;

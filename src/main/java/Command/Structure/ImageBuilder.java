@@ -6,13 +6,13 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import java.awt.*;
 import java.io.File;
 
-public abstract class UserLookupBuilder {
+public abstract class ImageBuilder {
     private final Guild guild;
     private final MessageChannel channel;
     private final String resourcePath;
     private Font gameFont;
 
-    public UserLookupBuilder(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
+    public ImageBuilder(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
         this.channel = channel;
         this.guild = guild;
         this.resourcePath = resourcePath;
