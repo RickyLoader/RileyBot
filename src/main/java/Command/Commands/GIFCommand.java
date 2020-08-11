@@ -27,17 +27,18 @@ public class GIFCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-        String query = context.getLowerCaseMessage().trim().replaceFirst(getTrigger(), "");
+        String query = context.getLowerCaseMessage().replaceFirst(getTrigger(), "").trim();
+        MessageChannel channel = context.getMessageChannel();
         if(queries.contains(query)) {
             return;
         }
-        MessageChannel channel = context.getMessageChannel();
         if(query.isEmpty()) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
         ArrayList<String> queryGifs = gifs.get(query);
         if(queryGifs == null) {
+            channel.sendMessage("I don't have any " + query + " gifs at the moment, let me check").queue();
             queryGifs = searchGIFs(query);
             gifs.put(query, queryGifs);
         }
@@ -53,21 +54,21 @@ public class GIFCommand extends DiscordCommand {
      * Search for GIFs related to the given query and save them
      *
      * @param query Search query
-     * @return JSON or null
+     * @return Array of GIFs
      */
     private ArrayList<String> searchGIFs(String query) {
+        ArrayList<String> gifs = new ArrayList<>();
         try {
-            String url = "https://api.redgifs.com/v1/gfycats/search?search_text=" + URLEncoder.encode(query, "UTF-8") + "&count=150";
+            String url = "https://api.redgifs.com/v1/gfycats/search?search_text=" + URLEncoder.encode(query, "UTF-8") + "&count=50";
             String json = new NetworkRequest(url, false).get();
             JSONArray results = new JSONObject(json).getJSONArray("gfycats");
-            ArrayList<String> gifs = new ArrayList<>();
             for(int i = 0; i < results.length(); i++) {
                 gifs.add(results.getJSONObject(i).getString("gifUrl"));
             }
             return gifs;
         }
         catch(Exception e) {
-            return new ArrayList<>();
+            return gifs;
         }
     }
 
