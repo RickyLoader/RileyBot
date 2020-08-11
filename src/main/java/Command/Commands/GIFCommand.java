@@ -27,7 +27,6 @@ public class GIFCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-        context.getMessage().delete().queue();
         String query = context.getLowerCaseMessage().trim().replaceFirst(getTrigger(), "");
         if(queries.contains(query)) {
             return;
