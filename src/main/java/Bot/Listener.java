@@ -11,12 +11,11 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.internal.StringUtil;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -63,16 +62,9 @@ public class Listener extends ListenerAdapter {
      * @return Jiggled string
      */
     private String jiggle(String message) {
-        StringBuilder builder = new StringBuilder();
-        char[] chars = message.toLowerCase().toCharArray();
-        for(char c : chars) {
-            String s = Character.toString(c);
-            if(new Random().nextInt(2) == 0) {
-                s = s.toUpperCase();
-            }
-            builder.append(s);
-        }
-        return builder.toString();
+        Random rand = new Random();
+        message = message.toLowerCase();
+        return StringUtils.join(Arrays.stream(message.split("")).map(s -> rand.nextInt(2) == 0 ? s.toUpperCase() : s).toArray());
     }
 
     /**

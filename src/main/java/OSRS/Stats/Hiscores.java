@@ -62,15 +62,6 @@ public class Hiscores extends ImageBuilder {
 
         List<Boss> bossKills = getBossKills(data);
 
-        if(bossKills.size() == 0 && nameQuery.toLowerCase().equals("hectiserect")) {
-            bossKills.add(new Boss("Butler", 500000));
-            bossKills.add(new Boss("Black dude", 12));
-        }
-
-        if(nameQuery.toLowerCase().equals("heineken_3")) {
-            bossKills.add(new Boss("Harambe", 1));
-        }
-
         String[] clues = getClueScrolls(data);
         String[] stats = orderSkills(data);
         BufferedImage playerImage = buildImage(nameQuery, data[0], stats, bossKills, clues);
@@ -426,12 +417,6 @@ public class Hiscores extends ImageBuilder {
                 case "Wintertodt":
                 case "Zalcano":
                     type = "Games";
-                    break;
-                case "Butler":
-                    type = "Planks";
-                    break;
-                case "Black dude":
-                    type = "Slobbers";
                     break;
                 default:
                     type = (kills == 1) ? "Kill" : "Kills";

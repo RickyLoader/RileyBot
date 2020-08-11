@@ -62,8 +62,8 @@ public class TweetCommand extends DiscordCommand {
         User user = status.getUser();
         MediaEntity[] mediaEntities = status.getMediaEntities();
         String tweetText = status.getText();
-        String image = "https://i.imgur.com/24Xf03H.png";
-        if(mediaEntities.length != 0) {
+        String image = "https://i.imgur.com/24Xf03H.png"; // Blank
+        if(mediaEntities.length > 0) {
             image = mediaEntities[0].getMediaURL();
             tweetText = tweetText.replace(mediaEntities[0].getURL(),"");
         }

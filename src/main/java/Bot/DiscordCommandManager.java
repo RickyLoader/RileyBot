@@ -9,7 +9,7 @@ import Command.Commands.Passive.BrewTrackerCommand;
 import Command.Commands.Passive.GunfightCommand;
 import Command.Commands.Passive.GunfightHelpCommand;
 import Command.Commands.Passive.LeaderboardCommand;
-import Command.Commands.Random.*;
+import Command.Commands.JSON.*;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -139,11 +139,7 @@ public class DiscordCommandManager {
      */
     private void addRandomCommands() {
         addCommand((new MemeCommand()));
-        addCommand((new RileyCommand()));
-        addCommand((new BrockCommand()));
-        addCommand((new KimmyCommand()));
-        addCommand((new ElsaCommand()));
-        addCommand((new SydneyCommand()));
+        addCommand(new GIFCommand());
         addCommand((new GenerateNameCommand()));
     }
 

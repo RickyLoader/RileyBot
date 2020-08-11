@@ -1,11 +1,11 @@
-package Command.Commands.Random;
+package Command.Commands.JSON;
 
 import Command.Structure.CommandContext;
-import Command.Structure.RandomCommand;
+import Command.Structure.JSONListCommand;
 
 import java.util.Random;
 
-public class GenerateNameCommand extends RandomCommand {
+public class GenerateNameCommand extends JSONListCommand {
 
     public GenerateNameCommand() {
         super("new name!", "Generate a cool name!", "name_command.json", "names");
@@ -16,13 +16,14 @@ public class GenerateNameCommand extends RandomCommand {
         Random rand = new Random();
         int attempts = 0;
         StringBuilder name = new StringBuilder();
+        String[] list = getList();
         int maxLength = 15;
 
         // 3 attempts
         while(attempts <= 2) {
 
             // Get a random word
-            String word = getLink();
+            String word = list[rand.nextInt(list.length)];
 
             // Append it to the current name if it can fit
             if(name.length() + word.length() <= maxLength) {

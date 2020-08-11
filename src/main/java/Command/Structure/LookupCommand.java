@@ -60,7 +60,7 @@ public abstract class LookupCommand extends DiscordCommand {
             }
         }
         if(name.length() > maxLength) {
-            channel.sendMessage("Maximum username length is " + maxLength + "characters cunt").queue();
+            channel.sendMessage("Maximum username length is " + maxLength + " characters cunt").queue();
             return;
         }
         if(name.isEmpty()) {
