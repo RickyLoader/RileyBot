@@ -239,11 +239,7 @@ public class Gunfight {
      * Remove the game message
      */
     public void deleteGame() {
-        System.out.println("Deleting game message...");
-        channel.retrieveMessageById(gameID).queue(message -> {
-            System.out.println("Message has been deleted...");
-            message.delete().queue();
-        });
+        channel.retrieveMessageById(gameID).queue(message -> message.delete().queue());
     }
 
     /**
@@ -316,9 +312,7 @@ public class Gunfight {
      * Move the game back to the most recent message
      */
     public void relocate() {
-        System.out.println("Checking if game is most recent message...");
         if(!gameFocused()) {
-            System.out.println("Game is not most recent message...");
             deleteGame();
             sendGameMessage(createGameMessage());
         }
@@ -360,9 +354,7 @@ public class Gunfight {
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
-        System.out.println("Sending game message...");
         channel.sendMessage(gameMessage).queue(message -> {
-            System.out.println("Game message has been sent...\n");
             gameID = message.getIdLong();
             message.addReaction(win).queue();
             message.addReaction(loss).queue();
@@ -385,7 +377,6 @@ public class Gunfight {
         if(currentStreak > longestStreak) {
             longestStreak = currentStreak;
         }
-
         System.out.println("\nWin reaction added: " + formatTime(lastUpdate) + " " + wins + "/" + losses);
     }
 
