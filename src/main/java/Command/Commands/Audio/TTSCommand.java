@@ -1,14 +1,13 @@
 package Command.Commands.Audio;
 
 import Audio.DiscordAudioPlayer;
+import Audio.TrackEndListener;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import Network.NetworkInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 
 import java.net.URLEncoder;
 import java.util.Date;
@@ -20,23 +19,67 @@ import java.util.List;
 public class TTSCommand extends DiscordCommand {
 
     public TTSCommand() {
-        super(".[TTS]", "Make the bot speak!");
+        super("dtts [What to say with Dectalk TTS]\ngtts [What to say with Google TTS]", "Make RileyBot speak!");
     }
 
     @Override
     public void execute(CommandContext context) {
+        String content = context.getLowerCaseMessage();
+        String url;
+        if(content.startsWith("gtts ")) {
+            url = getGoogleTTS(content.replaceFirst("gtts ", ""));
+        }
+        else if(content.startsWith("dtts ")) {
+            url = getDectalkTTS(content.replaceFirst("dtts ", ""));
+        }
+        else {
+            context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+        Guild guild = context.getGuild();
+        MessageChannel channel = context.getMessageChannel();
+        Member member = context.getMember();
+        DiscordAudioPlayer player = new DiscordAudioPlayer(member, guild, new TrackEndListener(() -> logTTS(content, context.getUser(), guild), guild), channel);
+        speak(url, member, guild, player, channel);
+    }
+
+    /**
+     * Get the URL required for Google TTS
+     *
+     * @param content Content to speak
+     * @return URL to speak given content using Google
+     */
+    private String getGoogleTTS(String content) {
         try {
-            String location = NetworkInfo.getAddress() + "/DiscordBotApi/api/dectalk/";
-            String content = URLEncoder.encode(context.getLowerCaseMessage().replaceFirst(".", ""), "UTF-8");
-            new DiscordAudioPlayer(
-                    context.getMember(),
-                    context.getGuild()
-            ).play(location + content);
-            logTTS(context.getMessageContent(), context.getUser(), context.getGuild());
+            return NetworkInfo.getAddress() + "/DiscordBotApi/api/google/" + URLEncoder.encode(content, "UTF-8");
         }
         catch(Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    /**
+     * Get the URL required for Dectalk TTS
+     *
+     * @param content Content to speak
+     * @return URL to speak given content using Dectalk
+     */
+    private String getDectalkTTS(String content) {
+        try {
+            return NetworkInfo.getAddress() + "/DiscordBotApi/api/dectalk/" + URLEncoder.encode(content, "UTF-8");
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    private void speak(String url, Member member, Guild guild, DiscordAudioPlayer player, MessageChannel channel) {
+        if(url == null) {
+            channel.sendMessage("Something went wrong when I tried to say that, sorry bro").queue();
+            return;
+        }
+        player.play(url);
     }
 
     /**
@@ -49,18 +92,23 @@ public class TTSCommand extends DiscordCommand {
     private void logTTS(String msg, User author, Guild guild) {
         List<TextChannel> channels = guild.getTextChannelsByName("tts-log", true);
         if(!channels.isEmpty()) {
-            MessageChannel log = channels.get(0);
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(15655767);
-            builder.setDescription("**Author**: " + author.getAsMention() + " **Submitted At**: " + new Date());
-            builder.setTitle("**TTS Log**");
-            builder.addField("Contents:", msg, false);
-            log.sendMessage(builder.build()).queue();
+            try {
+                MessageChannel log = channels.get(0);
+                EmbedBuilder builder = new EmbedBuilder();
+                builder.setColor(EmbedHelper.getYellow());
+                builder.setDescription("**Author**: " + author.getAsMention() + " **Submitted At**: " + new Date());
+                builder.setTitle("**TTS Log**");
+                builder.addField("Contents:", msg, false);
+                log.sendMessage(builder.build()).queue();
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
     public boolean matches(String query) {
-        return query.startsWith(".");
+        return query.startsWith("gtts ") || query.startsWith("dtts ");
     }
 }

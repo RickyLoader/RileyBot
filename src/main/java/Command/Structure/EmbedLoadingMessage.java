@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -19,6 +20,7 @@ public abstract class EmbedLoadingMessage {
     private final Guild guild;
     private final ArrayList<LoadingStage> stages;
     private int currentStep;
+    private boolean finished, failed;
 
     /**
      * Create a loading message
@@ -49,8 +51,23 @@ public abstract class EmbedLoadingMessage {
         builder.setTitle(getTitle());
         builder.setDescription(getDesc());
         builder.setThumbnail(getThumbnail());
-        builder.setColor(65280);
+        builder.setColor(getColour());
         return builder;
+    }
+
+    /**
+     * Get the colour to use as the embed border, based on the loading status
+     *
+     * @return Colour to use
+     */
+    private int getColour() {
+        if(finished) {
+            return EmbedHelper.getGreen();
+        }
+        if(failed) {
+            return EmbedHelper.getRed();
+        }
+        return EmbedHelper.getYellow();
     }
 
     /**
@@ -161,6 +178,7 @@ public abstract class EmbedLoadingMessage {
         LoadingStage done = new LoadingStage("Done!", guild);
         done.complete(startTime);
         getStages().add(done);
+        this.finished = true;
         updateLoadingMessage();
     }
 
@@ -176,6 +194,7 @@ public abstract class EmbedLoadingMessage {
         for(int i = currentStep; i < stages.size(); i++) {
             stages.get(i).fail();
         }
+        this.failed = true;
         updateLoadingMessage();
     }
 
@@ -194,39 +213,34 @@ public abstract class EmbedLoadingMessage {
     }
 
     /**
-     * Hold information on loading stages
+     * Wrap status emojis for complete, incomplete, and fail.
+     * Use the guild emote if it exists or a standard emoji
      */
-    static class LoadingStage {
-
-        private final String title;
-        private String neutral, fail, complete;
-        private String status, value;
-        private long duration;
-        private final Guild guild;
-
-        /**
-         * Create a default incomplete loading stage
-         *
-         * @param title Title to show in the embed - "Checking account type"
-         */
-        public LoadingStage(String title, Guild guild) {
-            this.guild = guild;
-            getEmotes();
-            this.status = neutral;
-            this.value = "---";
-            this.title = title;
-        }
+    public static class Status {
+        private final String neutral, fail, complete;
 
         /**
          * Use the guild emotes for completion status if available otherwise standard emoji
          */
-        private void getEmotes() {
+        public Status(Guild guild) {
             List<Emote> neutral = guild.getEmotesByName("neutral", true);
             List<Emote> fail = guild.getEmotesByName("fail", true);
             List<Emote> complete = guild.getEmotesByName("complete", true);
             this.neutral = neutral.isEmpty() ? "☐" : formatEmote(neutral.get(0));
             this.fail = fail.isEmpty() ? "☒" : formatEmote(fail.get(0));
             this.complete = complete.isEmpty() ? "\uD83D\uDDF9" : formatEmote(complete.get(0));
+        }
+
+        public String getComplete() {
+            return complete;
+        }
+
+        public String getFail() {
+            return fail;
+        }
+
+        public String getNeutral() {
+            return neutral;
         }
 
         /**
@@ -237,6 +251,29 @@ public abstract class EmbedLoadingMessage {
          */
         private String formatEmote(Emote e) {
             return "<:" + e.getName() + ":" + e.getId() + "> ";
+        }
+    }
+
+    /**
+     * Hold information on loading stages
+     */
+    static class LoadingStage {
+
+        private final String title;
+        private String currentStatus, value;
+        private long duration;
+        private final Status status;
+
+        /**
+         * Create a default incomplete loading stage
+         *
+         * @param title Title to show in the embed - "Checking account type"
+         */
+        public LoadingStage(String title, Guild guild) {
+            this.status = new Status(guild);
+            this.currentStatus = status.getNeutral();
+            this.value = "---";
+            this.title = title;
         }
 
         /**
@@ -256,7 +293,7 @@ public abstract class EmbedLoadingMessage {
          */
         public void complete(long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
-            this.status = complete;
+            this.currentStatus = status.getComplete();
             this.value = "";
         }
 
@@ -270,7 +307,7 @@ public abstract class EmbedLoadingMessage {
          */
         public void complete(String value, long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
-            this.status = complete;
+            this.currentStatus = status.getComplete();
             this.value = value;
         }
 
@@ -278,7 +315,7 @@ public abstract class EmbedLoadingMessage {
          * Fail a stage where the previous step was not completed
          */
         public void fail() {
-            this.status = fail;
+            this.currentStatus = status.getFail();
         }
 
         /**
@@ -290,7 +327,7 @@ public abstract class EmbedLoadingMessage {
         public void fail(String value, long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
             this.value = value;
-            this.status = fail;
+            this.currentStatus = status.getFail();
         }
 
         /**
@@ -299,7 +336,7 @@ public abstract class EmbedLoadingMessage {
          * @return Loading stage status
          */
         public String getValue() {
-            return duration > 0 ? status + " " + value + formatTime() : status + " " + value;
+            return duration > 0 ? currentStatus + " " + value + formatTime() : currentStatus + " " + value;
         }
 
         /**

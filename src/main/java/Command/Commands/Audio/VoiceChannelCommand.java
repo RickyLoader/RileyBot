@@ -15,7 +15,7 @@ public class VoiceChannelCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        DiscordAudioPlayer discordAudioPlayer = new DiscordAudioPlayer(context.getMember(), context.getGuild());
+        DiscordAudioPlayer discordAudioPlayer = new DiscordAudioPlayer(context.getMember(), context.getGuild(), context.getMessageChannel());
         if(context.getLowerCaseMessage().equals("stop")) {
             discordAudioPlayer.leave();
         }

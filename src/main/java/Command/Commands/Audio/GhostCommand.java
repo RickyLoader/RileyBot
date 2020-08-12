@@ -15,6 +15,6 @@ public class GhostCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        new DiscordAudioPlayer(context.getMember(), context.getGuild()).play("https://www.youtube.com/watch?v=q3O4lCKcuWc");
+        new DiscordAudioPlayer(context.getMember(), context.getGuild(), context.getMessageChannel()).play("https://www.youtube.com/watch?v=q3O4lCKcuWc");
     }
 }

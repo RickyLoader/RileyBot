@@ -1,5 +1,7 @@
 package LOL;
 
+import Command.Structure.EmbedHelper;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -40,7 +42,7 @@ public class SummonerImage {
             // Level circle
             BufferedImage circle = ImageIO.read(new File(res + "SummonerBorders/level_circle.png"));
             Graphics g = circle.getGraphics();
-            g.setColor(Color.decode("#e3ddc6"));
+            g.setColor(Color.decode(Integer.toHexString(EmbedHelper.getCream())));
             String level = String.valueOf(summoner.getLevel());
             int levelWidth = g.getFontMetrics().stringWidth(level);
             g.drawString(level, (circle.getWidth() / 2) - (levelWidth / 2), circle.getHeight() / 2 + g.getFont().getSize() / 2);
@@ -57,7 +59,7 @@ public class SummonerImage {
             g.drawImage(profileIcon, getCenterX(banner, profileIcon), getCenterY(banner, profileIcon), null);
 
             g.setFont(leagueFont.deriveFont(22f));
-            g.setColor(Color.decode("#e3ddc6"));
+            g.setColor(Color.decode(Integer.toHexString(EmbedHelper.getCream())));
 
             String name = summoner.getName();
             int nameWidth = g.getFontMetrics().stringWidth(name) / 2;

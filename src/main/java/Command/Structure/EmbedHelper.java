@@ -7,6 +7,30 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
  */
 public class EmbedHelper {
 
+    public static int getBlue() {
+        return 1942002;
+    }
+
+    public static int getGreen() {
+        return 65280;
+    }
+
+    public static int getCream() {
+        return 22722198;
+    }
+
+    public static int getPurple() {
+        return 16711935;
+    }
+
+    public static int getYellow() {
+        return 16776960;
+    }
+
+    public static int getRed() {
+        return 16711680;
+    }
+
     /**
      * Create a field with an invisible character for a title, and the value as a value.
      * Allows a column-esq appearance without having a title above every value
@@ -36,5 +60,14 @@ public class EmbedHelper {
      */
     public static String getBlankChar() {
         return "\u200e";
+    }
+
+    /**
+     * Get URL to a transparent image used to keep embeds at a constant width
+     *
+     * @return Transparent image url
+     */
+    public static String getSpacerImage() {
+        return "https://i.imgur.com/24Xf03H.png";
     }
 }

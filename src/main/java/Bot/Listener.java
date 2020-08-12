@@ -2,6 +2,7 @@ package Bot;
 
 
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -101,7 +102,7 @@ public class Listener extends ListenerAdapter {
      */
     private void welcomeCunt(Member self, Member cunt, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(15655767);
+        builder.setColor(EmbedHelper.getYellow());
         builder.setTitle("Hey " + cunt.getUser().getName() + "!");
         builder.setThumbnail(self.getUser().getAvatarUrl());
         builder.setDescription("Here's some stuff I can do, now fuck off.");

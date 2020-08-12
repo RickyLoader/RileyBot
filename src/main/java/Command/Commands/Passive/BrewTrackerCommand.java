@@ -2,6 +2,7 @@ package Command.Commands.Passive;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteListener;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -151,8 +152,8 @@ public class BrewTrackerCommand extends DiscordCommand {
             builder.setTitle("Brew Tracker!");
             builder.setDescription("Use the emotes to keep track of your alcoholism!");
             builder.setThumbnail("https://i.imgur.com/0lQ4Cxh.png");
-            builder.setImage("https://i.imgur.com/24Xf03H.png");
-            builder.setColor(16711935);
+            builder.setImage(EmbedHelper.getSpacerImage());
+            builder.setColor(EmbedHelper.getPurple());
             builder.setFooter("Take the quiz: https://www.alcohol.org.nz/quiz", "https://i.imgur.com/uogtXCW.png");
             int total = 0;
             int index = 0;

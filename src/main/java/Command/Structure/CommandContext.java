@@ -16,6 +16,10 @@ public class CommandContext {
         this.commands = commands;
     }
 
+    public User getSelf() {
+        return getJDA().getSelfUser();
+    }
+
     public ArrayList<DiscordCommand> getCommands() {
         return commands;
     }

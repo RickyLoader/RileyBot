@@ -10,18 +10,21 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
 
 public class DiscordAudioPlayer {
-    AudioPlayer player;
-    AudioPlayerManager manager;
-    Member member;
-    Guild guild;
+    private final AudioPlayer player;
+    private final AudioPlayerManager manager;
+    private final Member member;
+    private final Guild guild;
+    private final MessageChannel channel;
 
-    public DiscordAudioPlayer(Member member, Guild guild, TrackEndListener listener) {
+    public DiscordAudioPlayer(Member member, Guild guild, TrackEndListener listener, MessageChannel channel) {
         this.member = member;
         this.guild = guild;
+        this.channel = channel;
         this.manager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(manager);
         this.player = manager.createPlayer();
@@ -29,8 +32,8 @@ public class DiscordAudioPlayer {
         guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
     }
 
-    public DiscordAudioPlayer(Member member, Guild guild) {
-        this(member, guild, new TrackEndListener(null, guild));
+    public DiscordAudioPlayer(Member member, Guild guild, MessageChannel channel) {
+        this(member, guild, new TrackEndListener(null, guild), channel);
     }
 
     public void join(VoiceChannel vc) {
@@ -48,8 +51,12 @@ public class DiscordAudioPlayer {
         return member.getVoiceState().getChannel();
     }
 
-    public void play(String audio) {
+    public boolean play(String audio) {
         VoiceChannel vc = getMemberVoiceChannel();
+        if(vc == null) {
+            channel.sendMessage("You're not in a voice channel").queue();
+            return false;
+        }
         join(vc);
         try {
             manager.loadItem(audio, new AudioLoadResultHandler() {
@@ -65,10 +72,12 @@ public class DiscordAudioPlayer {
                 }
 
                 @Override
-                public void playlistLoaded(AudioPlaylist audioPlaylist) {}
+                public void playlistLoaded(AudioPlaylist audioPlaylist) {
+                }
 
                 @Override
-                public void noMatches() {}
+                public void noMatches() {
+                }
 
                 @Override
                 public void loadFailed(FriendlyException e) {
@@ -77,7 +86,8 @@ public class DiscordAudioPlayer {
             });
         }
         catch(Exception e) {
-            e.printStackTrace();
+            return false;
         }
+        return true;
     }
 }

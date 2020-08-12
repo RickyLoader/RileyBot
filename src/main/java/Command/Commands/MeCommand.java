@@ -3,6 +3,7 @@ package Command.Commands;
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ public class MeCommand extends DiscordCommand {
             return;
         }
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(15655767);
+        builder.setColor(EmbedHelper.getGreen());
         builder.setTitle(user.getName());
         builder.setThumbnail(user.getAvatarUrl() == null ? user.getDefaultAvatarUrl() : user.getAvatarUrl());
         builder.setDescription("Here's all the data I've stolen from you:");

@@ -2,8 +2,11 @@ package Command.Commands;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -13,7 +16,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class GIFCommand extends DiscordCommand {
-    private final HashMap<String, ArrayList<String>> gifs = new HashMap<>();
+    private final HashMap<String, ArrayList<GIF>> gifs = new HashMap<>();
     private final ArrayList<String> queries = new ArrayList<>();
 
     public GIFCommand() {
@@ -36,9 +39,9 @@ public class GIFCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        ArrayList<String> queryGifs = gifs.get(query);
+        ArrayList<GIF> queryGifs = gifs.get(query);
         if(queryGifs == null) {
-            channel.sendMessage("I don't have any " + query + " gifs at the moment, let me check").queue();
+            channel.sendMessage("I don't have any " + query + " gifs at the moment, let me check!").queue();
             queryGifs = searchGIFs(query);
             gifs.put(query, queryGifs);
         }
@@ -47,7 +50,25 @@ public class GIFCommand extends DiscordCommand {
             channel.sendMessage("I didn't find anything for: " + query).queue();
             return;
         }
-        channel.sendMessage(queryGifs.get(new Random().nextInt(queryGifs.size()))).queue();
+        channel.sendMessage(chooseGif(queryGifs, context.getSelf().getEffectiveAvatarUrl(), query)).queue();
+    }
+
+    /**
+     * Choose a random gif and wrap it in a message embed
+     *
+     * @param gifs List of gifs
+     * @return Gif wrapped in message embed
+     */
+    private MessageEmbed chooseGif(ArrayList<GIF> gifs, String thumbnail, String query) {
+        EmbedBuilder builder = new EmbedBuilder();
+        GIF gif = gifs.get(new Random().nextInt(gifs.size()));
+        builder.setTitle(gif.getTitle(), gif.getUrl());
+        builder.setImage(gif.getUrl());
+        builder.setDescription("Pulled from search term: **" + query + "**\n\nSometimes they don't load, click the title if you *really* want to see it.");
+        builder.setColor(EmbedHelper.getPurple());
+        builder.setThumbnail(thumbnail);
+        builder.setFooter("Try: " + getHelpName(), gif.getWebsiteIcon());
+        return builder.build();
     }
 
     /**
@@ -56,14 +77,15 @@ public class GIFCommand extends DiscordCommand {
      * @param query Search query
      * @return Array of GIFs
      */
-    private ArrayList<String> searchGIFs(String query) {
-        ArrayList<String> gifs = new ArrayList<>();
+    private ArrayList<GIF> searchGIFs(String query) {
+        ArrayList<GIF> gifs = new ArrayList<>();
         try {
             String url = "https://api.redgifs.com/v1/gfycats/search?search_text=" + URLEncoder.encode(query, "UTF-8") + "&count=50";
             String json = new NetworkRequest(url, false).get();
             JSONArray results = new JSONObject(json).getJSONArray("gfycats");
             for(int i = 0; i < results.length(); i++) {
-                gifs.add(results.getJSONObject(i).getString("gifUrl"));
+                JSONObject o = results.getJSONObject(i);
+                gifs.add(new GIF(o.getString("gifUrl"), o.getString("title"), o.getString("posterUrl")));
             }
             return gifs;
         }
@@ -75,5 +97,31 @@ public class GIFCommand extends DiscordCommand {
     @Override
     public boolean matches(String query) {
         return query.startsWith(getTrigger());
+    }
+
+    private static class GIF {
+        private final String url, title, poster;
+
+        public GIF(String url, String title, String poster) {
+            this.url = url;
+            this.title = title;
+            this.poster = poster;
+        }
+
+        public String getWebsiteIcon() {
+            return "https://external-preview.redd.it/Om4099FdY_let-yIXtPdTcaSPCfvV17HHISEpIGL6SY.jpg?auto=webp&s=0af3d783d15ef4c942d2d211bb3aff475eecaf96";
+        }
+
+        public String getPoster() {
+            return poster;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 }

@@ -4,6 +4,8 @@ import Audio.DiscordAudioPlayer;
 import Audio.TrackEndListener;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
+import Command.Structure.EmbedLoadingMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -18,45 +20,18 @@ import static Command.Structure.EmbedHelper.getValueField;
  */
 public class ExecuteOrder66Command extends DiscordCommand {
 
-    // Map enum name to emoji for displaying on embed
-    enum STATUS {
-        EXECUTED("\uD83D\uDDF9"),
-        FAILED("☒"),
-        PENDING("☐");
-        public final String emoji;
-
-        STATUS(String emoji) {
-            this.emoji = emoji;
-        }
-
-        public String getEmoji() {
-            return emoji;
-        }
-    }
-
-    private HashMap<Member, STATUS> targetStatus;
+    private HashMap<Member, String> targetStatus;
     private List<Member> targets;
     private long id;
     private ExecutorHandler.Executor executor;
     private String image;
+    private boolean finished;
+    private EmbedLoadingMessage.Status status;
 
     public ExecuteOrder66Command() {
         super("execute order 66", "Execute targets on the kill list!");
     }
 
-    /**
-     * Map the targets to the pending status
-     *
-     * @param targets Members with 'target' role
-     * @return Map of member->status
-     */
-    private HashMap<Member, STATUS> getTargetStatus(List<Member> targets) {
-        HashMap<Member, STATUS> targetStatus = new HashMap<>();
-        for(Member target : targets) {
-            targetStatus.put(target, STATUS.PENDING);
-        }
-        return targetStatus;
-    }
 
     /**
      * Kick all members with the 'target' role, apologise in a private message and give them an invite
@@ -66,6 +41,9 @@ public class ExecuteOrder66Command extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         context.getMessage().delete().complete();
+        if(status == null) {
+            status = new EmbedLoadingMessage.Status(context.getGuild());
+        }
 
         // Impatient, command is currently in progress
         if(executor != null) {
@@ -81,19 +59,29 @@ public class ExecuteOrder66Command extends DiscordCommand {
             context.getMessageChannel().sendMessage("Target sectors are already clear sir.").queue();
             return;
         }
+        targetStatus = new HashMap<>();
+        for(Member target : targets) {
+            if(target.getUser() == context.getSelf()) {
+                Guild g = context.getGuild();
+                g.removeRoleFromMember(target, g.getRolesByName("target", true).get(0)).queue();
+                continue;
+            }
+            targetStatus.put(target, status.getNeutral());
+        }
 
-        targetStatus = getTargetStatus(targets);
+        TrackEndListener listener = new TrackEndListener(new Thread(() -> {
+            purgeTargets(context);
+            executor = null;
+        })::start, context.getGuild());
+
+        DiscordAudioPlayer player = new DiscordAudioPlayer(context.getMember(), context.getGuild(), listener, context.getMessageChannel());
 
         context.getMessageChannel().sendMessage(buildStatusMessage()).queue(message -> {
             id = message.getIdLong();
-            TrackEndListener.Response method = new Thread(() -> {
-                purgeTargets(context);
+            if(!player.play(executor.getTrack())) {
                 executor = null;
-            })::start;
-            TrackEndListener listener = new TrackEndListener(method, context.getGuild());
-
-            // Play the track
-            new DiscordAudioPlayer(context.getMember(), context.getGuild(), listener).play(executor.getTrack());
+                message.delete().queue();
+            }
         });
     }
 
@@ -105,27 +93,26 @@ public class ExecuteOrder66Command extends DiscordCommand {
     private MessageEmbed buildStatusMessage() {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("EXECUTING ORDER 66");
-        builder.setColor(16711680);
+        builder.setColor(finished ? EmbedHelper.getGreen() : EmbedHelper.getRed());
         builder.setThumbnail(image);
-
-        long executed = targetStatus.entrySet().stream().filter(x -> x.getValue() == STATUS.EXECUTED).count();
+        builder.setImage(EmbedHelper.getSpacerImage());
+        long executed = targetStatus.entrySet().stream().filter(x -> x.getValue().equals(status.getComplete())).count();
         builder.setDescription(executed + "/" + targets.size() + " targets exterminated.");
 
         for(int i = 0; i < targets.size(); i++) {
             Member target = targets.get(i);
             String number = String.valueOf(i + 1);
             String name = getName(target);
-            STATUS status = targetStatus.get(target);
+            String status = targetStatus.get(target);
             if(i == 0) {
                 builder.addField(getTitleField("#", number));
                 builder.addField(getTitleField("TARGET", name));
-                builder.addField(getTitleField("EXECUTED", status.getEmoji()));
+                builder.addField(getTitleField("EXECUTED", status));
                 continue;
             }
             builder.addField(getValueField(number));
             builder.addField(getValueField(name));
-            builder.addField(getValueField(status.getEmoji()));
-
+            builder.addField(getValueField(status));
         }
         return builder.build();
     }
@@ -150,10 +137,13 @@ public class ExecuteOrder66Command extends DiscordCommand {
             try {
                 apologise(target.getUser(), invite);
                 context.getGuild().kick(target).complete();
-                targetStatus.put(target, STATUS.EXECUTED);
+                targetStatus.put(target, status.getComplete());
             }
             catch(Exception e) {
-                targetStatus.put(target, STATUS.FAILED);
+                targetStatus.put(target, status.getFail());
+            }
+            if(targets.indexOf(target) == targets.size() - 1) {
+                this.finished = true;
             }
             updateStatusMessage(context.getMessageChannel());
         }
@@ -168,7 +158,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
     private void apologise(User loser, String invite) {
         try {
             EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(15655767);
+            builder.setColor(EmbedHelper.getRed());
             builder.setTitle("I AM SORRY FOR KICKING YOU");
             builder.setDescription("Sorry about that bro, i'm actually a really friendly bot when you get to know me but I have to do what i'm told.");
             builder.addField("Feel free to join back though!", invite, true);

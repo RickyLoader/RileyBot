@@ -44,19 +44,13 @@ public class TrackEndListener extends AudioEventAdapter {
      */
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        //System.out.println("\nTrack ended\n");
 
-        // Leave the voice channel
         if(leave) {
             new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();
         }
 
-        /*
-         * Methods may want to do something after the track ends. In that case, an implementation of the Response
-         * interface is given which contains an implementation of the processFinish() method.
-         */
         if(method != null) {
-            method.processFinish();
+            new Thread(method::processFinish).start();
         }
     }
 

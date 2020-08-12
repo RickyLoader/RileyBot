@@ -53,7 +53,7 @@ public abstract class PageableEmbed {
 
     private MessageEmbed buildMessage() {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(15655767);
+        builder.setColor(EmbedHelper.getYellow());
         builder.setTitle(title);
         builder.setDescription(desc);
         builder.setThumbnail(thumb);

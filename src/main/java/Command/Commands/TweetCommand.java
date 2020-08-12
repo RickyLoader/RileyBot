@@ -2,6 +2,7 @@ package Command.Commands;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import Network.TwitterManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -70,7 +71,7 @@ public class TweetCommand extends DiscordCommand {
         return new EmbedBuilder()
                 .setAuthor(twitterManager.formatName(user), twitterManager.getProfileURL(user), user.getProfileImageURL())
                 .setTitle("Tweet #" + user.getStatusesCount(), twitterManager.getTweetURL(status))
-                .setColor(1942002)
+                .setColor(EmbedHelper.getBlue())
                 .setThumbnail(user.getProfileImageURL())
                 .setFooter("Try: " + getHelpName(), twitterManager.getThumbnail())
                 .setImage(image)

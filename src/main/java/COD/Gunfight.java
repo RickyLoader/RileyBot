@@ -1,5 +1,6 @@
 package COD;
 
+import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -132,13 +133,13 @@ public class Gunfight {
      */
     private int getColour() {
         if(wins == losses) {
-            return 16776960; // YELLOW
+            return EmbedHelper.getYellow();
         }
         else if(wins < losses) {
-            return 16711680; // RED
+            return EmbedHelper.getRed();
         }
         else {
-            return 65280; // Green
+            return EmbedHelper.getGreen();
         }
     }
 
@@ -191,7 +192,7 @@ public class Gunfight {
         builder.setTitle(title);
         builder.setDescription(createDesc());
         builder.setThumbnail(getThumbnail());
-        builder.setImage("https://i.imgur.com/24Xf03H.png");
+        builder.setImage(EmbedHelper.getSpacerImage());
         builder.addField("**WIN**", String.valueOf(wins), true);
         builder.addBlankField(true);
         builder.addField("**LOSS**", String.valueOf(losses), true);
@@ -354,6 +355,10 @@ public class Gunfight {
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
+        if(!checkEmotes()) {
+            channel.sendMessage("The emotes aren't here anymore, call me again when you've fixed it").queue();
+            return;
+        }
         channel.sendMessage(gameMessage).queue(message -> {
             gameID = message.getIdLong();
             message.addReaction(win).queue();
@@ -718,7 +723,7 @@ public class Gunfight {
      */
     private EmbedBuilder buildHelpMessage() {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(65280);
+        builder.setColor(EmbedHelper.getGreen());
         builder.setTitle("GUNFIGHT HELP");
         builder.addField("BASICS", "Call **gunfight!** to begin a gunfight session.\n\nThe session will run until it is submitted to the **leaderboard!**\n\nOnly the user who called **gunfight!** can control the session.", false);
         builder.addField("CUSTOM SCORE", "Call **gunfight! [wins] [losses] [current streak] [longest streak]** to begin a gunfight session with a custom score.", false);
