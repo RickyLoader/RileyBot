@@ -9,6 +9,8 @@ import org.json.JSONObject;
  * Helper methods for storing and retrieving information based on User id
  */
 public class DiscordUser {
+    private static final String MW = "MW", OSRS = "OSRS", LOL = "LOL", YT = "YT";
+
     /**
      * Retrieve name used in mwlookup command
      *
@@ -16,7 +18,17 @@ public class DiscordUser {
      * @return mwlookup name
      */
     public static String getMWName(long id) {
-        return getName(id, "mw");
+        return getName(id, MW);
+    }
+
+    /**
+     * Retrieve name used in lollookup command
+     *
+     * @param id Discord user object id
+     * @return lollookup name
+     */
+    public static String getLOLName(long id) {
+        return getName(id, LOL);
     }
 
     /**
@@ -26,7 +38,7 @@ public class DiscordUser {
      * @return osrslookup name
      */
     public static String getOSRSName(long id) {
-        return getName(id, "osrs");
+        return getName(id, OSRS);
     }
 
     /**
@@ -36,7 +48,7 @@ public class DiscordUser {
      * @return ytlookup name
      */
     public static String getYTName(long id) {
-        return getName(id, "yt");
+        return getName(id, YT);
     }
 
     /**
@@ -47,7 +59,7 @@ public class DiscordUser {
      * @param user    User to store by id
      */
     public static void saveMWName(String name, MessageChannel channel, User user) {
-        savePlayer(name, user.getIdLong(), "MW");
+        savePlayer(name, user.getIdLong(), MW);
         channel.sendMessage(user.getAsMention() + " Your mwlookup name is now " + name).queue();
     }
 
@@ -59,8 +71,20 @@ public class DiscordUser {
      * @param user    User to store by id
      */
     public static void saveOSRSName(String name, MessageChannel channel, User user) {
-        savePlayer(name, user.getIdLong(), "OSRS");
+        savePlayer(name, user.getIdLong(), OSRS);
         channel.sendMessage(user.getAsMention() + " Your osrslookup name is now " + name).queue();
+    }
+
+    /**
+     * Store a given name by the user's discord id for the lollookup command
+     *
+     * @param name    Name to be saved
+     * @param channel Channel to report status to
+     * @param user    User to store by id
+     */
+    public static void saveLOLName(String name, MessageChannel channel, User user) {
+        savePlayer(name, user.getIdLong(), LOL);
+        channel.sendMessage(user.getAsMention() + " Your lollookup name is now " + name).queue();
     }
 
     /**
@@ -71,7 +95,7 @@ public class DiscordUser {
      * @param user    User to store by id
      */
     public static void saveYTName(String name, MessageChannel channel, User user) {
-        savePlayer(name, user.getIdLong(), "YT");
+        savePlayer(name, user.getIdLong(), YT);
         channel.sendMessage(user.getAsMention() + " Your ytlookup name is now " + name).queue();
     }
 
@@ -91,7 +115,7 @@ public class DiscordUser {
      * Retrieve a name from the database
      *
      * @param id    id the name is stored by
-     * @param table Table to retrieve from [yt, mw, osrs]
+     * @param table Table to retrieve from [YT, MW, OSRS, LOL]
      * @return Saved name for given table
      */
     private static String getName(long id, String table) {

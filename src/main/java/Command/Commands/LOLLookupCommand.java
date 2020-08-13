@@ -1,32 +1,33 @@
 package Command.Commands;
 
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import LOL.Summoner;
+import Bot.DiscordUser;
+import Command.Structure.ImageBuilder;
+import Command.Structure.ImageBuilderCommand;
 import LOL.SummonerImage;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 
-public class LOLLookupCommand extends DiscordCommand {
+
+public class LOLLookupCommand extends ImageBuilderCommand {
+
 
     public LOLLookupCommand() {
-        super("lollookup [summoner]", "Look up a summoner!");
+        super("lollookup", "Look up a summoner", 16);
     }
 
     @Override
-    public void execute(CommandContext context) {
-        String name = context.getLowerCaseMessage().replace("lollookup ", "");
-        MessageChannel channel = context.getMessageChannel();
-        Summoner summoner = new Summoner(name);
-        if(!summoner.exists()) {
-            channel.sendMessage(name + " doesn't exist on the OCE server cunt").queue();
-            return;
-        }
-        channel.sendFile(new SummonerImage(summoner).buildImage()).queue();
-        channel.sendMessage("\uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7 UNDER CONSTRUCTION BEEP BEEP \uD83D\uDEA7\uD83D\uDEA7\uD83D\uDEA7").queue();
+    public ImageBuilder getImageBuilder(MessageChannel channel, Guild guild) {
+        return new SummonerImage(channel, guild, "src/main/resources/LOL/", "font.otf");
     }
 
     @Override
-    public boolean matches(String query) {
-        return query.startsWith("lollookup");
+    public String getSavedName(long id) {
+        return DiscordUser.getLOLName(id);
+    }
+
+    @Override
+    public void saveName(String name, MessageChannel channel, User user) {
+        DiscordUser.saveLOLName(name, channel, user);
     }
 }

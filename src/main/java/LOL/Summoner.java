@@ -11,20 +11,26 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 public class Summoner {
     private String name;
-    private final String apiKey = Secret.getLeagueKey(), res = "src/main/resources/LOL/Summoner/";
-    private final ArrayList<RankedQueue> queues = new ArrayList<>();
+    private final String apiKey = Secret.getLeagueKey(), res;
+    private final HashMap<String, RankedQueue> queues = new HashMap<>();
     private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
     boolean exists;
-    private File profileIcon, profileBorder;
+    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5";
+    private File profileIcon, profileBorder, profileBanner;
 
-    public Summoner(String name) {
+    public Summoner(String name, String res) {
         this.name = name;
+        this.res = res;
+        queues.put(FLEX, new RankedQueue(res, false));
+        queues.put(SOLO, new RankedQueue(res, true));
         this.exists = fetchSummonerData();
     }
 
@@ -45,10 +51,6 @@ public class Summoner {
         return profileBorder;
     }
 
-    public String getRes() {
-        return res;
-    }
-
     /**
      * Fetch summoner data from riot
      *
@@ -63,31 +65,33 @@ public class Summoner {
             if(json == null) {
                 return false;
             }
-
             JSONObject summoner = new JSONObject(json);
             String id = summoner.getString("id");
             this.name = summoner.getString("name");
             this.level = summoner.getInt("summonerLevel");
-            this.profileIcon = new File(res + "SummonerIcons/" + summoner.getInt("profileIconId") + ".png");
-            this.profileBorder = new File(res + "SummonerBorders/" + roundLevel(level) + ".png");
-
+            this.profileIcon = new File(res + "Summoner/Icons/" + summoner.getInt("profileIconId") + ".png");
+            this.profileBorder = new File(res + "Summoner/Borders/" + roundLevel(level) + ".png");
             url = "https://oc1.api.riotgames.com/lol/league/v4/entries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
+
             if(json != null) {
                 JSONArray queues = new JSONArray(json);
                 for(int i = 0; i < queues.length(); i++) {
                     JSONObject queue = queues.getJSONObject(i);
-                    this.queues.add(new RankedQueue(
-                            queue.getInt("wins"),
-                            queue.getInt("losses"),
-                            queue.getInt("leaguePoints"),
-                            queue.getString("tier"),
-                            queue.getString("rank"),
-                            queue.getString("queueType")
-                    ));
+                    String type = queue.getString("queueType");
+                    this.queues.put(type, new RankedQueue(
+                                    queue.getInt("wins"),
+                                    queue.getInt("losses"),
+                                    queue.getInt("leaguePoints"),
+                                    queue.getString("tier"),
+                                    queue.getString("rank"),
+                                    res,
+                                    type.equals(SOLO)
+                            )
+                    );
                 }
             }
-
+            this.profileBanner = new File(res + "Summoner/Banners/" + getHighestRank() + ".png");
             url = "https://oc1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
             if(json != null) {
@@ -97,16 +101,41 @@ public class Summoner {
                     this.champions.add(new Champion(
                             champion.getInt("championId"),
                             champion.getInt("championLevel"),
-                            champion.getInt("championPoints")
+                            champion.getInt("championPoints"),
+                            res
                     ));
                 }
                 Collections.sort(this.champions);
             }
         }
         catch(Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    public File getProfileBanner() {
+        return profileBanner;
+    }
+
+    private String getHighestRank() {
+        ArrayList<String> tiers = new ArrayList<>();
+        tiers.add("default");
+        tiers.add("iron");
+        tiers.add("bronze");
+        tiers.add("silver");
+        tiers.add("gold");
+        tiers.add("platinum");
+        tiers.add("master");
+        tiers.add("grandmaster");
+        tiers.add("challenger");
+        String solo = getSoloQueue().getTier().toLowerCase();
+        String flex = getFlexQueue().getTier().toLowerCase();
+        if(tiers.indexOf(solo) > tiers.indexOf(flex)) {
+            return solo;
+        }
+        return flex;
     }
 
     public int getLevel() {
@@ -117,12 +146,16 @@ public class Summoner {
         return champions;
     }
 
-    public ArrayList<RankedQueue> getQueues() {
-        return queues;
+    public RankedQueue getFlexQueue() {
+        return queues.get(FLEX);
+    }
+
+    public RankedQueue getSoloQueue() {
+        return queues.get(SOLO);
     }
 
     public File getProfileIcon() {
-        return profileIcon;
+        return profileIcon.exists() ? profileIcon : new File(res + "Summoner/Icons/0.png");
     }
 
     private int roundLevel(int level) {
@@ -136,16 +169,37 @@ public class Summoner {
     }
 
     public static class RankedQueue {
-        final int wins, losses, points;
-        final String tier, rank, queue;
+        private final int wins, losses, points;
+        private final String tier, rank, queue;
+        private final File helmet, banner;
+        private boolean unranked = false;
 
-        public RankedQueue(int wins, int losses, int points, String tier, String rank, String queue) {
+        public RankedQueue(int wins, int losses, int points, String tier, String rank, String res, boolean solo) {
             this.wins = wins;
             this.losses = losses;
             this.points = points;
             this.tier = tier;
             this.rank = rank;
-            this.queue = (queue.equals("RANKED_SOLO_5x5")) ? "Ranked Solo/Duo" : "Ranked Flex";
+            this.queue = solo ? "Ranked Solo/Duo" : "Ranked Flex";
+            this.helmet = new File(res + "Summoner/Ranked/Helmets/" + tier.toUpperCase() + "/" + rank.toUpperCase() + ".png");
+            this.banner = new File(res + "Summoner/Ranked/Banners/" + tier.toUpperCase() + ".png");
+        }
+
+        public RankedQueue(String res, boolean solo) {
+            this(0, 0, 0, "DEFAULT", "DEFAULT", res, solo);
+            this.unranked = true;
+        }
+
+        public boolean isUnranked() {
+            return unranked;
+        }
+
+        public File getBanner() {
+            return banner;
+        }
+
+        public File getHelmet() {
+            return helmet;
         }
 
         public int getPoints() {
@@ -176,13 +230,15 @@ public class Summoner {
     public static class Champion implements Comparable<Champion> {
         private final int id, level, points;
         private String name;
-        private final String res = "src/main/resources/LOL/";
-        private File image;
+        private final String res;
+        private File image, masteryIcon;
 
-        public Champion(int id, int level, int points) {
+        public Champion(int id, int level, int points, String res) {
             this.id = id;
             this.level = level;
             this.points = points;
+            this.res = res;
+            this.masteryIcon = new File(res + "Champions/Mastery/" + level + ".png");
             getChampionInfo();
         }
 
@@ -194,8 +250,20 @@ public class Summoner {
             return points;
         }
 
+        public String getFormattedPoints() {
+            return new DecimalFormat("#,###").format(points);
+        }
+
         public File getImage() {
             return image;
+        }
+
+        public File getMasteryIcon() {
+            return masteryIcon;
+        }
+
+        public int getLevel() {
+            return level;
         }
 
         private void getChampionInfo() {
@@ -205,7 +273,7 @@ public class Summoner {
                     JSONObject champion = champions.getJSONObject(championName);
                     if(champion.getString("key").equals(String.valueOf(id))) {
                         this.name = championName;
-                        this.image = new File(res + "Champions/" + champion.getString("id") + "_0.jpg");
+                        this.image = new File(res + "Champions/Images/" + champion.getString("id") + ".png");
                     }
                 }
             }

@@ -15,10 +15,6 @@ public class EmbedHelper {
         return 65280;
     }
 
-    public static int getCream() {
-        return 22722198;
-    }
-
     public static int getPurple() {
         return 16711935;
     }
