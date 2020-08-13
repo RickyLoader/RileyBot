@@ -22,6 +22,7 @@ public class TweetCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         if(twitterManager == null) {
             twitterManager = new TwitterManager(new TwitterAdapter() {
+
                 @Override
                 public void updatedStatus(Status status) {
                     context.getMessage().delete().queue();

@@ -31,6 +31,8 @@ public class TwitterManager {
             Message.Attachment a = attachments.get(i);
             update.media(getImage(a.getProxyUrl()));
         }
+        GeoLocation aitutaki = new GeoLocation(-18.853352, -159.793199);
+        update.setLocation(aitutaki);
         twitter.updateStatus(update);
         return true;
     }
@@ -85,6 +87,7 @@ public class TwitterManager {
                 .setOAuthConsumerSecret(Secret.getTwitterOAuthConsumerSecret())
                 .setOAuthAccessToken(Secret.getTwitterOAuthAccessToken())
                 .setOAuthAccessTokenSecret(Secret.getTwitterOAuthAccessTokenSecret());
+
         this.twitter = new AsyncTwitterFactory(builder.build()).getInstance();
         this.twitter.addListener(listener);
     }
