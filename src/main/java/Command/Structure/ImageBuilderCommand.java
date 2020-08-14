@@ -3,6 +3,8 @@ package Command.Structure;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+import java.awt.*;
+
 /**
  * Command to look up a player and build an image
  */
@@ -21,7 +23,11 @@ public abstract class ImageBuilderCommand extends LookupCommand {
 
     @Override
     public void processName(String name, MessageChannel channel, Guild guild) {
-        getImageBuilder(channel, guild).buildImage(name);
+        buildImage(name, getImageBuilder(channel, guild));
+    }
+
+    public void buildImage(String name, ImageBuilder builder) {
+        builder.buildImage(name);
     }
 
     /**

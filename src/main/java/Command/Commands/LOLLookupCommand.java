@@ -8,17 +8,53 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class LOLLookupCommand extends ImageBuilderCommand {
-
+    private final HashMap<String, String> regions;
+    private String region;
 
     public LOLLookupCommand() {
         super("lollookup", "Look up a summoner", 16);
+        this.regions = getRegions();
+    }
+
+    private HashMap<String, String> getRegions() {
+        HashMap<String, String> regions = new HashMap<>();
+        regions.put("br", "br1");
+        regions.put("eune", "eun1");
+        regions.put("euw", "euw1");
+        regions.put("jp", "jp1");
+        regions.put("kr", "kr");
+        regions.put("lan", "la1");
+        regions.put("las", "la2");
+        regions.put("na", "na1");
+        regions.put("oce", "oc1");
+        regions.put("ru", "ru");
+        regions.put("tr", "tr1");
+        return regions;
     }
 
     @Override
     public ImageBuilder getImageBuilder(MessageChannel channel, Guild guild) {
         return new SummonerImage(channel, guild, "src/main/resources/LOL/", "font.otf");
+    }
+
+    @Override
+    public String stripArguments(String query) {
+        String region = query.split(" ")[0];
+        if(region.equals(getTrigger())) {
+            this.region = regions.get("oce");
+            return query;
+        }
+        this.region = regions.get(region);
+        return query.replaceFirst(region, "").trim();
+    }
+
+    @Override
+    public void buildImage(String name, ImageBuilder builder) {
+        builder.buildImage(name, this.region);
     }
 
     @Override
@@ -29,5 +65,11 @@ public class LOLLookupCommand extends ImageBuilderCommand {
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
         DiscordUser.saveLOLName(name, channel, user);
+    }
+
+    @Override
+    public boolean matches(String query) {
+        String[] args = query.split(" ");
+        return query.startsWith(getTrigger()) || regions.containsKey(args[0]) && args[1].matches(getTrigger());
     }
 }

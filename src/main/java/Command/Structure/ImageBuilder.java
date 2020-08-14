@@ -71,8 +71,9 @@ public abstract class ImageBuilder {
      * Build the various sections of the image and draw them each on to the background image
      *
      * @param nameQuery Player name
+     * @param args      Other arguments
      */
-    public abstract void buildImage(String nameQuery);
+    public abstract void buildImage(String nameQuery, String... args);
 
     /**
      * Register the font with the graphics environment

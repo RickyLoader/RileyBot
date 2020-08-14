@@ -19,8 +19,15 @@ public class SummonerImage extends ImageBuilder {
         super(channel, guild, resourcePath, fontName);
     }
 
+    /**
+     * Build the various sections of the image and draw them each on to the background image
+     *
+     * @param nameQuery Player name
+     * @param args      Region
+     */
     @Override
-    public void buildImage(String nameQuery) {
+    public void buildImage(String nameQuery, String... args) {
+        String region = args[0];
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getGuild(),
@@ -34,9 +41,9 @@ public class SummonerImage extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.summoner = new Summoner(nameQuery, getResourcePath());
+        this.summoner = new Summoner(nameQuery, region, getResourcePath());
         if(!summoner.exists()) {
-            loading.failLoading("That summoner doesn't exist  on the OCE server cunt");
+            loading.failLoading("That summoner doesn't exist  on the " + region.toUpperCase() + " server cunt");
             return;
         }
         loading.completeStage();

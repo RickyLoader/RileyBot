@@ -24,11 +24,13 @@ public class Summoner {
     private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
     boolean exists;
-    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5";
+    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", urlPrefix;
     private File profileIcon, profileBorder, profileBanner;
 
-    public Summoner(String name, String res) {
+
+    public Summoner(String name, String region, String res) {
         this.name = name;
+        this.urlPrefix = "https://" + region + ".api.riotgames.com/lol/";
         this.res = res;
         queues.put(FLEX, new RankedQueue(res, false));
         queues.put(SOLO, new RankedQueue(res, true));
@@ -61,7 +63,7 @@ public class Summoner {
         String json;
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
-            String url = "https://oc1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + name + apiKey;
+            String url = urlPrefix + "summoner/v4/summoners/by-name/" + name + apiKey;
             json = new NetworkRequest(url, false).get();
             if(json == null) {
                 return false;
@@ -72,7 +74,7 @@ public class Summoner {
             this.level = summoner.getInt("summonerLevel");
             this.profileIcon = new File(res + "Summoner/Icons/" + summoner.getInt("profileIconId") + ".png");
             this.profileBorder = new File(res + "Summoner/Borders/" + roundLevel(level) + ".png");
-            url = "https://oc1.api.riotgames.com/lol/league/v4/entries/by-summoner/" + id + apiKey;
+            url = urlPrefix + "league/v4/entries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
 
             if(json != null) {
@@ -93,7 +95,7 @@ public class Summoner {
                 }
             }
             this.profileBanner = new File(res + "Summoner/Banners/" + getHighestRank() + ".png");
-            url = "https://oc1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
+            url = urlPrefix + "champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
             if(json != null) {
                 JSONArray champions = new JSONArray(json);
@@ -110,7 +112,6 @@ public class Summoner {
             }
         }
         catch(Exception e) {
-            e.printStackTrace();
             return false;
         }
         return true;

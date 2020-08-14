@@ -33,7 +33,7 @@ public abstract class LookupCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-        String query = context.getLowerCaseMessage().trim();
+        String query = stripArguments(context.getLowerCaseMessage().trim());
         MessageChannel channel = context.getMessageChannel();
         User author = context.getUser();
         List<User> mentioned = context.getMessage().getMentionedUsers();
@@ -68,6 +68,16 @@ public abstract class LookupCommand extends DiscordCommand {
             return;
         }
         lookupUser(name, channel, context.getGuild());
+    }
+
+    /**
+     * Strip and save extra arguments such that the query equals [trigger] [name]
+     *
+     * @param query String which triggered command
+     * @return Query to correct format
+     */
+    public String stripArguments(String query){
+        return query;
     }
 
     /**

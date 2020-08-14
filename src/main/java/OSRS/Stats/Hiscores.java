@@ -33,8 +33,9 @@ public class Hiscores extends ImageBuilder {
      * Look a player up on the OSRS hiscores and return an image displaying their skills
      *
      * @param nameQuery Player name
+     * @param args none
      */
-    public void buildImage(String nameQuery) {
+    public void buildImage(String nameQuery, String... args) {
         this.loading = new ImageLoadingMessage(
                 getChannel(),
                 getGuild(),
