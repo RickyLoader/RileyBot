@@ -62,10 +62,12 @@ public class SummonerImage extends ImageBuilder {
             int x = padding;
             int y = profileBanner.getHeight() + 50;
             ArrayList<Summoner.Champion> champions = summoner.getChampions();
-            for(int i = 0; i < 5; i++) {
+            int bound = 5;
+            for(int i = 0; i < bound; i++) {
                 Summoner.Champion c = champions.get(i);
                 BufferedImage championImage = buildChampionImage(c);
                 if(championImage == null) {
+                    bound++;
                     continue;
                 }
                 g.drawImage(championImage, x, y, null);
@@ -176,7 +178,7 @@ public class SummonerImage extends ImageBuilder {
             return championImage;
         }
         catch(Exception e) {
-            e.printStackTrace();
+            System.out.println("Missing info for " + champion.getName() + ":" + champion.getId());
         }
         return championImage;
     }
