@@ -27,7 +27,8 @@ public class SummonerImage extends ImageBuilder {
      */
     @Override
     public void buildImage(String nameQuery, String... args) {
-        String region = args[0];
+        String displayRegion = args[0];
+        String apiRegion = args[1];
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getGuild(),
@@ -41,9 +42,9 @@ public class SummonerImage extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.summoner = new Summoner(nameQuery, region, getResourcePath());
+        this.summoner = new Summoner(nameQuery, apiRegion, getResourcePath());
         if(!summoner.exists()) {
-            loading.failLoading("That summoner doesn't exist  on the " + region.toUpperCase() + " server cunt");
+            loading.failLoading("That summoner doesn't exist  on the " + displayRegion.toUpperCase() + " server cunt");
             return;
         }
         loading.completeStage();

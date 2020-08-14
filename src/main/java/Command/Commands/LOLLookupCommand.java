@@ -12,7 +12,8 @@ import java.util.HashMap;
 
 public class LOLLookupCommand extends ImageBuilderCommand {
     private final HashMap<String, String> regions;
-    private String region;
+    private String displayRegion, apiRegion;
+    private final String defaultRegion = "oce";
 
     public LOLLookupCommand() {
         super("lollookup", "Look up a summoner", "region", 16);
@@ -44,16 +45,18 @@ public class LOLLookupCommand extends ImageBuilderCommand {
     public String stripArguments(String query) {
         String region = query.split(" ")[0];
         if(region.equals(getTrigger())) {
-            this.region = regions.get("oce");
+            this.displayRegion = defaultRegion;
+            this.apiRegion = regions.get(defaultRegion);
             return query;
         }
-        this.region = regions.get(region);
+        this.displayRegion = region;
+        this.apiRegion = regions.get(region);
         return query.replaceFirst(region, "").trim();
     }
 
     @Override
     public void buildImage(String name, ImageBuilder builder) {
-        builder.buildImage(name, this.region);
+        builder.buildImage(name, this.displayRegion, this.apiRegion);
     }
 
     @Override
