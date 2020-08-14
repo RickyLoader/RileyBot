@@ -41,7 +41,7 @@ public class GIFCommand extends DiscordCommand {
         }
         ArrayList<GIF> queryGifs = gifs.get(query);
         if(queryGifs == null) {
-            channel.sendMessage("I don't have any " + query + " gifs at the moment, let me check!").queue();
+            channel.sendMessage("I don't have any " + query + " gifs at the moment, let me get some!").queue();
             queryGifs = searchGIFs(query);
             gifs.put(query, queryGifs);
         }
