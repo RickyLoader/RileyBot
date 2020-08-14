@@ -44,6 +44,10 @@ public class SummonerImage extends ImageBuilder {
             BufferedImage bg = ImageIO.read(new File(getResourcePath() + "map.png"));
             Graphics g = bg.getGraphics();
             BufferedImage profileBanner = buildProfileBanner();
+            if(profileBanner == null) {
+                loading.failLoading("Something went wrong!");
+                return;
+            }
             g.drawImage(profileBanner, getCenterX(bg, profileBanner), 0, null);
 
             int padding = (bg.getWidth() - (5 * 265)) / 6;
@@ -53,19 +57,25 @@ public class SummonerImage extends ImageBuilder {
             for(int i = 0; i < 5; i++) {
                 Summoner.Champion c = champions.get(i);
                 BufferedImage championImage = buildChampionImage(c);
+                if(championImage == null) {
+                    continue;
+                }
                 g.drawImage(championImage, x, y, null);
                 x += championImage.getWidth() + padding;
             }
 
             BufferedImage soloQueue = buildRankedImage(summoner.getSoloQueue());
-
+            BufferedImage flexQueue = buildRankedImage(summoner.getFlexQueue());
+            if(soloQueue == null || flexQueue == null) {
+                loading.failLoading("Something went wrong!");
+                return;
+            }
             x = (int) ((bg.getWidth() / 2) - (soloQueue.getWidth() * 1.25));
             y += 800;
 
             g.drawImage(soloQueue, x, y, null);
 
             x = (bg.getWidth() / 2) + (soloQueue.getWidth() / 4);
-            BufferedImage flexQueue = buildRankedImage(summoner.getFlexQueue());
             g.drawImage(flexQueue, x, y, null);
 
             loading.completeStage();
@@ -90,17 +100,36 @@ public class SummonerImage extends ImageBuilder {
             BufferedImage bg = ImageIO.read(queue.getBanner());
             BufferedImage helmet = ImageIO.read(queue.getHelmet());
             Graphics g = bg.getGraphics();
-            g.drawImage(helmet, getCenterX(bg, helmet), getCenterY(bg, helmet), null);
             g.setFont(getGameFont().deriveFont(30f));
             FontMetrics fm = g.getFontMetrics();
-            String rank = queue.getTier() + " " + queue.getRank();
+
+            String rank = queue.getRankSummary();
             String title = queue.getQueue();
+            String points = queue.getPoints();
+            String winLossPercent = String.valueOf(queue.getRatio());
+            String wins = queue.getWins();
+            String losses = queue.getLosses();
 
-            g.drawString(title, (bg.getWidth() - fm.stringWidth(title)) / 2, fm.getHeight() + 10);
+            g.drawImage(helmet, getCenterX(bg, helmet), getCenterY(bg, helmet), null);
 
-            //g.drawString(rank, (bg.getWidth() - fm.stringWidth(rank)) / 2, ((bg.getHeight() - fm.getHeight()) / 2) + fm.getMaxAscent());
+            int padding = (int) (fm.getHeight() * 1.5);
+            int y = fm.getHeight() + 20;
 
+            g.drawString("Ranked", (bg.getWidth() - fm.stringWidth("Ranked")) / 2, y);
+            g.drawString(title, (bg.getWidth() - fm.stringWidth(title)) / 2, y + padding);
 
+            y = (bg.getHeight() / 2) - helmet.getHeight();
+            g.drawString(rank, (bg.getWidth() - fm.stringWidth(rank)) / 2, y);
+            g.drawString(points, (bg.getWidth() - fm.stringWidth(points)) / 2, y + padding);
+
+            y = (bg.getHeight() / 2) + helmet.getHeight() - fm.getHeight();
+            g.setFont(getGameFont().deriveFont(24f));
+            fm = g.getFontMetrics();
+            padding = (int) (fm.getHeight() * 1.5);
+
+            g.drawString(wins, (bg.getWidth() - fm.stringWidth(wins)) / 2, y);
+            g.drawString(losses, (bg.getWidth() - fm.stringWidth(losses)) / 2, y + padding);
+            g.drawString(winLossPercent, (bg.getWidth() - fm.stringWidth(winLossPercent)) / 2, y + (padding * 2));
             return bg;
         }
         catch(Exception e) {
@@ -116,11 +145,12 @@ public class SummonerImage extends ImageBuilder {
      * @return Champion summary image
      */
     private BufferedImage buildChampionImage(Summoner.Champion champion) {
+        BufferedImage championImage = null;
         try {
-            BufferedImage championImage = ImageIO.read(champion.getImage());
+            championImage = ImageIO.read(champion.getImage());
             BufferedImage masteryIcon = ImageIO.read(champion.getMasteryIcon());
             Graphics g = championImage.getGraphics();
-            g.setFont(getGameFont().deriveFont(40f));
+            g.setFont(getGameFont().deriveFont(35f));
             FontMetrics fm = g.getFontMetrics();
             String name = champion.getName();
             int y = 500 + fm.getHeight();
@@ -139,8 +169,8 @@ public class SummonerImage extends ImageBuilder {
         }
         catch(Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return championImage;
     }
 
     /**
@@ -150,17 +180,17 @@ public class SummonerImage extends ImageBuilder {
      * @return Summoner profile icon
      */
     private BufferedImage buildProfileIcon() {
+        BufferedImage profileIcon = null;
         try {
-            BufferedImage profileIcon = ImageIO.read(summoner.getProfileIcon());
+            profileIcon = ImageIO.read(summoner.getProfileIcon());
             BufferedImage borderOutline = ImageIO.read(summoner.getProfileBorder());
             Graphics g = profileIcon.getGraphics();
             g.drawImage(borderOutline, getCenterX(profileIcon, borderOutline), getCenterY(profileIcon, borderOutline), null);
-            return profileIcon;
         }
         catch(Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return profileIcon;
     }
 
     /**
@@ -169,8 +199,9 @@ public class SummonerImage extends ImageBuilder {
      * @return Summoner profile banner
      */
     private BufferedImage buildProfileBanner() {
+        BufferedImage banner = null;
         try {
-            BufferedImage banner = ImageIO.read(summoner.getProfileBanner());
+            banner = ImageIO.read(summoner.getProfileBanner());
             BufferedImage profileIcon = buildProfileIcon();
             BufferedImage levelCircle = ImageIO.read(new File(getResourcePath() + "Summoner/Banners/level_circle.png"));
             BufferedImage borderOutline = ImageIO.read(summoner.getProfileBorder());
@@ -186,15 +217,16 @@ public class SummonerImage extends ImageBuilder {
             g.setFont(getGameFont().deriveFont(80f));
             fm = g.getFontMetrics();
             g.drawImage(levelCircle, banner.getWidth() - (levelCircle.getWidth() * 2), getCenterY(banner, levelCircle), null);
-            g.drawImage(profileIcon, profileIcon.getWidth(), getCenterY(banner, profileIcon), null);
             String name = summoner.getName();
             g.drawString(name, (banner.getWidth() - fm.stringWidth(name)) / 2, ((banner.getHeight() - fm.getHeight()) / 2) + fm.getMaxAscent());
-            return banner;
+            if(profileIcon != null) {
+                g.drawImage(profileIcon, profileIcon.getWidth(), getCenterY(banner, profileIcon), null);
+            }
         }
         catch(Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return banner;
     }
 
     /**

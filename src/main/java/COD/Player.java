@@ -277,7 +277,7 @@ public class Player {
     /**
      * Wrap Win/Loss, Kill/Death, Hits/Shots data
      */
-    private static class Ratio {
+    public static class Ratio {
         private final double ratio;
         private final int numerator, denominator, diff;
 

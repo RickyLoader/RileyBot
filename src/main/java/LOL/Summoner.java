@@ -1,5 +1,6 @@
 package LOL;
 
+import COD.Player;
 import Network.Secret;
 import Network.NetworkRequest;
 import org.jetbrains.annotations.NotNull;
@@ -169,20 +170,20 @@ public class Summoner {
     }
 
     public static class RankedQueue {
-        private final int wins, losses, points;
+        private final Player.Ratio winLoss;
+        private final int points;
         private final String tier, rank, queue;
         private final File helmet, banner;
         private boolean unranked = false;
 
         public RankedQueue(int wins, int losses, int points, String tier, String rank, String res, boolean solo) {
-            this.wins = wins;
-            this.losses = losses;
+            this.winLoss = new Player.Ratio(wins, losses);
             this.points = points;
             this.tier = tier;
             this.rank = rank;
-            this.queue = solo ? "Ranked Solo/Duo" : "Ranked Flex";
-            this.helmet = new File(res + "Summoner/Ranked/Helmets/" + tier.toUpperCase() + "/" + rank.toUpperCase() + ".png");
-            this.banner = new File(res + "Summoner/Ranked/Banners/" + tier.toUpperCase() + ".png");
+            this.queue = solo ? "Solo/Duo" : "Flex";
+            this.helmet = new File(res + "Summoner/Ranked/Helmets/" + tier + "/" + rank + ".png");
+            this.banner = new File(res + "Summoner/Ranked/Banners/" + tier + ".png");
         }
 
         public RankedQueue(String res, boolean solo) {
@@ -202,16 +203,26 @@ public class Summoner {
             return helmet;
         }
 
-        public int getPoints() {
-            return points;
+        public String getPoints() {
+            return points + " LP";
         }
 
-        public int getWins() {
-            return wins;
+        public String getWins() {
+            int wins = winLoss.getNumerator();
+            return wins + ((wins == 1) ? " win" : " wins");
         }
 
-        public int getLosses() {
-            return losses;
+        public String getLosses() {
+            int loses = winLoss.getDenominator();
+            return loses + ((loses == 1) ? " loss" : " losses");
+        }
+
+        public String getRatio() {
+            return winLoss.formatRatio(winLoss.getRatio()) + " W/L";
+        }
+
+        public String getRankSummary() {
+            return unranked ? "Unranked" : getTier() + " " + rank;
         }
 
         public String getQueue() {
@@ -222,8 +233,8 @@ public class Summoner {
             return rank;
         }
 
-        public String getTier() {
-            return tier;
+        private String getTier() {
+            return tier.charAt(0) + tier.substring(1).toLowerCase();
         }
     }
 
