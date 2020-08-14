@@ -27,6 +27,19 @@ public abstract class LookupCommand extends DiscordCommand {
     }
 
     /**
+     * Initialise the command
+     *
+     * @param trigger   Trigger of command
+     * @param desc      Description of command
+     * @param prefix    Prefix argument
+     * @param maxLength Max length of name
+     */
+    public LookupCommand(String trigger, String desc, String prefix, int maxLength) {
+        super(trigger, desc, (trigger + " [name/me/@someone]\n[" + prefix + "] " + trigger + " [name/me/@someone]\n" + trigger + " save [your name]"));
+        this.maxLength = maxLength;
+    }
+
+    /**
      * Lookup a user in a game or save their name for later look up queries
      *
      * @param context Context of command
@@ -76,7 +89,7 @@ public abstract class LookupCommand extends DiscordCommand {
      * @param query String which triggered command
      * @return Query to correct format
      */
-    public String stripArguments(String query){
+    public String stripArguments(String query) {
         return query;
     }
 

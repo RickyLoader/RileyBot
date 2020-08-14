@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class LOLLookupCommand extends ImageBuilderCommand {
@@ -16,7 +15,7 @@ public class LOLLookupCommand extends ImageBuilderCommand {
     private String region;
 
     public LOLLookupCommand() {
-        super("lollookup", "Look up a summoner", 16);
+        super("lollookup", "Look up a summoner", "region", 16);
         this.regions = getRegions();
     }
 
