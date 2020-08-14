@@ -1,6 +1,5 @@
 package Command.Structure;
 
-import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
