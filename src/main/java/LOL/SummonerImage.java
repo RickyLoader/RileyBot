@@ -135,7 +135,7 @@ public class SummonerImage extends ImageBuilder {
             y = (bg.getHeight() / 2) + helmet.getHeight() - fm.getHeight();
             g.setFont(getGameFont().deriveFont(24f));
             fm = g.getFontMetrics();
-            padding = fm.getHeight() * 2;
+            padding = (int) (fm.getHeight() * 1.5);
 
             g.drawString(wins, (bg.getWidth() - fm.stringWidth(wins)) / 2, y);
             g.drawString(losses, (bg.getWidth() - fm.stringWidth(losses)) / 2, y + padding);
