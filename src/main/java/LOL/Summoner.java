@@ -243,7 +243,8 @@ public class Summoner {
         private final int id, level, points;
         private String name;
         private final String res;
-        private File image, masteryIcon;
+        private File image;
+        private final File masteryIcon;
 
         public Champion(int id, int level, int points, String res) {
             this.id = id;

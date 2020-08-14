@@ -27,13 +27,13 @@ public class SummonerImage extends ImageBuilder {
      */
     @Override
     public void buildImage(String nameQuery, String... args) {
-        String displayRegion = args[0];
+        String displayRegion = args[0].toUpperCase();
         String apiRegion = args[1];
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getGuild(),
-                "LOL Summoner lookup: " + nameQuery.toUpperCase(),
-                "One moment please.",
+                "Summoner lookup: " + nameQuery.toUpperCase(),
+                "One moment please, checking the " + displayRegion + " region.",
                 "https://img.pngio.com/league-of-legends-needs-a-new-game-icon-league-of-legends-icon-png-256_256.png",
                 new String[]{
                         "Fetching summoner data...",
@@ -44,7 +44,7 @@ public class SummonerImage extends ImageBuilder {
         loading.showLoading();
         this.summoner = new Summoner(nameQuery, apiRegion, getResourcePath());
         if(!summoner.exists()) {
-            loading.failLoading("That summoner doesn't exist  on the " + displayRegion.toUpperCase() + " server cunt");
+            loading.failLoading("That summoner doesn't exist  on the " + displayRegion + " server cunt");
             return;
         }
         loading.completeStage();
@@ -135,7 +135,7 @@ public class SummonerImage extends ImageBuilder {
             y = (bg.getHeight() / 2) + helmet.getHeight() - fm.getHeight();
             g.setFont(getGameFont().deriveFont(24f));
             fm = g.getFontMetrics();
-            padding = (int) (fm.getHeight() * 1.5);
+            padding = fm.getHeight() * 2;
 
             g.drawString(wins, (bg.getWidth() - fm.stringWidth(wins)) / 2, y);
             g.drawString(losses, (bg.getWidth() - fm.stringWidth(losses)) / 2, y + padding);
