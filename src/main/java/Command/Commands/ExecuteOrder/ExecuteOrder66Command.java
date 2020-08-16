@@ -82,10 +82,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
             executor = null;
             return;
         }
-        context.getMessageChannel().sendMessage(buildStatusMessage()).queue(message -> {
-            id = message.getIdLong();
-            message.delete().queue();
-        });
+        context.getMessageChannel().sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
     }
 
     /**
