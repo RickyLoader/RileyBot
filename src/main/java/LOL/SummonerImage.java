@@ -62,12 +62,14 @@ public class SummonerImage extends ImageBuilder {
             int x = padding;
             int y = profileBanner.getHeight() + 50;
             ArrayList<Summoner.Champion> champions = summoner.getChampions();
-            int bound = 5;
+            int bound = Math.min(champions.size(), 5);
             for(int i = 0; i < bound; i++) {
                 Summoner.Champion c = champions.get(i);
                 BufferedImage championImage = buildChampionImage(c);
                 if(championImage == null) {
-                    bound++;
+                    if((bound + 1) < champions.size()) {
+                        bound++;
+                    }
                     continue;
                 }
                 g.drawImage(championImage, x, y, null);
