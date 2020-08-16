@@ -4,6 +4,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -34,6 +35,11 @@ public class KillListCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         context.getMessage().delete().queue();
+        Member instigator = context.getMember();
+        if(!instigator.hasPermission(Permission.KICK_MEMBERS)) {
+            context.getGuild().addRoleToMember(instigator, context.getTargetRole()).queue(aVoid -> context.getMessageChannel().sendMessage(instigator.getAsMention() + " big mistake cunt, now you're on the kill list.").queue());
+            return;
+        }
         List<Member> targets = context.getTargets();
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("KILL LIST");

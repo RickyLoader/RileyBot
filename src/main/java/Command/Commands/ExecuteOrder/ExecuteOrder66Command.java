@@ -7,10 +7,12 @@ import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmbedLoadingMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;
@@ -41,6 +43,11 @@ public class ExecuteOrder66Command extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         context.getMessage().delete().complete();
+        Member instigator = context.getMember();
+        if(!instigator.hasPermission(Permission.KICK_MEMBERS)) {
+            context.getGuild().addRoleToMember(instigator, context.getTargetRole()).queue(aVoid -> context.getMessageChannel().sendMessage(instigator.getAsMention() + " big mistake cunt, now you're on the kill list.").queue());
+            return;
+        }
         if(status == null) {
             status = new EmbedLoadingMessage.Status(context.getGuild());
         }

@@ -4,6 +4,7 @@ package Bot;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.audit.*;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -12,9 +13,13 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Event listener for bot
@@ -137,9 +142,11 @@ public class Listener extends ListenerAdapter {
         Guild guild = event.getGuild();
         Role targetRole = guild.getRolesByName("target", true).get(0);
         Member target = event.getMember();
+
         if(!event.getRoles().contains(targetRole)) {
             return;
         }
+
         if(!guild.getSelfMember().canInteract(target)) {
             guild.removeRoleFromMember(target, targetRole).queue();
         }

@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,13 +76,17 @@ public class CommandContext {
         return getMessageContent().toLowerCase();
     }
 
+    public Role getTargetRole() {
+        return getGuild().getRolesByName("target", true).get(0);
+    }
+
     /**
      * Get all members with the target role
      *
      * @return Members with target role
      */
     public ArrayList<Member> getTargets() {
-        Role targetRole = getGuild().getRolesByName("target", true).get(0);
+        Role targetRole = getTargetRole();
         ArrayList<Member> targets = new ArrayList<>();
         for(Member target : getGuild().getMembersWithRoles(targetRole)) {
             if(!getSelfMember().canInteract(target)) {
