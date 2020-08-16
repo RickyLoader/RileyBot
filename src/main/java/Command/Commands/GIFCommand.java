@@ -50,7 +50,7 @@ public class GIFCommand extends DiscordCommand {
             channel.sendMessage("I didn't find anything for: " + query).queue();
             return;
         }
-        channel.sendMessage(chooseGif(queryGifs, context.getSelf().getEffectiveAvatarUrl(), query)).queue();
+        channel.sendMessage(chooseGif(queryGifs, context.getSelfUser().getEffectiveAvatarUrl(), query)).queue();
     }
 
     /**

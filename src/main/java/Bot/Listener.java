@@ -6,7 +6,9 @@ import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.commons.lang3.StringUtils;
@@ -126,13 +128,31 @@ public class Listener extends ListenerAdapter {
     }
 
     /**
+     * Remove the target role if it is added to a member that the bot cannot kick
+     *
+     * @param event Role added event
+     */
+    @Override
+    public void onGuildMemberRoleAdd(@Nonnull GuildMemberRoleAddEvent event) {
+        Guild guild = event.getGuild();
+        Role targetRole = guild.getRolesByName("target", true).get(0);
+        Member target = event.getMember();
+        if(!event.getRoles().contains(targetRole)) {
+            return;
+        }
+        if(!guild.getSelfMember().canInteract(target)) {
+            guild.removeRoleFromMember(target, targetRole).queue();
+        }
+    }
+
+    /**
      * Add a newly joined member to the kill list by applying the 'target' role
      *
-     * @param guild Guild to search for role
-     * @param cunt  Newly joined member
+     * @param guild  Guild to search for role
+     * @param target Newly joined member
      */
-    private void targetCunt(Guild guild, Member cunt) {
+    private void targetCunt(Guild guild, Member target) {
         Role targetRole = guild.getRolesByName("target", true).get(0);
-        guild.addRoleToMember(cunt, targetRole).complete();
+        guild.addRoleToMember(target, targetRole).complete();
     }
 }

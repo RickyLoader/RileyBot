@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,12 @@ public class CommandContext {
         this.commands = commands;
     }
 
-    public User getSelf() {
+    public User getSelfUser() {
         return getJDA().getSelfUser();
+    }
+
+    public Member getSelfMember() {
+        return getGuild().getSelfMember();
     }
 
     public ArrayList<DiscordCommand> getCommands() {
@@ -77,7 +82,16 @@ public class CommandContext {
      *
      * @return Members with target role
      */
-    public List<Member> getTargets() {
-        return getGuild().getMembersWithRoles(getGuild().getRolesByName("target", true));
+    public ArrayList<Member> getTargets() {
+        Role targetRole = getGuild().getRolesByName("target", true).get(0);
+        ArrayList<Member> targets = new ArrayList<>();
+        for(Member target : getGuild().getMembersWithRoles(targetRole)) {
+            if(!getSelfMember().canInteract(target)) {
+                getGuild().removeRoleFromMember(target, targetRole).queue();
+                continue;
+            }
+            targets.add(target);
+        }
+        return targets;
     }
 }

@@ -61,11 +61,6 @@ public class ExecuteOrder66Command extends DiscordCommand {
         }
         targetStatus = new HashMap<>();
         for(Member target : targets) {
-            if(target.getUser() == context.getSelf()) {
-                Guild g = context.getGuild();
-                g.removeRoleFromMember(target, g.getRolesByName("target", true).get(0)).queue();
-                continue;
-            }
             targetStatus.put(target, status.getNeutral());
         }
 
@@ -76,12 +71,13 @@ public class ExecuteOrder66Command extends DiscordCommand {
 
         DiscordAudioPlayer player = new DiscordAudioPlayer(context.getMember(), context.getGuild(), listener, context.getMessageChannel());
 
+        if(!player.play(executor.getTrack())) {
+            executor = null;
+            return;
+        }
         context.getMessageChannel().sendMessage(buildStatusMessage()).queue(message -> {
             id = message.getIdLong();
-            if(!player.play(executor.getTrack())) {
-                executor = null;
-                message.delete().queue();
-            }
+            message.delete().queue();
         });
     }
 
