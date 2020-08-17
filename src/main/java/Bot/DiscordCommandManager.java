@@ -131,6 +131,7 @@ public class DiscordCommandManager {
         addCommand(new ImpersonateCommand());
         addCommand(new TweetCommand());
         addCommand(new TweetsCommand());
+        addCommand(new PlexCommand());
         //addCommand((new VoiceChannelCommand());
     }
 

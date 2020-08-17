@@ -12,4 +12,14 @@ public class NetworkInfo {
             return null;
         }
     }
+
+    public static String getPublicAddress() {
+        try {
+            return "http://" + new NetworkRequest("https://api.ipify.org", false).get();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

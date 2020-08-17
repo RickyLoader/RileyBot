@@ -38,7 +38,7 @@ public class Listener extends ListenerAdapter {
         System.out.println("\n\nBot is now running!");
         for(Guild g : event.getJDA().getGuilds()) {
             TextChannel channel = g.getDefaultChannel() == null ? g.getTextChannels().get(0) : g.getDefaultChannel();
-            channel.sendMessage(getUpMessage()).queue();
+            //channel.sendMessage(getUpMessage()).queue();
         }
     }
 

@@ -53,6 +53,26 @@ public class ImgurManager {
     }
 
     /**
+     * Upload an image to Imgur by a URL to the image
+     *
+     * @param image String URL to image to be uploaded
+     * @return Link to image or null
+     */
+    public static String uploadImage(String image) {
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("image", image)
+                .addFormDataPart("type", "URL")
+                .build();
+
+        String url = "https://api.imgur.com/3/image";
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "CLIENT-ID " + Secret.getImgurClientID());
+
+        String response = new NetworkRequest(url, false).post(body, headers);
+        return new JSONObject(response).getJSONObject("data").getString("link");
+    }
+
+    /**
      * Upload a given BufferedImage to Imgur and return the link to the image
      *
      * @param image Buffered image to be uploaded

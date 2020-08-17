@@ -1,5 +1,6 @@
 package COD;
 
+import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -164,12 +165,7 @@ public class Session {
      * @return Formatted string duration
      */
     String getDuration() {
-        return String.format("%02d:%02d:%02d",
-                TimeUnit.MILLISECONDS.toHours(duration),
-                TimeUnit.MILLISECONDS.toMinutes(duration) -
-                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)),
-                TimeUnit.MILLISECONDS.toSeconds(duration) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+        return EmbedHelper.formatTime(duration);
     }
 
     /**

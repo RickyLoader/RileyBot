@@ -32,7 +32,7 @@ public class NetworkRequest {
      */
     public String get() {
         try {
-            Response response = client.newCall(builder.build()).execute();
+            Response response = client.newCall(builder.addHeader("accept","application/json").build()).execute();
             return handleResponse(response);
         }
         catch(Exception e) {

@@ -3,6 +3,8 @@ package Command.Structure;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Commonly used features of an embed
  */
@@ -26,6 +28,10 @@ public class EmbedHelper {
 
     public static int getRed() {
         return 16711680;
+    }
+
+    public static int getOrange() {
+        return 0xd89620;
     }
 
     /**
@@ -76,5 +82,20 @@ public class EmbedHelper {
      */
     public static String formatEmote(Emote e) {
         return "<:" + e.getName() + ":" + e.getId() + "> ";
+    }
+
+    /**
+     * Format the given time in ms to HH:MM:SS
+     *
+     * @param time Time in ms
+     * @return Formatted time String
+     */
+    public static String formatTime(long time) {
+        return String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(time),
+                TimeUnit.MILLISECONDS.toMinutes(time) -
+                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(time)),
+                TimeUnit.MILLISECONDS.toSeconds(time) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time)));
     }
 }
