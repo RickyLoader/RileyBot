@@ -190,9 +190,9 @@ public class CombatRecord extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.player = new Player(nameQuery, "bnet");
-        if(!player.exists()) {
-            loading.failLoading("That player doesn't exist cunt");
+        this.player = new Player(nameQuery, nameQuery.contains("#") ? "bnet" : "acti");
+        if(!player.success()) {
+            loading.failLoading(player.getStatus());
             return;
         }
         loading.completeStage();

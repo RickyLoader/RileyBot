@@ -18,7 +18,10 @@ import java.util.Collections;
  * Hold information on user's Modern Warfare stats
  */
 public class Player {
-    private final String name, platform, data;
+    private final String name;
+    private final String platform;
+    private final String data;
+    private String status;
     private Ratio wl, kd;
     private int streak, spm;
     private Weapon primary, secondary, lethal;
@@ -40,10 +43,20 @@ public class Player {
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
             json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/" + name + "/" + platform, false).get();
+
             if(json == null) {
+                status = "Failed to communicate with API, try again later.";
                 return null;
             }
-            JSONObject player = new JSONObject(json).getJSONObject("lifetime");
+
+            JSONObject data = new JSONObject(json);
+            status = data.getString("status");
+
+            if(!status.equals("success")) {
+                return null;
+            }
+
+            JSONObject player = data.getJSONObject("data").getJSONObject("lifetime");
 
             JSONObject basic = player.getJSONObject("all").getJSONObject("properties");
 
@@ -266,12 +279,21 @@ public class Player {
     }
 
     /**
-     * Check if a player was found on the API
+     * Check if the network request for player data was successful
      *
      * @return Boolean account exists
      */
-    public boolean exists() {
+    public boolean success() {
         return data != null;
+    }
+
+    /**
+     * Get the status message from from the player data request
+     *
+     * @return Status message
+     */
+    public String getStatus() {
+        return status;
     }
 
     /**
