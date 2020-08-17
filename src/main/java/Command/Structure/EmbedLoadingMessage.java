@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * An embed to track the progress of a given task
  */
-public abstract class EmbedLoadingMessage {
+public class EmbedLoadingMessage {
     private final MessageChannel channel;
     private long id, startTime, currentTime;
     private final String title, thumbnail;
@@ -202,7 +202,13 @@ public abstract class EmbedLoadingMessage {
      *
      * @return Message embed
      */
-    public abstract MessageEmbed createLoadingMessage();
+    public MessageEmbed createLoadingMessage() {
+        EmbedBuilder builder = getEmbedBuilder();
+        for(LoadingStage stage : getStages()) {
+            builder.addField(stage.getTitle(), stage.getValue(), false);
+        }
+        return builder.build();
+    }
 
     /**
      * Edit the loading message
@@ -225,9 +231,9 @@ public abstract class EmbedLoadingMessage {
             List<Emote> neutral = guild.getEmotesByName("neutral", true);
             List<Emote> fail = guild.getEmotesByName("fail", true);
             List<Emote> complete = guild.getEmotesByName("complete", true);
-            this.neutral = neutral.isEmpty() ? "☐" : formatEmote(neutral.get(0));
-            this.fail = fail.isEmpty() ? "☒" : formatEmote(fail.get(0));
-            this.complete = complete.isEmpty() ? "\uD83D\uDDF9" : formatEmote(complete.get(0));
+            this.neutral = neutral.isEmpty() ? "☐" : EmbedHelper.formatEmote(neutral.get(0));
+            this.fail = fail.isEmpty() ? "☒" : EmbedHelper.formatEmote(fail.get(0));
+            this.complete = complete.isEmpty() ? "\uD83D\uDDF9" : EmbedHelper.formatEmote(complete.get(0));
         }
 
         public String getComplete() {
@@ -240,16 +246,6 @@ public abstract class EmbedLoadingMessage {
 
         public String getNeutral() {
             return neutral;
-        }
-
-        /**
-         * Format emote for use in embed
-         *
-         * @param e Emote to format
-         * @return Formatted emote
-         */
-        private String formatEmote(Emote e) {
-            return "<:" + e.getName() + ":" + e.getId() + "> ";
         }
     }
 

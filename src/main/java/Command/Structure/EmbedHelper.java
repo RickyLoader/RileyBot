@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 /**
@@ -65,5 +66,15 @@ public class EmbedHelper {
      */
     public static String getSpacerImage() {
         return "https://i.imgur.com/24Xf03H.png";
+    }
+
+    /**
+     * Get the String form of an emote to display inside an embed
+     *
+     * @param e Emote to convert
+     * @return String version of emote
+     */
+    public static String formatEmote(Emote e) {
+        return "<:" + e.getName() + ":" + e.getId() + "> ";
     }
 }
