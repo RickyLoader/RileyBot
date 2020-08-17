@@ -4,7 +4,6 @@ import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import sun.nio.ch.Net;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -65,7 +64,9 @@ public class Session {
     public static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
         Comparator<Session> sort = Comparator.comparing(Session::getLongestStreak)
                 .thenComparing(Session::getRatio)
-                .thenComparing(Session::getWins);
+                .thenComparing(Session::getWins)
+                .thenComparing(Comparator.comparingInt(Session::getGamesPlayed).reversed());
+
         if(ascending) {
             sessions.sort(sort.reversed());
         }
@@ -133,6 +134,15 @@ public class Session {
         }
 
         return (double) wins / (double) losses;
+    }
+
+    /**
+     * Get the wins and losses combined
+     *
+     * @return Wins and losses combined
+     */
+    public int getGamesPlayed() {
+        return wins + losses;
     }
 
     /**
