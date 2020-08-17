@@ -25,8 +25,8 @@ public class HelpCommand extends PageableEmbedCommand {
                 context.getGuild(),
                 context.getCommands(),
                 context.getJDA().getSelfUser().getAvatarUrl(),
-                "Help!",
-                "Here's some stuff I can do, now fuck off",
+                "RileyBot Commands",
+                "Here's some stuff I can do, now fuck off.",
                 new String[]{"Trigger", "Description"}
         );
     }
