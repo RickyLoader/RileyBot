@@ -6,6 +6,7 @@ import Network.NetworkRequest;
 import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,6 +34,10 @@ public class PlexServer {
         ArrayList<Movie> movies = new ArrayList<>();
         for(int i = 0; i < jsonArr.length(); i++) {
             JSONObject movie = jsonArr.getJSONObject(i);
+            if(!movieDataExists(movie)) {
+                System.out.println("Skipping movie");
+                continue;
+            }
             movies.add(new Movie(
                     getMovieID(movie.getString("guid")),
                     movie.getString("title"),
@@ -41,11 +46,20 @@ public class PlexServer {
                     movie.has("tagline") ? movie.getString("tagline") : null,
                     movie.getString("originallyAvailableAt"),
                     publicIP + movie.getString("thumb") + Secret.getPlexToken(),
-                    movie.getInt("year"),
                     movie.getLong("duration")
             ));
         }
         return movies;
+    }
+
+    /**
+     * Check whether Plex has the required information for a movie
+     *
+     * @param movie JSON object representing a movie
+     * @return Whether Plex has the sufficient information
+     */
+    private boolean movieDataExists(JSONObject movie) {
+        return movie.has("guid") && movie.has("title") && movie.has("summary") && movie.has("originallyAvailableAt");
     }
 
     /**
@@ -83,18 +97,22 @@ public class PlexServer {
      */
     public MessageEmbed getMovieEmbed() {
         Movie movie = getRandomMovie();
-        System.out.println(movie.test());
         String thumb = "https://i.imgur.com/FdabwCm.png"; // Plex Logo
         EmbedBuilder builder = new EmbedBuilder();
+
         String desc = "**Synopsis**: " + movie.getSummary();
         if(movie.getTagLine() != null) {
-            desc += "\n\n**Tagline**: " + movie.getTagLine() + "\n\n**Duration**: " + movie.getDuration();
+            desc += "\n\n**Tagline**: " + movie.getTagLine();
         }
+        ArrayList<String> directors = movie.getDirectors();
+        String director = directors.size() == 1 ? "Director" : "Directors";
+        desc += "\n\n**" + director + "**: " + StringUtils.join(directors.toArray(), ", ") + "\n\n**Cast**: " + movie.getCast() + "\n\n**Duration**: " + movie.getDuration();
         builder.setThumbnail(thumb);
         builder.setColor(EmbedHelper.getOrange());
         builder.setTitle(movie.getTitle());
         builder.setImage(movie.getThumbnail());
         builder.setDescription(desc);
+
         builder.setFooter("Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getReleaseDate(), thumb);
         return builder.build();
     }
@@ -136,10 +154,10 @@ public class PlexServer {
 
     public static class Movie {
         private final String id, title, contentRating, summary, tagLine, releaseDate, thumbnail;
-        private final int year;
         private final long duration;
+        private String castDetails;
 
-        public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String thumbnail, int year, long duration) {
+        public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String thumbnail, long duration) {
             this.id = id;
             this.title = title;
             this.contentRating = contentRating;
@@ -147,12 +165,52 @@ public class PlexServer {
             this.tagLine = tagLine;
             this.releaseDate = releaseDate;
             this.thumbnail = thumbnail;
-            this.year = year;
             this.duration = duration;
         }
 
-        public String test() {
-            return thumbnail;
+        /**
+         * Get the cast details JSON for the movie
+         */
+        private void getCastDetails() {
+            String url = "https://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + Secret.getTMDBKey();
+            this.castDetails = new NetworkRequest(url, false).get();
+        }
+
+        /**
+         * Get the director(s) of the movie in a comma separated String
+         *
+         * @return Comma separated String of directors
+         */
+        public ArrayList<String> getDirectors() {
+            if(castDetails == null) {
+                getCastDetails();
+            }
+            JSONArray crewMembers = new JSONObject(castDetails).getJSONArray("crew");
+            ArrayList<String> directors = new ArrayList<>();
+            for(int i = 0; i < crewMembers.length(); i++) {
+                JSONObject crewMember = crewMembers.getJSONObject(i);
+                if(crewMember.getString("job").equals("Director")) {
+                    directors.add(crewMember.getString("name"));
+                }
+            }
+            return directors;
+        }
+
+        /**
+         * Get the cast members of the movie in a comma separated String
+         *
+         * @return Comma separated String of cast members
+         */
+        public String getCast() {
+            if(castDetails == null) {
+                getCastDetails();
+            }
+            JSONArray cast = new JSONObject(castDetails).getJSONArray("cast");
+            ArrayList<String> actors = new ArrayList<>();
+            for(int i = 0; i < Math.min(cast.length(), 5); i++) {
+                actors.add(cast.getJSONObject(i).getString("name"));
+            }
+            return StringUtils.join(actors.toArray(), ", ");
         }
 
         /**
@@ -189,10 +247,6 @@ public class PlexServer {
 
         public String getTitle() {
             return title;
-        }
-
-        public int getYear() {
-            return year;
         }
 
         public String getContentRating() {

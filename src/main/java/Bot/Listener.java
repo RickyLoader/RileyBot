@@ -4,22 +4,16 @@ package Bot;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.audit.*;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * Event listener for bot
@@ -38,7 +32,7 @@ public class Listener extends ListenerAdapter {
         System.out.println("\n\nBot is now running!");
         for(Guild g : event.getJDA().getGuilds()) {
             TextChannel channel = g.getDefaultChannel() == null ? g.getTextChannels().get(0) : g.getDefaultChannel();
-            //channel.sendMessage(getUpMessage()).queue();
+            channel.sendMessage(getUpMessage()).queue();
         }
     }
 
