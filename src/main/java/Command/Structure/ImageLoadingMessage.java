@@ -25,11 +25,22 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
     /**
      * Complete the loading embed with an image URL to be used
      *
+     * @param url     URL to be used as the image of the embed
+     * @param message Message to display under the "Done!" loading step
+     */
+    public void completeLoading(String url, String message) {
+        this.url = url;
+        super.completeLoading(message);
+    }
+
+    /**
+     * Complete the loading embed with an image URL to be used
+     *
      * @param url URL to be used as the image of the embed
      */
     public void completeLoading(String url) {
         this.url = url;
-        super.completeLoading();
+        super.completeLoading(null);
     }
 
     @Override

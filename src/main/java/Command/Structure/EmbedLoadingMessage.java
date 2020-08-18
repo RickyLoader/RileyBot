@@ -172,10 +172,17 @@ public class EmbedLoadingMessage {
 
     /**
      * Add a field showing that the loading has completed
+     *
+     * @param value Value to display - "See player data"
      */
-    public void completeLoading() {
+    public void completeLoading(String value) {
         LoadingStage done = new LoadingStage("Done!", guild);
-        done.complete(startTime);
+        if(value == null) {
+            done.complete(startTime);
+        }
+        else {
+            done.complete(value, startTime);
+        }
         getStages().add(done);
         this.finished = true;
         updateLoadingMessage();
@@ -301,8 +308,7 @@ public class EmbedLoadingMessage {
          * @param value    Reason to be shown by completion - "Player is a normal account!"
          */
         public void complete(String value, long prevStep) {
-            this.duration = System.currentTimeMillis() - prevStep;
-            this.currentStatus = status.getComplete();
+            this.complete(prevStep);
             this.value = value;
         }
 

@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -28,19 +29,30 @@ public class Hiscores extends ImageBuilder {
         bossNames = getBossNames();
     }
 
+    private String encodeName(String name) {
+        try {
+            return URLEncoder.encode(name, "UTF-8");
+        }
+        catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return name;
+        }
+    }
 
     /**
      * Look a player up on the OSRS hiscores and return an image displaying their skills
      *
      * @param nameQuery Player name
-     * @param args none
+     * @param args      none
      */
     public void buildImage(String nameQuery, String... args) {
+        String encodedName = encodeName(nameQuery);
+        String defaultURL = getNormalAccount(encodedName);
         this.loading = new ImageLoadingMessage(
                 getChannel(),
                 getGuild(),
                 "OSRS Hiscores lookup: " + nameQuery.toUpperCase(),
-                "Give me a second, their website is slow as fuck.",
+                "Give me a second, their website can be slow as fuck.",
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 new String[]{
                         "Player exists...",
@@ -49,15 +61,15 @@ public class Hiscores extends ImageBuilder {
                         "Uploading image..."
                 }
         );
-        loading.showLoading();
-        String[] data = fetchPlayerData(nameQuery);
 
+        loading.showLoading();
+        String[] data = fetchPlayerData(encodedName);
         if(data == null) {
             if(timeout) {
-                loading.failLoading("I wasn't able to connect to the Hiscores");
+                loading.failLoading("I wasn't able to connect to the [Hiscores](" + defaultURL + ")");
                 return;
             }
-            loading.failLoading("That player doesn't exist cunt");
+            loading.failLoading("That player [doesn't exist](" + defaultURL + ") cunt");
             return;
         }
 
@@ -69,7 +81,7 @@ public class Hiscores extends ImageBuilder {
         loading.completeStage();
         String url = ImgurManager.uploadImage(playerImage);
         loading.completeStage();
-        loading.completeLoading(url);
+        loading.completeLoading(url, "[View raw data](" + data[data.length - 1] + ")");
     }
 
     /**
@@ -90,6 +102,27 @@ public class Hiscores extends ImageBuilder {
         return clues;
     }
 
+    private String getURL(String type, String name) {
+        return "https://secure.runescape.com/m=hiscore_oldschool" + type + "/index_lite.ws?player=" + name;
+    }
+
+    private String getNormalAccount(String name) {
+        return getURL("", name);
+    }
+
+    private String getIronmanAccount(String name) {
+        return getURL("_ironman", name);
+
+    }
+
+    private String getHardcoreAccount(String name) {
+        return getURL("_hardcore_ironman", name);
+    }
+
+    private String getUltimateAccount(String name) {
+        return getURL("_ultimate", name);
+    }
+
     /**
      * Fetch the CSV from the hiscores API
      *
@@ -97,7 +130,7 @@ public class Hiscores extends ImageBuilder {
      * @return CSV data from API
      */
     private String[] fetchPlayerData(String name) {
-        String[] normal = hiscoresRequest(name, "");
+        String[] normal = hiscoresRequest(getNormalAccount(name));
 
         if(normal == null) {
             return null;
@@ -107,7 +140,7 @@ public class Hiscores extends ImageBuilder {
 
         normal[0] = null;
         loading.updateStage("Player exists, checking ironman hiscores");
-        String[] iron = hiscoresRequest(name, "_ironman");
+        String[] iron = hiscoresRequest(getIronmanAccount(name));
 
         if(iron == null) {
             loading.completeStage("Player is a normal account!");
@@ -125,7 +158,7 @@ public class Hiscores extends ImageBuilder {
         }
 
         loading.updateStage("Player is an Ironman, checking Hardcore Ironman hiscores");
-        String[] hardcore = hiscoresRequest(name, "_hardcore_ironman");
+        String[] hardcore = hiscoresRequest(getHardcoreAccount(name));
 
         if(hardcore != null) {
             hardcore[0] = "hardcore";
@@ -141,7 +174,7 @@ public class Hiscores extends ImageBuilder {
         }
 
         loading.updateStage("Player is not hardcore, checking Ultimate Ironman hiscores");
-        String[] ultimate = hiscoresRequest(name, "_ultimate");
+        String[] ultimate = hiscoresRequest(getUltimateAccount(name));
 
         if(ultimate != null) {
             ultimate[0] = "ultimate";
@@ -162,13 +195,11 @@ public class Hiscores extends ImageBuilder {
     /**
      * Make a request to the OSRS hiscores API
      *
-     * @param name Name to request from hiscores
+     * @param url Hiscores URL to query
      * @return Response from API
      */
-    private String[] hiscoresRequest(String name, String type) {
-        String baseURL = "https://secure.runescape.com/m=hiscore_oldschool" + type;
-        String suffix = "/index_lite.ws?player=" + name;
-        String response = new NetworkRequest(baseURL + suffix, false).get();
+    private String[] hiscoresRequest(String url) {
+        String response = new NetworkRequest(url, false).get();
         if(response == null) {
             timeout = true;
             return null;
@@ -176,6 +207,7 @@ public class Hiscores extends ImageBuilder {
         if(response.equals("err")) {
             return null;
         }
+        response += "," + url;
         return response.replace("\n", ",").split(",");
     }
 
