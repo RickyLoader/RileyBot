@@ -133,13 +133,11 @@ public class PlexServer {
         builder.setThumbnail(plexIcon);
         builder.setTitle("Plex Movie Search");
         builder.setFooter("Try: plex! | plex! [search term]", plexIcon);
-        builder.setDescription(
-                bound == 0
-                        ?
-                        "No results found for: **" + query + "**, try again cunt."
-                        :
-                        "I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here are " + bound + " of them:"
-        );
+        if(bound == 0) {
+            builder.setDescription("No results found for: **" + query + "**, try again cunt.");
+            return builder.build();
+        }
+        builder.setDescription("I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here are " + bound + " of them:");
         for(int i = 0; i < bound; i++) {
             Movie movie = movies[i];
             String title = movie.getTitle();
