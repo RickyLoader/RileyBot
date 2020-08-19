@@ -10,7 +10,7 @@ public class PlexCommand extends DiscordCommand {
     private boolean refreshing = false;
 
     public PlexCommand() {
-        super("plex!", "Get a movie recommendation from Plex!");
+        super("plex!\nplex! [search query]", "Get a movie recommendation from Plex!");
         plex = new PlexServer();
     }
 
@@ -31,6 +31,22 @@ public class PlexCommand extends DiscordCommand {
             plex.refreshData();
             refreshing = false;
         }
-        context.getMessageChannel().sendMessage(plex.getMovieEmbed()).queue();
+
+        String query = context.getLowerCaseMessage().trim();
+        if(query.equals("plex!")) {
+            channel.sendMessage(plex.getMovieEmbed(plex.getRandomMovie())).queue();
+            return;
+        }
+        query = query.replaceFirst("plex!", "").trim();
+        if(query.isEmpty()) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+        channel.sendMessage(plex.search(query)).queue();
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return query.startsWith("plex!");
     }
 }

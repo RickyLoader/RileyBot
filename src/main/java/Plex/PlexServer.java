@@ -3,6 +3,7 @@ package Plex;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
+import javafx.scene.shape.MoveTo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
@@ -11,15 +12,14 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PlexServer {
     private long timeFetched;
-    private ArrayList<Movie> library;
+    private HashMap<String, Movie> library;
+    private final String plexIcon = "https://i.imgur.com/FdabwCm.png";
 
     /**
      * Read in the Plex library and remember the timestamp
@@ -34,18 +34,19 @@ public class PlexServer {
      *
      * @return List of movies
      */
-    private ArrayList<Movie> getLibraryOverview() {
+    private HashMap<String, Movie> getLibraryOverview() {
         JSONArray jsonArr = new JSONObject(new NetworkRequest(getPlexURL(), false).get()).getJSONObject("MediaContainer").getJSONArray("Metadata");
-        ArrayList<Movie> movies = new ArrayList<>();
+        HashMap<String, Movie> movies = new HashMap<>();
         for(int i = 0; i < jsonArr.length(); i++) {
             JSONObject movie = jsonArr.getJSONObject(i);
             if(!movieDataExists(movie)) {
                 System.out.println(movie.getJSONArray("Media").getJSONObject(0).getJSONArray("Part").getJSONObject(0).getString("file") + " missing info!");
                 continue;
             }
-            movies.add(new Movie(
-                    getMovieID(movie.getString("guid")),
-                    movie.getString("title"),
+            String title = movie.getString("title");
+            movies.put(title.toLowerCase(), new Movie(
+                    movie.getString("guid"),
+                    title,
                     movie.has("contentRating") ? movie.getString("contentRating") : "Not Rated",
                     movie.getString("summary"),
                     movie.has("tagline") ? movie.getString("tagline") : null,
@@ -85,43 +86,14 @@ public class PlexServer {
     }
 
     /**
-     * Extract the unique id from the guid Plex uses. E.g: "com.plexapp.agents.imdb://tt0309593?lang=en" = tt0309593
-     * Either points to TMDB or IMDB, TMDB supports either, Plex supplies only one
-     *
-     * @param guid The rating agent used by Plex to pull the rating for the movie
-     * @return id The id of the movie
-     */
-    private String getMovieID(String guid) {
-        String regex;
-        String id = null;
-
-        // e.g: "com.plexapp.agents.imdb://tt0309593?lang=en"
-        if(guid.contains("imdb")) {
-            regex = "tt[0-9]+";
-        }
-        // e.g: "com.plexapp.agents.themoviedb://14161?lang=en"
-        else {
-            regex = "[0-9]+";
-        }
-
-        Matcher matcher = Pattern.compile(regex).matcher(guid);
-
-        if(matcher.find()) {
-            id = guid.substring(matcher.start(), matcher.end());
-        }
-        return id;
-    }
-
-    /**
      * Build a message embed detailing a random movie in the Plex library
      *
+     * @param movie Movie to build embed for
      * @return Movie embed
      */
-    public MessageEmbed getMovieEmbed() {
-        Movie movie = getRandomMovie();
-        String thumb = "https://i.imgur.com/FdabwCm.png"; // Plex Logo
+    public MessageEmbed getMovieEmbed(Movie movie) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setThumbnail(thumb);
+        builder.setThumbnail(plexIcon);
         builder.setColor(EmbedHelper.getOrange());
         builder.setTitle(movie.getTitle());
         builder.setImage(movie.getPoster());
@@ -131,12 +103,71 @@ public class PlexServer {
     }
 
     /**
+     * Search for a movie on Plex
+     *
+     * @return Single movie embed or embed containing search results
+     */
+    public MessageEmbed search(String query) {
+        Movie[] results = library
+                .entrySet()
+                .stream()
+                .filter(e -> e.getKey().contains(query))
+                .map(Map.Entry::getValue)
+                .toArray(Movie[]::new);
+        if(results.length == 1) {
+            return getMovieEmbed(results[0]);
+        }
+        return buildSearchEmbed(query, results);
+    }
+
+    /**
+     * Build an embed displaying the search results of a query
+     *
+     * @param movies Movie search results
+     * @return Embed displaying search results
+     */
+    private MessageEmbed buildSearchEmbed(String query, Movie[] movies) {
+        int bound = Math.min(5, movies.length);
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setColor(EmbedHelper.getOrange());
+        builder.setThumbnail(plexIcon);
+        builder.setTitle("Plex Movie Search");
+        builder.setFooter("Try: plex! | plex! [search term]", plexIcon);
+        builder.setDescription(
+                bound == 0
+                        ?
+                        "No results found for: **" + query + "**, try again cunt."
+                        :
+                        "I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here are " + bound + " of them:"
+        );
+        for(int i = 0; i < bound; i++) {
+            Movie movie = movies[i];
+            String title = movie.getTitle();
+            String index = String.valueOf(i + 1);
+            String date = movie.getReleaseDate();
+            if(i == 0) {
+                builder.addField(EmbedHelper.getTitleField("#", index));
+                builder.addField(EmbedHelper.getTitleField("Title", title));
+                builder.addField(EmbedHelper.getTitleField("Release Date", date));
+            }
+            else {
+                builder.addField(EmbedHelper.getValueField(index));
+                builder.addField(EmbedHelper.getValueField(title));
+                builder.addField(EmbedHelper.getValueField(date));
+            }
+        }
+        builder.addBlankField(false);
+        return builder.build();
+    }
+
+    /**
      * Get a random movie from the Plex library
      *
      * @return Random movie
      */
-    private Movie getRandomMovie() {
-        return library.get(new Random().nextInt(library.size()));
+    public Movie getRandomMovie() {
+        String key = library.keySet().toArray(new String[0])[new Random().nextInt(library.size())];
+        return library.get(key);
     }
 
     /**
@@ -190,7 +221,10 @@ public class PlexServer {
          * @param rating        IMDB rating of movie
          */
         public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String director, String cast, String genre, long duration, double rating) {
-            this.id = id;
+            this.id = getMovieID(id);
+            if(id.contains("tt")) {
+                imdbURL = getIMDBUrl(id);
+            }
             this.title = title;
             this.contentRating = contentRating;
             this.summary = summary;
@@ -222,9 +256,13 @@ public class PlexServer {
         public String getIMDBUrl() {
             if(imdbURL == null) {
                 getMovieDetails();
-                imdbURL = "https://www.imdb.com/title/" + new JSONObject(movieDetails).getString("imdb_id");
+                imdbURL = getIMDBUrl(new JSONObject(movieDetails).getString("imdb_id"));
             }
             return imdbURL;
+        }
+
+        private String getIMDBUrl(String id) {
+            return "https://www.imdb.com/title/" + id;
         }
 
         /**
@@ -259,7 +297,7 @@ public class PlexServer {
         }
 
         /**
-         * Retrieve the movie language The Movie Database
+         * Retrieve the movie language from The Movie Database
          *
          * @return Movie language
          */
@@ -271,8 +309,9 @@ public class PlexServer {
                 JSONArray languages = movieDetails.getJSONArray("spoken_languages");
                 for(int i = 0; i < languages.length(); i++) {
                     JSONObject spokenLanguage = languages.getJSONObject(i);
-                    if(spokenLanguage.getString("iso_639_1").equals(language)) {
+                    if(!spokenLanguage.getString("iso_639_1").equals(language)) {
                         language = spokenLanguage.getString("name");
+                        break;
                     }
                 }
                 this.language = language;
@@ -347,6 +386,34 @@ public class PlexServer {
          * @return movie id
          */
         public String getId() {
+            return id;
+        }
+
+        /**
+         * Extract the unique id from the guid Plex uses. E.g: "com.plexapp.agents.imdb://tt0309593?lang=en" = tt0309593
+         * Either points to TMDB or IMDB, TMDB supports either, Plex supplies only one
+         *
+         * @param guid The rating agent used by Plex to pull the rating for the movie
+         * @return id The id of the movie
+         */
+        private String getMovieID(String guid) {
+            String regex;
+            String id = null;
+
+            // e.g: "com.plexapp.agents.imdb://tt0309593?lang=en"
+            if(guid.contains("imdb")) {
+                regex = "tt[0-9]+";
+            }
+            // e.g: "com.plexapp.agents.themoviedb://14161?lang=en"
+            else {
+                regex = "[0-9]+";
+            }
+
+            Matcher matcher = Pattern.compile(regex).matcher(guid);
+
+            if(matcher.find()) {
+                id = guid.substring(matcher.start(), matcher.end());
+            }
             return id;
         }
 
