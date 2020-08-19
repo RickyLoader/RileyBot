@@ -32,16 +32,12 @@ public class PlexCommand extends DiscordCommand {
             refreshing = false;
         }
 
-        String query = context.getLowerCaseMessage().trim();
+        String query = context.getLowerCaseMessage();
         if(query.equals("plex!")) {
             channel.sendMessage(plex.getMovieEmbed(plex.getRandomMovie())).queue();
             return;
         }
         query = query.replaceFirst("plex!", "").trim();
-        if(query.isEmpty()) {
-            channel.sendMessage(getHelpNameCoded()).queue();
-            return;
-        }
         channel.sendMessage(plex.search(query)).queue();
     }
 
