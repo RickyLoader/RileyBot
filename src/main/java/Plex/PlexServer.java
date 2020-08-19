@@ -309,7 +309,7 @@ public class PlexServer {
                 JSONArray languages = movieDetails.getJSONArray("spoken_languages");
                 for(int i = 0; i < languages.length(); i++) {
                     JSONObject spokenLanguage = languages.getJSONObject(i);
-                    if(!spokenLanguage.getString("iso_639_1").equals(language)) {
+                    if(spokenLanguage.getString("iso_639_1").equals(language)) {
                         language = spokenLanguage.getString("name");
                         break;
                     }
