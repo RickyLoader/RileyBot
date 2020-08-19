@@ -169,10 +169,10 @@ public class PlexServer {
      * Hold information about a movie on Plex
      */
     public static class Movie {
-        private final String id, title, contentRating, summary, tagLine, releaseDate, director, cast, genre;
+        private final String id, title, contentRating, summary, tagLine, releaseDate, director, cast;
         private final long duration;
         private final double rating;
-        private String movieDetails, language, imdbURL, poster;
+        private String movieDetails, language, imdbURL, poster, genre;
 
         /**
          * Construct the movie
@@ -220,13 +220,30 @@ public class PlexServer {
          * @return IMDB URL
          */
         public String getIMDBUrl() {
-            getMovieDetails();
             if(imdbURL == null) {
+                getMovieDetails();
                 imdbURL = "https://www.imdb.com/title/" + new JSONObject(movieDetails).getString("imdb_id");
             }
             return imdbURL;
         }
 
+        /**
+         * Attempt to retrieve the movie genre(s) from The Movie Database if no genre is available
+         *
+         * @return Movie genre(s)
+         */
+        public String getGenre() {
+            if(genre == null) {
+                getMovieDetails();
+                JSONArray genres = new JSONObject(movieDetails).getJSONArray("genres");
+                String[] genre = new String[genres.length()];
+                for(int i = 0; i < genres.length(); i++) {
+                    genre[i] = genres.getJSONObject(i).getString("name");
+                }
+                this.genre = StringUtils.join(genre, ", ");
+            }
+            return genre;
+        }
 
         /**
          * Retrieve the movie poster from The Movie Database
@@ -234,8 +251,8 @@ public class PlexServer {
          * @return Movie poster thumbnail
          */
         public String getPoster() {
-            getMovieDetails();
             if(poster == null) {
+                getMovieDetails();
                 poster = "https://image.tmdb.org/t/p/original/" + new JSONObject(movieDetails).getString("poster_path");
             }
             return poster;
@@ -244,11 +261,11 @@ public class PlexServer {
         /**
          * Retrieve the movie language(s) The Movie Database
          *
-         * @return Movie poster thumbnail
+         * @return Movie language(s)
          */
         public String getLanguage() {
-            getMovieDetails();
             if(language == null) {
+                getMovieDetails();
                 language = new JSONObject(movieDetails).getString("original_language");
             }
             return language;
@@ -342,9 +359,7 @@ public class PlexServer {
             if(cast != null) {
                 desc.append("\n\n**Cast**: ").append(cast);
             }
-            if(genre != null) {
-                desc.append("\n\n**Genre**: ").append(genre);
-            }
+            desc.append("\n\n**Genre**: ").append(getGenre());
             String language = getLanguage();
             if(!language.equals("en")) {
                 desc.append("\n\n**Language**: ").append(language);
