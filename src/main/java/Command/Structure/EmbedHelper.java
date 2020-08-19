@@ -98,4 +98,15 @@ public class EmbedHelper {
                 TimeUnit.MILLISECONDS.toSeconds(time) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time)));
     }
+
+    /**
+     * Return the String required to create a hyperlink in an embed
+     *
+     * @param text Text to display
+     * @param url  URL to link to
+     * @return Hyperlink
+     */
+    public static String embedURL(String text, String url) {
+        return "[" + text + "](" + url + ")";
+    }
 }

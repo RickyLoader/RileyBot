@@ -196,10 +196,10 @@ public class EmbedLoadingMessage {
     public void failLoading(String reason) {
         LoadingStage fail = new LoadingStage("FAIL!", guild);
         fail.fail(reason, startTime);
-        stages.add(fail);
         for(int i = currentStep; i < stages.size(); i++) {
             stages.get(i).fail();
         }
+        stages.add(fail);
         this.failed = true;
         updateLoadingMessage();
     }

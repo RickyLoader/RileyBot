@@ -1,7 +1,6 @@
 package Plex;
 
 import Command.Structure.EmbedHelper;
-import Network.NetworkInfo;
 import Network.NetworkRequest;
 import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -21,35 +20,58 @@ import java.util.regex.Pattern;
 public class PlexServer {
     private long timeFetched;
     private ArrayList<Movie> library;
-    private final String publicIP;
 
+    /**
+     * Read in the Plex library and remember the timestamp
+     */
     public PlexServer() {
-        this.publicIP = NetworkInfo.getPublicAddress() + Secret.getExternalPlexPort();
         this.library = getLibraryOverview();
         this.timeFetched = System.currentTimeMillis();
     }
 
+    /**
+     * Create a list of movies from the Plex API
+     *
+     * @return List of movies
+     */
     private ArrayList<Movie> getLibraryOverview() {
         JSONArray jsonArr = new JSONObject(new NetworkRequest(getPlexURL(), false).get()).getJSONObject("MediaContainer").getJSONArray("Metadata");
         ArrayList<Movie> movies = new ArrayList<>();
         for(int i = 0; i < jsonArr.length(); i++) {
             JSONObject movie = jsonArr.getJSONObject(i);
             if(!movieDataExists(movie)) {
-                System.out.println("Skipping movie");
+                System.out.println(movie.getJSONArray("Media").getJSONObject(0).getJSONArray("Part").getJSONObject(0).getString("file") + " missing info!");
                 continue;
             }
             movies.add(new Movie(
                     getMovieID(movie.getString("guid")),
                     movie.getString("title"),
-                    movie.has("contentRating") ? movie.getString("contentRating") : "N/A",
+                    movie.has("contentRating") ? movie.getString("contentRating") : "Not Rated",
                     movie.getString("summary"),
                     movie.has("tagline") ? movie.getString("tagline") : null,
                     movie.getString("originallyAvailableAt"),
-                    publicIP + movie.getString("thumb") + Secret.getPlexToken(),
-                    movie.getLong("duration")
+                    movie.has("Director") ? stringify(movie.getJSONArray("Director")) : null,
+                    movie.has("Role") ? stringify(movie.getJSONArray("Role")) : null,
+                    movie.has("Genre") ? stringify(movie.getJSONArray("Genre")) : null,
+                    movie.getLong("duration"),
+                    movie.getDouble("rating")
             ));
         }
         return movies;
+    }
+
+    /**
+     * Take a JSONArray of movie properties and convert to a comma separated String
+     *
+     * @param arr JSONArray of movie properties
+     * @return Comma separated String of elements
+     */
+    private String stringify(JSONArray arr) {
+        String[] list = new String[arr.length()];
+        for(int i = 0; i < arr.length(); i++) {
+            list[i] = arr.getJSONObject(i).getString("tag");
+        }
+        return StringUtils.join(list, ", ");
     }
 
     /**
@@ -59,7 +81,7 @@ public class PlexServer {
      * @return Whether Plex has the sufficient information
      */
     private boolean movieDataExists(JSONObject movie) {
-        return movie.has("guid") && movie.has("title") && movie.has("summary") && movie.has("originallyAvailableAt");
+        return movie.has("guid") && movie.has("title") && movie.has("summary") && movie.has("originallyAvailableAt") && movie.has("rating");
     }
 
     /**
@@ -99,21 +121,12 @@ public class PlexServer {
         Movie movie = getRandomMovie();
         String thumb = "https://i.imgur.com/FdabwCm.png"; // Plex Logo
         EmbedBuilder builder = new EmbedBuilder();
-
-        String desc = "**Synopsis**: " + movie.getSummary();
-        if(movie.getTagLine() != null) {
-            desc += "\n\n**Tagline**: " + movie.getTagLine();
-        }
-        ArrayList<String> directors = movie.getDirectors();
-        String director = directors.size() == 1 ? "Director" : "Directors";
-        desc += "\n\n**" + director + "**: " + StringUtils.join(directors.toArray(), ", ") + "\n\n**Cast**: " + movie.getCast() + "\n\n**Duration**: " + movie.getDuration();
         builder.setThumbnail(thumb);
         builder.setColor(EmbedHelper.getOrange());
         builder.setTitle(movie.getTitle());
-        builder.setImage(movie.getThumbnail());
-        builder.setDescription(desc);
-
-        builder.setFooter("Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getReleaseDate(), thumb);
+        builder.setImage(movie.getPoster());
+        builder.setDescription(movie.toString());
+        builder.setFooter("IMDB: " + movie.getRating() + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getReleaseDate(), movie.getRatingImage());
         return builder.build();
     }
 
@@ -152,84 +165,100 @@ public class PlexServer {
         return timeFetched;
     }
 
+    /**
+     * Hold information about a movie on Plex
+     */
     public static class Movie {
-        private final String id, title, contentRating, summary, tagLine, releaseDate, thumbnail;
+        private final String id, title, contentRating, summary, tagLine, releaseDate, director, cast, genre;
         private final long duration;
-        private String castDetails;
+        private final double rating;
+        private String movieDetails, language, imdbURL, poster;
 
-        public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String thumbnail, long duration) {
+        /**
+         * Construct the movie
+         *
+         * @param id            Plex ID of movie, either IMDB (tt6053438) or TMDB (14161) formatted
+         * @param title         Title of movie
+         * @param contentRating Content rating - G, PG..
+         * @param summary       Movie synopsis
+         * @param tagLine       Movie tagline
+         * @param releaseDate   Release date of movie
+         * @param director      Director of movie
+         * @param cast          Comma separated list of cast members
+         * @param genre         Comma separated list of genres
+         * @param duration      Duration of movie
+         * @param rating        IMDB rating of movie
+         */
+        public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String director, String cast, String genre, long duration, double rating) {
             this.id = id;
             this.title = title;
             this.contentRating = contentRating;
             this.summary = summary;
             this.tagLine = tagLine;
             this.releaseDate = releaseDate;
-            this.thumbnail = thumbnail;
+            this.director = director;
+            this.cast = cast;
+            this.genre = genre;
             this.duration = duration;
+            this.rating = rating;
         }
 
         /**
-         * Get the cast details JSON for the movie
+         * Get movie details JSON from TMDB containing movie poster, IMDB ID, and language information
          */
-        private void getCastDetails() {
-            String url = "https://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + Secret.getTMDBKey();
-            this.castDetails = new NetworkRequest(url, false).get();
+        private void getMovieDetails() {
+            if(movieDetails != null) {
+                return;
+            }
+            String url = "https://api.themoviedb.org/3/movie/" + id + "?api_key=" + Secret.getTMDBKey() + "&language=en-US";
+            this.movieDetails = new NetworkRequest(url, false).get();
         }
 
         /**
-         * Get the director(s) of the movie in a comma separated String
+         * Get the URL to the IMDB page of the movie from The Movie Database
          *
-         * @return Comma separated String of directors
+         * @return IMDB URL
          */
-        public ArrayList<String> getDirectors() {
-            if(castDetails == null) {
-                getCastDetails();
+        public String getIMDBUrl() {
+            getMovieDetails();
+            if(imdbURL == null) {
+                imdbURL = "https://www.imdb.com/title/" + new JSONObject(movieDetails).getString("imdb_id");
             }
-            JSONArray crewMembers = new JSONObject(castDetails).getJSONArray("crew");
-            ArrayList<String> directors = new ArrayList<>();
-            for(int i = 0; i < crewMembers.length(); i++) {
-                JSONObject crewMember = crewMembers.getJSONObject(i);
-                if(crewMember.getString("job").equals("Director")) {
-                    directors.add(crewMember.getString("name"));
-                }
-            }
-            return directors;
+            return imdbURL;
         }
 
-        /**
-         * Get the cast members of the movie in a comma separated String
-         *
-         * @return Comma separated String of cast members
-         */
-        public String getCast() {
-            if(castDetails == null) {
-                getCastDetails();
-            }
-            JSONArray cast = new JSONObject(castDetails).getJSONArray("cast");
-            ArrayList<String> actors = new ArrayList<>();
-            for(int i = 0; i < Math.min(cast.length(), 5); i++) {
-                actors.add(cast.getJSONObject(i).getString("name"));
-            }
-            return StringUtils.join(actors.toArray(), ", ");
-        }
 
         /**
-         * Plex thumbnails are often too large for Discord to send properly, first attempt to retrieve the thumbnail from
-         * The Movie Database
+         * Retrieve the movie poster from The Movie Database
          *
          * @return Movie poster thumbnail
          */
-        public String getThumbnail() {
-            try {
-                String url = "https://api.themoviedb.org/3/movie/" + id + "?api_key=" + Secret.getTMDBKey() + "&language=en-US";
-                return "https://image.tmdb.org/t/p/original/" + new JSONObject(new NetworkRequest(url, false).get()).getString("poster_path");
+        public String getPoster() {
+            getMovieDetails();
+            if(poster == null) {
+                poster = "https://image.tmdb.org/t/p/original/" + new JSONObject(movieDetails).getString("poster_path");
             }
-            catch(Exception e) {
-                e.printStackTrace();
-            }
-            return thumbnail;
+            return poster;
         }
 
+        /**
+         * Retrieve the movie language(s) The Movie Database
+         *
+         * @return Movie poster thumbnail
+         */
+        public String getLanguage() {
+            getMovieDetails();
+            if(language == null) {
+                language = new JSONObject(movieDetails).getString("original_language");
+            }
+            return language;
+        }
+
+        /**
+         * Format the release date to NZ format
+         *
+         * @return NZ formatted release date
+         */
         public String getReleaseDate() {
             try {
                 Date us = new SimpleDateFormat("yyyy-MM-dd").parse(releaseDate);
@@ -241,24 +270,89 @@ public class PlexServer {
             return releaseDate;
         }
 
+        /**
+         * Get the IMDB rating of the movie
+         *
+         * @return IMDB rating
+         */
+        public double getRating() {
+            return rating;
+        }
+
+        /**
+         * Get the duration of the movie in HH:MM:SS
+         *
+         * @return Formatted duration of movie
+         */
         public String getDuration() {
             return EmbedHelper.formatTime(duration);
         }
 
+        /**
+         * Get the title of the movie
+         *
+         * @return Movie title
+         */
         public String getTitle() {
             return title;
         }
 
+        /**
+         * Get the content rating of the movie - G, PG..
+         *
+         * @return Content rating of movie
+         */
         public String getContentRating() {
             return contentRating;
         }
 
-        public String getSummary() {
-            return summary;
+        /**
+         * Get the IMDB logo image
+         *
+         * @return URL to IMDB logo image
+         */
+        public String getRatingImage() {
+            return "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png";
         }
 
-        public String getTagLine() {
-            return tagLine;
+        /**
+         * Get the id of the movie
+         *
+         * @return movie id
+         */
+        public String getId() {
+            return id;
+        }
+
+        /**
+         * Format the movie information in to a summary
+         *
+         * @return Summary of movie information
+         */
+        @Override
+        public String toString() {
+            StringBuilder desc = new StringBuilder("**Synopsis**: " + summary);
+
+            if(tagLine != null) {
+                desc.append("\n\n**Tagline**: ").append(tagLine);
+            }
+            if(director != null) {
+                desc.append("\n\n**Director**: ").append(director);
+            }
+            if(cast != null) {
+                desc.append("\n\n**Cast**: ").append(cast);
+            }
+            if(genre != null) {
+                desc.append("\n\n**Genre**: ").append(genre);
+            }
+            String language = getLanguage();
+            if(!language.equals("en")) {
+                desc.append("\n\n**Language**: ").append(language);
+            }
+            desc.append("\n\n**Duration**: ").append(getDuration());
+            desc.append("\n\n**IMDB**: ").append(EmbedHelper.embedURL("View", getIMDBUrl()));
+
+            return desc.toString();
         }
     }
 }
