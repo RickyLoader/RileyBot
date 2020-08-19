@@ -142,7 +142,7 @@ public class PlexServer {
             builder.setDescription("No results found for: **" + query + "**, try again cunt.");
             return builder.build();
         }
-        builder.setDescription("I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here are " + bound + " of them:");
+        builder.setDescription("I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here" + ((bound == movies.length) ? " they are:" : "'s " + bound + " of them:"));
         for(int i = 0; i < bound; i++) {
             Movie movie = movies[i];
             String title = movie.getTitle();
