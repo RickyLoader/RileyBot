@@ -259,14 +259,23 @@ public class PlexServer {
         }
 
         /**
-         * Retrieve the movie language(s) The Movie Database
+         * Retrieve the movie language The Movie Database
          *
-         * @return Movie language(s)
+         * @return Movie language
          */
         public String getLanguage() {
             if(language == null) {
                 getMovieDetails();
-                language = new JSONObject(movieDetails).getString("original_language");
+                JSONObject movieDetails = new JSONObject(this.movieDetails);
+                String language = movieDetails.getString("original_language");
+                JSONArray languages = movieDetails.getJSONArray("spoken_languages");
+                for(int i = 0; i < languages.length(); i++) {
+                    JSONObject spokenLanguage = languages.getJSONObject(i);
+                    if(spokenLanguage.getString("iso_639_1").equals(language)) {
+                        language = spokenLanguage.getString("name");
+                    }
+                }
+                this.language = language;
             }
             return language;
         }
@@ -360,10 +369,12 @@ public class PlexServer {
                 desc.append("\n\n**Cast**: ").append(cast);
             }
             desc.append("\n\n**Genre**: ").append(getGenre());
+
             String language = getLanguage();
-            if(!language.equals("en")) {
+            if(!language.equals("English")) {
                 desc.append("\n\n**Language**: ").append(language);
             }
+
             desc.append("\n\n**Duration**: ").append(getDuration());
             desc.append("\n\n**IMDB**: ").append(EmbedHelper.embedURL("View", getIMDBUrl()));
 
