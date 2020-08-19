@@ -108,12 +108,17 @@ public class PlexServer {
      * @return Single movie embed or embed containing search results
      */
     public MessageEmbed search(String query) {
+        Movie movie = library.get(query);
+        if(movie != null) {
+            return getMovieEmbed(movie);
+        }
         Movie[] results = library
                 .entrySet()
                 .stream()
                 .filter(e -> e.getKey().contains(query))
                 .map(Map.Entry::getValue)
                 .toArray(Movie[]::new);
+
         if(results.length == 1) {
             return getMovieEmbed(results[0]);
         }
@@ -154,7 +159,6 @@ public class PlexServer {
                 builder.addField(EmbedHelper.getValueField(date));
             }
         }
-        builder.addBlankField(false);
         return builder.build();
     }
 
