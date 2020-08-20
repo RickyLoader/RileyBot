@@ -34,8 +34,8 @@ public class PlexServer {
      *
      * @return Library exists
      */
-    public boolean libraryExists() {
-        return !library.isEmpty();
+    public boolean libraryEmpty() {
+        return library.isEmpty();
     }
 
     /**

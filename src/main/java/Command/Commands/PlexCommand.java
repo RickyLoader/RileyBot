@@ -31,12 +31,12 @@ public class PlexCommand extends DiscordCommand {
 
         new Thread(() -> {
             // Been more than 24 hours
-            if(timePassed / 3600000 > 24 || !plex.libraryExists()) {
+            if(timePassed / 3600000 > 24 || plex.libraryEmpty()) {
                 refreshing = true;
                 channel.sendMessage("Let me refresh the Plex library first").queue();
                 plex.refreshData();
                 refreshing = false;
-                if(!plex.libraryExists()) {
+                if(plex.libraryEmpty()) {
                     channel.sendMessage("Plex is unavailable right now").queue();
                     return;
                 }
