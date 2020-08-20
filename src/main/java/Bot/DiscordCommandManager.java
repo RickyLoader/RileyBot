@@ -1,5 +1,6 @@
 package Bot;
 
+import Audio.DiscordAudioPlayer;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
@@ -23,6 +24,7 @@ import java.util.Random;
  */
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands = new ArrayList<>();
+    private final DiscordAudioPlayer player = new DiscordAudioPlayer();
 
     /**
      * Add the commands to the list
@@ -100,7 +102,7 @@ public class DiscordCommandManager {
         if(command == null) {
             return;
         }
-        command.execute(new CommandContext(event, commands));
+        command.execute(new CommandContext(event, commands, player));
     }
 
     /**
@@ -132,7 +134,7 @@ public class DiscordCommandManager {
         addCommand(new TweetCommand());
         addCommand(new TweetsCommand());
         addCommand(new PlexCommand());
-        //addCommand((new VoiceChannelCommand());
+        addCommand(new VoiceChannelCommand());
     }
 
     /**

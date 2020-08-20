@@ -6,32 +6,21 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import net.dv8tion.jda.api.entities.Guild;
 
-import javax.sound.midi.Track;
-
-/**
- * Extends the AudioEventAdapter class of Lava Player, overrides only the onTrackEnd listener.
- *
- * @author Ricky Loader
- * @version 5000.0
- */
 public class TrackEndListener extends AudioEventAdapter {
 
-    // Implementation of the Response interface
-    private final Response method;
-
-    // The server where the audio is being played
     private final Guild guild;
+    private Response method;
+    private boolean leave;
 
-    private final boolean leave;
-
-    public TrackEndListener(Response method, Guild guild, boolean leave) {
-        this.method = method;
+    public TrackEndListener(Guild guild, Response method) {
         this.guild = guild;
-        this.leave = leave;
+        this.method = method;
+        this.leave = true;
     }
 
-    public TrackEndListener(Response method, Guild guild) {
-        this(method, guild, true);
+    public TrackEndListener(Guild guild) {
+        this.guild = guild;
+        this.leave = false;
     }
 
     /**
@@ -44,14 +33,13 @@ public class TrackEndListener extends AudioEventAdapter {
      */
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-
         if(leave) {
             new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();
         }
-
         if(method != null) {
             new Thread(method::processFinish).start();
         }
+        player.removeListener(this);
     }
 
     /**

@@ -1,6 +1,5 @@
 package Command.Commands.Audio;
 
-import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
@@ -15,17 +14,13 @@ public class VoiceChannelCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        DiscordAudioPlayer discordAudioPlayer = new DiscordAudioPlayer(context.getMember(), context.getGuild(), context.getMessageChannel());
-        if(context.getLowerCaseMessage().equals("stop")) {
-            discordAudioPlayer.leave();
-        }
-        else {
-            discordAudioPlayer.join(discordAudioPlayer.getMemberVoiceChannel());
+        if(!context.getAudioPlayer().stop(context.getGuild())) {
+            context.getMessageChannel().sendMessage("You're not allowed to stop this").queue();
         }
     }
 
     @Override
     public boolean matches(String query) {
-        return query.equalsIgnoreCase("stop") || query.equalsIgnoreCase("join");
+        return query.equals("stop");
     }
 }

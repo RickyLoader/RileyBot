@@ -1,6 +1,5 @@
 package Command.Commands.Audio;
 
-import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
@@ -16,7 +15,13 @@ public class PlayYoutubeCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         String audio = context.getMessageContent().replace("!play ", "");
-        new DiscordAudioPlayer(context.getMember(), context.getGuild(), context.getMessageChannel()).play(audio);
+        context.getAudioPlayer().play(
+                audio,
+                context.getMember(),
+                context.getMessageChannel(),
+                context.getGuild(),
+                true
+        );
     }
 
     @Override

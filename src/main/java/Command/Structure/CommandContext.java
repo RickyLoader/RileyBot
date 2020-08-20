@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import Audio.DiscordAudioPlayer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -10,10 +11,16 @@ import java.util.List;
 public class CommandContext {
     private final GuildMessageReceivedEvent event;
     private final ArrayList<DiscordCommand> commands;
+    private final DiscordAudioPlayer player;
 
-    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands) {
+    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands, DiscordAudioPlayer player) {
         this.event = event;
         this.commands = commands;
+        this.player = player;
+    }
+
+    public DiscordAudioPlayer getAudioPlayer() {
+        return player;
     }
 
     public User getSelfUser() {

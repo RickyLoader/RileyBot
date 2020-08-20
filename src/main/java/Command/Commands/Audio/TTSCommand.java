@@ -24,6 +24,7 @@ public class TTSCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
+        context.getMessage().delete().queue();
         String content = context.getLowerCaseMessage();
         String url;
         if(content.startsWith("gtts ")) {
@@ -39,8 +40,17 @@ public class TTSCommand extends DiscordCommand {
         Guild guild = context.getGuild();
         MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
-        DiscordAudioPlayer player = new DiscordAudioPlayer(member, guild, new TrackEndListener(() -> logTTS(content, context.getUser(), guild), guild), channel);
-        speak(url, member, guild, player, channel);
+        if(url == null) {
+            channel.sendMessage("Something went wrong when I tried to say that, sorry bro").queue();
+            return;
+        }
+        context.getAudioPlayer().play(
+                url,
+                member,
+                channel,
+                guild,
+                true
+        );
     }
 
     /**
@@ -72,14 +82,6 @@ public class TTSCommand extends DiscordCommand {
         catch(Exception e) {
             return null;
         }
-    }
-
-    private void speak(String url, Member member, Guild guild, DiscordAudioPlayer player, MessageChannel channel) {
-        if(url == null) {
-            channel.sendMessage("Something went wrong when I tried to say that, sorry bro").queue();
-            return;
-        }
-        player.play(url);
     }
 
     /**

@@ -72,14 +72,24 @@ public class ExecuteOrder66Command extends DiscordCommand {
             targetStatus.put(target, status.getNeutral());
         }
 
-        TrackEndListener listener = new TrackEndListener(new Thread(() -> {
-            purgeTargets(context);
-            executor = null;
-        })::start, context.getGuild());
+        boolean play = context.getAudioPlayer().play(
+                executor.getTrack(),
+                instigator,
+                context.getMessageChannel(),
+                context.getGuild(),
+                false,
+                new TrackEndListener.Response() {
+                    @Override
+                    public void processFinish() {
+                        new Thread(() -> {
+                            purgeTargets(context);
+                            executor = null;
+                        }).start();
+                    }
+                }
+        );
 
-        DiscordAudioPlayer player = new DiscordAudioPlayer(context.getMember(), context.getGuild(), listener, context.getMessageChannel());
-
-        if(!player.play(executor.getTrack())) {
+        if(!play) {
             executor = null;
             return;
         }

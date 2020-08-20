@@ -17,47 +17,59 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 public class DiscordAudioPlayer {
     private final AudioPlayer player;
     private final AudioPlayerManager manager;
-    private final Member member;
-    private final Guild guild;
-    private final MessageChannel channel;
+    private boolean cancelable = true;
 
-    public DiscordAudioPlayer(Member member, Guild guild, TrackEndListener listener, MessageChannel channel) {
-        this.member = member;
-        this.guild = guild;
-        this.channel = channel;
+    public DiscordAudioPlayer() {
         this.manager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(manager);
         this.player = manager.createPlayer();
-        this.player.addListener(listener);
-        guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
     }
 
-    public DiscordAudioPlayer(Member member, Guild guild, MessageChannel channel) {
-        this(member, guild, new TrackEndListener(null, guild), channel);
-    }
-
-    public void join(VoiceChannel vc) {
+    public void join(VoiceChannel vc, Guild guild) {
         guild.getAudioManager().openAudioConnection(vc);
     }
 
-    public void leave() {
-        guild.getAudioManager().closeAudioConnection();
+    public boolean stop(Guild guild) {
+        if(cancelable) {
+            guild.getAudioManager().closeAudioConnection();
+            return true;
+        }
+        return false;
     }
 
-    public VoiceChannel getMemberVoiceChannel() {
+    public VoiceChannel getMemberVoiceChannel(Member member) {
         if(member.getVoiceState() == null) {
             return null;
         }
         return member.getVoiceState().getChannel();
     }
 
-    public boolean play(String audio) {
-        VoiceChannel vc = getMemberVoiceChannel();
+    public boolean isPlaying() {
+        return player.getPlayingTrack() != null;
+    }
+
+    public boolean play(String audio, Member member, MessageChannel channel, Guild guild, boolean cancelable, TrackEndListener.Response... doAfter) {
+        if(guild.getAudioManager().getSendingHandler() == null) {
+            guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
+        }
+
+        if(isPlaying() && !this.cancelable) {
+            channel.sendMessage("I'm busy right now").queue();
+            return false;
+        }
+
+        this.cancelable = cancelable;
+        player.addListener(doAfter.length > 0 ? new TrackEndListener(guild, doAfter[0]) : new TrackEndListener(guild));
+        VoiceChannel vc = getMemberVoiceChannel(member);
+
         if(vc == null) {
             channel.sendMessage("You're not in a voice channel").queue();
             return false;
         }
-        join(vc);
+
+        join(vc, guild);
+
+
         try {
             manager.loadItem(audio, new AudioLoadResultHandler() {
 
@@ -81,11 +93,12 @@ public class DiscordAudioPlayer {
 
                 @Override
                 public void loadFailed(FriendlyException e) {
-                    e.printStackTrace();
                 }
             });
         }
         catch(Exception e) {
+            e.printStackTrace();
+            this.cancelable = true;
             return false;
         }
         return true;
