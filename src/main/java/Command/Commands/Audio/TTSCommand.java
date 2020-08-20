@@ -1,7 +1,5 @@
 package Command.Commands.Audio;
 
-import Audio.DiscordAudioPlayer;
-import Audio.TrackEndListener;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
@@ -51,6 +49,7 @@ public class TTSCommand extends DiscordCommand {
                 guild,
                 true
         );
+        logTTS(content, member.getUser(), guild);
     }
 
     /**
