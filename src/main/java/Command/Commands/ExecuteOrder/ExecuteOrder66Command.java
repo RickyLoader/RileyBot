@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;

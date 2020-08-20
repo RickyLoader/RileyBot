@@ -86,7 +86,7 @@ public class Listener extends ListenerAdapter {
         try {
             Guild guild = event.getGuild();
             Member author = event.getMember();
-            targetCunt(guild, author);
+            targetMember(guild, author);
             welcomeCunt(guild.getSelfMember(), author, guild.getDefaultChannel());
         }
         catch(Exception e) {
@@ -97,32 +97,36 @@ public class Listener extends ListenerAdapter {
     /**
      * Post a helpful message containing 5 random commands that the bot can do
      *
-     * @param self    Bot member
-     * @param cunt    New member
-     * @param channel Channel to welcome new member in
+     * @param self      Bot member
+     * @param newMember New member
+     * @param channel   Channel to welcome new member in
      */
-    private void welcomeCunt(Member self, Member cunt, MessageChannel channel) {
+    private void welcomeCunt(Member self, Member newMember, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(EmbedHelper.getYellow());
-        builder.setTitle("Hey " + cunt.getUser().getName() + "!");
+        builder.setTitle("Hey " + newMember.getUser().getName() + "!");
         builder.setThumbnail(self.getUser().getAvatarUrl());
-        builder.setDescription("Here's some stuff I can do, now fuck off.");
+        builder.setDescription("Here's some stuff I can do " + newMember.getAsMention() + ", now fuck off.");
 
         DiscordCommand[] random = commandManager.pickRandomCommands(5);
 
 
         for(int i = 0; i < random.length; i++) {
             DiscordCommand c = random[i];
-            String triggerTitle = "\u200B", descTitle = "\u200B";
+            String trigger = c.getHelpName();
+            String desc = c.getDesc();
+
             if(i == 0) {
-                triggerTitle = "**Trigger**";
-                descTitle = "**Description**";
+                builder.addField(EmbedHelper.getTitleField("Trigger", trigger));
+                builder.addBlankField(true);
+                builder.addField(EmbedHelper.getTitleField("Description", desc));
             }
-            builder.addField(triggerTitle, c.getHelpName(), true);
-            builder.addBlankField(true);
-            builder.addField(descTitle, c.getDesc(), true);
+            else {
+                builder.addField(EmbedHelper.getValueField(trigger));
+                builder.addBlankField(true);
+                builder.addField(EmbedHelper.getValueField(desc));
+            }
         }
-        channel.sendMessage(cunt.getAsMention()).queue();
         channel.sendMessage(builder.build()).queue();
     }
 
@@ -152,8 +156,8 @@ public class Listener extends ListenerAdapter {
      * @param guild  Guild to search for role
      * @param target Newly joined member
      */
-    private void targetCunt(Guild guild, Member target) {
+    private void targetMember(Guild guild, Member target) {
         Role targetRole = guild.getRolesByName("target", true).get(0);
-        guild.addRoleToMember(target, targetRole).complete();
+        guild.addRoleToMember(target, targetRole).queue();
     }
 }
