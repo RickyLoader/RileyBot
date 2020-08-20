@@ -3,7 +3,6 @@ package Plex;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
-import javafx.scene.shape.MoveTo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
@@ -19,14 +18,24 @@ import java.util.regex.Pattern;
 public class PlexServer {
     private long timeFetched;
     private HashMap<String, Movie> library;
-    private final String plexIcon = "https://i.imgur.com/FdabwCm.png";
+    private final String helpMessage, plexIcon = "https://i.imgur.com/FdabwCm.png";
 
     /**
      * Read in the Plex library and remember the timestamp
      */
-    public PlexServer() {
+    public PlexServer(String helpMessage) {
+        this.helpMessage = helpMessage;
         this.library = getLibraryOverview();
         this.timeFetched = System.currentTimeMillis();
+    }
+
+    /**
+     * Return whether the library was successfully read in
+     *
+     * @return Library exists
+     */
+    public boolean libraryExists() {
+        return !library.isEmpty();
     }
 
     /**
@@ -35,8 +44,12 @@ public class PlexServer {
      * @return List of movies
      */
     private HashMap<String, Movie> getLibraryOverview() {
-        JSONArray jsonArr = new JSONObject(new NetworkRequest(getPlexURL(), false).get()).getJSONObject("MediaContainer").getJSONArray("Metadata");
         HashMap<String, Movie> movies = new HashMap<>();
+        String json = new NetworkRequest(getPlexURL(), false).get();
+        if(json == null) {
+            return movies;
+        }
+        JSONArray jsonArr = new JSONObject(json).getJSONObject("MediaContainer").getJSONArray("Metadata");
         for(int i = 0; i < jsonArr.length(); i++) {
             JSONObject movie = jsonArr.getJSONObject(i);
             if(!movieDataExists(movie)) {
@@ -137,7 +150,7 @@ public class PlexServer {
         builder.setColor(EmbedHelper.getOrange());
         builder.setThumbnail(plexIcon);
         builder.setTitle("Plex Movie Search");
-        builder.setFooter("Try: plex! | plex! [search term]", plexIcon);
+        builder.setFooter("Try: " + helpMessage, plexIcon);
         if(bound == 0) {
             builder.setDescription("No results found for: **" + query + "**, try again cunt.");
             return builder.build();
@@ -379,7 +392,7 @@ public class PlexServer {
          * @return URL to IMDB logo image
          */
         public String getRatingImage() {
-            return "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png";
+            return "https://i.imgur.com/qMCJLhJ.png";
         }
 
         /**
@@ -420,7 +433,7 @@ public class PlexServer {
         }
 
         /**
-         * Format the movie information in to a summary
+         * Format the movie information in to a String summary
          *
          * @return Summary of movie information
          */

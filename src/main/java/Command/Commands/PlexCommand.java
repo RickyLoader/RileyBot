@@ -11,7 +11,7 @@ public class PlexCommand extends DiscordCommand {
 
     public PlexCommand() {
         super("plex!\nplex! [search query]", "Get a movie recommendation from Plex!");
-        plex = new PlexServer();
+        plex = new PlexServer(getHelpName());
     }
 
     @Override
@@ -19,30 +19,40 @@ public class PlexCommand extends DiscordCommand {
         long timePassed = System.currentTimeMillis() - plex.getTimeFetched();
         MessageChannel channel = context.getMessageChannel();
 
+        if(!context.getLowerCaseMessage().startsWith("plex!")) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
         if(refreshing) {
             channel.sendMessage("I told you I was refreshing cunt").queue();
             return;
         }
 
-        // Been more than 24 hours
-        if(timePassed / 3600000 > 24) {
-            refreshing = true;
-            channel.sendMessage("It's been more than a day since I last refreshed the Plex library, let me do that first and i'll get back to you in a second.").queue();
-            plex.refreshData();
-            refreshing = false;
-        }
-
-        String query = context.getLowerCaseMessage();
-        if(query.equals("plex!")) {
-            channel.sendMessage(plex.getMovieEmbed(plex.getRandomMovie())).queue();
-            return;
-        }
-        query = query.replaceFirst("plex!", "").trim();
-        channel.sendMessage(plex.search(query)).queue();
+        new Thread(() -> {
+            // Been more than 24 hours
+            if(timePassed / 3600000 > 24 || !plex.libraryExists()) {
+                refreshing = true;
+                channel.sendMessage("Let me refresh the Plex library first").queue();
+                plex.refreshData();
+                refreshing = false;
+                if(!plex.libraryExists()) {
+                    channel.sendMessage("Plex is unavailable right now").queue();
+                    return;
+                }
+            }
+            String query = context.getLowerCaseMessage();
+            if(query.equals("plex!")) {
+                channel.sendMessage(plex.getMovieEmbed(plex.getRandomMovie())).queue();
+                return;
+            }
+            query = query.replaceFirst("plex!", "").trim();
+            channel.sendMessage(plex.search(query)).queue();
+        }).start();
     }
 
     @Override
     public boolean matches(String query) {
-        return query.startsWith("plex!");
+        return query.contains("plex");
     }
 }
