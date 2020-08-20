@@ -15,11 +15,8 @@ public class PlayYoutubeCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         String audio = context.getMessageContent().replace("!play ", "");
-        context.getAudioPlayer().play(
+        context.playAudio(
                 audio,
-                context.getMember(),
-                context.getMessageChannel(),
-                context.getGuild(),
                 true
         );
     }

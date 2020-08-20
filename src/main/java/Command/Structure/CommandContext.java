@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import Audio.DiscordAudioPlayer;
+import Audio.TrackEndListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -21,6 +22,17 @@ public class CommandContext {
 
     public DiscordAudioPlayer getAudioPlayer() {
         return player;
+    }
+
+    public boolean playAudio(String audio, boolean cancelable, TrackEndListener.Response... doAfter) {
+        return player.play(
+                audio,
+                getMember(),
+                getMessageChannel(),
+                getGuild(),
+                cancelable,
+                doAfter
+        );
     }
 
     public User getSelfUser() {

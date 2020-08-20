@@ -15,11 +15,8 @@ public class SawCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         context.getMessage().delete().complete();
-        context.getAudioPlayer().play(
+        context.playAudio(
                 "https://www.youtube.com/watch?v=4VB2vjfNp_o",
-                context.getMember(),
-                context.getMessageChannel(),
-                context.getGuild(),
                 true
         );
     }

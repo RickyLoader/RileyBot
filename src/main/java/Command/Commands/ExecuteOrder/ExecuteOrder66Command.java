@@ -72,11 +72,8 @@ public class ExecuteOrder66Command extends DiscordCommand {
             targetStatus.put(target, status.getNeutral());
         }
 
-        boolean play = context.getAudioPlayer().play(
+        boolean play = context.playAudio(
                 executor.getTrack(),
-                instigator,
-                context.getMessageChannel(),
-                context.getGuild(),
                 false,
                 new TrackEndListener.Response() {
                     @Override
