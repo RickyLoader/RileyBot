@@ -44,10 +44,12 @@ public class ExecuteOrder66Command extends DiscordCommand {
     public void execute(CommandContext context) {
         context.getMessage().delete().complete();
         Member instigator = context.getMember();
-        if(!instigator.hasPermission(Permission.KICK_MEMBERS)) {
+        targets = context.getTargets();
+        if(!instigator.hasPermission(Permission.KICK_MEMBERS) && context.getSelfMember().canInteract(instigator)) {
             context.getGuild().addRoleToMember(instigator, context.getTargetRole()).queue(aVoid -> context.getMessageChannel().sendMessage(instigator.getAsMention() + " big mistake cunt, now you're on the kill list.").queue());
             return;
         }
+
         if(status == null) {
             status = new EmbedLoadingMessage.Status(context.getGuild());
         }
@@ -56,17 +58,17 @@ public class ExecuteOrder66Command extends DiscordCommand {
         if(executor != null) {
             return;
         }
-        executor = new ExecutorHandler().getRandomExecutor();
-
-        // Image is randomly selected, save to variable to use the same image in private message
-        image = executor.getImage();
-        targets = context.getTargets();
 
         if(targets.isEmpty()) {
             context.getMessageChannel().sendMessage("Target sectors are already clear sir.").queue();
             return;
         }
+
+        executor = new ExecutorHandler().getRandomExecutor();
+
+        image = executor.getImage();
         targetStatus = new HashMap<>();
+
         for(Member target : targets) {
             targetStatus.put(target, status.getNeutral());
         }
