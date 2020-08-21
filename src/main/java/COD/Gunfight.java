@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import COD.GameStatus.*;
 
 /**
  * Interactive win/loss tracker for Modern Warfare - use emotes to track score and submit to leaderboard
@@ -490,53 +491,43 @@ public class Gunfight {
      */
     private String createDesc() {
         Random rand = new Random();
-        String[] messages;
+        String[] messages = new String[]{};
         String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's' ? owner.getName() + "'" : owner.getName() + "'s";
+        GAME_STATUS status = new GameStatus(wins, losses, currentStreak).getGameStatus();
 
-        // Beginning of game
-        if(wins == 0 && losses == 0) {
-            messages = new String[]{
-                    "Let's do this!",
-                    "Good news, the cheque cleared... It's go time!",
-                    "Shut up, cock in and load up.",
-                    "Lock 'em and load 'em ladies it's go time.",
-                    "Keep your head up and your ass down, it's go time."
-            };
-        }
-
-        // Score is even
-        else if(wins == losses) {
-            messages = new String[]{
-                    "Neck and neck, pick up your game cunts!",
-                    "You better not fall behind",
-                    "Get that lead back!"
-            };
-        }
-
-        // last match won
-        else if(currentStreak >= 1) {
-
-            // just taken lead and it isn't first match
-            if(wins - losses == 1 && losses != 0) {
+        switch(status) {
+            case BEGINNING:
                 messages = new String[]{
-                        "Now Maintain that lead cunts!",
-                        "Nice work, you're back in the game!",
-                        "What a cum back!"
+                        "Let's do this!",
+                        "Good news, the cheque cleared... It's go time!",
+                        "Shut up, cock in and load up.",
+                        "Lock 'em and load 'em ladies it's go time.",
+                        "Keep your head up and your ass down, it's go time."
                 };
-            }
-
-            // first win
-            else if(wins - losses == 1) {
+                break;
+            case TIE:
+                messages = new String[]{
+                        "Neck and neck, pick up your game cunts!",
+                        "You better not fall behind",
+                        "Get that lead back!"
+                };
+                break;
+            case WON_OPENING_GAME:
                 messages = new String[]{
                         "Off to a good start, how long before you fuck it up?",
                         "Nice job spastics!",
                         "Bon boulot, get ready for the next round",
                         "Let's get a streak going!",
                 };
-            }
-
-            // win streak
-            else if(wins - losses >= 5) {
+                break;
+            case WON_TAKEN_LEAD:
+                messages = new String[]{
+                        "Now Maintain that lead cunts!",
+                        "Nice work, you're back in the game!",
+                        "What a cum back!"
+                };
+                break;
+            case FIVE_OR_MORE_WIN_AHEAD:
                 messages = new String[]{
                         (wins - losses) + " wins ahead!, amazing work!",
                         owner.getName() + ", you absolutely carried the team that game! Nice job",
@@ -550,14 +541,13 @@ public class Gunfight {
                         "Joe is reaching for the big red button, stay frosty",
                         "It's not camping if you're sniping!",
                         "Riggs would be proud, good job",
-                        "Keep it pure, fantastic work!"
+                        "Keep it pure, fantastic work!",
+                        "HERE COMES JOE"
                 };
-            }
-
-            // win streak
-            else if(wins - losses > 1) {
+                break;
+            case STANDARD_WIN:
                 messages = new String[]{
-                        "Nice streak!",
+                        "Nice job!",
                         "What a lead!",
                         "Unstoppable!",
                         "They never stood a chance!",
@@ -565,14 +555,10 @@ public class Gunfight {
                         "You clobbered them! Nice job!",
                         "Beautiful job cunts, I loved that bit where that guy did that thing and you won!",
                         "That game was intense, fantastic work!",
-                        "On a roll!",
-                        "HERE COMES JOE",
                         "Beautiful, I especially enjoyed " + mvp + " performance, it was incredible!"
                 };
-            }
-
-            // still behind
-            else {
+                break;
+            case WON_STILL_BEHIND:
                 int behind = (losses - wins) + 1;
                 messages = new String[]{
                         "You're still behind cunts, not good enough",
@@ -581,23 +567,24 @@ public class Gunfight {
                         behind - 1 + " more and you're even, nice work!",
                         "You can do it! You're beginning to believe!"
                 };
-            }
-        }
-
-        // last match lost
-        else {
-
-            // just fallen behind
-            if(losses - wins == 1) {
+                break;
+            case LOST_OPENING_GAME:
+                messages = new String[]{
+                        "Off to a terrible start, why don't you just stop now?",
+                        "What an amazing start!",
+                        "That was only a warm up",
+                        "Let's get a negative streak going!",
+                };
+                break;
+            case LOST_LOSING_LEAD:
                 messages = new String[]{
                         "You're behind cunts",
                         "You're behind, you better win the fucking next one",
                         "You've fallen behind, pick up your game cunts",
                         "Is this the start of a loss streak?"
                 };
-            }
-
-            else if(losses - wins >= 5) {
+                break;
+            case FIVE_OR_MORE_LOSS_BEHIND:
                 messages = new String[]{
                         (losses - wins) + " losses behind, holy fuck",
                         "Did you spam click the defeat button by accident?",
@@ -611,9 +598,8 @@ public class Gunfight {
                         "You cunts are getting clobbered",
                         "Hold on, Guinness is on the line, you've just broken the world record for being shit at the game"
                 };
-            }
-            // loss streak
-            else if(losses - wins > 1) {
+                break;
+            case STANDARD_LOSS:
                 messages = new String[]{
                         "What the fuck was that?",
                         "How didn't you kill him?",
@@ -639,9 +625,8 @@ public class Gunfight {
                         "Just remember, chances are they are sober and you are not, don't be too hard on yourselves",
                         "Time to be tactical cunts, get those broken guns out"
                 };
-            }
-            // still ahead
-            else {
+                break;
+            case LOST_STILL_AHEAD:
                 messages = new String[]{
                         "Pathetic, but at least you're " + (wins - losses) + (wins - losses == 1 ? " win" : " wins") + " ahead cunts",
                         "Don't you dare fall behind cunts",
@@ -650,7 +635,7 @@ public class Gunfight {
                         "Oh no here we go again",
                         "Get the 725 out and get your lead back up"
                 };
-            }
+                break;
         }
 
         String message = null;

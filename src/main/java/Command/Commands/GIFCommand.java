@@ -109,7 +109,7 @@ public class GIFCommand extends DiscordCommand {
         }
 
         public String getWebsiteIcon() {
-            return "https://external-preview.redd.it/Om4099FdY_let-yIXtPdTcaSPCfvV17HHISEpIGL6SY.jpg?auto=webp&s=0af3d783d15ef4c942d2d211bb3aff475eecaf96";
+            return "https://i.imgur.com/bTDNO9G.jpg";
         }
 
         public String getPoster() {
