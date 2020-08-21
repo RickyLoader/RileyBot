@@ -468,7 +468,6 @@ public class Gunfight {
      */
     private String getRankingMessage() {
         String result;
-        int rank = checkRank();
         if(rank == 1) {
             result = "That's a new personal best, nice work cunts!";
         }
