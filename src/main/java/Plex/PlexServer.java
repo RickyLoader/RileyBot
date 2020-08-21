@@ -68,7 +68,7 @@ public class PlexServer {
                     movie.has("Role") ? stringify(movie.getJSONArray("Role")) : null,
                     movie.has("Genre") ? stringify(movie.getJSONArray("Genre")) : null,
                     movie.getLong("duration"),
-                    movie.getDouble("rating")
+                    movie.has("rating") ? movie.getDouble("rating") : 0
             ));
         }
         return movies;
@@ -95,7 +95,7 @@ public class PlexServer {
      * @return Whether Plex has the sufficient information
      */
     private boolean movieDataExists(JSONObject movie) {
-        return movie.has("guid") && movie.has("title") && movie.has("summary") && movie.has("originallyAvailableAt") && movie.has("rating");
+        return movie.has("guid") && movie.has("title") && movie.has("summary") && movie.has("originallyAvailableAt");
     }
 
     /**
@@ -111,7 +111,8 @@ public class PlexServer {
         builder.setTitle(movie.getTitle());
         builder.setImage(movie.getPoster());
         builder.setDescription(movie.toString());
-        builder.setFooter("IMDB: " + movie.getRating() + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getReleaseDate(), movie.getRatingImage());
+        double rating = movie.getRating();
+        builder.setFooter("IMDB: " + ((rating == 0) ? "N/A" : rating) + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getReleaseDate(), movie.getRatingImage());
         return builder.build();
     }
 

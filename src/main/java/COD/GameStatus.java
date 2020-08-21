@@ -1,5 +1,8 @@
 package COD;
 
+/**
+ * Wrap status of a Gunfight session's score to enum
+ */
 public class GameStatus {
     private final int win, loss, streak;
 
