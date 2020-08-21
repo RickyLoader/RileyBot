@@ -239,7 +239,7 @@ public class PlexServer {
         public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String director, String cast, String genre, long duration, double rating) {
             this.id = getMovieID(id);
             if(id.contains("tt")) {
-                imdbURL = getIMDBUrl(id);
+                imdbURL = getIMDBUrl(this.id);
             }
             this.title = title;
             this.contentRating = contentRating;
