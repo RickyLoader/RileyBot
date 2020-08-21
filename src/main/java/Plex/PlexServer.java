@@ -46,7 +46,7 @@ public class PlexServer {
     private HashMap<String, Movie> getLibraryOverview() {
         HashMap<String, Movie> movies = new HashMap<>();
         String json = new NetworkRequest(getPlexURL(), false).get();
-        if(json == null) {
+        if(json == null || json.equals("err")) {
             return movies;
         }
         JSONArray jsonArr = new JSONObject(json).getJSONObject("MediaContainer").getJSONArray("Metadata");

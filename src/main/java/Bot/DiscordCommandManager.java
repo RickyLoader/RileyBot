@@ -14,9 +14,11 @@ import Command.Commands.JSON.*;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -24,7 +26,7 @@ import java.util.Random;
  */
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands = new ArrayList<>();
-    private final DiscordAudioPlayer player = new DiscordAudioPlayer();
+    private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
 
     /**
      * Add the commands to the list
@@ -101,6 +103,11 @@ public class DiscordCommandManager {
         DiscordCommand command = getCommand(event.getMessage().getContentRaw());
         if(command == null) {
             return;
+        }
+        DiscordAudioPlayer player = audioPlayers.get(event.getGuild());
+        if(player == null) {
+            player = new DiscordAudioPlayer();
+            audioPlayers.put(event.getGuild(), player);
         }
         command.execute(new CommandContext(event, commands, player));
     }
