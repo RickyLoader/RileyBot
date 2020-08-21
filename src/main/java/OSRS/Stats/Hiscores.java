@@ -1,5 +1,6 @@
 package OSRS.Stats;
 
+import Command.Structure.EmbedHelper;
 import Command.Structure.ImageLoadingMessage;
 import Command.Structure.ImageBuilder;
 import Network.NetworkRequest;
@@ -66,10 +67,10 @@ public class Hiscores extends ImageBuilder {
         String[] data = fetchPlayerData(encodedName);
         if(data == null) {
             if(timeout) {
-                loading.failLoading("I wasn't able to connect to the [Hiscores](" + defaultURL + ")");
+                loading.failLoading("I wasn't able to connect to the " + EmbedHelper.embedURL("Hiscores", defaultURL));
                 return;
             }
-            loading.failLoading("That player [doesn't exist](" + defaultURL + ") cunt");
+            loading.failLoading("That player " + EmbedHelper.embedURL("doesn't exist", defaultURL) + " cunt");
             return;
         }
 
@@ -81,7 +82,7 @@ public class Hiscores extends ImageBuilder {
         loading.completeStage();
         String url = ImgurManager.uploadImage(playerImage);
         loading.completeStage();
-        loading.completeLoading(url, "[View raw data](" + data[data.length - 1] + ")");
+        loading.completeLoading(url, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
     }
 
     /**
