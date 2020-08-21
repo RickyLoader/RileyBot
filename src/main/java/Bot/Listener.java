@@ -76,21 +76,16 @@ public class Listener extends ListenerAdapter {
     }
 
     /**
-     * Welcome a new user when they join and add them to the kill list
+     * Welcome a new member when they join and add them to the kill list
      *
-     * @param event User has joined
+     * @param event Member has joined event
      */
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        try {
-            Guild guild = event.getGuild();
-            Member author = event.getMember();
-            targetMember(guild, author);
-            welcomeCunt(guild.getSelfMember(), author, guild.getDefaultChannel());
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+        Guild guild = event.getGuild();
+        Member joined = event.getMember();
+        targetMember(guild, joined);
+        welcomeMember(guild.getSelfMember(), joined, guild.getDefaultChannel());
     }
 
     /**
@@ -100,7 +95,7 @@ public class Listener extends ListenerAdapter {
      * @param newMember New member
      * @param channel   Channel to welcome new member in
      */
-    private void welcomeCunt(Member self, Member newMember, MessageChannel channel) {
+    private void welcomeMember(Member self, Member newMember, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(EmbedHelper.getYellow());
         builder.setTitle("Hey " + newMember.getUser().getName() + "!");
@@ -156,7 +151,9 @@ public class Listener extends ListenerAdapter {
      * @param target Newly joined member
      */
     private void targetMember(Guild guild, Member target) {
-        Role targetRole = guild.getRolesByName("target", true).get(0);
-        guild.addRoleToMember(target, targetRole).queue();
+        List<Role> targetRole = guild.getRolesByName("target", true);
+        if(!targetRole.isEmpty()) {
+            guild.addRoleToMember(target, targetRole.get(0)).queue();
+        }
     }
 }
