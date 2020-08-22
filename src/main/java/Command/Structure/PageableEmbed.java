@@ -3,7 +3,6 @@ package Command.Structure;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static Command.Structure.EmbedHelper.getTitleField;

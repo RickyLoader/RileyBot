@@ -16,12 +16,10 @@ import java.util.List;
  * Show the gunfight leaderboard
  */
 public class LeaderboardCommand extends PageableEmbedCommand {
-    private final String trophy = "https://i.imgur.com/yaLMta5.png";
 
     public LeaderboardCommand() {
         super("leaderboard!", "Have a gander at the gunfight leaderboard!", "leaderboard!\nleaderboard! [position]");
     }
-
 
     @Override
     public void execute(CommandContext context) {
@@ -69,7 +67,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
         builder.addBlankField(true);
         builder.addField("RATIO", session.getFormattedRatio(), true);
         builder.addField("LONGEST STREAK", String.valueOf(session.getLongestStreak()), false);
-        builder.setFooter("Check out the leaderboard!", trophy);
+        builder.setFooter("Check out the leaderboard!", "https://i.imgur.com/yaLMta5.png");
         return builder.build();
     }
 
