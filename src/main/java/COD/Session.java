@@ -163,7 +163,7 @@ public class Session {
      *
      * @return Formatted string duration
      */
-    String getDuration() {
+    public String getDuration() {
         return EmbedHelper.formatTime(duration);
     }
 
@@ -217,7 +217,7 @@ public class Session {
      *
      * @return Formatted session date
      */
-    String formatDate() {
+    public String getFormattedDate() {
         return new SimpleDateFormat("dd/MM/yy").format(date);
     }
 
@@ -226,7 +226,25 @@ public class Session {
      *
      * @return win/loss ratio truncated to 2 decimal places
      */
-    public String formatRatio() {
-        return wins + "/" + losses + " (" + new DecimalFormat("0.00").format(ratio) + ")";
+    public String getFormattedRatio() {
+        return new DecimalFormat("0.00").format(ratio);
+    }
+
+    /**
+     * Get a String containing the win/loss and ratio
+     *
+     * @return Formatted win/loss summary String
+     */
+    public String getWinLossSummary() {
+        return getFormattedWinLoss() + " (" + getFormattedRatio() + ")";
+    }
+
+    /**
+     * Format the wins and losses to wins/losses
+     *
+     * @return Formatted win loss String
+     */
+    public String getFormattedWinLoss() {
+        return wins + "/" + losses;
     }
 }

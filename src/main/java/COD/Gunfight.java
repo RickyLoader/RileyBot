@@ -456,7 +456,7 @@ public class Gunfight {
         builder.addField("**DURATION**", session.getDuration(), false);
         builder.addField("**WINS**", String.valueOf(wins), true);
         builder.addField("**LOSSES**", String.valueOf(losses), true);
-        builder.addField("**RATIO**", String.valueOf(session.formatRatio()), true);
+        builder.addField("**RATIO**", String.valueOf(session.getWinLossSummary()), true);
         builder.addField("**LONGEST STREAK**", session.formatStreak(), false);
         return builder.build();
     }
