@@ -34,8 +34,12 @@ public class LeaderboardCommand extends PageableEmbedCommand {
         int position = DiscordCommandManager.getQuantity(query.replace(getTrigger() + " ", ""));
         if(position > 0) {
             ArrayList<Session> sessions = Session.getHistory();
-            if(sessions == null || sessions.isEmpty() || position > sessions.size()) {
-                channel.sendMessage(getHelpNameCoded()).queue();
+            if(sessions == null) {
+                channel.sendMessage("Something went wrong fetching the leaderboard!").queue();
+                return;
+            }
+            else if(sessions.isEmpty() || position > sessions.size()) {
+                channel.sendMessage("There are only " + sessions.size() + " scores in the leaderboard!").queue();
                 return;
             }
             channel.sendMessage(buildSessionMessage(sessions.get(position - 1), position)).queue();
@@ -43,6 +47,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
         }
         channel.sendMessage(getHelpNameCoded()).queue();
     }
+
 
     /**
      * Build a message embed with more in depth information about the Gunfight Session
