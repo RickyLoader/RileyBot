@@ -37,7 +37,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
                 return;
             }
             else if(sessions.isEmpty() || position > sessions.size()) {
-                channel.sendMessage("There are only " + sessions.size() + " scores in the leaderboard!").queue();
+                channel.sendMessage("There are only " + sessions.size() + " scores on the leaderboard!").queue();
                 return;
             }
             channel.sendMessage(buildSessionMessage(sessions.get(position - 1), position)).queue();

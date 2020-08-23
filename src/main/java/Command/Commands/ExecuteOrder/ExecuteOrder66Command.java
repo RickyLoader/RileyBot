@@ -5,6 +5,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmbedLoadingMessage;
+import Command.Structure.EmbedLoadingMessage.Status;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -49,7 +50,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
         }
 
         if(status == null) {
-            status = new EmbedLoadingMessage.Status(context.getGuild());
+            status = new Status(context.getGuild());
         }
 
         // Impatient, command is currently in progress
