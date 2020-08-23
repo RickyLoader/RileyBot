@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import org.apache.http.client.config.RequestConfig;
 
 
 public class DiscordAudioPlayer {
@@ -21,6 +22,7 @@ public class DiscordAudioPlayer {
 
     public DiscordAudioPlayer() {
         this.manager = new DefaultAudioPlayerManager();
+        manager.setHttpRequestConfigurator((config) -> RequestConfig.copy(config).setConnectTimeout(10000).build());
         AudioSourceManagers.registerRemoteSources(manager);
         this.player = manager.createPlayer();
     }
