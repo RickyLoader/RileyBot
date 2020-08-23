@@ -93,6 +93,7 @@ public class DiscordAudioPlayer {
 
                 @Override
                 public void loadFailed(FriendlyException e) {
+                    e.printStackTrace();
                 }
             });
         }
