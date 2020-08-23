@@ -49,58 +49,63 @@ public class DiscordAudioPlayer {
     }
 
     public boolean play(String audio, Member member, MessageChannel channel, Guild guild, boolean cancelable, TrackEndListener.Response... doAfter) {
-        if(guild.getAudioManager().getSendingHandler() == null) {
-            guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
-        }
-
-        if(isPlaying() && !this.cancelable) {
-            channel.sendMessage("I'm busy right now").queue();
-            return false;
-        }
-
-        this.cancelable = cancelable;
-        player.addListener(doAfter.length > 0 ? new TrackEndListener(guild, doAfter[0]) : new TrackEndListener(guild));
-        VoiceChannel vc = getMemberVoiceChannel(member);
-
-        if(vc == null) {
-            channel.sendMessage("You're not in a voice channel").queue();
-            return false;
-        }
-
-        join(vc, guild);
-
-
         try {
-            manager.loadItem(audio, new AudioLoadResultHandler() {
+            if(guild.getAudioManager().getSendingHandler() == null) {
+                guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
+            }
 
-                /**
-                 * Play the audio once loaded
-                 *
-                 * @param audioTrack Track loaded in to player
-                 */
-                @Override
-                public void trackLoaded(AudioTrack audioTrack) {
-                    player.playTrack(audioTrack);
-                }
+            if(isPlaying() && !this.cancelable) {
+                channel.sendMessage("I'm busy right now").queue();
+                return false;
+            }
 
-                @Override
-                public void playlistLoaded(AudioPlaylist audioPlaylist) {
-                }
+            this.cancelable = cancelable;
+            player.addListener(doAfter.length > 0 ? new TrackEndListener(guild, doAfter[0]) : new TrackEndListener(guild));
+            VoiceChannel vc = getMemberVoiceChannel(member);
 
-                @Override
-                public void noMatches() {
-                }
+            if(vc == null) {
+                channel.sendMessage("You're not in a voice channel").queue();
+                return false;
+            }
 
-                @Override
-                public void loadFailed(FriendlyException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-        catch(Exception e) {
+            join(vc, guild);
+
+
+            try {
+                manager.loadItem(audio, new AudioLoadResultHandler() {
+
+                    /**
+                     * Play the audio once loaded
+                     *
+                     * @param audioTrack Track loaded in to player
+                     */
+                    @Override
+                    public void trackLoaded(AudioTrack audioTrack) {
+                        player.playTrack(audioTrack);
+                    }
+
+                    @Override
+                    public void playlistLoaded(AudioPlaylist audioPlaylist) {
+                    }
+
+                    @Override
+                    public void noMatches() {
+                    }
+
+                    @Override
+                    public void loadFailed(FriendlyException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+                this.cancelable = true;
+                return false;
+            }
+            return true;
+        }catch(Exception e){
             e.printStackTrace();
-            this.cancelable = true;
-            return false;
         }
         return true;
     }
