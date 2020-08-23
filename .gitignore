@@ -36,7 +36,6 @@
 /src/main/resources/META-INF/MANIFEST.MF
 /target/classes/META-INF/MANIFEST.MF
 /.idea/misc.xml
-/pom.xml
 /.idea/codeStyles/Project.xml
 /lib/slf4j-api-1.7.25.jar
 /target/classes/slf4j-nop-1.7.28.jar
