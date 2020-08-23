@@ -20,8 +20,7 @@ public class MemeCommand extends JSONListCommand {
         }
         int quantity = getQuantity(args[args.length - 1]);
         if(quantity == 0) {
-            context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
-            return;
+            quantity = 1;
         }
         context.getMessage().delete().queue();
         int bound = Math.min(quantity, 5);
