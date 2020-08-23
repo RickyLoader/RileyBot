@@ -21,6 +21,6 @@ public class VoiceChannelCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query) {
-        return query.equals("stop");
+        return query.equals("stop") || query.equals("leave");
     }
 }

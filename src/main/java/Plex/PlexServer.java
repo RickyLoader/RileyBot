@@ -49,6 +49,7 @@ public class PlexServer {
         if(json == null || json.equals("err")) {
             return movies;
         }
+        String languages = getLanguages();
         JSONArray jsonArr = new JSONObject(json).getJSONObject("MediaContainer").getJSONArray("Metadata");
         for(int i = 0; i < jsonArr.length(); i++) {
             JSONObject movie = jsonArr.getJSONObject(i);
@@ -67,11 +68,21 @@ public class PlexServer {
                     movie.has("Director") ? stringify(movie.getJSONArray("Director")) : null,
                     movie.has("Role") ? stringify(movie.getJSONArray("Role")) : null,
                     movie.has("Genre") ? stringify(movie.getJSONArray("Genre")) : null,
+                    languages,
                     movie.getLong("duration"),
                     movie.has("rating") ? movie.getDouble("rating") : 0
             ));
         }
         return movies;
+    }
+
+    /**
+     * Get the languages used by TMDB
+     *
+     * @return Languages used by TMDB
+     */
+    private String getLanguages() {
+        return new NetworkRequest("https://api.themoviedb.org/3/configuration/languages?api_key=" + Secret.getTMDBKey(), false).get();
     }
 
     /**
@@ -216,7 +227,7 @@ public class PlexServer {
      * Hold information about a movie on Plex
      */
     public static class Movie {
-        private final String id, title, contentRating, summary, tagLine, releaseDate, director, cast;
+        private final String id, title, contentRating, summary, tagLine, releaseDate, director, cast, languages;
         private final long duration;
         private final double rating;
         private String movieDetails, language, imdbURL, poster, genre;
@@ -236,7 +247,7 @@ public class PlexServer {
          * @param duration      Duration of movie
          * @param rating        IMDB rating of movie
          */
-        public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String director, String cast, String genre, long duration, double rating) {
+        public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String director, String cast, String genre, String languages, long duration, double rating) {
             this.id = getMovieID(id);
             if(id.contains("tt")) {
                 imdbURL = getIMDBUrl(this.id);
@@ -249,6 +260,7 @@ public class PlexServer {
             this.director = director;
             this.cast = cast;
             this.genre = genre;
+            this.languages = languages;
             this.duration = duration;
             this.rating = rating;
         }
@@ -321,16 +333,35 @@ public class PlexServer {
             if(language == null) {
                 getMovieDetails();
                 JSONObject movieDetails = new JSONObject(this.movieDetails);
-                String language = movieDetails.getString("original_language");
-                JSONArray languages = movieDetails.getJSONArray("spoken_languages");
-                for(int i = 0; i < languages.length(); i++) {
-                    JSONObject spokenLanguage = languages.getJSONObject(i);
-                    if(spokenLanguage.getString("iso_639_1").equals(language)) {
-                        language = spokenLanguage.getString("name");
+                String iso = movieDetails.getString("original_language");
+                JSONArray spokenLanguages = movieDetails.getJSONArray("spoken_languages");
+
+                for(int i = 0; i < spokenLanguages.length(); i++) {
+                    JSONObject lang = spokenLanguages.getJSONObject(i);
+                    if(lang.getString("iso_639_1").equals(iso)) {
+                        language = lang.getString("name");
                         break;
                     }
                 }
-                this.language = language;
+
+                /*
+                 * Original language is based on where the movie was filmed - English movie filmed in Germany
+                 * would show German as the original language but wouldn't be present in spoken languages.
+                 */
+                if(language == null) {
+                    language = spokenLanguages.getJSONObject(0).getString("name");
+                }
+
+                // Get the English name of the language
+                if(!language.equals("English")) {
+                    JSONArray allLanguages = new JSONArray(languages);
+                    for(int i = 0; i < allLanguages.length(); i++) {
+                        JSONObject lang = allLanguages.getJSONObject(i);
+                        if(lang.getString("iso_639_1").equals(iso)) {
+                            language = lang.getString("english_name");
+                        }
+                    }
+                }
             }
             return language;
         }
