@@ -5,7 +5,8 @@ import java.net.InetAddress;
 public class NetworkInfo {
     public static String getAddress() {
         try {
-            return "http://" + InetAddress.getLocalHost().getHostAddress();
+            //return "http://" + InetAddress.getLocalHost().getHostAddress();
+            return "http://" + "192.168.1.19";
         }
         catch(Exception e) {
             e.printStackTrace();
