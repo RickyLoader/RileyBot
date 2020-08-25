@@ -31,24 +31,22 @@ public abstract class PageableListEmbed extends PageableEmbed {
      */
     @Override
     public void addFields(EmbedBuilder builder, int currentIndex) {
-        builder.addField(getName(currentIndex, getItems()), getValue(currentIndex, getItems()), false);
+        builder.addField(getName(currentIndex), getValue(currentIndex), false);
     }
 
     /**
      * Get the name to use in a field for the item at the current index
      *
      * @param currentIndex Current index within list of items
-     * @param items        List of items
      * @return Name to use in field
      */
-    public abstract String getName(int currentIndex, List<?> items);
+    public abstract String getName(int currentIndex);
 
     /**
      * Get the value to use in a field for the item at the current index
      *
      * @param currentIndex Current index within list of items
-     * @param items        List of items
      * @return Name to use in field
      */
-    public abstract String getValue(int currentIndex, List<?> items);
+    public abstract String getValue(int currentIndex);
 }

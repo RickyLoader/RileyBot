@@ -5,8 +5,6 @@ import Command.Structure.JSONListCommand;
 
 import java.util.Random;
 
-import static Bot.DiscordCommandManager.getQuantity;
-
 public class MemeCommand extends JSONListCommand {
     public MemeCommand() {
         super("meme", "Posts a random meme!", "meme\nmeme [1-5]", "meme_command.json", "meme");

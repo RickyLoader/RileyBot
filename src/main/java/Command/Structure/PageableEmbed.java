@@ -143,7 +143,9 @@ public abstract class PageableEmbed {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(colour);
         builder.setTitle(title);
-        builder.setDescription(desc);
+        if(desc != null) {
+            builder.setDescription(desc);
+        }
         builder.setThumbnail(thumb);
         builder.setFooter("Page: " + page + "/" + (int) Math.ceil(items.size() / (double) bound));
 

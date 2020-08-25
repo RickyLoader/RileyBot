@@ -29,7 +29,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
             return;
         }
         MessageChannel channel = context.getMessageChannel();
-        int position = DiscordCommandManager.getQuantity(query.replace(getTrigger() + " ", ""));
+        int position = getQuantity(query.replace(getTrigger() + " ", ""));
         if(position > 0) {
             ArrayList<Session> sessions = Session.getHistory();
             if(sessions == null) {

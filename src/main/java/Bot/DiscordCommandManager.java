@@ -6,10 +6,7 @@ import Command.Commands.Audio.*;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
-import Command.Commands.Passive.BrewTrackerCommand;
-import Command.Commands.Passive.GunfightCommand;
-import Command.Commands.Passive.GunfightHelpCommand;
-import Command.Commands.Passive.LeaderboardCommand;
+import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
@@ -95,20 +92,6 @@ public class DiscordCommandManager {
     }
 
     /**
-     * Attempts to pull an integer from the given message when a Random type command is called.
-     *
-     * @return The integer or 1 if not found. Determines how many times to repeat the command
-     */
-    public static int getQuantity(String arg) {
-        try {
-            return Integer.parseInt(arg);
-        }
-        catch(Exception e) {
-            return 0;
-        }
-    }
-
-    /**
      * Get the command from a message event and execute it
      *
      * @param event MessageReceivedEvent
@@ -156,6 +139,7 @@ public class DiscordCommandManager {
         addCommand(new TweetsCommand());
         addCommand(new PlexCommand());
         addCommand(new VoiceChannelCommand());
+        addCommand(new OSRSPollCommand());
     }
 
     /**
