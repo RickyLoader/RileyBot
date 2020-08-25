@@ -58,7 +58,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
                 Arrays.asList(poll.getQuestions()),
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 "OSRS Poll #" + poll.getNumber() + " - " + new SimpleDateFormat("dd/MM/yyyy").format(poll.getStart()),
-                "**" + poll.getTitle() + "**",
+                poll.getTitle(),
                 EmbedHelper.formatEmote(guild.getEmotesByName(handle, true).get(0)),
                 EmbedHelper.formatEmote(guild.getEmotesByName(section, true).get(0)),
                 EmbedHelper.formatEmote(guild.getEmotesByName(tip, true).get(0)),
