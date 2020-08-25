@@ -137,7 +137,6 @@ public class OSRSPollCommand extends PageableEmbedCommand {
 
         /**
          * Build the sword image based on the percentage of votes an Answer has
-         * 0.1% adds an extra section of the sword
          *
          * @param percentageVotes Percentage of total votes the answer to a question has
          * @return Image of a sword
