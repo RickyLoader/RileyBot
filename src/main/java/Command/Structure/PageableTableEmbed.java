@@ -79,7 +79,7 @@ public abstract class PageableTableEmbed extends PageableEmbed {
     public abstract String[] getRowValues(int index, List<?> items, boolean defaultSort);
 
     /**
-     * Exception to throw when incorrect quantity of row values provided
+     * Exception to throw when incorrect quantity of row or column values provided
      */
     private static class IncorrectQuantityException extends Exception {
         public IncorrectQuantityException(String message) {
