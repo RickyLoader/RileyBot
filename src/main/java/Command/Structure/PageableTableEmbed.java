@@ -27,6 +27,14 @@ public abstract class PageableTableEmbed extends PageableEmbed {
     public PageableTableEmbed(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
         super(channel, guild, items, thumb, title, desc, colour);
         this.columns = columns;
+        try {
+            if(columns.length > 3) {
+                throw new IncorrectQuantityException("A maximum of 3 columns can be displayed as a table, you provided " + columns.length + " column headers");
+            }
+        }
+        catch(IncorrectQuantityException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
