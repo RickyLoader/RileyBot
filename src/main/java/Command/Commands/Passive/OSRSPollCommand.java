@@ -17,7 +17,7 @@ import java.util.List;
 public class OSRSPollCommand extends PageableEmbedCommand {
 
     public OSRSPollCommand() {
-        super("osrspoll | osrspoll [poll number]", "test");
+        super("osrspoll | osrspoll [poll number]", "Look at poll results!");
     }
 
     @Override
