@@ -1,8 +1,6 @@
 package Command.Commands;
 
-import Command.Structure.CommandContext;
-import Command.Structure.PageableEmbed;
-import Command.Structure.PageableEmbedCommand;
+import Command.Structure.*;
 import Network.TwitterManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -30,7 +28,8 @@ public class TweetsCommand extends PageableEmbedCommand {
                 twitterManager.getThumbnail(),
                 "My Tweets",
                 "Here are my " + tweets.size() + " tweets",
-                new String[]{"Date", "Content"}
+                new String[]{"Date", "Content"},
+                EmbedHelper.getBlue()
         );
     }
 
@@ -54,16 +53,15 @@ public class TweetsCommand extends PageableEmbedCommand {
         twitterManager.getTweets();
     }
 
-    private static class TweetsMessage extends PageableEmbed {
+    private static class TweetsMessage extends PageableTableEmbed {
 
-        public TweetsMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
-            super(channel, guild, items, thumb, title, desc, columns);
+        public TweetsMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
+            super(channel, guild, items, thumb, title, desc, columns, colour);
         }
 
         @Override
-        public String[] getValues(int index, List<?> items, boolean defaultSort) {
+        public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
             Status status = (Status) items.get(index);
-            int number = defaultSort ? index + 1 : items.size() - index;
             return new String[]{status.getCreatedAt().toString(), status.getText()};
         }
 

@@ -1,9 +1,6 @@
 package Command.Commands;
 
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.PageableEmbed;
-import Command.Structure.PageableEmbedCommand;
+import Command.Structure.*;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -31,7 +28,7 @@ public class HelpCommand extends PageableEmbedCommand {
         );
     }
 
-    public static class HelpMessage extends PageableEmbed {
+    public static class HelpMessage extends PageableTableEmbed {
 
         public HelpMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
             super(channel, guild, items, thumb, title, desc, columns);
@@ -50,7 +47,7 @@ public class HelpCommand extends PageableEmbedCommand {
         }
 
         @Override
-        public String[] getValues(int index, List<?> items, boolean defaultSort) {
+        public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
             DiscordCommand command = (DiscordCommand) items.get(index);
             return new String[]{command.getHelpName(), command.getDesc()};
         }

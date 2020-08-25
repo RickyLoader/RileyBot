@@ -98,7 +98,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
     /**
      * Gunfight history message, shows leaderboard of past gunfight sessions
      */
-    public static class Leaderboard extends PageableEmbed {
+    public static class Leaderboard extends PageableTableEmbed {
 
         public Leaderboard(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
             super(channel, guild, items, thumb, title, desc, columns);
@@ -110,7 +110,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
         }
 
         @Override
-        public String[] getValues(int index, List<?> items, boolean defaultSort) {
+        public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
             int rank = defaultSort ? (index + 1) : (items.size() - index);
             Session session = (Session) items.get(index);
             return new String[]{String.valueOf(rank), session.getWinLossSummary(), session.formatStreak()};

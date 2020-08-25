@@ -1,10 +1,7 @@
 package Command.Commands;
 
 import Bot.DiscordUser;
-import Command.Structure.CommandContext;
-import Command.Structure.LookupCommand;
-import Command.Structure.PageableEmbed;
-import Command.Structure.PageableEmbedCommand;
+import Command.Structure.*;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.*;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -214,14 +211,14 @@ public class YoutubeLookupCommand extends LookupCommand {
             }
         }
 
-        private static class YoutubeChannelMessage extends PageableEmbed {
+        private static class YoutubeChannelMessage extends PageableTableEmbed {
 
             public YoutubeChannelMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
                 super(channel, guild, items, thumb, title, desc, columns);
             }
 
             @Override
-            public String[] getValues(int index, List<?> items, boolean defaultSort) {
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 YoutubeChannel.Video v = (YoutubeChannel.Video) items.get(index);
                 return new String[]{v.getTitle(), v.getUrl(), String.valueOf(v.getViews())};
             }
