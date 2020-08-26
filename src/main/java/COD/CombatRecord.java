@@ -190,7 +190,7 @@ public class CombatRecord extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.player = new Player(nameQuery, nameQuery.contains("#") ? "bnet" : "acti");
+        this.player = new Player(nameQuery, args[0]);
         if(!player.success()) {
             loading.failLoading(player.getStatus());
             return;

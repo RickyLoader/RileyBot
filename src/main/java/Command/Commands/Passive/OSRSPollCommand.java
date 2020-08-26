@@ -41,7 +41,8 @@ public class OSRSPollCommand extends PageableEmbedCommand {
 
         String handle = "s1", section = "s2", tip = "s3";
 
-        if(!checkEmotes(context.getGuild(), handle, section, tip)) {
+        if(!checkEmotes(guild, handle, section, tip)) {
+            channel.sendMessage("I don't have the emotes for that.").queue();
             return null;
         }
 
