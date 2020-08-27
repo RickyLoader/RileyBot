@@ -11,13 +11,16 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 
 public class OSRSPollCommand extends PageableEmbedCommand {
+    private final PollManager pollManager;
 
     public OSRSPollCommand() {
         super("osrspoll | osrspoll [poll number]", "Look at poll results!");
+        this.pollManager = new PollManager();
     }
 
     @Override
@@ -33,7 +36,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         int number = 0;
         if(args.length == 2) {
             number = getQuantity(args[1]);
-            if(number == 0) {
+            if(number <= 0) {
                 channel.sendMessage(getHelpNameCoded()).queue();
                 return null;
             }
@@ -46,7 +49,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
             return null;
         }
 
-        Poll poll = PollManager.getPollByNumber(number);
+        Poll poll = pollManager.getPollByNumber(number);
 
         if(poll == null) {
             channel.sendMessage("That poll doesn't exist!").queue();
@@ -107,7 +110,14 @@ public class OSRSPollCommand extends PageableEmbedCommand {
 
         @Override
         public void sortItems(List<?> items, boolean defaultSort) {
-
+            items.sort((Comparator<Object>) (o1, o2) -> {
+                Question q1 = (Question) o1;
+                Question q2 = (Question) o2;
+                if(defaultSort) {
+                    return q1.getNumber() - q2.getNumber();
+                }
+                return q2.getNumber() - q1.getNumber();
+            });
         }
 
         /**

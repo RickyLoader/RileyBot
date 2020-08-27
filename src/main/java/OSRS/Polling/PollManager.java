@@ -1,10 +1,5 @@
 package OSRS.Polling;
 
-import Command.Structure.EmbedHelper;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,7 +9,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,6 +20,11 @@ import static OSRS.Polling.PollManager.Poll.*;
  * Hold information on OSRS polls
  */
 public class PollManager {
+    private final HashMap<Integer, Poll> polls;
+
+    public PollManager() {
+        this.polls = new HashMap<>();
+    }
 
     /**
      * Extract the Poll history from the OSRS wiki.
@@ -34,13 +34,16 @@ public class PollManager {
      *
      * @return List of HTML Table rows representing polls
      */
-    private static Elements getPollHistory() {
-        Elements summary = null;
+    private ArrayList<Element> getPollHistory() {
+        ArrayList<Element> summary = new ArrayList<>();
         try {
-            summary = Jsoup
+            summary = new ArrayList<>(Jsoup
                     .connect("https://oldschool.runescape.wiki/w/Polls")
                     .get()
-                    .select(".wikitable.sortable:not(.mw-collapsible) tr:not(:first-child)");
+                    .select(".wikitable.sortable:not(.mw-collapsible) tr:not(:first-child)"));
+
+            // Reverse so first element is poll #1
+            Collections.reverse(summary);
         }
         catch(IOException e) {
             e.printStackTrace();
@@ -54,7 +57,7 @@ public class PollManager {
      * @param summary HTML summary element of poll
      * @return Poll object
      */
-    private static Poll parsePoll(Element summary, boolean isLatest) {
+    private Poll parsePoll(Element summary, boolean isLatest) {
         Poll poll = null;
         Element titleElement = summary.child(1).child(0);
         try {
@@ -84,7 +87,7 @@ public class PollManager {
      * @param doc HTML document containing poll information
      * @return Array of poll questions
      */
-    private static Question[] parseQuestions(Document doc) {
+    private Question[] parseQuestions(Document doc) {
         Elements questionElements = doc.select(".pollquestionborder");
         Question[] questions = new Question[questionElements.size()];
         for(int i = 0; i < questionElements.size(); i++) {
@@ -104,7 +107,7 @@ public class PollManager {
      * @param answerElements Answer elements from question
      * @return Array of answers
      */
-    private static Question.Answer[] parseAnswers(Elements answerElements) {
+    private Question.Answer[] parseAnswers(Elements answerElements) {
         answerElements = answerElements.stream().filter(e -> e.hasText() && !e.text().matches("Question \\d+")).collect(Collectors.toCollection(Elements::new));
         Question.Answer[] answers = new Question.Answer[answerElements.size()];
 
@@ -133,7 +136,7 @@ public class PollManager {
      * @param desc Poll description
      * @return Poll description without closing date
      */
-    private static String truncateDescription(String desc) {
+    private String truncateDescription(String desc) {
         String regex = "(This poll will close on [A-Za-z]+ [\\d]+[A-Za-z]* [A-Za-z]+\\.)";
         Matcher matcher = Pattern.compile(regex).matcher(desc);
         if(matcher.find()) {
@@ -148,13 +151,24 @@ public class PollManager {
      * @param id Poll number or 0 for latest
      * @return Poll of given number
      */
-    public static Poll getPollByNumber(int id) {
-        Elements polls = getPollHistory();
-        if(polls == null) {
+    public Poll getPollByNumber(int id) {
+        if(polls.containsKey(id)) {
+            return polls.get(id);
+        }
+        ArrayList<Element> history = getPollHistory();
+        if(id > history.size()) {
             return null;
         }
-        int pollNumber = id == 0 ? id : polls.size() - id;
-        return parsePoll(polls.get(pollNumber), id == 0);
+
+        int pollIndex = ((id == 0) ? history.size() : id);
+
+        Poll poll = parsePoll(history.get(pollIndex - 1), pollIndex == history.size());
+
+        // Don't cache latest poll
+        if(pollIndex != history.size() && !polls.containsKey(poll.getNumber())) {
+            polls.put(poll.getNumber(), poll);
+        }
+        return poll;
     }
 
     /**
