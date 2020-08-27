@@ -27,7 +27,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
     public PageableEmbed getEmbed(CommandContext context) {
         String[] args = context.getLowerCaseMessage().trim().split(" ");
         MessageChannel channel = context.getMessageChannel();
-        Guild guild = context.getGuild();
+        Guild guild = context.getHomeGuild();
 
         if(args.length > 2) {
             channel.sendMessage(getHelpNameCoded()).queue();
@@ -40,13 +40,6 @@ public class OSRSPollCommand extends PageableEmbedCommand {
                 channel.sendMessage(getHelpNameCoded()).queue();
                 return null;
             }
-        }
-
-        String handle = "s1", section = "s2", tip = "s3";
-
-        if(!checkEmotes(guild, handle, section, tip)) {
-            channel.sendMessage("I don't have the emotes for that.").queue();
-            return null;
         }
 
         Poll poll = pollManager.getPollByNumber(number);
@@ -63,23 +56,11 @@ public class OSRSPollCommand extends PageableEmbedCommand {
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 "OSRS Poll #" + poll.getNumber() + " - " + new SimpleDateFormat("dd/MM/yyyy").format(poll.getStart()),
                 poll.getTitle(),
-                EmbedHelper.formatEmote(guild.getEmotesByName(handle, true).get(0)),
-                EmbedHelper.formatEmote(guild.getEmotesByName(section, true).get(0)),
-                EmbedHelper.formatEmote(guild.getEmotesByName(tip, true).get(0)),
+                EmbedHelper.formatEmote(guild.getEmotesByName("s1", true).get(0)),
+                EmbedHelper.formatEmote(guild.getEmotesByName("s2", true).get(0)),
+                EmbedHelper.formatEmote(guild.getEmotesByName("s3", true).get(0)),
                 EmbedHelper.getGreen()
         );
-    }
-
-    /**
-     * Check whether the required emotes are available on the server
-     *
-     * @return Server contains required emotes
-     */
-    private boolean checkEmotes(Guild guild, String handle, String section, String tip) {
-        List<Emote> handleEmotes = guild.getEmotesByName(handle, true);
-        List<Emote> sectionEmotes = guild.getEmotesByName(section, true);
-        List<Emote> tipEmotes = guild.getEmotesByName(tip, true);
-        return handleEmotes.size() > 0 && sectionEmotes.size() > 0 && tipEmotes.size() > 0;
     }
 
     @Override

@@ -80,7 +80,7 @@ public abstract class LookupCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        lookupUser(name, channel, context.getGuild());
+        lookupUser(name, channel, context.getHomeGuild());
     }
 
     /**

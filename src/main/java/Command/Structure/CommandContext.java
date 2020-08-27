@@ -35,6 +35,10 @@ public class CommandContext {
         );
     }
 
+    public Guild getHomeGuild() {
+        return getJDA().getGuildById("421443474391564299");
+    }
+
     public User getSelfUser() {
         return getJDA().getSelfUser();
     }

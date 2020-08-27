@@ -235,12 +235,9 @@ public class EmbedLoadingMessage {
          * Use the guild emotes for completion status if available otherwise standard emoji
          */
         public Status(Guild guild) {
-            List<Emote> neutral = guild.getEmotesByName("neutral", true);
-            List<Emote> fail = guild.getEmotesByName("fail", true);
-            List<Emote> complete = guild.getEmotesByName("complete", true);
-            this.neutral = neutral.isEmpty() ? "☐" : EmbedHelper.formatEmote(neutral.get(0));
-            this.fail = fail.isEmpty() ? "☒" : EmbedHelper.formatEmote(fail.get(0));
-            this.complete = complete.isEmpty() ? "\uD83D\uDDF9" : EmbedHelper.formatEmote(complete.get(0));
+            this.neutral = EmbedHelper.formatEmote(guild.getEmotesByName("neutral", true).get(0));
+            this.fail = EmbedHelper.formatEmote(guild.getEmotesByName("fail", true).get(0));
+            this.complete = EmbedHelper.formatEmote(guild.getEmotesByName("complete", true).get(0));
         }
 
         public String getComplete() {

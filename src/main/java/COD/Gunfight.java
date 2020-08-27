@@ -43,6 +43,7 @@ public class Gunfight {
         this.active = true;
         matchUpdateHistory = new LinkedList<>();
         leaderboard = Session.getHistory();
+        getEmotes();
     }
 
     /**
@@ -54,10 +55,18 @@ public class Gunfight {
     public Gunfight(MessageChannel channel, Guild server) {
         this.channel = channel;
         this.server = server;
+        getEmotes();
+        showHelpMessage();
+    }
 
-        if(checkEmotes()) {
-            showHelpMessage();
-        }
+    /**
+     * Get Emotes required for message
+     */
+    private void getEmotes() {
+        this.win = server.getEmotesByName("victory", true).get(0);
+        this.loss = server.getEmotesByName("defeat", true).get(0);
+        this.stop = server.getEmotesByName("stop", true).get(0);
+        this.undo = server.getEmotesByName("undo", true).get(0);
     }
 
     /**
@@ -78,6 +87,7 @@ public class Gunfight {
         this.currentStreak = currentStreak;
         this.longestStreak = longestStreak;
         this.lastUpdate = System.currentTimeMillis();
+        getEmotes();
     }
 
     /**
@@ -104,27 +114,6 @@ public class Gunfight {
      */
     public boolean isActive() {
         return active;
-    }
-
-    /**
-     * Attempts to locate emotes required for game
-     *
-     * @return Presence of emotes
-     */
-    private boolean checkEmotes() {
-        List<Emote> victory = server.getEmotesByName("victory", true);
-        List<Emote> defeat = server.getEmotesByName("defeat", true);
-        List<Emote> stop = server.getEmotesByName("stop", true);
-        List<Emote> undo = server.getEmotesByName("undo", true);
-
-        if(victory.size() > 0 && defeat.size() > 0 && stop.size() > 0 && undo.size() > 0) {
-            this.win = victory.get(0);
-            this.loss = defeat.get(0);
-            this.stop = stop.get(0);
-            this.undo = undo.get(0);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -228,10 +217,6 @@ public class Gunfight {
      * Send the game message to the channel to begin playing
      */
     public void startGame() {
-        if(!checkEmotes()) {
-            channel.sendMessage("This server needs emotes named \"victory\", \"defeat\", \"stop\", and \"undo\" to play gunfight cunt.").queue();
-            return;
-        }
         startTime = System.currentTimeMillis();
         rank = checkRank();
         sendGameMessage(createGameMessage());
@@ -356,10 +341,6 @@ public class Gunfight {
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
-        if(!checkEmotes()) {
-            channel.sendMessage("The emotes aren't here anymore, call me again when you've fixed it").queue();
-            return;
-        }
         channel.sendMessage(gameMessage).queue(message -> {
             gameID = message.getIdLong();
             message.addReaction(win).queue();
@@ -456,7 +437,7 @@ public class Gunfight {
         builder.addField("**DURATION**", session.getDuration(), false);
         builder.addField("**WINS**", String.valueOf(wins), true);
         builder.addField("**LOSSES**", String.valueOf(losses), true);
-        builder.addField("**RATIO**", String.valueOf(session.getWinLossSummary()), true);
+        builder.addField("**RATIO**", String.valueOf(session.getFormattedRatio()), true);
         builder.addField("**LONGEST STREAK**", session.formatStreak(), false);
         return builder.build();
     }

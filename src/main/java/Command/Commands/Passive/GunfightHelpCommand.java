@@ -35,7 +35,7 @@ public class GunfightHelpCommand extends DiscordCommand {
             addEmoteListener(context.getJDA());
             gunfightHelp = new Gunfight(
                     context.getMessageChannel(),
-                    context.getGuild()
+                    context.getHomeGuild()
             );
         }
     }

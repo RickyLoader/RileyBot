@@ -3,6 +3,7 @@ package Command.Commands;
 import Bot.DiscordUser;
 import Command.Structure.*;
 import Network.NetworkRequest;
+import Network.Secret;
 import net.dv8tion.jda.api.entities.*;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
@@ -59,7 +60,7 @@ public class YoutubeLookupCommand extends LookupCommand {
             }
             return new YoutubeChannelMessage(
                     context.getMessageChannel(),
-                    context.getGuild(),
+                    context.getHomeGuild(),
                     channel.getVideos(),
                     channel.getThumbnail(),
                     channel.getName(),
@@ -70,7 +71,6 @@ public class YoutubeLookupCommand extends LookupCommand {
 
         private static class YoutubeChannel {
             private String id, name, thumbnail, desc, url;
-            private final String key = "AIzaSyCoHcK0485x1Edq_4X1PNJNqaVuHZ11Evg";
             private ArrayList<Video> videos;
 
             public YoutubeChannel(String query) {
@@ -80,7 +80,7 @@ public class YoutubeLookupCommand extends LookupCommand {
             }
 
             private boolean getChannelInfo(String query) {
-                String searchChannel = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=" + query + "&key=" + key;
+                String searchChannel = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=" + query + Secret.getYoutubeKey();
                 String json = new NetworkRequest(searchChannel, false).get();
                 if(json == null) {
                     return false;
@@ -102,7 +102,7 @@ public class YoutubeLookupCommand extends LookupCommand {
 
             private ArrayList<Video> findVideos() {
                 HashMap<String, Video> videos = new HashMap<>();
-                String videoSearch = "https://www.googleapis.com/youtube/v3/search?channelId=" + id + "&part=snippet,id&order=date&maxResults=50&key=" + key;
+                String videoSearch = "https://www.googleapis.com/youtube/v3/search?channelId=" + id + "&part=snippet,id&order=date&maxResults=50" + Secret.getYoutubeKey();
                 String json = new NetworkRequest(videoSearch, false).get();
                 if(json == null) {
                     return null;
@@ -128,7 +128,7 @@ public class YoutubeLookupCommand extends LookupCommand {
                 }
                 ArrayList<String> videoIds = videos.values().stream().map(Video::getId).collect(Collectors.toCollection(ArrayList::new));
                 String idList = videoIds.toString().replace("[", "").replace("]", "").replace(" ", "");
-                String statSearch = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=" + idList + "&key=" + key;
+                String statSearch = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=" + idList + Secret.getYoutubeKey();
                 String statInfo = new NetworkRequest(statSearch, false).get();
                 if(statInfo == null) {
                     return null;

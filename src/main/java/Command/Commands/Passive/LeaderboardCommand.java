@@ -1,6 +1,5 @@
 package Command.Commands.Passive;
 
-import Bot.DiscordCommandManager;
 import COD.Gunfight;
 import Command.Structure.*;
 import COD.Session;
@@ -81,7 +80,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
     public PageableEmbed getEmbed(CommandContext context) {
         return new Leaderboard(
                 context.getMessageChannel(),
-                context.getGuild(),
+                context.getHomeGuild(),
                 Session.getHistory(),
                 Gunfight.getThumb(),
                 "GUNFIGHT LEADERBOARD!",

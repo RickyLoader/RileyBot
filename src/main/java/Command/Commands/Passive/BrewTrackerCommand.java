@@ -61,7 +61,7 @@ public class BrewTrackerCommand extends DiscordCommand {
     private void showBrewTracker(CommandContext context) {
         if(brewsMessage == null || brewsMessage.timedOut()) {
             addEmoteListener(context.getJDA());
-            brewsMessage = new BrewsMessage(context.getMessageChannel(), context.getGuild());
+            brewsMessage = new BrewsMessage(context.getMessageChannel(), context.getHomeGuild());
             return;
         }
         brewsMessage.relocate();
