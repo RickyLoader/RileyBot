@@ -174,7 +174,7 @@ public class CombatRecord extends ImageBuilder {
      * Build the various sections of the image and draw them each on to the background image
      *
      * @param nameQuery Player name
-     * @param args      None
+     * @param args      Platform
      */
     public void buildImage(String nameQuery, String... args) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
