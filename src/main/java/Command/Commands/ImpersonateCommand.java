@@ -1,6 +1,5 @@
 package Command.Commands;
 
-import COD.Player;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import club.minnced.discord.webhook.WebhookClient;

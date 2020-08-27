@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 public class CombatRecord extends ImageBuilder {
 
-    private Player player;
+    private CODPlayer player;
 
     public CombatRecord(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
         super(channel, guild, resourcePath, fontName);
@@ -29,8 +29,8 @@ public class CombatRecord extends ImageBuilder {
      * @param type Weapon type
      * @return Background image for weapon type
      */
-    private File getWeaponImage(Player.Weapon.TYPE type) {
-        if(type == Player.Weapon.TYPE.PRIMARY || type == Player.Weapon.TYPE.SECONDARY) {
+    private File getWeaponImage(CODPlayer.Weapon.TYPE type) {
+        if(type == CODPlayer.Weapon.TYPE.PRIMARY || type == CODPlayer.Weapon.TYPE.SECONDARY) {
             return new File((getResourcePath() + "Templates/wep_quadrant.png"));
         }
         return new File((getResourcePath() + "Templates/lethal_quadrant.png"));
@@ -42,7 +42,7 @@ public class CombatRecord extends ImageBuilder {
      * @param weapon Weapon to draw
      * @return Weapon section with weapon stats drawn on
      */
-    private BufferedImage drawWeapon(Player.Weapon weapon) {
+    private BufferedImage drawWeapon(CODPlayer.Weapon weapon) {
         BufferedImage image = null;
         try {
             image = ImageIO.read(getWeaponImage(weapon.getType()));
@@ -57,7 +57,7 @@ public class CombatRecord extends ImageBuilder {
             g.drawString(String.valueOf(weapon.getKills()), 277, 490);
 
             // Draw the other weapon stats (lethals only have kills)
-            if(weapon.getType() != Player.Weapon.TYPE.LETHAL) {
+            if(weapon.getType() != CODPlayer.Weapon.TYPE.LETHAL) {
                 g.drawString(String.valueOf(weapon.getDeaths()), 277, 590);
                 g.drawString(String.valueOf(weapon.getKd()), 277, 690);
 
@@ -108,7 +108,7 @@ public class CombatRecord extends ImageBuilder {
      * @return Commendation section with commendations drawn on
      */
     private BufferedImage drawCommendations() {
-        ArrayList<Player.Commendation> commendations = player.getCommendations();
+        ArrayList<CODPlayer.Commendation> commendations = player.getCommendations();
         BufferedImage image = null;
         try {
             image = ImageIO.read(new File((getResourcePath() + "Templates/commendations_section.png")));
@@ -117,7 +117,7 @@ public class CombatRecord extends ImageBuilder {
             int x = 100;
             for(int i = 0; i < 5; i++) {
                 g.setFont(getGameFont().deriveFont(32f));
-                Player.Commendation c = commendations.get(i);
+                CODPlayer.Commendation c = commendations.get(i);
                 BufferedImage icon = ImageIO.read(c.getImage());
                 g.drawImage(icon, x - (icon.getWidth() / 2), 250 - (icon.getHeight() / 2), null);
                 int titleWidth = g.getFontMetrics().stringWidth(c.getTitle()) / 2;
@@ -190,7 +190,7 @@ public class CombatRecord extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.player = new Player(nameQuery, args[0]);
+        this.player = new MWPlayer(nameQuery, args[0]);
         if(!player.success()) {
             loading.failLoading(player.getStatus());
             return;

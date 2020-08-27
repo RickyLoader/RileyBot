@@ -1,6 +1,6 @@
 package LOL;
 
-import COD.Player;
+import COD.CODPlayer;
 import Network.Secret;
 import Network.NetworkRequest;
 import org.jetbrains.annotations.NotNull;
@@ -171,14 +171,14 @@ public class Summoner {
     }
 
     public static class RankedQueue {
-        private final Player.Ratio winLoss;
+        private final CODPlayer.Ratio winLoss;
         private final int points;
         private final String tier, rank, queue;
         private final File helmet, banner;
         private boolean unranked = false;
 
         public RankedQueue(int wins, int losses, int points, String tier, String rank, String res, boolean solo) {
-            this.winLoss = new Player.Ratio(wins, losses);
+            this.winLoss = new CODPlayer.Ratio(wins, losses);
             this.points = points;
             this.tier = tier;
             this.rank = rank;

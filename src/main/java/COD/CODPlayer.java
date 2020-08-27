@@ -14,10 +14,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- * Hold information on user's Modern Warfare stats
- */
-public class Player {
+public abstract class CODPlayer {
     private final String name;
     private final String platform;
     private final String data;
@@ -26,10 +23,12 @@ public class Player {
     private int streak, spm;
     private Weapon primary, secondary, lethal;
     private ArrayList<Commendation> commendations;
+    private final String endpoint;
 
-    public Player(String name, String platform) {
+    public CODPlayer(String name, String platform, String endpoint) {
         this.name = name;
         this.platform = platform;
+        this.endpoint = endpoint;
         this.data = fetchPlayerData();
     }
 
@@ -42,7 +41,7 @@ public class Player {
         String json;
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
-            json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/" + name + "/" + platform, false).get();
+            json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/" + endpoint + "/" + name + "/" + platform, false).get();
 
             if(json == null) {
                 status = "Failed to communicate with API, try again later.";
@@ -628,7 +627,7 @@ public class Player {
          * Sort descending by quantity
          */
         @Override
-        public int compareTo(@NotNull Player.Commendation o) {
+        public int compareTo(@NotNull CODPlayer.Commendation o) {
             return o.getQuantity() - this.getQuantity();
         }
     }
