@@ -455,7 +455,7 @@ public class PlexServer {
          * @return Title with id
          */
         public String getFormattedTitle() {
-            return title + " (" + id + ")";
+            return title + "\n(" + id + ")";
         }
 
         /**
