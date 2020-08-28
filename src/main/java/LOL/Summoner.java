@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static COD.CODPlayer.*;
+
 public class Summoner {
     private String name;
     private final String apiKey = Secret.getLeagueKey(), res;
@@ -171,14 +173,14 @@ public class Summoner {
     }
 
     public static class RankedQueue {
-        private final CODPlayer.Ratio winLoss;
+        private final Ratio winLoss;
         private final int points;
         private final String tier, rank, queue;
         private final File helmet, banner;
         private boolean unranked = false;
 
         public RankedQueue(int wins, int losses, int points, String tier, String rank, String res, boolean solo) {
-            this.winLoss = new CODPlayer.Ratio(wins, losses);
+            this.winLoss = new Ratio(wins, losses);
             this.points = points;
             this.tier = tier;
             this.rank = rank;
