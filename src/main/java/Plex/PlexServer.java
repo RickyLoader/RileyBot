@@ -135,7 +135,7 @@ public class PlexServer {
      */
     public MessageEmbed search(String query) {
         Movie[] results;
-        if(query.matches("tt\\d+")) {
+        if(query.matches("(tt)?\\d+")) {
             results = searchByID(query);
         }
         else {

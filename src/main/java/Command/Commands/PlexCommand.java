@@ -30,8 +30,8 @@ public class PlexCommand extends DiscordCommand {
         }
 
         new Thread(() -> {
-            // Been more than 24 hours
-            if(timePassed / 3600000 > 24 || plex.libraryEmpty()) {
+            // Been more than an hour
+            if(timePassed / 3600000 > 1 || plex.libraryEmpty()) {
                 refreshing = true;
                 channel.sendMessage("Let me refresh the Plex library first").queue();
                 plex.refreshData();
