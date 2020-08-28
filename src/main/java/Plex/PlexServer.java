@@ -12,12 +12,13 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PlexServer {
     private long timeFetched;
-    private HashMap<String, Movie> library;
+    private ArrayList<Movie> library;
     private final String helpMessage, plexIcon = "https://i.imgur.com/FdabwCm.png";
 
     /**
@@ -43,8 +44,8 @@ public class PlexServer {
      *
      * @return List of movies
      */
-    private HashMap<String, Movie> getLibraryOverview() {
-        HashMap<String, Movie> movies = new HashMap<>();
+    private ArrayList<Movie> getLibraryOverview() {
+        ArrayList<Movie> movies = new ArrayList<>();
         String json = new NetworkRequest(getPlexURL(), false).get();
         if(json == null || json.equals("err")) {
             return movies;
@@ -58,7 +59,7 @@ public class PlexServer {
                 continue;
             }
             String title = movie.getString("title");
-            movies.put(title.toLowerCase(), new Movie(
+            movies.add(new Movie(
                     movie.getString("guid"),
                     title,
                     movie.has("contentRating") ? movie.getString("contentRating") : "Not Rated",
@@ -133,21 +134,61 @@ public class PlexServer {
      * @return Single movie embed or embed containing search results
      */
     public MessageEmbed search(String query) {
-        Movie movie = library.get(query);
-        if(movie != null) {
-            return getMovieEmbed(movie);
+        Movie[] results;
+        if(query.matches("tt\\d+")) {
+            results = searchByID(query);
         }
-        Movie[] results = library
-                .entrySet()
-                .stream()
-                .filter(e -> e.getKey().contains(query))
-                .map(Map.Entry::getValue)
-                .toArray(Movie[]::new);
+        else {
+            results = searchByTitle(query);
+            if(results.length == 0) {
+                results = searchByQuery(query);
+            }
+        }
 
         if(results.length == 1) {
             return getMovieEmbed(results[0]);
         }
         return buildSearchEmbed(query, results);
+    }
+
+    /**
+     * Filter movies by the title containing a query
+     *
+     * @param query Query to check title for
+     * @return Filtered array of movies that contain the query in the title
+     */
+    private Movie[] searchByQuery(String query) {
+        return getMatchingMovies(movie -> movie.title.toLowerCase().contains(query));
+    }
+
+    /**
+     * Filter movies by title
+     *
+     * @param title Movie title
+     * @return Filtered array of movies that match the title
+     */
+    private Movie[] searchByTitle(String title) {
+        return getMatchingMovies(movie -> movie.title.equalsIgnoreCase(title));
+    }
+
+    /**
+     * Filter movies by id
+     *
+     * @param id Movie id
+     * @return Filtered array of movies that match the id
+     */
+    private Movie[] searchByID(String id) {
+        return getMatchingMovies(movie -> movie.getId().equals(id));
+    }
+
+    /**
+     * Filter the library by a predicate
+     *
+     * @param p Predicate to filter by
+     * @return Filtered array of movies
+     */
+    private Movie[] getMatchingMovies(Predicate<Movie> p) {
+        return library.stream().filter(p).toArray(Movie[]::new);
     }
 
     /**
@@ -170,7 +211,7 @@ public class PlexServer {
         builder.setDescription("I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here" + ((bound == movies.length) ? " they are:" : "'s " + bound + " of them:"));
         for(int i = 0; i < bound; i++) {
             Movie movie = movies[i];
-            String title = movie.getTitle();
+            String title = movie.getFormattedTitle();
             String index = String.valueOf(i + 1);
             String date = movie.getReleaseDate();
             if(i == 0) {
@@ -193,8 +234,7 @@ public class PlexServer {
      * @return Random movie
      */
     public Movie getRandomMovie() {
-        String key = library.keySet().toArray(new String[0])[new Random().nextInt(library.size())];
-        return library.get(key);
+        return library.get(new Random().nextInt(library.size()));
     }
 
     /**
@@ -407,6 +447,15 @@ public class PlexServer {
          */
         public String getTitle() {
             return title;
+        }
+
+        /**
+         * Get the title with the id attached
+         *
+         * @return Title with id
+         */
+        public String getFormattedTitle() {
+            return title + " (" + id + ")";
         }
 
         /**
