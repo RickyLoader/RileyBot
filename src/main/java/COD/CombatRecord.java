@@ -188,13 +188,20 @@ public class CombatRecord extends ImageBuilder {
                 g.setFont(getGameFont().deriveFont(32f));
                 BufferedImage icon = ImageIO.read(killstreak.getImage());
                 g.drawImage(icon, x, 250 - (icon.getHeight() / 2), null);
-                g.drawString(killstreak.getName(), x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(killstreak.getName()) / 2), 155);
+                int y = 155;
+                int space = g.getFontMetrics().getHeight() + 20;
+                g.drawString(killstreak.getName(), x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(killstreak.getName()) / 2), y);
                 g.setFont(getGameFont().deriveFont(40f));
                 String quantity = "Quantity: " + killstreak.getUses();
-                g.drawString(quantity, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(quantity) / 2), 400);
+                y += 250;
+                g.drawString(quantity, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(quantity) / 2), y);
                 if(!killstreak.noExtraStat()) {
                     String extra = killstreak.getStatName() + ": " + killstreak.getStat();
-                    g.drawString(extra, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(extra) / 2), 400+g.getFontMetrics().getHeight()+20);
+                    y += space;
+                    g.drawString(extra, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(extra) / 2), y);
+                    String average = "Avg " + killstreak.getStatName() + ": " + killstreak.getAverage();
+                    y += space;
+                    g.drawString(average, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(average) / 2), y);
                 }
                 x += padding + icon.getWidth();
             }

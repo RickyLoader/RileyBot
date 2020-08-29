@@ -712,6 +712,7 @@ public abstract class CODPlayer {
         private final int stat, uses;
         private final String name, statName, iwName;
         private final File image;
+        private double average;
 
         /**
          * Create a killstreak
@@ -729,6 +730,18 @@ public abstract class CODPlayer {
             this.statName = statName;
             this.stat = stat;
             this.image = new File("src/main/resources/COD/Killstreaks/" + iwName + ".png");
+            if(statName != null) {
+                this.average = (double) stat / uses;
+            }
+        }
+
+        /**
+         * Get the average stat per use of the killstreak
+         *
+         * @return Average stat per use
+         */
+        public String getAverage() {
+            return new DecimalFormat("0.00").format(average);
         }
 
         /**
