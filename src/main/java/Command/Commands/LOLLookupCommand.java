@@ -54,7 +54,7 @@ public class LOLLookupCommand extends ImageBuilderCommand {
 
     @Override
     public void buildImage(String name, ImageBuilder builder) {
-        builder.buildImage(name, this.displayRegion, this.apiRegion);
+        builder.buildImage(name, getHelpName(), this.displayRegion, this.apiRegion);
     }
 
     @Override

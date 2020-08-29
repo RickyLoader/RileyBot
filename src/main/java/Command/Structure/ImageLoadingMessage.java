@@ -16,10 +16,11 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
      * @param title        Embed title
      * @param desc         Embed description
      * @param thumbnail    Embed thumbnail
+     * @param helpMessage  Help message to display in embed footer
      * @param loadingSteps List of titles for loading fields
      */
-    public ImageLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String[] loadingSteps) {
-        super(channel, guild, title, desc, thumbnail, loadingSteps);
+    public ImageLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String helpMessage, String[] loadingSteps) {
+        super(channel, guild, title, desc, thumbnail, helpMessage, loadingSteps);
     }
 
     /**

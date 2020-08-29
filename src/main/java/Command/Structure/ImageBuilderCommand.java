@@ -29,7 +29,7 @@ public abstract class ImageBuilderCommand extends LookupCommand {
     }
 
     public void buildImage(String name, ImageBuilder builder) {
-        builder.buildImage(name);
+        builder.buildImage(name, getHelpName());
     }
 
     /**

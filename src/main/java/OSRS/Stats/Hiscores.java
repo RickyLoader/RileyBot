@@ -43,10 +43,11 @@ public class Hiscores extends ImageBuilder {
     /**
      * Look a player up on the OSRS hiscores and return an image displaying their skills
      *
-     * @param nameQuery Player name
-     * @param args      none
+     * @param nameQuery   Player name
+     * @param helpMessage Help message to display in loading message
+     * @param args        none
      */
-    public void buildImage(String nameQuery, String... args) {
+    public void buildImage(String nameQuery, String helpMessage, String... args) {
         String encodedName = encodeName(nameQuery);
         String defaultURL = getNormalAccount(encodedName);
         this.loading = new ImageLoadingMessage(
@@ -55,6 +56,7 @@ public class Hiscores extends ImageBuilder {
                 "OSRS Hiscores lookup: " + nameQuery.toUpperCase(),
                 "Give me a second, their website can be slow as fuck.",
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
+                helpMessage,
                 new String[]{
                         "Player exists...",
                         "Checking account type...",

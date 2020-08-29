@@ -22,11 +22,12 @@ public class SummonerImage extends ImageBuilder {
     /**
      * Build the various sections of the image and draw them each on to the background image
      *
-     * @param nameQuery Player name
-     * @param args      Region
+     * @param nameQuery   Player name
+     * @param helpMessage Help message to display in loading message
+     * @param args        Region
      */
     @Override
-    public void buildImage(String nameQuery, String... args) {
+    public void buildImage(String nameQuery, String helpMessage, String... args) {
         String displayRegion = args[0].toUpperCase();
         String apiRegion = args[1];
         ImageLoadingMessage loading = new ImageLoadingMessage(
@@ -35,6 +36,7 @@ public class SummonerImage extends ImageBuilder {
                 "Summoner lookup: " + nameQuery.toUpperCase(),
                 "One moment please, checking the " + displayRegion + " region.",
                 "https://img.pngio.com/league-of-legends-needs-a-new-game-icon-league-of-legends-icon-png-256_256.png",
+                helpMessage,
                 new String[]{
                         "Fetching summoner data...",
                         "Building image...",

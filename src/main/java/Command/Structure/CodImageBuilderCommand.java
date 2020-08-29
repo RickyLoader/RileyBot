@@ -7,25 +7,30 @@ public abstract class CodImageBuilderCommand extends ImageBuilderCommand {
     private final List<String> platforms;
     private String platform;
 
-    public CodImageBuilderCommand(String trigger, String desc, String prefix) {
-        super(trigger, desc, prefix, 30);
-        platforms = Arrays.asList("bnet", "acti");
+    public CodImageBuilderCommand(String trigger, String desc) {
+        super(trigger, desc, "acti/bnet/psn/xbox", 30);
+        platforms = Arrays.asList("bnet", "acti", "xbox", "psn");
     }
 
     @Override
     public String stripArguments(String query) {
         String platform = query.split(" ")[0];
         if(platform.equals(getTrigger())) {
-            this.platform = "bnet";
-            return query;
+            this.platform = "acti";
         }
-        this.platform = platform;
-        return query.replaceFirst(platform, "").trim();
+        else {
+            this.platform = platform;
+            query = query.replaceFirst(platform, "").trim();
+        }
+        if(query.endsWith("#0")) {
+            query = query.replace("#0", "");
+        }
+        return query;
     }
 
     @Override
     public void buildImage(String name, ImageBuilder builder) {
-        builder.buildImage(name, platform);
+        builder.buildImage(name, getHelpName(), platform);
     }
 
     @Override

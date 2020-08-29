@@ -173,16 +173,18 @@ public class CombatRecord extends ImageBuilder {
     /**
      * Build the various sections of the image and draw them each on to the background image
      *
-     * @param nameQuery Player name
-     * @param args      Platform
+     * @param nameQuery   Player name
+     * @param helpMessage Help message to display in loading message
+     * @param args        Platform
      */
-    public void buildImage(String nameQuery, String... args) {
+    public void buildImage(String nameQuery, String helpMessage, String... args) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getGuild(),
                 "MW Player lookup: " + nameQuery.toUpperCase(),
                 "One moment please.",
                 Gunfight.getThumb(),
+                helpMessage,
                 new String[]{
                         "Fetching player data...",
                         "Building image...",

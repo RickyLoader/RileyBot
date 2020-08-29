@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 public class EmbedLoadingMessage {
     private final MessageChannel channel;
     private long id, startTime, currentTime;
-    private final String title, thumbnail;
+    private final String title, thumbnail, helpMessage;
     private String desc;
     private final Guild guild;
     private final ArrayList<LoadingStage> stages;
@@ -28,14 +27,16 @@ public class EmbedLoadingMessage {
      * @param title        Embed title
      * @param desc         Embed description
      * @param thumbnail    Embed thumbnail
+     * @param helpMessage  Help message to display in embed footer
      * @param loadingSteps List of titles for loading fields
      */
-    public EmbedLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String[] loadingSteps) {
+    public EmbedLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String helpMessage, String[] loadingSteps) {
         this.channel = channel;
         this.guild = guild;
         this.title = title;
         this.thumbnail = thumbnail;
         this.desc = desc;
+        this.helpMessage = helpMessage;
         this.stages = getStages(loadingSteps);
         this.currentStep = 0;
     }
@@ -51,6 +52,7 @@ public class EmbedLoadingMessage {
         builder.setDescription(getDesc());
         builder.setThumbnail(getThumbnail());
         builder.setColor(getColour());
+        builder.setFooter(helpMessage, thumbnail);
         return builder;
     }
 
@@ -183,7 +185,7 @@ public class EmbedLoadingMessage {
         else {
             done.complete(value, startTime);
         }
-        getStages().add(done);
+        stages.add(done);
         this.finished = true;
         updateLoadingMessage();
     }
@@ -211,7 +213,7 @@ public class EmbedLoadingMessage {
      */
     public MessageEmbed createLoadingMessage() {
         EmbedBuilder builder = getEmbedBuilder();
-        for(LoadingStage stage : getStages()) {
+        for(LoadingStage stage : stages) {
             builder.addField(stage.getTitle(), stage.getValue(), false);
         }
         return builder.build();

@@ -31,7 +31,7 @@ public abstract class LookupCommand extends DiscordCommand {
      *
      * @param trigger   Trigger of command
      * @param desc      Description of command
-     * @param prefix    Prefix argument
+     * @param prefix    Prefix argument of command
      * @param maxLength Max length of name
      */
     public LookupCommand(String trigger, String desc, String prefix, int maxLength) {

@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.entities.User;
 public class MWLookupCommand extends CodImageBuilderCommand {
 
     public MWLookupCommand() {
-        super("mwlookup", "Have a gander at a player's Modern Warfare stats!", "acti/bnet");
+        super("mwlookup", "Have a gander at a player's Modern Warfare stats!");
     }
 
     @Override
