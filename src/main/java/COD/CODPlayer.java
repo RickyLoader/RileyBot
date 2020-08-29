@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 public abstract class CODPlayer {
     private final String name;
@@ -22,6 +23,7 @@ public abstract class CODPlayer {
     private Ratio wl, kd;
     private int streak, spm;
     private Weapon primary, secondary, lethal;
+    private Killstreak[] killstreaks;
     private ArrayList<Commendation> commendations;
     private final String endpoint;
 
@@ -71,6 +73,9 @@ public abstract class CODPlayer {
             this.secondary = getFavourite(weapons, Weapon.TYPE.SECONDARY);
             this.lethal = getFavourite(weapons, Weapon.TYPE.LETHAL);
 
+            JSONObject killstreaks = player.getJSONObject("scorestreakData");
+            killstreaks = mergeStreakData(killstreaks.getJSONObject("lethalScorestreakData"), killstreaks.getJSONObject("supportScorestreakData"));
+            this.killstreaks = parseKillstreaks(killstreaks);
             this.commendations = parsePlayerCommendations(player.getJSONObject("accoladeData").getJSONObject("properties"));
         }
         catch(Exception e) {
@@ -124,6 +129,42 @@ public abstract class CODPlayer {
     }
 
     /**
+     * Add the real killstreak names and stat type to the JSON returned from the API
+     * Killstreaks have an "extraStat1" quantity which may refer to kills/assists/.. depending on the streak.
+     *
+     * @param lethalStreaks  Lethal killstreaks from the API
+     * @param supportStreaks Support killstreaks from the API
+     * @return Killstreak JSON containing real names and stat type
+     */
+    private JSONObject mergeStreakData(JSONObject lethalStreaks, JSONObject supportStreaks) {
+        try {
+            JSONObject streakData = readJSONFile("src/main/resources/COD/Data/streaks.json");
+            if(streakData == null) {
+                return null;
+            }
+            streakData = streakData.getJSONObject("streaks");
+
+            // Combine lethalStreaks in to supportStreaks
+            for(String lethalKey : lethalStreaks.keySet()) {
+                supportStreaks.put(lethalKey, lethalStreaks.getJSONObject(lethalKey));
+            }
+
+            for(String killstreakName : supportStreaks.keySet()) {
+                JSONObject streak = supportStreaks.getJSONObject(killstreakName).getJSONObject("properties");
+                JSONObject streakExtra = streakData.getJSONObject(killstreakName);
+                streak.put("real_name", streakExtra.getString("real_name"));
+                if(streakExtra.has("extra_stat")) {
+                    streak.put("extra_stat", streakExtra.getString("extra_stat"));
+                }
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return supportStreaks;
+    }
+
+    /**
      * Add the real gun names to the JSON returned from the API
      * (only contains gun variable names e.g iw8_me_akimboblunt = Kali Sticks)
      *
@@ -154,6 +195,33 @@ public abstract class CODPlayer {
             e.printStackTrace();
         }
         return items;
+    }
+
+    /**
+     * Parse the player's killstreak JSON to an array of Killstreak objects
+     *
+     * @param killstreakData Killstreak JSON
+     * @return Player's top 3 killstreaks
+     */
+    private Killstreak[] parseKillstreaks(JSONObject killstreakData) {
+        ArrayList<Killstreak> killstreaks = new ArrayList<>();
+        for(String killstreakName : killstreakData.keySet()) {
+            JSONObject killstreak = killstreakData.getJSONObject(killstreakName).getJSONObject("properties");
+            killstreaks.add(new Killstreak(
+                            killstreakName,
+                            killstreak.getString("real_name"),
+                            killstreak.getInt("uses"),
+                            killstreak.has("extra_stat") ? killstreak.getString("extra_stat") : null,
+                            killstreak.getInt("extraStat1")
+                    )
+            );
+        }
+        Collections.sort(killstreaks);
+        for(CODPlayer.Killstreak k : killstreaks) {
+            System.out.println(killstreaks.indexOf(k)+1 + ". " + k.getName() + "\nUses: " + k.getUses() + "\n" + ((k.noExtraStat()) ? "" : k.getStatName() + ": " + k.getStat()) + "\n\n");
+        }
+        return killstreaks.subList(0, 3).toArray(new Killstreak[0]);
+
     }
 
     /**
@@ -194,6 +262,15 @@ public abstract class CODPlayer {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Get player killstreaks
+     *
+     * @return Player killstreaks
+     */
+    public Killstreak[] getKillstreaks() {
+        return killstreaks;
     }
 
     /**
@@ -565,7 +642,7 @@ public abstract class CODPlayer {
         /**
          * Create a commendation
          *
-         * @param iwName   Infinity Ward of commendation e.g "noDeathsFromBehind"
+         * @param iwName   Infinity Ward name of commendation e.g "noDeathsFromBehind"
          * @param title    Real name of commendation e.g "Sixth Sense"
          * @param desc     Description of commendation e.g "No deaths from behind"
          * @param quantity Player quantity of commendation
@@ -628,7 +705,97 @@ public abstract class CODPlayer {
          */
         @Override
         public int compareTo(@NotNull CODPlayer.Commendation o) {
-            return o.getQuantity() - this.getQuantity();
+            return o.getQuantity() - quantity;
+        }
+    }
+
+    /**
+     * Hold killstreak information
+     */
+    public static class Killstreak implements Comparable<Killstreak> {
+        private final int stat, uses;
+        private final String name, statName, iwName;
+        private final File image;
+
+        /**
+         * Create a killstreak
+         *
+         * @param iwName   Infinity Ward name of streak e.g "radar_drone_overwatch"
+         * @param name     Real name of streak e.g "Personal Radar"
+         * @param uses     Quantity of uses
+         * @param statName Name of provided stat quantity, kills/assists/..
+         * @param stat     Quantity of the given stat
+         */
+        public Killstreak(String iwName, String name, int uses, String statName, int stat) {
+            this.iwName = iwName;
+            this.name = name;
+            this.uses = uses;
+            this.statName = statName;
+            this.stat = stat;
+            this.image = new File("src/main/resources/COD/Streaks/" + iwName + ".png");
+        }
+
+        /**
+         * Get the killstreak name
+         *
+         * @return Killstreak name
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * Get the killstreak image
+         *
+         * @return Killstreak image
+         */
+        public File getImage() {
+            return image;
+        }
+
+        /**
+         * Return if the killstreak doesn't have an extra stat
+         *
+         * @return Killstreak has no extra stat
+         */
+        public boolean noExtraStat() {
+            return statName == null;
+        }
+
+        /**
+         * Get the quantity of the given stat
+         *
+         * @return Quantity of stat
+         */
+        public int getStat() {
+            return stat;
+        }
+
+        /**
+         * Get the quantity of uses
+         *
+         * @return Killstreak uses
+         */
+        public int getUses() {
+            return uses;
+        }
+
+        /**
+         * Get the name of the given stat
+         *
+         * @return Name of stat
+         */
+        public String getStatName() {
+            return statName;
+        }
+
+
+        /**
+         * Sort descending by quantity
+         */
+        @Override
+        public int compareTo(@NotNull CODPlayer.Killstreak o) {
+            return o.getUses() - uses;
         }
     }
 }
