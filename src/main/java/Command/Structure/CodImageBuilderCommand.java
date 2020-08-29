@@ -8,8 +8,8 @@ public abstract class CodImageBuilderCommand extends ImageBuilderCommand {
     private String platform;
 
     public CodImageBuilderCommand(String trigger, String desc) {
-        super(trigger, desc, "acti/bnet/psn/xbox", 30);
-        platforms = Arrays.asList("bnet", "acti", "xbox", "psn");
+        super(trigger, desc, "acti/battle/psn/xbox", 30);
+        platforms = Arrays.asList("battle", "acti", "xbox", "psn");
     }
 
     @Override
