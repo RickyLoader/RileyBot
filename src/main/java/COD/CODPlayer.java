@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 public abstract class CODPlayer {
     private final String name;
@@ -42,7 +41,7 @@ public abstract class CODPlayer {
     private String fetchPlayerData() {
         String json;
         try {
-            String name = URLEncoder.encode(this.name, "UTF-8");
+            String name = URLEncoder.encode(this.name, "UTF-8").replaceAll("\\+", "%20");
             json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/" + endpoint + "/" + name + "/" + platform, false).get();
 
             if(json == null) {
@@ -217,10 +216,7 @@ public abstract class CODPlayer {
             );
         }
         Collections.sort(killstreaks);
-        for(CODPlayer.Killstreak k : killstreaks) {
-            System.out.println(killstreaks.indexOf(k)+1 + ". " + k.getName() + "\nUses: " + k.getUses() + "\n" + ((k.noExtraStat()) ? "" : k.getStatName() + ": " + k.getStat()) + "\n\n");
-        }
-        return killstreaks.subList(0, 3).toArray(new Killstreak[0]);
+        return killstreaks.subList(0, 5).toArray(new Killstreak[0]);
 
     }
 
@@ -732,7 +728,7 @@ public abstract class CODPlayer {
             this.uses = uses;
             this.statName = statName;
             this.stat = stat;
-            this.image = new File("src/main/resources/COD/Streaks/" + iwName + ".png");
+            this.image = new File("src/main/resources/COD/Killstreaks/" + iwName + ".png");
         }
 
         /**
@@ -788,7 +784,6 @@ public abstract class CODPlayer {
         public String getStatName() {
             return statName;
         }
-
 
         /**
          * Sort descending by quantity

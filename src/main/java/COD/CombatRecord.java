@@ -31,9 +31,9 @@ public class CombatRecord extends ImageBuilder {
      */
     private File getWeaponImage(CODPlayer.Weapon.TYPE type) {
         if(type == CODPlayer.Weapon.TYPE.PRIMARY || type == CODPlayer.Weapon.TYPE.SECONDARY) {
-            return new File((getResourcePath() + "Templates/wep_quadrant.png"));
+            return new File((getResourcePath() + "Templates/weapon_section.png"));
         }
-        return new File((getResourcePath() + "Templates/lethal_quadrant.png"));
+        return new File((getResourcePath() + "Templates/lethal_section.png"));
     }
 
     /**
@@ -84,7 +84,7 @@ public class CombatRecord extends ImageBuilder {
     private BufferedImage drawWinLoss() {
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/wl_quadrant.png")));
+            image = ImageIO.read(new File((getResourcePath() + "Templates/wl_section.png")));
             Graphics g = image.getGraphics();
             g.setFont(getGameFont());
             int x = 288;
@@ -111,7 +111,7 @@ public class CombatRecord extends ImageBuilder {
         ArrayList<CODPlayer.Commendation> commendations = player.getCommendations();
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/commendations_section.png")));
+            image = ImageIO.read(new File((getResourcePath() + "Templates/commendation_section.png")));
             Graphics g = image.getGraphics();
             g.setFont(getGameFont());
             int x = 100;
@@ -171,6 +171,34 @@ public class CombatRecord extends ImageBuilder {
     }
 
     /**
+     * Draw the killstreaks on to the killstreak section
+     *
+     * @return Kill death section with stats drawn on
+     */
+    private BufferedImage drawKillstreaks() {
+        CODPlayer.Killstreak[] killstreaks = player.getKillstreaks();
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(new File((getResourcePath() + "Templates/killstreak_section.png")));
+            Graphics g = image.getGraphics();
+            g.setFont(getGameFont());
+            int padding = (image.getWidth() - (280 * 5)) / 6;
+            int x = padding;
+            for(CODPlayer.Killstreak killstreak : killstreaks) {
+                g.setFont(getGameFont().deriveFont(32f));
+                BufferedImage icon = ImageIO.read(killstreak.getImage());
+                g.drawImage(icon, x, 250 - (icon.getHeight() / 2), null);
+                g.drawString(killstreak.getName(), x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(killstreak.getName()) / 2), 155);
+                x += padding + icon.getWidth();
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    /**
      * Build the various sections of the image and draw them each on to the background image
      *
      * @param nameQuery   Player name
@@ -209,7 +237,7 @@ public class CombatRecord extends ImageBuilder {
             g.drawImage(drawWinLoss(), 1067, 700, null);
             g.drawImage(drawKillDeath(), 1067, 1290, null);
             g.drawImage(drawCommendations(), 17, 1290, null);
-
+            g.drawImage(drawKillstreaks(), 17, 1880, null);
             g.setFont(getGameFont().deriveFont(100f));
             g.setColor(Color.black);
             String name = player.getName().toUpperCase();
