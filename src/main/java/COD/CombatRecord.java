@@ -189,6 +189,13 @@ public class CombatRecord extends ImageBuilder {
                 BufferedImage icon = ImageIO.read(killstreak.getImage());
                 g.drawImage(icon, x, 250 - (icon.getHeight() / 2), null);
                 g.drawString(killstreak.getName(), x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(killstreak.getName()) / 2), 155);
+                g.setFont(getGameFont().deriveFont(40f));
+                String quantity = "Quantity: " + killstreak.getUses();
+                g.drawString(quantity, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(quantity) / 2), 400);
+                if(!killstreak.noExtraStat()) {
+                    String extra = killstreak.getStatName() + ": " + killstreak.getStat();
+                    g.drawString(extra, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(extra) / 2), 400+g.getFontMetrics().getHeight()+20);
+                }
                 x += padding + icon.getWidth();
             }
         }
