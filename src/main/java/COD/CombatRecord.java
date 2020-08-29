@@ -244,7 +244,7 @@ public class CombatRecord extends ImageBuilder {
             g.drawImage(drawWinLoss(), 1067, 700, null);
             g.drawImage(drawKillDeath(), 1067, 1290, null);
             g.drawImage(drawCommendations(), 17, 1290, null);
-            g.drawImage(drawKillstreaks(), 17, 1880, null);
+            g.drawImage(drawKillstreaks(), 17, 1869, null);
             g.setFont(getGameFont().deriveFont(100f));
             g.setColor(Color.black);
             String name = player.getName().toUpperCase();
