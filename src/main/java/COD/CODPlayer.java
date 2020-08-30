@@ -5,7 +5,10 @@ import Network.NetworkInfo;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,6 +16,8 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class CODPlayer {
     private final String name;
@@ -22,7 +27,7 @@ public abstract class CODPlayer {
     private Ratio wl, kd;
     private int streak, spm;
     private Weapon primary, secondary, lethal;
-    private Killstreak[] killstreaks;
+    private ArrayList<Killstreak> killstreaks;
     private ArrayList<Commendation> commendations;
     private final String endpoint;
 
@@ -202,7 +207,7 @@ public abstract class CODPlayer {
      * @param killstreakData Killstreak JSON
      * @return Player's top 3 killstreaks
      */
-    private Killstreak[] parseKillstreaks(JSONObject killstreakData) {
+    private ArrayList<Killstreak> parseKillstreaks(JSONObject killstreakData) {
         ArrayList<Killstreak> killstreaks = new ArrayList<>();
         for(String killstreakName : killstreakData.keySet()) {
             JSONObject killstreak = killstreakData.getJSONObject(killstreakName).getJSONObject("properties");
@@ -216,8 +221,7 @@ public abstract class CODPlayer {
             );
         }
         Collections.sort(killstreaks);
-        return killstreaks.subList(0, 5).toArray(new Killstreak[0]);
-
+        return new ArrayList<>(killstreaks.subList(0, 5));
     }
 
     /**
@@ -265,7 +269,7 @@ public abstract class CODPlayer {
      *
      * @return Player killstreaks
      */
-    public Killstreak[] getKillstreaks() {
+    public ArrayList<Killstreak> getKillstreaks() {
         return killstreaks;
     }
 
@@ -758,8 +762,13 @@ public abstract class CODPlayer {
          *
          * @return Killstreak image
          */
-        public File getImage() {
-            return image;
+        public BufferedImage getImage() {
+            try {
+                return ImageIO.read(image);
+            }
+            catch(IOException e) {
+                return null;
+            }
         }
 
         /**

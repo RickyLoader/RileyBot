@@ -10,7 +10,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Build an image containing the user's Modern Warfare stats
@@ -176,30 +178,33 @@ public class CombatRecord extends ImageBuilder {
      * @return Kill death section with stats drawn on
      */
     private BufferedImage drawKillstreaks() {
-        CODPlayer.Killstreak[] killstreaks = player.getKillstreaks();
+        ArrayList<CODPlayer.Killstreak> killstreaks = player.getKillstreaks();
         BufferedImage image = null;
         try {
             image = ImageIO.read(new File((getResourcePath() + "Templates/killstreak_section.png")));
             Graphics g = image.getGraphics();
             g.setFont(getGameFont());
+            int maxHeight = killstreaks.stream().max(Comparator.comparing(killstreak -> killstreak.getImage().getHeight())).get().getImage().getHeight();
             int padding = (image.getWidth() - (280 * 5)) / 6;
             int x = padding;
             for(CODPlayer.Killstreak killstreak : killstreaks) {
                 g.setFont(getGameFont().deriveFont(32f));
-                BufferedImage icon = ImageIO.read(killstreak.getImage());
-                g.drawImage(icon, x, 250 - (icon.getHeight() / 2), null);
-                int y = 155;
-                int space = g.getFontMetrics().getHeight() + 20;
-                g.drawString(killstreak.getName(), x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(killstreak.getName()) / 2), y);
+                BufferedImage icon = killstreak.getImage();
+                int y = (200 + (maxHeight / 2) - (icon.getHeight() / 2));
+                g.drawImage(icon, x, y, null);
+                g.drawString(killstreak.getName(), x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(killstreak.getName()) / 2), 155);
+
                 g.setFont(getGameFont().deriveFont(40f));
                 String quantity = "Quantity: " + killstreak.getUses();
-                y += 250;
+                int space = ((image.getHeight() - (maxHeight + 200))) / 4;
+
+                y = (200 + maxHeight + space);
                 g.drawString(quantity, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(quantity) / 2), y);
                 if(!killstreak.noExtraStat()) {
                     String extra = killstreak.getStatName() + ": " + killstreak.getStat();
                     y += space;
                     g.drawString(extra, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(extra) / 2), y);
-                    String average = "Avg " + killstreak.getStatName() + ": " + killstreak.getAverage();
+                    String average = "Avg: " + killstreak.getAverage();
                     y += space;
                     g.drawString(average, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(average) / 2), y);
                 }
