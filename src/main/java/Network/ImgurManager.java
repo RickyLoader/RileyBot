@@ -43,9 +43,7 @@ public class ImgurManager {
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ImageIO.write(stripAlpha(image), "jpg", out);
-            String jpg = Base64.encodeBase64String(out.toByteArray());
-            new FileWriter(new File("jpg.txt")).append(jpg);
-            return jpg;
+            return Base64.encodeBase64String(out.toByteArray());
         }
         catch(Exception e) {
             return null;
