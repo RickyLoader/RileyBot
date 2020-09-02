@@ -32,7 +32,34 @@ public class NetworkRequest {
      */
     public String get() {
         try {
-            Response response = client.newCall(builder.addHeader("accept","application/json").build()).execute();
+            Response response = client.newCall(builder.addHeader("accept", "application/json").build()).execute();
+            return handleResponse(response);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Add headers to the builder
+     */
+    private void parseHeaders(HashMap<String, String> headers) {
+        for(String header : headers.keySet()) {
+            builder.addHeader(header, headers.get(header));
+        }
+    }
+
+    /**
+     * Make a GET request
+     *
+     * @return Response from request
+     */
+    public String get(HashMap<String, String> headers) {
+        try {
+            headers.put("accept", "application/json");
+            parseHeaders(headers);
+            Response response = client.newCall(builder.build()).execute();
             return handleResponse(response);
         }
         catch(Exception e) {
@@ -51,9 +78,7 @@ public class NetworkRequest {
     public String post(RequestBody body, HashMap<String, String> headers) {
         try {
             if(headers != null) {
-                for(String header : headers.keySet()) {
-                    builder.addHeader(header, headers.get(header));
-                }
+                parseHeaders(headers);
             }
             Response response = client.newCall(builder.post(body).build()).execute();
             return handleResponse(response);
@@ -92,6 +117,9 @@ public class NetworkRequest {
             }
             else if(response.code() == 404) {
                 data = "err";
+            }
+            else {
+                System.out.println(response.body().string());
             }
             response.close();
         }
