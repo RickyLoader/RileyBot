@@ -202,6 +202,22 @@ public class PollManager {
         }
 
         /**
+         * Get the open period of the poll.
+         * Start date - End date (Open/Closed)
+         *
+         * @return String containing poll open period
+         */
+        public String getOpenPeriod() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            return dateFormat.format(start) +
+                    " - " +
+                    dateFormat.format(end) +
+                    " (" +
+                    (new Date(System.currentTimeMillis()).after(end) ? "Closed" : "Open") +
+                    ")";
+        }
+
+        /**
          * Get the title of the poll
          *
          * @return Poll title
