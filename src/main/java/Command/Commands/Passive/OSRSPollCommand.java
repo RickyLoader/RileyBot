@@ -118,7 +118,6 @@ public class OSRSPollCommand extends PageableEmbedCommand {
                         .append(" ")
                         .append(a.getText());
 
-
                 if(i < answers.length - 1) {
                     builder.append("\n");
                 }
