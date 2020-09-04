@@ -5,11 +5,9 @@ import OSRS.Polling.PollManager;
 import OSRS.Polling.PollManager.Poll;
 import OSRS.Polling.PollManager.Poll.Question;
 import OSRS.Polling.PollManager.Poll.Question.Answer;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;

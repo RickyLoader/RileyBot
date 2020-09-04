@@ -46,7 +46,7 @@ public class PlexServer {
      */
     private ArrayList<Movie> getLibraryOverview() {
         ArrayList<Movie> movies = new ArrayList<>();
-        String json = new NetworkRequest(getPlexURL(), false).get();
+        String json = new NetworkRequest(getPlexLibraryURL(), false).get();
         if(json == null || json.equals("err")) {
             return movies;
         }
@@ -59,8 +59,13 @@ public class PlexServer {
                 continue;
             }
             String title = movie.getString("title");
+            String guid = movie.getString("guid");
+            if(guid.contains("plex://movie")) {
+                json = new NetworkRequest(getPlexItemURL(movie.getString("ratingKey")), false).get();
+                guid = new JSONObject(json).getJSONObject("MediaContainer").getJSONArray("Metadata").getJSONObject(0).getJSONArray("Guid").getJSONObject(0).getString("id");
+            }
             movies.add(new Movie(
-                    movie.getString("guid"),
+                    guid,
                     title,
                     movie.has("contentRating") ? movie.getString("contentRating") : "Not Rated",
                     movie.getString("summary"),
@@ -124,7 +129,7 @@ public class PlexServer {
         builder.setImage(movie.getPoster());
         builder.setDescription(movie.toString());
         double rating = movie.getRating();
-        builder.setFooter("IMDB: " + ((rating == 0) ? "N/A" : rating) + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getReleaseDate(), movie.getRatingImage());
+        builder.setFooter("IMDB: " + ((rating == 0) ? "N/A" : rating) + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getFormattedReleaseDate(), movie.getRatingImage());
         return builder.build();
     }
 
@@ -135,7 +140,9 @@ public class PlexServer {
      */
     public MessageEmbed search(String query) {
         Movie[] results;
-        if(query.matches("(tt)?\\d+")) {
+
+        // tt12345 or td12345
+        if(query.matches("([t][td])\\d+")) {
             results = searchByID(query);
         }
         else {
@@ -148,6 +155,7 @@ public class PlexServer {
         if(results.length == 1) {
             return getMovieEmbed(results[0]);
         }
+        Arrays.sort(results, Comparator.comparing(Movie::getReleaseDate));
         return buildSearchEmbed(query, results);
     }
 
@@ -178,7 +186,7 @@ public class PlexServer {
      * @return Filtered array of movies that match the id
      */
     private Movie[] searchByID(String id) {
-        return getMatchingMovies(movie -> movie.getId().equals(id));
+        return getMatchingMovies(movie -> movie.getFormattedId().equals(id));
     }
 
     /**
@@ -213,7 +221,7 @@ public class PlexServer {
             Movie movie = movies[i];
             String title = movie.getFormattedTitle();
             String index = String.valueOf(i + 1);
-            String date = movie.getReleaseDate();
+            String date = movie.getFormattedReleaseDate();
             if(i == 0) {
                 builder.addField(EmbedHelper.getTitleField("#", index));
                 builder.addField(EmbedHelper.getTitleField("Title", title));
@@ -242,8 +250,18 @@ public class PlexServer {
      *
      * @return Plex URL
      */
-    private String getPlexURL() {
+    private String getPlexLibraryURL() {
         return Secret.getPlexIp() + Secret.getInternalPlexPort() + "/library/sections/" + Secret.getPlexLibraryId() + "/all/" + Secret.getPlexToken();
+    }
+
+    /**
+     * Get the URL to fetch the comprehensive view of a movie
+     *
+     * @param id Plex id for movie
+     * @return Plex URL
+     */
+    private String getPlexItemURL(String id) {
+        return Secret.getPlexIp() + Secret.getInternalPlexPort() + "/library/metadata/" + id + Secret.getPlexToken();
     }
 
     /**
@@ -267,8 +285,9 @@ public class PlexServer {
      * Hold information about a movie on Plex
      */
     public static class Movie {
-        private final String id, title, contentRating, summary, tagLine, releaseDate, director, cast, languages;
+        private final String id, title, contentRating, summary, tagLine, director, cast, languages;
         private final long duration;
+        private final Date releaseDate;
         private final double rating;
         private String movieDetails, language, imdbURL, poster, genre;
 
@@ -296,7 +315,7 @@ public class PlexServer {
             this.contentRating = contentRating;
             this.summary = summary;
             this.tagLine = tagLine;
-            this.releaseDate = releaseDate;
+            this.releaseDate = parseReleaseDate(releaseDate);
             this.director = director;
             this.cast = cast;
             this.genre = genre;
@@ -409,16 +428,34 @@ public class PlexServer {
         /**
          * Format the release date to NZ format
          *
+         * @param releaseDate String date
          * @return NZ formatted release date
          */
-        public String getReleaseDate() {
+        private Date parseReleaseDate(String releaseDate) {
             try {
-                Date us = new SimpleDateFormat("yyyy-MM-dd").parse(releaseDate);
-                return new SimpleDateFormat("dd/MM/yyy").format(us);
+                return new SimpleDateFormat("yyyy-MM-dd").parse(releaseDate);
             }
             catch(ParseException e) {
                 e.printStackTrace();
             }
+            return null;
+        }
+
+        /**
+         * Get the release date formatted to NZ standard
+         *
+         * @return Formatted release date
+         */
+        public String getFormattedReleaseDate() {
+            return new SimpleDateFormat("dd/MM/yyy").format(releaseDate);
+        }
+
+        /**
+         * Get the release date
+         *
+         * @return Release date
+         */
+        public Date getReleaseDate() {
             return releaseDate;
         }
 
@@ -455,7 +492,7 @@ public class PlexServer {
          * @return Title with id
          */
         public String getFormattedTitle() {
-            return title + "\n(" + id + ")";
+            return title + "\n(" + getFormattedId() + ")";
         }
 
         /**
@@ -479,10 +516,10 @@ public class PlexServer {
         /**
          * Get the id of the movie
          *
-         * @return movie id
+         * @return movie id with prefix
          */
-        public String getId() {
-            return id;
+        public String getFormattedId() {
+            return id.startsWith("tt") ? id : "td" + id;
         }
 
         /**
