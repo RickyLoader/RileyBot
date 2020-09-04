@@ -11,6 +11,9 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalField;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -64,6 +67,7 @@ public class PlexServer {
                 json = new NetworkRequest(getPlexItemURL(movie.getString("ratingKey")), false).get();
                 guid = new JSONObject(json).getJSONObject("MediaContainer").getJSONArray("Metadata").getJSONObject(0).getJSONArray("Guid").getJSONObject(0).getString("id");
             }
+
             movies.add(new Movie(
                     guid,
                     title,
@@ -289,6 +293,7 @@ public class PlexServer {
         private final long duration;
         private final Date releaseDate;
         private final double rating;
+        private long budget, revenue;
         private String movieDetails, language, imdbURL, poster, genre;
 
         /**
@@ -348,6 +353,11 @@ public class PlexServer {
             return imdbURL;
         }
 
+        /**
+         * Get the URL to the IMDB page of the movie from the imdb id
+         *
+         * @return IMDB URL
+         */
         private String getIMDBUrl(String id) {
             return "https://www.imdb.com/title/" + id;
         }
@@ -381,6 +391,44 @@ public class PlexServer {
                 poster = "https://image.tmdb.org/t/p/original/" + new JSONObject(movieDetails).getString("poster_path");
             }
             return poster;
+        }
+
+        /**
+         * Retrieve the budget for the movie from The Movie Database
+         *
+         * @return Movie budget
+         */
+        public long getBudget() {
+            if(budget == 0) {
+                getMovieDetails();
+                long budget = new JSONObject(movieDetails).getLong("budget");
+                this.budget = budget == 0 ? -1 : budget;
+            }
+            return this.budget;
+        }
+
+        /**
+         * Retrieve the revenue for the movie from The Movie Database
+         *
+         * @return Movie revenue
+         */
+        public long getRevenue() {
+            if(revenue == 0) {
+                getMovieDetails();
+                long revenue = new JSONObject(movieDetails).getLong("revenue");
+                this.revenue = revenue == 0 ? -1 : revenue;
+            }
+            return this.revenue;
+        }
+
+        /**
+         * Format a long n to $n USD
+         *
+         * @param amount Long amount
+         * @return Formatted USD currency string
+         */
+        private String formatUSD(long amount) {
+            return String.format("$%,d USD", amount);
         }
 
         /**
@@ -551,6 +599,25 @@ public class PlexServer {
         }
 
         /**
+         * Build a String containing the revenue and box office information if available
+         *
+         * @return Null or String containing box office information
+         */
+        private String getBoxOffice() {
+            long budget = getBudget();
+            long revenue = getRevenue();
+            StringBuilder boxOffice = new StringBuilder();
+            if(budget > -1) {
+                boxOffice.append("**Budget**: ").append(formatUSD(budget));
+            }
+            if(revenue > -1) {
+                String prefix = "**Box Office**: ";
+                boxOffice.append(boxOffice.length() == 0 ? prefix : " | " + prefix).append(formatUSD(revenue));
+            }
+            return boxOffice.toString();
+        }
+
+        /**
          * Format the movie information in to a String summary
          *
          * @return Summary of movie information
@@ -576,6 +643,12 @@ public class PlexServer {
             }
 
             desc.append("\n\n**Duration**: ").append(getDuration());
+
+            String boxOffice = getBoxOffice();
+            if(!boxOffice.isEmpty()) {
+                desc.append("\n\n").append(getBoxOffice());
+            }
+
             desc.append("\n\n**IMDB**: ").append(EmbedHelper.embedURL("View", getIMDBUrl()));
 
             return desc.toString();
