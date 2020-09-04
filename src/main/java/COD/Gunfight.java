@@ -481,7 +481,7 @@ public class Gunfight {
                         "Let's do this!",
                         "Good news, the cheque cleared... It's go time!",
                         "Shut up, cock in and load up.",
-                        "Lock 'em and load 'em ladies it's go time.",
+                        "Lock 'em and load 'em ladies, it's go time.",
                         "Keep your head up and your ass down, it's go time."
                 };
                 break;
