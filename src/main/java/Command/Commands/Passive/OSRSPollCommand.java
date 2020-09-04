@@ -48,13 +48,13 @@ public class OSRSPollCommand extends PageableEmbedCommand {
             channel.sendMessage("That poll doesn't exist!").queue();
             return null;
         }
-
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         return new PollMessage(
                 channel,
                 guild,
                 Arrays.asList(poll.getQuestions()),
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
-                "OSRS Poll #" + poll.getNumber() + " - " + new SimpleDateFormat("dd/MM/yyyy").format(poll.getStart()),
+                "OSRS Poll #" + poll.getNumber() + "\n\n" + dateFormat.format(poll.getStart()) + " - " + dateFormat.format(poll.getEnd()),
                 poll.getTitle(),
                 EmbedHelper.formatEmote(guild.getEmotesByName("s1", true).get(0)),
                 EmbedHelper.formatEmote(guild.getEmotesByName("s2", true).get(0)),
