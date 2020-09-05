@@ -13,7 +13,7 @@ public abstract class PageableEmbed {
     private final List<?> items;
     private long id;
     private int index = 0, page = 1;
-    private final int bound, colour;
+    private final int bound, colour, pages;
     private final Emote forward, backward, reverse;
     private boolean defaultSort = true;
     private final String title, desc, thumb;
@@ -40,6 +40,7 @@ public abstract class PageableEmbed {
         this.thumb = thumb;
         this.bound = 5;
         this.colour = colour.length == 1 ? colour[0] : EmbedHelper.getYellow();
+        this.pages = (int) Math.ceil(items.size() / (double) bound);
         sortItems(items, defaultSort);
     }
 
@@ -120,9 +121,11 @@ public abstract class PageableEmbed {
      */
     public void showMessage() {
         channel.sendMessage(buildMessage()).queue(message -> {
-            id = message.getIdLong();
-            message.addReaction(backward).queue();
-            message.addReaction(forward).queue();
+            if(pages > 1) {
+                id = message.getIdLong();
+                message.addReaction(backward).queue();
+                message.addReaction(forward).queue();
+            }
             message.addReaction(reverse).queue();
         });
     }
@@ -147,7 +150,7 @@ public abstract class PageableEmbed {
             builder.setDescription(desc);
         }
         builder.setThumbnail(thumb);
-        builder.setFooter("Page: " + page + "/" + (int) Math.ceil(items.size() / (double) bound));
+        builder.setFooter("Page: " + page + "/" + pages);
 
         int max = Math.min(bound, (items.size() - this.index));
 
