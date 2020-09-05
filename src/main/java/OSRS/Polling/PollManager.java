@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +22,8 @@ import static OSRS.Polling.PollManager.Poll.*;
  */
 public class PollManager {
     private final HashMap<Integer, Poll> polls;
+    private ArrayList<Element> history;
+    private long historyFetched;
 
     public PollManager() {
         this.polls = new HashMap<>();
@@ -166,7 +167,12 @@ public class PollManager {
         if(polls.containsKey(id)) {
             return polls.get(id);
         }
-        ArrayList<Element> history = getPollHistory();
+
+        if(history == null || System.currentTimeMillis() - historyFetched > 3600000) {
+            history = getPollHistory();
+            historyFetched = System.currentTimeMillis();
+        }
+
         if(id > history.size()) {
             return null;
         }
