@@ -1,5 +1,6 @@
 package OSRS.Polling;
 
+import OSRS.Polling.PollManager.Poll.Question.Answer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -76,7 +77,7 @@ public class PollManager {
             );
         }
         catch(IOException | ParseException | NumberFormatException e) {
-            e.printStackTrace();
+            System.out.println("Error parsing: https://oldschool.runescape.wiki/w/Poll:" + titleElement.text().replaceAll(" ", "_"));
         }
         return poll;
     }
@@ -92,10 +93,14 @@ public class PollManager {
         Question[] questions = new Question[questionElements.size()];
         for(int i = 0; i < questionElements.size(); i++) {
             Element questionElement = questionElements.get(i);
+            Answer[] answers = parseAnswers(questionElement.select("div:not(.pollquestionborder)"));
+            Answer[] sorted = Arrays.copyOf(answers, answers.length);
+            Arrays.sort(sorted, (o1, o2) -> (int) (o2.getPercentageVote() - o1.getPercentageVote()));
             questions[i] = new Question(
                     i + 1,
                     questionElement.select("b").first().text(),
-                    parseAnswers(questionElement.select("div:not(.pollquestionborder)"))
+                    answers,
+                    sorted[0].getText().equals("Yes") && sorted[0].getPercentageVote() >= 75.0
             );
         }
         return questions;
@@ -107,9 +112,9 @@ public class PollManager {
      * @param answerElements Answer elements from question
      * @return Array of answers
      */
-    private Question.Answer[] parseAnswers(Elements answerElements) {
+    private Answer[] parseAnswers(Elements answerElements) {
         answerElements = answerElements.stream().filter(e -> e.hasText() && !e.text().matches("Question \\d+")).collect(Collectors.toCollection(Elements::new));
-        Question.Answer[] answers = new Question.Answer[answerElements.size()];
+        Answer[] answers = new Answer[answerElements.size()];
 
         for(int i = 0; i < answerElements.size(); i++) {
             Elements row = answerElements.get(i).select("span");
@@ -120,7 +125,7 @@ public class PollManager {
                     .replace(" votes)", "")
                     .split("%");
 
-            answers[i] = new Question.Answer(
+            answers[i] = new Answer(
                     Integer.parseInt(voteInfo[1]),
                     Double.parseDouble(voteInfo[0]),
                     row.get(0).text()
@@ -165,7 +170,7 @@ public class PollManager {
         Poll poll = parsePoll(history.get(pollIndex - 1), pollIndex == history.size());
 
         // Don't cache latest poll
-        if(pollIndex != history.size() && !polls.containsKey(poll.getNumber())) {
+        if(poll != null && pollIndex != history.size() && !polls.containsKey(poll.getNumber())) {
             polls.put(poll.getNumber(), poll);
         }
         return poll;
@@ -287,6 +292,7 @@ public class PollManager {
             private final int number;
             private final String text;
             private final Answer[] answers;
+            private final boolean pass;
 
             /**
              * Initialise poll question
@@ -295,10 +301,20 @@ public class PollManager {
              * @param text    Question text
              * @param answers Array of answers
              */
-            public Question(int number, String text, Answer[] answers) {
+            public Question(int number, String text, Answer[] answers, boolean pass) {
                 this.number = number;
                 this.text = number + ". " + text;
                 this.answers = answers;
+                this.pass = pass;
+            }
+
+            /**
+             * Return whether question received the 75% passing threshold
+             *
+             * @return Question passed
+             */
+            public boolean isPassed() {
+                return pass;
             }
 
             /**

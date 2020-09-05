@@ -43,8 +43,15 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         Poll poll = pollManager.getPollByNumber(number);
 
         if(poll == null) {
-            channel.sendMessage("That poll doesn't exist!").queue();
+            channel.sendMessage("That poll doesn't exist (or I couldn't parse it)").queue();
             return null;
+        }
+        try {
+            System.out.println("OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod());
+
+        }
+        catch(Exception e) {
+            e.printStackTrace();
         }
         return new PollMessage(
                 channel,
@@ -53,9 +60,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 "OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod(),
                 poll.getTitle(),
-                EmbedHelper.formatEmote(guild.getEmotesByName("s1", true).get(0)),
-                EmbedHelper.formatEmote(guild.getEmotesByName("s2", true).get(0)),
-                EmbedHelper.formatEmote(guild.getEmotesByName("s3", true).get(0)),
+                context.getEmoteHelper(),
                 EmbedHelper.getGreen()
         );
     }
@@ -79,11 +84,11 @@ public class OSRSPollCommand extends PageableEmbedCommand {
          * @param desc    Description to use for embed
          * @param colour  Optional colour to use for embed
          */
-        public PollMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String handle, String section, String tip, int... colour) {
+        public PollMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, EmoteHelper emoteHelper, int... colour) {
             super(channel, guild, items, thumb, title, desc, colour);
-            this.handle = handle;
-            this.section = section;
-            this.tip = tip;
+            this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());
+            this.section = EmoteHelper.formatEmote(emoteHelper.getSwordBlade());
+            this.tip = EmoteHelper.formatEmote(emoteHelper.getSwordTip());
         }
 
         @Override
@@ -143,6 +148,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
 
         @Override
         public String getName(int currentIndex) {
+            System.out.println(((Question) getItems().get(currentIndex)).isPassed());
             return ((Question) getItems().get(currentIndex)).getText();
         }
 

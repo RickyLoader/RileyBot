@@ -13,11 +13,20 @@ public class CommandContext {
     private final GuildMessageReceivedEvent event;
     private final ArrayList<DiscordCommand> commands;
     private final DiscordAudioPlayer player;
+    private final EmoteHelper emoteHelper;
 
-    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands, DiscordAudioPlayer player) {
+    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands, DiscordAudioPlayer player, EmoteHelper emoteHelper) {
         this.event = event;
         this.commands = commands;
         this.player = player;
+        this.emoteHelper = emoteHelper;
+    }
+
+    public EmoteHelper getEmoteHelper() {
+        if(!emoteHelper.hasGuild()) {
+            emoteHelper.setGuild(getHomeGuild());
+        }
+        return emoteHelper;
     }
 
     public DiscordAudioPlayer getAudioPlayer() {

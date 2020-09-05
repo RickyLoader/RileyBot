@@ -11,6 +11,7 @@ import Command.Commands.JSON.*;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmoteHelper;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -24,6 +25,7 @@ import java.util.Random;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands = new ArrayList<>();
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
+    private final EmoteHelper emoteHelper = new EmoteHelper();
 
     /**
      * Add the commands to the list
@@ -106,7 +108,7 @@ public class DiscordCommandManager {
             player = new DiscordAudioPlayer();
             audioPlayers.put(event.getGuild(), player);
         }
-        command.execute(new CommandContext(event, commands, player));
+        command.execute(new CommandContext(event, commands, player, emoteHelper));
     }
 
     /**

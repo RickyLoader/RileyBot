@@ -75,16 +75,6 @@ public class EmbedHelper {
     }
 
     /**
-     * Get the String form of an emote to display inside an embed
-     *
-     * @param e Emote to convert
-     * @return String version of emote
-     */
-    public static String formatEmote(Emote e) {
-        return "<:" + e.getName() + ":" + e.getId() + "> ";
-    }
-
-    /**
      * Format the given time in ms to HH:MM:SS
      *
      * @param time Time in ms
