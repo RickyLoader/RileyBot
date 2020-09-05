@@ -1,6 +1,5 @@
 package Command.Commands.Variable;
 
-import Command.Structure.LinkCommand;
 import Command.Structure.VariableLinkCommand;
 
 public class RiggsCommand extends VariableLinkCommand {

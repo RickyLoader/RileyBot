@@ -10,7 +10,7 @@ public class TrackEndListener extends AudioEventAdapter {
 
     private final Guild guild;
     private Response method;
-    private boolean leave;
+    private final boolean leave;
 
     public TrackEndListener(Guild guild, Response method) {
         this.guild = guild;

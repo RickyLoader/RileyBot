@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
-import java.time.chrono.MinguoDate;
 import java.util.List;
 
 import static Command.Commands.ExecuteOrder.ExecuteOrder66Command.getName;

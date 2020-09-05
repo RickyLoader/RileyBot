@@ -1,20 +1,19 @@
 package Command.Structure;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.*;
 import java.io.File;
 
 public abstract class ImageBuilder {
-    private final Guild guild;
+    private final EmoteHelper emoteHelper;
     private final MessageChannel channel;
     private final String resourcePath;
     private Font gameFont;
 
-    public ImageBuilder(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
+    public ImageBuilder(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         this.channel = channel;
-        this.guild = guild;
+        this.emoteHelper = emoteHelper;
         this.resourcePath = resourcePath;
         this.gameFont = registerFont(resourcePath + fontName);
         if(gameFont == null) {
@@ -50,12 +49,12 @@ public abstract class ImageBuilder {
     }
 
     /**
-     * Get the guild
+     * Get the Emote helper
      *
-     * @return Guild
+     * @return Emote helper
      */
-    public Guild getGuild() {
-        return guild;
+    public EmoteHelper getEmoteHelper() {
+        return emoteHelper;
     }
 
     /**

@@ -1,10 +1,10 @@
 package Command.Commands;
 
 import Bot.DiscordUser;
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilderCommand;
 import Command.Structure.ImageBuilder;
 import OSRS.Stats.Hiscores;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -18,8 +18,8 @@ public class OSRSLookupCommand extends ImageBuilderCommand {
     }
 
     @Override
-    public ImageBuilder getImageBuilder(MessageChannel channel, Guild guild) {
-        return new Hiscores(channel, guild, "src/main/resources/OSRS/", "osrs.ttf");
+    public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
+        return new Hiscores(channel, emoteHelper, "src/main/resources/OSRS/", "osrs.ttf");
     }
 
     @Override

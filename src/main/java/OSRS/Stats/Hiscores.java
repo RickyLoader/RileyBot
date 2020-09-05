@@ -1,11 +1,11 @@
 package OSRS.Stats;
 
 import Command.Structure.EmbedHelper;
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageLoadingMessage;
 import Command.Structure.ImageBuilder;
 import Network.NetworkRequest;
 import Network.ImgurManager;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
@@ -25,8 +25,8 @@ public class Hiscores extends ImageBuilder {
     private ImageLoadingMessage loading;
     private boolean timeout = false;
 
-    public Hiscores(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
-        super(channel, guild, resourcePath, fontName);
+    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
+        super(channel, emoteHelper, resourcePath, fontName);
         bossNames = getBossNames();
     }
 
@@ -52,7 +52,7 @@ public class Hiscores extends ImageBuilder {
         String defaultURL = getNormalAccount(encodedName);
         this.loading = new ImageLoadingMessage(
                 getChannel(),
-                getGuild(),
+                getEmoteHelper(),
                 "OSRS Hiscores lookup: " + nameQuery.toUpperCase(),
                 "Give me a second, their website can be slow as fuck.",
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",

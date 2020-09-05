@@ -22,21 +22,21 @@ public abstract class PageableEmbed {
      * Initialise the values
      *
      * @param channel Channel to send embed to
-     * @param guild   Guild to find emotes
+     * @param emoteHelper   Emote helper
      * @param items   List of items to be displayed
      * @param thumb   Thumbnail to use for embed
      * @param title   Title to use for embed
      * @param desc    Description to use for embed
      * @param colour  Optional colour to use for embed
      */
-    public PageableEmbed(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, int... colour) {
+    public PageableEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int... colour) {
         this.channel = channel;
         this.items = items;
         this.title = title;
         this.desc = desc;
-        this.forward = guild.getEmotesByName("forward", true).get(0);
-        this.backward = guild.getEmotesByName("backward", true).get(0);
-        this.reverse = guild.getEmotesByName("reverse", true).get(0);
+        this.forward = emoteHelper.getForward();
+        this.backward = emoteHelper.getBackward();
+        this.reverse = emoteHelper.getReverse();
         this.thumb = thumb;
         this.bound = 5;
         this.colour = colour.length == 1 ? colour[0] : EmbedHelper.getYellow();

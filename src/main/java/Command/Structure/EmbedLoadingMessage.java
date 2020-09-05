@@ -15,7 +15,7 @@ public class EmbedLoadingMessage {
     private long id, startTime, currentTime;
     private final String title, thumbnail, helpMessage;
     private String desc;
-    private final Guild guild;
+    private final EmoteHelper emoteHelper;
     private final ArrayList<LoadingStage> stages;
     private int currentStep;
     private boolean finished, failed;
@@ -24,15 +24,16 @@ public class EmbedLoadingMessage {
      * Create a loading message
      *
      * @param channel      Channel to send the message to
+     * @param emoteHelper  Emote helper
      * @param title        Embed title
      * @param desc         Embed description
      * @param thumbnail    Embed thumbnail
      * @param helpMessage  Help message to display in embed footer
      * @param loadingSteps List of titles for loading fields
      */
-    public EmbedLoadingMessage(MessageChannel channel, Guild guild, String title, String desc, String thumbnail, String helpMessage, String[] loadingSteps) {
+    public EmbedLoadingMessage(MessageChannel channel, EmoteHelper emoteHelper, String title, String desc, String thumbnail, String helpMessage, String[] loadingSteps) {
         this.channel = channel;
-        this.guild = guild;
+        this.emoteHelper = emoteHelper;
         this.title = title;
         this.thumbnail = thumbnail;
         this.desc = desc;
@@ -86,7 +87,7 @@ public class EmbedLoadingMessage {
      * @return Loading stages
      */
     private ArrayList<LoadingStage> getStages(String[] loadingSteps) {
-        return Arrays.stream(loadingSteps).map(step -> new LoadingStage(step, guild)).collect(Collectors.toCollection(ArrayList::new));
+        return Arrays.stream(loadingSteps).map(step -> new LoadingStage(step, emoteHelper)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -178,7 +179,7 @@ public class EmbedLoadingMessage {
      * @param value Value to display - "See player data"
      */
     public void completeLoading(String value) {
-        LoadingStage done = new LoadingStage("Done!", guild);
+        LoadingStage done = new LoadingStage("Done!", emoteHelper);
         if(value == null) {
             done.complete(startTime);
         }
@@ -196,7 +197,7 @@ public class EmbedLoadingMessage {
      * @param reason Reason for failure - "That player doesn't exist"
      */
     public void failLoading(String reason) {
-        LoadingStage fail = new LoadingStage("FAIL!", guild);
+        LoadingStage fail = new LoadingStage("FAIL!", emoteHelper);
         fail.fail(reason, startTime);
         for(int i = currentStep; i < stages.size(); i++) {
             stages.get(i).fail();
@@ -235,11 +236,13 @@ public class EmbedLoadingMessage {
 
         /**
          * Use the guild emotes for completion status if available otherwise standard emoji
+         *
+         * @param emoteHelper Emote helper
          */
-        public Status(Guild guild) {
-            this.neutral = EmbedHelper.formatEmote(guild.getEmotesByName("neutral", true).get(0));
-            this.fail = EmbedHelper.formatEmote(guild.getEmotesByName("fail", true).get(0));
-            this.complete = EmbedHelper.formatEmote(guild.getEmotesByName("complete", true).get(0));
+        public Status(EmoteHelper emoteHelper) {
+            this.neutral = EmoteHelper.formatEmote(emoteHelper.getNeutral());
+            this.fail = EmoteHelper.formatEmote(emoteHelper.getFail());
+            this.complete = EmoteHelper.formatEmote(emoteHelper.getComplete());
         }
 
         public String getComplete() {
@@ -270,8 +273,8 @@ public class EmbedLoadingMessage {
          *
          * @param title Title to show in the embed - "Checking account type"
          */
-        public LoadingStage(String title, Guild guild) {
-            this.status = new Status(guild);
+        public LoadingStage(String title, EmoteHelper helper) {
+            this.status = new Status(helper);
             this.currentStatus = status.getNeutral();
             this.value = "---";
             this.title = title;

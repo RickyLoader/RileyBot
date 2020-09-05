@@ -1,16 +1,15 @@
 package COD;
 
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -21,8 +20,8 @@ public class CombatRecord extends ImageBuilder {
 
     private CODPlayer player;
 
-    public CombatRecord(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
-        super(channel, guild, resourcePath, fontName);
+    public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
+        super(channel, emoteHelper, resourcePath, fontName);
     }
 
     /**
@@ -227,7 +226,7 @@ public class CombatRecord extends ImageBuilder {
     public void buildImage(String nameQuery, String helpMessage, String... args) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
-                getGuild(),
+                getEmoteHelper(),
                 "MW Player lookup: " + nameQuery.toUpperCase(),
                 "One moment please.",
                 Gunfight.getThumb(),

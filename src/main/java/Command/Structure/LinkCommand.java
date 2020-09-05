@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 public class LinkCommand extends DiscordCommand {
 
-    String link;
+    final String link;
 
     public LinkCommand(String trigger, String desc, String helpname) {
         super(trigger, desc, helpname);

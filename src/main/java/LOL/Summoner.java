@@ -1,6 +1,5 @@
 package LOL;
 
-import COD.CODPlayer;
 import Network.Secret;
 import Network.NetworkRequest;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +24,7 @@ public class Summoner {
     private final HashMap<String, RankedQueue> queues = new HashMap<>();
     private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
-    boolean exists;
+    final boolean exists;
     private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", urlPrefix;
     private File profileIcon, profileBorder, profileBanner;
 

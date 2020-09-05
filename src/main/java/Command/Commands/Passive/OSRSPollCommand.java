@@ -5,7 +5,6 @@ import OSRS.Polling.PollManager;
 import OSRS.Polling.PollManager.Poll;
 import OSRS.Polling.PollManager.Poll.Question;
 import OSRS.Polling.PollManager.Poll.Question.Answer;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.Arrays;
@@ -25,7 +24,6 @@ public class OSRSPollCommand extends PageableEmbedCommand {
     public PageableEmbed getEmbed(CommandContext context) {
         String[] args = context.getLowerCaseMessage().trim().split(" ");
         MessageChannel channel = context.getMessageChannel();
-        Guild guild = context.getHomeGuild();
 
         if(args.length > 2) {
             channel.sendMessage(getHelpNameCoded()).queue();
@@ -46,21 +44,14 @@ public class OSRSPollCommand extends PageableEmbedCommand {
             channel.sendMessage("That poll doesn't exist (or I couldn't parse it)").queue();
             return null;
         }
-        try {
-            System.out.println("OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod());
 
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
         return new PollMessage(
                 channel,
-                guild,
+                context.getEmoteHelper(),
                 Arrays.asList(poll.getQuestions()),
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 "OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod(),
                 poll.getTitle(),
-                context.getEmoteHelper(),
                 EmbedHelper.getGreen()
         );
     }
@@ -76,16 +67,16 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         /**
          * Embedded message that can be paged through with emotes and displays as a list of fields
          *
-         * @param channel Channel to send embed to
-         * @param guild   Guild to find emotes
-         * @param items   List of items to be displayed
-         * @param thumb   Thumbnail to use for embed
-         * @param title   Title to use for embed
-         * @param desc    Description to use for embed
-         * @param colour  Optional colour to use for embed
+         * @param channel     Channel to send embed to
+         * @param emoteHelper Emote helper
+         * @param items       List of items to be displayed
+         * @param thumb       Thumbnail to use for embed
+         * @param title       Title to use for embed
+         * @param desc        Description to use for embed
+         * @param colour      Optional colour to use for embed
          */
-        public PollMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, EmoteHelper emoteHelper, int... colour) {
-            super(channel, guild, items, thumb, title, desc, colour);
+        public PollMessage(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int... colour) {
+            super(channel, emoteHelper, items, thumb, title, desc, colour);
             this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());
             this.section = EmoteHelper.formatEmote(emoteHelper.getSwordBlade());
             this.tip = EmoteHelper.formatEmote(emoteHelper.getSwordTip());

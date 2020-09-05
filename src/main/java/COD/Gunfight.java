@@ -1,6 +1,7 @@
 package COD;
 
 import Command.Structure.EmbedHelper;
+import Command.Structure.EmoteHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -17,7 +18,6 @@ public class Gunfight {
     private MessageChannel channel;
     private Emote win, loss, stop, undo;
     private int wins = 0, losses = 0, currentStreak = 0, rank = 0, longestStreak = 0;
-    private Guild server;
     private long lastUpdate = 0, startTime = 0, gameID;
     private String lastMessage;
     private LinkedList<Gunfight> matchUpdateHistory;
@@ -32,62 +32,49 @@ public class Gunfight {
     /**
      * Constructor to begin gunfight session
      *
-     * @param channel Text channel to play in
-     * @param server  Guild to find emotes
-     * @param owner   User who started game
+     * @param channel     Text channel to play in
+     * @param owner       User who started game
+     * @param emoteHelper Emote helper
      */
-    public Gunfight(MessageChannel channel, Guild server, User owner) {
+    public Gunfight(MessageChannel channel, User owner, EmoteHelper emoteHelper) {
         this.channel = channel;
-        this.server = server;
         this.owner = owner;
         this.active = true;
         matchUpdateHistory = new LinkedList<>();
         leaderboard = Session.getHistory();
-        getEmotes();
+        getEmotes(emoteHelper);
     }
 
     /**
      * Constructor for help message
      *
-     * @param channel Channel to post in
-     * @param server  Guild for emotes
+     * @param channel     Channel to post in
+     * @param emoteHelper Emote helper
      */
-    public Gunfight(MessageChannel channel, Guild server) {
+    public Gunfight(MessageChannel channel, EmoteHelper emoteHelper) {
         this.channel = channel;
-        this.server = server;
-        getEmotes();
+        getEmotes(emoteHelper);
         showHelpMessage();
-    }
-
-    /**
-     * Get Emotes required for message
-     */
-    private void getEmotes() {
-        this.win = server.getEmotesByName("victory", true).get(0);
-        this.loss = server.getEmotesByName("defeat", true).get(0);
-        this.stop = server.getEmotesByName("stop", true).get(0);
-        this.undo = server.getEmotesByName("undo", true).get(0);
     }
 
     /**
      * Constructor to start a session with given score values
      *
      * @param channel       Text channel to play in
-     * @param server        Guild to find emotes
      * @param owner         User who started game
+     * @param emoteHelper   Emote helper
      * @param wins          wins to start with
      * @param losses        losses to start with
      * @param currentStreak current streak to set
      * @param longestStreak longest streak to set
      */
-    public Gunfight(MessageChannel channel, Guild server, User owner, int wins, int losses, int currentStreak, int longestStreak) {
-        this(channel, server, owner);
+    public Gunfight(MessageChannel channel, User owner, EmoteHelper emoteHelper, int wins, int losses, int currentStreak, int longestStreak) {
+        this(channel, owner, emoteHelper);
         this.wins = wins;
         this.losses = losses;
         this.currentStreak = currentStreak;
         this.longestStreak = longestStreak;
         this.lastUpdate = System.currentTimeMillis();
-        getEmotes();
     }
 
     /**
@@ -105,6 +92,16 @@ public class Gunfight {
         this.rank = rank;
         this.longestStreak = longestStreak;
         this.lastUpdate = lastUpdate;
+    }
+
+    /**
+     * Get Emotes required for message
+     */
+    private void getEmotes(EmoteHelper emoteHelper) {
+        this.win = emoteHelper.getVictory();
+        this.loss = emoteHelper.getDefeat();
+        this.stop = emoteHelper.getStop();
+        this.undo = emoteHelper.getUndo();
     }
 
     /**

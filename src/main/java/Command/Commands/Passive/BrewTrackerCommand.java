@@ -1,9 +1,6 @@
 package Command.Commands.Passive;
 
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.EmbedHelper;
-import Command.Structure.EmoteListener;
+import Command.Structure.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
@@ -61,7 +58,7 @@ public class BrewTrackerCommand extends DiscordCommand {
     private void showBrewTracker(CommandContext context) {
         if(brewsMessage == null || brewsMessage.timedOut()) {
             addEmoteListener(context.getJDA());
-            brewsMessage = new BrewsMessage(context.getMessageChannel(), context.getHomeGuild());
+            brewsMessage = new BrewsMessage(context.getMessageChannel(), context.getEmoteHelper(), context.getGuild());
             return;
         }
         brewsMessage.relocate();
@@ -93,22 +90,23 @@ public class BrewTrackerCommand extends DiscordCommand {
     private static class BrewsMessage {
         private final MessageChannel channel;
         private long id, lastUpdate;
-        private final Guild guild;
         private final LinkedHashMap<Member, Alcoholic> alcoholics = new LinkedHashMap<>();
         private final Emote increment, decrement, emptyBeer;
+        private final Guild guild;
 
         /**
          * Initialise the brew tracker
          *
-         * @param channel Channel to send message to
-         * @param guild   Guild to search for emotes
+         * @param channel     Channel to send message to
+         * @param emoteHelper Emote helper
+         * @param guild       Guild to find member
          */
-        public BrewsMessage(MessageChannel channel, Guild guild) {
+        public BrewsMessage(MessageChannel channel, EmoteHelper emoteHelper, Guild guild) {
             this.channel = channel;
             this.guild = guild;
-            this.increment = guild.getEmotesByName("add_beer", true).get(0);
-            this.decrement = guild.getEmotesByName("subtract_beer", true).get(0);
-            this.emptyBeer = guild.getEmotesByName("empty_beer", true).get(0);
+            this.increment = emoteHelper.getAddBeer();
+            this.decrement = emoteHelper.getSubtractBeer();
+            this.emptyBeer = emoteHelper.getEmptyBeer();
             this.lastUpdate = System.currentTimeMillis();
             sendMessage(getEmbed());
         }

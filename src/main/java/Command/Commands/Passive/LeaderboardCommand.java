@@ -4,7 +4,6 @@ import COD.Gunfight;
 import Command.Structure.*;
 import COD.Session;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
@@ -80,7 +79,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
     public PageableEmbed getEmbed(CommandContext context) {
         return new Leaderboard(
                 context.getMessageChannel(),
-                context.getHomeGuild(),
+                context.getEmoteHelper(),
                 Session.getHistory(),
                 Gunfight.getThumb(),
                 "GUNFIGHT LEADERBOARD!",
@@ -99,8 +98,20 @@ public class LeaderboardCommand extends PageableEmbedCommand {
      */
     public static class Leaderboard extends PageableTableEmbed {
 
-        public Leaderboard(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
-            super(channel, guild, items, thumb, title, desc, columns);
+        /**
+         * Embedded message that can be paged through with emotes and displays as a table.
+         *
+         * @param channel     Channel to send embed to
+         * @param emoteHelper Emote helper
+         * @param items       List of items to be displayed
+         * @param thumb       Thumbnail to use for embed
+         * @param title       Title to use for embed
+         * @param desc        Description to use for embed
+         * @param columns     Column headers to display at the top of message
+         * @param colour      Optional colour to use for embed
+         */
+        public Leaderboard(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
+            super(channel, emoteHelper, items, thumb, title, desc, columns, colour);
         }
 
         @Override

@@ -56,8 +56,8 @@ public class GunfightCommand extends DiscordCommand {
 
         gunfight = new Gunfight(
                 context.getMessageChannel(),
-                context.getHomeGuild(),
                 context.getUser(),
+                context.getEmoteHelper(),
                 Integer.parseInt(args[0]),
                 Integer.parseInt(args[1]),
                 Integer.parseInt(args[2]),
@@ -114,8 +114,8 @@ public class GunfightCommand extends DiscordCommand {
     private void startNormalGame(CommandContext context) {
         gunfight = new Gunfight(
                 context.getMessageChannel(),
-                context.getHomeGuild(),
-                context.getUser()
+                context.getUser(),
+                context.getEmoteHelper()
         );
         gunfight.startGame();
     }

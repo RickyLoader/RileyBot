@@ -3,8 +3,8 @@ package Command.Commands;
 import Bot.DiscordUser;
 import COD.CombatRecord;
 import Command.Structure.CodImageBuilderCommand;
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -18,8 +18,8 @@ public class MWLookupCommand extends CodImageBuilderCommand {
     }
 
     @Override
-    public ImageBuilder getImageBuilder(MessageChannel channel, Guild guild) {
-        return new CombatRecord(channel, guild, "src/main/resources/COD/", "ModernWarfare.otf");
+    public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
+        return new CombatRecord(channel, emoteHelper, "src/main/resources/COD/", "ModernWarfare.otf");
     }
 
     @Override

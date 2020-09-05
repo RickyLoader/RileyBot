@@ -1,6 +1,5 @@
 package Command.Structure;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -80,7 +79,7 @@ public abstract class LookupCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        lookupUser(name, channel, context.getHomeGuild());
+        lookupUser(name, channel, context.getEmoteHelper());
     }
 
     /**
@@ -96,17 +95,18 @@ public abstract class LookupCommand extends DiscordCommand {
     /**
      * Look up the player and build the image
      *
-     * @param name    Player to look up
-     * @param channel Channel to send result to
+     * @param name        Player to look up
+     * @param channel     Channel to send result to
+     * @param emoteHelper Emote helper
      */
-    private void lookupUser(String name, MessageChannel channel, Guild guild) {
+    private void lookupUser(String name, MessageChannel channel, EmoteHelper emoteHelper) {
         if(currentLookups.contains(name.toLowerCase())) {
             channel.sendMessage("Patience is a virtue cunt").queue();
             return;
         }
         currentLookups.add(name.toLowerCase());
         new Thread(() -> {
-            processName(name, channel, guild);
+            processName(name, channel, emoteHelper);
             currentLookups.remove(name.toLowerCase());
         }).start();
     }
@@ -114,7 +114,7 @@ public abstract class LookupCommand extends DiscordCommand {
     /**
      * Choose what to do with the given name
      */
-    public abstract void processName(String name, MessageChannel channel, Guild guild);
+    public abstract void processName(String name, MessageChannel channel, EmoteHelper emoteHelper);
 
     /**
      * Get a hint on how to save the name

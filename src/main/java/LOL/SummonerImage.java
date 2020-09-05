@@ -1,9 +1,9 @@
 package LOL;
 
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
@@ -15,8 +15,8 @@ import java.util.ArrayList;
 public class SummonerImage extends ImageBuilder {
     private Summoner summoner;
 
-    public SummonerImage(MessageChannel channel, Guild guild, String resourcePath, String fontName) {
-        super(channel, guild, resourcePath, fontName);
+    public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
+        super(channel, emoteHelper, resourcePath, fontName);
     }
 
     /**
@@ -32,7 +32,7 @@ public class SummonerImage extends ImageBuilder {
         String apiRegion = args[1];
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
-                getGuild(),
+                getEmoteHelper(),
                 "Summoner lookup: " + nameQuery.toUpperCase(),
                 "One moment please, checking the " + displayRegion + " region.",
                 "https://img.pngio.com/league-of-legends-needs-a-new-game-icon-league-of-legends-icon-png-256_256.png",

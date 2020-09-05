@@ -26,7 +26,7 @@ public class YoutubeLookupCommand extends LookupCommand {
     }
 
     @Override
-    public void processName(String name, MessageChannel channel, Guild guild) {
+    public void processName(String name, MessageChannel channel, EmoteHelper emoteHelper) {
         YoutubeBrowser youtubeBrowser = new YoutubeBrowser(getTrigger(), getDesc(), name);
         youtubeBrowser.execute(context);
     }
@@ -60,7 +60,7 @@ public class YoutubeLookupCommand extends LookupCommand {
             }
             return new YoutubeChannelMessage(
                     context.getMessageChannel(),
-                    context.getHomeGuild(),
+                    context.getEmoteHelper(),
                     channel.getVideos(),
                     channel.getThumbnail(),
                     channel.getName(),
@@ -213,8 +213,21 @@ public class YoutubeLookupCommand extends LookupCommand {
 
         private static class YoutubeChannelMessage extends PageableTableEmbed {
 
-            public YoutubeChannelMessage(MessageChannel channel, Guild guild, List<?> items, String thumb, String title, String desc, String[] columns) {
-                super(channel, guild, items, thumb, title, desc, columns);
+
+            /**
+             * Embedded message that can be paged through with emotes and displays as a table.
+             *
+             * @param channel     Channel to send embed to
+             * @param emoteHelper Emote helper
+             * @param items       List of items to be displayed
+             * @param thumb       Thumbnail to use for embed
+             * @param title       Title to use for embed
+             * @param desc        Description to use for embed
+             * @param columns     Column headers to display at the top of message
+             * @param colour      Optional colour to use for embed
+             */
+            public YoutubeChannelMessage(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
+                super(channel, emoteHelper, items, thumb, title, desc, columns, colour);
             }
 
             @Override

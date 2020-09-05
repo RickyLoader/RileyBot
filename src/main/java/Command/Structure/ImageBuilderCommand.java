@@ -1,6 +1,5 @@
 package Command.Structure;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 /**
@@ -24,8 +23,8 @@ public abstract class ImageBuilderCommand extends LookupCommand {
     }
 
     @Override
-    public void processName(String name, MessageChannel channel, Guild guild) {
-        buildImage(name, getImageBuilder(channel, guild));
+    public void processName(String name, MessageChannel channel, EmoteHelper emoteHelper) {
+        buildImage(name, getImageBuilder(channel, emoteHelper));
     }
 
     public void buildImage(String name, ImageBuilder builder) {
@@ -35,9 +34,9 @@ public abstract class ImageBuilderCommand extends LookupCommand {
     /**
      * Get the image builder for building the player stat image
      *
-     * @param channel Channel to send image to
-     * @param guild   Guild to find emotes
+     * @param channel     Channel to send image to
+     * @param emoteHelper Emote helper
      * @return Image builder
      */
-    public abstract ImageBuilder getImageBuilder(MessageChannel channel, Guild guild);
+    public abstract ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper);
 }

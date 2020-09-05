@@ -50,7 +50,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
         }
 
         if(status == null) {
-            status = new Status(context.getHomeGuild());
+            status = new Status(context.getEmoteHelper());
         }
 
         // Impatient, command is currently in progress

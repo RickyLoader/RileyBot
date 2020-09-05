@@ -1,6 +1,5 @@
 package Command.Structure;
 
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.concurrent.TimeUnit;

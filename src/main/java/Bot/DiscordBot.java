@@ -17,7 +17,6 @@ public class DiscordBot {
     public static void main(String[] args) {
         if(args.length == 1) {
             login(args[0]);
-
         }
         else {
             System.out.println("No discord token specified, please try again using the token as an argument.");
@@ -39,7 +38,7 @@ public class DiscordBot {
                             GatewayIntent.GUILD_EMOJIS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS
                     )
-                    .setActivity(Activity.watching("kids through my telescope"))
+                    .setActivity(Activity.watching("cum"))
                     .addEventListeners(new Listener())
                     .build();
         }
