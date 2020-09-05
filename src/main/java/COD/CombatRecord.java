@@ -1,5 +1,6 @@
 package COD;
 
+import COD.CODPlayer.Killstreak;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
@@ -177,16 +178,20 @@ public class CombatRecord extends ImageBuilder {
      * @return Kill death section with stats drawn on
      */
     private BufferedImage drawKillstreaks() {
-        ArrayList<CODPlayer.Killstreak> killstreaks = player.getKillstreaks();
+        ArrayList<Killstreak> killstreaks = player.getKillstreaks();
         BufferedImage image = null;
         try {
             image = ImageIO.read(new File((getResourcePath() + "Templates/killstreak_section.png")));
             Graphics g = image.getGraphics();
             g.setFont(getGameFont());
-            int maxHeight = killstreaks.stream().max(Comparator.comparing(killstreak -> killstreak.getImage().getHeight())).get().getImage().getHeight();
+            Killstreak largest = killstreaks.stream().max(Comparator.comparing(killstreak -> killstreak.getImage().getHeight())).orElse(null);
+            if(largest == null) {
+                throw new Exception("Unable to determine largest height for killstreaks");
+            }
+            int maxHeight = largest.getImage().getHeight();
             int padding = (image.getWidth() - (280 * 5)) / 6;
             int x = padding;
-            for(CODPlayer.Killstreak killstreak : killstreaks) {
+            for(Killstreak killstreak : killstreaks) {
                 g.setFont(getGameFont().deriveFont(32f));
                 BufferedImage icon = killstreak.getImage();
                 int y = (200 + (maxHeight / 2) - (icon.getHeight() / 2));

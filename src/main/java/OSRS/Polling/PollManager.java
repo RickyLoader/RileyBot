@@ -98,13 +98,13 @@ public class PollManager {
             Element questionElement = questionElements.get(i);
             Answer[] answers = parseAnswers(questionElement.select("div:not(.pollquestionborder)"));
 
-            Answer winner = Arrays.stream(answers).max(Comparator.comparing(Answer::getPercentageVote)).get();
+            Answer winner = Arrays.stream(answers).max(Comparator.comparing(Answer::getPercentageVote)).orElse(null);
             boolean opinionPoll = Arrays.stream(answers).noneMatch(a -> options.contains(a.getText()));
             questions[i] = new Question(
                     i + 1,
                     questionElement.select("b").first().text(),
                     answers,
-                    winner.getText().equals("Yes") && winner.getPercentageVote() >= 75.0,
+                    winner != null && (winner.getText().equals("Yes") && winner.getPercentageVote() >= 75.0),
                     winner,
                     opinionPoll
             );
