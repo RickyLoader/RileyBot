@@ -62,7 +62,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
     }
 
     private static class PollMessage extends PageableListEmbed {
-        private final String handle, section, tip;
+        private final String handle, section, tip, pass, fail;
 
         /**
          * Embedded message that can be paged through with emotes and displays as a list of fields
@@ -80,6 +80,8 @@ public class OSRSPollCommand extends PageableEmbedCommand {
             this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());
             this.section = EmoteHelper.formatEmote(emoteHelper.getSwordBlade());
             this.tip = EmoteHelper.formatEmote(emoteHelper.getSwordTip());
+            this.pass = EmoteHelper.formatEmote(emoteHelper.getComplete());
+            this.fail = EmoteHelper.formatEmote(emoteHelper.getFail());
         }
 
         @Override
@@ -98,15 +100,16 @@ public class OSRSPollCommand extends PageableEmbedCommand {
          * Build a String showing the votes for each answer of a question,
          * and the corresponding sword images.
          *
-         * @param answers Answers to build summary for
+         * @param question to build summary for answers
          * @return String summary of answers
          */
-        private String buildAnswerDisplay(Answer[] answers) {
+        private String buildAnswerDisplay(Question question) {
             StringBuilder builder = new StringBuilder();
+            Answer[] answers = question.getAnswers();
             for(int i = 0; i < answers.length; i++) {
                 Answer a = answers[i];
                 builder
-                        .append(buildSword(a.getPercentageVote()))
+                        .append(buildSword(a.getPercentageVote(), question.isOpinionQuestion() && a == question.getWinner()))
                         .append(" ")
                         .append(a.formatVotes())
                         .append(" ")
@@ -123,11 +126,16 @@ public class OSRSPollCommand extends PageableEmbedCommand {
          * Build the sword image based on the percentage of votes an Answer has
          *
          * @param percentageVotes Percentage of total votes the answer to a question has
+         * @param highestOpinion  Answer is the highest voted opinion
          * @return Image of a sword
          */
-        private String buildSword(double percentageVotes) {
+        private String buildSword(double percentageVotes, boolean highestOpinion) {
             int sections = (int) (percentageVotes / 15);
-            StringBuilder sword = new StringBuilder(handle);
+            StringBuilder sword = new StringBuilder();
+            if(highestOpinion) {
+                sword.append(pass);
+            }
+            sword.append(handle);
             for(int i = 0; i < sections; i++) {
                 sword.append(section);
             }
@@ -139,13 +147,17 @@ public class OSRSPollCommand extends PageableEmbedCommand {
 
         @Override
         public String getName(int currentIndex) {
-            System.out.println(((Question) getItems().get(currentIndex)).isPassed());
-            return ((Question) getItems().get(currentIndex)).getText();
+            Question question = (Question) getItems().get(currentIndex);
+            if(question.isOpinionQuestion()) {
+                return question.getText();
+            }
+            String emote = question.isPassed() ? pass : fail;
+            return emote + " " + question.getText();
         }
 
         @Override
         public String getValue(int currentIndex) {
-            return buildAnswerDisplay(((Question) getItems().get(currentIndex)).getAnswers());
+            return buildAnswerDisplay(((Question) getItems().get(currentIndex)));
         }
     }
 }
