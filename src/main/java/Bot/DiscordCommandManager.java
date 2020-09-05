@@ -108,6 +108,9 @@ public class DiscordCommandManager {
             player = new DiscordAudioPlayer();
             audioPlayers.put(event.getGuild(), player);
         }
+        if(!emoteHelper.hasGuild()) {
+            emoteHelper.setGuild(event.getJDA().getGuildById("421443474391564299"));
+        }
         command.execute(new CommandContext(event, commands, player, emoteHelper));
     }
 

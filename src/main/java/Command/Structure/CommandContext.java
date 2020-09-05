@@ -23,9 +23,6 @@ public class CommandContext {
     }
 
     public EmoteHelper getEmoteHelper() {
-        if(!emoteHelper.hasGuild()) {
-            emoteHelper.setGuild(getHomeGuild());
-        }
         return emoteHelper;
     }
 
@@ -42,10 +39,6 @@ public class CommandContext {
                 cancelable,
                 doAfter
         );
-    }
-
-    public Guild getHomeGuild() {
-        return getJDA().getGuildById("421443474391564299");
     }
 
     public User getSelfUser() {
