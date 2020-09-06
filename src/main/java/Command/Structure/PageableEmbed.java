@@ -121,8 +121,8 @@ public abstract class PageableEmbed {
      */
     public void showMessage() {
         channel.sendMessage(buildMessage()).queue(message -> {
+            id = message.getIdLong();
             if(pages > 1) {
-                id = message.getIdLong();
                 message.addReaction(backward).queue();
                 message.addReaction(forward).queue();
             }
