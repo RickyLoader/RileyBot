@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.commons.lang3.StringUtils;
+
 import javax.annotation.Nonnull;
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class Listener extends ListenerAdapter {
     }
 
     /**
-     * Get an up message to send to all guilds the bot is a member of when starting
+     * Get a start up message
      *
      * @return Bot is up message
      */
