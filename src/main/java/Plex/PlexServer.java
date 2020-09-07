@@ -291,7 +291,8 @@ public class PlexServer {
         private final Date releaseDate;
         private final double rating;
         private long budget, revenue;
-        private String movieDetails, language, imdbURL, poster, genre;
+        private String language, imdbURL, poster, genre;
+        private boolean complete;
 
         /**
          * Construct the movie
@@ -310,9 +311,6 @@ public class PlexServer {
          */
         public Movie(String id, String title, String contentRating, String summary, String tagLine, String releaseDate, String director, String cast, String genre, String languages, long duration, double rating) {
             this.id = getMovieID(id);
-            if(id.contains("tt")) {
-                imdbURL = getIMDBUrl(this.id);
-            }
             this.title = title;
             this.contentRating = contentRating;
             this.summary = summary;
@@ -324,17 +322,41 @@ public class PlexServer {
             this.languages = languages;
             this.duration = duration;
             this.rating = rating;
+            this.complete = false;
         }
 
         /**
-         * Get movie details JSON from TMDB containing movie poster, IMDB ID, and language information
+         * Complete the movie details that aren't provided by Plex via using The Movie Database
+         * Get IMDB URL, genre(s), poster, budget, revenue, and language data
          */
-        private void getMovieDetails() {
-            if(movieDetails != null) {
+        private void completeMovieDetails() {
+            if(complete) {
+                System.out.println("Movie is already complete!");
                 return;
             }
             String url = "https://api.themoviedb.org/3/movie/" + id + "?api_key=" + Secret.getTMDBKey() + "&language=en-US";
-            this.movieDetails = new NetworkRequest(url, false).get();
+            JSONObject movie = new JSONObject(new NetworkRequest(url, false).get());
+            this.imdbURL = buildIMDBUrl(movie.getString("imdb_id"));
+            this.genre = parseGenre(movie.getJSONArray("genres"));
+            this.poster = "https://image.tmdb.org/t/p/original/" + movie.getString("poster_path");
+            this.budget = movie.getLong("budget");
+            this.revenue = movie.getLong("revenue");
+            this.language = parseLanguage(movie);
+            this.complete = true;
+        }
+
+        /**
+         * Parse the genre data from The Movie Database
+         *
+         * @param genres Genre JSON
+         * @return Movie genre(s)
+         */
+        private String parseGenre(JSONArray genres) {
+            String[] genre = new String[genres.length()];
+            for(int i = 0; i < genres.length(); i++) {
+                genre[i] = genres.getJSONObject(i).getString("name");
+            }
+            return StringUtils.join(genre, ", ");
         }
 
         /**
@@ -343,79 +365,52 @@ public class PlexServer {
          * @return IMDB URL
          */
         public String getIMDBUrl() {
-            if(imdbURL == null) {
-                getMovieDetails();
-                imdbURL = getIMDBUrl(new JSONObject(movieDetails).getString("imdb_id"));
-            }
             return imdbURL;
         }
 
         /**
-         * Get the URL to the IMDB page of the movie from the imdb id
+         * Build the URL to the IMDB page of the movie from the imdb id
          *
          * @return IMDB URL
          */
-        private String getIMDBUrl(String id) {
+        private String buildIMDBUrl(String id) {
             return "https://www.imdb.com/title/" + id;
         }
 
         /**
-         * Attempt to retrieve the movie genre(s) from The Movie Database if no genre is available
+         * Get the movie genre(s)
          *
          * @return Movie genre(s)
          */
         public String getGenre() {
-            if(genre == null) {
-                getMovieDetails();
-                JSONArray genres = new JSONObject(movieDetails).getJSONArray("genres");
-                String[] genre = new String[genres.length()];
-                for(int i = 0; i < genres.length(); i++) {
-                    genre[i] = genres.getJSONObject(i).getString("name");
-                }
-                this.genre = StringUtils.join(genre, ", ");
-            }
             return genre;
         }
 
         /**
-         * Retrieve the movie poster from The Movie Database
+         * Get the movie poster
          *
          * @return Movie poster thumbnail
          */
         public String getPoster() {
-            if(poster == null) {
-                getMovieDetails();
-                poster = "https://image.tmdb.org/t/p/original/" + new JSONObject(movieDetails).getString("poster_path");
-            }
             return poster;
         }
 
         /**
-         * Retrieve the budget for the movie from The Movie Database
+         * Get the movie budget
          *
          * @return Movie budget
          */
         public long getBudget() {
-            if(budget == 0) {
-                getMovieDetails();
-                long budget = new JSONObject(movieDetails).getLong("budget");
-                this.budget = budget == 0 ? -1 : budget;
-            }
-            return this.budget;
+            return budget;
         }
 
         /**
-         * Retrieve the revenue for the movie from The Movie Database
+         * Get the box office revenue
          *
          * @return Movie revenue
          */
         public long getRevenue() {
-            if(revenue == 0) {
-                getMovieDetails();
-                long revenue = new JSONObject(movieDetails).getLong("revenue");
-                this.revenue = revenue == 0 ? -1 : revenue;
-            }
-            return this.revenue;
+            return revenue;
         }
 
         /**
@@ -429,44 +424,50 @@ public class PlexServer {
         }
 
         /**
-         * Retrieve the movie language from The Movie Database
+         * Parse the movie language data from The Movie Database
+         *
+         * @param movie Movie JSON from The Movie Database
+         * @return Movie language
+         */
+        public String parseLanguage(JSONObject movie) {
+            String iso = movie.getString("original_language");
+            JSONArray spokenLanguages = movie.getJSONArray("spoken_languages");
+
+            for(int i = 0; i < spokenLanguages.length(); i++) {
+                JSONObject lang = spokenLanguages.getJSONObject(i);
+                if(lang.getString("iso_639_1").equals(iso)) {
+                    language = lang.getString("name");
+                    break;
+                }
+            }
+
+            /*
+             * Original language is based on where the movie was filmed - English movie filmed in Germany
+             * would show German as the original language but wouldn't be present in spoken languages.
+             */
+            if(language == null) {
+                language = spokenLanguages.getJSONObject(0).getString("name");
+            }
+
+            // Get the English name of the language
+            if(!language.equals("English")) {
+                JSONArray allLanguages = new JSONArray(languages);
+                for(int i = 0; i < allLanguages.length(); i++) {
+                    JSONObject lang = allLanguages.getJSONObject(i);
+                    if(lang.getString("iso_639_1").equals(iso)) {
+                        language = lang.getString("english_name");
+                    }
+                }
+            }
+            return language;
+        }
+
+        /**
+         * Get the movie language
          *
          * @return Movie language
          */
         public String getLanguage() {
-            if(language == null) {
-                getMovieDetails();
-                JSONObject movieDetails = new JSONObject(this.movieDetails);
-                String iso = movieDetails.getString("original_language");
-                JSONArray spokenLanguages = movieDetails.getJSONArray("spoken_languages");
-
-                for(int i = 0; i < spokenLanguages.length(); i++) {
-                    JSONObject lang = spokenLanguages.getJSONObject(i);
-                    if(lang.getString("iso_639_1").equals(iso)) {
-                        language = lang.getString("name");
-                        break;
-                    }
-                }
-
-                /*
-                 * Original language is based on where the movie was filmed - English movie filmed in Germany
-                 * would show German as the original language but wouldn't be present in spoken languages.
-                 */
-                if(language == null) {
-                    language = spokenLanguages.getJSONObject(0).getString("name");
-                }
-
-                // Get the English name of the language
-                if(!language.equals("English")) {
-                    JSONArray allLanguages = new JSONArray(languages);
-                    for(int i = 0; i < allLanguages.length(); i++) {
-                        JSONObject lang = allLanguages.getJSONObject(i);
-                        if(lang.getString("iso_639_1").equals(iso)) {
-                            language = lang.getString("english_name");
-                        }
-                    }
-                }
-            }
             return language;
         }
 
@@ -559,7 +560,9 @@ public class PlexServer {
         }
 
         /**
-         * Get the id of the movie
+         * Get the id of the movie formatted with a prefix to assist in searching by id
+         * (TMDB ID is a number sequence e.g 231456) Append "td" to make it clear when
+         * an id has been provided for search
          *
          * @return movie id with prefix
          */
@@ -598,16 +601,16 @@ public class PlexServer {
         /**
          * Build a String containing the revenue and box office information if available
          *
-         * @return Null or String containing box office information
+         * @return String containing box office information
          */
-        private String getBoxOffice() {
+        private String getBoxOfficeSummary() {
             long budget = getBudget();
             long revenue = getRevenue();
             StringBuilder boxOffice = new StringBuilder();
-            if(budget > -1) {
+            if(budget > 0) {
                 boxOffice.append("**Budget**: ").append(formatUSD(budget));
             }
-            if(revenue > -1) {
+            if(revenue > 0) {
                 String prefix = "**Box Office**: ";
                 boxOffice.append(boxOffice.length() == 0 ? prefix : " | " + prefix).append(formatUSD(revenue));
             }
@@ -621,6 +624,9 @@ public class PlexServer {
          */
         @Override
         public String toString() {
+            if(!complete) {
+                completeMovieDetails();
+            }
             StringBuilder desc = new StringBuilder("**Synopsis**: " + summary);
 
             if(tagLine != null) {
@@ -641,9 +647,9 @@ public class PlexServer {
 
             desc.append("\n\n**Duration**: ").append(getDuration());
 
-            String boxOffice = getBoxOffice();
+            String boxOffice = getBoxOfficeSummary();
             if(!boxOffice.isEmpty()) {
-                desc.append("\n\n").append(getBoxOffice());
+                desc.append("\n\n").append(getBoxOfficeSummary());
             }
 
             desc.append("\n\n**IMDB**: ").append(EmbedHelper.embedURL("View", getIMDBUrl()));
