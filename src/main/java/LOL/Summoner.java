@@ -95,10 +95,8 @@ public class Summoner {
             this.profileBorder = new File(res + "Summoner/Borders/" + roundLevel(level) + ".png");
             url = urlPrefix + "league/v4/entries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
-
             if(json != null) {
                 JSONArray queues = new JSONArray(json);
-                System.out.println(queues.toString());
                 for(int i = 0; i < queues.length(); i++) {
                     JSONObject queue = queues.getJSONObject(i);
                     String type = queue.getString("queueType");
