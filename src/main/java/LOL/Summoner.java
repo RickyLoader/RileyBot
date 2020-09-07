@@ -28,16 +28,29 @@ public class Summoner {
     private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", urlPrefix;
     private File profileIcon, profileBorder, profileBanner;
 
-
+    /**
+     * Create a summoner
+     *
+     * @param name   Summoner name
+     * @param region Summoner region
+     * @param res    Resource path
+     */
     public Summoner(String name, String region, String res) {
         this.name = name;
         this.urlPrefix = "https://" + region + ".api.riotgames.com/lol/";
         this.res = res;
+
+        // Create default unranked queues
         queues.put(FLEX, new RankedQueue(res, false));
         queues.put(SOLO, new RankedQueue(res, true));
         this.exists = fetchSummonerData();
     }
 
+    /**
+     * Get the summoner name
+     *
+     * @return Summoner name
+     */
     public String getName() {
         return name;
     }
@@ -51,12 +64,17 @@ public class Summoner {
         return exists;
     }
 
+    /**
+     * Get the profile icon border based on summoner level
+     *
+     * @return Profile icon border
+     */
     public File getProfileBorder() {
         return profileBorder;
     }
 
     /**
-     * Fetch summoner data from riot
+     * Fetch summoner data from Riot API
      *
      * @return JSON from API
      */
@@ -80,6 +98,7 @@ public class Summoner {
 
             if(json != null) {
                 JSONArray queues = new JSONArray(json);
+                System.out.println(queues.toString());
                 for(int i = 0; i < queues.length(); i++) {
                     JSONObject queue = queues.getJSONObject(i);
                     String type = queue.getString("queueType");
@@ -118,10 +137,20 @@ public class Summoner {
         return true;
     }
 
+    /**
+     * Get the outline for the summoner banner based on their highest rank
+     *
+     * @return Profile banner outline
+     */
     public File getProfileBanner() {
         return profileBanner;
     }
 
+    /**
+     * Get the highest rank achieved across all ranked queues
+     *
+     * @return Highest rank
+     */
     private String getHighestRank() {
         ArrayList<String> tiers = new ArrayList<>();
         tiers.add("default");
@@ -141,26 +170,58 @@ public class Summoner {
         return flex;
     }
 
+    /**
+     * Get the summoner level
+     *
+     * @return Summoner level
+     */
     public int getLevel() {
         return level;
     }
 
+    /**
+     * Get the list of summoner champion stats
+     *
+     * @return List of champions
+     */
     public ArrayList<Champion> getChampions() {
         return champions;
     }
 
+    /**
+     * Get the flex ranked queue
+     *
+     * @return Flex ranked queue
+     */
     public RankedQueue getFlexQueue() {
         return queues.get(FLEX);
     }
 
+    /**
+     * Get the solo ranked queue
+     *
+     * @return Solo ranked queue
+     */
     public RankedQueue getSoloQueue() {
         return queues.get(SOLO);
     }
 
+    /**
+     * Get the profile icon of the summoner
+     *
+     * @return Summoner profile icon
+     */
     public File getProfileIcon() {
         return profileIcon.exists() ? profileIcon : new File(res + "Summoner/Icons/0.png");
     }
 
+    /**
+     * Round the summoner level to the nearest floor multiple of 25.
+     * Summoner icon border is based on level and is rewarded every 25 levels from 50 onward
+     *
+     * @param level Summoner level
+     * @return Closest floor multiple of 25
+     */
     private int roundLevel(int level) {
         if(level < 30) {
             return 1;
@@ -171,6 +232,9 @@ public class Summoner {
         return (int) (25 * Math.floor((double) level / 25));
     }
 
+    /**
+     * Hold information on a ranked queue
+     */
     public static class RankedQueue {
         private final Ratio winLoss;
         private final int points;
@@ -178,6 +242,17 @@ public class Summoner {
         private final File helmet, banner;
         private boolean unranked = false;
 
+        /**
+         * Create a ranked queue
+         *
+         * @param wins   Game wins
+         * @param losses Game losses
+         * @param points Ranked LP
+         * @param tier   Ranked tier - bronze, silver...
+         * @param rank   Ranked division - IV, III...
+         * @param res    Resource path
+         * @param solo   Solo queue
+         */
         public RankedQueue(int wins, int losses, int points, String tier, String rank, String res, boolean solo) {
             this.winLoss = new Ratio(wins, losses);
             this.points = points;
@@ -188,58 +263,104 @@ public class Summoner {
             this.banner = new File(res + "Summoner/Ranked/Banners/" + tier + ".png");
         }
 
+        /**
+         * Create a default ranked queue
+         *
+         * @param res  Resource path
+         * @param solo Solo queue
+         */
         public RankedQueue(String res, boolean solo) {
             this(0, 0, 0, "DEFAULT", "DEFAULT", res, solo);
             this.unranked = true;
         }
 
-        public boolean isUnranked() {
-            return unranked;
-        }
-
+        /**
+         * Get the banner to display ranked stats in - based on tier
+         *
+         * @return Banner to display ranked stats
+         */
         public File getBanner() {
             return banner;
         }
 
+        /**
+         * Get the ranked helmet - based on tier and rank
+         *
+         * @return Ranked helmet
+         */
         public File getHelmet() {
             return helmet;
         }
 
+        /**
+         * Get the ranked points
+         *
+         * @return Ranked points/LP
+         */
         public String getPoints() {
             return points + " LP";
         }
 
+        /**
+         * Get the number of wins
+         *
+         * @return Number of wins
+         */
         public String getWins() {
             int wins = winLoss.getNumerator();
             return wins + ((wins == 1) ? " win" : " wins");
         }
 
+        /**
+         * Get the number of losses
+         *
+         * @return Number of losses
+         */
         public String getLosses() {
             int loses = winLoss.getDenominator();
             return loses + ((loses == 1) ? " loss" : " losses");
         }
 
+        /**
+         * Get the win loss ratio summary String
+         *
+         * @return Win loss ratio summary
+         */
         public String getRatio() {
             return winLoss.formatRatio(winLoss.getRatio()) + " W/L";
         }
 
+        /**
+         * Get the tier and division summary String
+         *
+         * @return Tier and division summary String
+         */
         public String getRankSummary() {
             return unranked ? "Unranked" : getTier() + " " + rank;
         }
 
+        /**
+         * Get the name of the queue
+         *
+         * @return Queue name
+         */
         public String getQueue() {
             return queue;
         }
 
-        public String getRank() {
-            return rank;
-        }
-
+        /**
+         * Get the ranked tier name in normal case - GOLD -> Gold
+         *
+         * @return Ranked tier name
+         */
         private String getTier() {
             return tier.charAt(0) + tier.substring(1).toLowerCase();
         }
     }
 
+    /**
+     * Hold information on Summoner champion stats
+     */
     public static class Champion implements Comparable<Champion> {
         private final int id, level, points;
         private String name;
@@ -247,6 +368,14 @@ public class Summoner {
         private File image;
         private final File masteryIcon;
 
+        /**
+         * Create a champion
+         *
+         * @param id     Champion id
+         * @param level  Champion level
+         * @param points Champion mastery points
+         * @param res    Resource path
+         */
         public Champion(int id, int level, int points, String res) {
             this.id = id;
             this.level = level;
@@ -256,34 +385,72 @@ public class Summoner {
             getChampionInfo();
         }
 
+        /**
+         * Get the champion id
+         *
+         * @return Champion id
+         */
         public int getId() {
             return id;
         }
 
+        /**
+         * Get the champion name
+         *
+         * @return Champion name
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Get champion mastery points
+         *
+         * @return Champion mastery points
+         */
         public int getPoints() {
             return points;
         }
 
+        /**
+         * Format the points 1000 -> 1,000
+         *
+         * @return Formatted mastery points
+         */
         public String getFormattedPoints() {
             return new DecimalFormat("#,###").format(points);
         }
 
+        /**
+         * Get the champion loading screen image
+         *
+         * @return Champion loading screen image
+         */
         public File getImage() {
             return image;
         }
 
+        /**
+         * Get the champion mastery icon
+         *
+         * @return Mastery icon
+         */
         public File getMasteryIcon() {
             return masteryIcon;
         }
 
+        /**
+         * Get the champion level
+         *
+         * @return Champion level
+         */
         public int getLevel() {
             return level;
         }
 
+        /**
+         * Use the JSON file to find the champion name and image
+         */
         private void getChampionInfo() {
             try {
                 JSONObject champions = new JSONObject(new String(Files.readAllBytes(Paths.get(res + "Data/champions.json")), StandardCharsets.UTF_8)).getJSONObject("data");
@@ -300,6 +467,12 @@ public class Summoner {
             }
         }
 
+        /**
+         * Sort in descending order of mastery points
+         *
+         * @param o Champion to compare to current
+         * @return Mastery point comparison
+         */
         @Override
         public int compareTo(@NotNull Summoner.Champion o) {
             return o.getPoints() - getPoints();

@@ -15,6 +15,14 @@ import java.util.ArrayList;
 public class SummonerImage extends ImageBuilder {
     private Summoner summoner;
 
+    /**
+     * Initialise the class for building a summoner image
+     *
+     * @param channel      Channel to send built image to
+     * @param emoteHelper  Emote helper
+     * @param resourcePath Path to resources used by class
+     * @param fontName     Name of font
+     */
     public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         super(channel, emoteHelper, resourcePath, fontName);
     }
