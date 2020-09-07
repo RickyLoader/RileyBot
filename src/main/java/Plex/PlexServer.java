@@ -123,6 +123,9 @@ public class PlexServer {
      * @return Movie embed
      */
     public MessageEmbed getMovieEmbed(Movie movie) {
+        if(!movie.isComplete()) {
+            movie.completeMovieDetails();
+        }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setThumbnail(plexIcon);
         builder.setColor(EmbedHelper.getOrange());
@@ -326,10 +329,19 @@ public class PlexServer {
         }
 
         /**
+         * Does the movie have the required data from The Movie Database
+         *
+         * @return Movie has complete data for display
+         */
+        public boolean isComplete() {
+            return complete;
+        }
+
+        /**
          * Complete the movie details that aren't provided by Plex via using The Movie Database
          * Get IMDB URL, genre(s), poster, budget, revenue, and language data
          */
-        private void completeMovieDetails() {
+        public void completeMovieDetails() {
             if(complete) {
                 System.out.println("Movie is already complete!");
                 return;
@@ -624,9 +636,6 @@ public class PlexServer {
          */
         @Override
         public String toString() {
-            if(!complete) {
-                completeMovieDetails();
-            }
             StringBuilder desc = new StringBuilder("**Synopsis**: " + summary);
 
             if(tagLine != null) {
