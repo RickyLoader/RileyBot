@@ -19,7 +19,7 @@ public class MWLookupCommand extends CodImageBuilderCommand {
 
     @Override
     public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new CombatRecord(channel, emoteHelper, "src/main/resources/COD/", "ModernWarfare.otf");
+        return new CombatRecord(channel, emoteHelper, "MW", "ModernWarfare.otf");
     }
 
     @Override

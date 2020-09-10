@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Helper methods for storing and retrieving information based on User id
  */
 public class DiscordUser {
-    private static final String MW = "MW", OSRS = "OSRS", LOL = "LOL", YT = "YT";
+    private static final String MW = "MW", CW = "CW", OSRS = "OSRS", LOL = "LOL", YT = "YT";
 
     /**
      * Retrieve name used in mwlookup command
@@ -19,6 +19,16 @@ public class DiscordUser {
      */
     public static String getMWName(long id) {
         return getName(id, MW);
+    }
+
+    /**
+     * Retrieve name used in cwlookup command
+     *
+     * @param id Discord user object id
+     * @return cwlookup name
+     */
+    public static String getCWName(long id) {
+        return getName(id, CW);
     }
 
     /**
@@ -61,6 +71,18 @@ public class DiscordUser {
     public static void saveMWName(String name, MessageChannel channel, User user) {
         savePlayer(name, user.getIdLong(), MW);
         channel.sendMessage(user.getAsMention() + " Your mwlookup name is now " + name).queue();
+    }
+
+    /**
+     * Store a given name by the user's discord id for the cwlookup command
+     *
+     * @param name    Name to be saved
+     * @param channel Channel to report status to
+     * @param user    User to store by id
+     */
+    public static void saveCWName(String name, MessageChannel channel, User user) {
+        savePlayer(name, user.getIdLong(), CW);
+        channel.sendMessage(user.getAsMention() + " Your cwlookup name is now " + name).queue();
     }
 
     /**

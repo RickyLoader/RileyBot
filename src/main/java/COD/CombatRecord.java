@@ -22,7 +22,7 @@ public class CombatRecord extends ImageBuilder {
     private CODPlayer player;
 
     public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
-        super(channel, emoteHelper, resourcePath, fontName);
+        super(channel, emoteHelper, "src/main/resources/COD/" + resourcePath + "/", fontName);
     }
 
     /**

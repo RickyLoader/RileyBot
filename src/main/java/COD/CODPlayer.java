@@ -17,22 +17,20 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public abstract class CODPlayer {
-    private final String name;
-    private final String platform;
-    private final String data;
+public class CODPlayer {
+    private final String name, platform, data, endpoint, res;
     private String status;
     private Ratio wl, kd;
-    private int streak, spm;
+    private int streak;
     private Weapon primary, secondary, lethal;
     private ArrayList<Killstreak> killstreaks;
     private ArrayList<Commendation> commendations;
-    private final String endpoint;
 
-    public CODPlayer(String name, String platform, String endpoint) {
+    public CODPlayer(String name, String platform, String endpoint, String res) {
         this.name = name;
         this.platform = platform;
         this.endpoint = endpoint;
+        this.res = "src/main/resources/COD/" + res + "/";
         this.data = fetchPlayerData();
     }
 
@@ -46,7 +44,6 @@ public abstract class CODPlayer {
         try {
             String name = URLEncoder.encode(this.name, "UTF-8").replaceAll("\\+", "%20");
             json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/" + endpoint + "/" + name + "/" + platform, false).get();
-
             if(json == null) {
                 status = "Failed to communicate with API, try again later.";
                 return null;
@@ -66,9 +63,6 @@ public abstract class CODPlayer {
             this.kd = new Ratio(basic.getInt("kills"), basic.getInt("deaths"));
             this.wl = new Ratio(basic.getInt("wins"), basic.getInt("losses"));
             this.streak = basic.getInt("recordKillStreak");
-            this.spm = (int) Math.ceil((double) (basic.getInt("score")) / basic.getInt("timePlayedTotal"));
-
-
             JSONObject weapons = mergeGunNames(player.getJSONObject("itemData"));
 
             this.primary = getFavourite(weapons, Weapon.TYPE.PRIMARY);
@@ -77,10 +71,15 @@ public abstract class CODPlayer {
 
             JSONObject killstreaks = player.getJSONObject("scorestreakData");
             killstreaks = mergeStreakData(killstreaks.getJSONObject("lethalScorestreakData"), killstreaks.getJSONObject("supportScorestreakData"));
+            if(killstreaks == null) {
+                status = "Error getting killstreak info";
+                return null;
+            }
             this.killstreaks = parseKillstreaks(killstreaks);
             this.commendations = parsePlayerCommendations(player.getJSONObject("accoladeData").getJSONObject("properties"));
         }
         catch(Exception e) {
+            e.printStackTrace();
             return null;
         }
         return json;
@@ -110,7 +109,7 @@ public abstract class CODPlayer {
     private ArrayList<Commendation> parsePlayerCommendations(JSONObject items) {
         ArrayList<Commendation> commendations = new ArrayList<>();
         try {
-            JSONObject commendationNames = readJSONFile("src/main/resources/COD/Data/commendations.json");
+            JSONObject commendationNames = readJSONFile(res + "Data/commendations.json");
             if(commendationNames == null) {
                 return null;
             }
@@ -120,7 +119,7 @@ public abstract class CODPlayer {
                 int quantity = items.getInt(commendationName);
                 String title = commendationInfo.getString("title");
                 String desc = commendationInfo.getString("desc");
-                commendations.add(new Commendation(commendationName, title, desc, quantity));
+                commendations.add(new Commendation(commendationName, title, desc, quantity, res));
             }
         }
         catch(Exception e) {
@@ -139,29 +138,24 @@ public abstract class CODPlayer {
      * @return Killstreak JSON containing real names and stat type
      */
     private JSONObject mergeStreakData(JSONObject lethalStreaks, JSONObject supportStreaks) {
-        try {
-            JSONObject streakData = readJSONFile("src/main/resources/COD/Data/streaks.json");
-            if(streakData == null) {
-                return null;
-            }
-            streakData = streakData.getJSONObject("streaks");
-
-            // Combine lethalStreaks in to supportStreaks
-            for(String lethalKey : lethalStreaks.keySet()) {
-                supportStreaks.put(lethalKey, lethalStreaks.getJSONObject(lethalKey));
-            }
-
-            for(String killstreakName : supportStreaks.keySet()) {
-                JSONObject streak = supportStreaks.getJSONObject(killstreakName).getJSONObject("properties");
-                JSONObject streakExtra = streakData.getJSONObject(killstreakName);
-                streak.put("real_name", streakExtra.getString("real_name"));
-                if(streakExtra.has("extra_stat")) {
-                    streak.put("extra_stat", streakExtra.getString("extra_stat"));
-                }
-            }
+        JSONObject streakData = readJSONFile(res + "Data/streaks.json");
+        if(streakData == null) {
+            return null;
         }
-        catch(Exception e) {
-            e.printStackTrace();
+        streakData = streakData.getJSONObject("streaks");
+
+        // Combine lethalStreaks in to supportStreaks
+        for(String lethalKey : lethalStreaks.keySet()) {
+            supportStreaks.put(lethalKey, lethalStreaks.getJSONObject(lethalKey));
+        }
+
+        for(String killstreakName : supportStreaks.keySet()) {
+            JSONObject streak = supportStreaks.getJSONObject(killstreakName).getJSONObject("properties");
+            JSONObject streakExtra = streakData.getJSONObject(killstreakName);
+            streak.put("real_name", streakExtra.getString("real_name"));
+            if(streakExtra.has("extra_stat")) {
+                streak.put("extra_stat", streakExtra.getString("extra_stat"));
+            }
         }
         return supportStreaks;
     }
@@ -175,7 +169,7 @@ public abstract class CODPlayer {
      */
     private JSONObject mergeGunNames(JSONObject items) {
         try {
-            JSONObject gunNames = readJSONFile("src/main/resources/COD/Data/guns.json");
+            JSONObject gunNames = readJSONFile(res + "Data/guns.json");
             if(gunNames == null) {
                 return null;
             }
@@ -214,7 +208,8 @@ public abstract class CODPlayer {
                             killstreak.getString("real_name"),
                             killstreak.getInt("uses"),
                             killstreak.has("extra_stat") ? killstreak.getString("extra_stat") : null,
-                            killstreak.getInt("extraStat1")
+                            killstreak.getInt("extraStat1"),
+                            res
                     )
             );
         }
@@ -243,7 +238,8 @@ public abstract class CODPlayer {
                         new Ratio(weapon.getInt("kills"), weapon.getInt("deaths")),
                         new Ratio(weapon.getInt("hits"), weapon.getInt("shots")),
                         (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots"),
-                        type
+                        type,
+                        res
                 );
                 if(favWeapon == null || favWeapon.getKills() < currentWeapon.getKills()) {
                     favWeapon = currentWeapon;
@@ -465,8 +461,9 @@ public abstract class CODPlayer {
          * @param accuracy  Shots Hit/Shots Fired ratio of weapon
          * @param headshots Number of headshots with weapon
          * @param type      Type of weapon
+         * @param res       Resource location
          */
-        public Weapon(String iwName, String name, String category, Ratio kd, Ratio accuracy, int headshots, TYPE type) {
+        public Weapon(String iwName, String name, String category, Ratio kd, Ratio accuracy, int headshots, TYPE type, String res) {
             this.iwName = iwName;
             this.category = category;
             this.name = name;
@@ -474,7 +471,7 @@ public abstract class CODPlayer {
             this.type = type;
             this.accuracy = accuracy;
             this.headshots = headshots;
-            this.image = new File("src/main/resources/COD/Weapons/" + category + "/" + iwName + ".png");
+            this.image = new File(res + "Weapons/" + category + "/" + iwName + ".png");
             this.imageTitle = setImageTitle(type);
         }
 
@@ -644,13 +641,14 @@ public abstract class CODPlayer {
          * @param title    Real name of commendation e.g "Sixth Sense"
          * @param desc     Description of commendation e.g "No deaths from behind"
          * @param quantity Player quantity of commendation
+         * @param res      Resource location
          */
-        public Commendation(String iwName, String title, String desc, int quantity) {
+        public Commendation(String iwName, String title, String desc, int quantity, String res) {
             this.iwName = iwName;
             this.title = title;
             this.desc = desc;
             this.quantity = quantity;
-            this.image = new File("src/main/resources/COD/Accolades/" + iwName + ".png");
+            this.image = new File(res + "Accolades/" + iwName + ".png");
         }
 
         /**
@@ -724,14 +722,15 @@ public abstract class CODPlayer {
          * @param uses     Quantity of uses
          * @param statName Name of provided stat quantity, kills/assists/..
          * @param stat     Quantity of the given stat
+         * @param res      Resource location
          */
-        public Killstreak(String iwName, String name, int uses, String statName, int stat) {
+        public Killstreak(String iwName, String name, int uses, String statName, int stat, String res) {
             this.iwName = iwName;
             this.name = name;
             this.uses = uses;
             this.statName = statName;
             this.stat = stat;
-            this.image = new File("src/main/resources/COD/Killstreaks/" + iwName + ".png");
+            this.image = new File(res + "Killstreaks/" + iwName + ".png");
             if(statName != null) {
                 this.average = (double) stat / uses;
             }
