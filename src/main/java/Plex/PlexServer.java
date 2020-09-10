@@ -528,7 +528,7 @@ public class PlexServer {
         }
 
         /**
-         * Get the duration of the movie in HH:MM:SS
+         * Get the duration of the movie in HH:mm:ss
          *
          * @return Formatted duration of movie
          */

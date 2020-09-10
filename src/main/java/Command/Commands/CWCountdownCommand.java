@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -47,10 +48,10 @@ public class CWCountdownCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         long currentTime = Calendar.getInstance().getTimeInMillis();
         if(countdownMessage == null || currentTime - lastFetched > 600000) { // 10 minutes
+            lastFetched = currentTime;
             Countdown countdown = getCountdown(currentTime);
             String image = buildImage(countdown);
             countdownMessage = buildCountdownEmbed(image, currentTime >= releaseDate);
-            lastFetched = currentTime;
         }
         context.getMessageChannel().sendMessage(countdownMessage).queue();
     }
@@ -147,7 +148,7 @@ public class CWCountdownCommand extends DiscordCommand {
         builder.setDescription(released ? "Cold War has been out for:" : "Cold War release date: **13/11/2020**");
         builder.setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War");
         builder.setColor(EmbedHelper.getOrange());
-        builder.setFooter("Type: " + getHelpName() + " | Limit once every 10 minutes", "https://i.imgur.com/DOATel5.png");
+        builder.setFooter("Type: " + getHelpName() + " | Limit once every 10 minutes | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/DOATel5.png");
         return builder.build();
     }
 
