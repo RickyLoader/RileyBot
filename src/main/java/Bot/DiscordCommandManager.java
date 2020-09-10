@@ -145,6 +145,7 @@ public class DiscordCommandManager {
         addCommand(new PlexCommand());
         addCommand(new VoiceChannelCommand());
         addCommand(new OSRSPollCommand());
+        addCommand(new CWCountdownCommand());
     }
 
     /**

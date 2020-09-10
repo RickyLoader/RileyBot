@@ -48,6 +48,7 @@ public class PlexServer {
         ArrayList<Movie> movies = new ArrayList<>();
         String json = new NetworkRequest(getPlexLibraryURL(), false).get();
         if(json == null || json.equals("err")) {
+            System.out.println("Failed to contact Plex");
             return movies;
         }
         String languages = getLanguages();

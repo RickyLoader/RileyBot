@@ -78,7 +78,7 @@ public abstract class ImageBuilder {
     /**
      * Register the font with the graphics environment
      */
-    private Font registerFont(String fontPath) {
+    public static Font registerFont(String fontPath) {
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             Font gameFont = Font.createFont(Font.TRUETYPE_FONT, new File(fontPath));

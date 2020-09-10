@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 /**
  * Command to look up a player and build an image
  */
-public abstract class ImageBuilderCommand extends LookupCommand {
+public abstract class ImageBuilderLookupCommand extends LookupCommand {
 
     /**
      * Initialise the command
@@ -14,11 +14,11 @@ public abstract class ImageBuilderCommand extends LookupCommand {
      * @param desc      Description of command
      * @param maxLength Max length of name
      */
-    public ImageBuilderCommand(String trigger, String desc, int maxLength) {
+    public ImageBuilderLookupCommand(String trigger, String desc, int maxLength) {
         super(trigger, desc, maxLength);
     }
 
-    public ImageBuilderCommand(String trigger, String desc, String prefix, int maxLength) {
+    public ImageBuilderLookupCommand(String trigger, String desc, String prefix, int maxLength) {
         super(trigger, desc, prefix, maxLength);
     }
 

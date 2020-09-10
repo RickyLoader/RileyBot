@@ -3,14 +3,14 @@ package Command.Commands;
 import Bot.DiscordUser;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
-import Command.Structure.ImageBuilderCommand;
+import Command.Structure.ImageBuilderLookupCommand;
 import LOL.SummonerImage;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 import java.util.HashMap;
 
-public class LOLLookupCommand extends ImageBuilderCommand {
+public class LOLLookupCommand extends ImageBuilderLookupCommand {
     private final HashMap<String, String> regions;
     private String displayRegion, apiRegion;
 

@@ -3,7 +3,7 @@ package Command.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class CodImageBuilderCommand extends ImageBuilderCommand {
+public abstract class CodImageBuilderCommand extends ImageBuilderLookupCommand {
     private final List<String> platforms;
     private String platform;
 
