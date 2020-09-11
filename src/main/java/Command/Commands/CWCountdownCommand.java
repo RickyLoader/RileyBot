@@ -22,7 +22,6 @@ import static Command.Structure.ImageBuilder.registerFont;
  * Show how long until Cold War releases
  */
 public class CWCountdownCommand extends DiscordCommand {
-    private MessageEmbed countdownMessage = null;
     private long lastFetched;
     private final long releaseDate;
     private final Font font;
@@ -47,13 +46,10 @@ public class CWCountdownCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         long currentTime = Calendar.getInstance().getTimeInMillis();
-        if(countdownMessage == null || currentTime - lastFetched > 60000) { // 1 minutes
-            lastFetched = currentTime;
-            Countdown countdown = getCountdown(currentTime);
-            String image = buildImage(countdown);
-            countdownMessage = buildCountdownEmbed(image, currentTime >= releaseDate);
-        }
-        context.getMessageChannel().sendMessage(countdownMessage).queue();
+        lastFetched = currentTime;
+        Countdown countdown = getCountdown(currentTime);
+        String image = buildImage(countdown);
+        context.getMessageChannel().sendMessage(buildCountdownEmbed(image, currentTime >= releaseDate)).queue();
     }
 
     /**
