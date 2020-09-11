@@ -16,7 +16,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
     private final PollManager pollManager;
 
     public OSRSPollCommand() {
-        super("osrspoll | osrspoll [poll number]", "Look at poll results!");
+        super("osrspoll\nosrspoll [poll number]", "Look at poll results!");
         this.pollManager = new PollManager();
     }
 
