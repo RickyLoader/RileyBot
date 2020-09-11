@@ -1,0 +1,80 @@
+{
+  "streaks": {
+    "precision_airstrike": {
+      "real_name": "Precision Airstrike",
+      "extra_stat": "Kills"
+    },
+    "cruise_predator": {
+      "real_name": "Cruise Missile",
+      "extra_stat": "Kills"
+    },
+    "manual_turret": {
+      "real_name": "Shield Turret",
+      "extra_stat": "Kills"
+    },
+    "white_phosphorus": {
+      "real_name": "White Phosphorus",
+      "extra_stat": "Kills"
+    },
+    "hover_jet": {
+      "real_name": "VTOL Jet",
+      "extra_stat": "Kills"
+    },
+    "chopper_gunner": {
+      "real_name": "Chopper Gunner",
+      "extra_stat": "Kills"
+    },
+    "gunship": {
+      "real_name": "Gunship",
+      "extra_stat": "Kills"
+    },
+    "sentry_gun": {
+      "real_name": "Sentry Gun",
+      "extra_stat": "Kills"
+    },
+    "toma_strike": {
+      "real_name": "Cluster Strike",
+      "extra_stat": "Kills"
+    },
+    "nuke": {
+      "real_name": "Tactical Nuke",
+      "extra_stat": "?"
+    },
+    "juggernaut": {
+      "real_name": "Juggernaut",
+      "extra_stat": "Kills"
+    },
+    "pac_sentry": {
+      "real_name": "Wheelson",
+      "extra_stat": "Kills"
+    },
+    "chopper_support": {
+      "real_name": "Support Helo",
+      "extra_stat": "Kills"
+    },
+    "bradley": {
+      "real_name": "Infantry Assault Vehicle",
+      "extra_stat": "Kills"
+    },
+    "airdrop": {
+      "real_name": "Care Package"
+    },
+    "radar_drone_overwatch": {
+      "real_name": "Personal Radar"
+    },
+    "scrambler_drone_guard": {
+      "real_name": "Counter UAV"
+    },
+    "uav": {
+      "real_name": "UAV",
+      "extra_stat": "Assists"
+    },
+    "airdrop_multiple": {
+      "real_name": "Emergency Airdrop"
+    },
+    "directional_uav": {
+      "real_name": "Advanced UAV",
+      "extra_stat": "Assists"
+    }
+  }
+}
