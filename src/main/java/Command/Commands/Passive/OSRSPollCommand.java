@@ -152,7 +152,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         @Override
         public String getName(int currentIndex) {
             Question question = (Question) getItems().get(currentIndex);
-            if(question.isOpinionQuestion() || open) {
+            if(open || question.isOpinionQuestion()) {
                 return question.getText();
             }
             String emote = question.isPassed() ? pass : fail;
