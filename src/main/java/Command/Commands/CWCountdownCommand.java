@@ -148,7 +148,7 @@ public class CWCountdownCommand extends DiscordCommand {
         builder.setDescription(released ? "Cold War has been out for:" : "Cold War release date: **13/11/2020**");
         builder.setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War");
         builder.setColor(EmbedHelper.getOrange());
-        builder.setFooter("Try: " + getHelpName() + " | Once per minute | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/DOATel5.png");
+        builder.setFooter("Try: " + getHelpName() + " | Once per minute | Last checked: " + new SimpleDateFormat("HH:mm:ss:ms").format(lastFetched), "https://i.imgur.com/DOATel5.png");
         return builder.build();
     }
 
