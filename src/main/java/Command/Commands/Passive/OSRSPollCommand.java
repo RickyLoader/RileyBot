@@ -136,7 +136,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         private String buildSword(double percentageVotes, boolean highestOpinion) {
             int sections = (int) (percentageVotes / 15);
             StringBuilder sword = new StringBuilder();
-            if(open && highestOpinion) {
+            if(!open && highestOpinion) {
                 sword.append(pass);
             }
             sword.append(handle);
