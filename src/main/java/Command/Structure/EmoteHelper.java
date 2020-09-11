@@ -15,7 +15,7 @@ public class EmoteHelper {
     }
 
     /**
-     * Get the String form of an emote to display inside an embed
+     * Get the String form of an emote to display within a message
      *
      * @param e Emote to convert
      * @return String version of emote
