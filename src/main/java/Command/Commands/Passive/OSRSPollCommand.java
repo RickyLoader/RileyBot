@@ -52,6 +52,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
                 "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                 "OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod(),
                 poll.getTitle(),
+                poll.isOpen(),
                 EmbedHelper.getGreen()
         );
     }
@@ -63,6 +64,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
 
     private static class PollMessage extends PageableListEmbed {
         private final String handle, section, tip, pass, fail;
+        private final boolean open;
 
         /**
          * Embedded message that can be paged through with emotes and displays as a list of fields
@@ -73,15 +75,17 @@ public class OSRSPollCommand extends PageableEmbedCommand {
          * @param thumb       Thumbnail to use for embed
          * @param title       Title to use for embed
          * @param desc        Description to use for embed
+         * @param open        Poll is open
          * @param colour      Optional colour to use for embed
          */
-        public PollMessage(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int... colour) {
+        public PollMessage(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, boolean open, int... colour) {
             super(channel, emoteHelper, items, thumb, title, desc, colour);
             this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());
             this.section = EmoteHelper.formatEmote(emoteHelper.getSwordBlade());
             this.tip = EmoteHelper.formatEmote(emoteHelper.getSwordTip());
             this.pass = EmoteHelper.formatEmote(emoteHelper.getComplete());
             this.fail = EmoteHelper.formatEmote(emoteHelper.getFail());
+            this.open = open;
         }
 
         @Override
@@ -132,7 +136,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         private String buildSword(double percentageVotes, boolean highestOpinion) {
             int sections = (int) (percentageVotes / 15);
             StringBuilder sword = new StringBuilder();
-            if(highestOpinion) {
+            if(open && highestOpinion) {
                 sword.append(pass);
             }
             sword.append(handle);
@@ -148,7 +152,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
         @Override
         public String getName(int currentIndex) {
             Question question = (Question) getItems().get(currentIndex);
-            if(question.isOpinionQuestion()) {
+            if(question.isOpinionQuestion() || open) {
                 return question.getText();
             }
             String emote = question.isPassed() ? pass : fail;

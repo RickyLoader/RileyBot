@@ -196,6 +196,7 @@ public class PollManager {
         private final String title, description;
         private final int votes, number;
         private final Question[] questions;
+        private final boolean open;
 
         /**
          * Initialise the poll
@@ -216,6 +217,7 @@ public class PollManager {
             this.start = start;
             this.end = end;
             this.questions = questions;
+            this.open = new Date(System.currentTimeMillis()).before(end);
         }
 
         /**
@@ -226,12 +228,22 @@ public class PollManager {
          */
         public String getOpenPeriod() {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
             return dateFormat.format(start) +
                     " - " +
                     dateFormat.format(end) +
                     " (" +
-                    (new Date(System.currentTimeMillis()).after(end) ? "Closed" : "Open") +
+                    (open ? "Open" : "Closed") +
                     ")";
+        }
+
+        /**
+         * Get whether poll is open
+         *
+         * @return Poll is running
+         */
+        public boolean isOpen() {
+            return open;
         }
 
         /**

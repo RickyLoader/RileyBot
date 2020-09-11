@@ -10,7 +10,7 @@ public class PlexCommand extends DiscordCommand {
     private boolean refreshing = false;
 
     public PlexCommand() {
-        super("plex! | plex! [search query/movie id]", "Get a movie recommendation from Plex!");
+        super("plex!\nplex! [search query/movie id]", "Get a movie recommendation from Plex!");
         plex = new PlexServer(getHelpName());
     }
 
