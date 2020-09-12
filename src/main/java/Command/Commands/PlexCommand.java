@@ -11,7 +11,7 @@ public class PlexCommand extends DiscordCommand {
 
     public PlexCommand() {
         super("plex!\nplex! [search query/movie id]", "Get a movie recommendation from Plex!");
-        plex = new PlexServer(getHelpName().replace("\n"," | "));
+        plex = new PlexServer(getHelpName().replace("\n", " | "));
     }
 
     @Override
@@ -27,6 +27,10 @@ public class PlexCommand extends DiscordCommand {
         if(refreshing) {
             channel.sendMessage("I told you I was refreshing cunt").queue();
             return;
+        }
+
+        if(!plex.hasEmotes()) {
+            plex.setEmoteHelper(context.getEmoteHelper());
         }
 
         new Thread(() -> {

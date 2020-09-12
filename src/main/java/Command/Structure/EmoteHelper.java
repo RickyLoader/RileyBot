@@ -21,7 +21,7 @@ public class EmoteHelper {
      * @return String version of emote
      */
     public static String formatEmote(Emote e) {
-        return "<:" + e.getName() + ":" + e.getId() + "> ";
+        return "<:" + e.getName() + ":" + e.getId() + ">";
     }
 
     public Emote getUndo() {
@@ -38,6 +38,14 @@ public class EmoteHelper {
 
     public Emote getStop() {
         return guild.getEmoteById("742984225808187494");
+    }
+
+    public Emote getPlex() {
+        return guild.getEmoteById("754306729155756152");
+    }
+
+    public Emote getRadarr() {
+        return guild.getEmoteById("754306729860268082");
     }
 
     public Emote getVictory() {

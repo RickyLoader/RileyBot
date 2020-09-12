@@ -240,9 +240,9 @@ public class EmbedLoadingMessage {
          * @param emoteHelper Emote helper
          */
         public Status(EmoteHelper emoteHelper) {
-            this.neutral = EmoteHelper.formatEmote(emoteHelper.getNeutral());
-            this.fail = EmoteHelper.formatEmote(emoteHelper.getFail());
-            this.complete = EmoteHelper.formatEmote(emoteHelper.getComplete());
+            this.neutral = EmoteHelper.formatEmote(emoteHelper.getNeutral()) + " ";
+            this.fail = EmoteHelper.formatEmote(emoteHelper.getFail()) + " ";
+            this.complete = EmoteHelper.formatEmote(emoteHelper.getComplete()) + " ";
         }
 
         public String getComplete() {

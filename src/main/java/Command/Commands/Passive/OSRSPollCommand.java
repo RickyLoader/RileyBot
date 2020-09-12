@@ -146,7 +146,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
             if(sections > 0) {
                 sword.append(tip);
             }
-            return sword.toString().replace(" ", "");
+            return sword.toString();
         }
 
         @Override
