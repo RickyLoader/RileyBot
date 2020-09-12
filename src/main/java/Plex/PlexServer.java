@@ -612,25 +612,6 @@ public class PlexServer {
         }
 
         /**
-         * Build a String containing the revenue and box office information if available
-         *
-         * @return String containing box office information
-         */
-        private String getBoxOfficeSummary() {
-            long budget = getBudget();
-            long revenue = getRevenue();
-            StringBuilder boxOffice = new StringBuilder();
-            if(budget > 0) {
-                boxOffice.append("**Budget**: ").append(formatUSD(budget));
-            }
-            if(revenue > 0) {
-                String prefix = "**Box Office**: ";
-                boxOffice.append(boxOffice.length() == 0 ? prefix : " | " + prefix).append(formatUSD(revenue));
-            }
-            return boxOffice.toString();
-        }
-
-        /**
          * Format the movie information in to a String summary
          *
          * @return Summary of movie information
@@ -657,9 +638,12 @@ public class PlexServer {
 
             desc.append("\n\n**Duration**: ").append(getDuration());
 
-            String boxOffice = getBoxOfficeSummary();
-            if(!boxOffice.isEmpty()) {
-                desc.append("\n\n").append(getBoxOfficeSummary());
+
+            if(budget > 0) {
+                desc.append("\n\n**Budget**: ").append(formatUSD(budget));
+            }
+            if(revenue > 0) {
+                desc.append("\n\n**Box Office**: ").append(formatUSD(revenue));
             }
 
             desc.append("\n\n**IMDB**: ").append(EmbedHelper.embedURL("View", getIMDBUrl()));

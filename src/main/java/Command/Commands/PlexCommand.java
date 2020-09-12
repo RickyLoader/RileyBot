@@ -11,7 +11,7 @@ public class PlexCommand extends DiscordCommand {
 
     public PlexCommand() {
         super("plex!\nplex! [search query/movie id]", "Get a movie recommendation from Plex!");
-        plex = new PlexServer(getHelpName());
+        plex = new PlexServer(getHelpName().replace("\n"," | "));
     }
 
     @Override
