@@ -89,9 +89,6 @@ public class PlexServer {
             if(!movie.has("imdbId")) {
                 continue;
             }
-            if(!movie.has("inCinemas")) {
-                System.out.println(movie.getString("title"));
-            }
             library.add(new Movie(
                     movie.getString("imdbId"),
                     String.valueOf(movie.get("tmdbId")),
