@@ -78,13 +78,13 @@ public class CWCountdownCommand extends DiscordCommand {
             int y = ((countdownImage.getHeight() / 4) + (countdownImage.getHeight() / 8)) + (fm.getHeight() / 2);
             int padding = 250;
             int x = 100;
-            drawTimeUnit(countdown.getDays(), g, x, y);
+            drawTimeUnit(countdown.getDays(), g, fm, x, y);
             x += padding;
-            drawTimeUnit(countdown.getHours(), g, x, y);
+            drawTimeUnit(countdown.getHours(), g, fm, x, y);
             x += padding;
-            drawTimeUnit(countdown.getMinutes(), g, x, y);
+            drawTimeUnit(countdown.getMinutes(), g, fm, x, y);
             x += padding;
-            drawTimeUnit(countdown.getSeconds(), g, x, y);
+            drawTimeUnit(countdown.getSeconds(), g, fm, x, y);
             g.dispose();
             url = ImgurManager.uploadImage(countdownImage);
         }
@@ -99,13 +99,12 @@ public class CWCountdownCommand extends DiscordCommand {
      *
      * @param value Value to draw
      * @param g     Image graphics
+     * @param fm    Font metrics
      * @param x     X coordinate
      * @param y     Y coordinate
      */
-    private void drawTimeUnit(long value, Graphics g, int x, int y) {
-        FontMetrics fm = g.getFontMetrics();
+    private void drawTimeUnit(long value, Graphics g, FontMetrics fm, int x, int y) {
         String unit = new DecimalFormat("00").format(value);
-        g.setColor(Color.WHITE);
         g.drawString(unit, x - (fm.stringWidth(unit) / 2), y);
     }
 
