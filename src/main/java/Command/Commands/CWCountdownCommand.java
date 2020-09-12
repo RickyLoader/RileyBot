@@ -5,6 +5,7 @@ import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.imageio.ImageIO;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 import static Command.Structure.ImageBuilder.registerFont;
@@ -22,19 +24,16 @@ import static Command.Structure.ImageBuilder.registerFont;
  * Show how long until Cold War releases
  */
 public class CWCountdownCommand extends DiscordCommand {
-    private long lastFetched;
-    private final long releaseDate;
+    private long lastFetched, releaseDate;
     private final Font font;
     private final String res = "src/main/resources/COD/CW/";
+    private String type;
 
     /**
      * Initialise release date
      */
     public CWCountdownCommand() {
-        super("cold war", "How long until Cold War!");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2020, Calendar.NOVEMBER, 13, 0, 0, 0);
-        releaseDate = calendar.getTimeInMillis();
+        super("cold war\ncold war beta\ncold war early beta", "How long until Cold War!");
         font = registerFont(res + "ColdWar.ttf");
     }
 
@@ -45,6 +44,27 @@ public class CWCountdownCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
+        MessageChannel channel = context.getMessageChannel();
+        Calendar calendar = Calendar.getInstance();
+        switch(context.getLowerCaseMessage()) {
+            case "cold war beta":
+                calendar.set(2020, Calendar.OCTOBER, 17, 0, 0, 0);
+                type = "PC open beta";
+                break;
+            case "cold war early beta":
+                calendar.set(2020, Calendar.OCTOBER, 15, 0, 0, 0);
+                type = "PC early beta";
+                break;
+            case "cold war":
+                calendar.set(2020, Calendar.NOVEMBER, 13, 0, 0, 0);
+                type = "Cold War";
+                break;
+            default:
+                channel.sendMessage(getHelpNameCoded()).queue();
+                return;
+        }
+        releaseDate = calendar.getTimeInMillis();
+
         long currentTime = Calendar.getInstance().getTimeInMillis();
         lastFetched = currentTime;
         Countdown countdown = getCountdown(currentTime);
@@ -140,11 +160,16 @@ public class CWCountdownCommand extends DiscordCommand {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setImage(image);
         builder.setThumbnail("https://i.imgur.com/R1YXMmB.png");
-        builder.setDescription(released ? "Cold War has been out for:" : "Cold War release date: **13/11/2020**");
+        builder.setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**");
         builder.setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War");
         builder.setColor(EmbedHelper.getOrange());
-        builder.setFooter("Try: " + getHelpName() + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/DOATel5.png");
+        builder.setFooter("Try: " + getHelpName().replaceAll("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/DOATel5.png");
         return builder.build();
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return query.startsWith("cold war");
     }
 
     /**
