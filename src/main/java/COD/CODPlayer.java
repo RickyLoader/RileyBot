@@ -372,6 +372,7 @@ public class CODPlayer {
     public static class Ratio {
         private final double ratio;
         private final int numerator, denominator, diff;
+        private final DecimalFormat commaFormat;
 
         public Ratio(int numerator, int denominator) {
             if(numerator == 0 || denominator == 0) {
@@ -385,6 +386,7 @@ public class CODPlayer {
 
             // How many ahead/behind
             this.diff = numerator - denominator;
+            this.commaFormat = new DecimalFormat("#,###");
         }
 
         /**
@@ -422,6 +424,24 @@ public class CODPlayer {
          */
         public int getNumerator() {
             return numerator;
+        }
+
+        /**
+         * Get the numerator formatted with commas
+         *
+         * @return Numerator formatted with commas
+         */
+        public String formatNumerator() {
+            return commaFormat.format(numerator);
+        }
+
+        /**
+         * Get the denominator formatted with commas
+         *
+         * @return Denominator formatted with commas
+         */
+        public String formatDenominator() {
+            return commaFormat.format(denominator);
         }
 
         /**
@@ -560,8 +580,8 @@ public class CODPlayer {
          *
          * @return Shots fired
          */
-        public int getShotsFired() {
-            return accuracy.getDenominator();
+        public String getShotsFired() {
+            return accuracy.formatDenominator();
         }
 
         /**
@@ -578,8 +598,8 @@ public class CODPlayer {
          *
          * @return Shots hit
          */
-        public int getShotsHit() {
-            return accuracy.getNumerator();
+        public String getShotsHit() {
+            return accuracy.formatNumerator();
         }
 
         /**
