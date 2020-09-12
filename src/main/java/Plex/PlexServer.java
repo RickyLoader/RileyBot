@@ -89,6 +89,9 @@ public class PlexServer {
             if(!movie.has("imdbId")) {
                 continue;
             }
+            if(!movie.has("inCinemas")) {
+                System.out.println(movie.getString("title"));
+            }
             library.add(new Movie(
                     movie.getString("imdbId"),
                     String.valueOf(movie.get("tmdbId")),
@@ -145,7 +148,17 @@ public class PlexServer {
         if(results.length == 1) {
             return getMovieEmbed(results[0]);
         }
-
+        Arrays.sort(results, (o1, o2) -> {
+            Date a = o1.getReleaseDate();
+            Date b = o2.getReleaseDate();
+            if(a == null) {
+                return 1;
+            }
+            if(b == null) {
+                return -1;
+            }
+            return a.compareTo(b);
+        });
         return buildSearchEmbed(query, results);
     }
 
