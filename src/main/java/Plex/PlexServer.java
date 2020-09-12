@@ -197,7 +197,7 @@ public class PlexServer {
      */
     private MessageEmbed buildSearchEmbed(String query, Movie[] movies) {
         int bound = Math.min(5, movies.length);
-        String emoteKey = plexEmote + " = On Plex\n\n" + radarrEmote + " = On Radarr - Movie **is not** on Plex but will be when released.\n\n";
+        String emoteKey = plexEmote + " = On Plex\n\n" + radarrEmote + " = On Radarr - Movie **is not** on Plex but will be once released.\n\n";
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(EmbedHelper.getOrange());
         builder.setThumbnail(plexIcon);
