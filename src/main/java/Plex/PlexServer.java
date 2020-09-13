@@ -145,6 +145,8 @@ public class PlexServer {
         if(results.length == 1) {
             return getMovieEmbed(results[0]);
         }
+
+        // Movies without a known release date should be treated as the highest date
         Arrays.sort(results, (o1, o2) -> {
             Date a = o1.getReleaseDate();
             Date b = o2.getReleaseDate();
@@ -207,7 +209,6 @@ public class PlexServer {
      */
     private MessageEmbed buildSearchEmbed(String query, Movie[] movies) {
         int bound = Math.min(5, movies.length);
-        String emoteKey = plexEmote + " = On Plex\n\n" + radarrEmote + " = On Radarr - Movie **is not** on Plex but will be once released.\n\n";
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(EmbedHelper.getOrange());
         builder.setThumbnail(plexIcon);
@@ -217,7 +218,7 @@ public class PlexServer {
             builder.setDescription("No movie results found for: **" + query + "**, try again cunt.");
             return builder.build();
         }
-        builder.setDescription(emoteKey + "I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here" + ((bound == movies.length) ? " they are:" : "'s " + bound + " of them:"));
+        builder.setDescription(buildEmoteKey(movies) + "I found " + movies.length + " results for: **" + query + "**\n\nNarrow it down next time cunt, here" + ((bound == movies.length) ? " they are:" : "'s " + bound + " of them:"));
         for(int i = 0; i < bound; i++) {
             Movie movie = movies[i];
             String title = movie.getFormattedTitle();
@@ -235,6 +236,24 @@ public class PlexServer {
             }
         }
         return builder.build();
+    }
+
+    /**
+     * Build the emote key to explain the platform emotes that are required
+     * based on the list of movies
+     *
+     * @param movies List of movies
+     * @return Emote key
+     */
+    private String buildEmoteKey(Movie[] movies) {
+        StringBuilder key = new StringBuilder();
+        if(Arrays.stream(movies).anyMatch(Movie::isOnPlex)) {
+            key.append(plexEmote).append(" = On Plex\n\n");
+        }
+        if(Arrays.stream(movies).anyMatch(movie -> !movie.isOnPlex())) {
+            key.append(radarrEmote).append(" = On Radarr - Movie **is not** on Plex but will be once released.\n\n");
+        }
+        return key.toString();
     }
 
     /**
