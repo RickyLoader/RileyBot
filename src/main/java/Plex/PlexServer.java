@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,7 +25,7 @@ public class PlexServer {
     private ArrayList<Movie> library;
     private EmoteHelper emoteHelper;
     private final String helpMessage, plexIcon = "https://i.imgur.com/FdabwCm.png", radarrIcon = "https://i.imgur.com/d5p0ftd.png";
-    private String plexEmote, radarrEmote, availableEmote;
+    private String plexEmote, radarrEmote;
 
     /**
      * Read in the Radarr library and remember the timestamp
@@ -54,7 +53,6 @@ public class PlexServer {
         this.emoteHelper = emoteHelper;
         this.plexEmote = EmoteHelper.formatEmote(emoteHelper.getPlex());
         this.radarrEmote = EmoteHelper.formatEmote(emoteHelper.getRadarr());
-        this.availableEmote = EmoteHelper.formatEmote(emoteHelper.getNeutral());
     }
 
     /**
@@ -86,20 +84,24 @@ public class PlexServer {
             System.out.println("Failed to contact Radarr");
             return library;
         }
-        library = parseMovies(new JSONArray(json));
+        library = parseMovies(new JSONArray(json), false);
         return library;
     }
 
     /**
      * Parse Radarr JSON to a list of movies
      *
-     * @param movies Radarr movie list json
+     * @param movies        Radarr movie list json
+     * @param ignoreLibrary Ignore results which are on Radarr (For searching outside library)
      * @return List of movies
      */
-    private ArrayList<Movie> parseMovies(JSONArray movies) {
+    private ArrayList<Movie> parseMovies(JSONArray movies, boolean ignoreLibrary) {
         ArrayList<Movie> library = new ArrayList<>();
         for(int i = 0; i < movies.length(); i++) {
             JSONObject movie = movies.getJSONObject(i);
+            if(ignoreLibrary && movie.getBoolean("monitored")) {
+                continue;
+            }
             library.add(parseMovie(movie));
         }
         return library;
@@ -193,6 +195,21 @@ public class PlexServer {
     }
 
     /**
+     * Build an embed detailing a failure to complete
+     *
+     * @return Embed detailing failure
+     */
+    private MessageEmbed buildFailedEmbed() {
+        return new EmbedBuilder()
+                .setTitle("Plex Movie Search")
+                .setDescription("Something went wrong, try again in a bit.")
+                .setColor(EmbedHelper.getOrange())
+                .setImage(plexIcon)
+                .setFooter(helpMessage)
+                .build();
+    }
+
+    /**
      * Search Radarr for a movie
      *
      * @param query    Search query
@@ -201,15 +218,25 @@ public class PlexServer {
      */
     private MessageEmbed searchRadarr(String query, boolean idSearch) {
         String json = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get();
-        if(json.startsWith("{")) {
+        if(json == null) {
+            return buildFailedEmbed();
+        }
+        // ID search returns a JSON object rather than an array of results
+        if(idSearch) {
             return getMovieEmbed(addToRadarr(new JSONObject(json)), true);
         }
         else {
             JSONArray results = new JSONArray(json);
-            if(results.length() == 1) {
-                return getMovieEmbed(addToRadarr(results.getJSONObject(0)), true);
+            Movie[] movies = parseMovies(results, true).toArray(new Movie[0]);
+            if(movies.length == 1) {
+                for(int i = 0; i < results.length(); i++) {
+                    JSONObject result = results.getJSONObject(i);
+                    if(result.getInt("tmdbId") == Integer.parseInt(movies[0].getTmdbId())) {
+                        return getMovieEmbed(addToRadarr(result), true);
+                    }
+                }
             }
-            return buildSearchEmbed(query, parseMovies(new JSONArray(json)).toArray(new Movie[0]), false);
+            return buildSearchEmbed(query, movies, false);
         }
     }
 
@@ -350,7 +377,7 @@ public class PlexServer {
             key.append(plexEmote).append(" = On Plex\n\n");
         }
         if(Arrays.stream(movies).anyMatch(movie -> !movie.isOnPlex())) {
-            key.append(radarrEmote).append(library ? " = On Radarr - Movie **is not** on Plex but will be once released.\n\n" : " = Available on Radarr - Search by the title or id to add to Plex.\n\n");
+            key.append(radarrEmote).append(library ? " = On Radarr - Movie **is not** on Plex but will be once released.\n\n" : " = Available on Radarr - Search by the id to add to Plex.\n\n");
         }
         return key.toString();
     }
