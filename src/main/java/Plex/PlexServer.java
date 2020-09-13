@@ -425,16 +425,6 @@ public class PlexServer {
         }
 
         /**
-         * Build the URL to the movie poster given the Radarr id
-         *
-         * @param radarrId Radarr id
-         * @return Movie poster url
-         */
-        private String buildPosterURL(String radarrId) {
-            return Secret.getRadarrIp() + "/MediaCover/" + radarrId + "/poster.jpg";
-        }
-
-        /**
          * Get the movie genre(s)
          *
          * @return Movie genre(s)
