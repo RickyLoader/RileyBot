@@ -91,12 +91,11 @@ public class NetworkRequest {
     /**
      * Make a JSON POST request
      *
-     * @param body    body to send
-     * @param headers Headers if required
+     * @param body body to send
      * @return Response from request
      */
-    public String post(String body, HashMap<String, String> headers) {
-        return post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body), headers);
+    public String post(String body) {
+        return post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body), null);
     }
 
     /**
@@ -111,7 +110,7 @@ public class NetworkRequest {
             if(response.body() == null) {
                 return null;
             }
-            if(response.code() == 200) {
+            if(response.code() == 200 || response.code() == 201) {
                 data = response.body().string();
             }
             else if(response.code() == 404) {

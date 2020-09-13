@@ -79,7 +79,7 @@ public class Session {
      * Submit the gunfight session to the database
      */
     void submitGame() {
-        new NetworkRequest(endPoint + "/submit", true).post(getGameSummary(), null);
+        new NetworkRequest(endPoint + "/submit", true).post(getGameSummary());
     }
 
     /**

@@ -130,7 +130,7 @@ public class DiscordUser {
      */
     private static void savePlayer(String name, long id, String table) {
         JSONObject body = new JSONObject().put("discord_id", id).put("table", table).put("name", name);
-        new NetworkRequest("users/submit", true).post(body.toString(), null);
+        new NetworkRequest("users/submit", true).post(body.toString());
     }
 
     /**
