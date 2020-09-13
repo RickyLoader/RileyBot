@@ -18,7 +18,7 @@ public class ImgurManager {
      * @param image Image to have alpha channel stripped
      * @return JPG ready image
      */
-    private static BufferedImage stripAlpha(BufferedImage image) {
+    public static BufferedImage stripAlpha(BufferedImage image) {
         BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = copy.getGraphics();
         g.setColor(Color.WHITE);

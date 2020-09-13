@@ -6,11 +6,11 @@ import Command.Structure.EmbedHelper;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -64,12 +64,9 @@ public class CWCountdownCommand extends DiscordCommand {
                 return;
         }
         releaseDate = calendar.getTimeInMillis();
-
-        long currentTime = Calendar.getInstance().getTimeInMillis();
-        lastFetched = currentTime;
-        Countdown countdown = getCountdown(currentTime);
-        String image = buildImage(countdown);
-        context.getMessageChannel().sendMessage(buildCountdownEmbed(image, currentTime >= releaseDate)).queue();
+        lastFetched = Calendar.getInstance().getTimeInMillis();
+        Countdown countdown = getCountdown(lastFetched);
+        buildCountdownEmbed(channel, buildImage(countdown), lastFetched >= releaseDate);
     }
 
     /**
@@ -86,10 +83,10 @@ public class CWCountdownCommand extends DiscordCommand {
      * Build an image displaying the countdown time values
      *
      * @param countdown Countdown until release
-     * @return Image displaying countdown
+     * @return Image displaying countdown in byte array
      */
-    private String buildImage(Countdown countdown) {
-        String url = null;
+    private byte[] buildImage(Countdown countdown) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             BufferedImage countdownImage = ImageIO.read(getBackgroundImage());
             Graphics g = countdownImage.getGraphics();
@@ -106,12 +103,13 @@ public class CWCountdownCommand extends DiscordCommand {
             x += padding;
             drawTimeUnit(countdown.getSeconds(), g, fm, x, y);
             g.dispose();
-            url = ImgurManager.uploadImage(countdownImage);
+            ImageIO.write(ImgurManager.stripAlpha(countdownImage), "jpg", outputStream);
+            outputStream.close();
         }
         catch(Exception e) {
             e.printStackTrace();
         }
-        return url;
+        return outputStream.toByteArray();
     }
 
     /**
@@ -150,21 +148,21 @@ public class CWCountdownCommand extends DiscordCommand {
     }
 
     /**
-     * Build the message to display
+     * Build the message embed and send to the channel
      *
-     * @param image    Image displaying countdown
+     * @param channel  Channel to send message
+     * @param image    Image byte array displaying countdown
      * @param released Game has released
-     * @return MessageEmbed summarising countdown
      */
-    private MessageEmbed buildCountdownEmbed(String image, boolean released) {
+    private void buildCountdownEmbed(MessageChannel channel, byte[] image, boolean released) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setImage(image);
+        builder.setImage("attachment://countdown.jpg");
         builder.setThumbnail("https://i.imgur.com/R1YXMmB.png");
         builder.setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**");
         builder.setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War");
         builder.setColor(EmbedHelper.getOrange());
         builder.setFooter("Try: " + getHelpName().replaceAll("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/DOATel5.png");
-        return builder.build();
+        channel.sendMessage(builder.build()).addFile(image, "countdown.jpg").queue();
     }
 
     @Override
