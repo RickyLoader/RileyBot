@@ -203,8 +203,8 @@ public class PlexServer {
         return new EmbedBuilder()
                 .setTitle("Plex Movie Search")
                 .setDescription("Something went wrong, try again in a bit.")
-                .setColor(EmbedHelper.getOrange())
-                .setImage(plexIcon)
+                .setColor(EmbedHelper.getRed())
+                .setThumbnail(plexIcon)
                 .setFooter(helpMessage)
                 .build();
     }
@@ -218,7 +218,7 @@ public class PlexServer {
      */
     private MessageEmbed searchRadarr(String query, boolean idSearch) {
         String json = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get();
-        if(json == null) {
+        if(json == null || json.equals("err")) {
             return buildFailedEmbed();
         }
         // ID search returns a JSON object rather than an array of results
@@ -314,6 +314,7 @@ public class PlexServer {
      */
     private MessageEmbed buildSearchEmbed(String query, Movie[] movies, boolean library) {
         int bound = Math.min(5, movies.length);
+        library = library || bound == 0; // Show Plex icon when no results are found, even though it was a Radarr search
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(library ? EmbedHelper.getOrange() : EmbedHelper.getBlue());
         builder.setThumbnail(library ? plexIcon : radarrIcon);
@@ -323,7 +324,7 @@ public class PlexServer {
             builder.setDescription("No movie results found for: **" + query + "**, try again cunt.");
             return builder.build();
         }
-        StringBuilder description = new StringBuilder(buildEmoteKey(movies, library));
+        StringBuilder description = new StringBuilder(buildEmoteKey(movies, bound, library));
         if(library) {
             description
                     .append("I found ")
@@ -368,15 +369,16 @@ public class PlexServer {
      * based on the list of movies
      *
      * @param movies  List of movies
+     * @param bound   Number of movies to check
      * @param library Movies are from library
      * @return Emote key
      */
-    private String buildEmoteKey(Movie[] movies, boolean library) {
+    private String buildEmoteKey(Movie[] movies, long bound, boolean library) {
         StringBuilder key = new StringBuilder();
-        if(Arrays.stream(movies).anyMatch(Movie::isOnPlex)) {
+        if(Arrays.stream(movies).limit(bound).anyMatch(Movie::isOnPlex)) {
             key.append(plexEmote).append(" = On Plex\n\n");
         }
-        if(Arrays.stream(movies).anyMatch(movie -> !movie.isOnPlex())) {
+        if(Arrays.stream(movies).limit(bound).anyMatch(movie -> !movie.isOnPlex())) {
             key.append(radarrEmote).append(library ? " = On Radarr - Movie **is not** on Plex but will be once released.\n\n" : " = Available on Radarr - Search by the id to add to Plex.\n\n");
         }
         return key.toString();
@@ -542,15 +544,15 @@ public class PlexServer {
          * @return Movie content rating/certification - G, PG..
          */
         private String parseContentRating(JSONArray releases) {
+            String contentRating = null;
             for(int i = 0; i < releases.length(); i++) {
                 JSONObject release = releases.getJSONObject(i);
                 if(!release.getString("iso_3166_1").equals("US")) {
                     continue;
                 }
-                String contentRating = release.getJSONArray("release_dates").getJSONObject(0).getString("certification");
-                return contentRating.isEmpty() ? "N/A" : contentRating;
+                contentRating = release.getJSONArray("release_dates").getJSONObject(0).getString("certification");
             }
-            return null;
+            return contentRating == null || contentRating.isEmpty() ? "N/A" : contentRating;
         }
 
         /**
