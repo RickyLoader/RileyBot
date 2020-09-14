@@ -155,12 +155,11 @@ public class PlexServer {
      * @return Single movie embed or embed containing search results
      */
     public MessageEmbed searchLibrary(String query) {
-        String idRegex = "([t][td])\\d+";
         boolean idSearch = false;
         Movie[] results;
 
         // tt12345 or td12345
-        if(query.matches(idRegex)) {
+        if(query.matches("([t][td])\\d+")) {
             query = query.replaceFirst("td", "");
             idSearch = true;
             results = searchByID(query);
