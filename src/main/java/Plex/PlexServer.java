@@ -831,13 +831,13 @@ public class PlexServer {
         private String buildInfoSummary() {
             StringBuilder summary = new StringBuilder();
             if(imdbURL != null) {
-                summary.append("**IMDB**: ").append(EmbedHelper.embedURL("View", imdbURL)).append(" ");
+                summary.append(EmbedHelper.embedURL("**IMDB**", imdbURL)).append(" | ");
             }
             if(trailer != null) {
-                summary.append("**Trailer**: ").append(EmbedHelper.embedURL("View", trailer)).append(" ");
+                summary.append(EmbedHelper.embedURL("**Trailer**", trailer)).append(" | ");
             }
             if(website != null) {
-                summary.append("**Website**: ").append(EmbedHelper.embedURL("View", website));
+                summary.append(EmbedHelper.embedURL("**Website**", website));
             }
             String result = summary.toString();
             return result.isEmpty() ? null : result;
