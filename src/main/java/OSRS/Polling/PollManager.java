@@ -168,9 +168,10 @@ public class PollManager {
             return polls.get(id);
         }
 
-        if(history == null || System.currentTimeMillis() - historyFetched > 3600000) {
+        long currentTime = System.currentTimeMillis();
+        if(history == null || currentTime - historyFetched > 3600000) {
             history = getPollHistory();
-            historyFetched = System.currentTimeMillis();
+            historyFetched = currentTime;
         }
 
         if(id > history.size()) {
