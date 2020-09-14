@@ -120,6 +120,8 @@ public class PlexServer {
                 movie.getString("title"),
                 movie.has("overview") ? movie.getString("overview") : null,
                 movie.has("inCinemas") ? movie.getString("inCinemas") : null,
+                movie.has("youTubeTrailerId") ? movie.getString("youTubeTrailerId") : null,
+                movie.has("website") ? movie.getString("website") : null,
                 movie.getBoolean("downloaded"));
     }
 
@@ -259,9 +261,11 @@ public class PlexServer {
                 .put("addOptions", new JSONObject().put("searchForMovie", true))
                 .toString();
 
-        Movie result = parseMovie(new JSONObject(new NetworkRequest(getRadarrLibraryURL(), false).post(body)));
+        String json = new NetworkRequest(getRadarrLibraryURL(), false).post(body);
+        Movie result = parseMovie(new JSONObject(json));
         library.add(result);
         System.out.println(result.getTitle() + " (" + result.getReleaseDate() + ") has been added to Radarr: " + result.getIMDBUrl());
+        System.out.println(json);
         return result;
     }
 
@@ -433,7 +437,7 @@ public class PlexServer {
      * Hold information about a movie on Radarr
      */
     public static class Movie {
-        private final String tmdbId, title, summary;
+        private final String tmdbId, title, summary, trailer, website;
         private String contentRating, tagline, director, cast, language, genre, poster, imdbId, imdbURL;
         private final Date releaseDate;
         private double rating;
@@ -444,13 +448,15 @@ public class PlexServer {
         /**
          * Construct the movie
          *
-         * @param imdbId  IMDB (tt6053438) id of movie
-         * @param tmdbId  TMDB (14161) id of movie
-         * @param title   Title of movie
-         * @param summary Movie synopsis
-         * @param onPlex  Movie is on Plex
+         * @param imdbId    IMDB (tt6053438) id of movie
+         * @param tmdbId    TMDB (14161) id of movie
+         * @param title     Title of movie
+         * @param summary   Movie synopsis
+         * @param trailerId Youtube trailer id (Z9q1qJi1nMs)
+         * @param website   Movie website
+         * @param onPlex    Movie is on Plex
          */
-        public Movie(String imdbId, String tmdbId, String title, String summary, String releaseDate, boolean onPlex) {
+        public Movie(String imdbId, String tmdbId, String title, String summary, String releaseDate, String trailerId, String website, boolean onPlex) {
             this.imdbId = imdbId;
             this.imdbURL = buildIMDBUrl(imdbId);
             this.tmdbId = tmdbId;
@@ -458,7 +464,19 @@ public class PlexServer {
             this.summary = summary;
             this.releaseDate = releaseDate == null ? null : parseReleaseDate(releaseDate);
             this.onPlex = onPlex;
+            this.trailer = trailerId == null ? null : buildTrailerURL(trailerId);
+            this.website = (website == null || website.isEmpty()) ? null : website;
             this.complete = false;
+        }
+
+        /**
+         * Build the youtube trailer URL from the id
+         *
+         * @param trailerId Youtube trailer id (Z9q1qJi1nMs)
+         * @return Youtube trailer URL
+         */
+        private String buildTrailerURL(String trailerId) {
+            return "https://www.youtube.com/watch?v=" + trailerId;
         }
 
         /**
@@ -806,6 +824,26 @@ public class PlexServer {
         }
 
         /**
+         * Build a summary String of movie website, IMDB, and trailer
+         *
+         * @return Movie info summary
+         */
+        private String buildInfoSummary() {
+            StringBuilder summary = new StringBuilder();
+            if(imdbURL != null) {
+                summary.append("**IMDB**: ").append(EmbedHelper.embedURL("View", imdbURL)).append(" ");
+            }
+            if(trailer != null) {
+                summary.append("**Trailer**: ").append(EmbedHelper.embedURL("View", trailer)).append(" ");
+            }
+            if(website != null) {
+                summary.append("**Website**: ").append(EmbedHelper.embedURL("View", website));
+            }
+            String result = summary.toString();
+            return result.isEmpty() ? null : result;
+        }
+
+        /**
          * Format the movie information in to a String summary
          *
          * @return Summary of movie information
@@ -850,9 +888,9 @@ public class PlexServer {
             if(revenue > 0) {
                 desc.append("\n\n**Box Office**: ").append(formatUSD(revenue));
             }
-
-            if(imdbId != null) {
-                desc.append("\n\n**IMDB**: ").append(EmbedHelper.embedURL("View", getIMDBUrl()));
+            String infoSummary = buildInfoSummary();
+            if(infoSummary != null) {
+                desc.append("\n\n").append(infoSummary);
             }
 
             return desc.toString();
