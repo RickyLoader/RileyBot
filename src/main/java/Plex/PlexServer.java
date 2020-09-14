@@ -829,18 +829,17 @@ public class PlexServer {
          * @return Movie info summary
          */
         private String buildInfoSummary() {
-            StringBuilder summary = new StringBuilder();
+            ArrayList<String> elements = new ArrayList<>();
             if(imdbURL != null) {
-                summary.append(EmbedHelper.embedURL("**IMDB**", imdbURL)).append(" | ");
+                elements.add(EmbedHelper.embedURL("**IMDB**", imdbURL));
             }
             if(trailer != null) {
-                summary.append(EmbedHelper.embedURL("**Trailer**", trailer)).append(" | ");
+                elements.add(EmbedHelper.embedURL("**Trailer**", trailer));
             }
             if(website != null) {
-                summary.append(EmbedHelper.embedURL("**Website**", website));
+                elements.add(EmbedHelper.embedURL("**Website**", website));
             }
-            String result = summary.toString();
-            return result.isEmpty() ? null : result;
+            return elements.isEmpty() ? null : StringUtils.join(elements, " | ");
         }
 
         /**
