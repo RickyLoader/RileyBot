@@ -379,7 +379,7 @@ public class PlexServer {
             key.append(plexEmote).append(" = On Plex\n\n");
         }
         if(Arrays.stream(movies).limit(bound).anyMatch(movie -> !movie.isOnPlex())) {
-            key.append(radarrEmote).append(library ? " = On Radarr - Movie **is not** on Plex but will be once released.\n\n" : " = Available on Radarr - Search by the id to add to Plex.\n\n");
+            key.append(radarrEmote).append(library ? " = On Radarr - Movie **is not** on Plex but will be once released/downloaded.\n\n" : " = Available on Radarr - Search by the id to add to Plex.\n\n");
         }
         return key.toString();
     }
