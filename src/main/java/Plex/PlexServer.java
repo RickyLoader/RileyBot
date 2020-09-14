@@ -99,7 +99,7 @@ public class PlexServer {
         ArrayList<Movie> library = new ArrayList<>();
         for(int i = 0; i < movies.length(); i++) {
             JSONObject movie = movies.getJSONObject(i);
-            if(ignoreLibrary && movie.getBoolean("monitored")) {
+            if(ignoreLibrary && (movie.getBoolean("monitored") || movie.getBoolean("downloaded"))) {
                 continue;
             }
             library.add(parseMovie(movie));
@@ -655,8 +655,13 @@ public class PlexServer {
              * Original language is based on where the movie was filmed - English movie filmed in Germany
              * would show German as the original language but wouldn't be present in spoken languages.
              */
-            if(language == null && spokenLanguages.length() > 0) {
-                language = spokenLanguages.getJSONObject(0).getString("name");
+            if(language == null) {
+                if(spokenLanguages.length() > 0) {
+                    language = spokenLanguages.getJSONObject(0).getString("name");
+                }
+                else {
+                    language = "N/A";
+                }
             }
 
             // Get the English name of the language
@@ -672,7 +677,7 @@ public class PlexServer {
          * @return English name of language
          */
         private String getISOEnglishName(String iso) {
-            String language = null;
+            String language = iso;
             try {
                 JSONArray allLanguages = new JSONArray(new String(Files.readAllBytes(Paths.get("src/main/resources/Movie/languages.json")), StandardCharsets.UTF_8));
                 for(int i = 0; i < allLanguages.length(); i++) {
@@ -825,7 +830,7 @@ public class PlexServer {
                 desc.append("\n\n**Genre**: ").append(getGenre());
             }
 
-            if(language == null || !language.equals("English")) {
+            if(!language.equals("English")) {
                 desc.append("\n\n**Language**: ").append(language);
             }
 
