@@ -18,8 +18,9 @@ public class PlexCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         long timePassed = System.currentTimeMillis() - plex.getTimeFetched();
         MessageChannel channel = context.getMessageChannel();
+        final String message = context.getLowerCaseMessage();
 
-        if(!context.getLowerCaseMessage().startsWith("plex!")) {
+        if(!message.equals("plex!") && !message.startsWith("plex! ")) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
@@ -45,12 +46,11 @@ public class PlexCommand extends DiscordCommand {
                     return;
                 }
             }
-            String query = context.getLowerCaseMessage();
-            if(query.equals("plex!")) {
+            if(message.equals("plex!")) {
                 channel.sendMessage(plex.getMovieEmbed(plex.getRandomMovie(), false)).queue();
                 return;
             }
-            query = query.replaceFirst("plex! ", "").trim();
+            String query = message.replaceFirst("plex! ", "").trim();
             channel.sendMessage(plex.searchLibrary(query)).queue();
         }).start();
     }
