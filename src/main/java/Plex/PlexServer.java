@@ -116,7 +116,7 @@ public class PlexServer {
     private Movie parseMovie(JSONObject movie) {
         return new Movie(
                 movie.has("imdbId") ? movie.getString("imdbId") : null,
-                String.valueOf(movie.get("tmdbId")),
+                String.valueOf(movie.getInt("tmdbId")),
                 movie.getString("title"),
                 movie.has("overview") ? movie.getString("overview") : null,
                 movie.has("inCinemas") ? movie.getString("inCinemas") : null,
@@ -261,6 +261,7 @@ public class PlexServer {
 
         Movie result = parseMovie(new JSONObject(new NetworkRequest(getRadarrLibraryURL(), false).post(body)));
         library.add(result);
+        System.out.println(result.getTitle() + " (" + result.getReleaseDate() + ") has been added to Radarr: " + result.getIMDBUrl());
         return result;
     }
 
@@ -432,8 +433,8 @@ public class PlexServer {
      * Hold information about a movie on Radarr
      */
     public static class Movie {
-        private final String imdbId, tmdbId, title, summary, imdbURL;
-        private String contentRating, tagline, director, cast, language, genre, poster;
+        private final String tmdbId, title, summary;
+        private String contentRating, tagline, director, cast, language, genre, poster, imdbId, imdbURL;
         private final Date releaseDate;
         private double rating;
         private long budget, revenue, duration;
@@ -502,6 +503,10 @@ public class PlexServer {
             JSONObject credits = movie.getJSONObject("credits");
             this.cast = parseCast(credits.getJSONArray("cast"));
             this.director = parseDirectors(credits.getJSONArray("crew"));
+            if(this.imdbId == null) {
+                this.imdbId = movie.getString("imdb_id");
+                this.imdbURL = buildIMDBUrl(this.imdbId);
+            }
             this.complete = true;
         }
 
