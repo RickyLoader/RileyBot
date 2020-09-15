@@ -51,7 +51,7 @@ public class PlexCommand extends DiscordCommand {
                 return;
             }
             String query = message.replaceFirst("plex! ", "").trim();
-            channel.sendMessage(plex.searchLibrary(query)).queue();
+            channel.sendMessage(plex.searchLibrary(query, context.getMember())).queue();
         }).start();
     }
 

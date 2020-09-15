@@ -48,6 +48,18 @@ public class EmoteHelper {
         return guild.getEmoteById("754306729860268082");
     }
 
+    public Emote getYoutube() {
+        return guild.getEmoteById("755358421678555136");
+    }
+
+    public Emote getFacebook() {
+        return guild.getEmoteById("755358696162459718");
+    }
+
+    public Emote getIMDB() {
+        return guild.getEmoteById("755356580613980190");
+    }
+
     public Emote getVictory() {
         return guild.getEmoteById("742984225959051331");
     }
