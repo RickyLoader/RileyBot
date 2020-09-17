@@ -266,18 +266,18 @@ public class PlexServer {
                 .put("addOptions", new JSONObject().put("searchForMovie", true))
                 .toString();
 
-        // Add the movie to Radarr
-        new NetworkRequest(getRadarrLibraryURL(), false).post(body);
-
-        // Complete the movie details and add to the library
+        long start = System.currentTimeMillis();
         Movie result = parseMovie(movie);
         result.completeMovieDetails();
 
         // Store the movie in the database for later callback informing of download
         new NetworkRequest("plex/monitor", true).post(result.toJSON(member, System.currentTimeMillis()));
-        System.out.println(result.getTitle() + " (" + result.getFormattedReleaseDate() + ") has been added to Radarr: " + result.getIMDBUrl());
+
+        // Add the movie to Radarr
+        new NetworkRequest(getRadarrLibraryURL(), false).post(body);
 
         library.add(result);
+        System.out.println(result.getTitle() + " (" + result.getFormattedReleaseDate() + ") has been added to Radarr: " + result.getIMDBUrl() + "(" + (System.currentTimeMillis() - start) + " ms)");
         return result;
     }
 
