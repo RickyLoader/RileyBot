@@ -38,16 +38,14 @@ public class ImpersonateCommand extends DiscordCommand {
         }
 
         context.getGuild().retrieveWebhooks().queue(webhooks -> {
-            ArrayList<Webhook> filter = webhooks.stream().filter(webhook -> webhook.getName().equalsIgnoreCase("impersonate")).collect(Collectors.toCollection(ArrayList::new));
-            if(filter.isEmpty()) {
-                channel.sendMessage("I need a webhook named ```impersonate``` to do that cunt").queue();
+            String webhook = context.filterWebhooks(webhooks, "impersonate");
+            if(webhook == null) {
+                channel.sendMessage("I need a webhook named: ```impersonate``` to do that!").queue();
                 return;
             }
             try {
                 Member target = mentions.get(0);
-                Webhook impersonate = filter.get(0);
-                String url = impersonate.getUrl().replaceFirst("discord", "discordapp");
-                WebhookClient client = new WebhookClientBuilder(url).build();
+                WebhookClient client = new WebhookClientBuilder(webhook).build();
                 WebhookMessage message = new WebhookMessageBuilder()
                         .setUsername(target.getEffectiveName())
                         .setAvatarUrl(target.getUser().getEffectiveAvatarUrl())

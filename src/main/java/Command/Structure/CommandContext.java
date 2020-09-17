@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommandContext {
     private final GuildMessageReceivedEvent event;
@@ -39,6 +40,22 @@ public class CommandContext {
                 cancelable,
                 doAfter
         );
+    }
+
+    /**
+     * Filter webhooks by name and return the URL
+     *
+     * @param webhooks List of webhooks
+     * @param name     Name to filter by
+     * @return Webhook URL
+     */
+    public String filterWebhooks(List<Webhook> webhooks, String name) {
+        ArrayList<String> urls = webhooks
+                .stream()
+                .filter(webhook -> webhook.getName().equalsIgnoreCase(name))
+                .map(webhook -> webhook.getUrl().replaceFirst("discord", "discordapp"))
+                .collect(Collectors.toCollection(ArrayList::new));
+        return urls.isEmpty() ? null : urls.get(0);
     }
 
     public User getSelfUser() {

@@ -146,6 +146,7 @@ public class DiscordCommandManager {
         addCommand(new VoiceChannelCommand());
         addCommand(new OSRSPollCommand());
         addCommand(new CWCountdownCommand());
+        addCommand(new KnockCommand());
     }
 
     /**

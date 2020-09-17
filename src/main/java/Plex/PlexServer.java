@@ -154,11 +154,12 @@ public class PlexServer {
     /**
      * Search for a movie in the Radarr library
      *
-     * @param query  Search query - id or title
-     * @param member Member who requested search
+     * @param query   Search query - id or title
+     * @param member  Member who requested search
+     * @param webhook Webhook URL to respond to
      * @return Single movie embed or embed containing search results
      */
-    public MessageEmbed searchLibrary(String query, Member member) {
+    public MessageEmbed searchLibrary(String query, Member member, String webhook) {
         boolean idSearch = false;
         Movie[] results;
 
@@ -194,7 +195,7 @@ public class PlexServer {
 
         // Search the Radarr API
         if(results.length == 0) {
-            return searchRadarr(query, idSearch, member);
+            return searchRadarr(query, idSearch, member, webhook);
         }
         return buildSearchEmbed(query, results, true);
     }
@@ -220,16 +221,17 @@ public class PlexServer {
      * @param query    Search query
      * @param idSearch Search by id
      * @param member   Member who requested search
+     * @param webhook  Webhook URL to respond to
      * @return MessageEmbed detailing search result
      */
-    private MessageEmbed searchRadarr(String query, boolean idSearch, Member member) {
+    private MessageEmbed searchRadarr(String query, boolean idSearch, Member member, String webhook) {
         String json = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get();
         if(json == null || json.equals("err")) {
             return buildFailedEmbed();
         }
         // ID search returns a JSON object rather than an array of results
         if(idSearch) {
-            return getMovieEmbed(addToRadarr(new JSONObject(json), member), true);
+            return getMovieEmbed(addToRadarr(new JSONObject(json), member, webhook), true);
         }
         else {
             JSONArray results = new JSONArray(json);
@@ -238,7 +240,7 @@ public class PlexServer {
                 for(int i = 0; i < results.length(); i++) {
                     JSONObject result = results.getJSONObject(i);
                     if(result.getInt("tmdbId") == Integer.parseInt(movies[0].getTmdbId())) {
-                        return getMovieEmbed(addToRadarr(result, member), true);
+                        return getMovieEmbed(addToRadarr(result, member, webhook), true);
                     }
                 }
             }
@@ -249,11 +251,12 @@ public class PlexServer {
     /**
      * Add a movie to Radarr
      *
-     * @param movie  Movie JSON
-     * @param member Member who requested add
+     * @param movie   Movie JSON
+     * @param member  Member who requested add
+     * @param webhook Webhook URL to respond to
      * @return Movie object
      */
-    private Movie addToRadarr(JSONObject movie, Member member) {
+    private Movie addToRadarr(JSONObject movie, Member member, String webhook) {
         String body = new JSONObject()
                 .put("title", movie.getString("title"))
                 .put("qualityProfileId", 4)
@@ -271,7 +274,7 @@ public class PlexServer {
         result.completeMovieDetails();
 
         // Store the movie in the database for later callback informing of download
-        new NetworkRequest("plex/monitor", true).post(result.toJSON(member, System.currentTimeMillis()));
+        new NetworkRequest("plex/monitor", true).post(result.toJSON(member, System.currentTimeMillis() / 1000, webhook));
 
         // Add the movie to Radarr
         new NetworkRequest(getRadarrLibraryURL(), false).post(body);
@@ -482,9 +485,10 @@ public class PlexServer {
          *
          * @param member    Member who requested movie
          * @param requested Time of request
+         * @param webhook   Webhook URL to respond to
          * @return JSON formatted movie
          */
-        public String toJSON(Member member, long requested) {
+        public String toJSON(Member member, long requested, String webhook) {
             return new JSONObject()
                     .put("imdb_id", imdbId)
                     .put("title", title)
@@ -506,6 +510,7 @@ public class PlexServer {
                     .put("member", member.getAsMention())
                     .put("duration", duration > 0 ? getDuration() : JSONObject.NULL)
                     .put("requested", requested)
+                    .put("webhook", webhook)
                     .toString();
         }
 

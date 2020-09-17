@@ -4,6 +4,12 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Plex.PlexServer;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Webhook;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class PlexCommand extends DiscordCommand {
     private final PlexServer plex;
@@ -51,7 +57,14 @@ public class PlexCommand extends DiscordCommand {
                 return;
             }
             String query = message.replaceFirst("plex! ", "").trim();
-            channel.sendMessage(plex.searchLibrary(query, context.getMember())).queue();
+            context.getGuild().retrieveWebhooks().queue(webhooks -> {
+                String webhook = context.filterWebhooks(webhooks, "plex");
+                if(webhook == null) {
+                    channel.sendMessage("I need a webhook named: ```plex``` to do that!").queue();
+                    return;
+                }
+                channel.sendMessage(plex.searchLibrary(query, context.getMember(), webhook)).queue();
+            });
         }).start();
     }
 
