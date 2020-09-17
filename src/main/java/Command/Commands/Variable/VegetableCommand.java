@@ -4,6 +4,6 @@ import Command.Structure.VariableLinkCommand;
 
 public class VegetableCommand extends VariableLinkCommand {
     public VegetableCommand() {
-        super(new String[]{"brogle", "banana"}, "brogle, banana", "Some tasty vegetables!");
+        super(new String[]{"brogle", "banana"}, "Some tasty vegetables!");
     }
 }

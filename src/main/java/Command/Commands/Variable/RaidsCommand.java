@@ -4,6 +4,6 @@ import Command.Structure.VariableLinkCommand;
 
 public class RaidsCommand extends VariableLinkCommand {
     public RaidsCommand() {
-        super(new String[]{"raids", "chopping"}, "raids, chopping", "Some fun and helpful raids pictures!");
+        super(new String[]{"raids", "chopping"}, "Some fun and helpful raids pictures!");
     }
 }

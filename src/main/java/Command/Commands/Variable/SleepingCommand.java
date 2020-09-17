@@ -4,6 +4,6 @@ import Command.Structure.VariableLinkCommand;
 
 public class SleepingCommand extends VariableLinkCommand {
     public SleepingCommand() {
-        super(new String[]{"sleeping", "sleeping2"}, "sleeping, sleeping2", "Falling asleep is fun!");
+        super(new String[]{"sleeping", "sleeping2"}, "Falling asleep is fun!");
     }
 }
