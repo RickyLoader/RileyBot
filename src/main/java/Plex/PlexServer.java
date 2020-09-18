@@ -986,7 +986,7 @@ public class PlexServer {
          */
         public String buildEmbedDescription(String imdbEmote, String facebookEmote, String youtubeEmote, String plexEmote) {
             StringBuilder desc = new StringBuilder();
-            desc.append("**Plex**: ").append(onPlex ? "Movie **is** on Plex" : "Movie **is not** on Plex but will be once released/downloaded.");
+            desc.append(onPlex ? "Movie **is** on Plex" : "Movie **is not** on Plex but will be once released/downloaded.");
 
             if(summary != null) {
                 desc.append("\n\n**Synopsis**: ").append(summary);
