@@ -27,6 +27,7 @@ public class PlexServer {
     private EmoteHelper emoteHelper;
     private final String helpMessage, plexIcon = "https://i.imgur.com/FdabwCm.png", radarrIcon = "https://i.imgur.com/d5p0ftd.png";
     private String plexEmote, radarrEmote, imdbEmote, facebookEmote, youtubeEmote;
+    private HashMap<String, String> plexUrls;
 
     /**
      * Read in the Radarr library and remember the timestamp
@@ -60,11 +61,41 @@ public class PlexServer {
     }
 
     /**
-     * Refresh the Radarr library
+     * Refresh the Radarr library and Plex URLs
      */
     public void refreshData() {
+        this.plexUrls = parsePlex();
         this.library = getLibraryOverview();
         this.timeFetched = System.currentTimeMillis();
+    }
+
+    /**
+     * Retrieve the Plex URL for each movie from the Plex API. Map the folder name to the URL.
+     *
+     * @return Folder name mapped to Plex URL
+     */
+    private HashMap<String, String> parsePlex() {
+        HashMap<String, String> plexURLs = new HashMap<>();
+        String json = new NetworkRequest(getPlexLibraryURL(), false).get();
+        if(json == null || json.equals("err")) {
+            System.out.println("Failed to contact Plex");
+            return plexURLs;
+        }
+        JSONArray library = new JSONObject(json).getJSONObject("MediaContainer").getJSONArray("Metadata");
+        for(int i = 0; i < library.length(); i++) {
+            JSONObject movie = library.getJSONObject(i);
+            String folder = movie
+                    .getJSONArray("Media")
+                    .getJSONObject(0)
+                    .getJSONArray("Part")
+                    .getJSONObject(0)
+                    .getString("file");
+            plexURLs.put(
+                    folder.substring(0, folder.lastIndexOf('/')),
+                    "https://app.plex.tv/desktop#!/server/" + Secret.getPlexServerId() + "/details?key=/library/metadata/" + movie.getString("ratingKey")
+            );
+        }
+        return plexURLs;
     }
 
     /**
@@ -73,7 +104,7 @@ public class PlexServer {
      * @return Library exists
      */
     public boolean libraryEmpty() {
-        return library.isEmpty();
+        return library.isEmpty() || plexUrls.isEmpty();
     }
 
     /**
@@ -118,12 +149,14 @@ public class PlexServer {
      * @return Movie
      */
     private Movie parseMovie(JSONObject movie) {
+        String folder = movie.getString("path");
         return new Movie(
                 movie.has("imdbId") ? movie.getString("imdbId") : null,
                 String.valueOf(movie.getInt("tmdbId")),
                 movie.getString("title"),
                 movie.has("overview") ? movie.getString("overview") : null,
                 movie.has("inCinemas") ? movie.getString("inCinemas") : null,
+                folder.endsWith("/") ? plexUrls.get(folder.substring(0, folder.length() - 1)) : plexUrls.get(folder),
                 movie.getBoolean("downloaded"));
     }
 
@@ -145,7 +178,7 @@ public class PlexServer {
         if(movie.getPoster() != null) {
             builder.setImage(movie.getPoster());
         }
-        builder.setDescription(movie.buildEmbedDescription(imdbEmote, facebookEmote, youtubeEmote));
+        builder.setDescription(movie.buildEmbedDescription(imdbEmote, facebookEmote, youtubeEmote, plexEmote));
         double rating = movie.getRating();
         builder.setFooter("TMDB: " + ((rating == 0) ? "N/A" : rating) + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getFormattedReleaseDate(), "https://i.imgur.com/J1JGC4J.png");
         return builder.build();
@@ -424,6 +457,15 @@ public class PlexServer {
     }
 
     /**
+     * Get the URL to fetch movie data from Plex
+     *
+     * @return Plex URL
+     */
+    private String getPlexLibraryURL() {
+        return Secret.getPlexIp() + Secret.getInternalPlexPort() + "/library/sections/" + Secret.getPlexLibraryId() + "/all/" + Secret.getPlexToken();
+    }
+
+    /**
      * Get the URL to search for a movie to add on Radarr
      *
      * @param query    Movie title
@@ -452,7 +494,7 @@ public class PlexServer {
      * Hold information about a movie on Radarr
      */
     public static class Movie {
-        private final String tmdbId, title, summary;
+        private final String tmdbId, title, summary, plexURL;
         private String contentRating, tagline, director, cast, language, genre, poster, imdbId, imdbURL, trailer, facebook;
         private final Date releaseDate;
         private double rating;
@@ -467,9 +509,10 @@ public class PlexServer {
          * @param tmdbId  TMDB (14161) id of movie
          * @param title   Title of movie
          * @param summary Movie synopsis
+         * @param plexURL Plex direct URL to movie
          * @param onPlex  Movie is on Plex
          */
-        public Movie(String imdbId, String tmdbId, String title, String summary, String releaseDate, boolean onPlex) {
+        public Movie(String imdbId, String tmdbId, String title, String summary, String releaseDate, String plexURL, boolean onPlex) {
             this.imdbId = imdbId;
             this.imdbURL = buildIMDBUrl(imdbId);
             this.tmdbId = tmdbId;
@@ -477,6 +520,7 @@ public class PlexServer {
             this.summary = summary;
             this.releaseDate = releaseDate == null ? null : parseReleaseDate(releaseDate);
             this.onPlex = onPlex;
+            this.plexURL = plexURL;
             this.complete = false;
         }
 
@@ -911,9 +955,10 @@ public class PlexServer {
          * @param facebookEmote Facebook emote
          * @param imdbEmote     IMDB emote
          * @param youtubeEmote  Youtube emote
+         * @param plexEmote     Plex emote
          * @return Movie social summary
          */
-        private String buildSocialSummary(String facebookEmote, String imdbEmote, String youtubeEmote) {
+        private String buildSocialSummary(String facebookEmote, String imdbEmote, String youtubeEmote, String plexEmote) {
             ArrayList<String> elements = new ArrayList<>();
             if(imdbURL != null) {
                 elements.add(EmbedHelper.embedURL(imdbEmote + " IMDB", imdbURL));
@@ -924,6 +969,9 @@ public class PlexServer {
             if(facebook != null) {
                 elements.add(EmbedHelper.embedURL(facebookEmote + " Facebook", facebook));
             }
+            if(plexURL != null) {
+                elements.add(EmbedHelper.embedURL(plexEmote + " Plex", plexURL));
+            }
             return elements.isEmpty() ? null : StringUtils.join(elements, " | ");
         }
 
@@ -933,9 +981,10 @@ public class PlexServer {
          * @param facebookEmote Facebook emote
          * @param imdbEmote     IMDB emote
          * @param youtubeEmote  Youtube emote
+         * @param plexEmote     Plex emote
          * @return Summary of movie information
          */
-        public String buildEmbedDescription(String imdbEmote, String facebookEmote, String youtubeEmote) {
+        public String buildEmbedDescription(String imdbEmote, String facebookEmote, String youtubeEmote, String plexEmote) {
             StringBuilder desc = new StringBuilder();
             desc.append("**Plex**: ").append(onPlex ? "Movie **is** on Plex" : "Movie **is not** on Plex but will be once released/downloaded.");
 
@@ -974,7 +1023,7 @@ public class PlexServer {
             if(revenue > 0) {
                 desc.append("\n\n**Box Office**: ").append(formatUSD(revenue));
             }
-            String infoSummary = buildSocialSummary(facebookEmote, imdbEmote, youtubeEmote);
+            String infoSummary = buildSocialSummary(facebookEmote, imdbEmote, youtubeEmote, plexEmote);
             if(infoSummary != null) {
                 desc.append("\n\n").append(infoSummary);
             }
