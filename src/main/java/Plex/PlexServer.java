@@ -517,7 +517,7 @@ public class PlexServer {
             this.imdbURL = buildIMDBUrl(imdbId);
             this.tmdbId = tmdbId;
             this.title = title;
-            this.summary = summary;
+            this.summary = (summary == null || summary.length() < 175) ? summary : summary.substring(0, 175) + "...";
             this.releaseDate = releaseDate == null ? null : parseReleaseDate(releaseDate);
             this.onPlex = onPlex;
             this.plexURL = plexURL;
@@ -596,7 +596,6 @@ public class PlexServer {
             }
             String url = "https://api.themoviedb.org/3/movie/" + tmdbId + "?api_key=" + Secret.getTMDBKey() + "&append_to_response=credits,release_dates,videos,external_ids&language=en-US";
             JSONObject movie = new JSONObject(new NetworkRequest(url, false).get());
-
             this.genre = parseGenre(movie.getJSONArray("genres"));
             this.budget = movie.getLong("budget");
             this.revenue = movie.getLong("revenue");
