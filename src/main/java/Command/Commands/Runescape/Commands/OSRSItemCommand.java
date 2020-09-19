@@ -1,9 +1,9 @@
-package Command.Commands;
+package Command.Commands.Runescape.Commands;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import OSRS.Items.ItemManager;
-import OSRS.Items.ItemManager.Item;
+import Command.Commands.Runescape.OSRS.Items.ItemManager;
+import Command.Commands.Runescape.OSRS.Items.ItemManager.Item;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class OSRSItemCommand extends DiscordCommand {

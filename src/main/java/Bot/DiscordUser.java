@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Helper methods for storing and retrieving information based on User id
  */
 public class DiscordUser {
-    private static final String MW = "MW", CW = "CW", OSRS = "OSRS", LOL = "LOL", YT = "YT";
+    private static final String MW = "MW", CW = "CW", OSRS = "OSRS", LOL = "LOL", YT = "YT", RS3 = "RS3";
 
     /**
      * Retrieve name used in mwlookup command
@@ -52,6 +52,16 @@ public class DiscordUser {
     }
 
     /**
+     * Retrieve name used in rs3lookup command
+     *
+     * @param id Discord user object id
+     * @return rs3lookup name
+     */
+    public static String getRS3Name(long id) {
+        return getName(id, RS3);
+    }
+
+    /**
      * Retrieve name used in ytlookup command
      *
      * @param id Discord user object id
@@ -71,6 +81,18 @@ public class DiscordUser {
     public static void saveMWName(String name, MessageChannel channel, User user) {
         savePlayer(name, user.getIdLong(), MW);
         channel.sendMessage(user.getAsMention() + " Your mwlookup name is now " + name).queue();
+    }
+
+    /**
+     * Store a given name by the user's discord id for the rs3lookup command
+     *
+     * @param name    Name to be saved
+     * @param channel Channel to report status to
+     * @param user    User to store by id
+     */
+    public static void saveRS3Name(String name, MessageChannel channel, User user) {
+        savePlayer(name, user.getIdLong(), RS3);
+        channel.sendMessage(user.getAsMention() + " Your rs3lookup name is now " + name).queue();
     }
 
     /**
@@ -126,7 +148,7 @@ public class DiscordUser {
      *
      * @param name  Name to be saved
      * @param id    ID to store by
-     * @param table Table to save in [YT, MW, OSRS]
+     * @param table Table to save in [YT, MW, OSRS, CW, RS3]
      */
     private static void savePlayer(String name, long id, String table) {
         JSONObject body = new JSONObject().put("discord_id", id).put("table", table).put("name", name);
@@ -145,6 +167,7 @@ public class DiscordUser {
         if(json == null || json.isEmpty()) {
             return null;
         }
+        System.out.println(json);
         return new JSONObject(json).getString("name");
     }
 

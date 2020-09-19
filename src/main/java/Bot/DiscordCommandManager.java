@@ -8,6 +8,9 @@ import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
+import Command.Commands.Runescape.Commands.OSRSItemCommand;
+import Command.Commands.Runescape.Commands.OSRSLookupCommand;
+import Command.Commands.Runescape.Commands.RS3LookupCommand;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -148,6 +151,7 @@ public class DiscordCommandManager {
         addCommand(new CWCountdownCommand());
         addCommand(new KnockCommand());
         addCommand(new OSRSItemCommand());
+        addCommand(new RS3LookupCommand());
     }
 
     /**

@@ -1,10 +1,10 @@
 package Command.Commands.Passive;
 
 import Command.Structure.*;
-import OSRS.Polling.PollManager;
-import OSRS.Polling.PollManager.Poll;
-import OSRS.Polling.PollManager.Poll.Question;
-import OSRS.Polling.PollManager.Poll.Question.Answer;
+import Command.Commands.Runescape.OSRS.Polling.PollManager;
+import Command.Commands.Runescape.OSRS.Polling.PollManager.Poll;
+import Command.Commands.Runescape.OSRS.Polling.PollManager.Poll.Question;
+import Command.Commands.Runescape.OSRS.Polling.PollManager.Poll.Question.Answer;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.Arrays;

@@ -1,6 +1,6 @@
-package OSRS.Polling;
+package Command.Commands.Runescape.OSRS.Polling;
 
-import OSRS.Polling.PollManager.Poll.Question.Answer;
+import Command.Commands.Runescape.OSRS.Polling.PollManager.Poll.Question;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static OSRS.Polling.PollManager.Poll.*;
+import static Command.Commands.Runescape.OSRS.Polling.PollManager.Poll.Question.*;
 
 /**
  * Hold information on OSRS polls

@@ -1,10 +1,10 @@
-package Command.Commands;
+package Command.Commands.Runescape.Commands;
 
 import Bot.DiscordUser;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilderLookupCommand;
 import Command.Structure.ImageBuilder;
-import OSRS.Stats.Hiscores;
+import Command.Commands.Runescape.OSRS.Stats.Hiscores;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -19,7 +19,7 @@ public class OSRSLookupCommand extends ImageBuilderLookupCommand {
 
     @Override
     public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new Hiscores(channel, emoteHelper, "src/main/resources/OSRS/", "osrs.ttf");
+        return new Hiscores(channel, emoteHelper, "src/main/resources/Runescape/OSRS/", "osrs.ttf");
     }
 
     @Override

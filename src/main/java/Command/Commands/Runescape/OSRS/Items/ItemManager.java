@@ -1,4 +1,4 @@
-package OSRS.Items;
+package Command.Commands.Runescape.OSRS.Items;
 
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
