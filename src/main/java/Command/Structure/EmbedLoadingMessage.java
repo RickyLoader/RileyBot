@@ -51,7 +51,7 @@ public class EmbedLoadingMessage {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle(getTitle());
         builder.setDescription(getDesc());
-        builder.setThumbnail(getThumbnail());
+        builder.setThumbnail(thumbnail);
         builder.setColor(getColour());
         builder.setFooter(helpMessage, thumbnail);
         return builder;

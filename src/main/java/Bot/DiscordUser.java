@@ -167,7 +167,6 @@ public class DiscordUser {
         if(json == null || json.isEmpty()) {
             return null;
         }
-        System.out.println(json);
         return new JSONObject(json).getString("name");
     }
 

@@ -64,8 +64,8 @@ public class Hiscores extends ImageBuilder {
                         "Uploading image..."
                 }
         );
-
         loading.showLoading();
+
         String[] data = fetchPlayerData(encodedName);
         if(data == null) {
             if(timeout) {
@@ -88,7 +88,7 @@ public class Hiscores extends ImageBuilder {
     }
 
     /**
-     * Parse the player's clue scroll data from the Hiscores CSV
+     * Parse and format the player's clue scroll data from the Hiscores CSV
      *
      * @param data CSV data from API
      * @return Clue scroll data
