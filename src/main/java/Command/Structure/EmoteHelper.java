@@ -52,6 +52,54 @@ public class EmoteHelper {
         return guild.getEmoteById("755358421678555136");
     }
 
+    public Emote getSlash() {
+        return guild.getEmoteById("756771247278391306");
+    }
+
+    public Emote getStab() {
+        return guild.getEmoteById("756771247186247720");
+    }
+
+    public Emote getCrush() {
+        return guild.getEmoteById("756771247156625480");
+    }
+
+    public Emote getMagic() {
+        return guild.getEmoteById("756771246913486870");
+    }
+
+    public Emote getRanged() {
+        return guild.getEmoteById("756771247009955851");
+    }
+
+    public Emote getStrength() {
+        return guild.getEmoteById("756771247194636378");
+    }
+
+    public Emote getRangedStrength() {
+        return guild.getEmoteById("756771247207219230");
+    }
+
+    public Emote getMagicDamage() {
+        return guild.getEmoteById("756771247232253992");
+    }
+
+    public Emote getPrayer() {
+        return guild.getEmoteById("756771246926069841");
+    }
+
+    public Emote getDefence() {
+        return guild.getEmoteById("756771247274328125");
+    }
+
+    public Emote getAttack() {
+        return guild.getEmoteById("756771247206957111");
+    }
+
+    public Emote getOtherBonus() {
+        return guild.getEmoteById("756771247026602005");
+    }
+
     public Emote getFacebook() {
         return guild.getEmoteById("755358696162459718");
     }

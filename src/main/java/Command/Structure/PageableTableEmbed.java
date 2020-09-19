@@ -21,10 +21,11 @@ public abstract class PageableTableEmbed extends PageableEmbed {
      * @param title       Title to use for embed
      * @param desc        Description to use for embed
      * @param columns     Column headers to display at the top of message
+     * @param bound       Maximum items to display
      * @param colour      Optional colour to use for embed
      */
-    public PageableTableEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
-        super(channel, emoteHelper, items, thumb, title, desc, colour);
+    public PageableTableEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int bound, int... colour) {
+        super(channel, emoteHelper, items, thumb, title, desc, bound, colour);
         this.columns = columns;
         try {
             if(columns.length > 3) {

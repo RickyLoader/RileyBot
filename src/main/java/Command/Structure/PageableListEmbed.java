@@ -16,10 +16,11 @@ public abstract class PageableListEmbed extends PageableEmbed {
      * @param thumb       Thumbnail to use for embed
      * @param title       Title to use for embed
      * @param desc        Description to use for embed
+     * @param bound       Maximum items to display
      * @param colour      Optional colour to use for embed
      */
-    public PageableListEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int... colour) {
-        super(channel, emoteHelper, items, thumb, title, desc, colour);
+    public PageableListEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
+        super(channel, emoteHelper, items, thumb, title, desc, bound, colour);
     }
 
     /**

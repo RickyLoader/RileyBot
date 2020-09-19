@@ -147,6 +147,7 @@ public class DiscordCommandManager {
         addCommand(new OSRSPollCommand());
         addCommand(new CWCountdownCommand());
         addCommand(new KnockCommand());
+        addCommand(new OSRSItemCommand());
     }
 
     /**

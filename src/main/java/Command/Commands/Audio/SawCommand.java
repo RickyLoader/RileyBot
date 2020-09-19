@@ -9,7 +9,7 @@ import Command.Structure.DiscordCommand;
 public class SawCommand extends DiscordCommand {
 
     public SawCommand() {
-        super("saw", "The choice is yours!");
+        super("roulette", "The choice is yours!");
     }
 
     @Override

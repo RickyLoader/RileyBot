@@ -79,7 +79,7 @@ public class OSRSPollCommand extends PageableEmbedCommand {
          * @param colour      Optional colour to use for embed
          */
         public PollMessage(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, boolean open, int... colour) {
-            super(channel, emoteHelper, items, thumb, title, desc, colour);
+            super(channel, emoteHelper, items, thumb, title, desc, 3, colour);
             this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());
             this.section = EmoteHelper.formatEmote(emoteHelper.getSwordBlade());
             this.tip = EmoteHelper.formatEmote(emoteHelper.getSwordTip());

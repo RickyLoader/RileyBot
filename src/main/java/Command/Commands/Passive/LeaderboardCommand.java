@@ -111,7 +111,7 @@ public class LeaderboardCommand extends PageableEmbedCommand {
          * @param colour      Optional colour to use for embed
          */
         public Leaderboard(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
-            super(channel, emoteHelper, items, thumb, title, desc, columns, colour);
+            super(channel, emoteHelper, items, thumb, title, desc, columns, 5, colour);
         }
 
         @Override

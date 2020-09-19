@@ -65,6 +65,20 @@ public class EmbedHelper {
     }
 
     /**
+     * Get n blank characters
+     *
+     * @param n Quantity
+     * @return N Blank characters
+     */
+    public static String getBlankChar(int n) {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < n; i++) {
+            builder.append(getBlankChar());
+        }
+        return builder.toString();
+    }
+
+    /**
      * Get URL to a transparent image used to keep embeds at a constant width
      *
      * @return Transparent image url
