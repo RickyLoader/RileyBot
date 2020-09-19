@@ -337,7 +337,7 @@ public class Hiscores extends ImageBuilder {
      * @return Sorted CSV
      */
     private String[] orderSkills(String[] csv) {
-        String[] skills = new String[]{
+        return new String[]{
                 csv[4],     // ATTACK
                 csv[13].equals("1") ? "10" : csv[13],    // HITPOINTS
                 csv[46],    // MINING
@@ -370,23 +370,6 @@ public class Hiscores extends ImageBuilder {
                 csv[67],    // HUNTER
                 csv[1].equals("0") ? "---" : csv[1],     // TOTAL
         };
-        return getTotal(skills);
-    }
-
-    /**
-     * Total level appears as 0 if not in the top 2,000,000 players
-     *
-     * @param skills Array of skills with total level from hiscores
-     * @return Array of skills with adjusted total level
-     */
-    private String[] getTotal(String[] skills) {
-        int totalLevelIndex = skills.length - 1;
-        if(!skills[totalLevelIndex].equals("0")) {
-            return skills;
-        }
-        String total = "--";
-        skills[totalLevelIndex] = total;
-        return skills;
     }
 
     /**
