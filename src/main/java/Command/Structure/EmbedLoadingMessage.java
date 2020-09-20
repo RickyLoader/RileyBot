@@ -156,6 +156,14 @@ public class EmbedLoadingMessage {
     }
 
     /**
+     * Fail the current step with a value describing the error
+     */
+    public void failStage(String value) {
+        stages.get(currentStep).fail(value, currentTime);
+        nextStage();
+    }
+
+    /**
      * Complete the current step without a description
      */
     public void completeStage() {

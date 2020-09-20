@@ -7,11 +7,17 @@ import Command.Structure.ImageLoadingMessage;
 import Network.ImgurManager;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Build an image displaying a player's RS3 stats
@@ -19,9 +25,14 @@ import java.util.Arrays;
 public class Hiscores extends ImageBuilder {
     private ImageLoadingMessage loading;
     private boolean timeout = false;
+    private final Color orange, yellow, red, blue;
 
     public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         super(channel, emoteHelper, resourcePath, fontName);
+        this.orange = new Color(EmbedHelper.getRunescapeOrange());
+        this.yellow = new Color(EmbedHelper.getRunescapeYellow());
+        this.blue = new Color(EmbedHelper.getRunescapeBlue());
+        this.red = new Color(EmbedHelper.getRunescapeRed());
     }
 
     /**
@@ -103,6 +114,7 @@ public class Hiscores extends ImageBuilder {
                 new String[]{
                         "Player exists...",
                         "Checking account type...",
+                        "Checking RuneMetrics...",
                         "Building image...",
                         "Uploading image..."
                 }
@@ -119,10 +131,10 @@ public class Hiscores extends ImageBuilder {
             return;
         }
 
-        String[] clues = getClueScrolls(Arrays.copyOfRange(data, 137, 146));
+        String[] clues = getClueScrolls(Arrays.copyOfRange(data, 137, data.length - 1));
         String[] stats = orderSkills(data);
-
-        BufferedImage playerImage = buildImage(nameQuery, data[0], stats, clues);
+        JSONObject runeMetrics = getRuneMetrics(encodedName);
+        BufferedImage playerImage = buildImage(nameQuery, data[0], stats, clues, runeMetrics);
         loading.completeStage();
         String url = ImgurManager.uploadImage(playerImage);
         loading.completeStage();
@@ -132,14 +144,217 @@ public class Hiscores extends ImageBuilder {
     /**
      * Build an image based on the player's stats, boss kills, and clue scrolls
      *
-     * @param name   Player name
-     * @param type   Player account type
-     * @param skills Player stats
-     * @param clues  Player clue scroll completions
+     * @param name        Player name
+     * @param type        Player account type
+     * @param skills      Player stats
+     * @param clues       Player clue scroll completions
+     * @param runeMetrics Player RuneMetrics data
      * @return Image showing player stats
      */
-    private BufferedImage buildImage(String name, String type, String[] skills, String[] clues) {
+    private BufferedImage buildImage(String name, String type, String[] skills, String[] clues, JSONObject runeMetrics) {
+        int overhang = 65; // title section left overhang
+
+        BufferedImage skillSection = buildSkillSection(skills);
+        BufferedImage clueSection = buildClueSection(clues);
+        BufferedImage titleSection = buildTitleSection(name, type);
+
+        BufferedImage playerImage = new BufferedImage(
+                titleSection.getWidth(),
+                skillSection.getHeight() + titleSection.getHeight() + overhang,
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics g = playerImage.getGraphics();
+        g.drawImage(titleSection, 0, 0, null);
+        g.drawImage(skillSection, overhang, titleSection.getHeight(), null);
+        g.drawImage(clueSection, overhang + skillSection.getWidth(), titleSection.getHeight(), null);
+        if(runeMetrics != null) {
+            g.drawImage(buildQuestSection(runeMetrics), overhang + skillSection.getWidth(), titleSection.getHeight() + clueSection.getHeight(), null);
+        }
+        BufferedImage background = getBackgroundImage();
+        if(background == null) {
+            return playerImage;
+        }
+        g = background.getGraphics();
+        g.drawImage(playerImage, (background.getWidth() / 2) - (playerImage.getWidth() / 2), (background.getHeight() / 2) - (playerImage.getHeight() / 2), null);
+        g.dispose();
+        return background;
+    }
+
+    /**
+     * Get a random background image to use
+     *
+     * @return Background image
+     */
+    private BufferedImage getBackgroundImage() {
+        try {
+            File[] dir = new File(getResourcePath() + "Templates/Background").listFiles();
+            return ImageIO.read(dir[new Random().nextInt(dir.length)]);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
         return null;
+    }
+
+    /**
+     * Build the clue section of the image
+     *
+     * @param clues Clue data
+     * @return Clue scroll image section
+     */
+    private BufferedImage buildClueSection(String[] clues) {
+        BufferedImage clueSection = null;
+        try {
+            clueSection = ImageIO.read(new File(getResourcePath() + "Templates/clue_section.png"));
+            Graphics g = clueSection.getGraphics();
+            g.setFont(getGameFont().deriveFont(50f));
+            g.setColor(orange);
+            int x = 330;
+            int y = 174;
+            FontMetrics fm = g.getFontMetrics();
+            for(String quantity : clues) {
+                g.drawString(quantity, x, y - (fm.getHeight() / 2) + fm.getAscent());
+                y += 140;
+            }
+            g.dispose();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return clueSection;
+    }
+
+    /**
+     * Build the skill section of the image
+     *
+     * @param skills Skill data
+     * @return Skill image section
+     */
+    private BufferedImage buildSkillSection(String[] skills) {
+        BufferedImage skillSection = null;
+        try {
+            setGameFont(new Font("Trajan Pro Regular", Font.PLAIN, 55));
+            skillSection = ImageIO.read(new File(getResourcePath() + "Templates/skills_section.png"));
+            Graphics g = skillSection.getGraphics();
+            g.setFont(getGameFont());
+
+            // First skill location
+            int x = 170, ogX = x;
+            int y = 72;
+
+            int totalY = 1560;
+
+            g.setColor(yellow);
+
+            for(int i = 0; i < skills.length - 2; i++) {
+                String level = skills[i];
+                boolean master = level.length() > 2;
+                g.drawString(level, master ? x - 15 : x, y); // top
+                g.drawString(level, master ? x + 60 : x + 78, y + 64); // bottom
+
+                // Currently 3rd column, reset back to first column and go down a row
+                if((i + 1) % 3 == 0) {
+                    x = ogX;
+                    y += 142;
+                }
+                // Move to next column
+                else {
+                    x += 330;
+                }
+            }
+
+            g.setColor(Color.WHITE);
+            g.drawString(skills[skills.length - 2], 240, totalY);
+            g.drawString(skills[skills.length - 1], 730, totalY);
+            g.dispose();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return skillSection;
+    }
+
+    /**
+     * Build the title section of the image
+     *
+     * @param name        Player name
+     * @param accountType Player account type
+     * @return Title section of image
+     */
+    private BufferedImage buildTitleSection(String name, String accountType) {
+        BufferedImage titleSection = null;
+        try {
+            titleSection = ImageIO.read(new File(getResourcePath() + "Templates/title_section.png"));
+            BufferedImage avatar = ImageIO.read(new URL("http://services.runescape.com/m=avatar-rs/" + encodeName(name) + "/chat.gif"));
+            BufferedImage scaledAvatar = new BufferedImage(287, 287, BufferedImage.TYPE_INT_ARGB);
+            Graphics g = scaledAvatar.createGraphics();
+            g.drawImage(avatar, 0, 0, 287, 287, null);
+            g = titleSection.getGraphics();
+            g.drawImage(scaledAvatar, 110, 124, null);
+
+            g.setFont(getGameFont().deriveFont(100f));
+            g.setColor(orange);
+            FontMetrics fm = g.getFontMetrics();
+            int x = 445;
+            g.drawString(name.toUpperCase(), x, 375 - (fm.getHeight() / 2) + fm.getAscent());
+
+            if(accountType != null) {
+                BufferedImage typeImage = ImageIO.read(new File(getResourcePath() + "Accounts/" + accountType + ".png"));
+                g.drawImage(typeImage, x - (int) (typeImage.getWidth() * 1.5), 115 - (typeImage.getHeight() / 2), null);
+            }
+            g.dispose();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return titleSection;
+    }
+
+    /**
+     * Build quest image section
+     *
+     * @param runeMetrics Player RuneMetrics data
+     * @return Quest section displaying player quest stats
+     */
+    private BufferedImage buildQuestSection(JSONObject runeMetrics) {
+        BufferedImage questSection = null;
+        try {
+            double completed = runeMetrics.getDouble("questscomplete");
+            double notStarted = runeMetrics.getDouble("questsnotstarted");
+            double started = runeMetrics.getDouble("questsstarted");
+            double total = completed + notStarted + started;
+            questSection = ImageIO.read(new File(getResourcePath() + "Templates/quest_section.png"));
+            Graphics2D g = (Graphics2D) questSection.getGraphics();
+            g.setStroke(new BasicStroke(80f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int radius = 150;
+            int diameter = radius * 2;
+            int x = (questSection.getWidth() / 2) - radius;
+            int y = (questSection.getHeight() / 4);
+            double angle = 360;
+
+            int notStartedAngle = (int) (angle * (notStarted / total));
+            int startedAngle = (int) (angle * (started / total));
+            int completeAngle = (int) (angle - (startedAngle + notStartedAngle));
+            g.setColor(red);
+            g.drawArc(x, y, diameter, diameter, 90, notStartedAngle);
+            g.setColor(blue);
+            g.drawArc(x, y, diameter, diameter, notStartedAngle + 90, startedAngle);
+            g.setColor(orange);
+            g.drawArc(x, y, diameter, diameter, notStartedAngle + startedAngle + 90, completeAngle);
+            g.setFont(getGameFont().deriveFont(40f));
+            g.setColor(orange);
+            FontMetrics fm = g.getFontMetrics();
+            g.drawString(String.valueOf((int) completed), 385, 619 - (fm.getHeight() / 2) + fm.getAscent());
+            g.drawString(String.valueOf((int) started), 385, 693 - (fm.getHeight() / 2) + fm.getAscent());
+            g.drawString(String.valueOf((int) notStarted), 385, 767 - (fm.getHeight() / 2) + fm.getAscent());
+
+            g.dispose();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return questSection;
     }
 
     /**
@@ -202,10 +417,41 @@ public class Hiscores extends ImageBuilder {
                 skills[73],    // SUMMONING
                 skills[76],    // DUNGEONEERING
                 skills[79],    // DIVINATION
-                skills[82],    // INVENTION
+                skills[82].equals("0") ? "1" : skills[82],    // INVENTION
                 skills[85],    // ARCHAEOLOGY
                 skills[1].equals("0") ? "---" : skills[1],     // TOTAL
+                String.valueOf(calculateCombatLevel(
+                        Integer.parseInt(skills[4]),
+                        Integer.parseInt(skills[10]),
+                        Integer.parseInt(skills[22]),
+                        Integer.parseInt(skills[16]),
+                        Integer.parseInt(skills[7]),
+                        Integer.parseInt(skills[13]),
+                        Integer.parseInt(skills[19]),
+                        Integer.parseInt(skills[73])
+                ))
         };
+    }
+
+    /**
+     * Calculate the player's combat level
+     *
+     * @param attack    Attack level
+     * @param defence   Defence level
+     * @param hitpoints Hitpoints level
+     * @param magic     Magic level
+     * @param prayer    Prayer level
+     * @param ranged    Ranged level
+     * @param strength  Strength level
+     * @param summoning Summoning level
+     * @return Combat level
+     */
+    private int calculateCombatLevel(int attack, int strength, int magic, int ranged, int defence, int hitpoints, int prayer, int summoning) {
+        if(hitpoints == 0) {
+            hitpoints = 10;
+        }
+        int multiplier = Math.max((attack + strength), Math.max((2 * magic), (2 * ranged)));
+        return (int) (((13d / 10d) * multiplier + defence + hitpoints + (prayer / 2d) + (summoning / 2d)) / 4);
     }
 
     /**
@@ -215,7 +461,7 @@ public class Hiscores extends ImageBuilder {
      * @return Formatted clue scroll data
      */
     private String[] getClueScrolls(String[] data) {
-        String[] clues = new String[6];
+        String[] clues = new String[5];
         int j = 0;
         for(int i = 1; i < data.length; i += 2) {
             int quantity = Integer.parseInt(data[i]);
@@ -223,6 +469,25 @@ public class Hiscores extends ImageBuilder {
             j++;
         }
         return clues;
+    }
+
+    /**
+     * Get the player's RuneMetrics stats if available
+     *
+     * @param name URL encoded player name
+     * @return RuneMetrics stats
+     */
+    private JSONObject getRuneMetrics(String name) {
+        String url = "https://apps.runescape.com/runemetrics/profile/profile?user=" + name;
+        JSONObject profile = new JSONObject(
+                new NetworkRequest(url, false).get()
+        );
+        if(profile.has("error")) {
+            loading.failStage("Player's RuneMetrics is " + EmbedHelper.embedURL("private!", url));
+            return null;
+        }
+        loading.completeStage("Player's RuneMetrics is " + EmbedHelper.embedURL("public!", url));
+        return profile;
     }
 
     /**

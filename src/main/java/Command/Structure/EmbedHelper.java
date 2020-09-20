@@ -33,6 +33,22 @@ public class EmbedHelper {
         return 0xd89620;
     }
 
+    public static int getRunescapeYellow() {
+        return 16747520;
+    }
+
+    public static int getRunescapeOrange() {
+        return 13937190;
+    }
+
+    public static int getRunescapeRed() {
+        return 11672635;
+    }
+
+    public static int getRunescapeBlue() {
+        return 6206918;
+    }
+
     /**
      * Create a field with an invisible character for a title, and the value as a value.
      * Allows a column-esq appearance without having a title above every value
