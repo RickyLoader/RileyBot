@@ -236,6 +236,24 @@ public class EmbedLoadingMessage {
     }
 
     /**
+     * Get the message channel
+     *
+     * @return Message channel where loading message is located
+     */
+    public MessageChannel getChannel() {
+        return channel;
+    }
+
+    /**
+     * Get the id of the loading message
+     *
+     * @return Loading message id
+     */
+    public long getId() {
+        return id;
+    }
+
+    /**
      * Wrap status emojis for complete, incomplete, and fail.
      * Use the guild emote if it exists or a standard emoji
      */
