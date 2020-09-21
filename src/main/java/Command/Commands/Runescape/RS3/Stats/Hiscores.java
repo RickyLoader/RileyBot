@@ -236,7 +236,7 @@ public class Hiscores extends ImageBuilder {
     private BufferedImage buildSkillSection(String[] skills) {
         BufferedImage skillSection = null;
         try {
-            setGameFont(new Font("Trajan Pro Regular", Font.PLAIN, 55));
+            setGameFont(new Font("TrajanPro-Regular", Font.PLAIN, 55));
             skillSection = ImageIO.read(new File(getResourcePath() + "Templates/skills_section.png"));
             Graphics g = skillSection.getGraphics();
             g.setFont(getGameFont());
@@ -316,7 +316,7 @@ public class Hiscores extends ImageBuilder {
 
                     BufferedImage deathSection = ImageIO.read(new File(getResourcePath() + "Templates/death_section.png"));
                     g = deathSection.getGraphics();
-                    g.setFont(getGameFont().deriveFont(22f));
+                    g.setFont(getGameFont().deriveFont(20f));
                     fm = g.getFontMetrics();
                     g.setColor(Color.WHITE);
                     x = (deathSection.getWidth() / 2);
