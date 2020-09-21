@@ -4,10 +4,13 @@ import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
-import Network.ImgurManager;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,6 +19,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -26,6 +30,7 @@ public class Hiscores extends ImageBuilder {
     private ImageLoadingMessage loading;
     private boolean timeout = false;
     private final Color orange, yellow, red, blue;
+    private HCIMStatus hcimStatus;
 
     public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         super(channel, emoteHelper, resourcePath, fontName);
@@ -116,7 +121,6 @@ public class Hiscores extends ImageBuilder {
                         "Checking account type...",
                         "Checking RuneMetrics...",
                         "Building image...",
-                        "Uploading image..."
                 }
         );
         loading.showLoading();
@@ -136,9 +140,7 @@ public class Hiscores extends ImageBuilder {
         JSONObject runeMetrics = getRuneMetrics(encodedName);
         BufferedImage playerImage = buildImage(nameQuery, data[0], stats, clues, runeMetrics);
         loading.completeStage();
-        String url = ImgurManager.uploadImage(playerImage);
-        loading.completeStage();
-        loading.completeLoading(url, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
+        loading.completeLoading(playerImage, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
     }
 
     /**
@@ -163,6 +165,7 @@ public class Hiscores extends ImageBuilder {
                 skillSection.getHeight() + titleSection.getHeight() + overhang,
                 BufferedImage.TYPE_INT_ARGB
         );
+
         Graphics g = playerImage.getGraphics();
         g.drawImage(titleSection, 0, 0, null);
         g.drawImage(skillSection, overhang, titleSection.getHeight(), null);
@@ -292,15 +295,55 @@ public class Hiscores extends ImageBuilder {
             g = titleSection.getGraphics();
             g.drawImage(scaledAvatar, 110, 124, null);
 
-            g.setFont(getGameFont().deriveFont(100f));
+            g.setFont(getGameFont().deriveFont(75f));
             g.setColor(orange);
             FontMetrics fm = g.getFontMetrics();
-            int x = 445;
-            g.drawString(name.toUpperCase(), x, 375 - (fm.getHeight() / 2) + fm.getAscent());
+
+            int x = 1000;
+            int y = 375;
+            int width = fm.stringWidth(name.toUpperCase());
+            g.drawString(name.toUpperCase(), x - (width / 2), y - (fm.getHeight() / 2) + fm.getAscent());
 
             if(accountType != null) {
                 BufferedImage typeImage = ImageIO.read(new File(getResourcePath() + "Accounts/" + accountType + ".png"));
-                g.drawImage(typeImage, x - (int) (typeImage.getWidth() * 1.5), 115 - (typeImage.getHeight() / 2), null);
+                g.drawImage(typeImage, 511 - (typeImage.getWidth() / 2), 423 - typeImage.getHeight(), null);
+                if(hcimStatus != null && hcimStatus.isDead()) {
+                    if(accountType.equals("hardcore")) {
+                        g.setColor(red);
+                        ((Graphics2D) g).setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                        g.drawLine(x - (width / 2), y, x + (width / 2), y);
+                    }
+
+                    BufferedImage deathSection = ImageIO.read(new File(getResourcePath() + "Templates/death_section.png"));
+                    g = deathSection.getGraphics();
+                    g.setFont(getGameFont().deriveFont(22f));
+                    fm = g.getFontMetrics();
+                    g.setColor(Color.WHITE);
+                    x = (deathSection.getWidth() / 2);
+                    y = 45 + fm.getHeight();
+
+                    g.drawString(hcimStatus.getDate(), x - (fm.stringWidth(hcimStatus.getDate()) / 2), y);
+                    y += fm.getHeight();
+
+
+                    String[] cause = (hcimStatus.getLocation() + " " + hcimStatus.getCause()).split(" ");
+                    String curr = "";
+
+                    for(String word : cause) {
+                        String attempt = curr + " " + word;
+                        if(fm.stringWidth(attempt) > deathSection.getWidth()) {
+                            g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
+                            y += fm.getHeight();
+                            curr = word;
+                            continue;
+                        }
+                        curr = attempt;
+                    }
+                    g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
+                    g = titleSection.getGraphics();
+                    g.drawImage(deathSection, titleSection.getWidth() - 65 - deathSection.getWidth(), titleSection.getHeight() - deathSection.getHeight(), null);
+                    return titleSection;
+                }
             }
             g.dispose();
         }
@@ -463,9 +506,11 @@ public class Hiscores extends ImageBuilder {
     private String[] getClueScrolls(String[] data) {
         String[] clues = new String[5];
         int j = 0;
+        DecimalFormat format = new DecimalFormat("x#,###");
         for(int i = 1; i < data.length; i += 2) {
             int quantity = Integer.parseInt(data[i]);
-            clues[j] = "x" + ((quantity == -1) ? "0" : data[i]);
+            quantity = quantity == -1 ? 0 : quantity;
+            clues[j] = format.format(quantity);
             j++;
         }
         return clues;
@@ -482,11 +527,12 @@ public class Hiscores extends ImageBuilder {
         JSONObject profile = new JSONObject(
                 new NetworkRequest(url, false).get()
         );
+        String message = "Player's " + EmbedHelper.embedURL("RuneMetrics", url) + " is";
         if(profile.has("error")) {
-            loading.failStage("Player's RuneMetrics is " + EmbedHelper.embedURL("private!", url));
+            loading.failStage(message + " private (Can't display Quest data)");
             return null;
         }
-        loading.completeStage("Player's RuneMetrics is " + EmbedHelper.embedURL("public!", url));
+        loading.completeStage(message + " public!");
         return profile;
     }
 
@@ -530,16 +576,95 @@ public class Hiscores extends ImageBuilder {
         if(hardcore != null) {
             hardcore[0] = "hardcore";
             long hcXP = Long.parseLong(hardcore[2]);
-
-            if(ironXP > hcXP) {
-                loading.completeStage("Player was a Hardcore Ironman and died! What a loser!");
-                return iron;
+            this.hcimStatus = new HCIMStatus(name);
+            if(hcimStatus.isDead()) {
+                String status = "Player was a Hardcore Ironman and died.";
+                if(ironXP > hcXP) {
+                    loading.completeStage(status + " They were saved by a "
+                            + EmbedHelper.embedURL("Jar of divine light", "https://runescape.fandom.com/wiki/Jar_of_divine_light") + "!");
+                    return iron;
+                }
+                else {
+                    loading.completeStage(status + " What a loser!");
+                    return hardcore;
+                }
             }
-
             loading.completeStage("Player is a Hardcore Ironman!");
             return hardcore;
         }
+
         loading.completeStage("Player is an Ironman!");
         return iron;
+    }
+
+    /**
+     * Check if a Hardcore account is alive or not
+     */
+    private static class HCIMStatus {
+        private boolean dead;
+        private String cause, location, date;
+
+        public HCIMStatus(String name) {
+            fetchStatus(name);
+        }
+
+        /**
+         * Get death status
+         *
+         * @return Death status
+         */
+        public boolean isDead() {
+            return dead;
+        }
+
+        /**
+         * Get date of death
+         *
+         * @return Date of death
+         */
+        public String getDate() {
+            return date;
+        }
+
+        /**
+         * Get location of death
+         *
+         * @return Location of death
+         */
+        public String getLocation() {
+            return location;
+        }
+
+        /**
+         * Get cause for death
+         *
+         * @return Death cause
+         */
+        public String getCause() {
+            return cause;
+        }
+
+        /**
+         * Check HCIM status by parsing hiscores for death icon
+         *
+         * @param name Player name
+         */
+        private void fetchStatus(String name) {
+            String url = "https://secure.runescape.com/m=hiscore_hardcore_ironman/ranking?user=" + name;
+            try {
+                Document d = Jsoup.connect(url).get();
+                Element column = d.selectFirst(".hover .col2 .death-icon .death-icon__details");
+                this.dead = column != null;
+                if(dead) {
+                    Elements values = column.children();
+                    this.date = values.get(1).text();
+                    this.location = values.get(2).text();
+                    this.cause = values.get(3).text();
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

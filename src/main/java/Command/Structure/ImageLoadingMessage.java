@@ -1,12 +1,10 @@
 package Command.Structure;
 
-import Network.ImgurManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
@@ -45,6 +43,7 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
      *
      * @param url URL to be used as the image of the embed
      */
+    @Override
     public void completeLoading(String url) {
         this.url = url;
         super.completeLoading(null);
@@ -53,21 +52,29 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
     /**
      * Complete the loading embed with an image to be used
      *
-     * @param image to display
+     * @param image   to display
+     * @param message Message to display under the "Done!" loading step
      */
-    public void completeLoading(BufferedImage image) {
+    public void completeLoading(BufferedImage image, String message) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", outputStream);
             this.image = outputStream.toByteArray();
-            this.url = "image.png";
+            this.url = "attachment://image.png";
             outputStream.close();
+            super.completeLoading(message);
         }
         catch(Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Create the loading message with an image URL
+     *
+     * @return Loading message
+     */
+    @Override
     public MessageEmbed createLoadingMessage() {
         EmbedBuilder builder = getEmbedBuilder();
         for(LoadingStage stage : getStages()) {
@@ -76,16 +83,19 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
         if(url != null) {
             builder.setImage(url);
         }
-
         return builder.build();
     }
 
+    /**
+     * Update the loading message using a byte array attachment
+     */
     @Override
     void updateLoadingMessage() {
         if(image == null) {
             super.updateLoadingMessage();
             return;
         }
-        getChannel().retrieveMessageById(getId()).queue(message -> message.editMessage(createLoadingMessage()).addFile(image, url).queue());
+        getChannel().sendMessage(createLoadingMessage()).addFile(image, "image.png").queue();
+        getChannel().retrieveMessageById(getId()).queue(message -> message.delete().queue());
     }
 }

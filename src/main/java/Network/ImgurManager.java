@@ -40,7 +40,7 @@ public class ImgurManager {
                 image = stripAlpha(image);
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(stripAlpha(image), "jpg", out);
+            ImageIO.write(image, "jpg", out);
             return Base64.encodeBase64String(out.toByteArray());
         }
         catch(Exception e) {
