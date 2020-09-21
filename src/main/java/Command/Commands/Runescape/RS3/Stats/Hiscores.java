@@ -214,7 +214,7 @@ public class Hiscores extends ImageBuilder {
         try {
             clueSection = ImageIO.read(new File(getResourcePath() + "Templates/clue_section.png"));
             Graphics g = clueSection.getGraphics();
-            g.setFont(getGameFont().deriveFont(50f));
+            g.setFont(getGameFont().deriveFont(40f));
             g.setColor(orange);
             int x = 330;
             int y = 174;
