@@ -4,6 +4,7 @@ import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
+import Network.ImgurManager;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONObject;
@@ -121,6 +122,7 @@ public class Hiscores extends ImageBuilder {
                         "Checking account type...",
                         "Checking RuneMetrics...",
                         "Building image...",
+                        "Uploading image...",
                 }
         );
         loading.showLoading();
@@ -140,7 +142,9 @@ public class Hiscores extends ImageBuilder {
         JSONObject runeMetrics = getRuneMetrics(encodedName);
         BufferedImage playerImage = buildImage(nameQuery, data[0], stats, clues, runeMetrics);
         loading.completeStage();
-        loading.completeLoading(playerImage, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
+        String url = ImgurManager.uploadImage(playerImage);
+        loading.completeStage();
+        loading.completeLoading(url, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
     }
 
     /**

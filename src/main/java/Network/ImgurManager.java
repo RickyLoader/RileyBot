@@ -29,18 +29,35 @@ public class ImgurManager {
     }
 
     /**
-     * Convert a buffered image to base64 encoded png
+     * Convert a buffered image to base64 encoded JPEG
      *
      * @param image BufferedImage to be encoded
-     * @return String containing base64 encoded png
+     * @return String containing base64 encoded JPEG
      */
-    private static String toBase64(BufferedImage image) {
+    private static String toBase64JPEG(BufferedImage image) {
         try {
             if(image.getType() != BufferedImage.TYPE_INT_RGB) {
                 image = stripAlpha(image);
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ImageIO.write(image, "jpg", out);
+            return Base64.encodeBase64String(out.toByteArray());
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Convert a buffered image to base64 encoded PNG
+     *
+     * @param image BufferedImage to be encoded
+     * @return String containing base64 encoded PNG
+     */
+    private static String toBase64PNG(BufferedImage image) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", out);
             return Base64.encodeBase64String(out.toByteArray());
         }
         catch(Exception e) {
@@ -76,7 +93,7 @@ public class ImgurManager {
      */
     public static String uploadImage(BufferedImage image) {
         try {
-            String base64 = toBase64(image);
+            String base64 = toBase64JPEG(image);
             if(base64 == null) {
                 return null;
             }
