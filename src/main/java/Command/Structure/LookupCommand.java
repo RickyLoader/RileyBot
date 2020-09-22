@@ -156,6 +156,6 @@ public abstract class LookupCommand extends DiscordCommand {
      */
     @Override
     public boolean matches(String query) {
-        return query.startsWith(getTrigger() + " ");
+        return query.startsWith(getTrigger());
     }
 }
