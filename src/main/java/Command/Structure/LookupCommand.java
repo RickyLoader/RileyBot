@@ -50,6 +50,11 @@ public abstract class LookupCommand extends DiscordCommand {
         User author = context.getUser();
         List<User> mentioned = context.getMessage().getMentionedUsers();
 
+        if(!query.startsWith(getTrigger() + " ")) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
         String save = getTrigger() + " save ";
         if(query.startsWith(save) && !query.replace(save, "").isEmpty()) {
             saveName(query.replaceFirst(save, ""), channel, author);
@@ -151,6 +156,6 @@ public abstract class LookupCommand extends DiscordCommand {
      */
     @Override
     public boolean matches(String query) {
-        return query.startsWith(getTrigger());
+        return query.startsWith(getTrigger() + " ");
     }
 }
