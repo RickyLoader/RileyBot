@@ -19,13 +19,8 @@ public class GenerateNameCommand extends JSONListCommand {
         String[] list = getList();
         int maxLength = 15;
 
-        // 3 attempts
-        while(attempts <= 2) {
-
-            // Get a random word
+        for(int attempts = 0; attempts < 3; attempts++) {
             String word = list[rand.nextInt(list.length)];
-
-            // Append it to the current name if it can fit
             if(name.length() + word.length() <= maxLength) {
                 name.append(word);
             }
@@ -34,14 +29,9 @@ public class GenerateNameCommand extends JSONListCommand {
             attempts++;
         }
 
-        if(rand.nextInt(2) == 1) {
-            // How many characters left to to make the max length
+        if(name.length() < maxLength && rand.nextInt(2) == 1) {
             int charToMax = (maxLength - name.length());
-
-            // Generate a number from 0 to the maximum number that could fit in that space. E.g (10^5)-1 = 99,999 (5 chars)
-            if(charToMax > 0) {
-                name.append(rand.nextInt(10 ^ charToMax));
-            }
+            name.append(rand.nextInt(10 ^ charToMax));
         }
         context.getTextChannel().sendMessage(name.toString()).queue();
     }
