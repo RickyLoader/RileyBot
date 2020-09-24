@@ -1,4 +1,4 @@
-package Command.Commands;
+package Command.Commands.Lookup;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;

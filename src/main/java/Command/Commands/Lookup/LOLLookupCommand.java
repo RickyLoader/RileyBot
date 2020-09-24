@@ -1,4 +1,4 @@
-package Command.Commands;
+package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
 import Command.Structure.EmoteHelper;
