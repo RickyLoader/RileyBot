@@ -321,6 +321,9 @@ public class WeatherManager {
                 windDirection = wind.getString("direction");
                 windSpeed = (int) parseAmbiguousValue(wind.get("averageSpeed"));
                 windStrength = wind.getString("strength");
+                if(windDirection.equalsIgnoreCase(windStrength)) {
+                    windDirection = null;
+                }
             }
             if(pressureData != null) {
                 pressure = (int) parseAmbiguousValue(pressureData.get("atSeaLevel"));
@@ -617,7 +620,17 @@ public class WeatherManager {
          * @return Wind information String
          */
         public String formatWindDetails() {
-            return windSpeed + " km/h " + windDirection + "\n" + windStrength;
+            StringBuilder builder = new StringBuilder();
+            if(windSpeed > 0) {
+                builder.append(windSpeed).append(" ").append("km/h ");
+            }
+            if(windDirection != null) {
+                builder.append(windDirection);
+            }
+            if(builder.length() > 0) {
+                builder.append("\n");
+            }
+            return builder.append(windStrength).toString();
         }
 
         /**
@@ -707,7 +720,7 @@ public class WeatherManager {
          * @return Wind data exists
          */
         public boolean hasWind() {
-            return windStrength != null && windSpeed > 0 && windDirection != null;
+            return windStrength != null;
         }
 
         /**
