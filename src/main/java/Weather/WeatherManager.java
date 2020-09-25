@@ -39,7 +39,6 @@ public class WeatherManager {
         iconTypes.put("DAY_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getDayFewShowers()));
         iconTypes.put("DAY_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getDayPartlyCloudy()));
         iconTypes.put("DAY_RAIN", EmoteHelper.formatEmote(emoteHelper.getDayRain()));
-        iconTypes.put("DAY_WINDY", EmoteHelper.formatEmote(emoteHelper.getDayWindy()));
 
         iconTypes.put("NIGHT_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getNightPartlyCloudy()));
         iconTypes.put("NIGHT_FINE", EmoteHelper.formatEmote(emoteHelper.getNightFine()));
@@ -48,10 +47,13 @@ public class WeatherManager {
 
         String showers = EmoteHelper.formatEmote(emoteHelper.getShowers());
         String cloudy = EmoteHelper.formatEmote(emoteHelper.getCloudy());
+        String windy = EmoteHelper.formatEmote(emoteHelper.getWindy());
         iconTypes.put("DAY_SHOWERS", showers);
         iconTypes.put("NIGHT_SHOWERS", showers);
         iconTypes.put("DAY_CLOUDY", cloudy);
         iconTypes.put("NIGHT_CLOUDY", cloudy);
+        iconTypes.put("NIGHT_WINDY", windy);
+        iconTypes.put("DAY_WINDY", windy);
     }
 
     /**
@@ -309,10 +311,10 @@ public class WeatherManager {
             }
             if(rain != null) {
                 if(rain.has("relativeHumidity")) {
-                    humidity = rain.getInt("relativeHumidity");
+                    humidity = (int) parseAmbiguousValue(rain.get("relativeHumidity"));
                 }
                 if(rain.has("rainfall")) {
-                    rainFall = rain.getDouble("rainfall");
+                    rainFall = parseAmbiguousValue(rain.get("rainfall"));
                 }
             }
             if(wind != null) {
@@ -321,7 +323,7 @@ public class WeatherManager {
                 windStrength = wind.getString("strength");
             }
             if(pressureData != null) {
-                pressure = pressureData.getInt("atSeaLevel");
+                pressure = (int) parseAmbiguousValue(pressureData.get("atSeaLevel"));
                 trend = pressureData.getString("trend");
             }
             return new LocalObs(
@@ -339,7 +341,7 @@ public class WeatherManager {
                     trend
             );
         }
-        catch(JSONException e) {
+        catch(Exception e) {
             e.printStackTrace();
         }
         return null;
