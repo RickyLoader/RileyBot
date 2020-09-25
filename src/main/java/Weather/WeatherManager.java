@@ -140,9 +140,7 @@ public class WeatherManager {
             builder.addField(buildForecastField(dayData.getEvening()));
             builder.addField(buildForecastField(dayData.getOvernight()));
         }
-        if(forecast.hasImage()) {
-            builder.setImage(forecast.getImage());
-        }
+        builder.setImage(forecast.hasImage() ? forecast.getImage() : EmbedHelper.getSpacerImage());
         return builder.build();
     }
 
