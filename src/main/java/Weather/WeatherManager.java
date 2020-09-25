@@ -238,6 +238,7 @@ public class WeatherManager {
                 JSONObject module = images.getJSONObject(i);
                 if(module.has("image")) {
                     image = module.getString("image");
+                    break;
                 }
             }
 
