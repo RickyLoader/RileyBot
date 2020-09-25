@@ -14,6 +14,10 @@ public class EmoteHelper {
         this.guild = null;
     }
 
+    private Emote get(String id) {
+        return guild.getEmoteById(id);
+    }
+
     /**
      * Get the String form of an emote to display within a message
      *
@@ -25,7 +29,7 @@ public class EmoteHelper {
     }
 
     public Emote getUndo() {
-        return guild.getEmoteById("742984226621620234");
+        return get("742984226621620234");
     }
 
     public void setGuild(Guild guild) {
@@ -37,130 +41,150 @@ public class EmoteHelper {
     }
 
     public Emote getStop() {
-        return guild.getEmoteById("742984225808187494");
+        return get("742984225808187494");
     }
 
     public Emote getPlex() {
-        return guild.getEmoteById("754306729155756152");
+        return get("754306729155756152");
     }
 
     public Emote getRadarr() {
-        return guild.getEmoteById("754306729860268082");
+        return get("754306729860268082");
     }
 
     public Emote getYoutube() {
-        return guild.getEmoteById("755358421678555136");
-    }
-
-    public Emote getSlash() {
-        return guild.getEmoteById("756771247278391306");
-    }
-
-    public Emote getStab() {
-        return guild.getEmoteById("756771247186247720");
-    }
-
-    public Emote getCrush() {
-        return guild.getEmoteById("756771247156625480");
-    }
-
-    public Emote getMagic() {
-        return guild.getEmoteById("756771246913486870");
-    }
-
-    public Emote getRanged() {
-        return guild.getEmoteById("756771247009955851");
-    }
-
-    public Emote getStrength() {
-        return guild.getEmoteById("756771247194636378");
-    }
-
-    public Emote getRangedStrength() {
-        return guild.getEmoteById("756771247207219230");
-    }
-
-    public Emote getMagicDamage() {
-        return guild.getEmoteById("756771247232253992");
-    }
-
-    public Emote getPrayer() {
-        return guild.getEmoteById("756771246926069841");
-    }
-
-    public Emote getDefence() {
-        return guild.getEmoteById("756771247274328125");
-    }
-
-    public Emote getAttack() {
-        return guild.getEmoteById("756771247206957111");
-    }
-
-    public Emote getOtherBonus() {
-        return guild.getEmoteById("756771247026602005");
+        return get("755358421678555136");
     }
 
     public Emote getFacebook() {
-        return guild.getEmoteById("755358696162459718");
+        return get("755358696162459718");
     }
 
     public Emote getIMDB() {
-        return guild.getEmoteById("755356580613980190");
+        return get("755356580613980190");
     }
 
     public Emote getVictory() {
-        return guild.getEmoteById("742984225959051331");
+        return get("742984225959051331");
     }
 
     public Emote getDefeat() {
-        return guild.getEmoteById("742984225606860813");
+        return get("742984225606860813");
     }
 
     public Emote getSwordHandle() {
-        return guild.getEmoteById("747800793276481576");
+        return get("747800793276481576");
     }
 
     public Emote getSwordBlade() {
-        return guild.getEmoteById("747800793419350047");
+        return get("747800793419350047");
     }
 
     public Emote getSwordTip() {
-        return guild.getEmoteById("747800793511624854");
+        return get("747800793511624854");
     }
 
     public Emote getComplete() {
-        return guild.getEmoteById("740917148125364234");
+        return get("740917148125364234");
     }
 
     public Emote getNeutral() {
-        return guild.getEmoteById("740917148096135208");
+        return get("740917148096135208");
     }
 
     public Emote getFail() {
-        return guild.getEmoteById("740917148091678742");
+        return get("740917148091678742");
     }
 
     public Emote getEmptyBeer() {
-        return guild.getEmoteById("738290105227280445");
+        return get("738290105227280445");
     }
 
     public Emote getSubtractBeer() {
-        return guild.getEmoteById("738092614271893628");
+        return get("738092614271893628");
     }
 
     public Emote getAddBeer() {
-        return guild.getEmoteById("738092575340363787");
+        return get("738092575340363787");
     }
 
     public Emote getForward() {
-        return guild.getEmoteById("728480325956665395");
+        return get("728480325956665395");
     }
 
     public Emote getBackward() {
-        return guild.getEmoteById("728480346399834194");
+        return get("728480346399834194");
     }
 
     public Emote getReverse() {
-        return guild.getEmoteById("731016788732543057");
+        return get("731016788732543057");
+    }
+
+    public Emote getNightFine() {
+        return get("758598371757129768");
+    }
+
+    public Emote getNightPartlyCloudy() {
+        return get("758611377362305034");
+    }
+
+    public Emote getNightFewShowers() {
+        return get("758611377337663508");
+    }
+
+    public Emote getNightDrizzle() {
+        return get("758617768189886465");
+    }
+
+    public Emote getDayFine() {
+        return get("758598371685564467");
+    }
+
+    public Emote getDayRain() {
+        return get("758656025032654878");
+    }
+
+    public Emote getDayPartlyCloudy() {
+        return get("758598371698147328");
+    }
+
+    public Emote getShowers() {
+        return get("758611612843507764");
+    }
+
+    public Emote getCloudy() {
+        return get("758598371476111382");
+    }
+
+    public Emote getDayFewShowers() {
+        return get("758611376993730621");
+    }
+
+    public Emote getMaxTemp() {
+        return get("758598371719774219");
+    }
+
+    public Emote getMinTemp() {
+        return get("758598371702472745");
+    }
+
+    public Emote getHumidity() {
+        return get("758685947012710430");
+    }
+
+    public Emote getRain() {
+        return get("758685946978762772");
+    }
+
+    public Emote getWind() {
+        return get("758688992602095647");
+    }
+
+    public Emote getPressure() {
+        return get("758930591847940176");
+    }
+
+    public Emote getClothing() {
+        return get("758690648642945034");
     }
 }

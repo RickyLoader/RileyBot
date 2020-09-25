@@ -6,11 +6,14 @@ import Command.Commands.Audio.*;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
+import Command.Commands.Lookup.CWCountdownCommand;
+import Command.Commands.Lookup.LOLLookupCommand;
+import Command.Commands.Lookup.MWLookupCommand;
+import Command.Commands.Lookup.YoutubeLookupCommand;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
-import Command.Commands.Runescape.Commands.OSRSItemCommand;
-import Command.Commands.Runescape.Commands.OSRSLookupCommand;
-import Command.Commands.Runescape.Commands.RS3LookupCommand;
+import Command.Commands.Runescape.OSRSLookupCommand;
+import Command.Commands.Runescape.RS3LookupCommand;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -150,8 +153,8 @@ public class DiscordCommandManager {
         addCommand(new OSRSPollCommand());
         addCommand(new CWCountdownCommand());
         addCommand(new KnockCommand());
-        addCommand(new OSRSItemCommand());
         addCommand(new RS3LookupCommand());
+        addCommand(new WeatherCommand());
     }
 
     /**
