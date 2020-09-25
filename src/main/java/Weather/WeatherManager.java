@@ -670,7 +670,7 @@ public class WeatherManager {
          * @return Temperature data exists
          */
         public boolean hasTemp() {
-            return temp > 0;
+            return temp > 0 && feelsLike > 0;
         }
 
         /**
