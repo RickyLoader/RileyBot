@@ -183,7 +183,7 @@ public class WeatherManager {
      * @return Default embed builder
      */
     private EmbedBuilder getEmbedBuilder(String help) {
-        String metServiceIcon = "https://about.metservice.com/assets/img/css/400Logo-generic.jpg";
+        String metServiceIcon = "https://i.imgur.com/HyT0PpN.png";
         return new EmbedBuilder()
                 .setThumbnail(metServiceIcon)
                 .setFooter("Try: " + help, metServiceIcon);
