@@ -144,6 +144,10 @@ public class EmoteHelper {
         return get("758656025032654878");
     }
 
+    public Emote getDayWindy() {
+        return get("758935641630179378");
+    }
+
     public Emote getDayPartlyCloudy() {
         return get("758598371698147328");
     }

@@ -39,6 +39,7 @@ public class WeatherManager {
         iconTypes.put("DAY_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getDayFewShowers()));
         iconTypes.put("DAY_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getDayPartlyCloudy()));
         iconTypes.put("DAY_RAIN", EmoteHelper.formatEmote(emoteHelper.getDayRain()));
+        iconTypes.put("DAY_WINDY", EmoteHelper.formatEmote(emoteHelper.getDayWindy()));
 
         iconTypes.put("NIGHT_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getNightPartlyCloudy()));
         iconTypes.put("NIGHT_FINE", EmoteHelper.formatEmote(emoteHelper.getNightFine()));
@@ -123,24 +124,24 @@ public class WeatherManager {
             if(localObs.hasPressure()) {
                 builder.addField("Pressure " + pressure, localObs.formatPressureDetails(), true);
             }
+        }
 
-            int fields = builder.getFields().size();
-            int padding = fields % 3;
-            if(fields > 3 && padding > 0) {
-                for(int i = 0; i <= padding; i++) {
-                    builder.addBlankField(true);
-                }
+        int padding = 3 - (builder.getFields().size() % 3);
+        if(padding < 3) {
+            for(int i = 0; i < padding; i++) {
+                builder.addBlankField(true);
             }
         }
-        else {
-            builder.addBlankField(true);
-        }
+
         if(forecast.hasDayData()) {
             DayData dayData = forecast.getDayData();
             builder.addField(buildForecastField(dayData.getMorning()));
             builder.addField(buildForecastField(dayData.getAfternoon()));
             builder.addField(buildForecastField(dayData.getEvening()));
             builder.addField(buildForecastField(dayData.getOvernight()));
+        }
+        if(forecast.hasImage()) {
+            builder.setImage(forecast.getImage());
         }
         return builder.build();
     }
@@ -216,10 +217,29 @@ public class WeatherManager {
             int index = tomorrow ? 1 : 0;
             JSONObject targetDay = days.getJSONObject(index);
 
-            JSONObject localObs = forecastOverview
+            JSONArray localObsContainer = forecastOverview
                     .getJSONObject("left-major")
-                    .getJSONArray("modules")
-                    .getJSONObject(0);
+                    .getJSONArray("modules");
+
+            JSONObject localObs = null;
+            if(!localObsContainer.isEmpty()) {
+                localObs = localObsContainer.getJSONObject(0);
+                if(!localObs.has("observations")) {
+                    localObs = null;
+                }
+            }
+
+            JSONArray images = forecastOverview
+                    .getJSONObject("left-minor")
+                    .getJSONArray("modules");
+
+            String image = null;
+            for(int i = 0; i < images.length(); i++) {
+                JSONObject module = images.getJSONObject(i);
+                if(module.has("image")) {
+                    image = module.getString("image");
+                }
+            }
 
             JSONObject forecastStats = targetDay
                     .getJSONArray("forecasts")
@@ -227,12 +247,13 @@ public class WeatherManager {
 
             return new Forecast(
                     parseDate(targetDay.getString("date")),
-                    targetDay.has("issuedAt") ? parseDate(targetDay.getString("issuedAt")) : null,
+                    parseDate(targetDay.getString("issuedAt")),
                     targetDay.has("statement") ? targetDay.getString("statement") : forecastStats.getString("statement"),
                     targetDay.getDouble("highTemp"),
                     targetDay.getDouble("lowTemp"),
                     targetDay.has("breakdown") ? parseDayData(targetDay.getJSONObject("breakdown")) : null,
-                    tomorrow ? null : parseLocalObs(localObs)
+                    tomorrow || localObs == null ? null : parseLocalObs(localObs),
+                    image
             );
         }
         catch(JSONException e) {
@@ -281,8 +302,8 @@ public class WeatherManager {
             double rainFall = -1;
             int humidity = -1, windSpeed = -1, pressure = -1;
             String windStrength = null, windDirection = null, trend = null;
-            double current = parseTemperature(temperature.get("current"));
-            double feelsLike = parseTemperature(temperature.get("feelsLike"));
+            double current = parseAmbiguousValue(temperature.get("current"));
+            double feelsLike = parseAmbiguousValue(temperature.get("feelsLike"));
 
             if(clothing != null) {
                 layers = clothing.getString("layers");
@@ -292,11 +313,13 @@ public class WeatherManager {
                 if(rain.has("relativeHumidity")) {
                     humidity = rain.getInt("relativeHumidity");
                 }
-                rainFall = rain.getDouble("rainfall");
+                if(rain.has("rainfall")) {
+                    rainFall = rain.getDouble("rainfall");
+                }
             }
             if(wind != null) {
                 windDirection = wind.getString("direction");
-                windSpeed = wind.getInt("averageSpeed");
+                windSpeed = (int) parseAmbiguousValue(wind.get("averageSpeed"));
                 windStrength = wind.getString("strength");
             }
             if(pressureData != null) {
@@ -307,7 +330,7 @@ public class WeatherManager {
                     layers,
                     windProof,
                     humidity,
-                    parseDate(localObs.getString("issuedAt")),
+                    localObs.has("issuedAt") ? parseDate(localObs.getString("issuedAt")) : null,
                     current,
                     feelsLike,
                     rainFall,
@@ -325,16 +348,19 @@ public class WeatherManager {
     }
 
     /**
-     * Temperature can be String or double, convert to double
+     * Some values can be String or number, convert to double
      *
-     * @param o Object double or String
+     * @param o Object number or String
      * @return double
      */
-    private double parseTemperature(Object o) {
+    private double parseAmbiguousValue(Object o) {
         if(o instanceof String) {
             return o.equals("n/a") ? -1 : Double.parseDouble((String) o);
         }
-        return (double) o;
+        if(o instanceof Double) {
+            return (double) o;
+        }
+        return (int) o;
     }
 
     /**
@@ -383,7 +409,7 @@ public class WeatherManager {
      * Hold daily forecast data - projected min/max temp etc
      */
     private static class Forecast {
-        private final String forecast;
+        private final String forecast, image;
         private final double max, min;
         private final DayData dayData;
         private final LocalObs localObs;
@@ -399,8 +425,9 @@ public class WeatherManager {
          * @param min      Minimum projected temperature
          * @param dayData  Data for each section of the day
          * @param localObs Local observation data for date (only if current date)
+         * @param image    Rain radar
          */
-        public Forecast(Date date, Date issued, String forecast, double max, double min, DayData dayData, LocalObs localObs) {
+        public Forecast(Date date, Date issued, String forecast, double max, double min, DayData dayData, LocalObs localObs, String image) {
             this.date = date;
             this.issued = issued;
             this.forecast = forecast.length() > 100 ? (forecast.substring(0, 100) + "...") : forecast;
@@ -408,6 +435,16 @@ public class WeatherManager {
             this.min = min;
             this.dayData = dayData;
             this.localObs = localObs;
+            this.image = "https://www.metservice.com/" + image;
+        }
+
+        /**
+         * Get the rain radar image
+         *
+         * @return Rain radar image
+         */
+        public String getImage() {
+            return image;
         }
 
         /**
@@ -417,6 +454,15 @@ public class WeatherManager {
          */
         public boolean hasLocalObs() {
             return localObs != null;
+        }
+
+        /**
+         * Forecast has image
+         *
+         * @return Image exists
+         */
+        public boolean hasImage() {
+            return image != null;
         }
 
         /**
@@ -670,7 +716,7 @@ public class WeatherManager {
          * @return Temperature data exists
          */
         public boolean hasTemp() {
-            return temp > 0 && feelsLike > 0;
+            return temp > -1 && feelsLike > -1;
         }
 
         /**
