@@ -571,7 +571,7 @@ public class WeatherManager {
          * @return Wind information String
          */
         public String formatWindDetails() {
-            return windStrength + "\n" + windSpeed + " km/h " + windDirection;
+            return windSpeed + " km/h " + windDirection + "\n" + windStrength;
         }
 
         /**
