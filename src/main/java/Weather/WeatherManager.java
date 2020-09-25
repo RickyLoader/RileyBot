@@ -227,7 +227,7 @@ public class WeatherManager {
 
             return new Forecast(
                     parseDate(targetDay.getString("date")),
-                    parseDate(targetDay.getString("issuedAt")),
+                    targetDay.has("issuedAt") ? parseDate(targetDay.getString("issuedAt")) : null,
                     targetDay.has("statement") ? targetDay.getString("statement") : forecastStats.getString("statement"),
                     targetDay.getDouble("highTemp"),
                     targetDay.getDouble("lowTemp"),
