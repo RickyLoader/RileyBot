@@ -62,7 +62,7 @@ public class SteakCommand extends DiscordCommand {
                 .setColor(EmbedHelper.getPurple())
                 .setThumbnail(steak)
                 .setTitle(name + " - Photo with Steak")
-                .setDescription("The **greatest** League of Legends player in LCS history!")
+                .setDescription("The **GREATEST** League of Legends player in LCS history!")
                 .setFooter("I wanted a short name and steak is my favourite food - Steak", steak)
                 .setImage("attachment://steak.jpg")
                 .build();
