@@ -22,7 +22,9 @@ public class CODPlayer {
     private String status;
     private Ratio wl, kd;
     private int streak;
-    private Weapon primary, secondary, lethal;
+    private Standard primary, secondary;
+    private Lethal lethal;
+    private Tactical tactical;
     private ArrayList<Killstreak> killstreaks;
     private ArrayList<Commendation> commendations;
 
@@ -63,12 +65,15 @@ public class CODPlayer {
             this.kd = new Ratio(basic.getInt("kills"), basic.getInt("deaths"));
             this.wl = new Ratio(basic.getInt("wins"), basic.getInt("losses"));
             this.streak = basic.getInt("recordKillStreak");
-            JSONObject weapons = mergeGunNames(player.getJSONObject("itemData"));
+            JSONObject weapons = mergeGunStats(player.getJSONObject("itemData"));
 
-            this.primary = getFavourite(weapons, Weapon.TYPE.PRIMARY);
-            this.secondary = getFavourite(weapons, Weapon.TYPE.SECONDARY);
-            this.lethal = getFavourite(weapons, Weapon.TYPE.LETHAL);
+            this.primary = (Standard) getFavourite(weapons, Weapon.TYPE.PRIMARY);
+            this.secondary = (Standard) getFavourite(weapons, Weapon.TYPE.SECONDARY);
+            this.lethal = (Lethal) getFavourite(weapons, Weapon.TYPE.LETHAL);
+            this.tactical = (Tactical) getFavourite(weapons, Weapon.TYPE.TACTICAL);
 
+            System.out.println(lethal.getName() + " " + lethal.getKills() + " kills " + lethal.getUses() + " uses");
+            System.out.println(tactical.getName() + " " + tactical.getStat() + " " + tactical.getStatName() + " " + tactical.getUses());
             JSONObject killstreaks = player.getJSONObject("scorestreakData");
             killstreaks = mergeStreakData(killstreaks.getJSONObject("lethalScorestreakData"), killstreaks.getJSONObject("supportScorestreakData"));
             if(killstreaks == null) {
@@ -161,29 +166,33 @@ public class CODPlayer {
     }
 
     /**
-     * Add the real gun names to the JSON returned from the API
-     * (only contains gun variable names e.g iw8_me_akimboblunt = Kali Sticks)
+     * Add the real gun names and equipment stat names to the JSON returned from the API
+     * e.g iw8_me_akimboblunt = Kali Sticks
+     * e.g extraStat1 of equip_adrenaline = Health Healed
      *
      * @param items Weapons from API
      * @return Weapon JSON containing real names
      */
-    private JSONObject mergeGunNames(JSONObject items) {
+    private JSONObject mergeGunStats(JSONObject items) {
         try {
-            JSONObject gunNames = readJSONFile(res + "Data/guns.json");
-            if(gunNames == null) {
+            JSONObject weapons = readJSONFile(res + "Data/weapons.json");
+            if(weapons == null) {
                 return null;
             }
-            gunNames = gunNames.getJSONObject("guns");
+            weapons = weapons.getJSONObject("weapons");
             for(String categoryName : items.keySet()) {
                 JSONObject category = items.getJSONObject(categoryName);
-                for(String gunName : category.keySet()) {
-                    JSONObject gun = category.getJSONObject(gunName).getJSONObject("properties");
-                    if(!gunNames.has(categoryName) || !gunNames.getJSONObject(categoryName).has(gunName)) {
-                        System.out.println("MISSING GUN: " + gunName + " IN CATEGORY: " + categoryName);
+                for(String weaponName : category.keySet()) {
+                    JSONObject weapon = category.getJSONObject(weaponName).getJSONObject("properties");
+                    if(!weapons.has(categoryName) || !weapons.getJSONObject(categoryName).has(weaponName)) {
+                        System.out.println("MISSING WEAPON: " + weaponName + " IN CATEGORY: " + categoryName);
                         continue;
                     }
-                    String realName = gunNames.getJSONObject(categoryName).getJSONObject(gunName).getString("real_name");
-                    gun.put("real_name", realName);
+                    JSONObject weaponData = weapons.getJSONObject(categoryName).getJSONObject(weaponName);
+                    weapon.put("real_name", weaponData.getString("real_name"));
+                    if(weaponData.has("property")) {
+                        weapon.put("property", weaponData.getString("property"));
+                    }
                 }
             }
         }
@@ -206,9 +215,8 @@ public class CODPlayer {
             killstreaks.add(new Killstreak(
                             killstreakName,
                             killstreak.getString("real_name"),
-                            killstreak.getInt("uses"),
                             killstreak.has("extra_stat") ? killstreak.getString("extra_stat") : null,
-                            killstreak.getInt("extraStat1"),
+                            new Ratio(killstreak.getInt("extraStat1"), killstreak.getInt("uses")),
                             res
                     )
             );
@@ -226,41 +234,49 @@ public class CODPlayer {
      */
     private Weapon getFavourite(JSONObject items, Weapon.TYPE type) {
         String[] desiredCategories = Weapon.getCategories(type);
-        Weapon favWeapon = null;
+        ArrayList<Weapon> weapons = new ArrayList<>();
         for(String desiredCategory : desiredCategories) {
             JSONObject category = items.getJSONObject(desiredCategory);
             for(String weaponName : category.keySet()) {
                 JSONObject weapon = category.getJSONObject(weaponName).getJSONObject("properties");
                 String name = weapon.has("real_name") ? weapon.getString("real_name") : "MISSING NAME";
                 Weapon currentWeapon;
-                if(type == Weapon.TYPE.LETHAL || type == Weapon.TYPE.TACTICAL) {
-                    currentWeapon = new Weapon(
-                            weaponName,
-                            name,
-                            desiredCategory,
-                            new Ratio(weapon.getInt("kills"), weapon.getInt("uses")),
-                            type,
-                            res
-                    );
+                switch(type) {
+                    case LETHAL:
+                        currentWeapon = new Lethal(
+                                weaponName,
+                                name,
+                                res,
+                                new Ratio(weapon.getInt("kills"), weapon.getInt("uses"))
+                        );
+                        break;
+                    case TACTICAL:
+                        currentWeapon = new Tactical(
+                                weaponName,
+                                name,
+                                res,
+                                weapon.has("property") ? weapon.getString("property") : null,
+                                new Ratio(weapon.getInt("extraStat1"), weapon.getInt("uses"))
+                        );
+                        break;
+                    default:
+                        currentWeapon = new Standard(
+                                weaponName,
+                                name,
+                                desiredCategory,
+                                type,
+                                res,
+                                new Ratio(weapon.getInt("kills"), weapon.getInt("deaths")),
+                                new Ratio(weapon.getInt("hits"), weapon.getInt("shots")),
+                                (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots")
+                        );
+                        break;
                 }
-                else {
-                    currentWeapon = new Weapon(
-                            weaponName,
-                            name,
-                            desiredCategory,
-                            new Ratio(weapon.getInt("kills"), weapon.getInt("deaths")),
-                            new Ratio(weapon.getInt("hits"), weapon.getInt("shots")),
-                            (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots"),
-                            type,
-                            res
-                    );
-                }
-                if(favWeapon == null || favWeapon.getKills() < currentWeapon.getKills()) {
-                    favWeapon = currentWeapon;
-                }
+                weapons.add(currentWeapon);
             }
         }
-        return favWeapon;
+        Collections.sort(weapons);
+        return weapons.get(0);
     }
 
     /**
@@ -469,212 +485,6 @@ public class CODPlayer {
     }
 
     /**
-     * Hold weapon information
-     */
-    public static class Weapon {
-        private final Ratio kd, accuracy;
-        private final int headshots;
-        private final String name, iwName, imageTitle, category;
-        private final File image;
-        private final TYPE type;
-
-        public enum TYPE {
-            PRIMARY,
-            SECONDARY,
-            LETHAL,
-            TACTICAL
-        }
-
-        /**
-         * Create a weapon
-         *
-         * @param iwName    Infinity Ward name of weapon e.g "iw8_me_akimboblunt"
-         * @param name      Real name of weapon e.g "Kali Sticks"
-         * @param category  Infinity Ward name of weapon category e.g "weapon_melee"
-         * @param kd        Kill/Death ratio of weapon
-         * @param accuracy  Shots Hit/Shots Fired ratio of weapon
-         * @param headshots Number of headshots with weapon
-         * @param type      Type of weapon
-         * @param res       Resource location
-         */
-        public Weapon(String iwName, String name, String category, Ratio kd, Ratio accuracy, int headshots, TYPE type, String res) {
-            this.iwName = iwName;
-            this.category = category;
-            this.name = name;
-            this.kd = kd;
-            this.type = type;
-            this.accuracy = accuracy;
-            this.headshots = headshots;
-            this.image = new File(res + "Weapons/" + category + "/" + iwName + ".png");
-            this.imageTitle = setImageTitle(type);
-        }
-
-        /**
-         * Create a tactical/lethal equipment
-         *
-         * @param iwName   Infinity Ward name of weapon e.g "iw8_me_akimboblunt"
-         * @param name     Real name of weapon e.g "Kali Sticks"
-         * @param category Infinity Ward name of weapon category e.g "weapon_melee"
-         * @param kd       Kills/Uses Ratio of equipment
-         * @param type     Type of weapon
-         * @param res      Resource location
-         */
-        public Weapon(String iwName, String name, String category, Ratio kd, TYPE type, String res) {
-            this(iwName, name, category, kd, null, 0, type, res);
-        }
-
-        /**
-         * Set title used above weapon in combat record image
-         *
-         * @param type Enum type of weapon
-         * @return String title
-         */
-        private String setImageTitle(TYPE type) {
-            String imageTitle = "";
-            switch(type) {
-
-                case PRIMARY:
-                    imageTitle = "Primary Weapon of Choice";
-                    break;
-                case SECONDARY:
-                    imageTitle = "Secondary Weapon of Choice";
-                    break;
-                case LETHAL:
-                    imageTitle = "Lethal Equipment of Choice";
-                    break;
-                case TACTICAL:
-                    imageTitle = "Tactical Equipment of Choice";
-                    break;
-            }
-            return imageTitle;
-        }
-
-        /**
-         * Get the Infinity Ward name of the weapon
-         *
-         * @return Infinity Ward name of weapon
-         */
-        public String getIwName() {
-            return iwName;
-        }
-
-        /**
-         * Get the image title for use in combat record
-         *
-         * @return Image title
-         */
-        public String getImageTitle() {
-            return imageTitle;
-        }
-
-        /**
-         * Get the name of the weapon
-         *
-         * @return Weapon name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * Get the weapon type
-         *
-         * @return Weapon type
-         */
-        public TYPE getType() {
-            return type;
-        }
-
-        /**
-         * Get the image of the weapon
-         *
-         * @return Weapon image
-         */
-        public File getImage() {
-            return image;
-        }
-
-        /**
-         * Get the percentage formatted accuracy ratio of the weapon
-         *
-         * @return Accuracy ratio
-         */
-        public String getAccuracy() {
-            return accuracy.getRatioPercentage();
-        }
-
-        /**
-         * Get the shots fired
-         *
-         * @return Shots fired
-         */
-        public String getShotsFired() {
-            return accuracy.formatDenominator();
-        }
-
-        /**
-         * Get the K/D ratio formatted to 2 decimal places
-         *
-         * @return K/D ratio
-         */
-        public String getKd() {
-            return kd.formatRatio(kd.getRatio());
-        }
-
-        /**
-         * Get number of shots hit
-         *
-         * @return Shots hit
-         */
-        public String getShotsHit() {
-            return accuracy.formatNumerator();
-        }
-
-        /**
-         * Get number of kills
-         *
-         * @return Kills
-         */
-        public int getKills() {
-            return kd.getNumerator();
-        }
-
-        /**
-         * Get number of deaths
-         *
-         * @return Deaths
-         */
-        public int getDeaths() {
-            return kd.getDenominator();
-        }
-
-        /**
-         * Get the weapon categories associated with the given weapon type
-         *
-         * @param type (PRIMARY, SECONDARY...)
-         * @return Weapon categories
-         */
-        public static String[] getCategories(TYPE type) {
-            String[] categories = new String[]{};
-            switch(type) {
-                case PRIMARY:
-                    categories = new String[]{"weapon_sniper", "weapon_lmg", "weapon_assault_rifle", "weapon_other", "weapon_shotgun", "weapon_smg", "weapon_marksman"};
-                    break;
-                case SECONDARY:
-                    categories = new String[]{"weapon_launcher", "weapon_pistol", "weapon_melee"};
-                    break;
-                case LETHAL:
-                    categories = new String[]{"lethals"};
-                    break;
-                case TACTICAL:
-                    categories = new String[]{"tacticals"};
-                    break;
-            }
-            return categories;
-        }
-    }
-
-    /**
      * Hold commendation information
      */
     public static class Commendation implements Comparable<Commendation> {
@@ -757,31 +567,25 @@ public class CODPlayer {
      * Hold killstreak information
      */
     public static class Killstreak implements Comparable<Killstreak> {
-        private final int stat, uses;
+        private final Ratio statUse;
         private final String name, statName, iwName;
         private final File image;
-        private double average;
 
         /**
          * Create a killstreak
          *
          * @param iwName   Infinity Ward name of streak e.g "radar_drone_overwatch"
          * @param name     Real name of streak e.g "Personal Radar"
-         * @param uses     Quantity of uses
          * @param statName Name of provided stat quantity, kills/assists/..
-         * @param stat     Quantity of the given stat
+         * @param statUse  Stat/Use Ratio
          * @param res      Resource location
          */
-        public Killstreak(String iwName, String name, int uses, String statName, int stat, String res) {
+        public Killstreak(String iwName, String name, String statName, Ratio statUse, String res) {
             this.iwName = iwName;
             this.name = name;
-            this.uses = uses;
             this.statName = statName;
-            this.stat = stat;
+            this.statUse = statUse;
             this.image = new File(res + "Killstreaks/" + iwName + ".png");
-            if(statName != null) {
-                this.average = (double) stat / uses;
-            }
         }
 
         /**
@@ -790,7 +594,7 @@ public class CODPlayer {
          * @return Average stat per use
          */
         public String getAverage() {
-            return new DecimalFormat("0.00").format(average);
+            return statUse.formatRatio(statUse.getRatio());
         }
 
         /**
@@ -817,12 +621,12 @@ public class CODPlayer {
         }
 
         /**
-         * Return if the killstreak doesn't have an extra stat
+         * Return if the killstreak has an extra stat
          *
-         * @return Killstreak has no extra stat
+         * @return Killstreak has extra stat
          */
-        public boolean noExtraStat() {
-            return statName == null;
+        public boolean hasExtraStat() {
+            return statName != null;
         }
 
         /**
@@ -831,7 +635,7 @@ public class CODPlayer {
          * @return Quantity of stat
          */
         public int getStat() {
-            return stat;
+            return statUse.getNumerator();
         }
 
         /**
@@ -840,7 +644,7 @@ public class CODPlayer {
          * @return Killstreak uses
          */
         public int getUses() {
-            return uses;
+            return statUse.getDenominator();
         }
 
         /**
@@ -857,7 +661,7 @@ public class CODPlayer {
          */
         @Override
         public int compareTo(@NotNull CODPlayer.Killstreak o) {
-            return o.getUses() - uses;
+            return o.getUses() - getUses();
         }
     }
 }

@@ -31,8 +31,8 @@ public class CombatRecord extends ImageBuilder {
      * @param type Weapon type
      * @return Background image for weapon type
      */
-    private File getWeaponImage(CODPlayer.Weapon.TYPE type) {
-        if(type == CODPlayer.Weapon.TYPE.PRIMARY || type == CODPlayer.Weapon.TYPE.SECONDARY) {
+    private File getWeaponImage(Weapon.TYPE type) {
+        if(type == Weapon.TYPE.PRIMARY || type == Weapon.TYPE.SECONDARY) {
             return new File((getResourcePath() + "Templates/weapon_section.png"));
         }
         return new File((getResourcePath() + "Templates/lethal_section.png"));
@@ -44,7 +44,7 @@ public class CombatRecord extends ImageBuilder {
      * @param weapon Weapon to draw
      * @return Weapon section with weapon stats drawn on
      */
-    private BufferedImage drawWeapon(CODPlayer.Weapon weapon) {
+    private BufferedImage drawWeapon(Weapon weapon) {
         BufferedImage image = null;
         try {
             image = ImageIO.read(getWeaponImage(weapon.getType()));
@@ -56,16 +56,26 @@ public class CombatRecord extends ImageBuilder {
             // Draw the weapon image on to the background and write the name and kills
             g.drawImage(weaponImage, (image.getWidth() / 2) - (weaponImage.getWidth() / 2), 250, null);
             g.drawString(weapon.getName(), (image.getWidth() / 2) - (g.getFontMetrics().stringWidth(weapon.getName()) / 2), 175);
-            g.drawString(String.valueOf(weapon.getKills()), 277, 490);
+
+            if(weapon.getType() != Weapon.TYPE.TACTICAL) {
+                int kills;
+                if(weapon.getType() == Weapon.TYPE.LETHAL) {
+                    kills = ((Lethal) weapon).getKills();
+                }
+                else {
+                    kills = ((Standard) weapon).getKills();
+                }
+                g.drawString(String.valueOf(kills), 277, 490);
+            }
 
             // Draw the other weapon stats (lethals only have kills)
-            if(weapon.getType() != CODPlayer.Weapon.TYPE.LETHAL) {
-                g.drawString(String.valueOf(weapon.getDeaths()), 277, 590);
-                g.drawString(String.valueOf(weapon.getKd()), 277, 690);
-
-                g.drawString(String.valueOf(weapon.getShotsHit()), 277, 841);
-                g.drawString(String.valueOf(weapon.getShotsFired()), 277, 941);
-                g.drawString(String.valueOf(weapon.getAccuracy()), 277, 1041);
+            if(weapon.getType() != Weapon.TYPE.LETHAL) {
+                Standard standardWep = (Standard) weapon;
+                g.drawString(String.valueOf(standardWep.getDeaths()), 277, 590);
+                g.drawString(String.valueOf(standardWep.getKd()), 277, 690);
+                g.drawString(String.valueOf(standardWep.getShotsHit()), 277, 841);
+                g.drawString(String.valueOf(standardWep.getShotsFired()), 277, 941);
+                g.drawString(String.valueOf(standardWep.getAccuracy()), 277, 1041);
             }
 
             g.setFont(getGameFont().deriveFont(28f));
@@ -204,7 +214,7 @@ public class CombatRecord extends ImageBuilder {
 
                 y = (200 + maxHeight + space);
                 g.drawString(quantity, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(quantity) / 2), y);
-                if(!killstreak.noExtraStat()) {
+                if(killstreak.hasExtraStat()) {
                     String extra = killstreak.getStatName() + ": " + killstreak.getStat();
                     y += space;
                     g.drawString(extra, x + (icon.getWidth() / 2) - (g.getFontMetrics().stringWidth(extra) / 2), y);

@@ -1,5 +1,5 @@
 {
-  "guns": {
+  "weapons": {
     "weapon_sniper": {
       "iw8_sn_alpha50": {
         "real_name": "AX-50"
@@ -193,28 +193,34 @@
     },
     "tacticals": {
       "equip_gas_grenade": {
-        "real_name": "Gas Grenade"
+        "real_name": "Gas Grenade",
+        "property": "Hits"
       },
       "equip_snapshot_grenade": {
-        "real_name": "Snapshot Grenade"
+        "real_name": "Snapshot Grenade",
+        "property": "Hits"
       },
       "equip_decoy": {
-        "real_name": "Decoy Grenade"
+        "real_name": "Decoy Grenade",
+        "property": "Hits"
       },
       "equip_smoke": {
         "real_name": "Smoke Grenade"
       },
       "equip_concussion": {
-        "real_name": "Stun Grenade"
+        "real_name": "Stun Grenade",
+        "property": "Hits"
       },
       "equip_hb_sensor": {
         "real_name": "Heartbeat Sensor"
       },
       "equip_flash": {
-        "real_name": "Flash Grenade"
+        "real_name": "Flash Grenade",
+        "property": "Hits"
       },
       "equip_adrenaline": {
-        "real_name": "Stim"
+        "real_name": "Stim",
+        "property": "Healed"
       }
     },
     "lethals": {
