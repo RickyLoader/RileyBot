@@ -83,7 +83,7 @@ public class SteakCommand extends DiscordCommand {
             connection.connect();
             BufferedImage smallAvatar = ImageIO.read(connection.getInputStream());
 
-            BufferedImage avatar = new BufferedImage(240, 240, BufferedImage.TYPE_INT_RGB);
+            BufferedImage avatar = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
             Graphics g = avatar.getGraphics();
             g.drawImage(smallAvatar, 0, 0, 240, 240, null);
             g.dispose();
