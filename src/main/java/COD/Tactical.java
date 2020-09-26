@@ -68,10 +68,11 @@ public class Tactical extends Weapon {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("name: ").append(getName())
-                .append(" uses: ").append(getUses());
+        builder.append("name: ").append(getName()).append("\n")
+                .append("uses: ").append(getUses());
         if(hasExtraStat()) {
-            builder.append(" ").append(statName).append(": ").append(getStat()).append(" Per use: ").append(statUse.formatRatio(statUse.getRatio()));
+            builder.append("\n").append(statName).append(": ").append(getStat()).append("\n")
+                    .append("Per use: ").append(statUse.formatRatio(statUse.getRatio()));
         }
         return builder.toString();
     }

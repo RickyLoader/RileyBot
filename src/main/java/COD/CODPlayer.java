@@ -835,11 +835,11 @@ public class CODPlayer {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("name: ").append(name)
-                    .append(" kills: ").append(hasKills() ? getKills() : "N/A")
-                    .append(" uses: ").append(getUses());
+            builder.append("name: ").append(name).append("\n")
+                    .append("kills: ").append(hasKills() ? getKills() : "N/A").append("\n")
+                    .append("uses: ").append(getUses());
             if(hasProperty()) {
-                builder.append(" ").append(getPropertyName()).append(": ").append(getPropertyValue());
+                builder.append("\n").append(getPropertyName()).append(": ").append(getPropertyValue());
             }
             return builder.toString();
         }
