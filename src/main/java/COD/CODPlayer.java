@@ -834,14 +834,14 @@ public class CODPlayer {
 
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder("FAVOURITE FIELD UPGRADE:\n\n");
             builder.append("name: ").append(name).append("\n")
                     .append("kills: ").append(hasKills() ? getKills() : "N/A").append("\n")
                     .append("uses: ").append(getUses());
             if(hasProperty()) {
                 builder.append("\n").append(getPropertyName()).append(": ").append(getPropertyValue());
             }
-            return builder.toString();
+            return builder.append("\n\n").toString();
         }
 
         /**

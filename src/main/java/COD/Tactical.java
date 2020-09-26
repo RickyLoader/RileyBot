@@ -67,13 +67,13 @@ public class Tactical extends Weapon {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder("FAVOURITE TACTICAL:\n\n");
         builder.append("name: ").append(getName()).append("\n")
                 .append("uses: ").append(getUses());
         if(hasExtraStat()) {
             builder.append("\n").append(statName).append(": ").append(getStat()).append("\n")
                     .append("Per use: ").append(statUse.formatRatio(statUse.getRatio()));
         }
-        return builder.toString();
+        return builder.append("\n\n").toString();
     }
 }
