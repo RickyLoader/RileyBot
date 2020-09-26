@@ -42,6 +42,6 @@ public class Lethal extends Weapon {
 
     @Override
     public int getSortValue() {
-        return getKills();
+        return getUses();
     }
 }

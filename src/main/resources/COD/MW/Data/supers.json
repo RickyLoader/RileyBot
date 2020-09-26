@@ -1,0 +1,39 @@
+{
+  "supers": {
+    "super_emp_drone": {
+      "real_name": "EMP Drone",
+      "misc1_name": "Targets EMPed"
+    },
+    "super_trophy": {
+      "real_name": "Trophy System",
+      "misc1_name": "Projectiles Destroyed"
+    },
+    "super_ammo_drop": {
+      "real_name": "Munitions Box",
+      "misc1_name": "Ammo Resupplies"
+    },
+    "super_weapon_drop": {
+      "real_name": "Weapon Drop",
+      "misc1_name": "Weapon Resupplies"
+    },
+    "super_recon_drone": {
+      "real_name": "Recon Drone",
+      "misc1_name": "Targets Marked"
+    },
+    "super_deadsilence": {
+      "real_name": "Dead Silence",
+      "misc1_name": "Longest Streak"
+    },
+    "super_tac_cover": {
+      "real_name": "Deployable Cover",
+      "misc1_name": "Damage Blocked"
+    },
+    "super_support_box": {
+      "real_name": "Stopping Power Rounds"
+    },
+    "super_tac_insert": {
+      "real_name": "Tactical Insertion",
+      "misc1_name": "Respawns"
+    }
+  }
+}
