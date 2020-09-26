@@ -36,7 +36,7 @@ public class SteakCommand extends DiscordCommand {
             }
             BufferedImage steak = ImageIO.read(new File("src/main/resources/LOL/steak.jpg"));
             Graphics g = steak.getGraphics();
-            g.drawImage(fanImage, 205, 50, null);
+            g.drawImage(fanImage, 180, 50, null);
             g.dispose();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ImageIO.write(steak, "jpg", out);
