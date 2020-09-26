@@ -188,11 +188,8 @@ public class CODPlayer {
                 }
                 JSONObject data = superData.getJSONObject(superName);
                 fieldUpgrade.put("real_name", data.getString("real_name"));
-                if(data.has("misc1")) {
+                if(data.has("misc1_name")) {
                     fieldUpgrade.put("misc1_name", data.getString("misc1_name"));
-                }
-                if(data.has("misc2_name")) {
-                    fieldUpgrade.put("misc2_name", data.getString("misc2_name"));
                 }
             }
         }
@@ -273,9 +270,9 @@ public class CODPlayer {
                 continue;
             }
             int uses = fieldUpgrade.getInt("uses");
-            FieldUpgrade.Property first = null;
+            FieldUpgrade.Property property = null;
             if(fieldUpgrade.has("misc1_name")) {
-                first = new FieldUpgrade.Property(
+                property = new FieldUpgrade.Property(
                         fieldUpgrade.getString("misc1_name"),
                         fieldUpgrade.getInt("misc1")
                 );
@@ -287,7 +284,7 @@ public class CODPlayer {
                             fieldUpgrade.getString("real_name"),
                             res,
                             new Ratio(fieldUpgrade.getInt("kills"), uses),
-                            first
+                            property
                     )
             );
         }
@@ -735,23 +732,23 @@ public class CODPlayer {
         private final Ratio killUse;
         private final String name;
         private final File image;
-        private final Property first;
+        private final Property property;
 
         /**
          * Create a killstreak
          *
-         * @param iwName  Infinity Ward name of field upgrade e.g "super_deadsilence"
-         * @param name    Real name of field upgrade e.g "Dead Silence"
-         * @param killUse Kill/Use Ratio
-         * @param res     Resource location
-         * @param first   First property
+         * @param iwName   Infinity Ward name of field upgrade e.g "super_deadsilence"
+         * @param name     Real name of field upgrade e.g "Dead Silence"
+         * @param killUse  Kill/Use Ratio
+         * @param res      Resource location
+         * @param property Extra property
          */
-        public FieldUpgrade(String iwName, String name, String res, Ratio killUse, Property first) {
+        public FieldUpgrade(String iwName, String name, String res, Ratio killUse, Property property) {
             this.name = name;
             this.killUse = killUse;
             //this.image = new File(res + "Supers/" + iwName + ".png");
             this.image = null;
-            this.first = first;
+            this.property = property;
         }
 
         /**
@@ -769,17 +766,27 @@ public class CODPlayer {
          * @return Presence of first property
          */
         public boolean hasProperty() {
-            return first != null;
+            return property != null;
         }
 
         /**
-         * Get the first property of the field upgrade
+         * Get the name associated with the property
          *
-         * @return First property
+         * @return Property name
          */
-        public Property getProperty() {
-            return first;
+        public String getPropertyName() {
+            return property.getName();
         }
+
+        /**
+         * Get the value associated with the property
+         *
+         * @return Property value
+         */
+        public int getPropertyValue() {
+            return property.getValue();
+        }
+
 
         /**
          * Return field upgrade has kill stat
@@ -832,7 +839,7 @@ public class CODPlayer {
                     .append(" kills: ").append(hasKills() ? getKills() : "N/A")
                     .append(" uses: ").append(getUses());
             if(hasProperty()) {
-                builder.append(" ").append(first.getName()).append(": ").append(first.getValue());
+                builder.append(" ").append(getPropertyName()).append(": ").append(getPropertyValue());
             }
             return builder.toString();
         }
