@@ -61,8 +61,8 @@ public class SteakCommand extends DiscordCommand {
         MessageEmbed message = new EmbedBuilder()
                 .setColor(EmbedHelper.getPurple())
                 .setThumbnail(steak)
-                .setTitle(name + " - Photo with Steak!")
-                .setDescription("The **greatest** League of Legends player in LCS history.")
+                .setTitle(name + " - Photo with Steak")
+                .setDescription("The **greatest** League of Legends player in LCS history!")
                 .setFooter("I wanted a short name and steak is my favourite food - Steak", steak)
                 .setImage("attachment://steak.jpg")
                 .build();
