@@ -178,8 +178,8 @@ public class CODPlayer {
                 JSONObject category = items.getJSONObject(categoryName);
                 for(String gunName : category.keySet()) {
                     JSONObject gun = category.getJSONObject(gunName).getJSONObject("properties");
-                    if(!gunNames.getJSONObject(categoryName).has(gunName)) {
-                        System.out.println("MISSING GUN: " + gunName);
+                    if(!gunNames.has(categoryName) || !gunNames.getJSONObject(categoryName).has(gunName)) {
+                        System.out.println("MISSING GUN: " + gunName + " IN CATEGORY: " + categoryName);
                         continue;
                     }
                     String realName = gunNames.getJSONObject(categoryName).getJSONObject(gunName).getString("real_name");
@@ -231,16 +231,30 @@ public class CODPlayer {
             JSONObject category = items.getJSONObject(desiredCategory);
             for(String weaponName : category.keySet()) {
                 JSONObject weapon = category.getJSONObject(weaponName).getJSONObject("properties");
-                Weapon currentWeapon = new Weapon(
-                        weaponName,
-                        weapon.has("real_name") ? weapon.getString("real_name") : "MISSING NAME",
-                        desiredCategory,
-                        new Ratio(weapon.getInt("kills"), weapon.getInt("deaths")),
-                        new Ratio(weapon.getInt("hits"), weapon.getInt("shots")),
-                        (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots"),
-                        type,
-                        res
-                );
+                String name = weapon.has("real_name") ? weapon.getString("real_name") : "MISSING NAME";
+                Weapon currentWeapon;
+                if(type == Weapon.TYPE.LETHAL || type == Weapon.TYPE.TACTICAL) {
+                    currentWeapon = new Weapon(
+                            weaponName,
+                            name,
+                            desiredCategory,
+                            new Ratio(weapon.getInt("kills"), weapon.getInt("uses")),
+                            type,
+                            res
+                    );
+                }
+                else {
+                    currentWeapon = new Weapon(
+                            weaponName,
+                            name,
+                            desiredCategory,
+                            new Ratio(weapon.getInt("kills"), weapon.getInt("deaths")),
+                            new Ratio(weapon.getInt("hits"), weapon.getInt("shots")),
+                            (weapon.has("headshots")) ? weapon.getInt("headshots") : weapon.getInt("headShots"),
+                            type,
+                            res
+                    );
+                }
                 if(favWeapon == null || favWeapon.getKills() < currentWeapon.getKills()) {
                     favWeapon = currentWeapon;
                 }
@@ -493,6 +507,20 @@ public class CODPlayer {
             this.headshots = headshots;
             this.image = new File(res + "Weapons/" + category + "/" + iwName + ".png");
             this.imageTitle = setImageTitle(type);
+        }
+
+        /**
+         * Create a tactical/lethal equipment
+         *
+         * @param iwName   Infinity Ward name of weapon e.g "iw8_me_akimboblunt"
+         * @param name     Real name of weapon e.g "Kali Sticks"
+         * @param category Infinity Ward name of weapon category e.g "weapon_melee"
+         * @param kd       Kills/Uses Ratio of equipment
+         * @param type     Type of weapon
+         * @param res      Resource location
+         */
+        public Weapon(String iwName, String name, String category, Ratio kd, TYPE type, String res) {
+            this(iwName, name, category, kd, null, 0, type, res);
         }
 
         /**
