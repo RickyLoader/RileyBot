@@ -44,6 +44,7 @@ public class WeatherManager {
         iconTypes.put("NIGHT_FINE", EmoteHelper.formatEmote(emoteHelper.getNightFine()));
         iconTypes.put("NIGHT_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getNightFewShowers()));
         iconTypes.put("NIGHT_DRIZZLE", EmoteHelper.formatEmote(emoteHelper.getNightDrizzle()));
+        iconTypes.put("NIGHT_WIND_RAIN", EmoteHelper.formatEmote(emoteHelper.getNightWindRain()));
 
         String showers = EmoteHelper.formatEmote(emoteHelper.getShowers());
         String cloudy = EmoteHelper.formatEmote(emoteHelper.getCloudy());

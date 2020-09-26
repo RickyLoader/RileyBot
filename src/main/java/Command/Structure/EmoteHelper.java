@@ -191,4 +191,8 @@ public class EmoteHelper {
     public Emote getClothing() {
         return get("758690648642945034");
     }
+
+    public Emote getNightWindRain() {
+        return get("759221421816807425");
+    }
 }
