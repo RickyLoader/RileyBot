@@ -29,6 +29,7 @@ public class UrbanDictionaryCommand extends DiscordCommand {
         if(urbanDictionary == null) {
             urbanDictionary = new UrbanDictionary(context.getEmoteHelper(), getHelpName().replaceAll("\n", " | "));
         }
+
         new Thread(() -> {
             Definition definition;
             if(msg.equals("urbandict")) {
