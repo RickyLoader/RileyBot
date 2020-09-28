@@ -149,15 +149,20 @@ public class PlexServer {
      * @return Movie
      */
     private Movie parseMovie(JSONObject movie) {
-        String folder = movie.getString("path");
+        boolean downloaded = movie.getBoolean("downloaded");
+        String plexUrl = null;
+        if(downloaded) {
+            String folder = movie.getString("path");
+            plexUrl = folder.endsWith("/") ? plexUrls.get(folder.substring(0, folder.length() - 1)) : plexUrls.get(folder);
+        }
         return new Movie(
                 movie.has("imdbId") ? movie.getString("imdbId") : null,
                 String.valueOf(movie.getInt("tmdbId")),
                 movie.getString("title"),
                 movie.has("overview") ? movie.getString("overview") : null,
                 movie.has("inCinemas") ? movie.getString("inCinemas") : null,
-                folder.endsWith("/") ? plexUrls.get(folder.substring(0, folder.length() - 1)) : plexUrls.get(folder),
-                movie.getBoolean("downloaded"));
+                plexUrl,
+                downloaded);
     }
 
     /**

@@ -26,11 +26,6 @@ public class PlexCommand extends DiscordCommand {
             return;
         }
 
-        if(!context.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
-            channel.sendMessage("I need the manage webhooks permission to do that").queue();
-            return;
-        }
-
         if(refreshing) {
             channel.sendMessage("I told you I was refreshing cunt").queue();
             return;
@@ -57,6 +52,12 @@ public class PlexCommand extends DiscordCommand {
                 return;
             }
             String query = message.replaceFirst("plex! ", "").trim();
+
+            if(!context.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+                channel.sendMessage("I need the manage webhooks permission to do that").queue();
+                return;
+            }
+
             context.getGuild().retrieveWebhooks().queue(webhooks -> {
                 String webhook = context.filterWebhooks(webhooks, "plex");
                 if(webhook == null) {
