@@ -38,10 +38,10 @@ public class UrbanDictionary {
     public MessageEmbed getDefinitionEmbed(Definition definition) {
         String icon = "https://i.imgur.com/vQXfaJX.png";
 
-        StringBuilder description = new StringBuilder("**Definition**:\n\n");
+        StringBuilder description = new StringBuilder("**Definition**\n\n");
         description.append(definition.getExplanation()).append("\n\n");
         if(definition.hasQuote()) {
-            description.append("**Usage**:\n\n").append(definition.getQuote()).append("\n\n");
+            description.append("**Usage**\n\n").append(definition.getQuote()).append("\n\n");
         }
         description.append(EmbedHelper.embedURL("- *" + definition.getAuthor() + ", " + definition.formatSubmitted() + "*", definition.getUrl()));
 
