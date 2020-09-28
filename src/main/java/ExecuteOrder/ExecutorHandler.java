@@ -1,4 +1,4 @@
-package Command.Commands.ExecuteOrder;
+package ExecuteOrder;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -95,7 +95,7 @@ public class ExecutorHandler {
      * Hold information on an Executor for execute order 66 command
      * Hold an audio track and various images to be randomly selected
      */
-    static class Executor {
+    public static class Executor {
         private final String track;
         private final String[] images;
 
