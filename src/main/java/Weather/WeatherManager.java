@@ -60,6 +60,61 @@ public class WeatherManager {
         iconTypes.put("NIGHT_WIND_RAIN", windRain);
         iconTypes.put("DAY_SNOW", snow);
         iconTypes.put("NIGHT_SNOW", snow);
+
+        // Extremes
+        iconTypes.put("Highest", maxIcon);
+        iconTypes.put("Lowest", minIcon);
+        iconTypes.put("Windiest", wind);
+        iconTypes.put("Wettest", showers);
+    }
+
+    /**
+     * Get the current weather extremes
+     *
+     * @param help Help message
+     * @return Weather extremes message embed
+     */
+    public MessageEmbed getExtremes(String help) {
+        EmbedBuilder builder = getEmbedBuilder(help);
+        builder
+                .setColor(EmbedHelper.getOrange())
+                .setTitle("Current Weather Extremes");
+
+        JSONArray extremes = getExtremeData();
+
+        for(int i = 0; i < extremes.length(); i++) {
+            JSONObject location = extremes.getJSONObject(i);
+            String type = location.getString("title");
+            String icon = iconTypes.get(type);
+            if(icon == null) {
+                System.out.println(type + " MISSING");
+                continue;
+            }
+            builder.addField(
+                    type + " " + iconTypes.get(type),
+                    location.getString("text") + "\n" + location.getString("value"),
+                    true
+            );
+        }
+        return builder.build();
+    }
+
+    /**
+     * Get the current extreme weather data from MetService
+     *
+     * @return Extreme weather data
+     */
+    private JSONArray getExtremeData() {
+        return new JSONObject(
+                new NetworkRequest("https://www.metservice.com/publicData/webdata/national", false).get()
+        )
+                .getJSONObject("layout")
+                .getJSONObject("primary")
+                .getJSONObject("slots")
+                .getJSONObject("left-minor")
+                .getJSONArray("modules")
+                .getJSONObject(0)
+                .getJSONArray("items");
     }
 
     /**
