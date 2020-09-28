@@ -192,7 +192,11 @@ public class EmoteHelper {
         return get("758690648642945034");
     }
 
-    public Emote getNightWindRain() {
+    public Emote getWindRain() {
         return get("759221421816807425");
+    }
+
+    public Emote getSnow() {
+        return get("759961872312696912");
     }
 }

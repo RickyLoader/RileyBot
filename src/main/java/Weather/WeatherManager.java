@@ -44,17 +44,22 @@ public class WeatherManager {
         iconTypes.put("NIGHT_FINE", EmoteHelper.formatEmote(emoteHelper.getNightFine()));
         iconTypes.put("NIGHT_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getNightFewShowers()));
         iconTypes.put("NIGHT_DRIZZLE", EmoteHelper.formatEmote(emoteHelper.getNightDrizzle()));
-        iconTypes.put("NIGHT_WIND_RAIN", EmoteHelper.formatEmote(emoteHelper.getNightWindRain()));
 
         String showers = EmoteHelper.formatEmote(emoteHelper.getShowers());
         String cloudy = EmoteHelper.formatEmote(emoteHelper.getCloudy());
         String windy = EmoteHelper.formatEmote(emoteHelper.getWindy());
+        String windRain = EmoteHelper.formatEmote(emoteHelper.getWindRain());
+        String snow = EmoteHelper.formatEmote(emoteHelper.getSnow());
         iconTypes.put("DAY_SHOWERS", showers);
         iconTypes.put("NIGHT_SHOWERS", showers);
         iconTypes.put("DAY_CLOUDY", cloudy);
         iconTypes.put("NIGHT_CLOUDY", cloudy);
         iconTypes.put("NIGHT_WINDY", windy);
         iconTypes.put("DAY_WINDY", windy);
+        iconTypes.put("DAY_WIND_RAIN", windRain);
+        iconTypes.put("NIGHT_WIND_RAIN", windRain);
+        iconTypes.put("DAY_SNOW", snow);
+        iconTypes.put("NIGHT_SNOW", snow);
     }
 
     /**
