@@ -3,6 +3,7 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Plex.PlexServer;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class PlexCommand extends DiscordCommand {
@@ -22,6 +23,11 @@ public class PlexCommand extends DiscordCommand {
 
         if(!message.equals("plex!") && !message.startsWith("plex! ")) {
             channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
+        if(!context.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+            channel.sendMessage("I need the manage webhooks permission to do that").queue();
             return;
         }
 

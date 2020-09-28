@@ -6,15 +6,13 @@ import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Webhook;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class ImpersonateCommand extends DiscordCommand {
 
@@ -29,10 +27,16 @@ public class ImpersonateCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
+        MessageChannel channel = context.getMessageChannel();
+
+        if(!context.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+            channel.sendMessage("I need the manage webhooks permission to do that").queue();
+            return;
+        }
+
         Message m = context.getMessage();
         m.delete().queue();
         List<Member> mentions = m.getMentionedMembers();
-        MessageChannel channel = context.getMessageChannel();
         if(mentions.isEmpty()) {
             return;
         }
