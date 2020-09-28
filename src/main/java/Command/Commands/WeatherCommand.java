@@ -21,6 +21,10 @@ public class WeatherCommand extends DiscordCommand {
         MessageChannel channel = context.getMessageChannel();
         String help = getHelpName().replaceAll("\n", " | ");
 
+        if(!message.equals("weather") && !message.startsWith("weather ")) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
         if(weatherManager == null) {
             weatherManager = new WeatherManager(context.getEmoteHelper());
         }
