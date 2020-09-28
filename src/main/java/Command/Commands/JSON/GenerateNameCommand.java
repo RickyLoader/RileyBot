@@ -14,9 +14,8 @@ public class GenerateNameCommand extends JSONListCommand {
     @Override
     public void execute(CommandContext context) {
         Random rand = new Random();
-        int attempts = 0;
-        StringBuilder name = new StringBuilder();
         String[] list = getList();
+        StringBuilder name = new StringBuilder();
         int maxLength = 15;
 
         for(int attempts = 0; attempts < 3; attempts++) {
@@ -24,9 +23,6 @@ public class GenerateNameCommand extends JSONListCommand {
             if(name.length() + word.length() <= maxLength) {
                 name.append(word);
             }
-
-            // Either way the attempts increment
-            attempts++;
         }
 
         if(name.length() < maxLength && rand.nextInt(2) == 1) {
