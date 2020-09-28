@@ -6,6 +6,8 @@ import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmbedLoadingMessage;
 import Command.Structure.EmbedLoadingMessage.Status;
+import ExecuteOrder.ExecutorHandler;
+import ExecuteOrder.ExecutorHandler.Executor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -24,7 +26,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
     private HashMap<Member, String> targetStatus;
     private List<Member> targets;
     private long id;
-    private ExecutorHandler.Executor executor;
+    private Executor executor;
     private String image;
     private boolean finished;
     private EmbedLoadingMessage.Status status;
