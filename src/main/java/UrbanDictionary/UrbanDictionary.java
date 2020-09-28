@@ -8,8 +8,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 import static UrbanDictionary.Definition.parseSubmissionDate;
