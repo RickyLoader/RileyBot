@@ -85,13 +85,12 @@ public class WeatherManager {
         for(int i = 0; i < extremes.length(); i++) {
             JSONObject location = extremes.getJSONObject(i);
             String type = location.getString("title");
-            String icon = iconTypes.get(type);
-            if(icon == null) {
+            String icon = iconTypes.getOrDefault(type, missing);
+            if(!iconTypes.containsKey(type)) {
                 System.out.println(type + " MISSING");
-                continue;
             }
             builder.addField(
-                    type + " " + iconTypes.get(type),
+                    type + " " + icon,
                     location.getString("text") + "\n" + location.getString("value"),
                     true
             );
