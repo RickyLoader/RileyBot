@@ -37,16 +37,17 @@ public class UrbanDictionary {
      */
     public MessageEmbed getDefinitionEmbed(Definition definition) {
         String icon = "https://i.imgur.com/vQXfaJX.png";
+
+        StringBuilder description = new StringBuilder("**Definition**:\n\n");
+        description.append(definition.getExplanation()).append("\n\n");
+        if(definition.hasQuote()) {
+            description.append("**Usage**:\n\n").append(definition.getQuote()).append("\n\n");
+        }
+        description.append(EmbedHelper.embedURL("- *" + definition.getAuthor() + ", " + definition.formatSubmitted() + "*", definition.getUrl()));
+
         return new EmbedBuilder()
                 .setTitle("Urban Dictionary: " + definition.getTerm())
-                .setDescription(
-                        "**Definition**\n\n"
-                                + definition.getExplanation()
-                                + "\n\n**Usage**\n\n"
-                                + definition.getQuote()
-                                + "\n\n"
-                                + EmbedHelper.embedURL("- *" + definition.getAuthor() + ", " + definition.formatSubmitted() + "*", definition.getUrl())
-                )
+                .setDescription(description.toString())
                 .addField(upvote, String.valueOf(definition.getUpvote()), true)
                 .addField(downvote, String.valueOf(definition.getDownvote()), true)
                 .setFooter("Try: " + help, icon)

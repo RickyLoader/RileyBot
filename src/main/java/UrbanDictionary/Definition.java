@@ -37,6 +37,15 @@ public class Definition implements Comparable<Definition> {
     }
 
     /**
+     * Return if a quote is available for the definition
+     *
+     * @return Presence of quote
+     */
+    public boolean hasQuote() {
+        return !quote.isEmpty();
+    }
+
+    /**
      * Get the author of the definition
      *
      * @return Author of definition
