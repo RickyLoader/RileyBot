@@ -189,10 +189,9 @@ public class WeatherManager {
      * @return Default embed builder
      */
     private EmbedBuilder getEmbedBuilder(String help) {
-        String metServiceIcon = "https://i.imgur.com/clXlRGC.png";
         return new EmbedBuilder()
-                .setThumbnail(metServiceIcon)
-                .setFooter("Try: " + help, metServiceIcon);
+                .setThumbnail("https://i.imgur.com/clXlRGC.png")
+                .setFooter("Try: " + help, "https://i.imgur.com/wDgQGMw.png");
     }
 
     /**
