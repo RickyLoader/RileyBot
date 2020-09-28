@@ -156,6 +156,7 @@ public class DiscordCommandManager {
         addCommand(new RS3LookupCommand());
         addCommand(new WeatherCommand());
         addCommand(new SteakCommand());
+        addCommand(new UrbanDictionaryCommand());
     }
 
     /**

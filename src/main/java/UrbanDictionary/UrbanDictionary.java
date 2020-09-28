@@ -47,7 +47,7 @@ public class UrbanDictionary {
                                 + "\n\n**Usage**\n\n"
                                 + definition.getQuote()
                                 + "\n\n"
-                                + EmbedHelper.embedURL(" - *" + definition.getAuthor() + ", " + definition.formatSubmitted() + "*", definition.getUrl())
+                                + EmbedHelper.embedURL("- *" + definition.getAuthor() + ", " + definition.formatSubmitted() + "*", definition.getUrl())
                 )
                 .addField(upvote, String.valueOf(definition.getUpvote()), true)
                 .addField(downvote, String.valueOf(definition.getDownvote()), true)
