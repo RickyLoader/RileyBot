@@ -318,7 +318,7 @@ public class PlexServer {
         new NetworkRequest(getRadarrLibraryURL(), false).post(body);
 
         library.add(result);
-        System.out.println(result.getTitle() + " (" + result.getFormattedReleaseDate() + ") has been added to Radarr: " + result.getIMDBUrl() + "(" + (System.currentTimeMillis() - start) + " ms)");
+        System.out.println(result.getTitle() + " (" + result.getFormattedReleaseDate() + ") has been added to Radarr: " + result.getIMDBUrl() + " (" + (System.currentTimeMillis() - start) + " ms)");
         return result;
     }
 
