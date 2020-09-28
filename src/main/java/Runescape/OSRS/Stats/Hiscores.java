@@ -1,4 +1,4 @@
-package Command.Commands.Runescape.OSRS.Stats;
+package Runescape.OSRS.Stats;
 
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
