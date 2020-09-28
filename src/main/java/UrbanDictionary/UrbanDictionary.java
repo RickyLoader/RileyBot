@@ -109,10 +109,9 @@ public class UrbanDictionary {
      */
     private Definition parseDefinition(JSONObject definition) {
         String explanation = stripFormatting(definition.getString("definition"));
-        String term = definition.getString("word");
         return new Definition(
-                term,
-                explanation,
+                definition.getString("word"),
+                explanation.length() > 1000 ? explanation.substring(0, 1000) + "..." : explanation,
                 stripFormatting(definition.getString("example")),
                 definition.getInt("thumbs_up"),
                 definition.getInt("thumbs_down"),
