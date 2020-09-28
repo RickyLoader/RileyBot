@@ -199,4 +199,12 @@ public class EmoteHelper {
     public Emote getSnow() {
         return get("759961872312696912");
     }
+
+    public Emote getDownvote() {
+        return get("760119013145313310");
+    }
+
+    public Emote getUpvote() {
+        return get("760118777253462047");
+    }
 }

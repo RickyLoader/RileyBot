@@ -33,6 +33,10 @@ public class EmbedHelper {
         return 0xd89620;
     }
 
+    public static int getUrbanDictBlue() {
+        return 741095;
+    }
+
     public static int getRunescapeYellow() {
         return 16747520;
     }
