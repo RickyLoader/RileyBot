@@ -10,7 +10,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static UrbanDictionary.Definition.parseSubmissionDate;
 
@@ -78,7 +80,10 @@ public class UrbanDictionary {
      * @return Search result or null
      */
     public Definition searchDefinition(String term) {
-        return definitionRequest("https://api.urbandictionary.com/v0/define?term=" + term, false);
+        List<Definition> definitions = definitionRequest("https://api.urbandictionary.com/v0/define?term=" + term);
+        definitions = definitions.stream().filter(definition -> definition.getTerm().equalsIgnoreCase(term)).collect(Collectors.toList());
+        Collections.sort(definitions);
+        return definitions.isEmpty() ? null : definitions.get(0);
     }
 
     /**
@@ -87,24 +92,20 @@ public class UrbanDictionary {
      * @return Random definition
      */
     public Definition getRandomDefinition() {
-        return definitionRequest("https://api.urbandictionary.com/v0/random", true);
+        ArrayList<Definition> definitions = definitionRequest("https://api.urbandictionary.com/v0/random");
+        return definitions.isEmpty() ? null : definitions.get(new Random().nextInt(definitions.size()));
     }
 
     /**
-     * Retrieve a definition from the given URL, either random or the top result
+     * Retrieve a list of definitions from the given URL
      *
-     * @param url    URL to urban dictionary API endpoint
-     * @param random Return a random result
+     * @param url URL to urban dictionary API endpoint
      * @return Random definition from provided results
      */
-    private Definition definitionRequest(String url, boolean random) {
+    private ArrayList<Definition> definitionRequest(String url) {
         JSONArray results = new JSONObject(
                 new NetworkRequest(url, false).get()
         ).getJSONArray("list");
-
-        if(results.isEmpty()) {
-            return null;
-        }
 
         ArrayList<Definition> definitions = new ArrayList<>();
 
@@ -112,8 +113,7 @@ public class UrbanDictionary {
             definitions.add(parseDefinition(results.getJSONObject(i)));
         }
 
-        Collections.sort(definitions);
-        return definitions.get(random ? new Random().nextInt(definitions.size()) : 0);
+        return definitions;
     }
 
     /**

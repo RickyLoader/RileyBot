@@ -18,7 +18,7 @@ public class UrbanDictionaryCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        String msg = context.getLowerCaseMessage();
+        String msg = context.getMessageContent();
         MessageChannel channel = context.getMessageChannel();
 
         if(!msg.equals("urbandict") && !msg.startsWith("urbandict ")) {
@@ -36,7 +36,7 @@ public class UrbanDictionaryCommand extends DiscordCommand {
                 definition = urbanDictionary.getRandomDefinition();
             }
             else {
-                definition = urbanDictionary.searchDefinition(msg.replace("urbandict ", ""));
+                definition = urbanDictionary.searchDefinition(msg.replace("urbandict ",""));
             }
 
             if(definition == null) {
