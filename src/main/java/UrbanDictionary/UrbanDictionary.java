@@ -106,7 +106,7 @@ public class UrbanDictionary {
             return null;
         }
 
-        ArrayList<Definition> definitions = new ArrayList<Definition>();
+        ArrayList<Definition> definitions = new ArrayList<>();
 
         for(int i = 0; i < results.length(); i++) {
             definitions.add(parseDefinition(results.getJSONObject(i)));
