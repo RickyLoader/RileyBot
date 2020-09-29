@@ -81,9 +81,12 @@ public class UrbanDictionary {
      */
     public Definition searchDefinition(String term) {
         List<Definition> definitions = definitionRequest("https://api.urbandictionary.com/v0/define?term=" + term);
+        if(definitions == null) {
+            return null;
+        }
         definitions = definitions.stream().filter(definition -> definition.getTerm().equalsIgnoreCase(term)).collect(Collectors.toList());
         Collections.sort(definitions);
-        return definitions.isEmpty() ? null : definitions.get(0);
+        return definitions.get(0);
     }
 
     /**
@@ -93,7 +96,7 @@ public class UrbanDictionary {
      */
     public Definition getRandomDefinition() {
         ArrayList<Definition> definitions = definitionRequest("https://api.urbandictionary.com/v0/random");
-        return definitions.isEmpty() ? null : definitions.get(new Random().nextInt(definitions.size()));
+        return definitions == null ? null : definitions.get(new Random().nextInt(definitions.size()));
     }
 
     /**
@@ -103,9 +106,11 @@ public class UrbanDictionary {
      * @return Random definition from provided results
      */
     private ArrayList<Definition> definitionRequest(String url) {
-        JSONArray results = new JSONObject(
-                new NetworkRequest(url, false).get()
-        ).getJSONArray("list");
+        String json = new NetworkRequest(url, false).get();
+        if(json.equals("err")) {
+            return null;
+        }
+        JSONArray results = new JSONObject(json).getJSONArray("list");
 
         ArrayList<Definition> definitions = new ArrayList<>();
 
@@ -113,7 +118,7 @@ public class UrbanDictionary {
             definitions.add(parseDefinition(results.getJSONObject(i)));
         }
 
-        return definitions;
+        return definitions.isEmpty() ? null : definitions;
     }
 
     /**
