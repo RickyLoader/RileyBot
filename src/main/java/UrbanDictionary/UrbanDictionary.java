@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import static UrbanDictionary.Definition.parseSubmissionDate;
@@ -76,7 +78,7 @@ public class UrbanDictionary {
      * @return Search result or null
      */
     public Definition searchDefinition(String term) {
-        return definitionRequest("https://api.urbandictionary.com/v0/define?term=" + term);
+        return definitionRequest("https://api.urbandictionary.com/v0/define?term=" + term, false);
     }
 
     /**
@@ -85,20 +87,33 @@ public class UrbanDictionary {
      * @return Random definition
      */
     public Definition getRandomDefinition() {
-        return definitionRequest("https://api.urbandictionary.com/v0/random");
+        return definitionRequest("https://api.urbandictionary.com/v0/random", true);
     }
 
     /**
-     * Retrieve a random definition from the given URL
+     * Retrieve a definition from the given URL, either random or the top result
      *
-     * @param url URL to urban dictionary API endpoint
+     * @param url    URL to urban dictionary API endpoint
+     * @param random Return a random result
      * @return Random definition from provided results
      */
-    private Definition definitionRequest(String url) {
+    private Definition definitionRequest(String url, boolean random) {
         JSONArray results = new JSONObject(
                 new NetworkRequest(url, false).get()
         ).getJSONArray("list");
-        return results.isEmpty() ? null : parseDefinition(results.getJSONObject(new Random().nextInt(results.length())));
+
+        if(results.isEmpty()) {
+            return null;
+        }
+
+        ArrayList<Definition> definitions = new ArrayList<Definition>();
+
+        for(int i = 0; i < results.length(); i++) {
+            definitions.add(parseDefinition(results.getJSONObject(i)));
+        }
+
+        Collections.sort(definitions);
+        return definitions.get(random ? new Random().nextInt(definitions.size()) : 0);
     }
 
     /**
