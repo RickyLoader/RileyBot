@@ -86,7 +86,7 @@ public class UrbanDictionary {
         }
         definitions = definitions.stream().filter(definition -> definition.getTerm().equalsIgnoreCase(term)).collect(Collectors.toList());
         Collections.sort(definitions);
-        return definitions.get(0);
+        return definitions.isEmpty() ? null : definitions.get(0);
     }
 
     /**
