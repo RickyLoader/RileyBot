@@ -80,7 +80,7 @@ public class StoryTimeCommand extends DiscordCommand {
                 .setDescription("One moment while I complete your story\n\n**Prompt**: "
                         + text
                         + " with "
-                        + EmbedHelper.embedURL("Shortly Read", "https://www.shortlyread.com/"))
+                        + EmbedHelper.embedURL("Shortly Read AI", "https://www.shortlyread.com/write"))
                 .build();
     }
 
