@@ -31,27 +31,16 @@ public class StoryTimeCommand extends DiscordCommand {
         new Thread(() -> channel.sendMessage(buildRequestEmbed(text)).queue(requestReceived -> {
             String json = new NetworkRequest("https://api.shortlyread.com/stories/write-for-me/", false).post(getBody(text));
             if(json.equals("err")) {
-                fail(requestReceived, text, "Something went wrong!");
+                requestReceived.editMessage(buildFailedEmbed(text, "Something went wrong!")).queue();
                 return;
             }
             JSONObject response = new JSONObject(json);
             if(response.has("message")) {
-                fail(requestReceived, text, response.getString("message"));
+                requestReceived.editMessage(buildFailedEmbed(text, response.getString("message"))).queue();
                 return;
             }
             requestReceived.editMessage(buildCompleteEmbed("**" + text + "**" + response.getString("text"))).queue();
         })).start();
-    }
-
-    /**
-     * Fail the story request
-     *
-     * @param status Message to edit
-     * @param text   Story prompt
-     * @param error  Error reason
-     */
-    private void fail(Message status, String text, String error) {
-        status.editMessage(buildFailedEmbed(text, error)).queue();
     }
 
     /**
