@@ -5,6 +5,7 @@ import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONObject;
@@ -30,28 +31,27 @@ public class StoryTimeCommand extends DiscordCommand {
         new Thread(() -> channel.sendMessage(buildRequestEmbed(text)).queue(requestReceived -> {
             String json = new NetworkRequest("https://api.shortlyread.com/stories/write-for-me/", false).post(getBody(text));
             if(json.equals("err")) {
-                fail(channel, requestReceived.getIdLong(), text, "Something went wrong!");
+                fail(requestReceived, text, "Something went wrong!");
                 return;
             }
             JSONObject response = new JSONObject(json);
             if(response.has("message")) {
-                fail(channel, requestReceived.getIdLong(), text, response.getString("message"));
+                fail(requestReceived, text, response.getString("message"));
                 return;
             }
-            channel.sendMessage(buildCompleteEmbed("**" + text + "**" + response.getString("text"))).queue();
+            requestReceived.editMessage(buildCompleteEmbed("**" + text + "**" + response.getString("text"))).queue();
         })).start();
     }
 
     /**
      * Fail the story request
      *
-     * @param channel Channel where message is located
-     * @param id      Status message id
-     * @param text    Story prompt
-     * @param error   Error reason
+     * @param status Message to edit
+     * @param text   Story prompt
+     * @param error  Error reason
      */
-    private void fail(MessageChannel channel, long id, String text, String error) {
-        channel.editMessageById(id, buildFailedEmbed(text, error)).queue();
+    private void fail(Message status, String text, String error) {
+        status.editMessage(buildFailedEmbed(text, error)).queue();
     }
 
     /**
