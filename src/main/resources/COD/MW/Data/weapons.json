@@ -12,6 +12,9 @@
       },
       "iw8_sn_xmike109": {
         "real_name": "Rytec AMR"
+      },
+      "iw8_sn_romeo700": {
+        "real_name": "SP-R 208"
       }
     },
     "weapon_lmg": {
@@ -110,6 +113,9 @@
       },
       "iw8_ar_sierra552": {
         "real_name": "Grau 5.56"
+      },
+      "iw8_ar_valpha": {
+        "real_name": "AS VAL"
       }
     },
     "weapon_other": {

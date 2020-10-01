@@ -11,7 +11,7 @@ public class PlexCommand extends DiscordCommand {
     private boolean refreshing = false;
 
     public PlexCommand() {
-        super("plex!\nplex! [search query/movie id]", "Get a movie recommendation from Plex!");
+        super("plex!\nplex! [movie query/movie id]", "Get a movie recommendation from Plex!");
         plex = new PlexServer(getHelpName().replace("\n", " | "));
     }
 
@@ -71,6 +71,6 @@ public class PlexCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query) {
-        return query.contains("plex");
+        return query.startsWith("plex");
     }
 }

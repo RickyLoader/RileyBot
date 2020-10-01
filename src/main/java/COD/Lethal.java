@@ -23,12 +23,21 @@ public class Lethal extends Weapon {
     }
 
     /**
-     * Get the uses of the tactical equipment
+     * Get the uses of the lethal equipment
      *
      * @return Uses
      */
     public int getUses() {
         return killUse.getDenominator();
+    }
+
+    /**
+     * Get the kill/use ratio
+     *
+     * @return Kill/use ratio
+     */
+    public String getKillUse() {
+        return killUse.formatRatio(killUse.getRatio());
     }
 
     /**
@@ -38,6 +47,24 @@ public class Lethal extends Weapon {
      */
     public int getKills() {
         return killUse.getNumerator();
+    }
+
+    /**
+     * Get the kills in a formatted String
+     *
+     * @return Formatted String kills
+     */
+    public String formatKills() {
+        return killUse.formatNumerator();
+    }
+
+    /**
+     * Get the uses in a formatted String
+     *
+     * @return Formatted String uses
+     */
+    public String formatUses() {
+        return killUse.formatDenominator();
     }
 
     @Override

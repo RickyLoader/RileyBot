@@ -78,9 +78,6 @@ public class CODPlayer {
             this.tactical = (Tactical) getFavourite(mergedWeaponData, Weapon.TYPE.TACTICAL);
             this.fieldUpgrade = parseFavouriteFieldUpgrade(mergeSuperData(supers));
 
-            System.out.println(tactical.toString());
-            System.out.println(fieldUpgrade.toString());
-
             JSONObject killstreaks = player.getJSONObject("scorestreakData");
             killstreaks = mergeStreakData(killstreaks.getJSONObject("lethalScorestreakData"), killstreaks.getJSONObject("supportScorestreakData"));
 
@@ -394,10 +391,28 @@ public class CODPlayer {
     /**
      * Get favourite lethal equipment
      *
-     * @return Lethal weapon
+     * @return Lethal equipment
      */
     public Weapon getLethal() {
         return lethal;
+    }
+
+    /**
+     * Get favourite tactical equipment
+     *
+     * @return Tactical equipment
+     */
+    public Weapon getTactical() {
+        return tactical;
+    }
+
+    /**
+     * Get favourite field upgrade
+     *
+     * @return Field upgrade
+     */
+    public FieldUpgrade getSuper() {
+        return fieldUpgrade;
     }
 
     /**
@@ -423,8 +438,8 @@ public class CODPlayer {
      *
      * @return Total wins
      */
-    public int getWins() {
-        return wl.getNumerator();
+    public String getWins() {
+        return wl.formatNumerator();
     }
 
     /**
@@ -432,8 +447,8 @@ public class CODPlayer {
      *
      * @return Total losses
      */
-    public int getLosses() {
-        return wl.getDenominator();
+    public String getLosses() {
+        return wl.formatDenominator();
     }
 
     /**
@@ -588,7 +603,7 @@ public class CODPlayer {
          * @return Formatted quantity
          */
         public String formatQuantity() {
-            return "x" + quantity;
+            return "x" + new DecimalFormat("#,###").format(quantity);
         }
 
         /**
@@ -720,6 +735,24 @@ public class CODPlayer {
         }
 
         /**
+         * Get the uses in a formatted String
+         *
+         * @return Formatted String uses
+         */
+        public String formatUses() {
+            return statUse.formatDenominator();
+        }
+
+        /**
+         * Get the stat in a formatted String
+         *
+         * @return Formatted String stat
+         */
+        public String formatStat() {
+            return statUse.formatNumerator();
+        }
+
+        /**
          * Sort descending by quantity
          */
         @Override
@@ -728,7 +761,7 @@ public class CODPlayer {
         }
     }
 
-    private static class FieldUpgrade implements Comparable<FieldUpgrade> {
+    public static class FieldUpgrade implements Comparable<FieldUpgrade> {
         private final Ratio killUse;
         private final String name;
         private final File image;
@@ -746,8 +779,7 @@ public class CODPlayer {
         public FieldUpgrade(String iwName, String name, String res, Ratio killUse, Property property) {
             this.name = name;
             this.killUse = killUse;
-            //this.image = new File(res + "Supers/" + iwName + ".png");
-            this.image = null;
+            this.image = new File(res + "Supers/" + iwName + ".png");
             this.property = property;
         }
 
@@ -807,6 +839,24 @@ public class CODPlayer {
         }
 
         /**
+         * Get the uses in a formatted String
+         *
+         * @return Formatted String uses
+         */
+        public String formatUses() {
+            return killUse.formatDenominator();
+        }
+
+        /**
+         * Get the kills in a formatted String
+         *
+         * @return Formatted String kills
+         */
+        public String formatKills() {
+            return killUse.formatNumerator();
+        }
+
+        /**
          * Get the name of the field upgrade
          *
          * @return Name of field upgrade
@@ -822,6 +872,15 @@ public class CODPlayer {
          */
         public int getUses() {
             return killUse.getDenominator();
+        }
+
+        /**
+         * Get the kill/use ratio
+         *
+         * @return kill/use ratio
+         */
+        public String getKillUse() {
+            return killUse.formatRatio(killUse.getRatio());
         }
 
         /**

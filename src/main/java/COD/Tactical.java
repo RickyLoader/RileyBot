@@ -25,6 +25,33 @@ public class Tactical extends Weapon {
     }
 
     /**
+     * Get the stat value in a formatted String
+     *
+     * @return Formatted String stat
+     */
+    public String formatStat() {
+        return statUse.formatNumerator();
+    }
+
+    /**
+     * Get the uses in a formatted String
+     *
+     * @return Formatted String uses
+     */
+    public String formatUses() {
+        return statUse.formatDenominator();
+    }
+
+    /**
+     * Get the stat/use ratio
+     *
+     * @return stat/use ratio
+     */
+    public String getStatUse() {
+        return statUse.formatRatio(statUse.getRatio());
+    }
+
+    /**
      * Get the stat name for a tactical equipment
      *
      * @return Stat name

@@ -91,6 +91,24 @@ public class Standard extends Weapon {
         return kd.getNumerator();
     }
 
+    /**
+     * Get the kills in a formatted String
+     *
+     * @return Formatted String kills
+     */
+    public String formatKills() {
+        return kd.formatNumerator();
+    }
+
+    /**
+     * Get the deaths in a formatted String
+     *
+     * @return Formatted String deaths
+     */
+    public String formatDeaths() {
+        return kd.formatDenominator();
+    }
+
     @Override
     public int getSortValue() {
         return getKills();
