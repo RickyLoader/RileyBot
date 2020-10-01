@@ -113,7 +113,7 @@ public class NetworkRequest {
             if(response.code() == 200 || response.code() == 201 || response.code() == 406) {
                 data = response.body().string();
             }
-            else if(response.code() == 404 || response.code() == 501 || response.code() == 500) {
+            else if(response.code() == 404 || response.code() == 501 || response.code() == 500 || response.code() == 504) {
                 data = "err";
             }
             else {
