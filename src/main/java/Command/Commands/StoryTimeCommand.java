@@ -60,7 +60,7 @@ public class StoryTimeCommand extends DiscordCommand {
      * @return Default embed builder
      */
     private EmbedBuilder getEmbedBuilder() {
-        String icon = "https://www.shortlyread.com/logo-icon-dark.png";
+        String icon = "https://i.imgur.com/CCD5ghn.png";
         return new EmbedBuilder()
                 .setThumbnail(icon)
                 .setTitle("Story Time")
