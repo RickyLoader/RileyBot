@@ -77,7 +77,10 @@ public class StoryTimeCommand extends DiscordCommand {
         EmbedBuilder builder = getEmbedBuilder();
         return builder
                 .setColor(EmbedHelper.getBlue())
-                .setDescription("One moment while I complete your story\n\n**Prompt**: " + text)
+                .setDescription("One moment while I complete your story\n\n**Prompt**: "
+                        + text
+                        + " with "
+                        + EmbedHelper.embedURL("Shortly Read", "https://www.shortlyread.com/"))
                 .build();
     }
 
