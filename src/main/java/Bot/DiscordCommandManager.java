@@ -157,6 +157,7 @@ public class DiscordCommandManager {
         addCommand(new WeatherCommand());
         addCommand(new SteakCommand());
         addCommand(new UrbanDictionaryCommand());
+        addCommand(new StoryTimeCommand());
     }
 
     /**

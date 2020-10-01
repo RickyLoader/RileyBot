@@ -223,7 +223,7 @@ public class Gunfight {
      * Remove the game message
      */
     public void deleteGame() {
-        channel.retrieveMessageById(gameID).queue(message -> message.delete().queue());
+        channel.deleteMessageById(gameID).queue();
     }
 
     /**
@@ -281,15 +281,13 @@ public class Gunfight {
      * Update the game message to display new score
      */
     private void updateMessage() {
-        channel.retrieveMessageById(gameID).queue(message -> {
-            MessageEmbed updateMessage = createGameMessage();
-            if(gameFocused()) {
-                message.editMessage(updateMessage).queue();
-            }
-            else {
-                message.delete().queue(aVoid -> sendGameMessage(updateMessage));
-            }
-        });
+        MessageEmbed updateMessage = createGameMessage();
+        if(gameFocused()) {
+            channel.editMessageById(gameID, updateMessage).queue();
+        }
+        else {
+            channel.deleteMessageById(gameID).queue(aVoid -> sendGameMessage(updateMessage));
+        }
     }
 
     /**
@@ -707,12 +705,11 @@ public class Gunfight {
     public void updateHelpMessage(MessageReaction reaction) {
         Emote react = reaction.getReactionEmote().getEmote();
         String purpose = getEmoteFunction(react);
-        channel.retrieveMessageById(gameID).queue(message -> {
-            EmbedBuilder update = buildHelpMessage();
-            update.addBlankField(false);
-            update.setFooter(purpose, react.getImageUrl());
-            message.editMessage(update.build()).queue();
-        });
+        MessageEmbed update = buildHelpMessage()
+                .addBlankField(false)
+                .setFooter(purpose, react.getImageUrl())
+                .build();
+        channel.editMessageById(gameID, update).queue();
     }
 
     /**

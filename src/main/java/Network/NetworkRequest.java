@@ -110,7 +110,7 @@ public class NetworkRequest {
             if(response.body() == null) {
                 return null;
             }
-            if(response.code() == 200 || response.code() == 201) {
+            if(response.code() == 200 || response.code() == 201 || response.code() == 406) {
                 data = response.body().string();
             }
             else if(response.code() == 404 || response.code() == 501 || response.code() == 500) {
