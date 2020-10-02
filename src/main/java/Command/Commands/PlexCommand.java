@@ -43,7 +43,7 @@ public class PlexCommand extends DiscordCommand {
                 plex.refreshData();
                 refreshing = false;
                 if(plex.libraryEmpty()) {
-                    channel.sendMessage("Plex is unavailable right now").queue();
+                    channel.sendMessage("Request to Plex timed out, try again").queue();
                     return;
                 }
             }
