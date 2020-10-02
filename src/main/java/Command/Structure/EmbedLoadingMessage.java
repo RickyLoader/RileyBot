@@ -232,7 +232,7 @@ public class EmbedLoadingMessage {
      * Edit the loading message
      */
     void updateLoadingMessage() {
-        channel.retrieveMessageById(id).queue(message -> message.editMessage(createLoadingMessage()).queue());
+        channel.editMessageById(id,createLoadingMessage()).queue();
     }
 
     /**
