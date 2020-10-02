@@ -52,17 +52,16 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
     /**
      * Complete the loading embed with an image to be used
      *
-     * @param image   to display
-     * @param message Message to display under the "Done!" loading step
+     * @param image to display
      */
-    public void completeLoading(BufferedImage image, String message) {
+    public void completeLoading(BufferedImage image) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", outputStream);
             this.image = outputStream.toByteArray();
             this.url = "attachment://image.png";
             outputStream.close();
-            super.completeLoading(message);
+            super.completeLoading(null);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -96,6 +95,6 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
             return;
         }
         getChannel().sendMessage(createLoadingMessage()).addFile(image, "image.png").queue();
-        getChannel().retrieveMessageById(getId()).queue(message -> message.delete().queue());
+        getChannel().deleteMessageById(getId()).queue();
     }
 }

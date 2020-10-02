@@ -12,9 +12,6 @@
       },
       "iw8_sn_xmike109": {
         "real_name": "Rytec AMR"
-      },
-      "iw8_sn_romeo700": {
-        "real_name": "SP-R 208"
       }
     },
     "weapon_lmg": {
@@ -184,6 +181,9 @@
       },
       "iw8_sn_sksierra": {
         "real_name": "SKS"
+      },
+      "iw8_sn_romeo700": {
+        "real_name": "SP-R 208"
       }
     },
     "weapon_melee": {

@@ -359,7 +359,6 @@ public class CombatRecord extends ImageBuilder {
                 new String[]{
                         "Fetching player data...",
                         "Building image...",
-                        "Uploading image..."
                 }
         );
         loading.showLoading();
@@ -390,9 +389,7 @@ public class CombatRecord extends ImageBuilder {
             g.drawString(name, (main.getWidth() / 2) - (g.getFontMetrics().stringWidth(name) / 2), 100);
             g.dispose();
             loading.completeStage();
-            String url = ImgurManager.uploadImage(main);
-            loading.completeStage();
-            loading.completeLoading(url);
+            loading.completeLoading(main);
         }
         catch(Exception e) {
             e.printStackTrace();
