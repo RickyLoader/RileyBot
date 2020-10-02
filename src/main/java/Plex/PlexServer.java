@@ -218,6 +218,11 @@ public class PlexServer {
             return getMovieEmbed(results[0], false);
         }
 
+        // Search the Radarr API
+        if(results.length == 0) {
+            return searchRadarr(query, idSearch, member, webhook);
+        }
+
         // Movies without a known release date should be treated as the highest date
         Arrays.sort(results, (o1, o2) -> {
             Date a = o1.getReleaseDate();
@@ -230,11 +235,6 @@ public class PlexServer {
             }
             return a.compareTo(b);
         });
-
-        // Search the Radarr API
-        if(results.length == 0) {
-            return searchRadarr(query, idSearch, member, webhook);
-        }
         return buildSearchEmbed(query, results, true);
     }
 
