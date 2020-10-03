@@ -29,25 +29,27 @@ public class SteakCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
-        try {
-            Member biggestFan = context.getMember();
-            BufferedImage fanImage = getUserAvatar(biggestFan.getUser());
-            if(fanImage == null) {
-                throw new Exception();
+        new Thread(() -> {
+            try {
+                Member biggestFan = context.getMember();
+                BufferedImage fanImage = getUserAvatar(biggestFan.getUser());
+                if(fanImage == null) {
+                    throw new Exception();
+                }
+                BufferedImage steak = ImageIO.read(new File("src/main/resources/LOL/steak.png"));
+                Graphics g = steak.getGraphics();
+                g.drawImage(fanImage, 180, 50, null);
+                g.dispose();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                ImageIO.write(steak, "png", out);
+                out.close();
+                sendMessage(channel, out.toByteArray(), biggestFan.getEffectiveName());
             }
-            BufferedImage steak = ImageIO.read(new File("src/main/resources/LOL/steak.png"));
-            Graphics g = steak.getGraphics();
-            g.drawImage(fanImage, 180, 50, null);
-            g.dispose();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(steak, "png", out);
-            out.close();
-            sendMessage(channel, out.toByteArray(), biggestFan.getEffectiveName());
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-            channel.sendMessage("Steak was too busy to take a selfie with you, sorry!").queue();
-        }
+            catch(Exception e) {
+                e.printStackTrace();
+                channel.sendMessage("Steak was too busy to take a selfie with you, sorry!").queue();
+            }
+        }).start();
     }
 
     /**
@@ -110,16 +112,24 @@ public class SteakCommand extends DiscordCommand {
             URLConnection connection = new URL(fan.getEffectiveAvatarUrl()).openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
             connection.connect();
-            BufferedImage smallAvatar = ImageIO.read(connection.getInputStream());
-
-            BufferedImage avatar = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
-            Graphics g = avatar.getGraphics();
-            g.drawImage(smallAvatar, 0, 0, 240, 240, null);
-            g.dispose();
-            return avatar;
+            return resizeAvatar(ImageIO.read(connection.getInputStream()));
         }
         catch(Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Resize the user avatar image
+     *
+     * @param avatar User Discord avatar
+     * @return Resized image
+     */
+    private BufferedImage resizeAvatar(BufferedImage avatar) {
+        BufferedImage resized = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = avatar.getGraphics();
+        g.drawImage(avatar, 0, 0, 240, 240, null);
+        g.dispose();
+        return resized;
     }
 }
