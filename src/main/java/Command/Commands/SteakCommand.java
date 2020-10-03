@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Random;
 
 /**
  * Put the user's image in a selfie with Steak!
@@ -34,12 +35,12 @@ public class SteakCommand extends DiscordCommand {
             if(fanImage == null) {
                 throw new Exception();
             }
-            BufferedImage steak = ImageIO.read(new File("src/main/resources/LOL/steak.jpg"));
+            BufferedImage steak = ImageIO.read(new File("src/main/resources/LOL/steak.png"));
             Graphics g = steak.getGraphics();
             g.drawImage(fanImage, 180, 50, null);
             g.dispose();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ImageIO.write(steak, "jpg", out);
+            ImageIO.write(steak, "png", out);
             out.close();
             sendMessage(channel, out.toByteArray(), biggestFan.getEffectiveName());
         }
@@ -63,10 +64,38 @@ public class SteakCommand extends DiscordCommand {
                 .setThumbnail(steak)
                 .setTitle(name + " - Photo with Steak")
                 .setDescription("The **GREATEST** League of Legends player in LCS history!")
-                .setFooter("I wanted a short name and steak is my favourite food - Steak", steak)
+                .setFooter(getQuote(), steak)
                 .setImage("attachment://steak.jpg")
                 .build();
         channel.sendMessage(message).addFile(steakSelfie, "steak.jpg").queue();
+    }
+
+    /**
+     * Get a famous Steak quote
+     *
+     * @return Steak quote
+     */
+    private String getQuote() {
+        String[] quotes = new String[]{
+                "I wanted a short name and steak is my favourite food - Steak",
+                "Uh it's pretty easy to go in the game knowing that i'm gonna be the only one to troll our team - Steak",
+                "Yeah so like Maple's gonna carry me no matter what - Steak",
+                "It's pretty easy yeah - Steak",
+                "I think we're gonna make it through like, I don't know, I think - Steak",
+                "They just kinda leave Steak to do whatever, most of the time he's just dead - Doublelift",
+                "We have pretty much confident in this tournament - Steak",
+                "Yeah but, hmm actually I think.. It's possible.. well the.. second to six team - Steak",
+                "Everybody has like the same skill set yeah, except for SKT1, yeah they're the best - Steak",
+                "If you count the whole region I think we might not even be better than wildcard - Steak",
+                "Uh we prepared a lot, I would say enough, yeah but um our gameplay was pretty bad - Steak",
+                "Like our communication and our team play was really really bad, so that's why we lost - Steak",
+                "I'd say we're really really good, and I hope we can show you that in a few days, yeah - Steak",
+                "I think strategicca..strateg..whatever. Strategy yeah, yeah strategy isn't that much from the coach - Steak",
+                "Um thank you for your support and I hope we do good in the next few games, yeah - Steak",
+                "Aphromoo is kinda famous for his hair, yeah but I think my hair crushes his - Steak",
+                "Best hair award, there we go, for NA, that was me. I don't know what Steak's won.. but - Aphromoo"
+        };
+        return quotes[new Random().nextInt(quotes.length)];
     }
 
     /**
