@@ -127,7 +127,7 @@ public class SteakCommand extends DiscordCommand {
      */
     private BufferedImage resizeAvatar(BufferedImage avatar) {
         BufferedImage resized = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = avatar.getGraphics();
+        Graphics g = resized.getGraphics();
         g.drawImage(avatar, 0, 0, 240, 240, null);
         g.dispose();
         return resized;
