@@ -127,7 +127,9 @@ public abstract class PageableEmbed {
                 message.addReaction(backward).queue();
                 message.addReaction(forward).queue();
             }
-            message.addReaction(reverse).queue();
+            if(items.size() > 1) {
+                message.addReaction(reverse).queue();
+            }
         });
     }
 
