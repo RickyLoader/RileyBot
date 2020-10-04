@@ -133,7 +133,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
      * @param channel Channel to find status message
      */
     private void updateStatusMessage(MessageChannel channel) {
-        channel.retrieveMessageById(id).queue(message -> message.editMessage(buildStatusMessage()).queue());
+        channel.editMessageById(id, buildStatusMessage()).queue();
     }
 
     /**
