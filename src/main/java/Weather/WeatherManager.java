@@ -89,9 +89,16 @@ public class WeatherManager {
             if(!iconTypes.containsKey(type)) {
                 System.out.println(type + " MISSING");
             }
+
+            String value = location.getString("text");
+
+            if(location.has("value")) {
+                value += "\n" + location.getString("value");
+            }
+
             builder.addField(
                     type + " " + icon,
-                    location.getString("text") + "\n" + location.getString("value"),
+                    value,
                     true
             );
         }
