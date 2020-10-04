@@ -6,7 +6,7 @@ import Command.Commands.Audio.*;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
-import Command.Commands.Lookup.CWCountdownCommand;
+import Command.Commands.CWCountdownCommand;
 import Command.Commands.Lookup.LOLLookupCommand;
 import Command.Commands.Lookup.MWLookupCommand;
 import Command.Commands.Lookup.YoutubeLookupCommand;
