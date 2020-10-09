@@ -5,7 +5,6 @@ import COD.CODPlayer.Killstreak;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
-import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import javax.imageio.ImageIO;
@@ -59,7 +58,6 @@ public class CombatRecord extends ImageBuilder {
 
             BufferedImage weaponImage = ImageIO.read(weapon.getImage());
 
-            // Draw the weapon image on to the background and write the name and kills
             g.drawImage(weaponImage, (image.getWidth() / 2) - (weaponImage.getWidth() / 2), 250, null);
             g.drawString(weapon.getName(), (image.getWidth() / 2) - (fm.stringWidth(weapon.getName()) / 2), 175);
 
@@ -208,9 +206,9 @@ public class CombatRecord extends ImageBuilder {
         try {
             image = ImageIO.read(new File((getResourcePath() + "Templates/wl_section.png")));
             Graphics g = image.getGraphics();
-            g.setFont(getGameFont());
+            g.setFont(getGameFont().deriveFont(50f));
             int x = 288;
-            int y = 175;
+            int y = 160;
             g.drawString(player.getWins(), x, y);
             y += 165;
             g.drawString(player.getLosses(), x, y);
@@ -281,9 +279,9 @@ public class CombatRecord extends ImageBuilder {
         try {
             image = ImageIO.read(new File((getResourcePath() + "Templates/kd_section.png")));
             Graphics g = image.getGraphics();
-            g.setFont(getGameFont());
-            g.drawString(String.valueOf(player.getKD()), 282, 200);
-            g.drawString(String.valueOf(player.getLongestKillStreak()), 282, 482);
+            g.setFont(getGameFont().deriveFont(50f));
+            g.drawString(String.valueOf(player.getKD()), 282, 180);
+            g.drawString(String.valueOf(player.getLongestKillStreak()), 282, 462);
             g.dispose();
         }
         catch(Exception e) {
@@ -369,8 +367,6 @@ public class CombatRecord extends ImageBuilder {
         }
         loading.completeStage();
         try {
-            setGameFont(new Font("Eurostile Next LT Pro Semibold", Font.PLAIN, 75));
-
             BufferedImage main = ImageIO.read(new File((getResourcePath() + "Templates/template.png")));
             Graphics g = main.getGraphics();
 

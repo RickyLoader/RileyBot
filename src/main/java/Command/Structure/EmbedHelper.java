@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
  * Commonly used features of an embed
  */
 public class EmbedHelper {
-
     public static int getBlue() {
         return 1942002;
     }
