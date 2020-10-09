@@ -120,7 +120,7 @@ public class BlitzCommand extends DiscordCommand {
     private MessageEmbed getErrorMessage(String query, String role) {
         return getEmbedBuilder()
                 .setColor(EmbedHelper.getRed())
-                .setDescription("No data found for **" + query.toUpperCase() + "** in **" + role + "**")
+                .setDescription("No data found for **" + query.toUpperCase() + " " + role + "**")
                 .setImage(EmbedHelper.getSpacerImage())
                 .build();
     }
