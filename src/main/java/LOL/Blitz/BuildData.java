@@ -10,6 +10,8 @@ public class BuildData {
     private final Ability[] abilityOrder;
     private final Rune[] runes;
     private final String role;
+    private final double winRate;
+    private final int games;
 
     /**
      * Create the build data
@@ -22,8 +24,10 @@ public class BuildData {
      * @param finalBuild    Final build items
      * @param abilityOrder  Abilities in order of unlock
      * @param runes         Runes
+     * @param winRate       Champion win rate in role with given build
+     * @param games         Total games that stats are based on
      */
-    public BuildData(Champion champion, String role, SummonerSpell[] spells, Item[] startingItems, Item[] buildOrder, Item[] finalBuild, int[] abilityOrder, Rune[] runes) {
+    public BuildData(Champion champion, String role, SummonerSpell[] spells, Item[] startingItems, Item[] buildOrder, Item[] finalBuild, int[] abilityOrder, Rune[] runes, double winRate, int games) {
         this.champion = champion;
         this.role = role;
         this.spells = spells;
@@ -36,6 +40,26 @@ public class BuildData {
         }
         this.abilityOrder = abilities;
         this.runes = runes;
+        this.winRate = winRate;
+        this.games = games;
+    }
+
+    /**
+     * Get the win rate
+     *
+     * @return Win rate
+     */
+    public double getWinRate() {
+        return winRate;
+    }
+
+    /**
+     * Get the number of games that Build Data is based on
+     *
+     * @return Number of games
+     */
+    public int getGames() {
+        return games;
     }
 
     /**

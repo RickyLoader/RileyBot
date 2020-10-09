@@ -56,7 +56,7 @@ public class BlitzCommand extends DiscordCommand {
         }
 
         new Thread(() -> {
-            BuildData championBuildData = blitz.getBuildInfo(champion, role);
+            BuildData championBuildData = blitz.getBuildData(champion, role);
 
             if(championBuildData == null) {
                 channel.sendMessage(getErrorMessage(champion, role)).queue();

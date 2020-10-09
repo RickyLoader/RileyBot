@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 public class BlitzImageBuilder {
@@ -69,12 +70,21 @@ public class BlitzImageBuilder {
             FontMetrics fm = g.getFontMetrics();
 
             g.drawImage(championImage, border, border, null);
+
+            int x = championImage.getWidth() + 20 + border;
+            int y = border + fm.getAscent();
+
             String championName = buildData.getChampion().getName() + " - " + buildData.getRole();
-            g.drawString(championName, championImage.getWidth() + 20 + border, border + (championImage.getHeight() / 2) - (fm.getHeight() / 2) + fm.getAscent());
+            g.drawString(championName, x, y);
+
+            g.setFont(blitzFont.deriveFont(35f));
+            fm = g.getFontMetrics();
+            String stats = new DecimalFormat("0.00% Win Rate").format(buildData.getWinRate()) + new DecimalFormat(" (#,### Games)").format(buildData.getGames());
+            g.drawString(stats, x, y + 20 + fm.getHeight());
 
             g.setFont(blitzFont.deriveFont(20f));
             fm = g.getFontMetrics();
-            int y = championImage.getHeight() + border + 20 + fm.getHeight();
+            y = championImage.getHeight() + border + 20 + fm.getHeight();
 
             g.drawString("Summoner Spells", border, y);
             g.drawImage(spellsImage, border, y + 20, null);

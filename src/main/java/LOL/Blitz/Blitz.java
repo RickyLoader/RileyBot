@@ -194,16 +194,6 @@ public class Blitz {
     }
 
     /**
-     * Get the build information for a champion
-     *
-     * @param query Champion query to get information for
-     * @param role  Role of champion
-     */
-    public BuildData getBuildInfo(String query, String role) {
-        return getBuildData(query, role);
-    }
-
-    /**
      * Get the champion data for the given query
      *
      * @param query Champion name query
@@ -214,10 +204,15 @@ public class Blitz {
         for(int i = 0; i < words.length; i++) {
             words[i] = StringUtils.capitalize(words[i]);
         }
-        return champions.getOrDefault(
-                StringUtils.join(words, ""),
-                null
-        );
+        Champion champion = champions.getOrDefault(StringUtils.join(words, ""), null);
+        if(champion == null) {
+            for(Champion c : champions.values()) {
+                if(c.getName().toLowerCase().contains(query)) {
+                    return c;
+                }
+            }
+        }
+        return champion;
     }
 
     /**
@@ -227,7 +222,7 @@ public class Blitz {
      * @param role  Champion role
      * @return Champion build data
      */
-    private BuildData getBuildData(String query, String role) {
+    public BuildData getBuildData(String query, String role) {
         Champion champion = getChampion(query);
 
         if(champion == null) {
@@ -297,7 +292,9 @@ public class Blitz {
                 parseItemList(getBuildList(stats, "most_common_core_builds")),
                 parseItemList(getBuildList(stats, "most_common_big_item_builds")),
                 abilityOrder,
-                runes.toArray(new Rune[0])
+                runes.toArray(new Rune[0]),
+                stats.getJSONObject("most_common_big_item_builds").getDouble("win_rate"),
+                stats.getJSONObject("most_common_big_item_builds").getInt("games")
         );
     }
 
