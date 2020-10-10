@@ -129,7 +129,7 @@ public class Blitz {
     }
 
     /**
-     * Get the champion data from Blitz and map champion id to champion data
+     * Get the champion data from Blitz and map champion key to champion data
      *
      * @param version Game version String
      * @return Champion id to champion data map
@@ -201,9 +201,11 @@ public class Blitz {
      */
     private Champion getChampion(String query) {
         String[] words = query.split(" ");
+
         for(int i = 0; i < words.length; i++) {
             words[i] = StringUtils.capitalize(words[i]);
         }
+
         Champion champion = champions.getOrDefault(StringUtils.join(words, ""), null);
         if(champion == null) {
             for(Champion c : champions.values()) {
