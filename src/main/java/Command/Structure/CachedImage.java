@@ -16,6 +16,7 @@ public class CachedImage {
      * @param path Path to image
      */
     public CachedImage(String path) {
+        System.out.println("Caching: " + path);
         this.image = readImage(path);
     }
 

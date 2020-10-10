@@ -237,14 +237,17 @@ public class Blitz {
             version = version.substring(0, version.lastIndexOf("."));
 
             JSONArray current = new JSONObject(getBlitzData(champion, role, version)).getJSONArray("data");
+
             if(current.isEmpty()) {
                 continue;
             }
+
             JSONObject currentData = current.getJSONObject(0);
 
             JSONObject stats = currentData.getJSONObject("stats");
             JSONObject build = stats.getJSONObject("most_common_big_item_builds");
             JSONArray items = build.isNull("build") ? null : build.getJSONArray("build");
+
             if(items == null || !(items.get(items.length() - 1) instanceof Integer)) {
                 continue;
             }
