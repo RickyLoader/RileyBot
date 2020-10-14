@@ -5,10 +5,10 @@ import org.json.JSONObject;
 
 public class LinkCommand extends DiscordCommand {
 
-    final String link;
+    private final String link;
 
-    public LinkCommand(String trigger, String desc, String helpname) {
-        super(trigger, desc, helpname);
+    public LinkCommand(String trigger, String desc, String helpName) {
+        super(trigger, desc, helpName);
         this.link = parseJSON();
     }
 
@@ -23,15 +23,10 @@ public class LinkCommand extends DiscordCommand {
     }
 
     private String parseJSON() {
-        String link = null;
-        System.out.println("Loading " + getTrigger() + "...");
-        try {
-            JSONObject o = readJSONFile("links.json").getJSONObject(getTrigger());
-            link = o.getString("link");
+        JSONObject o = readJSONFile("links.json");
+        if(o == null) {
+            return null;
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return link;
+        return o.getJSONObject(getTrigger()).getString("link");
     }
 }

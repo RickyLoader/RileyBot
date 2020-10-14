@@ -19,7 +19,7 @@ public class RS3LookupCommand extends ImageBuilderLookupCommand {
 
     @Override
     public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new Hiscores(channel, emoteHelper, "src/main/resources/Runescape/RS3/", "rs3.ttf");
+        return new Hiscores(channel, emoteHelper, "/Runescape/RS3/", "rs3.ttf");
     }
 
     @Override

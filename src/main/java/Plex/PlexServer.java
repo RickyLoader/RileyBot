@@ -1,5 +1,6 @@
 package Plex;
 
+import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
@@ -12,9 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -28,12 +26,14 @@ public class PlexServer {
     private final String helpMessage, plexIcon = "https://i.imgur.com/FdabwCm.png", radarrIcon = "https://i.imgur.com/d5p0ftd.png";
     private String plexEmote, radarrEmote, imdbEmote, facebookEmote, youtubeEmote;
     private HashMap<String, String> plexUrls;
+    private final ResourceHandler handler;
 
     /**
      * Read in the Radarr library and remember the timestamp
      */
     public PlexServer(String helpMessage) {
         this.helpMessage = helpMessage;
+        this.handler = new ResourceHandler();
         refreshData();
     }
 
@@ -498,7 +498,7 @@ public class PlexServer {
     /**
      * Hold information about a movie on Radarr
      */
-    public static class Movie {
+    public class Movie {
         private final String tmdbId, title, summary, plexURL;
         private String contentRating, tagline, director, cast, language, genre, poster, imdbId, imdbURL, trailer, facebook;
         private final Date releaseDate;
@@ -832,7 +832,9 @@ public class PlexServer {
         private String getISOEnglishName(String iso) {
             String language = iso;
             try {
-                JSONArray allLanguages = new JSONArray(new String(Files.readAllBytes(Paths.get("src/main/resources/Movie/languages.json")), StandardCharsets.UTF_8));
+                JSONArray allLanguages = new JSONArray(
+                        handler.getResourceFileAsString("/Movie/languages.json")
+                );
                 for(int i = 0; i < allLanguages.length(); i++) {
                     JSONObject lang = allLanguages.getJSONObject(i);
                     if(lang.getString("iso_639_1").equals(iso)) {

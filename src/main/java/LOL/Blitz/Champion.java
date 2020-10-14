@@ -1,7 +1,6 @@
 package LOL.Blitz;
 
-
-import Command.Structure.CachedImage;
+import Bot.ResourceHandler;
 
 import java.awt.image.BufferedImage;
 
@@ -11,7 +10,7 @@ import java.awt.image.BufferedImage;
 public class Champion {
     private final String name, id;
     private final Ability[] abilities;
-    private final CachedImage championImage;
+    private final BufferedImage championImage;
 
     /**
      * Create a champion
@@ -24,7 +23,7 @@ public class Champion {
     public Champion(String name, String id, String key, Ability[] abilities) {
         this.name = name;
         this.id = id;
-        this.championImage = new CachedImage("src/main/resources/LOL/Champions/Thumbnails/" + key + ".png");
+        this.championImage = new ResourceHandler().getImageResource("/LOL/Champions/Thumbnails/" + key + ".png");
         this.abilities = abilities;
     }
 
@@ -34,7 +33,7 @@ public class Champion {
      * @return Champion image
      */
     public BufferedImage getChampionImage() {
-        return championImage.getImage();
+        return championImage;
     }
 
     /**

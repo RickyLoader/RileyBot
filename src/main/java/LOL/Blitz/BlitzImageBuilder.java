@@ -1,35 +1,26 @@
 package LOL.Blitz;
 
+import Bot.ResourceHandler;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
+import static Command.Structure.ImageBuilder.registerFont;
+
 public class BlitzImageBuilder {
     private final Font blitzFont;
+    private final ResourceHandler handler;
+    private final BufferedImage next, abilityOrderTemplate;
 
     public BlitzImageBuilder() {
-        this.blitzFont = registerBlitzFont();
-    }
-
-    /**
-     * Register the Blitz font
-     *
-     * @return Blitz font
-     */
-    private Font registerBlitzFont() {
-        try {
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            Font blitzFont = Font.createFont(Font.TRUETYPE_FONT, new File("src/main/resources/LOL/blitz_font.ttf"));
-            ge.registerFont(blitzFont);
-            return blitzFont;
-        }
-        catch(Exception e) {
-            return null;
-        }
+        this.handler = new ResourceHandler();
+        this.blitzFont = registerFont("/LOL/blitz_font.ttf", handler);
+        this.next = handler.getImageResource("/LOL/next.png");
+        this.abilityOrderTemplate = handler.getImageResource("/LOL/Champions/Abilities/Order/ability_order.png");
     }
 
     /**
@@ -134,8 +125,11 @@ public class BlitzImageBuilder {
         int height = 232, width = 900;
         BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         try {
-            BufferedImage abilityImage = ImageIO.read(new File("src/main/resources/LOL/Champions/Abilities/Order/ability_order.png"));
+            BufferedImage abilityImage = new BufferedImage(abilityOrderTemplate.getWidth(), abilityOrderTemplate.getHeight(), abilityOrderTemplate.getType());
             Graphics g = abilityImage.getGraphics();
+            g.drawImage(abilityOrderTemplate, 0, 0, null);
+            g = abilityImage.getGraphics();
+
             HashMap<Ability, Integer> seen = new HashMap<>();
 
             int y = 74;
@@ -230,13 +224,12 @@ public class BlitzImageBuilder {
         );
 
         try {
-            BufferedImage arrow = ImageIO.read(new File("src/main/resources/LOL/next.png"));
             Graphics g = itemImage.getGraphics();
             int x = 0, y = 0;
             for(int i = 0; i < items.length; i++) {
                 g.drawImage(items[i].getItemImage(), x, y, null);
                 if(buildPath && i < items.length - 1) {
-                    g.drawImage(arrow, x + 64, y + 16, null);
+                    g.drawImage(next, x + 64, y + 16, null);
                 }
                 x += buildPath ? 96 : 74;
                 if((i + 1) % rowWidth == 0) {

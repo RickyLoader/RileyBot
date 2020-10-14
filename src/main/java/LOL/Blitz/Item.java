@@ -1,6 +1,6 @@
 package LOL.Blitz;
 
-import Command.Structure.CachedImage;
+import Bot.ResourceHandler;
 
 import java.awt.image.BufferedImage;
 
@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
  */
 public class Item {
     private final String name;
-    private final CachedImage itemImage;
+    private final BufferedImage itemImage;
 
     /**
      * Create an item
@@ -18,7 +18,7 @@ public class Item {
      * @param id   Item id - 3044
      */
     public Item(String name, String id) {
-        this.itemImage = new CachedImage("src/main/resources/LOL/Items/" + id + ".png");
+        this.itemImage = new ResourceHandler().getImageResource("/LOL/Items/" + id + ".png");
         this.name = name;
     }
 
@@ -28,7 +28,7 @@ public class Item {
      * @return Item image
      */
     public BufferedImage getItemImage() {
-        return itemImage.getImage();
+        return itemImage;
     }
 
     /**

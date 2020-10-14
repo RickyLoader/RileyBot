@@ -2,7 +2,7 @@ package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
 import COD.CombatRecord;
-import Command.Structure.CodImageBuilderCommand;
+import Command.Structure.CODImageBuilderCommand;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.entities.User;
 /**
  * Look up a Modern Warfare player and build an image with their stats
  */
-public class MWLookupCommand extends CodImageBuilderCommand {
+public class MWLookupCommand extends CODImageBuilderCommand {
 
     public MWLookupCommand() {
         super("mwlookup", "Have a gander at a player's Modern Warfare stats!");

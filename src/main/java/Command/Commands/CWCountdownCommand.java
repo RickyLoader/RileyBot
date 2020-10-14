@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
@@ -11,7 +12,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,15 +26,30 @@ import static Command.Structure.ImageBuilder.registerFont;
 public class CWCountdownCommand extends DiscordCommand {
     private long lastFetched, releaseDate;
     private final Font font;
-    private final String res = "src/main/resources/COD/CW/";
+    private final String res = "/COD/CW/";
+    private final ResourceHandler handler;
     private String type;
+    private final String[] bgImages;
 
     /**
      * Initialise release date
      */
     public CWCountdownCommand() {
         super("cold war\ncold war beta\ncold war early beta", "How long until Cold War!");
-        font = registerFont(res + "ColdWar.ttf");
+        this.handler = new ResourceHandler();
+        this.font = registerFont(res + "ColdWar.ttf", handler);
+        this.bgImages = new String[]{
+                "1.png",
+                "2.png",
+                "3.png",
+                "4.png",
+                "5.png",
+                "6.png",
+                "7.png",
+                "8.png",
+                "9.png",
+                "10.png",
+        };
     }
 
     /**
@@ -70,16 +85,6 @@ public class CWCountdownCommand extends DiscordCommand {
     }
 
     /**
-     * Get a random background image for the countdown
-     *
-     * @return Background image
-     */
-    private File getBackgroundImage() {
-        File[] dir = new File(res + "Templates/Countdown").listFiles();
-        return dir[new Random().nextInt(dir.length)];
-    }
-
-    /**
      * Build an image displaying the countdown time values
      *
      * @param countdown Countdown until release
@@ -88,7 +93,9 @@ public class CWCountdownCommand extends DiscordCommand {
     private byte[] buildImage(Countdown countdown) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            BufferedImage countdownImage = ImageIO.read(getBackgroundImage());
+            BufferedImage countdownImage = handler.getImageResource(
+                    res + "Templates/Countdown/" + bgImages[new Random().nextInt(bgImages.length)]
+            );
             Graphics g = countdownImage.getGraphics();
             g.setFont(font.deriveFont(80f));
             FontMetrics fm = g.getFontMetrics();
@@ -161,7 +168,7 @@ public class CWCountdownCommand extends DiscordCommand {
         builder.setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**");
         builder.setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War");
         builder.setColor(EmbedHelper.getOrange());
-        builder.setFooter("Try: " + getHelpName().replaceAll("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/DOATel5.png");
+        builder.setFooter("Try: " + getHelpName().replaceAll("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/s6p534X.png");
         channel.sendMessage(builder.build()).addFile(image, "countdown.jpg").queue();
     }
 

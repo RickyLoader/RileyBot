@@ -3,11 +3,11 @@ package Command.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class CodImageBuilderCommand extends ImageBuilderLookupCommand {
+public abstract class CODImageBuilderCommand extends ImageBuilderLookupCommand {
     private final List<String> platforms;
     private String platform;
 
-    public CodImageBuilderCommand(String trigger, String desc) {
+    public CODImageBuilderCommand(String trigger, String desc) {
         super(trigger, desc, "acti/battle/psn/xbox", 30);
         platforms = Arrays.asList("battle", "acti", "xbox", "psn");
     }

@@ -36,7 +36,7 @@ public class LOLLookupCommand extends ImageBuilderLookupCommand {
 
     @Override
     public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new SummonerImage(channel, emoteHelper, "src/main/resources/LOL/", "riot_font.otf");
+        return new SummonerImage(channel, emoteHelper);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package LOL.Blitz;
 
-
-import Command.Structure.CachedImage;
+import Bot.ResourceHandler;
 
 import java.awt.image.BufferedImage;
 
@@ -12,7 +11,7 @@ public class Rune {
     private final int id;
     private final String name;
     private final boolean keyRune;
-    private final CachedImage image;
+    private final BufferedImage image;
 
     /**
      * Create a rune
@@ -24,7 +23,7 @@ public class Rune {
      */
     public Rune(int id, String name, String image, boolean keyRune) {
         String filename = image.contains("/") ? (image.substring(image.lastIndexOf("/") + 1)) : image;
-        this.image = new CachedImage("src/main/resources/LOL/Summoner/Runes/" + filename);
+        this.image = new ResourceHandler().getImageResource("/LOL/Summoner/Runes/" + filename);
         this.id = id;
         this.name = name;
         this.keyRune = keyRune;
@@ -45,7 +44,7 @@ public class Rune {
      * @return Rune image
      */
     public BufferedImage getImage() {
-        return image.getImage();
+        return image;
     }
 
     /**

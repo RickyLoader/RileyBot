@@ -13,15 +13,18 @@ public class MemeCommand extends JSONListCommand {
     @Override
     public void execute(CommandContext context) {
         String[] args = context.getLowerCaseMessage().split(" ");
+
         if(!args[0].equals(getTrigger())) {
             return;
         }
 
         int quantity = args.length == 2 ? getQuantity(args[1]) : 1;
+
         if(quantity == 0) {
             context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
             return;
         }
+
         context.getMessage().delete().queue();
         int bound = Math.min(quantity, 5);
         Random rand = new Random();

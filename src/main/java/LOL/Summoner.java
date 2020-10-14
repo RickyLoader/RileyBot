@@ -1,16 +1,14 @@
 package LOL;
 
+import Bot.ResourceHandler;
 import Network.Secret;
 import Network.NetworkRequest;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
+import java.awt.image.BufferedImage;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,19 +24,22 @@ public class Summoner {
     private int level;
     final boolean exists;
     private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", urlPrefix;
-    private File profileIcon, profileBorder, profileBanner;
+    private BufferedImage profileBorder, profileIcon, profileBanner;
+    private final ResourceHandler handler;
 
     /**
      * Create a summoner
      *
-     * @param name   Summoner name
-     * @param region Summoner region
-     * @param res    Resource path
+     * @param name    Summoner name
+     * @param region  Summoner region
+     * @param res     Resource path
+     * @param handler Resource handler
      */
-    public Summoner(String name, String region, String res) {
+    public Summoner(String name, String region, String res, ResourceHandler handler) {
         this.name = name;
         this.urlPrefix = "https://" + region + ".api.riotgames.com/lol/";
         this.res = res;
+        this.handler = handler;
 
         // Create default unranked queues
         queues.put(FLEX, new RankedQueue(res, false));
@@ -69,7 +70,7 @@ public class Summoner {
      *
      * @return Profile icon border
      */
-    public File getProfileBorder() {
+    public BufferedImage getProfileBorder() {
         return profileBorder;
     }
 
@@ -91,8 +92,9 @@ public class Summoner {
             String id = summoner.getString("id");
             this.name = summoner.getString("name");
             this.level = summoner.getInt("summonerLevel");
-            this.profileIcon = new File(res + "Summoner/Icons/" + summoner.getInt("profileIconId") + ".png");
-            this.profileBorder = new File(res + "Summoner/Borders/" + roundLevel(level) + ".png");
+            this.profileIcon = handler.getImageResource(res + "Summoner/Icons/" + summoner.getInt("profileIconId") + ".png");
+            this.profileBorder = handler.getImageResource(res + "Summoner/Borders/" + roundLevel(level) + ".png");
+
             url = urlPrefix + "league/v4/entries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
             if(json != null) {
@@ -112,7 +114,7 @@ public class Summoner {
                     );
                 }
             }
-            this.profileBanner = new File(res + "Summoner/Banners/" + getHighestRank() + ".png");
+            this.profileBanner = handler.getImageResource(res + "Summoner/Banners/" + getHighestRank() + ".png");
             url = urlPrefix + "champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
             json = new NetworkRequest(url, false).get();
             if(json != null) {
@@ -140,7 +142,7 @@ public class Summoner {
      *
      * @return Profile banner outline
      */
-    public File getProfileBanner() {
+    public BufferedImage getProfileBanner() {
         return profileBanner;
     }
 
@@ -209,8 +211,8 @@ public class Summoner {
      *
      * @return Summoner profile icon
      */
-    public File getProfileIcon() {
-        return profileIcon.exists() ? profileIcon : new File(res + "Summoner/Icons/0.png");
+    public BufferedImage getProfileIcon() {
+        return profileIcon == null ? handler.getImageResource(res + "Summoner/Icons/0.png") : profileIcon;
     }
 
     /**
@@ -233,11 +235,11 @@ public class Summoner {
     /**
      * Hold information on a ranked queue
      */
-    public static class RankedQueue {
+    public class RankedQueue {
         private final Ratio winLoss;
         private final int points;
         private final String tier, rank, queue;
-        private final File helmet, banner;
+        private final BufferedImage helmet, banner;
         private boolean unranked = false;
 
         /**
@@ -257,8 +259,8 @@ public class Summoner {
             this.tier = tier;
             this.rank = rank;
             this.queue = solo ? "Solo/Duo" : "Flex";
-            this.helmet = new File(res + "Summoner/Ranked/Helmets/" + tier + "/" + rank + ".png");
-            this.banner = new File(res + "Summoner/Ranked/Banners/" + tier + ".png");
+            this.helmet = handler.getImageResource(res + "Summoner/Ranked/Helmets/" + tier + "/" + rank + ".png");
+            this.banner = handler.getImageResource(res + "Summoner/Ranked/Banners/" + tier + ".png");
         }
 
         /**
@@ -277,7 +279,7 @@ public class Summoner {
          *
          * @return Banner to display ranked stats
          */
-        public File getBanner() {
+        public BufferedImage getBanner() {
             return banner;
         }
 
@@ -286,7 +288,7 @@ public class Summoner {
          *
          * @return Ranked helmet
          */
-        public File getHelmet() {
+        public BufferedImage getHelmet() {
             return helmet;
         }
 
@@ -359,12 +361,11 @@ public class Summoner {
     /**
      * Hold information on Summoner champion stats
      */
-    public static class Champion implements Comparable<Champion> {
+    public class Champion implements Comparable<Champion> {
         private final int id, level, points;
-        private String name;
+        private String name, imagePath;
         private final String res;
-        private File image;
-        private final File masteryIcon;
+        private final String masteryIconPath;
 
         /**
          * Create a champion
@@ -379,7 +380,7 @@ public class Summoner {
             this.level = level;
             this.points = points;
             this.res = res;
-            this.masteryIcon = new File(res + "Champions/Mastery/" + level + ".png");
+            this.masteryIconPath = res + "Champions/Mastery/" + level + ".png";
             getChampionInfo();
         }
 
@@ -420,21 +421,21 @@ public class Summoner {
         }
 
         /**
-         * Get the champion loading screen image
+         * Get the champion loading screen image path
          *
-         * @return Champion loading screen image
+         * @return Champion loading screen image path
          */
-        public File getImage() {
-            return image;
+        public String getImagePath() {
+            return imagePath;
         }
 
         /**
-         * Get the champion mastery icon
+         * Get the champion mastery icon path
          *
-         * @return Mastery icon
+         * @return Mastery icon path
          */
-        public File getMasteryIcon() {
-            return masteryIcon;
+        public String getMasteryIconPath() {
+            return masteryIconPath;
         }
 
         /**
@@ -451,12 +452,14 @@ public class Summoner {
          */
         private void getChampionInfo() {
             try {
-                JSONObject champions = new JSONObject(new String(Files.readAllBytes(Paths.get(res + "Data/champions.json")), StandardCharsets.UTF_8)).getJSONObject("data");
+                JSONObject champions = new JSONObject(
+                        handler.getResourceFileAsString(res + "Data/champions.json")
+                ).getJSONObject("data");
                 for(String championName : champions.keySet()) {
                     JSONObject champion = champions.getJSONObject(championName);
                     if(champion.getString("key").equals(String.valueOf(id))) {
                         this.name = championName;
-                        this.image = new File(res + "Champions/Images/" + champion.getString("id") + ".png");
+                        this.imagePath = res + "Champions/Images/" + champion.getString("id") + ".png";
                     }
                 }
             }

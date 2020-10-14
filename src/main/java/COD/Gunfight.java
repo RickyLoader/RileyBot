@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 
 import COD.GameStatus.*;
 
@@ -23,7 +24,7 @@ public class Gunfight {
     private LinkedList<Gunfight> matchUpdateHistory;
     private ArrayList<Session> leaderboard;
 
-    // If !game message has been replaced with game summary message
+    // If game message has been replaced with game summary message
     private boolean active;
 
     // User who started game, only user allowed to register score
@@ -196,7 +197,7 @@ public class Gunfight {
             footer = "Last update at " + formatTime(lastUpdate);
         }
 
-        builder.setFooter(footer + suffix, "https://i.imgur.com/rVhdoRs.gif"); // Spinning clock gif
+        builder.setFooter(footer + suffix, "https://i.imgur.com/v2u22T6.gif"); // Spinning clock gif
         return builder.build();
     }
 
@@ -220,13 +221,6 @@ public class Gunfight {
     }
 
     /**
-     * Remove the game message
-     */
-    public void deleteGame() {
-        channel.deleteMessageById(gameID).queue();
-    }
-
-    /**
      * Check if reaction is a win or loss & update score appropriately
      *
      * @param reaction Emote reaction on game message (may be invalid)
@@ -234,17 +228,19 @@ public class Gunfight {
     public void reactionAdded(MessageReaction reaction) {
         Emote emote = reaction.getReactionEmote().getEmote();
         long currentTime = System.currentTimeMillis();
-
+        System.out.println("Gunfight received emote");
         if((emote != win && emote != loss && emote != stop && emote != undo)) {
             return;
         }
 
         if(emote == stop) {
+            System.out.println("Stopping game");
             stopGame();
             return;
         }
 
         if(emote == undo) {
+            System.out.println("Undo last score");
             undoLast();
             return;
         }
@@ -281,12 +277,18 @@ public class Gunfight {
      * Update the game message to display new score
      */
     private void updateMessage() {
+        System.out.println("Updating message");
         MessageEmbed updateMessage = createGameMessage();
         if(gameFocused()) {
+            System.out.println("Editing message");
             channel.editMessageById(gameID, updateMessage).queue();
         }
         else {
-            channel.deleteMessageById(gameID).queue(aVoid -> sendGameMessage(updateMessage));
+            System.out.println("Resending message");
+            channel.deleteMessageById(gameID).queue(aVoid -> {
+                System.out.println("Deleted last, resending");
+                sendGameMessage(updateMessage);
+            });
         }
     }
 
@@ -294,10 +296,10 @@ public class Gunfight {
      * Move the game back to the most recent message
      */
     public void relocate() {
-        if(!gameFocused()) {
-            deleteGame();
-            sendGameMessage(createGameMessage());
-        }
+        System.out.println("Relocating - Deleting message");
+        channel.deleteMessageById(gameID).queue();
+        System.out.println("Relocating - Sending message");
+        sendGameMessage(createGameMessage());
     }
 
     /**
@@ -342,6 +344,7 @@ public class Gunfight {
             message.addReaction(loss).queue();
             message.addReaction(undo).queue();
             message.addReaction(stop).queue();
+            System.out.println("Gunfight message sent");
         });
     }
 
@@ -406,7 +409,7 @@ public class Gunfight {
      */
     private void stopGame() {
         active = false;
-        deleteGame();
+        channel.deleteMessageById(gameID).queue();
 
         // Don't submit empty games
         if(wins == 0 && losses == 0) {

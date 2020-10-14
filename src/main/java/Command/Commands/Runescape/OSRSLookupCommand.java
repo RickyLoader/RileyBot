@@ -19,7 +19,7 @@ public class OSRSLookupCommand extends ImageBuilderLookupCommand {
 
     @Override
     public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new Hiscores(channel, emoteHelper, "src/main/resources/Runescape/OSRS/", "osrs.ttf");
+        return new Hiscores(channel, emoteHelper, "/Runescape/OSRS/", "osrs.ttf");
     }
 
     @Override

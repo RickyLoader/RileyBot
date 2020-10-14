@@ -1,5 +1,6 @@
 package Runescape.OSRS.Stats;
 
+import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageLoadingMessage;
@@ -8,7 +9,6 @@ import Network.NetworkRequest;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -228,9 +228,7 @@ public class Hiscores extends ImageBuilder {
         BufferedImage image = null;
         int fontSize = 65;
         try {
-            String imagePath = (getResourcePath() + "Templates/stats_template.png");
-
-            image = ImageIO.read(new File(imagePath));
+            image = getResourceHandler().getImageResource(getResourcePath() + "Templates/stats_template.png");
             Graphics g = image.getGraphics();
             Font runeFont = new Font("RuneScape Chat '07", Font.PLAIN, fontSize);
             g.setFont(runeFont);
@@ -294,7 +292,7 @@ public class Hiscores extends ImageBuilder {
 
                 for(int i = 0; i < max; i++) {
                     Boss boss = bosses.get(i);
-                    BufferedImage bossImage = ImageIO.read(boss.getImage());
+                    BufferedImage bossImage = boss.getImage();
                     g.drawImage(bossImage, bossCentre - (bossImage.getWidth() / 2), y, null);
 
                     g.setColor(Color.YELLOW);
@@ -306,7 +304,7 @@ public class Hiscores extends ImageBuilder {
                 }
             }
             else {
-                BufferedImage noBoss = ImageIO.read(new File(getResourcePath() + "Templates/no_boss.png"));
+                BufferedImage noBoss = getResourceHandler().getImageResource(getResourcePath() + "Templates/no_boss.png");
                 g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200 - 425) / 2) - (noBoss.getHeight() / 2)), null);
             }
 
@@ -319,7 +317,7 @@ public class Hiscores extends ImageBuilder {
             g.drawString(name.toUpperCase(), x, y);
 
             if(type != null) {
-                BufferedImage accountType = ImageIO.read(new File(getResourcePath() + "Accounts/" + type + ".png"));
+                BufferedImage accountType = getResourceHandler().getImageResource(getResourcePath() + "Accounts/" + type + ".png");
                 g.drawImage(accountType, x - (int) (accountType.getWidth() * 1.5), 115 - (accountType.getHeight() / 2), null);
             }
             g.dispose();
@@ -445,8 +443,8 @@ public class Hiscores extends ImageBuilder {
             return NumberFormat.getNumberInstance().format(kills) + " " + type;
         }
 
-        File getImage() {
-            return new File(getResourcePath() + "Bosses/" + filename);
+        BufferedImage getImage() {
+            return getResourceHandler().getImageResource(getResourcePath() + "Bosses/" + filename);
         }
 
         @Override

@@ -2,13 +2,13 @@ package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
 import COD.CombatRecord;
-import Command.Structure.CodImageBuilderCommand;
+import Command.Structure.CODImageBuilderCommand;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
-public class CWLookupCommand extends CodImageBuilderCommand {
+public class CWLookupCommand extends CODImageBuilderCommand {
 
     public CWLookupCommand() {
         super("cwlookup", "Have a gander at a player's Cold War stats!");

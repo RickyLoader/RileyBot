@@ -7,10 +7,8 @@ import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -22,7 +20,7 @@ public class CombatRecord extends ImageBuilder {
     private CODPlayer player;
 
     public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
-        super(channel, emoteHelper, "src/main/resources/COD/" + resourcePath + "/", fontName);
+        super(channel, emoteHelper, "/COD/" + resourcePath + "/", fontName);
     }
 
     /**
@@ -31,14 +29,14 @@ public class CombatRecord extends ImageBuilder {
      * @param type Weapon type
      * @return Background image for weapon type
      */
-    private File getWeaponImage(Weapon.TYPE type) {
+    private BufferedImage getWeaponImage(Weapon.TYPE type) {
         if(type == Weapon.TYPE.LETHAL) {
-            return new File(getResourcePath() + "Templates/lethal_section.png");
+            return getResourceHandler().getImageResource(getResourcePath() + "Templates/lethal_section.png");
         }
         if(type == Weapon.TYPE.TACTICAL) {
-            return new File((getResourcePath() + "Templates/tactical_section.png"));
+            return getResourceHandler().getImageResource(getResourcePath() + "Templates/tactical_section.png");
         }
-        return new File((getResourcePath() + "Templates/weapon_section.png"));
+        return getResourceHandler().getImageResource(getResourcePath() + "Templates/weapon_section.png");
     }
 
     /**
@@ -51,12 +49,12 @@ public class CombatRecord extends ImageBuilder {
         BufferedImage image = null;
         try {
             int x = 277;
-            image = ImageIO.read(getWeaponImage(weapon.getType()));
+            image = getWeaponImage(weapon.getType());
             Graphics g = image.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
             FontMetrics fm = g.getFontMetrics();
 
-            BufferedImage weaponImage = ImageIO.read(weapon.getImage());
+            BufferedImage weaponImage = getResourceHandler().getImageResource(weapon.getImagePath());
 
             g.drawImage(weaponImage, (image.getWidth() / 2) - (weaponImage.getWidth() / 2), 250, null);
             g.drawString(weapon.getName(), (image.getWidth() / 2) - (fm.stringWidth(weapon.getName()) / 2), 175);
@@ -133,8 +131,8 @@ public class CombatRecord extends ImageBuilder {
         BufferedImage image = null;
 
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/field_upgrade_section.png")));
-            BufferedImage superImage = ImageIO.read(fieldUpgrade.getImage());
+            image = getResourceHandler().getImageResource(getResourcePath() + "Templates/field_upgrade_section.png");
+            BufferedImage superImage = getResourceHandler().getImageResource(fieldUpgrade.getImagePath());
 
             Graphics g = image.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
@@ -204,7 +202,7 @@ public class CombatRecord extends ImageBuilder {
     private BufferedImage drawWinLoss() {
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/wl_section.png")));
+            image = getResourceHandler().getImageResource(getResourcePath() + "Templates/wl_section.png");
             Graphics g = image.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
             int x = 288;
@@ -231,14 +229,14 @@ public class CombatRecord extends ImageBuilder {
         ArrayList<CODPlayer.Commendation> commendations = player.getCommendations();
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/commendation_section.png")));
+            image = getResourceHandler().getImageResource(getResourcePath() + "Templates/commendation_section.png");
             Graphics g = image.getGraphics();
             g.setFont(getGameFont());
             int x = 100;
             for(int i = 0; i < 5; i++) {
                 g.setFont(getGameFont().deriveFont(32f));
                 CODPlayer.Commendation c = commendations.get(i);
-                BufferedImage icon = ImageIO.read(c.getImage());
+                BufferedImage icon = getResourceHandler().getImageResource(c.getImagePath());
                 g.drawImage(icon, x - (icon.getWidth() / 2), 250 - (icon.getHeight() / 2), null);
                 int titleWidth = g.getFontMetrics().stringWidth(c.getTitle()) / 2;
                 g.drawString(c.getTitle(), x - titleWidth, 155);
@@ -277,7 +275,7 @@ public class CombatRecord extends ImageBuilder {
     private BufferedImage drawKillDeath() {
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/kd_section.png")));
+            image = getResourceHandler().getImageResource(getResourcePath() + "Templates/kd_section.png");
             Graphics g = image.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
             g.drawString(String.valueOf(player.getKD()), 282, 180);
@@ -299,13 +297,15 @@ public class CombatRecord extends ImageBuilder {
         ArrayList<Killstreak> killstreaks = player.getKillstreaks();
         BufferedImage image = null;
         try {
-            image = ImageIO.read(new File((getResourcePath() + "Templates/killstreak_section.png")));
+            image = getResourceHandler().getImageResource(getResourcePath() + "Templates/killstreak_section.png");
             Graphics g = image.getGraphics();
             g.setFont(getGameFont());
             Killstreak largest = killstreaks.stream().max(Comparator.comparing(killstreak -> killstreak.getImage().getHeight())).orElse(null);
+
             if(largest == null) {
                 throw new Exception("Unable to determine largest height for killstreaks");
             }
+
             int maxHeight = largest.getImage().getHeight();
             int padding = (image.getWidth() - (280 * 5)) / 6;
             int x = padding;
@@ -367,7 +367,7 @@ public class CombatRecord extends ImageBuilder {
         }
         loading.completeStage();
         try {
-            BufferedImage main = ImageIO.read(new File((getResourcePath() + "Templates/template.png")));
+            BufferedImage main = getResourceHandler().getImageResource(getResourcePath() + "Templates/template.png");
             Graphics g = main.getGraphics();
 
             g.drawImage(drawWeapon(player.getPrimary()), 17, 119, null);

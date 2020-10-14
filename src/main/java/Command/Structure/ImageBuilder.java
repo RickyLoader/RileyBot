@@ -1,24 +1,35 @@
 package Command.Structure;
 
+import Bot.ResourceHandler;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.*;
-import java.io.File;
 
 public abstract class ImageBuilder {
     private final EmoteHelper emoteHelper;
     private final MessageChannel channel;
     private final String resourcePath;
+    private final ResourceHandler handler;
     private Font gameFont;
 
     public ImageBuilder(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         this.channel = channel;
         this.emoteHelper = emoteHelper;
         this.resourcePath = resourcePath;
-        this.gameFont = registerFont(resourcePath + fontName);
+        this.handler = new ResourceHandler();
+        this.gameFont = registerFont(resourcePath + fontName, handler);
         if(gameFont == null) {
             System.out.println("Error loading font at: " + resourcePath + fontName);
         }
+    }
+
+    /**
+     * Get the resource handler
+     *
+     * @return Resource handler
+     */
+    public ResourceHandler getResourceHandler() {
+        return handler;
     }
 
     /**
@@ -77,11 +88,14 @@ public abstract class ImageBuilder {
 
     /**
      * Register the font with the graphics environment
+     *
+     * @param fontPath Path to font relative to resource directory
+     * @param handler  Resource handler
      */
-    public static Font registerFont(String fontPath) {
+    public static Font registerFont(String fontPath, ResourceHandler handler) {
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            Font gameFont = Font.createFont(Font.TRUETYPE_FONT, new File(fontPath));
+            Font gameFont = Font.createFont(Font.TRUETYPE_FONT, handler.getResourceFileAsStream(fontPath));
             ge.registerFont(gameFont);
             return gameFont;
         }

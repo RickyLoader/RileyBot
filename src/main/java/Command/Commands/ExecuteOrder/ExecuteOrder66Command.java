@@ -29,7 +29,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
     private Executor executor;
     private String image;
     private boolean finished;
-    private EmbedLoadingMessage.Status status;
+    private Status status;
 
     public ExecuteOrder66Command() {
         super("execute order 66", "Execute targets on the kill list!");
@@ -46,6 +46,8 @@ public class ExecuteOrder66Command extends DiscordCommand {
         context.getMessage().delete().complete();
         Member instigator = context.getMember();
         targets = context.getTargets();
+        MessageChannel channel = context.getMessageChannel();
+
         if(!instigator.hasPermission(Permission.KICK_MEMBERS) && context.getSelfMember().canInteract(instigator)) {
             context.getGuild().addRoleToMember(instigator, context.getTargetRole()).queue(aVoid -> context.getMessageChannel().sendMessage(instigator.getAsMention() + " big mistake cunt, now you're on the kill list.").queue());
             return;
@@ -57,6 +59,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
 
         // Impatient, command is currently in progress
         if(executor != null) {
+            channel.sendMessage("I'm already doing that!").queue();
             return;
         }
 
@@ -77,22 +80,18 @@ public class ExecuteOrder66Command extends DiscordCommand {
         boolean play = context.playAudio(
                 executor.getTrack(),
                 false,
-                new TrackEndListener.Response() {
-                    @Override
-                    public void processFinish() {
-                        new Thread(() -> {
-                            purgeTargets(context);
-                            executor = null;
-                        }).start();
-                    }
-                }
+                () -> new Thread(() -> {
+                    purgeTargets(context);
+                    executor = null;
+                }).start()
         );
 
         if(!play) {
             executor = null;
             return;
         }
-        context.getMessageChannel().sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
+
+        channel.sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
     }
 
     /**

@@ -52,20 +52,30 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
     /**
      * Complete the loading embed with an image to be used
      *
-     * @param image to display
+     * @param image   Image to display
+     * @param message Message to display
      */
-    public void completeLoading(BufferedImage image) {
+    public void completeLoading(BufferedImage image, String message) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", outputStream);
             this.image = outputStream.toByteArray();
             this.url = "attachment://image.png";
             outputStream.close();
-            super.completeLoading(null);
+            super.completeLoading(message);
         }
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Complete the loading embed with an image to be used
+     *
+     * @param image to display
+     */
+    public void completeLoading(BufferedImage image) {
+        completeLoading(image, null);
     }
 
     /**

@@ -28,7 +28,9 @@ public class GunfightCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
+        System.out.println("Gunfight command hit");
         if(gunfight != null && gunfight.isActive()) {
+            System.out.println("Attempting to relocate Gunfight");
             gunfight.relocate();
             return;
         }
@@ -129,8 +131,10 @@ public class GunfightCommand extends DiscordCommand {
         return new EmoteListener() {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
+                System.out.println("Emote added");
                 long reactID = reaction.getMessageIdLong();
                 if(gunfight != null && reactID == gunfight.getGameId() && gunfight.isActive() && (user == gunfight.getOwner() || (user == guild.getOwner().getUser()))) {
+                    System.out.println("Sending to gunfight");
                     gunfight.reactionAdded(reaction);
                 }
             }

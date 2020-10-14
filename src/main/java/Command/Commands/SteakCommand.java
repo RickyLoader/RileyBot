@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
@@ -13,7 +14,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Random;
@@ -22,8 +22,14 @@ import java.util.Random;
  * Put the user's image in a selfie with Steak!
  */
 public class SteakCommand extends DiscordCommand {
+
+    private final ResourceHandler handler;
+    private final BufferedImage steak;
+
     public SteakCommand() {
         super("steak", "Get a photo with steak!");
+        this.handler = new ResourceHandler();
+        this.steak = handler.getImageResource("/LOL/steak.png");
     }
 
     @Override
@@ -36,8 +42,16 @@ public class SteakCommand extends DiscordCommand {
                 if(fanImage == null) {
                     throw new Exception();
                 }
-                BufferedImage steak = ImageIO.read(new File("src/main/resources/LOL/steak.png"));
+
+                BufferedImage steak = new BufferedImage(
+                        this.steak.getWidth(),
+                        this.steak.getHeight(),
+                        this.steak.getType()
+                );
+
                 Graphics g = steak.getGraphics();
+                g.drawImage(this.steak, 0, 0, null);
+
                 g.drawImage(fanImage, 180, 50, null);
                 g.dispose();
                 ByteArrayOutputStream out = new ByteArrayOutputStream();

@@ -1,7 +1,6 @@
 package LOL.Blitz;
 
-
-import Command.Structure.CachedImage;
+import Bot.ResourceHandler;
 
 import java.awt.image.BufferedImage;
 
@@ -9,7 +8,7 @@ import java.awt.image.BufferedImage;
  * Champion ability
  */
 public class Ability {
-    private final CachedImage buttonImage, abilityImage;
+    private final BufferedImage buttonImage, abilityImage;
 
     /**
      * Create an ability
@@ -18,8 +17,9 @@ public class Ability {
      * @param image      Ability image name - JaxLeapStrike.png
      */
     public Ability(String buttonText, String image) {
-        this.abilityImage = new CachedImage("src/main/resources/LOL/Champions/Abilities/" + image);
-        this.buttonImage = new CachedImage("src/main/resources/LOL/Champions/Abilities/Order/" + buttonText + ".png");
+        ResourceHandler handler = new ResourceHandler();
+        this.abilityImage = handler.getImageResource("/LOL/Champions/Abilities/" + image);
+        this.buttonImage = handler.getImageResource("/LOL/Champions/Abilities/Order/" + buttonText + ".png");
     }
 
     /**
@@ -28,7 +28,7 @@ public class Ability {
      * @return Ability button image
      */
     public BufferedImage getButtonImage() {
-        return buttonImage.getImage();
+        return buttonImage;
     }
 
     /**
@@ -37,6 +37,6 @@ public class Ability {
      * @return Ability image
      */
     public BufferedImage getAbilityImage() {
-        return abilityImage.getImage();
+        return abilityImage;
     }
 }

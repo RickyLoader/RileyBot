@@ -2,14 +2,11 @@ package COD;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-
 /**
  * Hold weapon information
  */
 public abstract class Weapon implements Comparable<Weapon> {
-    private final String name, iwName, imageTitle;
-    private final File image;
+    private final String name, iwName, imageTitle, imagePath;
     private final TYPE type;
 
     public enum TYPE {
@@ -32,7 +29,7 @@ public abstract class Weapon implements Comparable<Weapon> {
         this.iwName = iwName;
         this.name = name;
         this.type = type;
-        this.image = new File(res + "Weapons/" + category + "/" + iwName + ".png");
+        this.imagePath = res + "Weapons/" + category + "/" + iwName + ".png";
         this.imageTitle = setImageTitle(type);
     }
 
@@ -98,12 +95,12 @@ public abstract class Weapon implements Comparable<Weapon> {
     }
 
     /**
-     * Get the image of the weapon
+     * Get the image path of the weapon
      *
-     * @return Weapon image
+     * @return Weapon image path
      */
-    public File getImage() {
-        return image;
+    public String getImagePath() {
+        return imagePath;
     }
 
     /**

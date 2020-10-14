@@ -26,7 +26,7 @@ public class TweetsCommand extends PageableEmbedCommand {
                 tweets,
                 twitterManager.getThumbnail(),
                 "My Tweets",
-                "Here are my latest" + tweets.size() + " tweets",
+                "Here are my latest " + tweets.size() + " tweets",
                 new String[]{"Date", "Content"},
                 EmbedHelper.getBlue()
         );

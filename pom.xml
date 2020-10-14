@@ -8,6 +8,12 @@
     <artifactId>DiscordBot</artifactId>
     <version>1.0</version>
     <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+        <resource>
+            <directory>/src/main/resources</directory>
+        </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

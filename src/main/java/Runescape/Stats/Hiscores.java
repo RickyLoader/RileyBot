@@ -1,10 +1,10 @@
 package Runescape.Stats;
 
+import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
-import Network.ImgurManager;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONObject;
@@ -16,7 +16,6 @@ import org.jsoup.select.Elements;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -32,6 +31,8 @@ public class Hiscores extends ImageBuilder {
     private boolean timeout = false;
     private final Color orange, yellow, red, blue;
     private HCIMStatus hcimStatus;
+    private final ResourceHandler handler;
+    private final String[] bgImages;
 
     public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         super(channel, emoteHelper, resourcePath, fontName);
@@ -39,6 +40,14 @@ public class Hiscores extends ImageBuilder {
         this.yellow = new Color(EmbedHelper.getRunescapeYellow());
         this.blue = new Color(EmbedHelper.getRunescapeBlue());
         this.red = new Color(EmbedHelper.getRunescapeRed());
+        this.handler = new ResourceHandler();
+        this.bgImages = new String[]{
+                "1.png",
+                "2.png",
+                "3.png",
+                "4.png",
+                "5.png"
+        };
     }
 
     /**
@@ -121,8 +130,7 @@ public class Hiscores extends ImageBuilder {
                         "Player exists...",
                         "Checking account type...",
                         "Checking RuneMetrics...",
-                        "Building image...",
-                        "Uploading image...",
+                        "Building image..."
                 }
         );
         loading.showLoading();
@@ -142,9 +150,7 @@ public class Hiscores extends ImageBuilder {
         JSONObject runeMetrics = getRuneMetrics(encodedName);
         BufferedImage playerImage = buildImage(nameQuery, data[0], stats, clues, runeMetrics);
         loading.completeStage();
-        String url = ImgurManager.uploadImage(playerImage);
-        loading.completeStage();
-        loading.completeLoading(url, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
+        loading.completeLoading(playerImage, EmbedHelper.embedURL("View raw data", data[data.length - 1]));
     }
 
     /**
@@ -177,7 +183,11 @@ public class Hiscores extends ImageBuilder {
         if(runeMetrics != null) {
             g.drawImage(buildQuestSection(runeMetrics), overhang + skillSection.getWidth(), titleSection.getHeight() + clueSection.getHeight(), null);
         }
-        BufferedImage background = getBackgroundImage();
+
+        BufferedImage background = handler.getImageResource(
+                getResourcePath() + "Templates/Background/" + bgImages[new Random().nextInt(bgImages.length)]
+        );
+
         if(background == null) {
             return playerImage;
         }
@@ -185,22 +195,6 @@ public class Hiscores extends ImageBuilder {
         g.drawImage(playerImage, (background.getWidth() / 2) - (playerImage.getWidth() / 2), (background.getHeight() / 2) - (playerImage.getHeight() / 2), null);
         g.dispose();
         return background;
-    }
-
-    /**
-     * Get a random background image to use
-     *
-     * @return Background image
-     */
-    private BufferedImage getBackgroundImage() {
-        try {
-            File[] dir = new File(getResourcePath() + "Templates/Background").listFiles();
-            return ImageIO.read(dir[new Random().nextInt(dir.length)]);
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
@@ -212,7 +206,7 @@ public class Hiscores extends ImageBuilder {
     private BufferedImage buildClueSection(String[] clues) {
         BufferedImage clueSection = null;
         try {
-            clueSection = ImageIO.read(new File(getResourcePath() + "Templates/clue_section.png"));
+            clueSection = handler.getImageResource(getResourcePath() + "Templates/clue_section.png");
             Graphics g = clueSection.getGraphics();
             g.setFont(getGameFont().deriveFont(40f));
             g.setColor(orange);
@@ -241,7 +235,7 @@ public class Hiscores extends ImageBuilder {
         BufferedImage skillSection = null;
         try {
             setGameFont(new Font("TrajanPro-Regular", Font.PLAIN, 55));
-            skillSection = ImageIO.read(new File(getResourcePath() + "Templates/skills_section.png"));
+            skillSection = getResourceHandler().getImageResource(getResourcePath() + "Templates/skills_section.png");
             Graphics g = skillSection.getGraphics();
             g.setFont(getGameFont());
 
@@ -291,7 +285,7 @@ public class Hiscores extends ImageBuilder {
     private BufferedImage buildTitleSection(String name, String accountType) {
         BufferedImage titleSection = null;
         try {
-            titleSection = ImageIO.read(new File(getResourcePath() + "Templates/title_section.png"));
+            titleSection = handler.getImageResource(getResourcePath() + "Templates/title_section.png");
             BufferedImage avatar = ImageIO.read(new URL("http://services.runescape.com/m=avatar-rs/" + encodeName(name) + "/chat.gif"));
             BufferedImage scaledAvatar = new BufferedImage(287, 287, BufferedImage.TYPE_INT_ARGB);
             Graphics g = scaledAvatar.createGraphics();
@@ -309,7 +303,7 @@ public class Hiscores extends ImageBuilder {
             g.drawString(name.toUpperCase(), x - (width / 2), y - (fm.getHeight() / 2) + fm.getAscent());
 
             if(accountType != null) {
-                BufferedImage typeImage = ImageIO.read(new File(getResourcePath() + "Accounts/" + accountType + ".png"));
+                BufferedImage typeImage = handler.getImageResource(getResourcePath() + "Accounts/" + accountType + ".png");
                 g.drawImage(typeImage, 511 - (typeImage.getWidth() / 2), 423 - typeImage.getHeight(), null);
                 if(hcimStatus != null && hcimStatus.isDead()) {
                     if(accountType.equals("hardcore")) {
@@ -318,7 +312,7 @@ public class Hiscores extends ImageBuilder {
                         g.drawLine(x - (width / 2), y, x + (width / 2), y);
                     }
 
-                    BufferedImage deathSection = ImageIO.read(new File(getResourcePath() + "Templates/death_section.png"));
+                    BufferedImage deathSection = getResourceHandler().getImageResource(getResourcePath() + "Templates/death_section.png");
                     g = deathSection.getGraphics();
                     g.setFont(getGameFont().deriveFont(20f));
                     fm = g.getFontMetrics();
@@ -370,7 +364,7 @@ public class Hiscores extends ImageBuilder {
             double notStarted = runeMetrics.getDouble("questsnotstarted");
             double started = runeMetrics.getDouble("questsstarted");
             double total = completed + notStarted + started;
-            questSection = ImageIO.read(new File(getResourcePath() + "Templates/quest_section.png"));
+            questSection = handler.getImageResource(getResourcePath() + "Templates/quest_section.png");
             Graphics2D g = (Graphics2D) questSection.getGraphics();
             g.setStroke(new BasicStroke(80f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

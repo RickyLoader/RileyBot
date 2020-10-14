@@ -3,29 +3,27 @@ package Command.Structure;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class VariableLinkCommand extends DiscordCommand {
-    private final HashMap<String, String> versions = new HashMap<>();
+    private final HashMap<String, String> versions;
 
     public VariableLinkCommand(String[] variations, String desc) {
         super(StringUtils.join(variations, "\n"), desc);
-        parseJSON(variations);
+        this.versions = parseJSON(variations);
     }
 
-    private void parseJSON(String[] variations) {
-        System.out.println("Loading " + Arrays.toString(variations) + "...");
-        try {
-            JSONObject o = readJSONFile("links.json");
-            for(String trigger : variations) {
-                JSONObject command = o.getJSONObject(trigger);
-                versions.put(trigger, command.getString("link"));
-            }
+    private HashMap<String, String> parseJSON(String[] variations) {
+        HashMap<String, String> versions = new HashMap<>();
+        JSONObject o = readJSONFile("links.json");
+        if(o == null) {
+            return versions;
         }
-        catch(Exception e) {
-            e.printStackTrace();
+        for(String trigger : variations) {
+            JSONObject command = o.getJSONObject(trigger);
+            versions.put(trigger, command.getString("link"));
         }
+        return versions;
     }
 
     @Override

@@ -1,18 +1,15 @@
 package COD;
 
+import Bot.ResourceHandler;
 import Network.NetworkRequest;
 import Network.NetworkInfo;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,12 +25,14 @@ public class CODPlayer {
     private FieldUpgrade fieldUpgrade;
     private ArrayList<Killstreak> killstreaks;
     private ArrayList<Commendation> commendations;
+    private final ResourceHandler handler;
 
-    public CODPlayer(String name, String platform, String endpoint, String res) {
+    public CODPlayer(String name, String platform, String endpoint, String res, ResourceHandler handler) {
         this.name = name;
         this.platform = platform;
         this.endpoint = endpoint;
-        this.res = "src/main/resources/COD/" + res + "/";
+        this.res = "/COD/" + res + "/";
+        this.handler = handler;
         this.data = fetchPlayerData();
     }
 
@@ -98,12 +97,11 @@ public class CODPlayer {
      * @return JSON object of file
      */
     JSONObject readJSONFile(String filename) {
-        try {
-            return new JSONObject(new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8));
-        }
-        catch(Exception e) {
+        String text = new ResourceHandler().getResourceFileAsString(filename);
+        if(text == null) {
             return null;
         }
+        return new JSONObject(text);
     }
 
     /**
@@ -569,8 +567,7 @@ public class CODPlayer {
      */
     public static class Commendation implements Comparable<Commendation> {
         private final int quantity;
-        private final String title, desc;
-        private final File image;
+        private final String title, desc, imagePath;
 
         /**
          * Create a commendation
@@ -585,16 +582,16 @@ public class CODPlayer {
             this.title = title;
             this.desc = desc;
             this.quantity = quantity;
-            this.image = new File(res + "Accolades/" + iwName + ".png");
+            this.imagePath = res + "Accolades/" + iwName + ".png";
         }
 
         /**
-         * Get the image of the commendation
+         * Get the image path of the commendation
          *
-         * @return Commendation image
+         * @return Commendation image path
          */
-        public File getImage() {
-            return image;
+        public String getImagePath() {
+            return imagePath;
         }
 
         /**
@@ -645,10 +642,10 @@ public class CODPlayer {
     /**
      * Hold killstreak information
      */
-    public static class Killstreak implements Comparable<Killstreak> {
+    public class Killstreak implements Comparable<Killstreak> {
         private final Ratio statUse;
         private final String name, statName;
-        private final File image;
+        private final BufferedImage image;
 
         /**
          * Create a killstreak
@@ -663,7 +660,7 @@ public class CODPlayer {
             this.name = name;
             this.statName = statName;
             this.statUse = statUse;
-            this.image = new File(res + "Killstreaks/" + iwName + ".png");
+            this.image = handler.getImageResource(res + "Killstreaks/" + iwName + ".png");
         }
 
         /**
@@ -690,12 +687,7 @@ public class CODPlayer {
          * @return Killstreak image
          */
         public BufferedImage getImage() {
-            try {
-                return ImageIO.read(image);
-            }
-            catch(IOException e) {
-                return null;
-            }
+            return image;
         }
 
         /**
@@ -763,8 +755,7 @@ public class CODPlayer {
 
     public static class FieldUpgrade implements Comparable<FieldUpgrade> {
         private final Ratio killUse;
-        private final String name;
-        private final File image;
+        private final String name, imagePath;
         private final Property property;
 
         /**
@@ -779,17 +770,17 @@ public class CODPlayer {
         public FieldUpgrade(String iwName, String name, String res, Ratio killUse, Property property) {
             this.name = name;
             this.killUse = killUse;
-            this.image = new File(res + "Supers/" + iwName + ".png");
+            this.imagePath = res + "Supers/" + iwName + ".png";
             this.property = property;
         }
 
         /**
-         * Get the field upgrade image
+         * Get the field upgrade image path
          *
-         * @return Field upgrade image
+         * @return Field upgrade image path
          */
-        public File getImage() {
-            return image;
+        public String getImagePath() {
+            return imagePath;
         }
 
         /**

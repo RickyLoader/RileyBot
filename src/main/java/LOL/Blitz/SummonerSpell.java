@@ -1,6 +1,6 @@
 package LOL.Blitz;
 
-import Command.Structure.CachedImage;
+import Bot.ResourceHandler;
 
 import java.awt.image.BufferedImage;
 
@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
  */
 public class SummonerSpell {
     private final String name;
-    private final CachedImage spellImage;
+    private final BufferedImage spellImage;
 
     /**
      * Create a summoner spell
@@ -18,7 +18,7 @@ public class SummonerSpell {
      * @param key  Spell key - SummonerHaste
      */
     public SummonerSpell(String name, String key) {
-        this.spellImage = new CachedImage("src/main/resources/LOL/Summoner/Spells/" + key + ".png");
+        this.spellImage = new ResourceHandler().getImageResource("/LOL/Summoner/Spells/" + key + ".png");
         this.name = name;
     }
 
@@ -28,7 +28,7 @@ public class SummonerSpell {
      * @return Spell image
      */
     public BufferedImage getSpellImage() {
-        return spellImage.getImage();
+        return spellImage;
     }
 
     /**

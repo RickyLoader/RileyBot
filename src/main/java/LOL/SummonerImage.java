@@ -3,13 +3,10 @@ package LOL;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
-import Network.ImgurManager;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 
 public class SummonerImage extends ImageBuilder {
@@ -18,13 +15,11 @@ public class SummonerImage extends ImageBuilder {
     /**
      * Initialise the class for building a summoner image
      *
-     * @param channel      Channel to send built image to
-     * @param emoteHelper  Emote helper
-     * @param resourcePath Path to resources used by class
-     * @param fontName     Name of font
+     * @param channel     Channel to send built image to
+     * @param emoteHelper Emote helper
      */
-    public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
-        super(channel, emoteHelper, resourcePath, fontName);
+    public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper) {
+        super(channel, emoteHelper, "/LOL/", "riot_font.otf");
     }
 
     /**
@@ -48,18 +43,17 @@ public class SummonerImage extends ImageBuilder {
                 new String[]{
                         "Fetching summoner data...",
                         "Building image...",
-                        "Uploading image..."
                 }
         );
         loading.showLoading();
-        this.summoner = new Summoner(nameQuery, apiRegion, getResourcePath());
+        this.summoner = new Summoner(nameQuery, apiRegion, getResourcePath(), getResourceHandler());
         if(!summoner.exists()) {
             loading.failLoading("That summoner doesn't exist  on the " + displayRegion + " server cunt");
             return;
         }
         loading.completeStage();
         try {
-            BufferedImage bg = ImageIO.read(new File(getResourcePath() + "map.png"));
+            BufferedImage bg = getResourceHandler().getImageResource(getResourcePath() + "map.png");
             Graphics g = bg.getGraphics();
             BufferedImage profileBanner = buildProfileBanner();
             if(profileBanner == null) {
@@ -101,9 +95,7 @@ public class SummonerImage extends ImageBuilder {
             g.drawImage(flexQueue, x, y, null);
 
             loading.completeStage();
-            String url = ImgurManager.uploadImage(bg);
-            loading.completeStage();
-            loading.completeLoading(url);
+            loading.completeLoading(bg);
             g.dispose();
         }
         catch(Exception e) {
@@ -119,8 +111,8 @@ public class SummonerImage extends ImageBuilder {
      */
     private BufferedImage buildRankedImage(Summoner.RankedQueue queue) {
         try {
-            BufferedImage bg = ImageIO.read(queue.getBanner());
-            BufferedImage helmet = ImageIO.read(queue.getHelmet());
+            BufferedImage bg = queue.getBanner();
+            BufferedImage helmet = queue.getHelmet();
             Graphics g = bg.getGraphics();
             g.setFont(getGameFont().deriveFont(30f));
             FontMetrics fm = g.getFontMetrics();
@@ -169,8 +161,8 @@ public class SummonerImage extends ImageBuilder {
     private BufferedImage buildChampionImage(Summoner.Champion champion) {
         BufferedImage championImage = null;
         try {
-            championImage = ImageIO.read(champion.getImage());
-            BufferedImage masteryIcon = ImageIO.read(champion.getMasteryIcon());
+            championImage = getResourceHandler().getImageResource(champion.getImagePath());
+            BufferedImage masteryIcon = getResourceHandler().getImageResource(champion.getMasteryIconPath());
             Graphics g = championImage.getGraphics();
             g.setFont(getGameFont().deriveFont(35f));
             FontMetrics fm = g.getFontMetrics();
@@ -204,8 +196,8 @@ public class SummonerImage extends ImageBuilder {
     private BufferedImage buildProfileIcon() {
         BufferedImage profileIcon = null;
         try {
-            profileIcon = ImageIO.read(summoner.getProfileIcon());
-            BufferedImage borderOutline = ImageIO.read(summoner.getProfileBorder());
+            profileIcon = summoner.getProfileIcon();
+            BufferedImage borderOutline = summoner.getProfileBorder();
             Graphics g = profileIcon.getGraphics();
             g.drawImage(borderOutline, getCenterX(profileIcon, borderOutline), getCenterY(profileIcon, borderOutline), null);
         }
@@ -223,10 +215,10 @@ public class SummonerImage extends ImageBuilder {
     private BufferedImage buildProfileBanner() {
         BufferedImage banner = null;
         try {
-            banner = ImageIO.read(summoner.getProfileBanner());
+            banner = summoner.getProfileBanner();
             BufferedImage profileIcon = buildProfileIcon();
-            BufferedImage levelCircle = ImageIO.read(new File(getResourcePath() + "Summoner/Banners/level_circle.png"));
-            BufferedImage borderOutline = ImageIO.read(summoner.getProfileBorder());
+            BufferedImage levelCircle = getResourceHandler().getImageResource(getResourcePath() + "Summoner/Banners/level_circle.png");
+            BufferedImage borderOutline = summoner.getProfileBorder();
 
             Graphics g = levelCircle.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
