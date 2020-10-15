@@ -203,7 +203,7 @@ public class Hangman {
                 .stream()
                 .map(e -> {
                     String guess = e.toUpperCase();
-                    if(e.length() == 1 && secretWordMap.containsKey(e.charAt(0))) {
+                    if((e.length() == 1 && secretWordMap.containsKey(e.charAt(0))) || e.equals(secretWord)) {
                         return "**" + guess + "**";
                     }
                     return "~~" + guess + "~~";
@@ -265,13 +265,13 @@ public class Hangman {
             return;
         }
 
-        guesses.add(guess);
-
         if(guess.length() == 1) {
+            guesses.add(guess);
             guessCharacter(guess.charAt(0));
             updateGame();
         }
         else if(guessWord(guess, player)) {
+            guesses.add(guess);
             updateGame();
         }
     }
