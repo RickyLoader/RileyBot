@@ -162,7 +162,7 @@ public class Hangman {
      */
     private MessageEmbed buildGameMessage() {
         return new EmbedBuilder()
-                .setTitle(owner.getEffectiveName() + " | Hangman - " + getGameStatus())
+                .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
                 .setFooter("Try: " + helpMessage, EmbedHelper.getClock())
                 .setThumbnail("https://i.imgur.com/SyNTdci.png")
                 .setImage("attachment://image.png")

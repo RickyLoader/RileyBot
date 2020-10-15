@@ -1,23 +1,53 @@
 package Command.Commands;
 
+import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Hangman.Hangman;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Play Hangman! Fun!
  */
 public class HangmanCommand extends DiscordCommand {
     private final HashMap<MessageChannel, Hangman> hangmanGames;
+    private final HashSet<String> dictionary;
+    private final int MIN_LENGTH = 5, MAX_LENGTH = 25;
 
     public HangmanCommand() {
         super("hangman start [word]\nhangman guess [word/letter]\nhangman hint\nhangman stop", "Play hangman!");
         this.hangmanGames = new HashMap<MessageChannel, Hangman>();
+        this.dictionary = parseDictionary();
     }
+
+    /**
+     * Parse Webster's English dictionary in to a HashSet
+     *
+     * @return English Dictionary in HashSet
+     */
+    private HashSet<String> parseDictionary() {
+        System.out.println("Parsing Webster's English dictionary...");
+        JSONObject data = new JSONObject(
+                new ResourceHandler().getResourceFileAsString("/Hangman/dictionary.json")
+        );
+        HashSet<String> dictionary = new HashSet<>();
+        for(String word : data.keySet()) {
+            if(invalidInput(word)) {
+                continue;
+            }
+            dictionary.add(word.toLowerCase());
+        }
+        return dictionary;
+    }
+
 
     @Override
     public void execute(CommandContext context) {
@@ -68,8 +98,29 @@ public class HangmanCommand extends DiscordCommand {
                     }
                     finalGame.getHint(player);
                     break;
+                case "ai":
+                    if(finalGame.isRunning()) {
+                        channel.sendMessage(player.getAsMention() + " Stop the current game if you want to play Hangman with me cunt").queue();
+                        return;
+                    }
+                    finalGame.startGame(channel, getRandomWord(), context.getSelfMember());
+                    break;
             }
         }).start();
+    }
+
+    /**
+     * Get a random word from the dictionary for playing
+     * Hangman with RileyBot
+     *
+     * @return Random word within MIN_LENGTH & MAX_LENGTH
+     */
+    private String getRandomWord() {
+        ArrayList<String> possibilities = dictionary
+                .stream()
+                .filter(word -> word.length() >= MIN_LENGTH && word.length() <= MAX_LENGTH)
+                .collect(Collectors.toCollection(ArrayList::new));
+        return possibilities.get(new Random().nextInt(possibilities.size()));
     }
 
     /**
@@ -123,13 +174,13 @@ public class HangmanCommand extends DiscordCommand {
 
         if(invalidInput(word)) {
             channel.sendMessage(
-                    player.getAsMention() + " Input must be one word, using only the alphabet."
+                    player.getAsMention() + " Input must be a one word, using only the alphabet."
             ).queue();
             return;
         }
 
-        if(word.length() < 5 || word.length() > 25) {
-            channel.sendMessage(player.getAsMention() + " Minimum of 5 / Maximum of 25 characters").queue();
+        if(word.length() < MIN_LENGTH || word.length() > MAX_LENGTH) {
+            channel.sendMessage(player.getAsMention() + " Minimum of " + MIN_LENGTH + " / Maximum of " + MAX_LENGTH + " characters").queue();
             return;
         }
 
