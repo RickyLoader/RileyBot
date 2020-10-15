@@ -159,6 +159,7 @@ public class DiscordCommandManager {
         addCommand(new UrbanDictionaryCommand());
         addCommand(new StoryTimeCommand());
         addCommand(new BlitzCommand());
+        addCommand(new HangmanCommand());
     }
 
     /**

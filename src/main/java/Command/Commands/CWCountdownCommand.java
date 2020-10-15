@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
 
 import static Command.Structure.ImageBuilder.registerFont;
 
@@ -63,11 +64,13 @@ public class CWCountdownCommand extends DiscordCommand {
         Calendar calendar = Calendar.getInstance();
         switch(context.getLowerCaseMessage()) {
             case "cold war beta":
+                calendar.setTimeZone(TimeZone.getTimeZone("ET"));
                 calendar.set(2020, Calendar.OCTOBER, 17, 0, 0, 0);
                 type = "PC open beta";
                 break;
             case "cold war early beta":
-                calendar.set(2020, Calendar.OCTOBER, 15, 0, 0, 0);
+                calendar.setTimeZone(TimeZone.getTimeZone("ET"));
+                calendar.set(2020, Calendar.OCTOBER, 15, 13, 0, 0);
                 type = "PC early beta";
                 break;
             case "cold war":

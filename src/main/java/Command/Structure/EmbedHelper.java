@@ -131,4 +131,13 @@ public class EmbedHelper {
     public static String embedURL(String text, String url) {
         return "[" + text + "](" + url + ")";
     }
+
+    /**
+     * Get the spinning clock gif
+     *
+     * @return Spinning clock gif
+     */
+    public static String getClock() {
+        return "https://i.imgur.com/v2u22T6.gif";
+    }
 }

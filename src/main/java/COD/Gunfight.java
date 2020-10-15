@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Consumer;
 
 import COD.GameStatus.*;
 
@@ -197,7 +196,7 @@ public class Gunfight {
             footer = "Last update at " + formatTime(lastUpdate);
         }
 
-        builder.setFooter(footer + suffix, "https://i.imgur.com/v2u22T6.gif"); // Spinning clock gif
+        builder.setFooter(footer + suffix, EmbedHelper.getClock());
         return builder.build();
     }
 
@@ -396,12 +395,12 @@ public class Gunfight {
     }
 
     /**
-     * Get the thumbnail used in the game message
+     * Get the default price thumbnail used in the game message
      *
      * @return URL of thumbnail
      */
     public static String getThumb() {
-        return "https://bit.ly/2YTzfTQ"; // Default price
+        return "https://bit.ly/2YTzfTQ";
     }
 
     /**
