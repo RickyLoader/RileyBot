@@ -23,7 +23,7 @@ public class HangmanCommand extends DiscordCommand {
     private final int MIN_LENGTH = 5, MAX_LENGTH = 25;
 
     public HangmanCommand() {
-        super("hangman start [word]\nhangman guess [word/letter]\nhangman hint\nhangman stop", "Play hangman!");
+        super("hangman start [word]\nhangman guess [word/letter]\nhangman hint\nhangman stop\nhangman ai", "Play hangman!");
         this.hangmanGames = new HashMap<MessageChannel, Hangman>();
         this.dictionary = parseDictionary();
     }
