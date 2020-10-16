@@ -167,7 +167,10 @@ public class Hangman {
                 .setThumbnail("https://i.imgur.com/SyNTdci.png")
                 .setImage("attachment://image.png")
                 .setColor(getColour())
-                .setDescription("\n**Guesses**: " + formatGuesses() + "\n**Hints**: " + currentHints + "/" + MAX_HINTS)
+                .setDescription(
+                        "\n**Guesses**: " + formatGuesses() + "\n**Hints**: "
+                                + (hints.size() == 1 ? "No hints available for the final character " : currentHints + "/" + MAX_HINTS)
+                )
                 .build();
     }
 
@@ -209,10 +212,6 @@ public class Hangman {
                     return "~~" + guess + "~~";
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
-
-        if(guesses.size() == 1) {
-            return "Final letter - No guesses allowed!";
-        }
         return guesses.isEmpty() ? "None!" : StringUtils.join(guesses, ", ") + " (" + guesses.size() + ")";
     }
 
