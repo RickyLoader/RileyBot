@@ -209,6 +209,10 @@ public class Hangman {
                     return "~~" + guess + "~~";
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
+
+        if(guesses.size() == 1) {
+            return "Final letter - No guesses allowed!";
+        }
         return guesses.isEmpty() ? "None!" : StringUtils.join(guesses, ", ") + " (" + guesses.size() + ")";
     }
 
@@ -354,6 +358,11 @@ public class Hangman {
             channel.sendMessage(
                     player.getAsMention() + " You've already exceeded the maximum of " + MAX_HINTS + " hints, time to use your brain"
             ).queue();
+            return;
+        }
+
+        if(hints.size() == 1) {
+            channel.sendMessage(player.getAsMention() + " NO, Use your brain for the last letter").queue();
             return;
         }
 
