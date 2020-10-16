@@ -286,6 +286,7 @@ public class Hangman {
             currentFails++;
             return;
         }
+        hints.remove(String.valueOf(guess));
         addCharacterToGuess(guess);
     }
 
