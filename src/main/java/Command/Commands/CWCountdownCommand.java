@@ -7,6 +7,7 @@ import Command.Structure.EmbedHelper;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -62,15 +63,16 @@ public class CWCountdownCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
         Calendar calendar = Calendar.getInstance();
+        TimeZone timeZone = TimeZone.getDefault();
         switch(context.getLowerCaseMessage()) {
             case "cold war beta":
-                calendar.setTimeZone(TimeZone.getTimeZone("ET"));
-                calendar.set(2020, Calendar.OCTOBER, 17, 0, 0, 0);
+                timeZone = TimeZone.getTimeZone("America/Los_Angeles");
+                calendar.set(2020, Calendar.OCTOBER, 17, 10, 0, 0);
                 type = "PC open beta";
                 break;
             case "cold war early beta":
-                calendar.setTimeZone(TimeZone.getTimeZone("ET"));
-                calendar.set(2020, Calendar.OCTOBER, 15, 13, 0, 0);
+                timeZone = TimeZone.getTimeZone("America/Los_Angeles");
+                calendar.set(2020, Calendar.OCTOBER, 15, 10, 0, 0);
                 type = "PC early beta";
                 break;
             case "cold war":
@@ -81,6 +83,7 @@ public class CWCountdownCommand extends DiscordCommand {
                 channel.sendMessage(getHelpNameCoded()).queue();
                 return;
         }
+        calendar.setTimeZone(timeZone);
         releaseDate = calendar.getTimeInMillis();
         lastFetched = Calendar.getInstance().getTimeInMillis();
         Countdown countdown = getCountdown(lastFetched);
@@ -165,14 +168,15 @@ public class CWCountdownCommand extends DiscordCommand {
      * @param released Game has released
      */
     private void buildCountdownEmbed(MessageChannel channel, byte[] image, boolean released) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setImage("attachment://countdown.jpg");
-        builder.setThumbnail("https://i.imgur.com/R1YXMmB.png");
-        builder.setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**");
-        builder.setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War");
-        builder.setColor(EmbedHelper.getOrange());
-        builder.setFooter("Try: " + getHelpName().replaceAll("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/s6p534X.png");
-        channel.sendMessage(builder.build()).addFile(image, "countdown.jpg").queue();
+        MessageEmbed embed = new EmbedBuilder()
+                .setImage("attachment://countdown.jpg")
+                .setThumbnail("https://i.imgur.com/R1YXMmB.png")
+                .setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**")
+                .setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War")
+                .setColor(EmbedHelper.getOrange())
+                .setFooter("Try: " + getHelpName().replace("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/s6p534X.png")
+                .build();
+        channel.sendMessage(embed).addFile(image, "countdown.jpg").queue();
     }
 
     @Override

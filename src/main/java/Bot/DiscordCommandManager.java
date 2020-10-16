@@ -160,6 +160,7 @@ public class DiscordCommandManager {
         addCommand(new StoryTimeCommand());
         addCommand(new BlitzCommand());
         addCommand(new HangmanCommand());
+        addCommand(new FBICommand());
     }
 
     /**

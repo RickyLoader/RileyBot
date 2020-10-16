@@ -38,7 +38,7 @@ public class DiscordBot {
                             GatewayIntent.GUILD_EMOJIS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS
                     )
-                    .setActivity(Activity.watching("the weather"))
+                    .setActivity(Activity.watching("the Hangman championship"))
                     .addEventListeners(new Listener())
                     .build();
         }
