@@ -164,7 +164,7 @@ public class Hangman {
         return new EmbedBuilder()
                 .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
                 .setFooter("Try: " + helpMessage, EmbedHelper.getClock())
-                .setThumbnail("https://i.imgur.com/SyNTdci.png")
+                .setThumbnail("https://i.imgur.com/5kyZ42Q.png")
                 .setImage("attachment://image.png")
                 .setColor(getColour())
                 .setDescription(
