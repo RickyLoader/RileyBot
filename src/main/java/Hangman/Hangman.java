@@ -320,6 +320,7 @@ public class Hangman {
         }
         else {
             currentGuess = guess;
+            hints = new ArrayList<>();
         }
         return true;
     }
