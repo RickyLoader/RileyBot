@@ -89,7 +89,7 @@ public class Listener extends ListenerAdapter {
     }
 
     /**
-     * Post a helpful message containing 5 random commands that the bot can do
+     * Post a helpful message containing 3 random commands that the bot can do
      *
      * @param self      Bot member
      * @param newMember New member
@@ -102,7 +102,7 @@ public class Listener extends ListenerAdapter {
         builder.setThumbnail(self.getUser().getAvatarUrl());
         builder.setDescription("Here's some stuff I can do " + newMember.getAsMention() + ", now fuck off.");
 
-        DiscordCommand[] random = commandManager.pickRandomCommands(5);
+        DiscordCommand[] random = commandManager.pickRandomCommands(3);
 
 
         for(int i = 0; i < random.length; i++) {
