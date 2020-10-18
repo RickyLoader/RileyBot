@@ -23,7 +23,7 @@ public class HangmanCommand extends DiscordCommand {
     private final int MIN_LENGTH = 5, MAX_LENGTH = 25;
 
     public HangmanCommand() {
-        super("hangman start [word]\nhangman guess [word/letter]\nhangman hint\nhangman stop\nhangman ai", "Play hangman!");
+        super("hm start [word]\nhm guess [word/letter]\nhm hint\nhm stop\nhm ai", "Play hangman!");
         this.hangmanGames = new HashMap<MessageChannel, Hangman>();
         this.dictionary = parseDictionary();
     }
@@ -53,8 +53,14 @@ public class HangmanCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
         Member player = context.getMember();
+        String content = context.getLowerCaseMessage();
 
-        String message = context.getLowerCaseMessage().replaceFirst("hangman", "").trim();
+        if(content.startsWith("hangman")) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
+        String message = content.replaceFirst("hm", "").trim();
         String op = message.split(" ")[0];
 
         if(message.isEmpty()) {
@@ -199,6 +205,6 @@ public class HangmanCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query) {
-        return query.startsWith("hangman");
+        return query.startsWith("hm") || query.startsWith("hangman");
     }
 }

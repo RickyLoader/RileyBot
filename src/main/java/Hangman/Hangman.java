@@ -169,7 +169,7 @@ public class Hangman {
                 .setColor(getColour())
                 .setDescription(
                         "\n**Guesses**: " + formatGuesses() + "\n**Hints**: "
-                                + (hints.size() == 1 ? "No hints available for the final character " : currentHints + "/" + MAX_HINTS)
+                                + ((hints.size() == 1 && running) ? "No hints available for the final character " : currentHints + "/" + MAX_HINTS)
                 )
                 .build();
     }
