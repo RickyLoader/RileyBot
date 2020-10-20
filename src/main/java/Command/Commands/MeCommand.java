@@ -32,7 +32,7 @@ public class MeCommand extends DiscordCommand {
         boolean first = true;
         JSONObject data = new JSONObject(json);
         for(String command : data.keySet()) {
-            if(data.isNull(command)){
+            if(data.isNull(command)) {
                 continue;
             }
             String value = data.getString(command);
@@ -47,8 +47,6 @@ public class MeCommand extends DiscordCommand {
             builder.addBlankField(true);
             builder.addField("\u200e", value, true);
         }
-
-
         context.getMessageChannel().sendMessage(builder.build()).queue();
     }
 }
