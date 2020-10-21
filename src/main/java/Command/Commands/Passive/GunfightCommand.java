@@ -4,7 +4,6 @@ import Command.Structure.EmoteListener;
 import COD.Gunfight;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageReaction;
@@ -28,13 +27,20 @@ public class GunfightCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-        System.out.println("Gunfight command hit");
         if(gunfight != null && gunfight.isActive()) {
-            System.out.println("Attempting to relocate Gunfight");
-            gunfight.relocate();
-            return;
+            if(System.currentTimeMillis() - gunfight.getLastUpdate() >= 3600000) {
+                gunfight = null;
+            }
+            else {
+                gunfight.relocate();
+                return;
+            }
         }
-        addEmoteListener(context.getJDA());
+
+        if(this.listener == null) {
+            this.listener = getEmoteListener();
+            context.getJDA().addEventListener(this.listener);
+        }
 
         if(context.getLowerCaseMessage().equals("gunfight!")) {
             startNormalGame(context);
@@ -131,26 +137,12 @@ public class GunfightCommand extends DiscordCommand {
         return new EmoteListener() {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                System.out.println("Emote added");
                 long reactID = reaction.getMessageIdLong();
                 if(gunfight != null && reactID == gunfight.getGameId() && gunfight.isActive() && (user == gunfight.getOwner() || (user == guild.getOwner().getUser()))) {
-                    System.out.println("Sending to gunfight");
                     gunfight.reactionAdded(reaction);
                 }
             }
         };
-    }
-
-    /**
-     * Add an emote listener to listen for gunfight emotes if there isn't one already
-     *
-     * @param jda BOT
-     */
-    private void addEmoteListener(JDA jda) {
-        if(this.listener == null) {
-            this.listener = getEmoteListener();
-            jda.addEventListener(this.listener);
-        }
     }
 
     @Override

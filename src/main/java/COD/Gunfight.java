@@ -168,36 +168,21 @@ public class Gunfight {
      * @return Game message
      */
     private MessageEmbed buildGameMessage(String streak, String longestStreak) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(getColour());
-
-        String title = "GUNFIGHT";
-        if(rank > 0) {
-            title += " RANK " + rank;
-        }
-
-        builder.setTitle(title);
-        builder.setDescription(createDesc());
-        builder.setThumbnail(getThumbnail());
-        builder.setImage(EmbedHelper.getSpacerImage());
-        builder.addField("**WIN**", String.valueOf(wins), true);
-        builder.addBlankField(true);
-        builder.addField("**LOSS**", String.valueOf(losses), true);
-        builder.addField("**STREAK**", streak, true);
-        builder.addBlankField(true);
-        builder.addField("**LONGEST STREAK**", longestStreak, true);
-        String footer;
-        String suffix = " -- Checkout 'gunfight help!' for instructions";
-
-        if(lastUpdate == 0) {
-            footer = "Game started at " + formatTime(startTime);
-        }
-        else {
-            footer = "Last update at " + formatTime(lastUpdate);
-        }
-
-        builder.setFooter(footer + suffix, EmbedHelper.getClock());
-        return builder.build();
+        return new EmbedBuilder()
+                .setColor(getColour())
+                .setTitle(rank == 0 ? "GUNFIGHT" : "GUNFIGHT RANK " + rank)
+                .setDescription(createDesc())
+                .setThumbnail(getThumbnail())
+                .setImage(EmbedHelper.getSpacerImage())
+                .addField("**WIN**", String.valueOf(wins), true)
+                .addBlankField(true)
+                .addField("**LOSS**", String.valueOf(losses), true)
+                .addField("**STREAK**", streak, true)
+                .addBlankField(true)
+                .addField("**LONGEST STREAK**", longestStreak, true)
+                .addField("**EMOTE MANAGER**", owner.getAsMention(), false)
+                .setFooter((lastUpdate == 0 ? "Game started at " + formatTime(startTime) : "Last update at " + formatTime(lastUpdate)) + " -- Checkout 'gunfight help!' for instructions", EmbedHelper.getClock())
+                .build();
     }
 
 
@@ -215,7 +200,6 @@ public class Gunfight {
      */
     public void startGame() {
         startTime = System.currentTimeMillis();
-        rank = checkRank();
         sendGameMessage(createGameMessage());
     }
 
@@ -227,19 +211,17 @@ public class Gunfight {
     public void reactionAdded(MessageReaction reaction) {
         Emote emote = reaction.getReactionEmote().getEmote();
         long currentTime = System.currentTimeMillis();
-        System.out.println("Gunfight received emote");
+
         if((emote != win && emote != loss && emote != stop && emote != undo)) {
             return;
         }
 
         if(emote == stop) {
-            System.out.println("Stopping game");
             stopGame();
             return;
         }
 
         if(emote == undo) {
-            System.out.println("Undo last score");
             undoLast();
             return;
         }
@@ -276,18 +258,12 @@ public class Gunfight {
      * Update the game message to display new score
      */
     private void updateMessage() {
-        System.out.println("Updating message");
         MessageEmbed updateMessage = createGameMessage();
         if(gameFocused()) {
-            System.out.println("Editing message");
             channel.editMessageById(gameID, updateMessage).queue();
         }
         else {
-            System.out.println("Resending message");
-            channel.deleteMessageById(gameID).queue(aVoid -> {
-                System.out.println("Deleted last, resending");
-                sendGameMessage(updateMessage);
-            });
+            channel.deleteMessageById(gameID).queue(aVoid -> sendGameMessage(updateMessage));
         }
     }
 
@@ -295,9 +271,7 @@ public class Gunfight {
      * Move the game back to the most recent message
      */
     public void relocate() {
-        System.out.println("Relocating - Deleting message");
         channel.deleteMessageById(gameID).queue();
-        System.out.println("Relocating - Sending message");
         sendGameMessage(createGameMessage());
     }
 
@@ -343,7 +317,6 @@ public class Gunfight {
             message.addReaction(loss).queue();
             message.addReaction(undo).queue();
             message.addReaction(stop).queue();
-            System.out.println("Gunfight message sent");
         });
     }
 
@@ -425,18 +398,18 @@ public class Gunfight {
      * @return Game summary message
      */
     private MessageEmbed buildGameSummaryMessage(Session session) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(getColour());
-        builder.setTitle("GUNFIGHT RESULTS #" + (Session.getTotalMatches()));
-        builder.setThumbnail(getThumbnail());
-        builder.setDescription(getRankingMessage());
-        builder.setFooter("Check out the leaderboard!", null);
-        builder.addField("**DURATION**", session.getDuration(), false);
-        builder.addField("**WINS**", String.valueOf(wins), true);
-        builder.addField("**LOSSES**", String.valueOf(losses), true);
-        builder.addField("**RATIO**", String.valueOf(session.getFormattedRatio()), true);
-        builder.addField("**LONGEST STREAK**", session.formatStreak(), false);
-        return builder.build();
+        return new EmbedBuilder()
+                .setColor(getColour())
+                .setTitle("GUNFIGHT RESULTS #" + (Session.getTotalMatches()))
+                .setThumbnail(getThumbnail())
+                .setDescription(getRankingMessage())
+                .setFooter("Check out the leaderboard!", null)
+                .addField("**DURATION**", session.getDuration(), false)
+                .addField("**WINS**", String.valueOf(wins), true)
+                .addField("**LOSSES**", String.valueOf(losses), true)
+                .addField("**RATIO**", String.valueOf(session.getFormattedRatio()), true)
+                .addField("**LONGEST STREAK**", session.formatStreak(), false)
+                .build();
     }
 
     /**
@@ -598,7 +571,7 @@ public class Gunfight {
                         "Where's Rory when you need him?",
                         "Sometimes you just need to swallow your pride and gear up in your M4 & 725 loadout",
                         "Stop runecrafting and start winning cunts",
-                        "Put the fuckin crossbow away and get out your 725",
+                        "Put the fucking crossbow away and get out your 725",
                         "Just remember, chances are they are sober and you are not, don't be too hard on yourselves",
                         "Time to be tactical cunts, get those broken guns out"
                 };
@@ -684,14 +657,23 @@ public class Gunfight {
      * @return Ready to send/edit help message
      */
     private EmbedBuilder buildHelpMessage() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(EmbedHelper.getGreen());
-        builder.setTitle("GUNFIGHT HELP");
-        builder.addField("BASICS", "Call **gunfight!** to begin a gunfight session.\n\nThe session will run until it is submitted to the **leaderboard!**\n\nOnly the user who called **gunfight!** can control the session.", false);
-        builder.addField("CUSTOM SCORE", "Call **gunfight! [wins] [losses] [current streak] [longest streak]** to begin a gunfight session with a custom score.", false);
-        builder.addField("HOW TO USE", "CLICK THE EMOTES", false);
-        builder.setThumbnail(getThumb());
-        return builder;
+        return new EmbedBuilder()
+                .setColor(EmbedHelper.getGreen())
+                .setTitle("GUNFIGHT HELP")
+                .addField(
+                        "BASICS",
+                        "Call **gunfight!** to begin or resend a gunfight session.\n\n" +
+                                "The session will run until it is submitted to the **leaderboard!** or **gunfight!** is called and it has been more than an hour since the last update.\n\n" +
+                                "Only the user who called **gunfight!** can control the session.",
+                        false
+                )
+                .addField(
+                        "CUSTOM SCORE",
+                        "Call **gunfight! [wins] [losses] [current streak] [longest streak]** to begin a gunfight session with a custom score.",
+                        false
+                )
+                .addField("HOW TO USE", "CLICK THE EMOTES", false)
+                .setThumbnail(getThumb());
     }
 
     /**
