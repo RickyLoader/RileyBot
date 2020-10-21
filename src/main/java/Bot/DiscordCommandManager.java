@@ -126,24 +126,24 @@ public class DiscordCommandManager {
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
-        addCommand((new GunfightCommand()));
-        addCommand((new GunfightHelpCommand()));
-        addCommand((new LeaderboardCommand()));
-        addCommand((new MeCommand()));
-        addCommand((new OSRSLookupCommand()));
-        addCommand((new GhostCommand()));
-        addCommand((new SawCommand()));
-        addCommand((new TTSCommand()));
-        addCommand((new SurvivorCommand()));
-        addCommand((new PlayYoutubeCommand()));
-        addCommand((new MakeAChoiceCommand()));
-        addCommand((new InviteCommand()));
-        addCommand((new ExecuteOrder66Command()));
-        addCommand((new KillListCommand()));
-        addCommand((new TobinCommand()));
-        addCommand((new MWLookupCommand()));
-        addCommand((new HelpCommand()));
-        addCommand((new LOLLookupCommand()));
+        addCommand(new GunfightCommand());
+        addCommand(new GunfightHelpCommand());
+        addCommand(new LeaderboardCommand());
+        addCommand(new MeCommand());
+        addCommand(new OSRSLookupCommand());
+        addCommand(new GhostCommand());
+        addCommand(new SawCommand());
+        addCommand(new TTSCommand());
+        addCommand(new SurvivorCommand());
+        addCommand(new PlayYoutubeCommand());
+        addCommand(new MakeAChoiceCommand());
+        addCommand(new InviteCommand());
+        addCommand(new ExecuteOrder66Command());
+        addCommand(new KillListCommand());
+        addCommand(new TobinCommand());
+        addCommand(new MWLookupCommand());
+        addCommand(new HelpCommand());
+        addCommand(new LOLLookupCommand());
         addCommand(new YoutubeLookupCommand());
         addCommand(new ImpersonateCommand());
         addCommand(new TweetCommand());
@@ -167,32 +167,32 @@ public class DiscordCommandManager {
      * Commands which return a random element from a list
      */
     private void addRandomCommands() {
-        addCommand((new MemeCommand()));
+        addCommand(new MemeCommand());
         addCommand(new GIFCommand());
-        addCommand((new GenerateNameCommand()));
+        addCommand(new GenerateNameCommand());
     }
 
     /**
      * Commands which return a single image
      */
     private void addLinkCommands() {
-        addCommand((new BrewsCommand()));
-        addCommand((new DobroCommand()));
-        addCommand((new ExodiaCommand()));
-        addCommand((new FriendlyCommand()));
-        addCommand((new GothCommand()));
-        addCommand((new HagridCommand()));
-        addCommand((new MandrillCommand()));
-        addCommand((new MegaCommand()));
-        addCommand((new PureCommand()));
-        addCommand((new RememberCommand()));
-        addCommand((new BrewTrackerCommand()));
-        addCommand((new ShrekCommand()));
-        addCommand((new SmirnyCommand()));
-        addCommand((new SpidermanCommand()));
-        addCommand((new TrulyCommand()));
-        addCommand((new UnderbellyCommand()));
-        addCommand((new VapeCommand()));
+        addCommand(new BrewsCommand());
+        addCommand(new DobroCommand());
+        addCommand(new ExodiaCommand());
+        addCommand(new FriendlyCommand());
+        addCommand(new GothCommand());
+        addCommand(new HagridCommand());
+        addCommand(new MandrillCommand());
+        addCommand(new MegaCommand());
+        addCommand(new PureCommand());
+        addCommand(new RememberCommand());
+        addCommand(new BrewTrackerCommand());
+        addCommand(new ShrekCommand());
+        addCommand(new SmirnyCommand());
+        addCommand(new SpidermanCommand());
+        addCommand(new TrulyCommand());
+        addCommand(new UnderbellyCommand());
+        addCommand(new VapeCommand());
 
         addCommand((new FishingCommand()));
         addCommand((new NormanCommand()));
