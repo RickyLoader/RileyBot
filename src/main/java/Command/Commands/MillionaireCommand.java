@@ -58,7 +58,7 @@ public class MillionaireCommand extends DiscordCommand {
 
         if(message.equals("forfeit")) {
             if(!games.containsKey(owner)) {
-                channel.sendMessage(owner.getAsMention() + " You don't have a game to stop!").queue();
+                channel.sendMessage(owner.getAsMention() + " You don't have a game to forfeit!").queue();
                 return;
             }
             MillionaireGameshow gameShow = games.get(owner);
