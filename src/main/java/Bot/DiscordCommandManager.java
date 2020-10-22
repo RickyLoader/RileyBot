@@ -161,6 +161,7 @@ public class DiscordCommandManager {
         addCommand(new BlitzCommand());
         addCommand(new HangmanCommand());
         addCommand(new FBICommand());
+        addCommand(new MillionaireCommand());
     }
 
     /**

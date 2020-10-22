@@ -207,4 +207,24 @@ public class EmoteHelper {
     public Emote getUpvote() {
         return get("760118777253462047");
     }
+
+    public Emote getOptionA() {
+        return get("768689497327271958");
+    }
+
+    public Emote getOptionB() {
+        return get("768689497625460776");
+    }
+
+    public Emote getOptionC() {
+        return get("768689497294110721");
+    }
+
+    public Emote getOptionD() {
+        return get("768689497616547840");
+    }
+
+    public Emote getLifeline() {
+        return get("768695195783921694");
+    }
 }
