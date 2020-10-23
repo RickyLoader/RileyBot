@@ -4,20 +4,20 @@ import Command.Structure.EmoteListener;
 import COD.Gunfight;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
+
+import java.util.HashMap;
 
 /**
  * Track Modern Warfare wins/losses with an embedded message
  */
 public class GunfightCommand extends DiscordCommand {
-    private Gunfight gunfight;
+    private final HashMap<Member, Gunfight> gunfightSessions;
     private EmoteListener listener;
 
     public GunfightCommand() {
         super("gunfight!", "Play a fun game of gunfight!");
+        this.gunfightSessions = new HashMap<>();
     }
 
     /**
@@ -27,9 +27,11 @@ public class GunfightCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
+        Member member = context.getMember();
+        Gunfight gunfight = gunfightSessions.get(member);
         if(gunfight != null && gunfight.isActive()) {
             if(System.currentTimeMillis() - gunfight.getLastUpdate() >= 3600000) {
-                gunfight = null;
+                gunfightSessions.remove(member);
             }
             else {
                 gunfight.relocate();
@@ -62,7 +64,7 @@ public class GunfightCommand extends DiscordCommand {
             return;
         }
 
-        gunfight = new Gunfight(
+        Gunfight gunfight = new Gunfight(
                 context.getMessageChannel(),
                 context.getUser(),
                 context.getEmoteHelper(),
@@ -71,6 +73,7 @@ public class GunfightCommand extends DiscordCommand {
                 Integer.parseInt(args[2]),
                 Integer.parseInt(args[3])
         );
+        gunfightSessions.put(context.getMember(), gunfight);
         gunfight.startGame();
     }
 
@@ -120,11 +123,12 @@ public class GunfightCommand extends DiscordCommand {
      * @param context Context of the message that triggered the command
      */
     private void startNormalGame(CommandContext context) {
-        gunfight = new Gunfight(
+        Gunfight gunfight = new Gunfight(
                 context.getMessageChannel(),
                 context.getUser(),
                 context.getEmoteHelper()
         );
+        gunfightSessions.put(context.getMember(), gunfight);
         gunfight.startGame();
     }
 
@@ -138,7 +142,8 @@ public class GunfightCommand extends DiscordCommand {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long reactID = reaction.getMessageIdLong();
-                if(gunfight != null && reactID == gunfight.getGameId() && gunfight.isActive() && (user == gunfight.getOwner() || (user == guild.getOwner().getUser()))) {
+                Gunfight gunfight = gunfightSessions.get(guild.getMember(user));
+                if(gunfight != null && reactID == gunfight.getGameId() && gunfight.isActive() && user == gunfight.getOwner()) {
                     gunfight.reactionAdded(reaction);
                 }
             }
