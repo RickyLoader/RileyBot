@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * Get the weather for a NZ location
  */
 public class WeatherCommand extends DiscordCommand {
-    WeatherManager weatherManager;
+    private WeatherManager weatherManager;
 
     public WeatherCommand() {
         super("weather\nweather [NZ location]\nweather [NZ location] -t", "Get the weather!");
