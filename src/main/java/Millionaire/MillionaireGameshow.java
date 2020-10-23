@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class MillionaireGameshow {
@@ -20,7 +21,7 @@ public class MillionaireGameshow {
     private final Emote a, b, c, d, lifeline;
     private long gameID;
     private final Quiz quiz;
-    private boolean running, victory, stop;
+    private boolean running, victory, stop, paused;
 
     /**
      * Create a game of who wants to be a millionaire
@@ -132,10 +133,11 @@ public class MillionaireGameshow {
     private void updateGame() {
         MessageEmbed gameMessage = buildGameMessage();
         int lifeline = quiz.hasLifeline() ? 1 : 0;
+        paused = true;
         channel.retrieveMessageById(gameID).queue(message -> {
             int options = lifeline + quiz.getCurrentQuestion().getAnswers().size();
             if(running && channel.getLatestMessageIdLong() == gameID && options == message.getReactions().size()) {
-                channel.editMessageById(gameID, gameMessage).queue();
+                channel.editMessageById(gameID, gameMessage).queue(m -> paused = false);
             }
             else {
                 sendGameMessage(gameMessage);
@@ -160,6 +162,7 @@ public class MillionaireGameshow {
                     m.addReaction(lifeline).queue();
                 }
             }
+            paused = false;
         });
     }
 
@@ -314,7 +317,7 @@ public class MillionaireGameshow {
      */
     public void reactionAdded(MessageReaction reaction) {
         Emote emote = reaction.getReactionEmote().getEmote();
-        if(emote != a && emote != b && emote != c && emote != d && emote != lifeline) {
+        if(paused || emote != a && emote != b && emote != c && emote != d && emote != lifeline) {
             return;
         }
         if(emote == lifeline && quiz.hasLifeline()) {
