@@ -1,0 +1,139 @@
+{
+  "modes": {
+    "war": {
+      "real_name": "Team Deathmatch"
+    },
+    "sd": {
+      "real_name": "Search and Destroy"
+    },
+    "dom": {
+      "real_name": "Domination"
+    },
+    "tdef": {
+      "real_name": "Headquarters"
+    },
+    "dm": {
+      "real_name": "Free For All"
+    },
+    "koth": {
+      "real_name": "Hardpoint"
+    },
+    "hq": {
+      "real_name": "Headquarters"
+    },
+    "arena": {
+      "real_name": "Gunfight"
+    },
+    "arm": {
+      "real_name": "Ground War"
+    },
+    "conf": {
+      "real_name": "Kill Confirmed"
+    },
+    "cyber": {
+      "real_name": "Cyber Attack"
+    },
+    "hc_war": {
+      "real_name": "HC Team Deathmatch"
+    },
+    "hc_arena": {
+      "real_name": "HC Gunfight"
+    },
+    "hq_arm": {
+      "real_name": "HC Ground War"
+    },
+    "hq_conf": {
+      "real_name": "HC Kill Confirmed"
+    },
+    "hq_cyber": {
+      "real_name": "HC Cyber Attack"
+    },
+    "hc_dm": {
+      "real_name": "HC Free For All"
+    },
+    "hc_hq": {
+      "real_name": "HC Headquarters"
+    },
+    "hc_dom": {
+      "real_name": "HC Domination"
+    },
+    "hc_sd": {
+      "real_name": "HC Search and Destroy"
+    },
+    "gun": {
+      "real_name": "Gun Game"
+    },
+    "gun_hc": {
+      "real_name": "HC Gun Game"
+    },
+    "siege": {
+      "real_name": "Reinforce"
+    },
+    "infect": {
+      "real_name": "Infected"
+    },
+    "arena_op": {
+      "real_name": "Gunfight O.S.P"
+    },
+    "grind": {
+      "real_name": "Grind"
+    },
+    "ctf": {
+      "real_name": "Capture the Flag"
+    },
+    "br_all": {
+      "real_name": "All"
+    },
+    "br": {
+      "real_name": "Warzone"
+    },
+    "br_dmz": {
+      "real_name": "Plunder"
+    },
+    "br_dmz_38": {
+      "real_name": "Plunder Quads"
+    },
+    "br_87": {
+      "real_name": "Warzone Solo"
+    },
+    "br_dmz_104": {
+      "real_name": "Blood Money"
+    },
+    "koth_hc": {
+      "real_name": "HC Hardpoint"
+    },
+    "br_25": {
+      "real_name": "Warzone Trios"
+    },
+    "br_89": {
+      "real_name": "Warzone Quads"
+    },
+    "br_dmz_76": {
+      "real_name": "Plunder Quads"
+    },
+    "br_77": {
+      "real_name": "Warzone Scopes & Scatter Guns"
+    },
+    "br_dmz_85": {
+      "real_name": "Plunder Duos"
+    },
+    "cyber_hc": {
+      "real_name": "HC Cyber Attack"
+    },
+    "war_hc": {
+      "real_name": "HC Team Deathmatch"
+    },
+    "dom_hc": {
+      "real_name": "HC Domination"
+    },
+    "sd_hc": {
+      "real_name": "HC Search and Destroy"
+    },
+    "conf_hc": {
+      "real_name": "HC Kill Confirmed"
+    },
+    "hq_hc": {
+      "real_name": "HC Headquarters"
+    }
+  }
+}

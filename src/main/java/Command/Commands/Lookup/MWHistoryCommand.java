@@ -1,36 +1,67 @@
 package Command.Commands.Lookup;
 
+import Bot.ResourceHandler;
 import COD.CODAPI;
 import COD.Gunfight;
-import COD.MWPlayer;
 import COD.MWPlayer.Ratio;
 import Command.Structure.*;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Get MW player match history
  */
 public class MWHistoryCommand extends MWLookupCommand {
+    private final HashMap<String, String> modes, maps;
+
     public MWHistoryCommand() {
         super("mwhistory", "Have a gander at a player's match history!");
+        String res = "/COD/MW/Data/";
+        this.modes = getItemMap(res + "modes.json", "modes");
+        this.maps = getItemMap(res + "maps.json", "maps");
+    }
+
+
+    /**
+     * Parse map/mode names from local JSON
+     *
+     * @param location Location of file
+     * @param key      JSON parent key
+     * @return Map of IW names -> real names
+     */
+    private HashMap<String, String> getItemMap(String location, String key) {
+        HashMap<String, String> items = new HashMap<>();
+        JSONObject itemData = new JSONObject(
+                new ResourceHandler().getResourceFileAsString(location)
+        ).getJSONObject(key);
+
+        for(String iwName : itemData.keySet()) {
+            items.put(
+                    iwName,
+                    itemData.getJSONObject(iwName).getString("real_name")
+            );
+        }
+        return items;
     }
 
     @Override
     public void processName(String name, CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
-        channel.sendMessage("One moment please").queue();
         MatchHistory matchHistory = getMatches(name, getPlatform(), context.getEmoteHelper());
+
         if(matchHistory == null) {
-            channel.sendMessage("I didn't find any match history for " + name).queue();
+            channel.sendMessage(
+                    "I didn't find any match history for **"
+                            + name
+                            + "** on platform: **"
+                            + getPlatform()
+                            + "**, try another platform or learn how to spell.\n"
+                            + getHelpNameCoded()
+            ).queue();
             return;
         }
         getMatchHistoryEmbed(context, matchHistory).showMessage();
@@ -52,8 +83,8 @@ public class MWHistoryCommand extends MWLookupCommand {
                 Gunfight.getThumb(),
                 "MW Match History: " + matchHistory.getName().toUpperCase(),
                 matchHistory.getSummary(),
-                new String[]{"Index", "Date", "Result"},
-                5
+                new String[]{"Match", "Details", "Result"},
+                3
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
@@ -61,7 +92,7 @@ public class MWHistoryCommand extends MWLookupCommand {
                 int position = defaultSort ? (index + 1) : (items.size() - index);
                 return new String[]{
                         String.valueOf(position),
-                        match.getDateSummary(),
+                        match.getMatchSummary(),
                         match.getFormattedResult()
                 };
             }
@@ -102,6 +133,14 @@ public class MWHistoryCommand extends MWLookupCommand {
                             new Date(match.getLong("utcStartSeconds") * 1000),
                             new Date(match.getLong("utcEndSeconds") * 1000),
                             match.getString("result"),
+                            maps.getOrDefault(
+                                    match.getString("map"),
+                                    "MISSING: " + match.getString("map")
+                            ),
+                            modes.getOrDefault(
+                                    match.getString("mode"),
+                                    "MISSING: " + match.getString("mode")
+                            ),
                             helper
                     )
             );
@@ -178,13 +217,13 @@ public class MWHistoryCommand extends MWLookupCommand {
         public String getSummary() {
             StringBuilder summary = new StringBuilder("Here are the last " + matches.size() + " matches:");
             summary
-                    .append("\n\nWINS: ").append("**").append(getWins()).append("**")
-                    .append("\nLOSSES: ").append("**").append(getLosses()).append("**");
+                    .append("\n\nWins: ").append("**").append(getWins()).append("**")
+                    .append("\nLosses: ").append("**").append(getLosses()).append("**");
             if(ties > 0) {
-                summary.append("\nTIES: ").append("**").append(ties).append("**");
+                summary.append("\nTies: ").append("**").append(ties).append("**");
             }
             return summary
-                    .append("\nRATIO: ").append("**").append(winLoss.formatRatio(winLoss.getRatio())).append("**")
+                    .append("\nRatio: ").append("**").append(winLoss.formatRatio(winLoss.getRatio())).append("**")
                     .toString();
         }
 
@@ -211,7 +250,7 @@ public class MWHistoryCommand extends MWLookupCommand {
         private final Date start, end;
         private final long duration;
         private final RESULT result;
-        private final String winEmote, lossEmote, tieEmote;
+        private final String winEmote, lossEmote, tieEmote, map, mode;
 
         enum RESULT {
             WIN,
@@ -227,7 +266,7 @@ public class MWHistoryCommand extends MWLookupCommand {
          * @param result Match result
          * @param helper Emote Helper
          */
-        public Match(Date start, Date end, String result, EmoteHelper helper) {
+        public Match(Date start, Date end, String result, String map, String mode, EmoteHelper helper) {
             this.start = start;
             this.end = end;
             this.duration = end.getTime() - start.getTime();
@@ -235,20 +274,26 @@ public class MWHistoryCommand extends MWLookupCommand {
             this.winEmote = EmoteHelper.formatEmote(helper.getComplete());
             this.lossEmote = EmoteHelper.formatEmote(helper.getFail());
             this.tieEmote = EmoteHelper.formatEmote(helper.getNeutral());
+            this.map = map;
+            this.mode = mode;
         }
 
         /**
-         * Get the date and duration of the match
+         * Get the date, duration, map, mode, and result of the match
          *
          * @return Date and duration
          */
-        public String getDateSummary() {
-            return "**DATE**: "
+        public String getMatchSummary() {
+            return "**Date**: "
                     + new SimpleDateFormat("dd/MM/yyyy").format(start)
-                    + "\n**TIME**: "
+                    + "\n**Time**: "
                     + new SimpleDateFormat("HH:mm:ss").format(start)
-                    + "\n**DURATION**: "
-                    + EmbedHelper.formatTime(duration);
+                    + "\n**Duration**: "
+                    + EmbedHelper.formatTime(duration)
+                    + "\n\n**Mode**: "
+                    + mode
+                    + "\n**MAP**: "
+                    + map;
         }
 
         /**

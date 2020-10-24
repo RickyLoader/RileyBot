@@ -1,0 +1,178 @@
+{
+  "maps": {
+    "mp_hackney_yard": {
+      "real_name": "Hackney Yard (Night)"
+    },
+    "mp_aniyah": {
+      "real_name": "Aniyah Palace"
+    },
+    "mp_euphrates": {
+      "real_name": "Euphrates Bridge"
+    },
+    "mp_raid": {
+      "real_name": "Grazna Raid"
+    },
+    "mp_m_pine": {
+      "real_name": "Pine"
+    },
+    "mp_m_stack": {
+      "real_name": "Stack"
+    },
+    "mp_deadzone": {
+      "real_name": "Arklov Peak"
+    },
+    "mp_quarry2": {
+      "real_name": "Karst River Quarry"
+    },
+    "mp_m_overunder": {
+      "real_name": "Docks"
+    },
+    "mp_cave_am": {
+      "real_name": "Azhir Cave"
+    },
+    "mp_cave": {
+      "real_name": "Azhir Cave (Night)"
+    },
+    "mp_runner": {
+      "real_name": "Gun Runner"
+    },
+    "mp_runner_pm": {
+      "real_name": "Gun Runner (Night)"
+    },
+    "mp_hackney_am": {
+      "real_name": "Hackney Yard"
+    },
+    "mp_piccadilly": {
+      "real_name": "Piccadilly"
+    },
+    "mp_spear": {
+      "real_name": "Rammaza"
+    },
+    "mp_spear_pm": {
+      "real_name": "Rammaza (Night)"
+    },
+    "mp_petrograd": {
+      "real_name": "St. Petrograd"
+    },
+    "mp_m_hill": {
+      "real_name": "Hill"
+    },
+    "mp_m_king": {
+      "real_name": "King"
+    },
+    "mp_m_speedball": {
+      "real_name": "Speedball"
+    },
+    "mp_m_showers": {
+      "real_name": "Gulag Showers"
+    },
+    "mp_downtown_gw": {
+      "real_name": "Tavorsk District"
+    },
+    "mp_m_speed": {
+      "real_name": "Shoot House"
+    },
+    "mp_farms2_gw": {
+      "real_name": "Krovnik Farmland"
+    },
+    "mp_port2_gw": {
+      "real_name": "Port of Verdansk"
+    },
+    "mp_crash2": {
+      "real_name": "Crash"
+    },
+    "mp_vacant": {
+      "real_name": "Vacant"
+    },
+    "mp_shipment": {
+      "real_name": "Shipment"
+    },
+    "mp_m_cargo": {
+      "real_name": "Cargo"
+    },
+    "mp_m_cage": {
+      "real_name": "Atrium"
+    },
+    "mp_m_overwinter": {
+      "real_name": "Winter Docks"
+    },
+    "mp_emporium": {
+      "real_name": "Atlas Superstore"
+    },
+    "mp_rust": {
+      "real_name": "Rust"
+    },
+    "mp_boneyard_gw": {
+      "real_name": "Zhokov Boneyard"
+    },
+    "mp_m_fork": {
+      "real_name": "Bazaar"
+    },
+    "mp_donetsk": {
+      "real_name": "Verdansk"
+    },
+    "mp_hideout": {
+      "real_name": "Khandor Hideout"
+    },
+    "mp_aniyah_tac": {
+      "real_name": "Aniyah Incursion"
+    },
+    "mp_backlot2": {
+      "real_name": "Talsik Backlot"
+    },
+    "mp_village2": {
+      "real_name": "Hovec Sawmill"
+    },
+    "mp_hardhat": {
+      "real_name": "Hardhat"
+    },
+    "mp_m_wallco2": {
+      "real_name": "Aisle 9"
+    },
+    "mp_donetsk2": {
+      "real_name": "Verdansk"
+    },
+    "mp_scrapyard": {
+      "real_name": "Scrapyard"
+    },
+    "mp_m_trench": {
+      "real_name": "Trench"
+    },
+    "mp_promenade_gw": {
+      "real_name": "Barakett Promenade"
+    },
+    "mp_don3": {
+      "real_name": "Verdansk"
+    },
+    "mp_garden": {
+      "real_name": "Cheshire Park"
+    },
+    "mp_m_stadium": {
+      "real_name": "Verdansk Stadium"
+    },
+    "mp_riverside_gw": {
+      "real_name": "Verdansk Riverside"
+    },
+    "mp_layover_gw": {
+      "real_name": "Verdansk International Airport"
+    },
+    "mp_harbor": {
+      "real_name": "Suldal Harbor"
+    },
+    "mp_m_train": {
+      "real_name": "Station"
+    },
+    "mp_oilrig": {
+      "real_name": "Petrov Oil Rig"
+    },
+    "mp_malyshev": {
+      "real_name": "Mialstor Tank Factory"
+    },
+    "mp_m_cornfield": {
+      "real_name": "Livestock"
+    },
+    "mp_broadcast2": {
+      "real_name": "Broadcast"
+    }
+  }
+}
