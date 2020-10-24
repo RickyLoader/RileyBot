@@ -43,7 +43,7 @@ public class CODAPI {
         try {
             String nameEncode = encodeName(name);
             json = new NetworkRequest(
-                    MODERN_WARFARE_URL + "/history/" + nameEncode + "/" + platform,
+                    MODERN_WARFARE_URL + "history/" + nameEncode + "/" + platform,
                     false)
                     .get();
         }

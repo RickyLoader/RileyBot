@@ -350,7 +350,7 @@ public class CombatRecord extends ImageBuilder {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getEmoteHelper(),
-                "MW Player lookup: " + nameQuery.toUpperCase(),
+                "MW Player Stats: " + nameQuery.toUpperCase(),
                 "One moment please.",
                 Gunfight.getThumb(),
                 helpMessage,

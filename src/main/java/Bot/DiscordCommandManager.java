@@ -8,6 +8,7 @@ import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
 import Command.Commands.CWCountdownCommand;
 import Command.Commands.Lookup.LOLLookupCommand;
+import Command.Commands.Lookup.MWHistoryCommand;
 import Command.Commands.Lookup.MWStatsCommand;
 import Command.Commands.Lookup.YoutubeLookupCommand;
 import Command.Commands.Passive.*;
@@ -162,6 +163,7 @@ public class DiscordCommandManager {
         addCommand(new HangmanCommand());
         addCommand(new FBICommand());
         addCommand(new MillionaireCommand());
+        addCommand(new MWHistoryCommand());
     }
 
     /**

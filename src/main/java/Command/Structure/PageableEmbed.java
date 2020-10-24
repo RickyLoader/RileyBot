@@ -160,6 +160,7 @@ public abstract class PageableEmbed {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(colour);
         builder.setTitle(title);
+        builder.setImage(EmbedHelper.getSpacerImage());
         if(desc != null) {
             builder.setDescription(desc);
         }
