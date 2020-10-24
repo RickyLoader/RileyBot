@@ -292,7 +292,7 @@ public class MWHistoryCommand extends MWLookupCommand {
                     + EmbedHelper.formatTime(duration)
                     + "\n\n**Mode**: "
                     + mode
-                    + "\n**MAP**: "
+                    + "\n**Map**: "
                     + map;
         }
 
