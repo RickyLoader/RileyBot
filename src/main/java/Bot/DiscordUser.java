@@ -80,7 +80,7 @@ public class DiscordUser {
      */
     public static void saveMWName(String name, MessageChannel channel, User user) {
         savePlayer(name, user.getIdLong(), MW);
-        channel.sendMessage(user.getAsMention() + " Your mwlookup name is now " + name).queue();
+        channel.sendMessage(user.getAsMention() + " Your mwlookup/mwhistory name is now " + name).queue();
     }
 
     /**

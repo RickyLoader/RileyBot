@@ -120,7 +120,7 @@ public class MWHistoryCommand extends MWLookupCommand {
         ArrayList<Match> matches = new ArrayList<>();
         String matchJSON = CODAPI.getMWMatchHistory(name, platform);
 
-        if(matchJSON == null) {
+        if(matchJSON == null || !new JSONObject(matchJSON).has("matches")) {
             return null;
         }
 
