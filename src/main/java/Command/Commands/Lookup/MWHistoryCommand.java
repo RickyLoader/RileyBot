@@ -178,7 +178,7 @@ public class MWHistoryCommand extends MWLookupCommand {
         public String getSummary() {
             StringBuilder summary = new StringBuilder("Here are the last " + matches.size() + " matches:");
             summary
-                    .append("\nWINS: ").append("**").append(getWins()).append("**")
+                    .append("\n\nWINS: ").append("**").append(getWins()).append("**")
                     .append("\nLOSSES: ").append("**").append(getLosses()).append("**");
             if(ties > 0) {
                 summary.append("\nTIES: ").append("**").append(ties).append("**");
