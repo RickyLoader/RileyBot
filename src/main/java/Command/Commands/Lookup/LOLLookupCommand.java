@@ -1,16 +1,15 @@
 package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
-import Command.Structure.EmoteHelper;
-import Command.Structure.ImageBuilder;
-import Command.Structure.ImageBuilderLookupCommand;
+import Command.Structure.CommandContext;
+import Command.Structure.LookupCommand;
 import LOL.SummonerImage;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 import java.util.HashMap;
 
-public class LOLLookupCommand extends ImageBuilderLookupCommand {
+public class LOLLookupCommand extends LookupCommand {
     private final HashMap<String, String> regions;
     private String displayRegion, apiRegion;
 
@@ -19,6 +18,11 @@ public class LOLLookupCommand extends ImageBuilderLookupCommand {
         this.regions = getRegions();
     }
 
+    /**
+     * Get a map of human region code to API region code
+     *
+     * @return Region code map
+     */
     private HashMap<String, String> getRegions() {
         HashMap<String, String> regions = new HashMap<>();
         regions.put("br", "br1");
@@ -35,11 +39,6 @@ public class LOLLookupCommand extends ImageBuilderLookupCommand {
     }
 
     @Override
-    public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new SummonerImage(channel, emoteHelper);
-    }
-
-    @Override
     public String stripArguments(String query) {
         String region = query.split(" ")[0];
         if(region.equals(getTrigger())) {
@@ -53,8 +52,9 @@ public class LOLLookupCommand extends ImageBuilderLookupCommand {
     }
 
     @Override
-    public void buildImage(String name, ImageBuilder builder) {
-        builder.buildImage(name, getHelpName(), this.displayRegion, this.apiRegion);
+    public void processName(String name, CommandContext context) {
+        SummonerImage summonerImage = new SummonerImage(context.getMessageChannel(), context.getEmoteHelper());
+        summonerImage.buildImage(name, getHelpName(), displayRegion, apiRegion);
     }
 
     @Override

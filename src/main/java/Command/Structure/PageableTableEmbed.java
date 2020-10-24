@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public abstract class PageableTableEmbed extends PageableEmbed {
     /**
      * Embedded message that can be paged through with emotes and displays as a table.
      *
+     * @param jda         JDA for listener
      * @param channel     Channel to send embed to
      * @param emoteHelper Emote helper
      * @param items       List of items to be displayed
@@ -24,8 +26,8 @@ public abstract class PageableTableEmbed extends PageableEmbed {
      * @param bound       Maximum items to display
      * @param colour      Optional colour to use for embed
      */
-    public PageableTableEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int bound, int... colour) {
-        super(channel, emoteHelper, items, thumb, title, desc, bound, colour);
+    public PageableTableEmbed(JDA jda, MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int bound, int... colour) {
+        super(jda, channel, emoteHelper, items, thumb, title, desc, bound, colour);
         this.columns = columns;
         try {
             if(columns.length > 3) {

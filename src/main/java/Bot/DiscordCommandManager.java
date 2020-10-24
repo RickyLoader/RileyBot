@@ -8,7 +8,7 @@ import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
 import Command.Commands.CWCountdownCommand;
 import Command.Commands.Lookup.LOLLookupCommand;
-import Command.Commands.Lookup.MWLookupCommand;
+import Command.Commands.Lookup.MWStatsCommand;
 import Command.Commands.Lookup.YoutubeLookupCommand;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
@@ -141,7 +141,7 @@ public class DiscordCommandManager {
         addCommand(new ExecuteOrder66Command());
         addCommand(new KillListCommand());
         addCommand(new TobinCommand());
-        addCommand(new MWLookupCommand());
+        addCommand(new MWStatsCommand());
         addCommand(new HelpCommand());
         addCommand(new LOLLookupCommand());
         addCommand(new YoutubeLookupCommand());

@@ -46,6 +46,7 @@ public class CODPlayer {
         try {
             String name = URLEncoder.encode(this.name, "UTF-8").replaceAll("\\+", "%20");
             json = new NetworkRequest(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/" + endpoint + "/" + name + "/" + platform, false).get();
+           System.out.println(NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/" + endpoint + "/" + name + "/" + platform);
             if(json == null) {
                 status = "Failed to communicate with API, try again later.";
                 return null;

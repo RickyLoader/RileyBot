@@ -3,13 +3,22 @@ package Command.Structure;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class CODImageBuilderCommand extends ImageBuilderLookupCommand {
+public abstract class CODLookupCommand extends LookupCommand {
     private final List<String> platforms;
     private String platform;
 
-    public CODImageBuilderCommand(String trigger, String desc) {
+    public CODLookupCommand(String trigger, String desc) {
         super(trigger, desc, "acti/battle/psn/xbox", 30);
         platforms = Arrays.asList("battle", "acti", "xbox", "psn");
+    }
+
+    /**
+     * Get the requested platform
+     *
+     * @return Platform
+     */
+    public String getPlatform() {
+        return platform;
     }
 
     @Override
@@ -26,11 +35,6 @@ public abstract class CODImageBuilderCommand extends ImageBuilderLookupCommand {
             query = query.replace("#0", "");
         }
         return query;
-    }
-
-    @Override
-    public void buildImage(String name, ImageBuilder builder) {
-        builder.buildImage(name, getHelpName(), platform);
     }
 
     @Override

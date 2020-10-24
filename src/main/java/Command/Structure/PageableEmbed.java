@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public abstract class PageableEmbed {
     private final MessageChannel channel;
-    private final List<?> items;
+    private List<?> items;
     private long id;
     private int index = 0, page = 1;
     private final int bound, colour, pages;
@@ -21,6 +22,7 @@ public abstract class PageableEmbed {
     /**
      * Initialise the values
      *
+     * @param jda         JDA for listener
      * @param channel     Channel to send embed to
      * @param emoteHelper Emote helper
      * @param items       List of items to be displayed
@@ -30,7 +32,7 @@ public abstract class PageableEmbed {
      * @param bound       Maximum items to display
      * @param colour      Optional colour to use for embed
      */
-    public PageableEmbed(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
+    public PageableEmbed(JDA jda, MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
         this.channel = channel;
         this.items = items;
         this.title = title;
@@ -42,6 +44,15 @@ public abstract class PageableEmbed {
         this.bound = bound;
         this.colour = colour.length == 1 ? colour[0] : EmbedHelper.getYellow();
         this.pages = (int) Math.ceil(items.size() / (double) bound);
+        jda.addEventListener(new EmoteListener() {
+            @Override
+            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
+                long reactID = reaction.getMessageIdLong();
+                if(reactID == id) {
+                    reactionAdded(reaction);
+                }
+            }
+        });
         sortItems(items, defaultSort);
     }
 
@@ -231,5 +242,14 @@ public abstract class PageableEmbed {
         }
         this.page = (index / bound) + 1;
         updateMessage();
+    }
+
+    /**
+     * Replace the list of items
+     *
+     * @param items List to replace current
+     */
+    public void updateItems(List<?> items) {
+        this.items = items;
     }
 }

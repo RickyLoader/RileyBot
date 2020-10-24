@@ -84,7 +84,7 @@ public abstract class LookupCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        lookupUser(name, channel, context.getEmoteHelper());
+        lookupUser(name, context);
     }
 
     /**
@@ -100,26 +100,29 @@ public abstract class LookupCommand extends DiscordCommand {
     /**
      * Look up the player and build the image
      *
-     * @param name        Player to look up
-     * @param channel     Channel to send result to
-     * @param emoteHelper Emote helper
+     * @param name    Player to look up
+     * @param context Command context
      */
-    private void lookupUser(String name, MessageChannel channel, EmoteHelper emoteHelper) {
+    private void lookupUser(String name, CommandContext context) {
+        MessageChannel channel = context.getMessageChannel();
         if(currentLookups.contains(name.toLowerCase())) {
             channel.sendMessage("Patience is a virtue cunt").queue();
             return;
         }
         currentLookups.add(name.toLowerCase());
         new Thread(() -> {
-            processName(name, channel, emoteHelper);
+            processName(name, context);
             currentLookups.remove(name.toLowerCase());
         }).start();
     }
 
     /**
      * Choose what to do with the given name
+     *
+     * @param name    Name
+     * @param context Command context
      */
-    public abstract void processName(String name, MessageChannel channel, EmoteHelper emoteHelper);
+    public abstract void processName(String name, CommandContext context);
 
     /**
      * Get a hint on how to save the name

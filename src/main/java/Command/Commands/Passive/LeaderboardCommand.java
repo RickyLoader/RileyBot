@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Show the gunfight leaderboard
  */
-public class LeaderboardCommand extends PageableEmbedCommand {
+public class LeaderboardCommand extends DiscordCommand {
 
     public LeaderboardCommand() {
         super("leaderboard!", "Have a gander at the gunfight leaderboard!", "leaderboard!\nleaderboard! [position]");
@@ -23,7 +23,8 @@ public class LeaderboardCommand extends PageableEmbedCommand {
     public void execute(CommandContext context) {
         String query = context.getLowerCaseMessage();
         if(query.equals(getTrigger())) {
-            super.execute(context);
+            PageableTableEmbed leaderboard = getLeaderboardEmbed(context);
+            leaderboard.showMessage();
             return;
         }
         MessageChannel channel = context.getMessageChannel();
@@ -46,27 +47,27 @@ public class LeaderboardCommand extends PageableEmbedCommand {
 
 
     /**
-     * Build a message embed with more in depth information about the Gunfight Session
+     * Build a message embed with in depth information about the given Gunfight Session
      *
      * @param session Session to build embed for
      * @param rank    Rank of the session
      * @return Message embed detailing Session
      */
     private MessageEmbed buildSessionMessage(Session session, int rank) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(EmbedHelper.getGreen());
-        builder.setThumbnail(Gunfight.getThumb());
-        builder.setTitle("GUNFIGHT RANK #" + rank);
-        builder.setDescription("Here's the break down!");
-        builder.addField("DATE", session.getFormattedDate(), true);
-        builder.addBlankField(true);
-        builder.addField("DURATION", session.getDuration(), true);
-        builder.addField("W/L", session.getFormattedWinLoss(), true);
-        builder.addBlankField(true);
-        builder.addField("RATIO", session.getFormattedRatio(), true);
-        builder.addField("LONGEST STREAK", String.valueOf(session.getLongestStreak()), false);
-        builder.setFooter("Check out the leaderboard!", "https://i.imgur.com/yaLMta5.png");
-        return builder.build();
+        return new EmbedBuilder()
+                .setColor(EmbedHelper.getGreen())
+                .setThumbnail(Gunfight.getThumb())
+                .setTitle("GUNFIGHT RANK #" + rank)
+                .setDescription("Here's the break down!")
+                .addField("DATE", session.getFormattedDate(), true)
+                .addBlankField(true)
+                .addField("DURATION", session.getDuration(), true)
+                .addField("W/L", session.getFormattedWinLoss(), true)
+                .addBlankField(true)
+                .addField("RATIO", session.getFormattedRatio(), true)
+                .addField("LONGEST STREAK", String.valueOf(session.getLongestStreak()), false)
+                .setFooter("Check out the leaderboard!", "https://i.imgur.com/yaLMta5.png")
+                .build();
     }
 
     /**
@@ -75,55 +76,39 @@ public class LeaderboardCommand extends PageableEmbedCommand {
      * @param context Context of command
      * @return Leaderboard embed
      */
-    @Override
-    public PageableEmbed getEmbed(CommandContext context) {
-        return new Leaderboard(
+    public PageableTableEmbed getLeaderboardEmbed(CommandContext context) {
+        return new PageableTableEmbed(
+                context.getJDA(),
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
                 Session.getHistory(),
                 Gunfight.getThumb(),
                 "GUNFIGHT LEADERBOARD!",
                 "Here are the top gunfight performances!",
-                new String[]{"RANK", "W/L", "STREAK"}
-        );
+                new String[]{"RANK", "W/L", "STREAK"},
+                5
+        ) {
+            @Override
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
+                int rank = defaultSort ? (index + 1) : (items.size() - index);
+                Session session = (Session) items.get(index);
+                return new String[]{String.valueOf(rank), session.getWinLossSummary(), session.formatStreak()};
+            }
+
+            @Override
+            public void sortItems(List<?> items, boolean defaultSort) {
+                ArrayList<Session> sessions = new ArrayList<>();
+                for(Object session : items) {
+                    sessions.add((Session) session);
+                }
+                Session.sortSessions(sessions, defaultSort);
+                updateItems(sessions);
+            }
+        };
     }
 
     @Override
     public boolean matches(String query) {
         return query.startsWith(getTrigger());
-    }
-
-    /**
-     * Gunfight history message, shows leaderboard of past gunfight sessions
-     */
-    public static class Leaderboard extends PageableTableEmbed {
-
-        /**
-         * Embedded message that can be paged through with emotes and displays as a table.
-         *
-         * @param channel     Channel to send embed to
-         * @param emoteHelper Emote helper
-         * @param items       List of items to be displayed
-         * @param thumb       Thumbnail to use for embed
-         * @param title       Title to use for embed
-         * @param desc        Description to use for embed
-         * @param columns     Column headers to display at the top of message
-         * @param colour      Optional colour to use for embed
-         */
-        public Leaderboard(MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, String[] columns, int... colour) {
-            super(channel, emoteHelper, items, thumb, title, desc, columns, 5, colour);
-        }
-
-        @Override
-        public void sortItems(List<?> items, boolean defaultSort) {
-            Session.sortSessions((ArrayList<Session>) items, defaultSort);
-        }
-
-        @Override
-        public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-            int rank = defaultSort ? (index + 1) : (items.size() - index);
-            Session session = (Session) items.get(index);
-            return new String[]{String.valueOf(rank), session.getWinLossSummary(), session.formatStreak()};
-        }
     }
 }

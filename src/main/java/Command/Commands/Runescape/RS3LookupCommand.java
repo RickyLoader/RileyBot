@@ -1,25 +1,30 @@
 package Command.Commands.Runescape;
 
 import Bot.DiscordUser;
+import Command.Structure.CommandContext;
+import Command.Structure.LookupCommand;
 import Runescape.Stats.Hiscores;
-import Command.Structure.EmoteHelper;
-import Command.Structure.ImageBuilder;
-import Command.Structure.ImageBuilderLookupCommand;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 /**
  * Look up a OSRS player and build an image with their stats
  */
-public class RS3LookupCommand extends ImageBuilderLookupCommand {
+public class RS3LookupCommand extends LookupCommand {
 
     public RS3LookupCommand() {
         super("rs3lookup", "Check out someone's stats on RS3!", 12);
     }
 
     @Override
-    public ImageBuilder getImageBuilder(MessageChannel channel, EmoteHelper emoteHelper) {
-        return new Hiscores(channel, emoteHelper, "/Runescape/RS3/", "rs3.ttf");
+    public void processName(String name, CommandContext context) {
+        Hiscores hiscores = new Hiscores(
+                context.getMessageChannel(),
+                context.getEmoteHelper(),
+                "/Runescape/RS3/",
+                "rs3.ttf"
+        );
+        hiscores.buildImage(name, getHelpName());
     }
 
     @Override
