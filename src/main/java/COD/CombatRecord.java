@@ -1,7 +1,7 @@
 package COD;
 
-import COD.CODPlayer.FieldUpgrade;
-import COD.CODPlayer.Killstreak;
+import COD.MWPlayer.FieldUpgrade;
+import COD.MWPlayer.Killstreak;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
@@ -17,7 +17,7 @@ import java.util.Comparator;
  */
 public class CombatRecord extends ImageBuilder {
 
-    private CODPlayer player;
+    private MWPlayer player;
 
     public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
         super(channel, emoteHelper, "/COD/" + resourcePath + "/", fontName);
@@ -226,7 +226,7 @@ public class CombatRecord extends ImageBuilder {
      * @return Commendation section
      */
     private BufferedImage drawCommendations() {
-        ArrayList<CODPlayer.Commendation> commendations = player.getCommendations();
+        ArrayList<MWPlayer.Commendation> commendations = player.getCommendations();
         BufferedImage image = null;
         try {
             image = getResourceHandler().getImageResource(getResourcePath() + "Templates/commendation_section.png");
@@ -235,7 +235,7 @@ public class CombatRecord extends ImageBuilder {
             int x = 100;
             for(int i = 0; i < 5; i++) {
                 g.setFont(getGameFont().deriveFont(32f));
-                CODPlayer.Commendation c = commendations.get(i);
+                MWPlayer.Commendation c = commendations.get(i);
                 BufferedImage icon = getResourceHandler().getImageResource(c.getImagePath());
                 g.drawImage(icon, x - (icon.getWidth() / 2), 250 - (icon.getHeight() / 2), null);
                 int titleWidth = g.getFontMetrics().stringWidth(c.getTitle()) / 2;

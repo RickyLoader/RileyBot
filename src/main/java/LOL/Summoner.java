@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static COD.CODPlayer.*;
+import static COD.MWPlayer.*;
 
 public class Summoner {
     private String name;

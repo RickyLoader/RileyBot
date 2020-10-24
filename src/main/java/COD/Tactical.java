@@ -1,6 +1,6 @@
 package COD;
 
-import COD.CODPlayer.Ratio;
+import COD.MWPlayer.Ratio;
 
 /**
  * Tactical equipment
