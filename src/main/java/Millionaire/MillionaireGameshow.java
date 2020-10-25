@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class MillionaireGameshow {
@@ -22,6 +21,7 @@ public class MillionaireGameshow {
     private long gameID;
     private final Quiz quiz;
     private boolean running, victory, stop, paused;
+    private final String correctEmote, incorrectEmote;
 
     /**
      * Create a game of who wants to be a millionaire
@@ -39,6 +39,8 @@ public class MillionaireGameshow {
         this.c = emoteHelper.getOptionC();
         this.d = emoteHelper.getOptionD();
         this.lifeline = emoteHelper.getLifeline();
+        this.correctEmote = EmoteHelper.formatEmote(emoteHelper.getComplete());
+        this.incorrectEmote = EmoteHelper.formatEmote(emoteHelper.getFail());
         this.helpMessage = helpMessage;
         this.quiz = new Quiz(getQuestions());
     }
@@ -190,10 +192,10 @@ public class MillionaireGameshow {
             String value = a.getTitle();
             if(!running) {
                 if(a.isSelected() && !a.isCorrect()) {
-                    value = "~~" + value + "~~";
+                    value = "~~" + value + "~~ " + incorrectEmote;
                 }
                 else if(a.isCorrect()) {
-                    value = "**" + value + "**";
+                    value = "**" + value + "** " + correctEmote;
                 }
             }
             builder.addField("**" + a.getOption() + "** ", value, true);
