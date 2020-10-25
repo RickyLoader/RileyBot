@@ -140,7 +140,7 @@ public class EmoteHelper {
         return get("758598371685564467");
     }
 
-    public Emote getDayRain() {
+    public Emote getRain() {
         return get("758656025032654878");
     }
 
@@ -174,10 +174,6 @@ public class EmoteHelper {
 
     public Emote getHumidity() {
         return get("758685947012710430");
-    }
-
-    public Emote getRain() {
-        return get("758685946978762772");
     }
 
     public Emote getWind() {

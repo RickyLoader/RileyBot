@@ -38,7 +38,6 @@ public class WeatherManager {
         iconTypes.put("DAY_FINE", EmoteHelper.formatEmote(emoteHelper.getDayFine()));
         iconTypes.put("DAY_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getDayFewShowers()));
         iconTypes.put("DAY_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getDayPartlyCloudy()));
-        iconTypes.put("DAY_RAIN", EmoteHelper.formatEmote(emoteHelper.getDayRain()));
 
         iconTypes.put("NIGHT_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getNightPartlyCloudy()));
         iconTypes.put("NIGHT_FINE", EmoteHelper.formatEmote(emoteHelper.getNightFine()));
@@ -50,6 +49,7 @@ public class WeatherManager {
         String windRain = EmoteHelper.formatEmote(emoteHelper.getWindRain());
         String snow = EmoteHelper.formatEmote(emoteHelper.getSnow());
         String drizzle = EmoteHelper.formatEmote(emoteHelper.getNightDrizzle());
+        String rain = EmoteHelper.formatEmote(emoteHelper.getRain());
 
         iconTypes.put("NIGHT_DRIZZLE", drizzle);
         iconTypes.put("DAY_DRIZZLE", drizzle);
@@ -63,12 +63,14 @@ public class WeatherManager {
         iconTypes.put("NIGHT_WIND_RAIN", windRain);
         iconTypes.put("DAY_SNOW", snow);
         iconTypes.put("NIGHT_SNOW", snow);
+        iconTypes.put("DAY_RAIN", rain);
+        iconTypes.put("NIGHT_RAIN", rain);
 
         // Extremes
         iconTypes.put("Highest", maxIcon);
         iconTypes.put("Lowest", minIcon);
         iconTypes.put("Windiest", wind);
-        iconTypes.put("Wettest", showers);
+        iconTypes.put("Wettest", rain);
     }
 
     /**
