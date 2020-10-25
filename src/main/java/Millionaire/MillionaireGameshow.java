@@ -262,7 +262,7 @@ public class MillionaireGameshow {
      */
     private String getGameProgression() {
         StringBuilder progression = new StringBuilder();
-        String green = "🟢", white = "⚪", red = "\uD83D\uDD34", blue = "\uD83D\uDD35";
+        String green = "🟢", white = "⚪", red = "\uD83D\uDD34", blue = "\uD83D\uDD35", yellow = "\uD83D\uDFE1";
         for(int i = 0; i < quiz.getTotalQuestions(); i++) {
             int currentIndex = quiz.getCurrentQuestionIndex();
             Question current = quiz.getCurrentQuestion();
@@ -279,7 +279,7 @@ public class MillionaireGameshow {
                 progression.append(green);
             }
             else {
-                progression.append(white);
+                progression.append(quiz.isSafetyNetQuestion(i) ? yellow : white);
             }
         }
         return progression.toString();
@@ -380,6 +380,7 @@ public class MillionaireGameshow {
         private final ArrayList<Question> questions;
         private final HashMap<Integer, Integer> rewardMap;
         private int index;
+        private final int firstCheckpoint = 4, secondCheckpoint = 9;
         private boolean lifeline;
 
         /**
@@ -438,11 +439,11 @@ public class MillionaireGameshow {
             if(questions.get(index).getCorrectAnswer().isSelected()) {
                 return rewardMap.get(index);
             }
-            else if(index >= 10) {
-                return rewardMap.get(9);
+            else if(index >= secondCheckpoint + 1) {
+                return rewardMap.get(secondCheckpoint);
             }
-            else if(index >= 5) {
-                return rewardMap.get(4);
+            else if(index >= firstCheckpoint + 1) {
+                return rewardMap.get(firstCheckpoint);
             }
             return rewardMap.get(-1);
         }
@@ -480,6 +481,16 @@ public class MillionaireGameshow {
          */
         public boolean isFinalQuestion() {
             return index == questions.size() - 1;
+        }
+
+        /**
+         * Check if the current question is a safety net/checkpoint
+         *
+         * @param index Index of question
+         * @return Question is a safety net
+         */
+        public boolean isSafetyNetQuestion(int index) {
+            return index == firstCheckpoint || index == secondCheckpoint;
         }
 
         /**
