@@ -59,12 +59,12 @@ public class LOLLookupCommand extends LookupCommand {
 
     @Override
     public String getSavedName(long id) {
-        return DiscordUser.getLOLName(id);
+        return DiscordUser.getSavedName(id, DiscordUser.LOL);
     }
 
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
-        DiscordUser.saveLOLName(name, channel, user);
+        DiscordUser.saveName(name, DiscordUser.LOL, channel, user);
     }
 
     @Override

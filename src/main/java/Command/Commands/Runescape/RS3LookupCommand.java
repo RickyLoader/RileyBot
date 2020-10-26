@@ -29,11 +29,11 @@ public class RS3LookupCommand extends LookupCommand {
 
     @Override
     public String getSavedName(long id) {
-        return DiscordUser.getRS3Name(id);
+        return DiscordUser.getSavedName(id, DiscordUser.RS3);
     }
 
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
-        DiscordUser.saveRS3Name(name, channel, user);
+        DiscordUser.saveName(name, DiscordUser.RS3, channel, user);
     }
 }

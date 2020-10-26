@@ -31,12 +31,12 @@ public class YoutubeLookupCommand extends LookupCommand {
 
     @Override
     public String getSavedName(long id) {
-        return DiscordUser.getYTName(id);
+        return DiscordUser.getSavedName(id, DiscordUser.YT);
     }
 
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
-        DiscordUser.saveYTName(name, channel, user);
+        DiscordUser.saveName(name, DiscordUser.YT, channel, user);
     }
 
     /**

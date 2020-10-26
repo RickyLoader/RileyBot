@@ -29,11 +29,11 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public String getSavedName(long id) {
-        return DiscordUser.getOSRSName(id);
+        return DiscordUser.getSavedName(id, DiscordUser.OSRS);
     }
 
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
-        DiscordUser.saveOSRSName(name, channel, user);
+        DiscordUser.saveName(name, DiscordUser.OSRS, channel, user);
     }
 }

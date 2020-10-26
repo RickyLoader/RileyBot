@@ -12,11 +12,11 @@ public abstract class MWLookupCommand extends CODLookupCommand {
 
     @Override
     public String getSavedName(long id) {
-        return DiscordUser.getMWName(id);
+        return DiscordUser.getSavedName(id, DiscordUser.MW);
     }
 
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
-        DiscordUser.saveMWName(name, channel, user);
+        DiscordUser.saveName(name, DiscordUser.MW, channel, user);
     }
 }

@@ -52,7 +52,6 @@ public class MWHistoryCommand extends MWLookupCommand {
     public void processName(String name, CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
         MatchHistory matchHistory = getMatches(name, getPlatform(), context.getEmoteHelper());
-
         if(matchHistory == null) {
             channel.sendMessage(
                     "I didn't find any match history for **"
