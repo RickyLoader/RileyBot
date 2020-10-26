@@ -20,8 +20,9 @@ public class MillionaireGameshow {
     private final Emote a, b, c, d, lifeline;
     private long gameID;
     private final Quiz quiz;
-    private boolean running, victory, stop, paused;
+    private boolean running, victory, forfeit, paused;
     private final String correctEmote, incorrectEmote;
+    public final static String thumb = "https://i.imgur.com/6kjTqXa.png";
 
     /**
      * Create a game of who wants to be a millionaire
@@ -130,9 +131,13 @@ public class MillionaireGameshow {
     }
 
     /**
-     * Send the game message to the channel, or edit the existing message
+     * Send or edit the game message.
+     * Add reward to bank if game has completed
      */
     private void updateGame() {
+        if(!running) {
+            addToBank(forfeit ? quiz.getForfeitReward() : quiz.getReward());
+        }
         MessageEmbed gameMessage = buildGameMessage();
         int lifeline = quiz.hasLifeline() ? 1 : 0;
         paused = true;
@@ -169,11 +174,11 @@ public class MillionaireGameshow {
     }
 
     /**
-     * Stop the game
+     * Forfeit the game and store the reward in the user's bank
      */
-    public void stop() {
+    public void forfeit() {
         running = false;
-        stop = true;
+        forfeit = true;
         updateGame();
     }
 
@@ -207,7 +212,7 @@ public class MillionaireGameshow {
         return builder
                 .setTitle(owner.getEffectiveName() + " " + getTitle() + " a millionaire!")
                 .setDescription(buildDescription(question))
-                .setThumbnail("https://i.imgur.com/6kjTqXa.png")
+                .setThumbnail(thumb)
                 .setFooter("Try: " + helpMessage, EmbedHelper.getClock())
                 .setColor(getColour())
                 .setImage(EmbedHelper.getSpacerImage())
@@ -231,7 +236,7 @@ public class MillionaireGameshow {
                     + description;
         }
         else {
-            int reward = stop ? quiz.getForfeitReward() : quiz.getReward();
+            int reward = forfeit ? quiz.getForfeitReward() : quiz.getReward();
             description = "**You won**: "
                     + (reward == 0 ? getEmpatheticMessage() : quiz.formatReward(reward))
                     + "\n\n" + description;
@@ -306,7 +311,7 @@ public class MillionaireGameshow {
         if(victory) {
             return "became a";
         }
-        if(stop) {
+        if(forfeit) {
             return "gave up on becoming";
         }
         return "failed becoming";
@@ -352,7 +357,22 @@ public class MillionaireGameshow {
             running = false;
         }
         updateGame();
+    }
 
+    /**
+     * Add the winnings to the player's bank
+     *
+     * @param reward Reward from quiz
+     */
+    private void addToBank(int reward) {
+        new NetworkRequest("millionaire/bank/update", true)
+                .post(
+                        new JSONObject()
+                                .put("discord_id", owner.getIdLong())
+                                .put("name", owner.getEffectiveName())
+                                .put("reward", reward)
+                                .toString()
+                );
     }
 
     /**

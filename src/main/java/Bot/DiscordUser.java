@@ -38,6 +38,27 @@ public class DiscordUser {
     }
 
     /**
+     * Get a user's millionaire bank stats
+     *
+     * @param id User id of millionaire contestant
+     * @return User's millionaire bank stats
+     */
+    public static String getMillionaireBankData(long id) {
+        String json = new NetworkRequest("millionaire/bank/" + id, true).get();
+        return json.isEmpty() ? null : json;
+    }
+
+    /**
+     * Get millionaire bank stats for all users
+     *
+     * @return All user millionaire bank stats
+     */
+    public static String getMillionaireBankLeaderboard() {
+        String json = new NetworkRequest("millionaire/leaderboard", true).get();
+        return json.isEmpty() ? null : json;
+    }
+
+    /**
      * Retrieve all saved names by a user id
      *
      * @param id ID of user to look up

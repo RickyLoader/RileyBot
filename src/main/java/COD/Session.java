@@ -67,12 +67,7 @@ public class Session {
                 .thenComparing(Session::getWins)
                 .thenComparing(Comparator.comparingInt(Session::getGamesPlayed).reversed());
 
-        if(ascending) {
-            sessions.sort(sort.reversed());
-        }
-        else {
-            sessions.sort(sort);
-        }
+        sessions.sort(ascending ? sort.reversed() : sort);
     }
 
     /**
