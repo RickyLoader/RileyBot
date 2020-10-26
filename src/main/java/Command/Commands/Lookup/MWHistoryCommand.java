@@ -163,6 +163,9 @@ public class MWHistoryCommand extends MWLookupCommand {
         );
     }
 
+    /**
+     * Hold data on a player's match history
+     */
     private static class MatchHistory {
         private final ArrayList<Match> matches;
         private final String name;
@@ -281,6 +284,9 @@ public class MWHistoryCommand extends MWLookupCommand {
         }
     }
 
+    /**
+     * Hold data on a match played
+     */
     private static class Match {
         private final Date start, end;
         private final long duration;
@@ -385,15 +391,6 @@ public class MWHistoryCommand extends MWLookupCommand {
          */
         public Date getStart() {
             return start;
-        }
-
-        /**
-         * Get match victory
-         *
-         * @return Match victory
-         */
-        public boolean matchWon() {
-            return result == RESULT.WIN;
         }
 
         /**
