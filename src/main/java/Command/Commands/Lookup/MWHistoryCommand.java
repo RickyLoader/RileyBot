@@ -124,15 +124,18 @@ public class MWHistoryCommand extends MWLookupCommand {
             return null;
         }
 
-        JSONArray matchList = new JSONObject(matchJSON).getJSONArray("matches");
+        JSONObject overview = new JSONObject(matchJSON);
+        JSONArray matchList = overview.getJSONArray("matches");
+        JSONObject summary = overview.getJSONObject("summary").getJSONObject("all");
 
         for(int i = 0; i < matchList.length(); i++) {
             JSONObject match = matchList.getJSONObject(i);
+            JSONObject playerStats = match.getJSONObject("playerStats");
             matches.add(
                     new Match(
                             new Date(match.getLong("utcStartSeconds") * 1000),
                             new Date(match.getLong("utcEndSeconds") * 1000),
-                            match.getString("result"),
+                            match.getBoolean("isPresentAtEnd") ? match.getString("result") : "FORFEIT",
                             maps.getOrDefault(
                                     match.getString("map"),
                                     "MISSING: " + match.getString("map")
@@ -141,6 +144,10 @@ public class MWHistoryCommand extends MWLookupCommand {
                                     match.getString("mode"),
                                     "MISSING: " + match.getString("mode")
                             ),
+                            new Ratio(
+                                    playerStats.getInt("kills"),
+                                    playerStats.getInt("deaths")
+                            ),
                             helper
                     )
             );
@@ -148,30 +155,37 @@ public class MWHistoryCommand extends MWLookupCommand {
 
         return new MatchHistory(
                 name,
-                matches
+                matches,
+                new Ratio(
+                        summary.getInt("kills"),
+                        summary.getInt("deaths")
+                )
         );
     }
 
     private static class MatchHistory {
         private final ArrayList<Match> matches;
         private final String name;
-        private int ties = 0;
+        private int draws = 0, forfeits = 0;
         private Ratio winLoss;
+        private final Ratio killDeath;
 
         /**
          * Create the match history
          *
-         * @param name    Player name
-         * @param matches List of matches
+         * @param name      Player name
+         * @param matches   List of matches
+         * @param killDeath Kill/Death ratio
          */
-        public MatchHistory(String name, ArrayList<Match> matches) {
+        public MatchHistory(String name, ArrayList<Match> matches, Ratio killDeath) {
             this.matches = matches;
             this.name = name;
+            this.killDeath = killDeath;
             calculateSummary();
         }
 
         /**
-         * Calculate the match history wins, losses, and ties
+         * Calculate the match history wins, losses, and draws
          */
         private void calculateSummary() {
             int wins = 0, losses = 0;
@@ -183,8 +197,11 @@ public class MWHistoryCommand extends MWLookupCommand {
                     case LOSS:
                         losses++;
                         break;
-                    case TIE:
-                        ties++;
+                    case DRAW:
+                        draws++;
+                        break;
+                    case FORFEIT:
+                        forfeits++;
                         break;
                 }
             }
@@ -218,13 +235,31 @@ public class MWHistoryCommand extends MWLookupCommand {
             StringBuilder summary = new StringBuilder("Here are the last " + matches.size() + " matches:");
             summary
                     .append("\n\nWins: ").append("**").append(getWins()).append("**")
-                    .append("\nLosses: ").append("**").append(getLosses()).append("**");
-            if(ties > 0) {
-                summary.append("\nTies: ").append("**").append(ties).append("**");
+                    .append(" | ")
+                    .append("Losses: ").append("**").append(getLosses()).append("**");
+
+            if(draws > 0) {
+                summary
+                        .append(" | ")
+                        .append("Draws: ").append("**").append(draws).append("**");
             }
-            return summary
-                    .append("\nRatio: ").append("**").append(winLoss.formatRatio(winLoss.getRatio())).append("**")
-                    .toString();
+
+            if(forfeits > 0) {
+                summary
+                        .append(" | ")
+                        .append("Forfeits: ").append("**").append(forfeits).append("**");
+            }
+
+            summary
+                    .append(" | ")
+                    .append("Ratio: ").append("**").append(winLoss.formatRatio(winLoss.getRatio())).append("**")
+                    .append("\nKills: ").append("**").append(killDeath.getNumerator()).append("**")
+                    .append(" | ")
+                    .append("Deaths: ").append("**").append(killDeath.getDenominator()).append("**")
+                    .append(" | ")
+                    .append("Ratio: ").append("**").append(killDeath.formatRatio(killDeath.getRatio())).append("**");
+
+            return summary.toString();
         }
 
         /**
@@ -250,32 +285,73 @@ public class MWHistoryCommand extends MWLookupCommand {
         private final Date start, end;
         private final long duration;
         private final RESULT result;
-        private final String winEmote, lossEmote, tieEmote, map, mode;
+        private final String winEmote, lossEmote, drawEmote, map, mode;
+        private final Ratio killDeath;
 
         enum RESULT {
             WIN,
             LOSS,
-            TIE
+            DRAW,
+            FORFEIT
         }
 
         /**
          * Create a match
          *
-         * @param start  Date of match start
-         * @param end    Date of match end
-         * @param result Match result
-         * @param helper Emote Helper
+         * @param start     Date of match start
+         * @param end       Date of match end
+         * @param result    Match result
+         * @param killDeath Kill/Death ratio
+         * @param helper    Emote Helper
          */
-        public Match(Date start, Date end, String result, String map, String mode, EmoteHelper helper) {
+        public Match(Date start, Date end, String result, String map, String mode, Ratio killDeath, EmoteHelper helper) {
             this.start = start;
             this.end = end;
             this.duration = end.getTime() - start.getTime();
-            this.result = result.equalsIgnoreCase("win") ? RESULT.WIN : (result.equalsIgnoreCase("loss") ? RESULT.LOSS : RESULT.TIE);
+            this.result = parseResult(result);
             this.winEmote = EmoteHelper.formatEmote(helper.getComplete());
             this.lossEmote = EmoteHelper.formatEmote(helper.getFail());
-            this.tieEmote = EmoteHelper.formatEmote(helper.getNeutral());
+            this.drawEmote = EmoteHelper.formatEmote(helper.getDraw());
             this.map = map;
             this.mode = mode;
+            this.killDeath = killDeath;
+        }
+
+        /**
+         * Get the match kills
+         *
+         * @return Match kills
+         */
+        public int getKills() {
+            return killDeath.getNumerator();
+        }
+
+        /**
+         * Get the match deaths
+         *
+         * @return Match deaths
+         */
+        public int getDeaths() {
+            return killDeath.getDenominator();
+        }
+
+        /**
+         * Parse the result of the match from the given String
+         *
+         * @param result Result of match - win, loss, draw, forfeit
+         * @return Match result
+         */
+        private RESULT parseResult(String result) {
+            switch(result.toLowerCase()) {
+                case "win":
+                    return RESULT.WIN;
+                case "loss":
+                    return RESULT.LOSS;
+                case "forfeit":
+                    return RESULT.FORFEIT;
+                default:
+                    return RESULT.DRAW;
+            }
         }
 
         /**
@@ -284,16 +360,13 @@ public class MWHistoryCommand extends MWLookupCommand {
          * @return Date and duration
          */
         public String getMatchSummary() {
-            return "**Date**: "
-                    + new SimpleDateFormat("dd/MM/yyyy").format(start)
-                    + "\n**Time**: "
-                    + new SimpleDateFormat("HH:mm:ss").format(start)
-                    + "\n**Duration**: "
-                    + EmbedHelper.formatTime(duration)
-                    + "\n\n**Mode**: "
-                    + mode
-                    + "\n**Map**: "
-                    + map;
+            return "**Date**: " + new SimpleDateFormat("dd/MM/yyyy").format(start) +
+                    "\n**Time**: " + new SimpleDateFormat("HH:mm:ss").format(start) +
+                    "\n**Duration**: " + EmbedHelper.formatTime(duration) +
+                    "\n\n**Mode**: " + mode +
+                    "\n**Map**: " + map +
+                    "\n**K/D**: " + killDeath.getNumerator() + "/" + killDeath.getDenominator() +
+                    " (" + killDeath.formatRatio(killDeath.getRatio()) + ")";
         }
 
         /**
@@ -324,7 +397,7 @@ public class MWHistoryCommand extends MWLookupCommand {
         }
 
         /**
-         * Get the match result - win, loss, draw
+         * Get the match result - win, loss, draw, forfeit
          *
          * @return Match result
          */
@@ -338,7 +411,20 @@ public class MWHistoryCommand extends MWLookupCommand {
          * @return Formatted result
          */
         public String getFormattedResult() {
-            return result.toString() + " " + (result == RESULT.WIN ? winEmote : (result == RESULT.LOSS ? lossEmote : tieEmote));
+            String title = result.toString();
+            String emote;
+            switch(result) {
+                case WIN:
+                    emote = winEmote;
+                    break;
+                case LOSS:
+                    emote = lossEmote;
+                    break;
+                default:
+                    emote = drawEmote;
+                    break;
+            }
+            return title + " " + emote;
         }
     }
 }

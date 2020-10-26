@@ -92,6 +92,10 @@ public class EmoteHelper {
         return get("740917148096135208");
     }
 
+    public Emote getDraw() {
+        return get("770129906293014568");
+    }
+
     public Emote getFail() {
         return get("740917148091678742");
     }

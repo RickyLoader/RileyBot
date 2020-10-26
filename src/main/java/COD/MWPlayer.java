@@ -475,15 +475,18 @@ public class MWPlayer {
         private final DecimalFormat commaFormat;
 
         public Ratio(int numerator, int denominator) {
-            if(numerator == 0 || denominator == 0) {
+            if(numerator == 0) {
                 this.ratio = 0;
+            }
+            else if(denominator == 0) {
+                this.ratio = numerator;
             }
             else {
                 this.ratio = (double) numerator / (double) denominator;
             }
+
             this.denominator = denominator;
             this.numerator = numerator;
-
             this.commaFormat = new DecimalFormat("#,###");
         }
 
