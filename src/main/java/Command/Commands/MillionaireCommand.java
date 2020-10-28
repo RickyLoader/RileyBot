@@ -90,7 +90,7 @@ public class MillionaireCommand extends DiscordCommand {
                 Bank.getLeaderboard(),
                 MillionaireGameshow.thumb,
                 "Millionaire Leaderboard",
-                "Here are the top contestants!",
+                "Check out **millionaire bank** to view your personal stats!",
                 new String[]{
                         "Rank",
                         "Details",
