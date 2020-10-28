@@ -227,4 +227,8 @@ public class EmoteHelper {
     public Emote getLifeline() {
         return get("768695195783921694");
     }
+
+    public Emote getBlankGap() {
+        return get("770829814424272936");
+    }
 }

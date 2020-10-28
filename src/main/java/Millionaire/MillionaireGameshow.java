@@ -21,7 +21,7 @@ public class MillionaireGameshow {
     private long gameID;
     private final Quiz quiz;
     private boolean running, victory, forfeit, paused;
-    private final String correctEmote, incorrectEmote;
+    private final String correctEmote, incorrectEmote, blankEmote;
     public final static String thumb = "https://i.imgur.com/6kjTqXa.png";
 
     /**
@@ -42,6 +42,7 @@ public class MillionaireGameshow {
         this.lifeline = emoteHelper.getLifeline();
         this.correctEmote = EmoteHelper.formatEmote(emoteHelper.getComplete());
         this.incorrectEmote = EmoteHelper.formatEmote(emoteHelper.getFail());
+        this.blankEmote = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
         this.helpMessage = helpMessage;
         this.quiz = new Quiz(getQuestions());
     }
@@ -241,7 +242,7 @@ public class MillionaireGameshow {
                     + (reward == 0 ? getEmpatheticMessage() : quiz.formatReward(reward))
                     + "\n\n" + description;
         }
-        return description + "\n\n" + getGameProgression();
+        return getGameProgression() + "\n\n" + description;
     }
 
     /**
@@ -267,10 +268,12 @@ public class MillionaireGameshow {
      */
     private String getGameProgression() {
         StringBuilder progression = new StringBuilder();
+        StringBuilder safetyNetLocation = new StringBuilder();
         String green = "🟢", white = "⚪", red = "\uD83D\uDD34", blue = "\uD83D\uDD35", yellow = "\uD83D\uDFE1";
         for(int i = 0; i < quiz.getTotalQuestions(); i++) {
             int currentIndex = quiz.getCurrentQuestionIndex();
             Question current = quiz.getCurrentQuestion();
+            boolean safetyNet = quiz.isSafetyNetQuestion(i);
 
             if(i == currentIndex) {
                 if(current.getSelectedAnswer() != null) {
@@ -284,10 +287,11 @@ public class MillionaireGameshow {
                 progression.append(green);
             }
             else {
-                progression.append(quiz.isSafetyNetQuestion(i) ? yellow : white);
+                progression.append(safetyNet ? yellow : white);
             }
+            safetyNetLocation.append(safetyNet ? "\uD83D\uDCB0" : blankEmote);
         }
-        return progression.toString();
+        return safetyNetLocation.append("\n").append(progression.toString()).toString();
     }
 
     /**
