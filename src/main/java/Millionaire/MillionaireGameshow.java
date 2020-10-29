@@ -20,9 +20,10 @@ public class MillionaireGameshow {
     private final Emote a, b, c, d, lifeline;
     private long gameID;
     private final Quiz quiz;
-    private boolean running, victory, forfeit, paused;
+    private boolean running, victory, forfeit, paused, timeout;
     private final String correctEmote, incorrectEmote, blankEmote;
     public final static String thumb = "https://i.imgur.com/6kjTqXa.png";
+    private final HashMap<Question, Timer> questionTimers;
 
     /**
      * Create a game of who wants to be a millionaire
@@ -45,6 +46,7 @@ public class MillionaireGameshow {
         this.blankEmote = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
         this.helpMessage = helpMessage;
         this.quiz = new Quiz(getQuestions());
+        this.questionTimers = new HashMap<>();
     }
 
     /**
@@ -145,7 +147,10 @@ public class MillionaireGameshow {
         channel.retrieveMessageById(gameID).queue(message -> {
             int options = lifeline + quiz.getCurrentQuestion().getAnswers().size();
             if(running && channel.getLatestMessageIdLong() == gameID && options == message.getReactions().size()) {
-                channel.editMessageById(gameID, gameMessage).queue(m -> paused = false);
+                channel.editMessageById(gameID, gameMessage).queue(m -> {
+                    paused = false;
+                    startTimer();
+                });
             }
             else {
                 sendGameMessage(gameMessage);
@@ -169,13 +174,41 @@ public class MillionaireGameshow {
                 if(quiz.hasLifeline()) {
                     m.addReaction(lifeline).queue();
                 }
+                startTimer();
             }
             paused = false;
         });
     }
 
     /**
-     * Forfeit the game and store the reward in the user's bank
+     * Start a timer to end the game if an answer is not submitted within 90 seconds.
+     * Ignore questions that are already being timed.
+     */
+    private void startTimer() {
+        Question currentQuestion = quiz.getCurrentQuestion();
+        if(questionTimers.containsKey(currentQuestion)) {
+            return;
+        }
+        Timer timer = new Timer();
+        questionTimers.put(currentQuestion, timer);
+        timer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        if(!running || currentQuestion.hasSelectedAnswer()) {
+                            timer.cancel();
+                            return;
+                        }
+                        running = false;
+                        timeout = true;
+                        updateGame();
+                    }
+                },
+                90000);
+    }
+
+    /**
+     * Forfeit the game and retain the current reward
      */
     public void forfeit() {
         running = false;
@@ -276,7 +309,7 @@ public class MillionaireGameshow {
             boolean safetyNet = quiz.isSafetyNetQuestion(i);
 
             if(i == currentIndex) {
-                if(current.getSelectedAnswer() != null) {
+                if(current.hasSelectedAnswer()) {
                     progression.append(current.getCorrectAnswer().isSelected() ? green : red);
                 }
                 else {
@@ -317,6 +350,9 @@ public class MillionaireGameshow {
         }
         if(forfeit) {
             return "gave up on becoming";
+        }
+        if(timeout) {
+            return "was too slow to become";
         }
         return "failed becoming";
     }
@@ -595,12 +631,12 @@ public class MillionaireGameshow {
         }
 
         /**
-         * Get the selected answer
+         * Check if an answer has been selected
          *
-         * @return Selected answer
+         * @return Answer has been selected
          */
-        public Answer getSelectedAnswer() {
-            return selectedAnswer;
+        public boolean hasSelectedAnswer() {
+            return selectedAnswer != null;
         }
 
         /**
