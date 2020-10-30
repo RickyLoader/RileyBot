@@ -11,9 +11,10 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a OSRS player and build an image with their stats
  */
 public class OSRSLookupCommand extends LookupCommand {
+    private boolean league = false;
 
     public OSRSLookupCommand() {
-        super("osrslookup", "Check out someone's stats on OSRS!", 12);
+        super("osrslookup", "Check out someone's stats on OSRS!", "league", 12);
     }
 
     @Override
@@ -22,9 +23,22 @@ public class OSRSLookupCommand extends LookupCommand {
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
                 "/Runescape/OSRS/",
-                "osrs.ttf"
+                "osrs.ttf",
+                league
         );
         hiscores.buildImage(name, getHelpName());
+    }
+
+    @Override
+    public String stripArguments(String query) {
+        if(query.startsWith("league")) {
+            query = query.replaceFirst("league", "").trim();
+            league = true;
+        }
+        else {
+            league = false;
+        }
+        return query;
     }
 
     @Override
@@ -35,5 +49,10 @@ public class OSRSLookupCommand extends LookupCommand {
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
         DiscordUser.saveName(name, DiscordUser.OSRS, channel, user);
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return query.startsWith(getTrigger()) || query.startsWith("league");
     }
 }

@@ -1,6 +1,5 @@
 package Runescape.OSRS.Stats;
 
-import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageLoadingMessage;
@@ -24,12 +23,29 @@ public class Hiscores extends ImageBuilder {
     private final String[] bossNames;
     private ImageLoadingMessage loading;
     private boolean timeout = false;
+    private final boolean league;
 
-    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
+    /**
+     * Create the Hiscores instance
+     *
+     * @param channel      Channel to send message to
+     * @param emoteHelper  Emote helper
+     * @param resourcePath Path to resources
+     * @param fontName     Font name
+     * @param league       Use league hiscores or normal
+     */
+    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName, boolean league) {
         super(channel, emoteHelper, resourcePath, fontName);
-        bossNames = getBossNames();
+        this.bossNames = getBossNames();
+        this.league = league;
     }
 
+    /**
+     * URL encode the player name
+     *
+     * @param name Player name
+     * @return URL encoded player name
+     */
     private String encodeName(String name) {
         try {
             return URLEncoder.encode(name, "UTF-8");
@@ -38,6 +54,22 @@ public class Hiscores extends ImageBuilder {
             e.printStackTrace();
             return name;
         }
+    }
+
+    /**
+     * Get the loading criteria to use based on whether it is a league lookup
+     *
+     * @return Loading criteria
+     */
+    private String[] getLoadingCriteria() {
+        ArrayList<String> criteria = new ArrayList<>();
+        criteria.add(league ? "Player has League status..." : "Player exists...");
+        if(!league) {
+            criteria.add("Checking account type...");
+        }
+        criteria.add("Building image...");
+        criteria.add("Uploading image...");
+        return criteria.toArray(new String[0]);
     }
 
     /**
@@ -50,19 +82,15 @@ public class Hiscores extends ImageBuilder {
     public void buildImage(String nameQuery, String helpMessage, String... args) {
         String encodedName = encodeName(nameQuery);
         String defaultURL = getNormalAccount(encodedName);
+
         this.loading = new ImageLoadingMessage(
                 getChannel(),
                 getEmoteHelper(),
-                "OSRS Hiscores lookup: " + nameQuery.toUpperCase(),
+                "OSRS " + (league ? "League" : "Hiscores") + " lookup: " + nameQuery.toUpperCase(),
                 "Give me a second, their website can be slow as fuck.",
-                "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
+                league ? "https://i.imgur.com/xksIl6S.png" : "https://i.imgur.com/Hoke7jA.png",
                 helpMessage,
-                new String[]{
-                        "Player exists...",
-                        "Checking account type...",
-                        "Building image...",
-                        "Uploading image..."
-                }
+                getLoadingCriteria()
         );
         loading.showLoading();
 
@@ -72,7 +100,14 @@ public class Hiscores extends ImageBuilder {
                 loading.failLoading("I wasn't able to connect to the " + EmbedHelper.embedURL("Hiscores", defaultURL));
                 return;
             }
-            loading.failLoading("That player " + EmbedHelper.embedURL("doesn't exist", defaultURL) + " cunt");
+            loading.failLoading(
+                    "That player "
+                            + EmbedHelper.embedURL(
+                            league ? "isn't on the league hiscores" : "doesn't exist",
+                            defaultURL
+                    )
+                            + " cunt"
+            );
             return;
         }
 
@@ -115,7 +150,6 @@ public class Hiscores extends ImageBuilder {
 
     private String getIronmanAccount(String name) {
         return getURL("_ironman", name);
-
     }
 
     private String getHardcoreAccount(String name) {
@@ -126,6 +160,10 @@ public class Hiscores extends ImageBuilder {
         return getURL("_ultimate", name);
     }
 
+    private String getLeagueAccount(String name) {
+        return getURL("_seasonal", name);
+    }
+
     /**
      * Fetch the CSV from the hiscores API
      *
@@ -133,15 +171,19 @@ public class Hiscores extends ImageBuilder {
      * @return CSV data from API
      */
     private String[] fetchPlayerData(String name) {
-        String[] normal = hiscoresRequest(getNormalAccount(name));
+        String[] normal = hiscoresRequest(league ? getLeagueAccount(name) : getNormalAccount(name));
 
         if(normal == null) {
             return null;
         }
 
         loading.completeStage();
-
         normal[0] = null;
+
+        if(league) {
+            return normal;
+        }
+
         loading.updateStage("Player exists, checking ironman hiscores");
         String[] iron = hiscoresRequest(getIronmanAccount(name));
 
