@@ -92,7 +92,6 @@ public class ExecuteOrder66Command extends DiscordCommand {
             System.out.println(executor.getTrack());
         }
         else {
-            executor = null;
             channel.sendMessage(buildStatusMessage()).queue(message -> {
                 id = message.getIdLong();
                 doAfter.processFinish();
