@@ -63,7 +63,7 @@ public class Hiscores extends ImageBuilder {
      */
     private String[] getLoadingCriteria() {
         ArrayList<String> criteria = new ArrayList<>();
-        criteria.add(league ? "Player has League status..." : "Player exists...");
+        criteria.add(league ? "Player has League stats..." : "Player exists...");
         if(!league) {
             criteria.add("Checking account type...");
         }
