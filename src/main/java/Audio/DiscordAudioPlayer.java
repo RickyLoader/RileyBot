@@ -20,6 +20,9 @@ public class DiscordAudioPlayer {
     private final AudioPlayerManager manager;
     private boolean cancelable = true;
 
+    /**
+     * Create the audio player
+     */
     public DiscordAudioPlayer() {
         this.manager = new DefaultAudioPlayerManager();
         manager.setHttpRequestConfigurator((config) -> RequestConfig.copy(config).setConnectTimeout(10000).build());
@@ -27,10 +30,22 @@ public class DiscordAudioPlayer {
         this.player = manager.createPlayer();
     }
 
+    /**
+     * Join the given voice channel
+     *
+     * @param vc    Voice channel to join
+     * @param guild Guild for audio manager
+     */
     public void join(VoiceChannel vc, Guild guild) {
         guild.getAudioManager().openAudioConnection(vc);
     }
 
+    /**
+     * Stop the audio if it is cancelable (leave the voice channel)
+     *
+     * @param guild Guild for audio manager
+     * @return success
+     */
     public boolean stop(Guild guild) {
         if(cancelable) {
             guild.getAudioManager().closeAudioConnection();
@@ -39,6 +54,12 @@ public class DiscordAudioPlayer {
         return false;
     }
 
+    /**
+     * Get the voice channel of the given member
+     *
+     * @param member Member to get voice channel for
+     * @return Voice channel or null if not in one
+     */
     public VoiceChannel getMemberVoiceChannel(Member member) {
         if(member.getVoiceState() == null) {
             return null;
@@ -46,70 +67,81 @@ public class DiscordAudioPlayer {
         return member.getVoiceState().getChannel();
     }
 
+    /**
+     * Check if the audio player is currently playing
+     *
+     * @return Audio player playing
+     */
     public boolean isPlaying() {
         return player.getPlayingTrack() != null;
     }
 
+    /**
+     * Play audio in the given member's voice channel
+     *
+     * @param audio      URL to audio
+     * @param member     Member to join voice channel of
+     * @param channel    Channel to send status updates to
+     * @param guild      Guild for audio manager
+     * @param cancelable Whether the track should be allowed to be canceled
+     * @param doAfter    Method to execute once the audio is complete
+     * @return Success of loading track
+     */
     public boolean play(String audio, Member member, MessageChannel channel, Guild guild, boolean cancelable, TrackEndListener.Response... doAfter) {
-        try {
-            if(guild.getAudioManager().getSendingHandler() == null) {
-                guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
-            }
-
-            if(isPlaying() && !this.cancelable) {
-                channel.sendMessage("I'm busy right now").queue();
-                return false;
-            }
-
-            this.cancelable = cancelable;
-            player.addListener(doAfter.length > 0 ? new TrackEndListener(guild, doAfter[0]) : new TrackEndListener(guild));
-            VoiceChannel vc = getMemberVoiceChannel(member);
-
-            if(vc == null) {
-                channel.sendMessage("You're not in a voice channel").queue();
-                return false;
-            }
-
-            join(vc, guild);
-
-
-            try {
-                manager.loadItem(audio, new AudioLoadResultHandler() {
-
-                    /**
-                     * Play the audio once loaded
-                     *
-                     * @param audioTrack Track loaded in to player
-                     */
-                    @Override
-                    public void trackLoaded(AudioTrack audioTrack) {
-                        player.playTrack(audioTrack);
-                    }
-
-                    @Override
-                    public void playlistLoaded(AudioPlaylist audioPlaylist) {
-                    }
-
-                    @Override
-                    public void noMatches() {
-                    }
-
-                    @Override
-                    public void loadFailed(FriendlyException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-                this.cancelable = true;
-                return false;
-            }
-            return true;
+        if(guild.getAudioManager().getSendingHandler() == null) {
+            guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
         }
-        catch(Exception e) {
-            e.printStackTrace();
+
+        // Ignore request if current audio is not cancelable
+        if(isPlaying() && !this.cancelable) {
+            channel.sendMessage("I'm busy right now").queue();
+            return false;
         }
-        return true;
+
+        this.cancelable = cancelable;
+        player.addListener(doAfter.length > 0 ? new TrackEndListener(guild, doAfter[0]) : new TrackEndListener(guild));
+        VoiceChannel vc = getMemberVoiceChannel(member);
+
+        if(vc == null) {
+            channel.sendMessage("You're not in a voice channel").queue();
+            return false;
+        }
+
+        join(vc, guild);
+        final boolean[] success = {false};
+
+        manager.loadItem(audio, new AudioLoadResultHandler() {
+
+            /**
+             * Play the audio once loaded
+             *
+             * @param audioTrack Track loaded in to player
+             */
+            @Override
+            public void trackLoaded(AudioTrack audioTrack) {
+                success[0] = true;
+                player.playTrack(audioTrack);
+            }
+
+            @Override
+            public void playlistLoaded(AudioPlaylist audioPlaylist) {
+            }
+
+            @Override
+            public void noMatches() {
+            }
+
+            @Override
+            public void loadFailed(FriendlyException e) {
+            }
+        });
+
+        if(!success[0]) {
+            this.cancelable = true;
+            stop(guild);
+            channel.sendMessage("I couldn't get YouTube on the phone, try again later.").queue();
+        }
+
+        return success[0];
     }
 }

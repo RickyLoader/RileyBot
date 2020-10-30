@@ -4,7 +4,6 @@ import Audio.TrackEndListener;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
-import Command.Structure.EmbedLoadingMessage;
 import Command.Structure.EmbedLoadingMessage.Status;
 import ExecuteOrder.ExecutorHandler;
 import ExecuteOrder.ExecutorHandler.Executor;
@@ -14,6 +13,7 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;
@@ -57,7 +57,6 @@ public class ExecuteOrder66Command extends DiscordCommand {
             status = new Status(context.getEmoteHelper());
         }
 
-        // Impatient, command is currently in progress
         if(executor != null) {
             channel.sendMessage("I'm already doing that!").queue();
             return;
@@ -77,21 +76,28 @@ public class ExecuteOrder66Command extends DiscordCommand {
             targetStatus.put(target, status.getNeutral());
         }
 
+        TrackEndListener.Response doAfter = () -> new Thread(() -> {
+            purgeTargets(context);
+            executor = null;
+        }).start();
+
         boolean play = context.playAudio(
                 executor.getTrack(),
                 false,
-                () -> new Thread(() -> {
-                    purgeTargets(context);
-                    executor = null;
-                }).start()
+                doAfter
         );
 
-        if(!play) {
-            executor = null;
-            return;
+        if(play) {
+            channel.sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
+            System.out.println(executor.getTrack());
         }
-
-        channel.sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
+        else {
+            executor = null;
+            channel.sendMessage(buildStatusMessage()).queue(message -> {
+                id = message.getIdLong();
+                doAfter.processFinish();
+            });
+        }
     }
 
     /**
@@ -100,11 +106,12 @@ public class ExecuteOrder66Command extends DiscordCommand {
      * @return Status embed
      */
     private MessageEmbed buildStatusMessage() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("EXECUTING ORDER 66");
-        builder.setColor(finished ? EmbedHelper.getGreen() : EmbedHelper.getRed());
-        builder.setThumbnail(image);
-        builder.setImage(EmbedHelper.getSpacerImage());
+        EmbedBuilder builder = new EmbedBuilder()
+                .setTitle("EXECUTING ORDER 66")
+                .setColor(finished ? EmbedHelper.getGreen() : EmbedHelper.getRed())
+                .setThumbnail(image)
+                .setImage(EmbedHelper.getSpacerImage());
+
         long executed = targetStatus.entrySet().stream().filter(x -> x.getValue().equals(status.getComplete())).count();
         builder.setDescription(executed + "/" + targets.size() + " targets exterminated.");
 
@@ -114,14 +121,15 @@ public class ExecuteOrder66Command extends DiscordCommand {
             String name = getName(target);
             String status = targetStatus.get(target);
             if(i == 0) {
-                builder.addField(getTitleField("#", number));
-                builder.addField(getTitleField("TARGET", name));
-                builder.addField(getTitleField("EXECUTED", status));
+                builder
+                        .addField(getTitleField("#", number))
+                        .addField(getTitleField("TARGET", name))
+                        .addField(getTitleField("EXECUTED", status));
                 continue;
             }
-            builder.addField(getValueField(number));
-            builder.addField(getValueField(name));
-            builder.addField(getValueField(status));
+            builder.addField(getValueField(number))
+                    .addField(getValueField(name))
+                    .addField(getValueField(status));
         }
         return builder.build();
     }
@@ -166,13 +174,16 @@ public class ExecuteOrder66Command extends DiscordCommand {
      */
     private void apologise(User loser, String invite) {
         try {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(EmbedHelper.getRed());
-            builder.setTitle("I AM SORRY FOR KICKING YOU");
-            builder.setDescription("Sorry about that bro, i'm actually a really friendly bot when you get to know me but I have to do what i'm told.");
-            builder.addField("Feel free to join back though!", invite, true);
-            builder.setThumbnail(image);
-            loser.openPrivateChannel().complete().sendMessage(builder.build()).complete();
+            MessageEmbed apology = new EmbedBuilder()
+                    .setColor(EmbedHelper.getRed())
+                    .setTitle("I AM SORRY FOR KICKING YOU")
+                    .setDescription(
+                            "Sorry about that bro, i'm actually a really friendly bot when you get to know me but I have to do what i'm told."
+                    )
+                    .addField("Feel free to join back though!", invite, true)
+                    .setThumbnail(image)
+                    .build();
+            loser.openPrivateChannel().complete().sendMessage(apology).complete();
         }
         catch(Exception e) {
             e.printStackTrace();

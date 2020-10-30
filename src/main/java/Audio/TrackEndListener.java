@@ -12,12 +12,23 @@ public class TrackEndListener extends AudioEventAdapter {
     private Response method;
     private final boolean leave;
 
+    /**
+     * Create a listener
+     *
+     * @param guild  Guild where audio is playing
+     * @param method Method to execute once audio has finished
+     */
     public TrackEndListener(Guild guild, Response method) {
         this.guild = guild;
         this.method = method;
         this.leave = true;
     }
 
+    /**
+     * Create a listener
+     *
+     * @param guild Guild where audio is playing
+     */
     public TrackEndListener(Guild guild) {
         this.guild = guild;
         this.leave = false;
@@ -33,13 +44,18 @@ public class TrackEndListener extends AudioEventAdapter {
      */
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if(leave) {
-            new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();
+        try {
+            if(leave) {
+                new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();
+            }
+            if(method != null) {
+                new Thread(method::processFinish).start();
+            }
+            player.removeListener(this);
         }
-        if(method != null) {
-            new Thread(method::processFinish).start();
+        catch(Exception e) {
+            e.printStackTrace();
         }
-        player.removeListener(this);
     }
 
     /**
