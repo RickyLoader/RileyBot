@@ -21,7 +21,11 @@ public abstract class LookupCommand extends DiscordCommand {
      * @param maxLength Max length of name
      */
     public LookupCommand(String trigger, String desc, int maxLength) {
-        super(trigger, desc, (trigger + " [name/me/@someone]\n" + trigger + " save [your name]"));
+        super(
+                trigger,
+                desc,
+                (getDefaultHelpText(trigger))
+        );
         this.maxLength = maxLength;
     }
 
@@ -30,12 +34,36 @@ public abstract class LookupCommand extends DiscordCommand {
      *
      * @param trigger   Trigger of command
      * @param desc      Description of command
-     * @param prefix    Prefix argument of command
+     * @param helpText  Help text to be appended to default lookup actions
      * @param maxLength Max length of name
      */
-    public LookupCommand(String trigger, String desc, String prefix, int maxLength) {
-        super(trigger, desc, (trigger + " [name/me/@someone]\n[" + prefix + "] " + trigger + " [name/me/@someone]\n" + trigger + " save [your name]"));
+    public LookupCommand(String trigger, String desc, String helpText, int maxLength) {
+        super(
+                trigger,
+                desc,
+                getDefaultHelpText(trigger) + "\n" + helpText
+        );
         this.maxLength = maxLength;
+    }
+
+    /**
+     * Get a String detailing the default lookup arguments
+     *
+     * @param trigger Trigger to prepend to String
+     * @return trigger [name/me/@someone]
+     */
+    public static String getDefaultLookupArgs(String trigger) {
+        return trigger + " [name/me/@someone]";
+    }
+
+    /**
+     * Get a String detailing the default lookup help text
+     *
+     * @param trigger Trigger to use in help text
+     * @return trigger [name/me/@someone] trigger save [your name]
+     */
+    public static String getDefaultHelpText(String trigger) {
+        return getDefaultLookupArgs(trigger) + "\n" + trigger + " save [your name]";
     }
 
     /**

@@ -8,8 +8,42 @@ public abstract class CODLookupCommand extends LookupCommand {
     private String platform;
 
     public CODLookupCommand(String trigger, String desc) {
-        super(trigger, desc, "acti/battle/psn/xbox", 30);
-        platforms = Arrays.asList("battle", "acti", "xbox", "psn");
+        super(
+                trigger,
+                desc,
+                getHelpText(trigger),
+                30
+        );
+        platforms = getPlatforms();
+    }
+
+    public CODLookupCommand(String trigger, String desc, String helpText) {
+        super(
+                trigger,
+                desc,
+                getHelpText(trigger) + "\n" + helpText,
+                30
+        );
+        platforms = getPlatforms();
+    }
+
+    /**
+     * Get the default help text of platform information
+     *
+     * @param trigger Trigger to prepend
+     * @return Default help text
+     */
+    private static String getHelpText(String trigger) {
+        return "[platform] " + getDefaultLookupArgs(trigger);
+    }
+
+    /**
+     * Get the platforms that can be searched
+     *
+     * @return List of platforms
+     */
+    private List<String> getPlatforms() {
+        return Arrays.asList("battle", "acti", "xbox", "psn");
     }
 
     /**

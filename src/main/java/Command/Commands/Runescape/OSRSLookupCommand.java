@@ -14,7 +14,12 @@ public class OSRSLookupCommand extends LookupCommand {
     private boolean league = false;
 
     public OSRSLookupCommand() {
-        super("osrslookup", "Check out someone's stats on OSRS!", "league", 12);
+        super(
+                "osrslookup",
+                "Check out someone's stats on OSRS!",
+                "league " + getDefaultLookupArgs("osrslookup"),
+                12
+        );
     }
 
     @Override

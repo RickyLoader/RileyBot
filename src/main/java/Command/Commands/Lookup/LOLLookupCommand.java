@@ -14,7 +14,12 @@ public class LOLLookupCommand extends LookupCommand {
     private String displayRegion, apiRegion;
 
     public LOLLookupCommand() {
-        super("lollookup", "Look up a summoner", "region", 16);
+        super(
+                "lollookup",
+                "Look up a summoner",
+                "[region] " + getDefaultLookupArgs("lollookup"),
+                16
+        );
         this.regions = getRegions();
     }
 
