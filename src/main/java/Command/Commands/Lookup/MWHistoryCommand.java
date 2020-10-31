@@ -26,8 +26,8 @@ public class MWHistoryCommand extends MWLookupCommand {
         super(
                 "mwhistory",
                 "Have a gander at a player's match history!",
-                getDefaultLookupArgs("mwhistory") + " [match id]\n"
-                        + getHelpText("mwhistory") + " [match id]"
+                getDefaultLookupArgs("mwhistory") + " [match id/latest]\n"
+                        + getHelpText("mwhistory") + " [match id/latest]"
         );
         String res = "/COD/MW/Data/";
         this.modes = getItemMap(res + "modes.json", "modes");
