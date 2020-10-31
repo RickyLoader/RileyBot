@@ -82,7 +82,7 @@ public class Hiscores extends ImageBuilder {
      */
     public void buildImage(String nameQuery, String helpMessage, String... args) {
         String encodedName = encodeName(nameQuery);
-        String defaultURL = getNormalAccount(encodedName);
+        String defaultURL = league ? getLeagueAccount(encodedName) : getNormalAccount(encodedName);
 
         this.loading = new ImageLoadingMessage(
                 getChannel(),
