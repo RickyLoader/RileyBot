@@ -75,7 +75,7 @@ public abstract class LookupCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         Message message = context.getMessage();
-        String query = stripArguments(message.getContentRaw().toLowerCase().trim());
+        String query = stripArguments(message.getContentRaw().toLowerCase().trim().replaceAll("\\s+", " "));
         MessageChannel channel = context.getMessageChannel();
         User author = context.getUser();
         List<User> mentioned = message.getMentionedUsers();
