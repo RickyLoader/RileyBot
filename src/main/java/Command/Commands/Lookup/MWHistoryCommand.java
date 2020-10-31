@@ -119,7 +119,7 @@ public class MWHistoryCommand extends MWLookupCommand {
                 .addField("**Damage Dealt**", String.valueOf(match.getDamageDealt()), true)
                 .addField("**Damage Taken**", String.valueOf(match.getDamageReceived()), true)
                 .addField("**Longest Streak**", String.valueOf(match.getLongestStreak()), true)
-                .addField("**Distance Traveled**", match.getDistanceTravelled(), false)
+                .addField("**Distance Travelled**", match.getDistanceTravelled(), false)
                 .addField("**Nemesis**", match.getNemesis(), true)
                 .addField("**Most Killed**", match.getMostKilled(), true)
                 .addBlankField(true)
