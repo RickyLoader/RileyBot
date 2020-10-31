@@ -35,7 +35,7 @@ public class Hiscores extends ImageBuilder {
      * @param fontName     Font name
      * @param league       Use league hiscores or normal
      */
-    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName, boolean league){
+    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName, boolean league) {
         super(channel, emoteHelper, resourcePath, fontName);
         this.bossNames = getBossNames();
         this.league = league;
@@ -47,7 +47,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL encoded player name
      */
-    private String encodeName(String name){
+    private String encodeName(String name) {
         try{
             return URLEncoder.encode(name, "UTF-8");
         }
@@ -62,10 +62,10 @@ public class Hiscores extends ImageBuilder {
      *
      * @return Loading criteria
      */
-    private String[] getLoadingCriteria(){
+    private String[] getLoadingCriteria() {
         ArrayList<String> criteria = new ArrayList<>();
         criteria.add(league ? "Player has League stats..." : "Player exists...");
-        if(!league){
+        if(!league) {
             criteria.add("Checking account type...");
         }
         criteria.add("Building image...");
@@ -80,7 +80,7 @@ public class Hiscores extends ImageBuilder {
      * @param helpMessage Help message to display in loading message
      * @param args        none
      */
-    public void buildImage(String nameQuery, String helpMessage, String... args){
+    public void buildImage(String nameQuery, String helpMessage, String... args) {
         String defaultURL = league ? getLeagueAccount(nameQuery) : getNormalAccount(nameQuery);
 
         this.loading = new ImageLoadingMessage(getChannel(), getEmoteHelper(), "OSRS " + (league ? "League" : "Hiscores") + " lookup: " + nameQuery.toUpperCase(), "Give me a second, their website can be slow as fuck.", league ? "https://i.imgur.com/xksIl6S.png" : "https://i.imgur.com/Hoke7jA.png", helpMessage, getLoadingCriteria());
@@ -88,8 +88,8 @@ public class Hiscores extends ImageBuilder {
 
         PlayerStats stats = fetchPlayerData(nameQuery);
 
-        if(stats == null){
-            if(timeout){
+        if(stats == null) {
+            if(timeout) {
                 loading.failLoading("I wasn't able to connect to the " + EmbedHelper.embedURL("hiscores", defaultURL));
                 return;
             }
@@ -110,11 +110,11 @@ public class Hiscores extends ImageBuilder {
      * @param data CSV data from API
      * @return Clue scroll data
      */
-    private String[] parseClueScrolls(String[] data){
+    private String[] parseClueScrolls(String[] data) {
         data = Arrays.copyOfRange(data, 80, 93);
         String[] clues = new String[6];
         int j = 0;
-        for(int i = 1; i < data.length; i += 2){
+        for(int i = 1; i < data.length; i += 2) {
             int quantity = Integer.parseInt(data[i]);
             clues[j] = "x" + ((quantity == -1) ? "0" : data[i]);
             j++;
@@ -129,7 +129,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL to hiscores CSV
      */
-    private String getURL(String type, String name){
+    private String getURL(String type, String name) {
         return "https://secure.runescape.com/m=hiscore_oldschool" + type + "/index_lite.ws?player=" + encodeName(name);
     }
 
@@ -140,7 +140,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL to normal account hiscores CSV
      */
-    private String getNormalAccount(String name){
+    private String getNormalAccount(String name) {
         return getURL("", name);
     }
 
@@ -151,7 +151,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL to ironman account hiscores CSV
      */
-    private String getIronmanAccount(String name){
+    private String getIronmanAccount(String name) {
         return getURL("_ironman", name);
     }
 
@@ -162,7 +162,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL to hardcore ironman account hiscores CSV
      */
-    private String getHardcoreAccount(String name){
+    private String getHardcoreAccount(String name) {
         return getURL("_hardcore_ironman", name);
     }
 
@@ -173,7 +173,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL to ultimate ironman account hiscores CSV
      */
-    private String getUltimateAccount(String name){
+    private String getUltimateAccount(String name) {
         return getURL("_ultimate", name);
     }
 
@@ -184,7 +184,7 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return URL to league account hiscores CSV
      */
-    private String getLeagueAccount(String name){
+    private String getLeagueAccount(String name) {
         return getURL("_seasonal", name);
     }
 
@@ -197,7 +197,7 @@ public class Hiscores extends ImageBuilder {
      * @param type Account type
      * @return PlayerStats object
      */
-    private PlayerStats parsePlayerStats(String name, String url, String[] csv, PlayerStats.ACCOUNT type){
+    private PlayerStats parsePlayerStats(String name, String url, String[] csv, PlayerStats.ACCOUNT type) {
         return new PlayerStats(
                 name,
                 url,
@@ -215,18 +215,18 @@ public class Hiscores extends ImageBuilder {
      * @param name Player name
      * @return CSV data from API
      */
-    private PlayerStats fetchPlayerData(String name){
+    private PlayerStats fetchPlayerData(String name) {
         String url = league ? getLeagueAccount(name) : getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
-        if(normal == null){
+        if(normal == null) {
             return null;
         }
 
         loading.completeStage();
         PlayerStats normalAccount = parsePlayerStats(name, url, normal, league ? PlayerStats.ACCOUNT.LEAGUE : PlayerStats.ACCOUNT.NORMAL);
 
-        if(league){
+        if(league) {
             normalAccount.setLeaguePoints(Integer.parseInt(normal[73]));
             return normalAccount;
         }
@@ -235,7 +235,7 @@ public class Hiscores extends ImageBuilder {
         String ironURL = getIronmanAccount(name);
         String[] iron = hiscoresRequest(ironURL);
 
-        if(iron == null){
+        if(iron == null) {
             loading.completeStage("Player is a normal account!");
             return normalAccount;
         }
@@ -243,7 +243,7 @@ public class Hiscores extends ImageBuilder {
         long ironXP = Long.parseLong(iron[2]);
         long normXP = Long.parseLong(normal[2]);
 
-        if(normXP > ironXP){
+        if(normXP > ironXP) {
             loading.completeStage("Player is a de-ironed normal account!");
             return normalAccount;
         }
@@ -254,10 +254,10 @@ public class Hiscores extends ImageBuilder {
         String hardcoreURL = getHardcoreAccount(name);
         String[] hardcore = hiscoresRequest(hardcoreURL);
 
-        if(hardcore != null){
+        if(hardcore != null) {
             long hcXP = Long.parseLong(hardcore[2]);
 
-            if(ironXP > hcXP){
+            if(ironXP > hcXP) {
                 loading.completeStage("Player was a Hardcore Ironman and died! What a loser!");
                 return ironAccount;
             }
@@ -271,10 +271,10 @@ public class Hiscores extends ImageBuilder {
         String ultimateURL = getUltimateAccount(name);
         String[] ultimate = hiscoresRequest(ultimateURL);
 
-        if(ultimate != null){
+        if(ultimate != null) {
             long ultXP = Long.parseLong(ultimate[2]);
 
-            if(ironXP > ultXP){
+            if(ironXP > ultXP) {
                 loading.completeStage("Player is an Ironman who chickened out of Ultimate Ironman!");
                 return ironAccount;
             }
@@ -292,13 +292,13 @@ public class Hiscores extends ImageBuilder {
      * @param url Hiscores URL to query
      * @return Response from API
      */
-    private String[] hiscoresRequest(String url){
+    private String[] hiscoresRequest(String url) {
         String response = new NetworkRequest(url, false).get();
-        if(response == null){
+        if(response == null) {
             timeout = true;
             return null;
         }
-        if(response.equals("err")){
+        if(response.equals("err")) {
             return null;
         }
         response += "," + url;
@@ -311,7 +311,7 @@ public class Hiscores extends ImageBuilder {
      * @param playerStats Player hiscores stats
      * @return Image showing player stats
      */
-    private BufferedImage buildImage(PlayerStats playerStats){
+    private BufferedImage buildImage(PlayerStats playerStats) {
         BufferedImage image = null;
         int fontSize = 65;
         boolean league = playerStats.isLeague();
@@ -327,11 +327,11 @@ public class Hiscores extends ImageBuilder {
             int y = 315;
 
             String[] skills = playerStats.getSkills();
-            for(int i = 0; i < skills.length; i++){
+            for(int i = 0; i < skills.length; i++) {
                 String level = skills[i];
 
                 // total level
-                if(i == skills.length - 1){
+                if(i == skills.length - 1) {
                     g.setColor(Color.YELLOW);
                     g.drawString(level, x - 70, y + 60);
                     continue;
@@ -348,12 +348,12 @@ public class Hiscores extends ImageBuilder {
                 g.drawString(level, x + 60, y + 60); // bottom
 
                 // Currently 3rd column, reset back to first column and go down a row
-                if((i + 1) % 3 == 0){
+                if((i + 1) % 3 == 0) {
                     x = ogX;
                     y = (y + 160);
                 }
                 // Move to next column
-                else{
+                else {
                     x = (x + 315);
                 }
             }
@@ -363,13 +363,13 @@ public class Hiscores extends ImageBuilder {
             x = 170;
             y = 1960;
             g.setFont(runeFont.deriveFont(fontSize));
-            for(String quantity : clues){
+            for(String quantity : clues) {
                 int quantityWidth = fm.stringWidth(quantity) / 2;
                 g.drawString(quantity, x - quantityWidth, y);
                 x += 340;
             }
             List<Boss> bosses = playerStats.getBossKills();
-            if(bosses.size() > 0){
+            if(bosses.size() > 0) {
                 int max = Math.min(5, bosses.size());
 
                 // All images have 220px height, and the top name banner + bottom border has 260px total height, clue section has height of 425
@@ -380,7 +380,7 @@ public class Hiscores extends ImageBuilder {
 
                 int bossCentre = (int) (image.getWidth() * 0.625); // mid point of boss image section
 
-                for(int i = 0; i < max; i++){
+                for(int i = 0; i < max; i++) {
                     Boss boss = bosses.get(i);
                     BufferedImage bossImage = boss.getImage();
                     g.drawImage(bossImage, bossCentre - (bossImage.getWidth() / 2), y, null);
@@ -393,14 +393,14 @@ public class Hiscores extends ImageBuilder {
                     y += 220 + padding;
                 }
             }
-            else{
+            else {
                 BufferedImage noBoss = getResourceHandler().getImageResource(getResourcePath() + "Templates/no_boss.png");
                 g.drawImage(noBoss, (int) ((image.getWidth() * 0.75)) - (noBoss.getWidth() / 2), 200 + (((image.getHeight() - 200 - 425) / 2) - (noBoss.getHeight() / 2)), null);
             }
 
             // Name, rank, and optional league points
             String name = playerStats.getName();
-            g.setFont(runeFont.deriveFont(runeFont.getSize() * 3F));
+            g.setFont(runeFont.deriveFont(140f));
             fm = g.getFontMetrics();
 
             int nameSectionMid = 115;
@@ -414,13 +414,13 @@ public class Hiscores extends ImageBuilder {
             int nameSectionTextY = nameSectionMid + (fm.getMaxAscent() / 2);
 
             String type = playerStats.getAccountType().toString().toLowerCase();
-            if(playerStats.getAccountType() != PlayerStats.ACCOUNT.NORMAL){
+            if(playerStats.getAccountType() != PlayerStats.ACCOUNT.NORMAL) {
                 BufferedImage accountType = getResourceHandler().getImageResource(getResourcePath() + "Accounts/" + type + ".png");
                 int accountWidth = accountType.getWidth();
                 x = league ? 50 : (x - (int) (accountWidth * 1.5));
                 g.drawImage(accountType, x, nameSectionMid - (accountType.getHeight() / 2), null);
 
-                if(league){
+                if(league) {
                     String points = playerStats.getLeaguePoints();
                     g.drawString(points, x + accountWidth + 15, nameSectionTextY);
                 }
@@ -446,7 +446,7 @@ public class Hiscores extends ImageBuilder {
      * @param csv CSV from API
      * @return Sorted CSV
      */
-    private String[] parseSkills(String[] csv){
+    private String[] parseSkills(String[] csv) {
         return new String[]{csv[4],     // ATTACK
                 csv[13].equals("1") ? "10" : csv[13],    // HITPOINTS
                 csv[46],    // MINING
@@ -487,16 +487,16 @@ public class Hiscores extends ImageBuilder {
      * @param csv csv from API
      * @return Sorted list of boss kill counts
      */
-    private List<Boss> parseBossKills(String[] csv){
+    private List<Boss> parseBossKills(String[] csv) {
 
         // Truncate csv to begin at index of first boss rank
         List<String> stats = Arrays.asList(csv).subList(94, csv.length);
         List<Boss> bosses = new ArrayList<>();
 
         int i = 1;
-        for(String boss : bossNames){
+        for(String boss : bossNames) {
             int kills = Integer.parseInt(stats.get(i));
-            if(kills > -1){
+            if(kills > -1) {
                 bosses.add(new Boss(boss, kills));
             }
             i += 2;
@@ -508,17 +508,17 @@ public class Hiscores extends ImageBuilder {
     /**
      * Hold information about a boss, sortable by kill count
      */
-    private class Boss implements Comparable<Boss>{
+    private class Boss implements Comparable<Boss> {
         private final String name, filename;
         private final int kills;
 
-        Boss(String name, int kills){
+        Boss(String name, int kills) {
             this.name = name;
             this.kills = kills;
             this.filename = name + ".png";
         }
 
-        int getKills(){
+        int getKills() {
             return kills;
         }
 
@@ -527,7 +527,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Formatted string containing kill count and qualifier (kills, games, etc)
          */
-        String formatKills(){
+        String formatKills() {
             String type;
             switch(name) {
                 case "Barrows Chests":
@@ -554,12 +554,12 @@ public class Hiscores extends ImageBuilder {
             return NumberFormat.getNumberInstance().format(kills) + " " + type;
         }
 
-        BufferedImage getImage(){
+        BufferedImage getImage() {
             return getResourceHandler().getImageResource(getResourcePath() + "Bosses/" + filename);
         }
 
         @Override
-        public int compareTo(Boss o){
+        public int compareTo(Boss o) {
             return o.getKills() - kills;
         }
     }
@@ -569,14 +569,14 @@ public class Hiscores extends ImageBuilder {
      *
      * @return List of boss names
      */
-    private String[] getBossNames(){
+    private String[] getBossNames() {
         return new String[]{"Abyssal Sire", "Alchemical Hydra", "Barrows Chests", "Bryophyta", "Callisto", "Cerberus", "Chambers of Xeric", "Chambers of Xeric Challenge Mode", "Chaos Elemental", "Chaos Fanatic", "Commander Zilyana", "Corporeal Beast", "Crazy Archaeologist", "Dagannoth Prime", "Dagannoth Rex", "Dagannoth Supreme", "Deranged Archaeologist", "General Graardor", "Giant Mole", "Grotesque Guardians", "Hespori", "Kalphite Queen", "King Black Dragon", "Kraken", "Kree'Arra", "K'ril Tsutsaroth", "Mimic", "Nightmare", "Obor", "Sarachnis", "Scorpia", "Skotizo", "The Gauntlet", "The Corrupted Gauntlet", "Theatre of Blood", "Thermonuclear Smoke Devil", "TzKal-Zuk", "TzTok-Jad", "Venenatis", "Vet'ion", "Vorkath", "Wintertodt", "Zalcano", "Zulrah"};
     }
 
     /**
      * Hold player hiscores entries - skills, boss kills, clue scrolls, etc
      */
-    private static class PlayerStats{
+    private static class PlayerStats {
         private final String rank, name, url;
         private String leaguePoints;
         private final String[] skills, clues;
@@ -584,7 +584,7 @@ public class Hiscores extends ImageBuilder {
         private final ACCOUNT type;
         private final DecimalFormat commaFormat = new DecimalFormat("#,###");
 
-        enum ACCOUNT{
+        enum ACCOUNT {
             NORMAL, IRON, ULTIMATE, LEAGUE, HARDCORE
         }
 
@@ -599,7 +599,7 @@ public class Hiscores extends ImageBuilder {
          * @param bossKills List of boss kill data
          * @param type      Account type
          */
-        public PlayerStats(String name, String url, int rank, String[] skills, String[] clues, List<Boss> bossKills, ACCOUNT type){
+        public PlayerStats(String name, String url, int rank, String[] skills, String[] clues, List<Boss> bossKills, ACCOUNT type) {
             this.name = name;
             this.url = url;
             this.rank = commaFormat.format(rank);
@@ -614,7 +614,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return URL to hiscores CSV
          */
-        public String getUrl(){
+        public String getUrl() {
             return url;
         }
 
@@ -623,7 +623,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Stats are from a league
          */
-        public boolean isLeague(){
+        public boolean isLeague() {
             return type == ACCOUNT.LEAGUE;
         }
 
@@ -632,7 +632,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Player name
          */
-        public String getName(){
+        public String getName() {
             return name;
         }
 
@@ -641,7 +641,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return League points
          */
-        public String getLeaguePoints(){
+        public String getLeaguePoints() {
             return leaguePoints;
         }
 
@@ -650,7 +650,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @param leaguePoints League points to set
          */
-        public void setLeaguePoints(int leaguePoints){
+        public void setLeaguePoints(int leaguePoints) {
             this.leaguePoints = commaFormat.format(leaguePoints) + " points";
         }
 
@@ -659,7 +659,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Player hiscores rank
          */
-        public String getRank(){
+        public String getRank() {
             return rank;
         }
 
@@ -668,7 +668,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Bosses
          */
-        public List<Boss> getBossKills(){
+        public List<Boss> getBossKills() {
             return bossKills;
         }
 
@@ -677,7 +677,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Clue scroll completions
          */
-        public String[] getClues(){
+        public String[] getClues() {
             return clues;
         }
 
@@ -686,7 +686,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Account type
          */
-        public ACCOUNT getAccountType(){
+        public ACCOUNT getAccountType() {
             return type;
         }
 
@@ -695,7 +695,7 @@ public class Hiscores extends ImageBuilder {
          *
          * @return Player skill values
          */
-        public String[] getSkills(){
+        public String[] getSkills() {
             return skills;
         }
     }
