@@ -97,7 +97,7 @@ public class MWHistoryCommand extends MWLookupCommand {
      * @return Message embed detailing match or error
      */
     private MessageEmbed getMatchEmbed(MatchHistory matchHistory) {
-        Match match = matchHistory.getMatch(matchID);
+        Match match = matchID.equals("latest") ? matchHistory.getMatches().get(0) : matchHistory.getMatch(matchID);
         if(match == null) {
             return getErrorEmbed(matchHistory);
         }
