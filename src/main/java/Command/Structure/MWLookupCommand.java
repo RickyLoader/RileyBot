@@ -10,6 +10,10 @@ public abstract class MWLookupCommand extends CODLookupCommand {
         super(trigger, desc);
     }
 
+    public MWLookupCommand(String trigger, String desc, String helpText) {
+        super(trigger, desc, helpText);
+    }
+
     @Override
     public String getSavedName(long id) {
         return DiscordUser.getSavedName(id, DiscordUser.MW);

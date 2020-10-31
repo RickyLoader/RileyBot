@@ -34,7 +34,7 @@ public class DiscordUser {
      */
     public static String getSavedName(long id, String nameType) {
         String json = new NetworkRequest("users/names/" + nameType + "/" + id, true).get();
-        return json == null || new JSONObject(json).isNull(nameType) ? null : new JSONObject(json).getString(nameType);
+        return json.isEmpty() ? null : new JSONObject(json).getString(nameType);
     }
 
     /**

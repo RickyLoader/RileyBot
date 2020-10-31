@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -41,7 +42,7 @@ public abstract class LookupCommand extends DiscordCommand {
         super(
                 trigger,
                 desc,
-                getDefaultHelpText(trigger) + "\n" + helpText
+                getDefaultHelpText(trigger) + "\n\n" + helpText
         );
         this.maxLength = maxLength;
     }
@@ -73,10 +74,11 @@ public abstract class LookupCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-        String query = stripArguments(context.getLowerCaseMessage().trim());
+        Message message = context.getMessage();
+        String query = stripArguments(message.getContentRaw().toLowerCase().trim());
         MessageChannel channel = context.getMessageChannel();
         User author = context.getUser();
-        List<User> mentioned = context.getMessage().getMentionedUsers();
+        List<User> mentioned = message.getMentionedUsers();
 
         if(!query.startsWith(getTrigger() + " ")) {
             channel.sendMessage(getHelpNameCoded()).queue();

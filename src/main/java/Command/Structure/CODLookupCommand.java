@@ -33,7 +33,7 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @param trigger Trigger to prepend
      * @return Default help text
      */
-    private static String getHelpText(String trigger) {
+    public static String getHelpText(String trigger) {
         return "[platform] " + getDefaultLookupArgs(trigger);
     }
 
@@ -55,8 +55,35 @@ public abstract class CODLookupCommand extends LookupCommand {
         return platform;
     }
 
+    /**
+     * Strip platform out of query
+     *
+     * @param query String which triggered command
+     * @return trigger [name]
+     */
     @Override
     public String stripArguments(String query) {
+        return fixName(setPlatform(query));
+    }
+
+    /**
+     * Remove trailing zero from name if present
+     *
+     * @param name Name to fix
+     * @return name#0 -> name
+     */
+    public String fixName(String name) {
+        return name.endsWith("#0") ? name.replace("#0", "") : name;
+    }
+
+    /**
+     * Strip the platform from the given query
+     * and save to a variable
+     *
+     * @param query Query to remove platform from
+     * @return Query with platform removed
+     */
+    public String setPlatform(String query) {
         String platform = query.split(" ")[0];
         if(platform.equals(getTrigger())) {
             this.platform = "acti";
@@ -64,9 +91,6 @@ public abstract class CODLookupCommand extends LookupCommand {
         else {
             this.platform = platform;
             query = query.replaceFirst(platform, "").trim();
-        }
-        if(query.endsWith("#0")) {
-            query = query.replace("#0", "");
         }
         return query;
     }
