@@ -268,9 +268,9 @@ public class MWHistoryCommand extends MWLookupCommand {
                             playerSummary.has("mostKilled") ? playerSummary.getString("mostKilled") : "-",
                             playerStats.getInt("longestStreak"),
                             playerStats.getInt("damageDone"),
-                            playerStats.getInt("damageTaken"),
+                            playerStats.has("damageTaken") ? playerStats.getInt("damageTaken") : 0,
                             playerStats.getInt("matchXp"),
-                            playerStats.getInt("distanceTraveled"),
+                            playerStats.has("distanceTraveled") ? playerStats.getInt("distanceTraveled") : 0,
                             helper
                     )
             );
