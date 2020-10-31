@@ -38,6 +38,9 @@ public class MWHistoryCommand extends MWLookupCommand {
     public String stripArguments(String query) {
         query = setPlatform(query); // mwhistory args[]
         String[] args = query.split(" ");
+        if(args.length == 1) {
+            return query;
+        }
         if(args[1].equals("save") || args.length < 3) {
             matchID = null;
             return fixName(query); // mwhistory save [name] || mwhistory [name]
