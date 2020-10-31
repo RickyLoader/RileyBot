@@ -39,7 +39,6 @@ public class ResourceHandler {
             return ImageIO.read(getResourceFileAsStream(path));
         }
         catch(Exception e) {
-            e.printStackTrace();
             return null;
         }
     }

@@ -224,7 +224,11 @@ public class SummonerImage extends ImageBuilder {
             g.setFont(getGameFont().deriveFont(50f));
             FontMetrics fm = g.getFontMetrics();
             String level = String.valueOf(summoner.getLevel());
-            g.drawString(level, (levelCircle.getWidth() - fm.stringWidth(level)) / 2, ((levelCircle.getHeight() - fm.getHeight()) / 2) + fm.getMaxAscent());
+            g.drawString(
+                    level,
+                    (levelCircle.getWidth() - fm.stringWidth(level)) / 2,
+                    (levelCircle.getHeight() / 2) + (fm.getMaxAscent() / 2)
+            );
             g.drawImage(borderOutline, getCenterX(levelCircle, borderOutline), getCenterY(levelCircle, borderOutline), null);
 
             g = banner.getGraphics();
@@ -232,7 +236,11 @@ public class SummonerImage extends ImageBuilder {
             fm = g.getFontMetrics();
             g.drawImage(levelCircle, banner.getWidth() - (levelCircle.getWidth() * 2), getCenterY(banner, levelCircle), null);
             String name = summoner.getName();
-            g.drawString(name, (banner.getWidth() - fm.stringWidth(name)) / 2, ((banner.getHeight() - fm.getHeight()) / 2) + fm.getMaxAscent());
+            g.drawString(
+                    name,
+                    (banner.getWidth() - fm.stringWidth(name)) / 2,
+                    (banner.getHeight() / 2) + (fm.getMaxAscent() / 2)
+            );
             if(profileIcon != null) {
                 g.drawImage(profileIcon, profileIcon.getWidth(), getCenterY(banner, profileIcon), null);
             }

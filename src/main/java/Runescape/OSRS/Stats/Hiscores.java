@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -112,10 +113,17 @@ public class Hiscores extends ImageBuilder {
         }
 
         List<Boss> bossKills = getBossKills(data);
-
         String[] clues = getClueScrolls(data);
         String[] stats = orderSkills(data);
-        BufferedImage playerImage = buildImage(nameQuery, data[0], stats, bossKills, clues);
+
+        BufferedImage playerImage = buildImage(
+                nameQuery,
+                data[0],
+                stats,
+                bossKills,
+                clues,
+                Integer.parseInt(data[73])
+        );
         loading.completeStage();
         String url = ImgurManager.uploadImage(playerImage);
         loading.completeStage();
@@ -181,6 +189,7 @@ public class Hiscores extends ImageBuilder {
         normal[0] = null;
 
         if(league) {
+            normal[0] = "league";
             return normal;
         }
 
@@ -257,16 +266,17 @@ public class Hiscores extends ImageBuilder {
     }
 
     /**
-     * Build an image based on the player's stats, boss kills, and clue scrolls
+     * Build an image based on the player's stats, boss kills, clue scrolls, and league points (where applicable)
      *
-     * @param name   Player name
-     * @param type   Player account type
-     * @param skills Player stats
-     * @param bosses Player boss kills
-     * @param clues  Player clue scroll completions
+     * @param name         Player name
+     * @param type         Player account type
+     * @param skills       Player stats
+     * @param bosses       Player boss kills
+     * @param clues        Player clue scroll completions
+     * @param leaguePoints Player league points
      * @return Image showing player stats
      */
-    private BufferedImage buildImage(String name, String type, String[] skills, List<Boss> bosses, String[] clues) {
+    private BufferedImage buildImage(String name, String type, String[] skills, List<Boss> bosses, String[] clues, int leaguePoints) {
         BufferedImage image = null;
         int fontSize = 65;
         try {
@@ -274,6 +284,7 @@ public class Hiscores extends ImageBuilder {
             Graphics g = image.getGraphics();
             Font runeFont = new Font("RuneScape Chat '07", Font.PLAIN, fontSize);
             g.setFont(runeFont);
+            FontMetrics fm = g.getFontMetrics();
 
             // First skill location
             int x = 200, ogX = 200;
@@ -316,7 +327,7 @@ public class Hiscores extends ImageBuilder {
             y = 1960;
             g.setFont(runeFont.deriveFont(fontSize));
             for(String quantity : clues) {
-                int quantityWidth = g.getFontMetrics().stringWidth(quantity) / 2;
+                int quantityWidth = fm.stringWidth(quantity) / 2;
                 g.drawString(quantity, x - quantityWidth, y);
                 x += 340;
             }
@@ -340,8 +351,12 @@ public class Hiscores extends ImageBuilder {
                     g.setColor(Color.YELLOW);
                     g.setFont(runeFont.deriveFont(runeFont.getSize() * 1.2F));
                     String kills = boss.formatKills();
-                    int killWidth = g.getFontMetrics().stringWidth(kills);
-                    g.drawString(kills, (int) ((image.getWidth() * 0.875) - killWidth / 2), (y + (bossImage.getHeight() / 2) + (g.getFont().getSize() / 2)));
+                    int killWidth = fm.stringWidth(kills);
+                    g.drawString(
+                            kills,
+                            (int) ((image.getWidth() * 0.875) - killWidth / 2),
+                            (y + (bossImage.getHeight() / 2) + (fm.getHeight() / 2))
+                    );
                     y += 220 + padding;
                 }
             }
@@ -351,16 +366,34 @@ public class Hiscores extends ImageBuilder {
             }
 
             // Name stuff
-
             g.setFont(runeFont.deriveFont(runeFont.getSize() * 3F));
-            int nameWidth = g.getFontMetrics().stringWidth(name);
+            fm = g.getFontMetrics();
+            int nameSectionMid = 115;
+
+            int nameWidth = fm.stringWidth(name);
             x = (image.getWidth() / 2) - (nameWidth / 2);
-            y = 100 + (g.getFont().getSize() / 2);
+            y = nameSectionMid + (fm.getMaxAscent() / 2);
             g.drawString(name.toUpperCase(), x, y);
 
             if(type != null) {
                 BufferedImage accountType = getResourceHandler().getImageResource(getResourcePath() + "Accounts/" + type + ".png");
-                g.drawImage(accountType, x - (int) (accountType.getWidth() * 1.5), 115 - (accountType.getHeight() / 2), null);
+                int accountWidth = accountType.getWidth();
+                x = league ? 50 : (x - (int) (accountWidth * 1.5));
+                g.drawImage(
+                        accountType,
+                        x,
+                        nameSectionMid - (accountType.getHeight() / 2),
+                        null);
+                if(league) {
+                    g.setFont(runeFont.deriveFont(75f));
+                    fm = g.getFontMetrics();
+                    String points = new DecimalFormat("#,### points").format(leaguePoints);
+                    g.drawString(
+                            points,
+                            x + accountWidth + 15,
+                            nameSectionMid + (fm.getMaxAscent() / 2)
+                    );
+                }
             }
             g.dispose();
         }
