@@ -3,7 +3,7 @@ package Command.Commands.Runescape;
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
-import Runescape.Stats.Hiscores;
+import Runescape.Stats.RS3Hiscores;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -11,20 +11,37 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a OSRS player and build an image with their stats
  */
 public class RS3LookupCommand extends LookupCommand {
+    private boolean virtual;
 
     public RS3LookupCommand() {
-        super("rs3lookup", "Check out someone's stats on RS3!", 12);
+        super(
+                "rs3lookup",
+                "Check out someone's stats on RS3!",
+                "virtual " + getDefaultLookupArgs("rs3lookup"),
+                12
+        );
     }
 
     @Override
     public void processName(String name, CommandContext context) {
-        Hiscores hiscores = new Hiscores(
+        RS3Hiscores hiscores = new RS3Hiscores(
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
-                "/Runescape/RS3/",
-                "rs3.ttf"
+                virtual
         );
-        hiscores.buildImage(name, getHelpName());
+        hiscores.buildImage(name, "Type " + getTrigger() + " for help");
+    }
+
+    @Override
+    public String stripArguments(String query) {
+        if(query.startsWith("virtual")) {
+            query = query.replaceFirst("virtual", "").trim();
+            virtual = true;
+        }
+        else {
+            virtual = false;
+        }
+        return query;
     }
 
     @Override
@@ -35,5 +52,10 @@ public class RS3LookupCommand extends LookupCommand {
     @Override
     public void saveName(String name, MessageChannel channel, User user) {
         DiscordUser.saveName(name, DiscordUser.RS3, channel, user);
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return query.startsWith(getTrigger()) || query.startsWith("virtual") && query.contains(getTrigger());
     }
 }

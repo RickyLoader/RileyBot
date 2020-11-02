@@ -48,13 +48,12 @@ public class EmbedLoadingMessage {
      * @return Embed builder
      */
     public EmbedBuilder getEmbedBuilder() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(getTitle());
-        builder.setDescription(getDesc());
-        builder.setThumbnail(thumbnail);
-        builder.setColor(getColour());
-        builder.setFooter(helpMessage, thumbnail);
-        return builder;
+        return new EmbedBuilder()
+                .setTitle(getTitle())
+                .setDescription(getDesc())
+                .setThumbnail(thumbnail)
+                .setColor(getColour())
+                .setFooter(helpMessage, thumbnail);
     }
 
     /**

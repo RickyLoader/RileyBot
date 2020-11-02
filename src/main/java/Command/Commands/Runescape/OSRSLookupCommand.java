@@ -3,7 +3,7 @@ package Command.Commands.Runescape;
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
-import Runescape.OSRS.Stats.Hiscores;
+import Runescape.OSRS.Stats.OSRSHiscores;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -11,38 +11,56 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a OSRS player and build an image with their stats
  */
 public class OSRSLookupCommand extends LookupCommand {
-    private boolean league = false;
+    private boolean league = false, virtual = false;
 
     public OSRSLookupCommand() {
         super(
                 "osrslookup",
                 "Check out someone's stats on OSRS!",
-                "league " + getDefaultLookupArgs("osrslookup"),
+                "[league] [virtual] " + getDefaultLookupArgs("osrslookup"),
                 12
         );
     }
 
     @Override
     public void processName(String name, CommandContext context) {
-        Hiscores hiscores = new Hiscores(
+        OSRSHiscores hiscores = new OSRSHiscores(
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
-                "/Runescape/OSRS/",
-                "osrs.ttf",
-                league
+                league,
+                virtual
         );
-        hiscores.buildImage(name, getHelpName());
+        hiscores.buildImage(name, "Type " + getTrigger() + " for help");
     }
 
     @Override
     public String stripArguments(String query) {
-        if(query.startsWith("league")) {
-            query = query.replaceFirst("league", "").trim();
-            league = true;
+        if(query.startsWith(getTrigger())) {
+            return query;
         }
-        else {
-            league = false;
+
+        boolean league = false;
+        boolean virtual = false;
+
+        String[] args = query
+                .split(getTrigger())[0]
+                .trim()
+                .split(" ");
+
+        for(String arg : args) {
+            switch(arg) {
+                case "league":
+                    league = true;
+                    break;
+                case "virtual":
+                    virtual = true;
+                    break;
+            }
+            query = query.replaceFirst(arg, "").trim();
         }
+
+        this.league = league;
+        this.virtual = virtual;
         return query;
     }
 
@@ -58,6 +76,8 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public boolean matches(String query) {
-        return query.startsWith(getTrigger()) || query.startsWith("league");
+        return query.startsWith(getTrigger()) ||
+                query.startsWith("league") && query.contains(getTrigger()) ||
+                query.startsWith("virtual") && query.contains(getTrigger());
     }
 }
