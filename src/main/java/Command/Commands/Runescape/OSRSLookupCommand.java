@@ -35,8 +35,8 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public String stripArguments(String query) {
-        boolean league = false;
-        boolean virtual = false;
+        league = false;
+        virtual = false;
 
         String[] args = query
                 .split(getTrigger())[0]
@@ -54,9 +54,6 @@ public class OSRSLookupCommand extends LookupCommand {
             }
             query = query.replaceFirst(arg, "").trim();
         }
-
-        this.league = league;
-        this.virtual = virtual;
         return query;
     }
 
