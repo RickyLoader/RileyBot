@@ -35,10 +35,6 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public String stripArguments(String query) {
-        if(query.startsWith(getTrigger())) {
-            return query;
-        }
-
         boolean league = false;
         boolean virtual = false;
 
