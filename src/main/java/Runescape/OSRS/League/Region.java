@@ -23,7 +23,7 @@ public class Region {
      */
     public Region(String name, int unlockIndex) {
         this.name = name;
-        this.imagePath = res + name + ".png";
+        this.imagePath = res + name.toLowerCase() + ".png";
         this.unlockIndex = unlockIndex;
     }
 
