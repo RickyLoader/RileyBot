@@ -53,8 +53,8 @@ public abstract class DiscordCommand {
      * @param filename Filename
      * @return JSON object of file
      */
-    JSONObject readJSONFile(String filename) {
-        String text = new ResourceHandler().getResourceFileAsString("/Commands/" + filename);
+    public JSONObject readJSONFile(String filename) {
+        String text = new ResourceHandler().getResourceFileAsString(filename);
         if(text == null) {
             return null;
         }

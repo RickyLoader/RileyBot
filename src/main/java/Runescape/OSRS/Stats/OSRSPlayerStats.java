@@ -1,14 +1,19 @@
 package Runescape.OSRS.Stats;
 
 import Runescape.Boss;
+import Runescape.OSRS.League.Region;
+import Runescape.OSRS.League.RelicTier;
 import Runescape.PlayerStats;
 import Runescape.Skill;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OSRSPlayerStats extends PlayerStats {
     private final List<Boss> bossKills;
     private int leaguePoints;
+    private ArrayList<Region> regions;
+    private ArrayList<RelicTier> relicTiers;
 
     /**
      * Create OSRS player stats
@@ -59,5 +64,51 @@ public class OSRSPlayerStats extends PlayerStats {
      */
     public List<Boss> getBossKills() {
         return bossKills;
+    }
+
+    /**
+     * Get the player unlocked relic tiers
+     *
+     * @return Player unlocked relic tiers
+     */
+    public ArrayList<RelicTier> getRelicTiers() {
+        return relicTiers;
+    }
+
+    /**
+     * Get the player unlocked regions
+     *
+     * @return Player unlocked regions
+     */
+    public ArrayList<Region> getRegions() {
+        return regions;
+    }
+
+    /**
+     * Set the list of player unlocked relic tiers
+     *
+     * @param relicTiers List of relic tiers the player has unlocked
+     */
+    public void setRelicTiers(ArrayList<RelicTier> relicTiers) {
+        this.relicTiers = relicTiers;
+    }
+
+    /**
+     * Set the list of player unlocked regions
+     *
+     * @param regions List of regions the player has unlocked
+     */
+    public void setRegions(ArrayList<Region> regions) {
+        this.regions = regions;
+    }
+
+    /**
+     * Check if the player has any stored relic & region
+     * unlock data
+     *
+     * @return Player has stored relic & region data
+     */
+    public boolean hasLeagueUnlockData() {
+        return !relicTiers.isEmpty() && !regions.isEmpty();
     }
 }

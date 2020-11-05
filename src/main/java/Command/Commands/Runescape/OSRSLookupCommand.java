@@ -38,6 +38,10 @@ public class OSRSLookupCommand extends LookupCommand {
         league = false;
         virtual = false;
 
+        if(query.equals(getTrigger())) {
+            return query;
+        }
+
         String[] args = query
                 .split(getTrigger())[0]
                 .trim()

@@ -15,7 +15,7 @@ public class VariableLinkCommand extends DiscordCommand {
 
     private HashMap<String, String> parseJSON(String[] variations) {
         HashMap<String, String> versions = new HashMap<>();
-        JSONObject o = readJSONFile("links.json");
+        JSONObject o = readJSONFile("/Commands/links.json");
         if(o == null) {
             return versions;
         }

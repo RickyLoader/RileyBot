@@ -24,7 +24,7 @@ public abstract class JSONListCommand extends DiscordCommand {
 
     private String[] parseJSON(String filename, String root) {
         ArrayList<String> links = new ArrayList<>();
-        JSONObject o = readJSONFile(filename);
+        JSONObject o = readJSONFile("/Commands/" + filename);
         if(o == null) {
             return null;
         }

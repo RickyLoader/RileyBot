@@ -13,6 +13,7 @@ import Command.Commands.Lookup.MWStatsCommand;
 import Command.Commands.Lookup.YoutubeLookupCommand;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
+import Command.Commands.Runescape.TrailblazerCommand;
 import Command.Commands.Runescape.OSRSLookupCommand;
 import Command.Commands.Runescape.RS3LookupCommand;
 import Command.Commands.Variable.*;
@@ -164,6 +165,7 @@ public class DiscordCommandManager {
         addCommand(new FBICommand());
         addCommand(new MillionaireCommand());
         addCommand(new MWHistoryCommand());
+        addCommand(new TrailblazerCommand());
     }
 
     /**

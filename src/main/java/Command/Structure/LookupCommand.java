@@ -13,6 +13,7 @@ import java.util.List;
 public abstract class LookupCommand extends DiscordCommand {
     private final ArrayList<String> currentLookups = new ArrayList<>();
     private final int maxLength;
+    public final static String RESOLVE_NAME_ARGS = " [name/me/@someone]";
 
     /**
      * Initialise the command
@@ -54,7 +55,7 @@ public abstract class LookupCommand extends DiscordCommand {
      * @return trigger [name/me/@someone]
      */
     public static String getDefaultLookupArgs(String trigger) {
-        return trigger + " [name/me/@someone]";
+        return trigger + RESOLVE_NAME_ARGS;
     }
 
     /**

@@ -23,7 +23,7 @@ public class LinkCommand extends DiscordCommand {
     }
 
     private String parseJSON() {
-        JSONObject o = readJSONFile("links.json");
+        JSONObject o = readJSONFile("/Commands/links.json");
         if(o == null) {
             return null;
         }

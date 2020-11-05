@@ -67,4 +67,14 @@ public class DiscordUser {
     public static String getUserData(long id) {
         return new NetworkRequest("users/info/" + id, true).get();
     }
+
+    /**
+     * Get the OSRS league data for the given player name
+     *
+     * @param playerName Player name
+     * @return OSRS league data
+     */
+    public static String getOSRSLeagueData(String playerName) {
+        return new NetworkRequest("osrs/league/player/" + playerName, true).get();
+    }
 }

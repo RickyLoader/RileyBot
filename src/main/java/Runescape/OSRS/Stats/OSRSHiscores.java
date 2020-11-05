@@ -1,12 +1,17 @@
 package Runescape.OSRS.Stats;
 
+import Bot.DiscordUser;
 import Command.Structure.EmoteHelper;
 
 import Runescape.Boss;
 import Runescape.Hiscores;
+import Runescape.OSRS.League.Region;
+import Runescape.OSRS.League.Relic;
+import Runescape.OSRS.League.RelicTier;
 import Runescape.PlayerStats;
 import Runescape.Skill;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.json.JSONObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,6 +26,7 @@ import static Runescape.Skill.SKILL_NAME.*;
 public class OSRSHiscores extends Hiscores {
     private final String[] bossNames;
     private final boolean league, virtual;
+    public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
 
     /**
      * Create the OSRS Hiscores instance
@@ -54,7 +60,7 @@ public class OSRSHiscores extends Hiscores {
 
     @Override
     public String getLoadingThumbnail() {
-        return league ? "https://i.imgur.com/xksIl6S.png" : "https://i.imgur.com/Hoke7jA.png";
+        return league ? leagueThumbnail : "https://i.imgur.com/Hoke7jA.png";
     }
 
     /**
@@ -126,6 +132,9 @@ public class OSRSHiscores extends Hiscores {
 
         if(league) {
             normalAccount.setLeaguePoints(Integer.parseInt(normal[73]));
+            JSONObject leagueData = new JSONObject(DiscordUser.getOSRSLeagueData(name));
+            normalAccount.setRegions(Region.parseRegions(leagueData.getJSONArray("regions")));
+            normalAccount.setRelicTiers(RelicTier.parseRelics(leagueData.getJSONArray("relics")));
             return normalAccount;
         }
 
@@ -209,11 +218,11 @@ public class OSRSHiscores extends Hiscores {
         BufferedImage image = null;
         int fontSize = 65;
         boolean league = stats.isLeague();
-        try{
+        try {
             image = getResourceHandler().getImageResource(getResourcePath() + "Templates/stats_template.png");
             Graphics g = image.getGraphics();
-            Font runeFont = new Font("RuneScape Chat '07", Font.PLAIN, fontSize);
-            g.setFont(runeFont);
+            setGameFont(new Font("RuneScape Chat '07", Font.PLAIN, fontSize));
+            g.setFont(getGameFont());
             FontMetrics fm = g.getFontMetrics();
 
             // First skill location
@@ -260,7 +269,7 @@ public class OSRSHiscores extends Hiscores {
             String[] clues = playerStats.getClues();
             x = 170;
             y = 1960;
-            g.setFont(runeFont.deriveFont(fontSize));
+            g.setFont(getGameFont().deriveFont(fontSize));
             for(String quantity : clues) {
                 int quantityWidth = fm.stringWidth(quantity) / 2;
                 g.drawString(quantity, x - quantityWidth, y);
@@ -284,7 +293,7 @@ public class OSRSHiscores extends Hiscores {
                     g.drawImage(bossImage, bossCentre - (bossImage.getWidth() / 2), y, null);
 
                     g.setColor(Color.YELLOW);
-                    g.setFont(runeFont.deriveFont(runeFont.getSize() * 1.2F));
+                    g.setFont(getGameFont().deriveFont(getGameFont().getSize() * 1.2F));
                     String kills = boss.formatKills();
                     int killWidth = fm.stringWidth(kills);
                     g.drawString(kills, (int) ((image.getWidth() * 0.875) - killWidth / 2), (y + (bossImage.getHeight() / 2) + (fm.getHeight() / 2)));
@@ -298,7 +307,7 @@ public class OSRSHiscores extends Hiscores {
 
             // Name, rank, and optional league points
             String name = playerStats.getName();
-            g.setFont(runeFont.deriveFont(140f));
+            g.setFont(getGameFont().deriveFont(140f));
             fm = g.getFontMetrics();
 
             int nameSectionMid = 115;
@@ -307,7 +316,7 @@ public class OSRSHiscores extends Hiscores {
             y = nameSectionMid + (fm.getMaxAscent() / 2);
             g.drawString(name.toUpperCase(), x, y);
 
-            g.setFont(runeFont.deriveFont(75f));
+            g.setFont(getGameFont().deriveFont(75f));
             fm = g.getFontMetrics();
             int nameSectionTextY = nameSectionMid + (fm.getMaxAscent() / 2);
 
@@ -336,12 +345,127 @@ public class OSRSHiscores extends Hiscores {
                     nameSectionMid - (rankImage.getHeight() / 2),
                     null
             );
+
+            if(league && stats.hasLeagueUnlockData()) {
+                return buildLeagueImage(image, stats);
+            }
             g.dispose();
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
         }
         return image;
+    }
+
+    /**
+     * Append league relics and region unlocks to the player image
+     *
+     * @param baseImage Base Player image
+     * @param stats     Player stats
+     * @return Base player image with league unlocks appended
+     */
+    private BufferedImage buildLeagueImage(BufferedImage baseImage, OSRSPlayerStats stats) {
+        BufferedImage regionImage = buildRegionSection(stats.getRegions());
+        BufferedImage relicImage = buildRelicSection(stats.getRelicTiers());
+
+        BufferedImage leagueImage = new BufferedImage(
+                baseImage.getWidth(),
+                baseImage.getHeight() + regionImage.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        Graphics g = leagueImage.getGraphics();
+        g.drawImage(baseImage, 0, 0, null);
+        g.drawImage(relicImage, 0, baseImage.getHeight(), null);
+        g.drawImage(regionImage, relicImage.getWidth(), baseImage.getHeight(), null);
+        g.dispose();
+        return leagueImage;
+    }
+
+    /**
+     * Create an image displaying the unlocked/locked relic tiers
+     * of a league player
+     *
+     * @param relicTiers List of unlocked relics
+     * @return Image displaying player relics
+     */
+    private BufferedImage buildRelicSection(ArrayList<RelicTier> relicTiers) {
+        BufferedImage relicContainer = getResourceHandler().getImageResource(
+                getResourcePath() + "Templates/relic_container.png"
+        );
+        BufferedImage lockedRelic = getResourceHandler().getImageResource(Relic.res + Relic.lockedRelic);
+        Graphics g = relicContainer.getGraphics();
+        g.setFont(getGameFont().deriveFont(40f));
+        FontMetrics fm = g.getFontMetrics();
+
+        int x = 170, ogX = 170, y = 170;
+
+        // Always display 6 relics - Anything less than max is considered locked
+        for(int i = 0; i < RelicTier.MAX_RELICS; i++) {
+            BufferedImage relicImage;
+            if(i >= relicTiers.size()) {
+                relicImage = lockedRelic;
+            }
+            else {
+                Relic relic = relicTiers.get(i).getRelicByIndex(0);
+                relicImage = getResourceHandler().getImageResource(relic.getImagePath());
+                String name = relic.getName();
+                g.drawString(
+                        name,
+                        x - (fm.stringWidth(name) / 2),
+                        y + (relicImage.getHeight() / 2) + 15 + fm.getMaxAscent()
+                );
+
+            }
+            g.drawImage(
+                    relicImage,
+                    x - (relicImage.getWidth() / 2),
+                    y - (relicImage.getHeight() / 2),
+                    null
+            );
+
+            if((i + 1) % 3 == 0) {
+                x = ogX;
+                y += 312;
+            }
+            else {
+                x += 340;
+            }
+        }
+        g.dispose();
+        return relicContainer;
+    }
+
+    /**
+     * Create an image displaying the unlocked/locked regions
+     * of a league player
+     *
+     * @param regions List of unlocked regions
+     * @return Image displaying player regions
+     */
+    private BufferedImage buildRegionSection(ArrayList<Region> regions) {
+        BufferedImage map = getResourceHandler().getImageResource(Region.res + Region.baseMap);
+        BufferedImage mapContainer = getResourceHandler().getImageResource(
+                getResourcePath() + "Templates/map_container.png"
+        );
+        Graphics g = map.getGraphics();
+        for(Region region : regions) {
+            g.drawImage(
+                    getResourceHandler().getImageResource(region.getImagePath()),
+                    0,
+                    0,
+                    null
+            );
+        }
+        g = mapContainer.getGraphics();
+        g.drawImage(
+                map,
+                (mapContainer.getWidth() / 2) - (map.getWidth() / 2),
+                (mapContainer.getHeight() / 2) - (map.getHeight() / 2),
+                null
+        );
+        g.dispose();
+        return mapContainer;
     }
 
     /**

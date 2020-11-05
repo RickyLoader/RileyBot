@@ -54,7 +54,26 @@ public class ResourceHandler {
         if(stream == null) {
             return null;
         }
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        return getStreamAsString(stream);
+    }
+
+    /**
+     * Get an InputStream as a String
+     *
+     * @param is Input Stream of file
+     * @return File contents String
+     */
+    public String getStreamAsString(InputStream is) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String result = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            is.close();
+            reader.close();
+            return result;
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
