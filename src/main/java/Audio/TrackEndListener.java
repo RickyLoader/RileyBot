@@ -44,6 +44,7 @@ public class TrackEndListener extends AudioEventAdapter {
      */
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        System.out.println("Track ended: " + track.getInfo().title);
         try {
             if(leave) {
                 new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();

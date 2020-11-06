@@ -75,16 +75,18 @@ public class ExecuteOrder66Command extends DiscordCommand {
             targetStatus.put(target, status.getNeutral());
         }
 
-        TrackEndListener.Response doAfter = () -> new Thread(() -> {
-            purgeTargets(context);
-            executor = null;
-        }).start();
-
-        context.playAudio(
-                executor.getTrack(),
-                doAfter
-        );
-        channel.sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
+        channel.sendMessage(
+                buildStatusMessage()
+        ).queue(message -> {
+            id = message.getIdLong();
+            context.playAudio(
+                    executor.getTrack(),
+                    () -> new Thread(() -> {
+                        purgeTargets(context);
+                        executor = null;
+                    }).start()
+            );
+        });
     }
 
     /**

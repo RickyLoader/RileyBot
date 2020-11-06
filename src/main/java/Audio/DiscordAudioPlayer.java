@@ -117,7 +117,12 @@ public class DiscordAudioPlayer {
 
             @Override
             public void loadFailed(FriendlyException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
+                guild.getAudioManager().closeAudioConnection();
+                channel.sendMessage("I couldn't get YouTube on the phone").queue();
+                if(doAfter.length > 0) {
+                    doAfter[0].processFinish();
+                }
             }
         });
     }
