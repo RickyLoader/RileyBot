@@ -14,9 +14,7 @@ public class VoiceChannelCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        if(!context.getAudioPlayer().stop(context.getGuild())) {
-            context.getMessageChannel().sendMessage("You're not allowed to stop this").queue();
-        }
+        context.getAudioPlayer().stop(context.getGuild());
     }
 
     @Override

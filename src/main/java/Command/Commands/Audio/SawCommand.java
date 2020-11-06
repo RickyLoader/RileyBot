@@ -16,8 +16,7 @@ public class SawCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         context.getMessage().delete().complete();
         context.playAudio(
-                "https://www.youtube.com/watch?v=4VB2vjfNp_o",
-                true
+                "https://www.youtube.com/watch?v=4VB2vjfNp_o"
         );
     }
 }

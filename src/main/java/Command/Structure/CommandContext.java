@@ -31,13 +31,12 @@ public class CommandContext {
         return player;
     }
 
-    public boolean playAudio(String audio, boolean cancelable, TrackEndListener.Response... doAfter) {
-        return player.play(
+    public void playAudio(String audio, TrackEndListener.Response... doAfter) {
+        player.play(
                 audio,
                 getMember(),
                 getMessageChannel(),
                 getGuild(),
-                cancelable,
                 doAfter
         );
     }

@@ -16,8 +16,7 @@ public class PlayYoutubeCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         String audio = context.getMessageContent().replace("!play ", "");
         context.playAudio(
-                audio,
-                true
+                audio
         );
     }
 

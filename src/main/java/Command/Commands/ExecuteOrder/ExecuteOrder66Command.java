@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;
@@ -81,22 +80,11 @@ public class ExecuteOrder66Command extends DiscordCommand {
             executor = null;
         }).start();
 
-        boolean play = context.playAudio(
+        context.playAudio(
                 executor.getTrack(),
-                false,
                 doAfter
         );
-
-        if(play) {
-            channel.sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
-            System.out.println(executor.getTrack());
-        }
-        else {
-            channel.sendMessage(buildStatusMessage()).queue(message -> {
-                id = message.getIdLong();
-                doAfter.processFinish();
-            });
-        }
+        channel.sendMessage(buildStatusMessage()).queue(message -> id = message.getIdLong());
     }
 
     /**

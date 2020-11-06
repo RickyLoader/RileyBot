@@ -43,8 +43,7 @@ public class TTSCommand extends DiscordCommand {
             return;
         }
         context.playAudio(
-                url,
-                true
+                url
         );
         logTTS(content, member.getUser(), guild);
     }

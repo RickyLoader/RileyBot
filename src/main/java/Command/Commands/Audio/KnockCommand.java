@@ -10,6 +10,8 @@ public class KnockCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        context.getMessage().delete().queue(aVoid -> context.playAudio("https://www.youtube.com/watch?v=nDAfnDnT2gA", true));
+        context.getMessage().delete().queue(
+                aVoid -> context.playAudio("https://www.youtube.com/watch?v=nDAfnDnT2gA")
+        );
     }
 }

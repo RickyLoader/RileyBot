@@ -15,8 +15,7 @@ public class GhostCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         context.playAudio(
-                "https://www.youtube.com/watch?v=q3O4lCKcuWc",
-                true
+                "https://www.youtube.com/watch?v=q3O4lCKcuWc"
         );
     }
 }
