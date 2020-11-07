@@ -42,6 +42,7 @@ public class TTSCommand extends DiscordCommand {
             channel.sendMessage("Something went wrong when I tried to say that, sorry bro").queue();
             return;
         }
+        System.out.println(url);
         context.playAudio(
                 url
         );
@@ -56,7 +57,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getGoogleTTS(String content) {
         try {
-            return NetworkInfo.getAddress() + "/DiscordBotApi/api/google/" + URLEncoder.encode(content, "UTF-8");
+            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/google/" + URLEncoder.encode(content, "UTF-8");
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -72,7 +73,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getDectalkTTS(String content) {
         try {
-            return NetworkInfo.getAddress() + "/DiscordBotApi/api/dectalk/" + URLEncoder.encode(content, "UTF-8");
+            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/dectalk/" + URLEncoder.encode(content, "UTF-8");
         }
         catch(Exception e) {
             return null;
