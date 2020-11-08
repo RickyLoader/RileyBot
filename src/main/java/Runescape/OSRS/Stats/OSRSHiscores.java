@@ -226,8 +226,11 @@ public class OSRSHiscores extends Hiscores {
         if(playerStats == null) {
             return null;
         }
+        
+        if(!league){
+            getTrackerData((OSRSPlayerStats) playerStats);
+        }
 
-        getTrackerData((OSRSPlayerStats) playerStats);
         return playerStats;
     }
 
