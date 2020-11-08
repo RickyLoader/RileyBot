@@ -2,6 +2,7 @@ package Network;
 
 import okhttp3.*;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -72,14 +73,20 @@ public class NetworkRequest {
      *
      * @param body    body to send
      * @param headers Headers if required
+     * @param async   Async request
      * @return Response from request
      */
-    public String post(RequestBody body, HashMap<String, String> headers) {
+    public String post(RequestBody body, HashMap<String, String> headers, boolean async) {
         try {
             if(headers != null) {
                 parseHeaders(headers);
             }
-            Response response = client.newCall(builder.post(body).build()).execute();
+            Call request = client.newCall(builder.post(body).build());
+            if(async) {
+                asyncRequest(request);
+                return null;
+            }
+            Response response = request.execute();
             return handleResponse(response);
         }
         catch(Exception e) {
@@ -89,13 +96,39 @@ public class NetworkRequest {
     }
 
     /**
+     * Make an async request
+     *
+     * @param call Call to be executed
+     */
+    public void asyncRequest(Call call) {
+        new Thread(() -> {
+            try {
+                call.execute();
+            }
+            catch(IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
      * Make a JSON POST request
      *
-     * @param body body to send
+     * @param body  Body to send
+     * @param async Async request
      * @return Response from request
      */
+    public String post(String body, boolean async) {
+        return post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body), null, async);
+    }
+
+    /**
+     * Make a JSON POST request
+     *
+     * @param body Body to send
+     */
     public String post(String body) {
-        return post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body), null);
+        return post(body, false);
     }
 
     /**
@@ -110,7 +143,7 @@ public class NetworkRequest {
             if(response.body() == null) {
                 return null;
             }
-            if(response.code() == 200 || response.code() == 201 || response.code() == 406) {
+            if(response.code() == 200 || response.code() == 201 || response.code() == 406 || response.code() == 429) {
                 data = response.body().string();
             }
             else if(response.code() == 404 || response.code() == 501 || response.code() == 500 || response.code() == 504) {

@@ -3,6 +3,7 @@ package Runescape.OSRS.Stats;
 import Bot.DiscordUser;
 import Command.Structure.EmoteHelper;
 
+import Network.NetworkRequest;
 import Runescape.Boss;
 import Runescape.Hiscores;
 import Runescape.OSRS.League.Region;
@@ -49,6 +50,7 @@ public class OSRSHiscores extends Hiscores {
         criteria.add(league ? "Player has League stats..." : "Player exists...");
         if(!league) {
             criteria.add("Checking account type...");
+            criteria.add("Checking XP tracker...");
         }
         return criteria;
     }
@@ -107,8 +109,13 @@ public class OSRSHiscores extends Hiscores {
         return getURL("_seasonal", name);
     }
 
-    @Override
-    public PlayerStats fetchPlayerData(String name) {
+    /**
+     * Fetch the player stats
+     *
+     * @param name Player name
+     * @return Player stats object
+     */
+    private PlayerStats fetchStats(String name) {
         String url = league ? getLeagueAccount(name) : getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
@@ -210,6 +217,85 @@ public class OSRSHiscores extends Hiscores {
         }
         loading.completeStage("Player is an Ironman!");
         return ironAccount;
+    }
+
+    @Override
+    public PlayerStats fetchPlayerData(String name) {
+        PlayerStats playerStats = fetchStats(name);
+
+        if(playerStats == null) {
+            return null;
+        }
+
+        getTrackerData((OSRSPlayerStats) playerStats);
+        return playerStats;
+    }
+
+    /**
+     * Update player tracking data/Begin tracking a player
+     *
+     * @param name Player name
+     * @param wait Wait for response
+     */
+    private void updatePlayerTracking(String name, boolean wait) {
+        new NetworkRequest(
+                "https://wiseoldman.net/api/players/track",
+                false
+        ).post(
+                new JSONObject().put("username", name).toString(),
+                !wait
+        );
+    }
+
+    /**
+     * Fetch XP tracking data for the given player
+     *
+     * @param name Player name
+     * @return XP tracking data
+     */
+    private String fetchPlayerTrackingData(String name) {
+        return new NetworkRequest(
+                "https://wiseoldman.net/api/players/username/" + name + "/gained",
+                false
+        ).get();
+    }
+
+    /**
+     * Get the weekly tracker data for the given player.
+     * If the player is not currently tracked begin tracking
+     *
+     * @param playerStats Player stats
+     */
+    private void getTrackerData(OSRSPlayerStats playerStats) {
+        String name = playerStats.getName();
+        String json = fetchPlayerTrackingData(name); // Check if player exists
+
+        if(json.equals("err")) {
+            updatePlayerTracking(name, false); // Tracking a new player can take 20+ seconds, don't wait
+            loading.completeStage("Player not tracked - They will be *soon*™");
+            return;
+        }
+
+        updatePlayerTracking(name, true); // Update player data before fetching again
+        json = fetchPlayerTrackingData(name); // Get updated player data
+
+        JSONObject stats = new JSONObject(json).getJSONObject("week").getJSONObject("data");
+
+        for(String key : stats.keySet()) {
+            JSONObject entry = stats.getJSONObject(key);
+            if(!entry.has("experience")) {
+                continue;
+            }
+            Skill.SKILL_NAME skillName = key.equals("overall")
+                    ?
+                    Skill.SKILL_NAME.TOTAL_LEVEL
+                    :
+                    Skill.SKILL_NAME.valueOf(key.toUpperCase().replace(" ", "_"));
+
+            JSONObject experienceData = entry.getJSONObject("experience");
+            playerStats.addGainedXP(skillName, experienceData.getLong("gained"));
+        }
+        loading.completeStage(playerStats.hasWeeklyGains() ? "Weekly XP obtained" : "No XP gained this week");
     }
 
     @Override
@@ -348,6 +434,16 @@ public class OSRSHiscores extends Hiscores {
 
             if(league && stats.hasLeagueUnlockData()) {
                 return buildLeagueImage(image, stats);
+            }
+
+            if(stats.hasWeeklyGains()) {
+                System.out.println(stats.getName() + " has gained " + stats.getGainedXP() + " XP this week!\n");
+                for(Skill skill : stats.getSkills()) {
+                    if(!skill.hasGainedXP()) {
+                        continue;
+                    }
+                    System.out.println(skill.getName() + ": +" + skill.getGainedXP() + " XP");
+                }
             }
             g.dispose();
         }
@@ -494,7 +590,7 @@ public class OSRSHiscores extends Hiscores {
                 new Skill(MAGIC, 21, csv),
                 new Skill(FLETCHING, 30, csv),
                 new Skill(WOODCUTTING, 27, csv),
-                new Skill(RUNECRAFT, 63, csv),
+                new Skill(RUNECRAFTING, 63, csv),
                 new Skill(SLAYER, 57, csv),
                 new Skill(FARMING, 60, csv),
                 new Skill(CONSTRUCTION, 69, csv),

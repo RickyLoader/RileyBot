@@ -35,10 +35,10 @@ public abstract class Hiscores extends ImageBuilder {
      * @return URL encoded player name
      */
     public String encodeName(String name) {
-        try{
+        try {
             return URLEncoder.encode(name, "UTF-8");
         }
-        catch(UnsupportedEncodingException e){
+        catch(UnsupportedEncodingException e) {
             e.printStackTrace();
             return name;
         }

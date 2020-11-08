@@ -384,7 +384,7 @@ public class RS3Hiscores extends Hiscores {
                 new Skill(MAGIC, 21, csv),
                 new Skill(FLETCHING, 30, csv),
                 new Skill(WOODCUTTING, 27, csv),
-                new Skill(RUNECRAFT, 63, csv),
+                new Skill(RUNECRAFTING, 63, csv),
                 new Skill(SLAYER, 57, csv),
                 new Skill(FARMING, 60, csv),
                 new Skill(CONSTRUCTION, 69, csv),

@@ -7,6 +7,7 @@ public class Skill {
     private final long rank, xp;
     private final int level, virtualLevel;
     private final SKILL_NAME name;
+    private long gained;
     public final static String RANK_IMAGE_PATH = "/Runescape/rank.png";
 
     public enum SKILL_NAME {
@@ -28,7 +29,7 @@ public class Skill {
         MAGIC,
         FLETCHING,
         WOODCUTTING,
-        RUNECRAFT,
+        RUNECRAFTING,
         SLAYER,
         FARMING,
         CONSTRUCTION,
@@ -39,7 +40,7 @@ public class Skill {
         INVENTION,
         ARCHAEOLOGY,
         TOTAL_LEVEL,
-        VIRTUAL_TOTAL_LEVEL,
+        VIRTUAL_TOTAL_LEVEL
     }
 
     /**
@@ -72,6 +73,33 @@ public class Skill {
                 Integer.parseInt(csv[rankIndex + 1]),
                 Long.parseLong(csv[rankIndex + 2])
         );
+    }
+
+    /**
+     * Get the gained XP
+     *
+     * @return Gained XP
+     */
+    public long getGainedXP() {
+        return gained;
+    }
+
+    /**
+     * Set the gained XP to the given value
+     *
+     * @param gained XP gained
+     */
+    public void setGained(long gained) {
+        this.gained = gained;
+    }
+
+    /**
+     * Check if the skill has weekly gained XP
+     *
+     * @return Skill has weekly gained XP
+     */
+    public boolean hasGainedXP() {
+        return gained > 0;
     }
 
     /**

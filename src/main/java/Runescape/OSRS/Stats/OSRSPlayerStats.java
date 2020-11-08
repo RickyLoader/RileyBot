@@ -111,4 +111,32 @@ public class OSRSPlayerStats extends PlayerStats {
     public boolean hasLeagueUnlockData() {
         return !relicTiers.isEmpty() && !regions.isEmpty();
     }
+
+    /**
+     * Add weekly gained XP to the skill of the given name
+     *
+     * @param skillName Skill name
+     * @param gained    XP gained
+     */
+    public void addGainedXP(Skill.SKILL_NAME skillName, long gained) {
+        getSkill(skillName).setGained(gained);
+    }
+
+    /**
+     * Check if the player has weekly gained XP
+     *
+     * @return Player has weekly gained XP
+     */
+    public boolean hasWeeklyGains() {
+        return getTotal().hasGainedXP();
+    }
+
+    /**
+     * Get the weekly gained XP
+     *
+     * @return Weekly gained XP
+     */
+    public long getGainedXP() {
+        return getTotal().getGainedXP();
+    }
 }

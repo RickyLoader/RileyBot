@@ -74,7 +74,7 @@ public class PlayerStats {
      * @return Skill from given name
      */
     public Skill getSkill(Skill.SKILL_NAME name) {
-        return skillMap.getOrDefault(name, null);
+        return skillMap.get(name);
     }
 
     /**
@@ -197,6 +197,15 @@ public class PlayerStats {
      */
     public long getTotalXP() {
         return total.getXP();
+    }
+
+    /**
+     * Get the total level skill
+     *
+     * @return Total level skill
+     */
+    public Skill getTotal() {
+        return total;
     }
 
     /**
