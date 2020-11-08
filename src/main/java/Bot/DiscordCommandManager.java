@@ -199,16 +199,16 @@ public class DiscordCommandManager {
         addCommand(new UnderbellyCommand());
         addCommand(new VapeCommand());
 
-        addCommand((new FishingCommand()));
-        addCommand((new NormanCommand()));
-        addCommand((new PhotoshopCommand()));
-        addCommand((new RaidsCommand()));
-        addCommand((new RestingCommand()));
-        addCommand((new RiggsCommand()));
-        addCommand((new SleepingCommand()));
-        addCommand((new TurboCommand()));
-        addCommand((new TwitchCommand()));
-        addCommand((new VegetableCommand()));
-        addCommand((new VodkaCommand()));
+        addCommand(new FishingCommand());
+        addCommand(new NormanCommand());
+        addCommand(new PhotoshopCommand());
+        addCommand(new RaidsCommand());
+        addCommand(new RestingCommand());
+        addCommand(new RiggsCommand());
+        addCommand(new SleepingCommand());
+        addCommand(new TurboCommand());
+        addCommand(new TwitchCommand());
+        addCommand(new VegetableCommand());
+        addCommand(new VodkaCommand());
     }
 }
