@@ -1,6 +1,5 @@
 package Command.Commands;
 
-import COD.Session;
 import Command.Structure.*;
 import Millionaire.Bank;
 import Millionaire.MillionaireGameshow;
@@ -8,7 +7,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
