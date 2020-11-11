@@ -59,7 +59,12 @@ public class LOLLookupCommand extends LookupCommand {
     @Override
     public void processName(String name, CommandContext context) {
         SummonerImage summonerImage = new SummonerImage(context.getMessageChannel(), context.getEmoteHelper());
-        summonerImage.buildImage(name, getHelpName(), displayRegion, apiRegion);
+        summonerImage.buildImage(
+                name,
+                getHelpName(),
+                displayRegion.toUpperCase(),
+                apiRegion
+        );
     }
 
     @Override

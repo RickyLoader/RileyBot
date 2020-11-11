@@ -344,9 +344,9 @@ public class CombatRecord extends ImageBuilder {
      *
      * @param nameQuery   Player name
      * @param helpMessage Help message to display in loading message
-     * @param args        Platform
+     * @param platform    Platform
      */
-    public void buildImage(String nameQuery, String helpMessage, String... args) {
+    public void buildImage(String nameQuery, String helpMessage, String platform) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getEmoteHelper(),
@@ -360,7 +360,7 @@ public class CombatRecord extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.player = new MWPlayer(nameQuery, args[0]);
+        this.player = new MWPlayer(nameQuery, platform);
         if(!player.success()) {
             loading.failLoading(player.getStatus());
             return;

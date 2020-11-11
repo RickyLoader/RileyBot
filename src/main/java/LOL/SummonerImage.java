@@ -25,14 +25,12 @@ public class SummonerImage extends ImageBuilder {
     /**
      * Build the various sections of the image and draw them each on to the background image
      *
-     * @param nameQuery   Player name
-     * @param helpMessage Help message to display in loading message
-     * @param args        Region
+     * @param nameQuery     Player name
+     * @param helpMessage   Help message to display in loading message
+     * @param displayRegion Region as displayed in game - "OCE"
+     * @param apiRegion     Region code for API - "oc1"
      */
-    @Override
-    public void buildImage(String nameQuery, String helpMessage, String... args) {
-        String displayRegion = args[0].toUpperCase();
-        String apiRegion = args[1];
+    public void buildImage(String nameQuery, String helpMessage, String displayRegion, String apiRegion) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getEmoteHelper(),

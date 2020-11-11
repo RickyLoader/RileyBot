@@ -13,11 +13,10 @@ import static Command.Structure.ImageBuilder.registerFont;
 
 public class BlitzImageBuilder {
     private final Font blitzFont;
-    private final ResourceHandler handler;
     private final BufferedImage next, abilityOrderTemplate;
 
     public BlitzImageBuilder() {
-        this.handler = new ResourceHandler();
+        ResourceHandler handler = new ResourceHandler();
         this.blitzFont = registerFont("/LOL/blitz_font.ttf", handler);
         this.next = handler.getImageResource("/LOL/next.png");
         this.abilityOrderTemplate = handler.getImageResource("/LOL/Champions/Abilities/Order/ability_order.png");

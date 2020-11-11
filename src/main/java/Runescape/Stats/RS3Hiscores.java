@@ -394,7 +394,7 @@ public class RS3Hiscores extends Hiscores {
                 new Skill(DIVINATION, 78, csv),
                 new Skill(INVENTION, 81, csv),
                 new Skill(ARCHAEOLOGY, 84, csv),
-                new Skill(TOTAL_LEVEL, 0, csv),
+                new Skill(OVERALL, 0, csv),
         };
     }
 
