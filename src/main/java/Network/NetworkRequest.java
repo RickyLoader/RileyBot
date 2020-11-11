@@ -1,6 +1,7 @@
 package Network;
 
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -81,12 +82,22 @@ public class NetworkRequest {
             if(headers != null) {
                 parseHeaders(headers);
             }
-            Call request = client.newCall(builder.post(body).build());
+            Request request = builder.post(body).build();
             if(async) {
-                asyncRequest(request);
+                asyncRequest(request, new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        // Do nothing
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) {
+                        response.close();
+                    }
+                });
                 return null;
             }
-            Response response = request.execute();
+            Response response = client.newCall(request).execute();
             return handleResponse(response);
         }
         catch(Exception e) {
@@ -98,17 +109,11 @@ public class NetworkRequest {
     /**
      * Make an async request
      *
-     * @param call Call to be executed
+     * @param request  Request to be executed
+     * @param callback Callback to use
      */
-    public void asyncRequest(Call call) {
-        new Thread(() -> {
-            try {
-                call.execute();
-            }
-            catch(IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+    public void asyncRequest(Request request, Callback callback) {
+        client.newCall(request).enqueue(callback);
     }
 
     /**
