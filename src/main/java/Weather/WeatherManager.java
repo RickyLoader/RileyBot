@@ -570,12 +570,16 @@ public class WeatherManager {
          * @return Day suffix
          */
         private String getDaySuffix(int day) {
-            switch(day % 10) {
+            switch(day) {
                 case 1:
+                case 21:
+                case 31:
                     return "st";
                 case 2:
+                case 22:
                     return "nd";
                 case 3:
+                case 23:
                     return "rd";
                 default:
                     return "th";
