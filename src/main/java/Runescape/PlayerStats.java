@@ -38,7 +38,7 @@ public class PlayerStats {
         for(Skill skill : skills) {
             skillMap.put(skill.getName(), skill);
         }
-        this.total = getSkill(Skill.SKILL_NAME.TOTAL_LEVEL);
+        this.total = getSkill(Skill.SKILL_NAME.OVERALL);
         this.virtualTotal = calculateVirtualTotal(total, skills);
     }
 
@@ -53,7 +53,7 @@ public class PlayerStats {
         int xp = 0;
         int level = 0;
         for(Skill skill : skills) {
-            if(skill.getName() == Skill.SKILL_NAME.TOTAL_LEVEL) {
+            if(skill.getName() == Skill.SKILL_NAME.OVERALL) {
                 continue;
             }
             xp += skill.getXP();

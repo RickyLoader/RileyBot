@@ -39,7 +39,7 @@ public class Skill {
         DIVINATION,
         INVENTION,
         ARCHAEOLOGY,
-        TOTAL_LEVEL,
+        OVERALL,
         VIRTUAL_TOTAL_LEVEL
     }
 
@@ -91,6 +91,15 @@ public class Skill {
      */
     public void setGained(long gained) {
         this.gained = gained;
+    }
+
+    /**
+     * Get the path to the skill icon image
+     *
+     * @return Skill image path
+     */
+    public String getImagePath() {
+        return "/Runescape/OSRS/Skills/" + name.name() + ".png";
     }
 
     /**

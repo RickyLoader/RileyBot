@@ -145,9 +145,8 @@ public abstract class Hiscores extends ImageBuilder {
      *
      * @param nameQuery   Player name
      * @param helpMessage Help message to display in loading message
-     * @param args        none
      */
-    public void buildImage(String nameQuery, String helpMessage, String... args) {
+    public void buildImage(String nameQuery, String helpMessage) {
         String defaultURL = getDefaultURL(nameQuery);
         ArrayList<String> loadingCriteria = getLoadingCriteria();
         loadingCriteria.add("Building image...");

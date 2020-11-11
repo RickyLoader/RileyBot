@@ -1,19 +1,22 @@
 package Runescape.OSRS.Stats;
 
 import Runescape.Boss;
+import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.RelicTier;
 import Runescape.PlayerStats;
 import Runescape.Skill;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OSRSPlayerStats extends PlayerStats {
     private final List<Boss> bossKills;
-    private int leaguePoints;
+    private LeagueTier leagueTier;
     private ArrayList<Region> regions;
     private ArrayList<RelicTier> relicTiers;
+    private Date trackerStart, trackerEnd;
 
     /**
      * Create OSRS player stats
@@ -40,12 +43,12 @@ public class OSRSPlayerStats extends PlayerStats {
     }
 
     /**
-     * Get the player league points
+     * Get the league tier info
      *
-     * @return League points
+     * @return League tier
      */
-    public String getLeaguePoints() {
-        return commaFormat.format(leaguePoints) + " points";
+    public LeagueTier getLeagueTier() {
+        return leagueTier;
     }
 
     /**
@@ -54,7 +57,7 @@ public class OSRSPlayerStats extends PlayerStats {
      * @param leaguePoints League points to set
      */
     public void setLeaguePoints(int leaguePoints) {
-        this.leaguePoints = leaguePoints == -1 ? 0 : leaguePoints;
+        this.leagueTier = new LeagueTier(leaguePoints == -1 ? 0 : leaguePoints);
     }
 
     /**
@@ -138,5 +141,34 @@ public class OSRSPlayerStats extends PlayerStats {
      */
     public long getGainedXP() {
         return getTotal().getGainedXP();
+    }
+
+    /**
+     * Set the XP tracker period with a start and end date
+     *
+     * @param start Start date of tracker
+     * @param end   End date of tracker
+     */
+    public void setTrackerPeriod(Date start, Date end) {
+        this.trackerStart = start;
+        this.trackerEnd = end;
+    }
+
+    /**
+     * Get the end date of the XP tracker
+     *
+     * @return End date
+     */
+    public Date getTrackerEndDate() {
+        return trackerEnd;
+    }
+
+    /**
+     * Get the start date of the XP tracker
+     *
+     * @return End date
+     */
+    public Date getTrackerStartDate() {
+        return trackerStart;
     }
 }
