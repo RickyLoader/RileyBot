@@ -63,20 +63,19 @@ public class CWCountdownCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
         Calendar calendar = Calendar.getInstance();
-        TimeZone timeZone = TimeZone.getDefault();
+        TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
+
         switch(context.getLowerCaseMessage()) {
             case "cold war beta":
-                timeZone = TimeZone.getTimeZone("America/Los_Angeles");
                 calendar.set(2020, Calendar.OCTOBER, 17, 10, 0, 0);
                 type = "PC open beta";
                 break;
             case "cold war early beta":
-                timeZone = TimeZone.getTimeZone("America/Los_Angeles");
                 calendar.set(2020, Calendar.OCTOBER, 15, 10, 0, 0);
                 type = "PC early beta";
                 break;
             case "cold war":
-                calendar.set(2020, Calendar.NOVEMBER, 13, 0, 0, 0);
+                calendar.set(2020, Calendar.NOVEMBER, 12, 21, 0, 0);
                 type = "Cold War";
                 break;
             default:
