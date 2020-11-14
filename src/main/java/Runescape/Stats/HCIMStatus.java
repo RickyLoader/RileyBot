@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
  * Hold information on a HCIM death
  */
 public class HCIMStatus {
-    private boolean dead, disabled;
+    private boolean dead;
     private String cause, location, date;
 
     /**
