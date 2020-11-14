@@ -121,7 +121,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 .addField("**Accuracy**", match.getAccuracySummary(), true)
                 .addField("**Damage Dealt**", String.valueOf(match.getDamageDealt()), true)
                 .addField("**Damage Taken**", String.valueOf(match.getDamageReceived()), true)
-                .addField("**Longest Streak**", String.valueOf(match.getLongestStreak()), true)
+                .addField("**Highest Streak**", String.valueOf(match.getLongestStreak()), true)
                 .addField("**Distance Travelled**", match.getDistanceTravelled(), false)
                 .addField("**Nemesis**", match.getNemesis(), true)
                 .addField("**Most Killed**", match.getMostKilled(), true)
@@ -290,7 +290,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                             ),
                             getOptionalString(playerStats, "nemesis"),
                             getOptionalString(playerStats, "mostKilled"),
-                            getOptionalInt(playerStats, "longestStreak"),
+                            getLongestStreak(playerStats),
                             getDamageDealt(playerStats),
                             getOptionalInt(playerStats, "damageTaken"),
                             getOptionalInt(playerStats, "matchXp"),
@@ -353,6 +353,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
 
     /**
      * Get the damage dealt value from the match JSON
+     * The key varies by game
      *
      * @param playerStats Player stats match JSON
      * @return Damage dealt
@@ -361,6 +362,20 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         return Math.max(
                 getOptionalInt(playerStats, "damageDone"),
                 getOptionalInt(playerStats, "damageDealt")
+        );
+    }
+
+    /**
+     * Get the longest streak value from the match JSON
+     * The key varies by game
+     *
+     * @param playerStats Player stats match JSON
+     * @return Longest streak
+     */
+    private int getLongestStreak(JSONObject playerStats) {
+        return Math.max(
+                getOptionalInt(playerStats, "longestStreak"),
+                getOptionalInt(playerStats, "highestStreak")
         );
     }
 
