@@ -154,10 +154,7 @@ public class Match {
      * @return Player accuracy
      */
     public String getAccuracySummary() {
-        if(accuracy == null) {
-            return "-";
-        }
-        return accuracy.getRatioPercentage();
+        return hasAccuracy() ? accuracy.getRatioPercentage() : "-";
     }
 
     /**
