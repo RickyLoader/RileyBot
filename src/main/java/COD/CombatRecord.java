@@ -352,7 +352,7 @@ public class CombatRecord extends ImageBuilder {
                 getEmoteHelper(),
                 "MW Player Stats: " + nameQuery.toUpperCase(),
                 "One moment please.",
-                Gunfight.getThumb(),
+                Gunfight.thumbnail,
                 helpMessage,
                 new String[]{
                         "Fetching player data...",

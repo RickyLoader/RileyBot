@@ -1,0 +1,28 @@
+{
+  "maps": {
+    "mp_black_sea": {
+      "real_name": "Armada"
+    },
+    "mp_cartel": {
+      "real_name": "Cartel"
+    },
+    "mp_tundra": {
+      "real_name": "Crossroads"
+    },
+    "mp_tank": {
+      "real_name": "Garrison"
+    },
+    "mp_miami": {
+      "real_name": "Miami"
+    },
+    "mp_moscow": {
+      "real_name": "Moscow"
+    },
+    "mp_satellite": {
+      "real_name": "Satellite"
+    },
+    "mp_kgb": {
+      "real_name": "Checkmate"
+    }
+  }
+}

@@ -22,6 +22,7 @@ public class Gunfight {
     private String lastMessage;
     private LinkedList<Gunfight> matchUpdateHistory;
     private ArrayList<Session> leaderboard;
+    public static final String thumbnail = "https://bit.ly/2YTzfTQ";
 
     // If game message has been replaced with game summary message
     private boolean active;
@@ -368,15 +369,6 @@ public class Gunfight {
     }
 
     /**
-     * Get the default price thumbnail used in the game message
-     *
-     * @return URL of thumbnail
-     */
-    public static String getThumb() {
-        return "https://bit.ly/2YTzfTQ";
-    }
-
-    /**
      * Finish the game and commit the score to the database
      */
     private void stopGame() {
@@ -673,7 +665,7 @@ public class Gunfight {
                         false
                 )
                 .addField("HOW TO USE", "CLICK THE EMOTES", false)
-                .setThumbnail(getThumb());
+                .setThumbnail(thumbnail);
     }
 
     /**

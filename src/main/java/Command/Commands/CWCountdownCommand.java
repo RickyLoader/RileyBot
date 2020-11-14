@@ -32,6 +32,7 @@ public class CWCountdownCommand extends DiscordCommand {
     private final ResourceHandler handler;
     private String type;
     private final String[] bgImages;
+    public static final String thumbnail = "https://i.imgur.com/R1YXMmB.png";
 
     /**
      * Initialise release date
@@ -169,7 +170,7 @@ public class CWCountdownCommand extends DiscordCommand {
     private void buildCountdownEmbed(MessageChannel channel, byte[] image, boolean released) {
         MessageEmbed embed = new EmbedBuilder()
                 .setImage("attachment://countdown.jpg")
-                .setThumbnail("https://i.imgur.com/R1YXMmB.png")
+                .setThumbnail(thumbnail)
                 .setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**")
                 .setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War")
                 .setColor(EmbedHelper.getOrange())

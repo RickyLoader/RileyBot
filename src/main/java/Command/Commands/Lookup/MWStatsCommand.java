@@ -20,6 +20,6 @@ public class MWStatsCommand extends MWLookupCommand {
                 "MW",
                 "ModernWarfare.otf"
         );
-        combatRecord.buildImage(name, getHelpName(), getPlatform());
+        combatRecord.buildImage(name, "Type " + getTrigger() + " for help", getPlatform());
     }
 }

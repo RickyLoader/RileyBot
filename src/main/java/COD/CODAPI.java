@@ -7,7 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 public class CODAPI {
-    private static final String MODERN_WARFARE_URL = NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/modernwarfare/";
+    private static final String BASE_URL = NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/";
+    private static final String MODERN_WARFARE_URL = BASE_URL + "modernwarfare/";
+    private static final String COLD_WAR_URL = BASE_URL + "coldwar/";
 
     /**
      * Get a player's Modern Warfare stats
@@ -32,18 +34,41 @@ public class CODAPI {
     }
 
     /**
-     * Get a player's match history
+     * Get a player's Modern Warfare match history
      *
      * @param name     Player name
      * @param platform Player platform
      * @return Player match history
      */
     public static String getMWMatchHistory(String name, String platform) {
+        return getMatchHistory(name, platform, MODERN_WARFARE_URL);
+    }
+
+    /**
+     * Get a player's Cold War match history
+     *
+     * @param name     Player name
+     * @param platform Player platform
+     * @return Player match history
+     */
+    public static String getCWMatchHistory(String name, String platform) {
+        return getMatchHistory(name, platform, COLD_WAR_URL);
+    }
+
+    /**
+     * Get a player's match history
+     *
+     * @param name     Player name
+     * @param platform Player platform
+     * @param gameURL  Base URL for game
+     * @return Player match history
+     */
+    private static String getMatchHistory(String name, String platform, String gameURL) {
         String json = null;
         try {
             String nameEncode = encodeName(name);
             json = new NetworkRequest(
-                    MODERN_WARFARE_URL + "history/" + nameEncode + "/" + platform,
+                    gameURL + "history/" + nameEncode + "/" + platform,
                     false)
                     .get();
         }

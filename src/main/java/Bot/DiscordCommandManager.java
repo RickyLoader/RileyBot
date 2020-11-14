@@ -7,10 +7,8 @@ import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
 import Command.Commands.CWCountdownCommand;
-import Command.Commands.Lookup.LOLLookupCommand;
-import Command.Commands.Lookup.MWHistoryCommand;
-import Command.Commands.Lookup.MWStatsCommand;
-import Command.Commands.Lookup.YoutubeLookupCommand;
+import Command.Commands.Lookup.*;
+import Command.Structure.MatchHistoryCommand;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
 import Command.Commands.Runescape.TrailblazerCommand;
@@ -164,8 +162,9 @@ public class DiscordCommandManager {
         addCommand(new HangmanCommand());
         addCommand(new FBICommand());
         addCommand(new MillionaireCommand());
-        addCommand(new MWHistoryCommand());
         addCommand(new TrailblazerCommand());
+        addCommand(new MWHistoryCommand());
+        addCommand(new CWHistoryCommand());
     }
 
     /**

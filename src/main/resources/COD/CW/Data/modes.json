@@ -1,0 +1,49 @@
+{
+  "modes": {
+    "sd": {
+      "real_name": "Search and Destroy"
+    },
+    "sd_hc": {
+      "real_name": "HC Search and Destroy"
+    },
+    "tdm": {
+      "real_name": "Team Deathmatch"
+    },
+    "tdm_hc": {
+      "real_name": "HC Team Deathmatch"
+    },
+    "dm": {
+      "real_name": "Free For All"
+    },
+    "dm_hc": {
+      "real_name": "HC Free For All"
+    },
+    "dom": {
+      "real_name": "Domination"
+    },
+    "dom_hc": {
+      "real_name": "HC Domination"
+    },
+    "koth": {
+      "real_name": "Hardpoint"
+    },
+    "control": {
+      "real_name": "Control"
+    },
+    "vip": {
+      "real_name": "VIP Escort"
+    },
+    "conf": {
+      "real_name": "Kill Confirmed"
+    },
+    "conf_hc": {
+      "real_name": "HC Kill Confirmed"
+    },
+    "dom10v10": {
+      "real_name": "Combined Arms: Domination"
+    },
+    "war12v12": {
+      "real_name": "Combined Arms: Assault"
+    }
+  }
+}

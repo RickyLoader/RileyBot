@@ -9,7 +9,7 @@ import org.json.JSONObject;
  * Helper methods for storing and retrieving information based on User id
  */
 public class DiscordUser {
-    public static final String MW = "mwlookup", OSRS = "osrslookup", LOL = "lollookup", YT = "ytlookup", RS3 = "rs3lookup";
+    public static final String MW = "mw", CW = "cw", OSRS = "osrslookup", LOL = "lollookup", YT = "ytlookup", RS3 = "rs3lookup";
 
     /**
      * Store a string in the database by a user's id
