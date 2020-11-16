@@ -1,5 +1,7 @@
 package Runescape.OSRS.League;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Hold league points/tier
  */
@@ -14,7 +16,8 @@ public class LeagueTier {
         MITHRIL,
         STEEL,
         IRON,
-        BRONZE
+        BRONZE,
+        UNQUALIFIED
     }
 
     /**
@@ -33,6 +36,19 @@ public class LeagueTier {
      */
     public boolean hasTier() {
         return tier != null;
+    }
+
+    /**
+     * Get the tier name
+     *
+     * @return Tier name
+     */
+    public String getTierName() {
+        String tierName = StringUtils.capitalize(tier.name().toLowerCase());
+        if(tier == LEAGUE_TIER.UNQUALIFIED) {
+            return tierName;
+        }
+        return tierName + " tier";
     }
 
     /**

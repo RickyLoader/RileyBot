@@ -14,6 +14,7 @@ import Runescape.PlayerStats;
 import Runescape.Skill;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -24,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
+import static Runescape.OSRS.League.LeagueTier.*;
 import static Runescape.Skill.SKILL_NAME.*;
 
 /**
@@ -57,6 +59,7 @@ public class OSRSHiscores extends Hiscores {
         if(league) {
             criteria.add("Player has League stats...");
             criteria.add("Player has stored Relic/Region data...");
+            criteria.add("Calculating League Tier...");
         }
         else {
             criteria.add("Player exists...");
@@ -239,12 +242,19 @@ public class OSRSHiscores extends Hiscores {
     @Override
     public PlayerStats fetchPlayerData(String name) {
         PlayerStats playerStats = fetchStats(name);
+        OSRSPlayerStats stats = (OSRSPlayerStats) playerStats;
 
         if(playerStats == null) {
             return null;
         }
 
-        getTrackerData((OSRSPlayerStats) playerStats);
+        if(league) {
+            LeagueTier leagueTier = stats.getLeagueTier();
+            leagueTier.setTier(calculateTier(playerStats.getRank()));
+            loading.completeStage("Player is " + leagueTier.getTierName() + "!");
+        }
+
+        getTrackerData(stats);
         return playerStats;
     }
 
@@ -284,30 +294,10 @@ public class OSRSHiscores extends Hiscores {
      * @return XP tracking data
      */
     private String fetchPlayerTrackingData(String name, boolean league) {
-
         return new NetworkRequest(
                 "https://" + getTrackerDomain(league) + "/api/players/username/" + name + "/gained",
                 false
         ).get();
-    }
-
-    /**
-     * Fetch the league tier for the given player
-     *
-     * @param name Player name
-     * @return League tier
-     */
-    private String fetchLeagueTier(String name) {
-        try {
-            String tierData = new NetworkRequest(
-                    "https://trailblazer.wiseoldman.net/api/players/username/" + name,
-                    false
-            ).get();
-            return new JSONObject(tierData).getString("leagueTier");
-        }
-        catch(Exception e) {
-            return null;
-        }
     }
 
     /**
@@ -353,19 +343,32 @@ public class OSRSHiscores extends Hiscores {
                     dateFormat.parse(week.getString("startsAt")),
                     dateFormat.parse(week.getString("endsAt"))
             );
-
-            if(league) {
-                String leagueTier = fetchLeagueTier(name);
-                if(leagueTier != null) {
-                    LeagueTier.LEAGUE_TIER tierName = LeagueTier.LEAGUE_TIER.valueOf(leagueTier.toUpperCase());
-                    playerStats.getLeagueTier().setTier(tierName);
-                }
-            }
             loading.completeStage(playerStats.hasWeeklyGains() ? "Weekly XP obtained" : "No XP gained this week");
         }
         catch(ParseException e) {
             loading.failStage("Failed to parse Weekly XP");
         }
+    }
+
+    /**
+     * Calculate a player's league tier manually from the given rank
+     *
+     * @param rank Player rank
+     * @return League tier
+     */
+    private LEAGUE_TIER calculateTier(long rank) {
+        JSONArray tiers = new JSONArray(
+                new NetworkRequest("https://trailblazer.wiseoldman.net/api/league/tiers", false).get()
+        );
+        LEAGUE_TIER tier = LEAGUE_TIER.UNQUALIFIED;
+        for(int i = 0; i < tiers.length(); i++) {
+            JSONObject tierInfo = tiers.getJSONObject(i);
+            if(rank > tierInfo.getLong("threshold")) {
+                break;
+            }
+            tier = LEAGUE_TIER.valueOf(tierInfo.getString("name").toUpperCase());
+        }
+        return tier;
     }
 
     /**
@@ -535,12 +538,8 @@ public class OSRSHiscores extends Hiscores {
             y += leaguePointImage.getHeight() + 3;
             g.drawImage(tierIcon, x, y, null);
 
-            String tierName = StringUtils.capitalize(
-                    leagueTier.getTier().name().toLowerCase()
-            ) + " tier";
-
             g.drawString(
-                    tierName,
+                    leagueTier.getTierName(),
                     titleX,
                     y + (tierIcon.getHeight() / 2) + (fm.getMaxAscent() / 2)
             );
