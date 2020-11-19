@@ -255,7 +255,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             JSONObject playerStats = match.getJSONObject("playerStats");
             String mapName = match.getString("map");
             Match.RESULT result = parseResult(
-                    match.getBoolean("isPresentAtEnd") ? match.getString("result") : "FORFEIT"
+                    (!match.getBoolean("isPresentAtEnd") || match.isNull("result")) ? "FORFEIT" : match.getString("result")
             );
 
             matches.add(
@@ -390,6 +390,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             case "win":
                 return Match.RESULT.WIN;
             case "loss":
+            case "lose":
                 return Match.RESULT.LOSS;
             case "forfeit":
                 return Match.RESULT.FORFEIT;
