@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 public class Item {
     private final String name;
     private final BufferedImage itemImage;
+    public final static String IMAGE_PATH = "/LOL/Items/";
 
     /**
      * Create an item
@@ -18,8 +19,29 @@ public class Item {
      * @param id   Item id - 3044
      */
     public Item(String name, String id) {
-        this.itemImage = new ResourceHandler().getImageResource("/LOL/Items/" + id + ".png");
+        this.itemImage = new ResourceHandler().getImageResource(getImagePath(id));
         this.name = name;
+    }
+
+    /**
+     * Create an item with an existing image
+     *
+     * @param name      Item name
+     * @param itemImage Item image
+     */
+    public Item(String name, BufferedImage itemImage) {
+        this.name = name;
+        this.itemImage = itemImage;
+    }
+
+    /**
+     * Get the image path for the given item id
+     *
+     * @param id Item id
+     * @return Image path for given item id
+     */
+    public static String getImagePath(String id) {
+        return IMAGE_PATH + id + ".png";
     }
 
     /**

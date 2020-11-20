@@ -1,11 +1,14 @@
 package LOL.Blitz;
 
+import Bot.ResourceHandler;
 import Network.NetworkRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,6 +22,7 @@ public class Blitz {
     private final HashMap<String, Item> items;
     private final HashMap<String, SummonerSpell> spells;
     private final HashMap<Integer, Rune> runes;
+    private final BufferedImage deletedItemImage;
 
     /**
      * Create the Blitz wrapper
@@ -30,6 +34,7 @@ public class Blitz {
         this.items = getItems(versionString);
         this.spells = getSummonerSpells(versionString);
         this.runes = getRunes(versionString);
+        this.deletedItemImage = new ResourceHandler().getImageResource("/LOL/items/missing.png");
         getStaticRunes();
     }
 
@@ -56,8 +61,8 @@ public class Blitz {
                 new NetworkRequest(ddragonPrefix + "versions.json", false).get()
         );
         String[] versions = new String[5];
-        for(int i = 1; i < 6; i++) {
-            versions[i - 1] = versionData.getString(i);
+        for(int i = 0; i < 5; i++) {
+            versions[i] = versionData.getString(i);
         }
         return versions;
     }
@@ -232,11 +237,15 @@ public class Blitz {
         }
 
         JSONObject data = null;
+        String buildVersion = null;
 
         for(String version : versions) {
-            version = version.substring(0, version.lastIndexOf("."));
-
-            JSONArray current = new JSONObject(getBlitzData(champion, role, version)).getJSONArray("data");
+            JSONArray current = new JSONObject(
+                    getBlitzData(
+                            champion,
+                            role,
+                            version.substring(0, version.lastIndexOf("."))
+                    )).getJSONArray("data");
 
             if(current.isEmpty()) {
                 continue;
@@ -257,6 +266,7 @@ public class Blitz {
             }
 
             data = currentData;
+            buildVersion = version;
             break;
         }
 
@@ -290,6 +300,8 @@ public class Blitz {
         }
 
         return new BuildData(
+                buildVersion,
+                versions[0],
                 champion,
                 role,
                 spells,
@@ -347,8 +359,36 @@ public class Blitz {
                 continue;
             }
             String id = String.valueOf(o);
-            items.add(this.items.get(id));
+            items.add(
+                    this.items.getOrDefault(
+                            id,
+                            getDeletedItem(id)
+                    )
+            );
         }
         return items.toArray(new Item[0]);
+    }
+
+    /**
+     * Create an item object for an item that has been deleted
+     * Build an image to use as the item icon displaying the item overlaid with a removed icon
+     *
+     * @param id Item id
+     * @return Deleted item
+     */
+    private Item getDeletedItem(String id) {
+        BufferedImage itemImage = new ResourceHandler().getImageResource(Item.getImagePath(id));
+        Graphics g = itemImage.getGraphics();
+        g.drawImage(
+                deletedItemImage,
+                itemImage.getWidth() / 2 - deletedItemImage.getWidth() / 2,
+                itemImage.getHeight() / 2 - deletedItemImage.getHeight() / 2,
+                null
+        );
+        g.dispose();
+        return new Item(
+                "Deleted",
+                itemImage
+        );
     }
 }

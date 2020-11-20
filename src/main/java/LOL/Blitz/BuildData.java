@@ -9,13 +9,15 @@ public class BuildData {
     private final Item[] startingItems, buildOrder, finalBuild;
     private final Ability[] abilityOrder;
     private final Rune[] runes;
-    private final String role;
+    private final String buildVersion, latestVersion, role;
     private final double winRate;
     private final int games;
 
     /**
      * Create the build data
      *
+     * @param buildVersion  Game version of build data
+     * @param latestVersion Latest game version
      * @param champion      Champion
      * @param role          Role
      * @param spells        Summoner spells
@@ -27,7 +29,9 @@ public class BuildData {
      * @param winRate       Champion win rate in role with given build
      * @param games         Total games that stats are based on
      */
-    public BuildData(Champion champion, String role, SummonerSpell[] spells, Item[] startingItems, Item[] buildOrder, Item[] finalBuild, int[] abilityOrder, Rune[] runes, double winRate, int games) {
+    public BuildData(String buildVersion, String latestVersion, Champion champion, String role, SummonerSpell[] spells, Item[] startingItems, Item[] buildOrder, Item[] finalBuild, int[] abilityOrder, Rune[] runes, double winRate, int games) {
+        this.buildVersion = buildVersion;
+        this.latestVersion = latestVersion;
         this.champion = champion;
         this.role = role;
         this.spells = spells;
@@ -140,11 +144,12 @@ public class BuildData {
      * @return Build data summary
      */
     public String getDescription() {
-        return "Here is the most common **"
+        String desc = "Here is the most common **"
                 + champion.getName()
                 + " "
-                +
-                role
-                + "** build data for Platinum and above!";
+                + role
+                + "** build data for Platinum and above!\n\n"
+                + "For version: " + buildVersion;
+        return desc + " (Latest" + (buildVersion.equals(latestVersion) ? ")" : " version: " + latestVersion + ")");
     }
 }
