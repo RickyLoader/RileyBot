@@ -104,7 +104,7 @@ public class DiscordAudioPlayer {
              */
             @Override
             public void trackLoaded(AudioTrack audioTrack) {
-                System.out.println("Track loaded: "+audioTrack.getInfo().uri);
+                System.out.println("Track loaded: " + audioTrack.getInfo().uri);
                 player.playTrack(audioTrack);
             }
 
@@ -118,7 +118,7 @@ public class DiscordAudioPlayer {
 
             @Override
             public void loadFailed(FriendlyException e) {
-                System.out.println(e.getMessage());
+                System.out.println("Load failed: " + e.getMessage());
                 guild.getAudioManager().closeAudioConnection();
                 channel.sendMessage(
                         "I couldn't get "

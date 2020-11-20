@@ -39,6 +39,7 @@ public class TrackEndListener extends AudioEventAdapter {
     public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
         System.out.println("TRACK EXCEPTION:\n");
         exception.printStackTrace();
+        stopSession(player, track);
     }
 
     @Override
@@ -57,6 +58,16 @@ public class TrackEndListener extends AudioEventAdapter {
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         System.out.println("Track ended: " + track.getInfo().title);
+        stopSession(player, track);
+    }
+
+    /**
+     * Stop the audio playing session
+     *
+     * @param player Audio player
+     * @param track  Track which was played
+     */
+    private void stopSession(AudioPlayer player, AudioTrack track) {
         try {
             if(leave) {
                 new Thread(() -> guild.getAudioManager().closeAudioConnection()).start();
