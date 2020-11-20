@@ -104,6 +104,7 @@ public class DiscordAudioPlayer {
              */
             @Override
             public void trackLoaded(AudioTrack audioTrack) {
+                System.out.println("Track loaded: "+audioTrack.getInfo().uri);
                 player.playTrack(audioTrack);
             }
 

@@ -42,7 +42,6 @@ public class TTSCommand extends DiscordCommand {
             channel.sendMessage("Something went wrong when I tried to say that, sorry bro").queue();
             return;
         }
-        System.out.println(url);
         context.playAudio(
                 url
         );
