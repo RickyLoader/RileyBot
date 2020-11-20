@@ -119,7 +119,11 @@ public class DiscordAudioPlayer {
             public void loadFailed(FriendlyException e) {
                 System.out.println(e.getMessage());
                 guild.getAudioManager().closeAudioConnection();
-                channel.sendMessage("I couldn't get YouTube on the phone").queue();
+                channel.sendMessage(
+                        "I couldn't get "
+                                + (audio.toLowerCase().contains("youtube") ? "YouTube" : "anyone")
+                                + " on the phone"
+                ).queue();
                 if(doAfter.length > 0) {
                     doAfter[0].processFinish();
                 }
