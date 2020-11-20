@@ -34,7 +34,7 @@ public class Blitz {
         this.items = getItems(versionString);
         this.spells = getSummonerSpells(versionString);
         this.runes = getRunes(versionString);
-        this.deletedItemImage = new ResourceHandler().getImageResource("/LOL/items/missing.png");
+        this.deletedItemImage = new ResourceHandler().getImageResource(Item.getImagePath("missing"));
         getStaticRunes();
     }
 
