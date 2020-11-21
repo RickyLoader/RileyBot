@@ -18,7 +18,7 @@ import java.util.*;
 
 public class WeatherManager {
     private final HashMap<String, String> iconTypes = new HashMap<>();
-    private final String maxIcon, minIcon, clothing, humidity, rain, wind, pressure, missing;
+    private final String maxIcon, minIcon, clothing, humidity, rain, wind, gust, pressure, missing;
 
     /**
      * Create the weather manager
@@ -31,6 +31,7 @@ public class WeatherManager {
         this.rain = EmoteHelper.formatEmote(emoteHelper.getRain());
         this.humidity = EmoteHelper.formatEmote(emoteHelper.getHumidity());
         this.wind = EmoteHelper.formatEmote(emoteHelper.getWind());
+        this.gust = EmoteHelper.formatEmote(emoteHelper.getGust());
         this.clothing = EmoteHelper.formatEmote(emoteHelper.getClothing());
         this.missing = EmoteHelper.formatEmote(emoteHelper.getFail());
         this.pressure = EmoteHelper.formatEmote(emoteHelper.getPressure());
@@ -188,6 +189,9 @@ public class WeatherManager {
             }
             if(localObs.hasWind()) {
                 builder.addField("Wind " + wind, localObs.formatWindDetails(), true);
+                if(localObs.hasGustSpeed()) {
+                    builder.addField("Gust " + gust, localObs.formatGustSpeed(), true);
+                }
             }
             if(localObs.hasRainfall()) {
                 builder.addField("Rainfall " + rain, localObs.formatRainfall(), true);
@@ -372,7 +376,7 @@ public class WeatherManager {
             }
             String layers = null, windProof = null;
             double rainFall = -1;
-            int humidity = -1, windSpeed = -1, pressure = -1;
+            int humidity = -1, windSpeed = -1, pressure = -1, guestSpeed = -1;
             String windStrength = null, windDirection = null, trend = null;
             double current = parseAmbiguousValue(temperature.get("current"));
             double feelsLike = parseAmbiguousValue(temperature.get("feelsLike"));
@@ -392,6 +396,7 @@ public class WeatherManager {
             if(wind != null) {
                 windDirection = wind.getString("direction");
                 windSpeed = (int) parseAmbiguousValue(wind.get("averageSpeed"));
+                guestSpeed = (int) parseAmbiguousValue(wind.get("gustSpeed"));
                 windStrength = wind.getString("strength");
                 if(windDirection.equalsIgnoreCase(windStrength)) {
                     windDirection = null;
@@ -411,6 +416,7 @@ public class WeatherManager {
                     rainFall,
                     windDirection,
                     windSpeed,
+                    guestSpeed,
                     windStrength,
                     pressure,
                     trend
@@ -656,7 +662,7 @@ public class WeatherManager {
     private static class LocalObs {
         private final String clothing, windDirection, windClothing, windStrength, pressureTrend;
         private final double temp, feelsLike, rainFall;
-        private final int windSpeed, humidity, pressure;
+        private final int windSpeed, gustSpeed, humidity, pressure;
         private final Date dateIssued;
 
         /**
@@ -671,11 +677,12 @@ public class WeatherManager {
          * @param rainFall      Rainfall in mm
          * @param windDirection Compass direction of wind
          * @param windSpeed     km/h wind speed
+         * @param gustSpeed     km/h wind max gust speed
          * @param windStrength  Description of wind strength - "Light Winds"
          * @param pressure      Pressure
          * @param pressureTrend Trend of pressure - "rising"
          */
-        public LocalObs(String clothing, String windClothing, int humidity, Date dateIssued, double temp, double feelsLike, double rainFall, String windDirection, int windSpeed, String windStrength, int pressure, String pressureTrend) {
+        public LocalObs(String clothing, String windClothing, int humidity, Date dateIssued, double temp, double feelsLike, double rainFall, String windDirection, int windSpeed, int gustSpeed, String windStrength, int pressure, String pressureTrend) {
             this.clothing = clothing;
             this.windClothing = windClothing;
             this.humidity = humidity;
@@ -685,6 +692,7 @@ public class WeatherManager {
             this.rainFall = rainFall;
             this.windDirection = windDirection;
             this.windSpeed = windSpeed;
+            this.gustSpeed = gustSpeed;
             this.windStrength = windStrength;
             this.pressure = pressure;
             this.pressureTrend = StringUtils.capitalize(pressureTrend);
@@ -698,15 +706,34 @@ public class WeatherManager {
         public String formatWindDetails() {
             StringBuilder builder = new StringBuilder();
             if(windSpeed > 0) {
-                builder.append(windSpeed).append(" ").append("km/h ");
+                builder.append(formatSpeed(windSpeed));
             }
             if(windDirection != null) {
-                builder.append(windDirection);
+                builder.append(" ").append(windDirection);
             }
             if(builder.length() > 0) {
                 builder.append("\n");
             }
             return builder.append(windStrength).toString();
+        }
+
+        /**
+         * Format the maximum wind gust speed
+         *
+         * @return Gust information String
+         */
+        public String formatGustSpeed() {
+            return formatSpeed(gustSpeed);
+        }
+
+        /**
+         * Format the given speed to a String containing km/h
+         *
+         * @param speed Speed to format
+         * @return Speed km/h
+         */
+        private String formatSpeed(int speed) {
+            return speed + " km/h";
         }
 
         /**
@@ -797,6 +824,15 @@ public class WeatherManager {
          */
         public boolean hasWind() {
             return windStrength != null;
+        }
+
+        /**
+         * Return presence of maximum wind gust speed
+         *
+         * @return Gust speed exists
+         */
+        public boolean hasGustSpeed() {
+            return gustSpeed > -1;
         }
 
         /**

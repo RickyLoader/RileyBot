@@ -231,4 +231,8 @@ public class EmoteHelper {
     public Emote getBlankGap() {
         return get("770829814424272936");
     }
+
+    public Emote getGust() {
+        return get("779571150647721984");
+    }
 }
