@@ -108,7 +108,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             return getErrorEmbed(matchHistory);
         }
         return getDefaultEmbedBuilder(matchHistory.getName().toUpperCase())
-                .setColor(EmbedHelper.getPurple())
+                .setColor(getResultColour(match.getResult()))
                 .setImage(match.getMap().getImageURL())
                 .addField("**Date**", match.getDateString(), true)
                 .addField("**Time**", match.getTimeString(), true)
@@ -133,6 +133,25 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                         true
                 )
                 .build();
+    }
+
+    /**
+     * Get the colour to use in a Match embed based on the match result
+     *
+     * @param result Match result
+     * @return Colour to use
+     */
+    public int getResultColour(Match.RESULT result) {
+        switch(result) {
+            case WIN:
+                return EmbedHelper.getGreen();
+            case LOSS:
+                return EmbedHelper.getRed();
+            case DRAW:
+                return EmbedHelper.getYellow();
+            default:
+                return EmbedHelper.getPurple();
+        }
     }
 
     /**
