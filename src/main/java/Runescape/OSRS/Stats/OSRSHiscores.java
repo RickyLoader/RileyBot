@@ -153,7 +153,12 @@ public class OSRSHiscores extends Hiscores {
 
         if(league) {
             normalAccount.setLeaguePoints(Integer.parseInt(normal[73]));
-            JSONObject leagueData = new JSONObject(DiscordUser.getOSRSLeagueData(name));
+            String leagueJSON = DiscordUser.getOSRSLeagueData(name);
+            if(leagueJSON == null) {
+                loading.failStage("Unable to connect to the API");
+                return normalAccount;
+            }
+            JSONObject leagueData = new JSONObject(leagueJSON);
             normalAccount.setRegions(Region.parseRegions(leagueData.getJSONArray("regions")));
             normalAccount.setRelicTiers(RelicTier.parseRelics(leagueData.getJSONArray("relics")));
             if(normalAccount.hasLeagueUnlockData()) {
