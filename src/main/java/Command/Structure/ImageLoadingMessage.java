@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class ImageLoadingMessage extends EmbedLoadingMessage {
     private String url;
@@ -56,16 +57,28 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
      * @param message Message to display
      */
     public void completeLoading(BufferedImage image, String message) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        this.image = imageToByteArray(image);
+        this.url = "attachment://image.png";
+        super.completeLoading(message);
+    }
+
+    /**
+     * Create a byte array from an image
+     *
+     * @param image Image to create byte array from
+     * @return Byte array
+     */
+    public static byte[] imageToByteArray(BufferedImage image) {
         try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "png", outputStream);
-            this.image = outputStream.toByteArray();
-            this.url = "attachment://image.png";
+            byte[] byteArray = outputStream.toByteArray();
             outputStream.close();
-            super.completeLoading(message);
+            return byteArray;
         }
-        catch(Exception e) {
+        catch(IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
