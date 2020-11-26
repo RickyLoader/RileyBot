@@ -19,7 +19,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
             SELECT_CASE = TRIGGER + " select [case #]",
             OPEN_CASE = TRIGGER + " open [case #]",
             DEAL_OFFER = TRIGGER + " [deal/no deal]",
-            SWAP_OFFER = TRIGGER + " [swap/don't swap]",
+            SWAP_OFFER = TRIGGER + " [keep/swap]",
             START_GAME = TRIGGER + " start",
             FORFEIT_GAME = TRIGGER + " forfeit";
 
@@ -49,7 +49,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
             return;
         }
 
-        String action = message.replace("'", "").replaceAll("\\d+", "").trim();
+        String action = message.replaceAll("\\d+", "").trim();
         new Thread(() -> {
             switch(action) {
                 case "start":
@@ -67,7 +67,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
                             action.equals("open")
                     );
                     break;
-                case "dont swap":
+                case "keep":
                 case "swap":
                     answerSwap(contestant, action.equals("swap"), channel);
                     break;
