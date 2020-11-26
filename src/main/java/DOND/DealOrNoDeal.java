@@ -307,7 +307,7 @@ public class DealOrNoDeal {
         Graphics g = image.getGraphics();
         g.drawImage(BRIEFCASE_CONTAINER, 0, 0, null);
 
-        int xGap = 35, yGap = 23, x = xGap, y = yGap;
+        int xGap = 35, yGap = 25, x = xGap, y = yGap;
 
         for(Briefcase briefcase : briefcases) {
             BufferedImage briefcaseImage = buildBriefcaseImage(briefcase);
