@@ -247,7 +247,7 @@ public class WeatherManager {
     private MessageEmbed createFailEmbed(EmbedBuilder builder, String location) {
         return builder
                 .setColor(EmbedHelper.getRed())
-                .setDescription("I didn't anything for **" + location + "**\n\nSome places don't show up because nobody likes them.")
+                .setDescription("I didn't find anything for **" + location + "**\n\nSome places don't show up because nobody likes them.")
                 .setTitle("Weather Forecast")
                 .build();
     }
