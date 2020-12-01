@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 
 import COD.GameStatus.*;
 
@@ -264,7 +265,10 @@ public class Gunfight {
             channel.editMessageById(gameID, updateMessage).queue();
         }
         else {
-            channel.deleteMessageById(gameID).queue(aVoid -> sendGameMessage(updateMessage));
+            channel.deleteMessageById(gameID).queue(success -> sendGameMessage(updateMessage), throwable -> {
+                throwable.printStackTrace();
+                sendGameMessage(updateMessage);
+            });
         }
     }
 
