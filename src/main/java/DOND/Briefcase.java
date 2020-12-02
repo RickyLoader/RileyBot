@@ -48,6 +48,16 @@ public class Briefcase {
     }
 
     /**
+     * Check if the reward contained within the briefcase is of
+     * high value
+     *
+     * @return Reward is high value
+     */
+    public boolean isHighValue() {
+        return reward > 750;
+    }
+
+    /**
      * Get the reward held by the briefcase
      *
      * @return Reward

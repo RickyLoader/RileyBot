@@ -355,8 +355,7 @@ public class DealOrNoDeal {
         BufferedImage briefcaseImage;
 
         if(open) {
-            boolean highValue = briefcase.getReward() > 1000;
-            briefcaseImage = selectedCase ? BRIEFCASE_OPEN_CHOSEN : (highValue ? BRIEFCASE_OPEN_HIGH : BRIEFCASE_OPEN_LOW);
+            briefcaseImage = selectedCase ? BRIEFCASE_OPEN_CHOSEN : (briefcase.isHighValue() ? BRIEFCASE_OPEN_HIGH : BRIEFCASE_OPEN_LOW);
         }
         else {
             briefcaseImage = selectedCase ? BRIEFCASE_CLOSED_CHOSEN : BRIEFCASE_CLOSED;
@@ -423,7 +422,7 @@ public class DealOrNoDeal {
             background = (briefcase == selected && status == GAME_STATUS.FINALE ? PRIZE_WON : PRIZE_LOST);
         }
         else {
-            background = (briefcase.getReward() < 1000 ? PRIZE_LOW : PRIZE_HIGH);
+            background = briefcase.isHighValue() ? PRIZE_HIGH : PRIZE_LOW;
         }
 
         BufferedImage image = new BufferedImage(
