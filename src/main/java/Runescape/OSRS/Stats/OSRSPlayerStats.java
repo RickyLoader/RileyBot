@@ -55,9 +55,10 @@ public class OSRSPlayerStats extends PlayerStats {
      * Set the player league points
      *
      * @param leaguePoints League points to set
+     * @param rank         League point rank
      */
-    public void setLeaguePoints(int leaguePoints) {
-        this.leagueTier = new LeagueTier(leaguePoints == -1 ? 0 : leaguePoints);
+    public void setLeaguePoints(int leaguePoints, long rank) {
+        this.leagueTier = new LeagueTier((leaguePoints == -1 ? 0 : leaguePoints), rank);
     }
 
     /**

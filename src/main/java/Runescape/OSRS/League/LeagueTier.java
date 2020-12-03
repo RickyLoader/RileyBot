@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class LeagueTier {
     private final int points;
+    private final long rank;
     private LEAGUE_TIER tier;
 
     public enum LEAGUE_TIER {
@@ -24,9 +25,20 @@ public class LeagueTier {
      * Create a league tier
      *
      * @param points League points
+     * @param rank   League point rank
      */
-    public LeagueTier(int points) {
+    public LeagueTier(int points, long rank) {
         this.points = points;
+        this.rank = rank;
+    }
+
+    /**
+     * Get the player's league point rank
+     *
+     * @return League point rank
+     */
+    public long getRank() {
+        return rank;
     }
 
     /**

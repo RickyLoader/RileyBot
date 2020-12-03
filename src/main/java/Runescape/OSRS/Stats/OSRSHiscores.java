@@ -152,7 +152,7 @@ public class OSRSHiscores extends Hiscores {
         );
 
         if(league) {
-            normalAccount.setLeaguePoints(Integer.parseInt(normal[73]));
+            normalAccount.setLeaguePoints(Integer.parseInt(normal[73]), Long.parseLong(normal[72]));
             String leagueJSON = DiscordUser.getOSRSLeagueData(name);
             if(leagueJSON == null) {
                 loading.failStage("Unable to connect to the API");
@@ -255,7 +255,7 @@ public class OSRSHiscores extends Hiscores {
 
         if(league) {
             LeagueTier leagueTier = stats.getLeagueTier();
-            leagueTier.setTier(calculateTier(playerStats.getRank()));
+            leagueTier.setTier(calculateTier(leagueTier.getRank()));
             loading.completeStage("Player is " + leagueTier.getTierName() + "!");
         }
 
@@ -358,7 +358,7 @@ public class OSRSHiscores extends Hiscores {
     /**
      * Calculate a player's league tier manually from the given rank
      *
-     * @param rank Player rank
+     * @param rank Player league point rank
      * @return League tier
      */
     private LEAGUE_TIER calculateTier(long rank) {
