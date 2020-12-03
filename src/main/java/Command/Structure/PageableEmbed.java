@@ -157,15 +157,16 @@ public abstract class PageableEmbed {
      * @return Message embed
      */
     public MessageEmbed buildMessage() {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(colour);
-        builder.setTitle(title);
-        builder.setImage(EmbedHelper.SPACER_IMAGE);
+        EmbedBuilder builder = new EmbedBuilder()
+                .setColor(colour)
+                .setTitle(title)
+                .setThumbnail(thumb)
+                .setFooter("Page: " + page + "/" + pages)
+                .setImage(EmbedHelper.SPACER_IMAGE);
+
         if(desc != null) {
             builder.setDescription(desc);
         }
-        builder.setThumbnail(thumb);
-        builder.setFooter("Page: " + page + "/" + pages);
 
         int max = Math.min(bound, (items.size() - this.index));
 
