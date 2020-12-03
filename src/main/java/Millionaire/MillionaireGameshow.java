@@ -246,7 +246,7 @@ public class MillionaireGameshow {
                 .setTitle(owner.getEffectiveName() + " " + getTitle() + " a millionaire!")
                 .setDescription(buildDescription(question))
                 .setThumbnail(thumb)
-                .setFooter("Try: " + helpMessage, EmbedHelper.CLOCK_GIF)
+                .setFooter("Try: " + helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .setColor(getColour())
                 .setImage(EmbedHelper.SPACER_IMAGE)
                 .build();

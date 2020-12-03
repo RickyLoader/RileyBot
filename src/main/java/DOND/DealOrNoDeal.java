@@ -171,7 +171,7 @@ public class DealOrNoDeal {
                 .setDescription(getGameStatusMessage())
                 .setImage("attachment://image.png")
                 .setThumbnail(LOGO)
-                .setFooter(getHelpMessage(), LOGO)
+                .setFooter(getHelpMessage(), running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .build();
     }
 

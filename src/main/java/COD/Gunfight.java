@@ -170,6 +170,7 @@ public class Gunfight {
      * @return Game message
      */
     private MessageEmbed buildGameMessage(String streak, String longestStreak) {
+        String footer = (lastUpdate == 0 ? "Game started at " + formatTime(startTime) : "Last update at " + formatTime(lastUpdate));
         return new EmbedBuilder()
                 .setColor(getColour())
                 .setTitle(rank == 0 ? "GUNFIGHT" : "GUNFIGHT RANK " + rank)
@@ -183,7 +184,7 @@ public class Gunfight {
                 .addBlankField(true)
                 .addField("**LONGEST STREAK**", longestStreak, true)
                 .addField("**EMOTE MANAGER**", owner.getAsMention(), false)
-                .setFooter((lastUpdate == 0 ? "Game started at " + formatTime(startTime) : "Last update at " + formatTime(lastUpdate)) + " -- Checkout 'gunfight help!' for instructions", EmbedHelper.CLOCK_GIF)
+                .setFooter(footer + " -- Checkout 'gunfight help!' for instructions", EmbedHelper.CLOCK_GIF)
                 .build();
     }
 
