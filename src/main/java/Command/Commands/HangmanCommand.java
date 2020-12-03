@@ -55,19 +55,13 @@ public class HangmanCommand extends DiscordCommand {
         Member player = context.getMember();
         String content = context.getLowerCaseMessage();
 
-        if(content.startsWith("hangman")) {
+        String[] args = content.split(" ");
+        if(args.length == 1){
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-
-        String message = content.replaceFirst("hm", "").trim();
-        String op = message.split(" ")[0];
-
-        if(message.isEmpty()) {
-            channel.sendMessage(getHelpNameCoded()).queue();
-            return;
-        }
-
+        String trigger = args[0], op = args[1];
+        String message = content.replaceFirst(trigger, "").trim();
         Hangman game = hangmanGames.get(channel);
 
         if(game == null) {
@@ -85,7 +79,7 @@ public class HangmanCommand extends DiscordCommand {
             switch(op) {
                 case "start":
                     context.getMessage().delete().queue();
-                    startGame(finalGame, message, channel, player);
+                    startGame(finalGame, message, channel, player, trigger);
                     break;
                 case "guess":
                     playerGuess(finalGame, player, channel, message);
@@ -164,8 +158,9 @@ public class HangmanCommand extends DiscordCommand {
      * @param message Player message - "start [word]"
      * @param channel Channel to play in
      * @param player  Player starting game
+     * @param trigger Trigger player used
      */
-    private void startGame(Hangman game, String message, MessageChannel channel, Member player) {
+    private void startGame(Hangman game, String message, MessageChannel channel, Member player, String trigger) {
         if(game.isRunning()) {
             channel.sendMessage(player.getAsMention() + " There's already a game running in this channel, you have to stop it first!").queue();
             return;
@@ -173,7 +168,7 @@ public class HangmanCommand extends DiscordCommand {
         String word = message.replace("start", "").trim();
 
         if(!word.startsWith("||") || !word.endsWith("||")) {
-            channel.sendMessage(player.getAsMention() + " Place your word inside a spoiler tag! e.g hangman start ||word||").queue();
+            channel.sendMessage(player.getAsMention() + " Place your word inside a spoiler tag! e.g: " + trigger + " start ||word||").queue();
             return;
         }
         word = word.replaceAll("\\|", "");
