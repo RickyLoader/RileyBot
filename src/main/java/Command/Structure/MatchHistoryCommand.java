@@ -39,17 +39,20 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
 
     @Override
     public String stripArguments(String query) {
-        query = setPlatform(query); // trigger args[]
+        query = setPlatform(query);
         String[] args = query.split(" ");
+
         if(args.length == 1) {
             return query;
         }
-        if(args[1].equals("save") || args.length < 3) {
-            matchID = null;
-            return fixName(query); // trigger save [name] || trigger [name]
+
+        String lastArg = args[args.length - 1];
+        if(lastArg.matches("\\d+") || lastArg.equals("latest")) {
+            matchID = lastArg;
+            return fixName(query.replace(lastArg, "").trim());
         }
-        matchID = args[2];
-        return fixName(query.replace(matchID, "").trim());
+        matchID = null;
+        return fixName(query);
     }
 
     /**
