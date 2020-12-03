@@ -168,7 +168,7 @@ public class HangmanCommand extends DiscordCommand {
         String word = message.replace("start", "").trim();
 
         if(!word.startsWith("||") || !word.endsWith("||")) {
-            channel.sendMessage(player.getAsMention() + " Place your word inside a spoiler tag! e.g: " + trigger + " start ||word||").queue();
+            channel.sendMessage(player.getAsMention() + " Place your word inside a spoiler tag! e.g: ```" + trigger + " start ||word||```").queue();
             return;
         }
         word = word.replaceAll("\\|", "");
