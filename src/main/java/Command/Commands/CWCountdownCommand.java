@@ -173,7 +173,7 @@ public class CWCountdownCommand extends DiscordCommand {
                 .setThumbnail(thumbnail)
                 .setDescription(released ? type + " has been out for:" : type + " release date: **" + new SimpleDateFormat("dd/MM/yyyy").format(new Date(releaseDate)) + "**")
                 .setTitle((released ? "Time since" : "Cuntdown to") + " Black Ops: Cold War")
-                .setColor(EmbedHelper.getOrange())
+                .setColor(EmbedHelper.ORANGE)
                 .setFooter("Try: " + getHelpName().replace("\n", " | ") + " | Last checked: " + new SimpleDateFormat("HH:mm:ss").format(lastFetched), "https://i.imgur.com/s6p534X.png")
                 .build();
         channel.sendMessage(embed).addFile(image, "countdown.jpg").queue();

@@ -72,7 +72,7 @@ public class TweetCommand extends DiscordCommand {
         return new EmbedBuilder()
                 .setAuthor(twitterManager.formatName(user), twitterManager.getProfileURL(user), user.getProfileImageURL())
                 .setTitle("Tweet #" + user.getStatusesCount(), twitterManager.getTweetURL(status))
-                .setColor(EmbedHelper.getBlue())
+                .setColor(EmbedHelper.BLUE)
                 .setThumbnail(user.getProfileImageURL())
                 .setFooter("Try: " + getHelpName(), twitterManager.getThumbnail())
                 .setImage(image)

@@ -63,12 +63,12 @@ public class EmbedLoadingMessage {
      */
     private int getColour() {
         if(finished) {
-            return EmbedHelper.getGreen();
+            return EmbedHelper.GREEN;
         }
         if(failed) {
-            return EmbedHelper.getRed();
+            return EmbedHelper.RED;
         }
-        return EmbedHelper.getYellow();
+        return EmbedHelper.YELLOW;
     }
 
     /**

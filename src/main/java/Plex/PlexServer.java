@@ -178,7 +178,7 @@ public class PlexServer {
         }
         EmbedBuilder builder = new EmbedBuilder();
         builder.setThumbnail(movie.isOnPlex() ? plexIcon : radarrIcon);
-        builder.setColor(movie.isOnPlex() ? EmbedHelper.getOrange() : EmbedHelper.getBlue());
+        builder.setColor(movie.isOnPlex() ? EmbedHelper.ORANGE : EmbedHelper.BLUE);
         builder.setTitle(adding ? movie.getTitle() + " - Added to Radarr queue" : movie.getTitle());
         if(movie.getPoster() != null) {
             builder.setImage(movie.getPoster());
@@ -247,7 +247,7 @@ public class PlexServer {
         return new EmbedBuilder()
                 .setTitle("Plex Movie Search")
                 .setDescription("Something went wrong, try again in a bit.")
-                .setColor(EmbedHelper.getRed())
+                .setColor(EmbedHelper.RED)
                 .setThumbnail(plexIcon)
                 .setFooter(helpMessage)
                 .build();
@@ -374,7 +374,7 @@ public class PlexServer {
         int bound = Math.min(5, movies.length);
         library = library || bound == 0; // Show Plex icon when no results are found, even though it was a Radarr search
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(library ? EmbedHelper.getOrange() : EmbedHelper.getBlue());
+        builder.setColor(library ? EmbedHelper.ORANGE : EmbedHelper.BLUE);
         builder.setThumbnail(library ? plexIcon : radarrIcon);
         builder.setTitle(library ? "Plex Movie Search" : "Radarr Movie Search");
         builder.setFooter("Try: " + helpMessage);
@@ -907,7 +907,7 @@ public class PlexServer {
          * @return Formatted duration of movie
          */
         public String getDuration() {
-            return EmbedHelper.formatTime(duration * 60000);
+            return EmbedHelper.formatDuration(duration * 60000);
         }
 
         /**

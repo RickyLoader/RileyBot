@@ -246,9 +246,9 @@ public class MillionaireGameshow {
                 .setTitle(owner.getEffectiveName() + " " + getTitle() + " a millionaire!")
                 .setDescription(buildDescription(question))
                 .setThumbnail(thumb)
-                .setFooter("Try: " + helpMessage, EmbedHelper.getClock())
+                .setFooter("Try: " + helpMessage, EmbedHelper.CLOCK_GIF)
                 .setColor(getColour())
-                .setImage(EmbedHelper.getSpacerImage())
+                .setImage(EmbedHelper.SPACER_IMAGE)
                 .build();
     }
 
@@ -332,7 +332,7 @@ public class MillionaireGameshow {
      * @return Colour to use
      */
     private int getColour() {
-        return running ? EmbedHelper.getYellow() : (victory ? EmbedHelper.getGreen() : EmbedHelper.getRed());
+        return running ? EmbedHelper.YELLOW : (victory ? EmbedHelper.GREEN : EmbedHelper.RED);
     }
 
     /**

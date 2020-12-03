@@ -97,7 +97,7 @@ public class Listener extends ListenerAdapter {
      */
     private void welcomeMember(Member self, Member newMember, MessageChannel channel) {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(EmbedHelper.getYellow());
+        builder.setColor(EmbedHelper.YELLOW);
         builder.setTitle("Hey " + newMember.getUser().getName() + "!");
         builder.setThumbnail(self.getUser().getAvatarUrl());
         builder.setDescription("Here's some stuff I can do " + newMember.getAsMention() + ", now fuck off.");

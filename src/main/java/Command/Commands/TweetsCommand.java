@@ -49,7 +49,7 @@ public class TweetsCommand extends DiscordCommand {
                 "Here are my latest " + tweets.size() + " tweets:",
                 new String[]{"Date", "Content"},
                 5,
-                EmbedHelper.getBlue()
+                EmbedHelper.BLUE
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {

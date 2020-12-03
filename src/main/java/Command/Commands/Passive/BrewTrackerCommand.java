@@ -150,8 +150,8 @@ public class BrewTrackerCommand extends DiscordCommand {
             builder.setTitle("Brew Tracker!");
             builder.setDescription("Use the emotes to keep track of your alcoholism!");
             builder.setThumbnail("https://i.imgur.com/0lQ4Cxh.png");
-            builder.setImage(EmbedHelper.getSpacerImage());
-            builder.setColor(EmbedHelper.getPurple());
+            builder.setImage(EmbedHelper.SPACER_IMAGE);
+            builder.setColor(EmbedHelper.PURPLE);
             builder.setFooter("Take the quiz: https://www.alcohol.org.nz/quiz", "https://i.imgur.com/uogtXCW.png");
             int total = 0;
             int index = 0;

@@ -147,13 +147,13 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     public int getResultColour(Match.RESULT result) {
         switch(result) {
             case WIN:
-                return EmbedHelper.getGreen();
+                return EmbedHelper.GREEN;
             case LOSS:
-                return EmbedHelper.getRed();
+                return EmbedHelper.RED;
             case DRAW:
-                return EmbedHelper.getYellow();
+                return EmbedHelper.YELLOW;
             default:
-                return EmbedHelper.getPurple();
+                return EmbedHelper.PURPLE;
         }
     }
 
@@ -165,7 +165,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      */
     private MessageEmbed getErrorEmbed(MatchHistory matchHistory) {
         return getDefaultEmbedBuilder(matchHistory.getName().toUpperCase())
-                .setColor(EmbedHelper.getRed())
+                .setColor(EmbedHelper.RED)
                 .setDescription(
                         "No match found with id: **" + matchID + "**" +
                                 " for player: **" + matchHistory.getName().toUpperCase() + "**"

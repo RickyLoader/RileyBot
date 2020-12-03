@@ -122,13 +122,13 @@ public class Gunfight {
      */
     private int getColour() {
         if(wins == losses) {
-            return EmbedHelper.getYellow();
+            return EmbedHelper.YELLOW;
         }
         else if(wins < losses) {
-            return EmbedHelper.getRed();
+            return EmbedHelper.RED;
         }
         else {
-            return EmbedHelper.getGreen();
+            return EmbedHelper.GREEN;
         }
     }
 
@@ -175,7 +175,7 @@ public class Gunfight {
                 .setTitle(rank == 0 ? "GUNFIGHT" : "GUNFIGHT RANK " + rank)
                 .setDescription(createDesc())
                 .setThumbnail(getThumbnail())
-                .setImage(EmbedHelper.getSpacerImage())
+                .setImage(EmbedHelper.SPACER_IMAGE)
                 .addField("**WIN**", String.valueOf(wins), true)
                 .addBlankField(true)
                 .addField("**LOSS**", String.valueOf(losses), true)
@@ -183,7 +183,7 @@ public class Gunfight {
                 .addBlankField(true)
                 .addField("**LONGEST STREAK**", longestStreak, true)
                 .addField("**EMOTE MANAGER**", owner.getAsMention(), false)
-                .setFooter((lastUpdate == 0 ? "Game started at " + formatTime(startTime) : "Last update at " + formatTime(lastUpdate)) + " -- Checkout 'gunfight help!' for instructions", EmbedHelper.getClock())
+                .setFooter((lastUpdate == 0 ? "Game started at " + formatTime(startTime) : "Last update at " + formatTime(lastUpdate)) + " -- Checkout 'gunfight help!' for instructions", EmbedHelper.CLOCK_GIF)
                 .build();
     }
 
@@ -654,7 +654,7 @@ public class Gunfight {
      */
     private EmbedBuilder buildHelpMessage() {
         return new EmbedBuilder()
-                .setColor(EmbedHelper.getGreen())
+                .setColor(EmbedHelper.GREEN)
                 .setTitle("GUNFIGHT HELP")
                 .addField(
                         "BASICS",

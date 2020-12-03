@@ -163,7 +163,7 @@ public class Hangman {
     private MessageEmbed buildGameMessage() {
         return new EmbedBuilder()
                 .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
-                .setFooter("Try: " + helpMessage, EmbedHelper.getClock())
+                .setFooter("Try: " + helpMessage, EmbedHelper.CLOCK_GIF)
                 .setThumbnail("https://i.imgur.com/5kyZ42Q.png")
                 .setImage("attachment://image.png")
                 .setColor(getColour())
@@ -180,7 +180,7 @@ public class Hangman {
      * @return Colour
      */
     private int getColour() {
-        return running ? EmbedHelper.getYellow() : (victory ? EmbedHelper.getGreen() : EmbedHelper.getRed());
+        return running ? EmbedHelper.YELLOW : (victory ? EmbedHelper.GREEN : EmbedHelper.RED);
     }
 
     /**

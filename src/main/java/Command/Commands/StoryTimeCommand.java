@@ -65,7 +65,7 @@ public class StoryTimeCommand extends DiscordCommand {
     private MessageEmbed buildRequestEmbed(String text) {
         EmbedBuilder builder = getEmbedBuilder();
         return builder
-                .setColor(EmbedHelper.getBlue())
+                .setColor(EmbedHelper.BLUE)
                 .setDescription("One moment while I complete your story with "
                         + EmbedHelper.embedURL("Shortly Read AI", "https://www.shortlyread.com/write")
                         + "\n\n**Prompt**: "
@@ -83,7 +83,7 @@ public class StoryTimeCommand extends DiscordCommand {
     private MessageEmbed buildCompleteEmbed(String story) {
         EmbedBuilder builder = getEmbedBuilder();
         return builder
-                .setColor(EmbedHelper.getGreen())
+                .setColor(EmbedHelper.GREEN)
                 .setDescription(story)
                 .build();
     }
@@ -98,7 +98,7 @@ public class StoryTimeCommand extends DiscordCommand {
     private MessageEmbed buildFailedEmbed(String text, String error) {
         EmbedBuilder builder = getEmbedBuilder();
         return builder
-                .setColor(EmbedHelper.getRed())
+                .setColor(EmbedHelper.RED)
                 .setDescription("**Error**: " + error + "\n\n**For prompt**: " + text)
                 .build();
     }

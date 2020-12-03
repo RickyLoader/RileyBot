@@ -83,7 +83,7 @@ public class WeatherManager {
     public MessageEmbed getExtremes(String help) {
         EmbedBuilder builder = getEmbedBuilder(help);
         builder
-                .setColor(EmbedHelper.getOrange())
+                .setColor(EmbedHelper.ORANGE)
                 .setTitle("Current Weather Extremes");
 
         JSONArray extremes = getExtremeData();
@@ -152,7 +152,7 @@ public class WeatherManager {
             return failEmbed;
         }
 
-        builder.setColor(EmbedHelper.getBlue());
+        builder.setColor(EmbedHelper.BLUE);
         builder.setTitle(
                 correctedLocation.getLocation()
                         + " Weather Forecast | "
@@ -218,7 +218,7 @@ public class WeatherManager {
             builder.addField(buildForecastField(dayData.getEvening()));
             builder.addField(buildForecastField(dayData.getOvernight()));
         }
-        builder.setImage(forecast.hasImage() ? forecast.getImage() : EmbedHelper.getSpacerImage());
+        builder.setImage(forecast.hasImage() ? forecast.getImage() : EmbedHelper.SPACER_IMAGE);
         return builder.build();
     }
 
@@ -246,7 +246,7 @@ public class WeatherManager {
      */
     private MessageEmbed createFailEmbed(EmbedBuilder builder, String location) {
         return builder
-                .setColor(EmbedHelper.getRed())
+                .setColor(EmbedHelper.RED)
                 .setDescription("I didn't find anything for **" + location + "**\n\nSome places don't show up because nobody likes them.")
                 .setTitle("Weather Forecast")
                 .build();

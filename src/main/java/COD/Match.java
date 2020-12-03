@@ -288,7 +288,7 @@ public class Match {
      * @return Match String
      */
     public String getDurationString() {
-        return EmbedHelper.formatTime(duration);
+        return EmbedHelper.formatDuration(duration);
     }
 
     /**

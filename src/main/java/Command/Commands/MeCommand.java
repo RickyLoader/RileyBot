@@ -24,7 +24,7 @@ public class MeCommand extends DiscordCommand {
             return;
         }
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setColor(EmbedHelper.getGreen());
+        builder.setColor(EmbedHelper.GREEN);
         builder.setTitle(user.getName());
         builder.setThumbnail(user.getAvatarUrl() == null ? user.getDefaultAvatarUrl() : user.getAvatarUrl());
         builder.setDescription("Here's all the data I've stolen from you:");

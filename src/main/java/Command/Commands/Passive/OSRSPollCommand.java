@@ -79,7 +79,7 @@ public class OSRSPollCommand extends DiscordCommand {
                     "OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod(),
                     poll.getTitle(),
                     3,
-                    EmbedHelper.getGreen()
+                    EmbedHelper.GREEN
             );
             EmoteHelper emoteHelper = context.getEmoteHelper();
             this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());

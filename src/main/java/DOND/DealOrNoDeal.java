@@ -166,7 +166,7 @@ public class DealOrNoDeal {
      */
     private MessageEmbed buildGameMessage() {
         return new EmbedBuilder()
-                .setColor(EmbedHelper.getYellow())
+                .setColor(EmbedHelper.YELLOW)
                 .setTitle(contestant.getEffectiveName() + " | Deal or No Deal")
                 .setDescription(getGameStatusMessage())
                 .setImage("attachment://image.png")

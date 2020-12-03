@@ -76,7 +76,7 @@ public class SteakCommand extends DiscordCommand {
     private void sendMessage(MessageChannel channel, byte[] steakSelfie, String name) {
         String steak = "https://i.imgur.com/KXnIE3C.png";
         MessageEmbed message = new EmbedBuilder()
-                .setColor(EmbedHelper.getPurple())
+                .setColor(EmbedHelper.PURPLE)
                 .setThumbnail(steak)
                 .setTitle(name + " - Photo with Steak")
                 .setDescription("The **GREATEST** League of Legends player in LCS history!")

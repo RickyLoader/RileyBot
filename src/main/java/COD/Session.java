@@ -159,7 +159,7 @@ public class Session {
      * @return Formatted string duration
      */
     public String getDuration() {
-        return EmbedHelper.formatTime(duration);
+        return EmbedHelper.formatDuration(duration);
     }
 
     /**

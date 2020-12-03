@@ -95,7 +95,7 @@ public class MillionaireCommand extends DiscordCommand {
                         "Games"
                 },
                 5,
-                EmbedHelper.getPurple()
+                EmbedHelper.PURPLE
         ) {
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {

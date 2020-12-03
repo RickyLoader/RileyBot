@@ -65,7 +65,7 @@ public class GIFCommand extends DiscordCommand {
         builder.setTitle(gif.getTitle(), gif.getUrl());
         builder.setImage(gif.getUrl());
         builder.setDescription("Pulled from search term: **" + query + "**\n\nSometimes they don't load, click the title if you *really* want to see it.");
-        builder.setColor(EmbedHelper.getPurple());
+        builder.setColor(EmbedHelper.PURPLE);
         builder.setThumbnail(thumbnail);
         builder.setFooter("Try: " + getHelpName(), gif.getWebsiteIcon());
         return builder.build();

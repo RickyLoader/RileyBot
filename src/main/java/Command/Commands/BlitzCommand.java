@@ -72,7 +72,7 @@ public class BlitzCommand extends DiscordCommand {
 
             channel.sendMessage(getEmbedBuilder()
                     .setImage("attachment://image.png")
-                    .setColor(EmbedHelper.getOrange())
+                    .setColor(EmbedHelper.ORANGE)
                     .setDescription(championBuildData.getDescription())
                     .build()).addFile(image, "image.png").queue();
         }).start();
@@ -119,9 +119,9 @@ public class BlitzCommand extends DiscordCommand {
      */
     private MessageEmbed getErrorMessage(String query, String role) {
         return getEmbedBuilder()
-                .setColor(EmbedHelper.getRed())
+                .setColor(EmbedHelper.RED)
                 .setDescription("No data found for **" + query.toUpperCase() + " " + role + "**")
-                .setImage(EmbedHelper.getSpacerImage())
+                .setImage(EmbedHelper.SPACER_IMAGE)
                 .build();
     }
 

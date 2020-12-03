@@ -56,8 +56,8 @@ public class UrbanDictionary {
                 .addField(downvote, String.valueOf(definition.getDownvote()), true)
                 .setFooter("Try: " + help, icon)
                 .setThumbnail(icon)
-                .setImage(EmbedHelper.getSpacerImage())
-                .setColor(EmbedHelper.getUrbanDictBlue())
+                .setImage(EmbedHelper.SPACER_IMAGE)
+                .setColor(EmbedHelper.URBAN_DICT_BLUE)
                 .build();
     }
 

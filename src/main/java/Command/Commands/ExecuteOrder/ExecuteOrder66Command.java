@@ -97,9 +97,9 @@ public class ExecuteOrder66Command extends DiscordCommand {
     private MessageEmbed buildStatusMessage() {
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle("EXECUTING ORDER 66")
-                .setColor(finished ? EmbedHelper.getGreen() : EmbedHelper.getRed())
+                .setColor(finished ? EmbedHelper.GREEN : EmbedHelper.RED)
                 .setThumbnail(image)
-                .setImage(EmbedHelper.getSpacerImage());
+                .setImage(EmbedHelper.SPACER_IMAGE);
 
         long executed = targetStatus.entrySet().stream().filter(x -> x.getValue().equals(status.getComplete())).count();
         builder.setDescription(executed + "/" + targets.size() + " targets exterminated.");
@@ -164,7 +164,7 @@ public class ExecuteOrder66Command extends DiscordCommand {
     private void apologise(User loser, String invite) {
         try {
             MessageEmbed apology = new EmbedBuilder()
-                    .setColor(EmbedHelper.getRed())
+                    .setColor(EmbedHelper.RED)
                     .setTitle("I AM SORRY FOR KICKING YOU")
                     .setDescription(
                             "Sorry about that bro, i'm actually a really friendly bot when you get to know me but I have to do what i'm told."

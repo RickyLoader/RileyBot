@@ -55,7 +55,7 @@ public class LeaderboardCommand extends DiscordCommand {
      */
     private MessageEmbed buildSessionMessage(Session session, int rank) {
         return new EmbedBuilder()
-                .setColor(EmbedHelper.getGreen())
+                .setColor(EmbedHelper.GREEN)
                 .setThumbnail(Gunfight.thumbnail)
                 .setTitle("GUNFIGHT RANK #" + rank)
                 .setDescription("Here's the break down!")

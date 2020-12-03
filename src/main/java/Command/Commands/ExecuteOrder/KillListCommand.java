@@ -43,7 +43,7 @@ public class KillListCommand extends DiscordCommand {
         List<Member> targets = context.getTargets();
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("KILL LIST");
-        builder.setColor(EmbedHelper.getRed());
+        builder.setColor(EmbedHelper.RED);
         builder.setThumbnail(executorHandler.getRandomExecutor().getImage());
 
         if(targets.isEmpty()) {

@@ -92,7 +92,7 @@ public class TTSCommand extends DiscordCommand {
             try {
                 MessageChannel log = channels.get(0);
                 EmbedBuilder builder = new EmbedBuilder();
-                builder.setColor(EmbedHelper.getYellow());
+                builder.setColor(EmbedHelper.YELLOW);
                 builder.setDescription("**Author**: " + author.getAsMention() + " **Submitted At**: " + new Date());
                 builder.setTitle("**TTS Log**");
                 builder.addField("Contents:", msg, false);

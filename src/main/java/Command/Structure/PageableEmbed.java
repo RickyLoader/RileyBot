@@ -42,7 +42,7 @@ public abstract class PageableEmbed {
         this.reverse = emoteHelper.getReverse();
         this.thumb = thumb;
         this.bound = bound;
-        this.colour = colour.length == 1 ? colour[0] : EmbedHelper.getYellow();
+        this.colour = colour.length == 1 ? colour[0] : EmbedHelper.YELLOW;
         this.pages = (int) Math.ceil(items.size() / (double) bound);
         jda.addEventListener(new EmoteListener() {
             @Override
@@ -160,7 +160,7 @@ public abstract class PageableEmbed {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setColor(colour);
         builder.setTitle(title);
-        builder.setImage(EmbedHelper.getSpacerImage());
+        builder.setImage(EmbedHelper.SPACER_IMAGE);
         if(desc != null) {
             builder.setDescription(desc);
         }

@@ -5,52 +5,27 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Commonly used features of an embed
+ * Commonly used features, colours, and images of an embedded message
  */
 public class EmbedHelper {
-    public static int getBlue() {
-        return 1942002;
-    }
+    public static final int
+            BLUE = 1942002,
+            GREEN = 65280,
+            PURPLE = 16711935,
+            YELLOW = 16776960,
+            RED = 16711680,
+            ORANGE = 0xd89620,
+            URBAN_DICT_BLUE = 741095,
+            RUNESCAPE_YELLOW = 16747520,
+            RUNESCAPE_ORANGE = 13937190,
+            RUNESCAPE_RED = 11672635,
+            RUNESCAPE_BLUE = 6206918;
 
-    public static int getGreen() {
-        return 65280;
-    }
+    public static final String
+            CLOCK_GIF = "https://i.imgur.com/v2u22T6.gif",
+            SPACER_IMAGE = "https://i.imgur.com/24Xf03H.png",
+            BLANK_CHAR = "\u200e";
 
-    public static int getPurple() {
-        return 16711935;
-    }
-
-    public static int getYellow() {
-        return 16776960;
-    }
-
-    public static int getRed() {
-        return 16711680;
-    }
-
-    public static int getOrange() {
-        return 0xd89620;
-    }
-
-    public static int getUrbanDictBlue() {
-        return 741095;
-    }
-
-    public static int getRunescapeYellow() {
-        return 16747520;
-    }
-
-    public static int getRunescapeOrange() {
-        return 13937190;
-    }
-
-    public static int getRunescapeRed() {
-        return 11672635;
-    }
-
-    public static int getRunescapeBlue() {
-        return 6206918;
-    }
 
     /**
      * Create a field with an invisible character for a title, and the value as a value.
@@ -60,7 +35,7 @@ public class EmbedHelper {
      * @return Value field
      */
     public static MessageEmbed.Field getValueField(String value) {
-        return new MessageEmbed.Field(getBlankChar(), value, true);
+        return new MessageEmbed.Field(BLANK_CHAR, value, true);
     }
 
     /**
@@ -75,15 +50,6 @@ public class EmbedHelper {
     }
 
     /**
-     * Invisible character allows no value to be given to fields
-     *
-     * @return Invisible character
-     */
-    public static String getBlankChar() {
-        return "\u200e";
-    }
-
-    /**
      * Get n blank characters
      *
      * @param n Quantity
@@ -92,18 +58,9 @@ public class EmbedHelper {
     public static String getBlankChar(int n) {
         StringBuilder builder = new StringBuilder();
         for(int i = 0; i < n; i++) {
-            builder.append(getBlankChar());
+            builder.append(BLANK_CHAR);
         }
         return builder.toString();
-    }
-
-    /**
-     * Get URL to a transparent image used to keep embeds at a constant width
-     *
-     * @return Transparent image url
-     */
-    public static String getSpacerImage() {
-        return "https://i.imgur.com/24Xf03H.png";
     }
 
     /**
@@ -112,7 +69,7 @@ public class EmbedHelper {
      * @param time Time in ms
      * @return Formatted time String
      */
-    public static String formatTime(long time) {
+    public static String formatDuration(long time) {
         return String.format("%02d:%02d:%02d",
                 TimeUnit.MILLISECONDS.toHours(time),
                 TimeUnit.MILLISECONDS.toMinutes(time) -
@@ -130,14 +87,5 @@ public class EmbedHelper {
      */
     public static String embedURL(String text, String url) {
         return "[" + text + "](" + url + ")";
-    }
-
-    /**
-     * Get the spinning clock gif
-     *
-     * @return Spinning clock gif
-     */
-    public static String getClock() {
-        return "https://i.imgur.com/v2u22T6.gif";
     }
 }

@@ -39,10 +39,10 @@ public class RS3Hiscores extends Hiscores {
      */
     public RS3Hiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean virtual) {
         super(channel, emoteHelper, "/Runescape/RS3/", "rs3.ttf");
-        this.orange = new Color(EmbedHelper.getRunescapeOrange());
-        this.yellow = new Color(EmbedHelper.getRunescapeYellow());
-        this.blue = new Color(EmbedHelper.getRunescapeBlue());
-        this.red = new Color(EmbedHelper.getRunescapeRed());
+        this.orange = new Color(EmbedHelper.RUNESCAPE_ORANGE);
+        this.yellow = new Color(EmbedHelper.RUNESCAPE_YELLOW);
+        this.blue = new Color(EmbedHelper.RUNESCAPE_BLUE);
+        this.red = new Color(EmbedHelper.RUNESCAPE_RED);
         this.handler = new ResourceHandler();
         this.bgImages = new String[]{
                 "1.png",
