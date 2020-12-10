@@ -1,0 +1,93 @@
+{
+    "weapons": {
+        "weapon_sniper": {
+            "sniper_quickscope_t9": {
+                "real_name": "Pelington 703"
+            },
+            "sniper_standard_t9": {
+                "real_name": "LW3 - Tundra"
+            },
+            "sniper_powersemi_t9": {
+                "real_name": "M82"
+            }
+        },
+        "weapon_lmg": {
+            "lmg_light_t9": {
+                "real_name": "RPD"
+            },
+            "lmg_slowfire_t9": {
+                "real_name": "M60"
+            },
+            "lmg_accurate_t9": {
+                "real_name": "Stoner 63"
+            }
+        },
+        "weapon_pistol": {
+            "pistol_semiauto_t9": {
+                "real_name": "1911"
+            },
+            "pistol_burst_t9": {
+                "real_name": "Diamatti"
+            },
+            "pistol_revolver_t9": {
+                "real_name": "Magnum"
+            }
+        },
+        "weapon_assault_rifle": {
+            "ar_fastfire_t9": {
+                "real_name": "FFAR 1"
+            },
+            "ar_standard_t9": {
+                "real_name": "XM4"
+            },
+            "ar_mobility_t9": {
+                "real_name": "QBZ-83"
+            },
+            "ar_damage_t9": {
+                "real_name": "AK-47"
+            },
+            "ar_accurate_t9": {
+                "real_name": "Krig 6"
+            }
+        },
+        "weapon_shotgun": {
+            "shotgun_semiauto_t9": {
+                "real_name": "Gallo SA12"
+            },
+            "shotgun_pump_t9": {
+                "real_name": "Hauer 77"
+            }
+        },
+        "weapon_smg": {
+            "smg_capacity_t9": {
+                "real_name": "Bullfrog"
+            },
+            "smg_heavy_t9": {
+                "real_name": "AK-74u"
+            },
+            "smg_handling_t9": {
+                "real_name": "Milano 821"
+            },
+            "smg_standard_t9": {
+                "real_name": "MP5"
+            },
+            "smg_burst_t9": {
+                "real_name": "KSP 45"
+            }
+        },
+        "weapon_marksman": {
+            "tr_longburst_t9": {
+                "real_name": "M16"
+            },
+            "tr_damagesemi_t9": {
+                "real_name": "Type 63"
+            },
+            "tr_precisionsemi_t9": {
+                "real_name": "DMR 14"
+            },
+            "tr_powerburst_t9": {
+                "real_name": "AUG"
+            }
+        }
+    }
+}
