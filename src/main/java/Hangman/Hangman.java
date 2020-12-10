@@ -24,7 +24,8 @@ public class Hangman {
     private final String helpMessage;
     private long gameID;
     private int currentFails, currentHints;
-    private String currentGuess, secretWord;
+    private String currentGuess;
+    private DictWord secretWord;
     private MessageChannel channel;
     private Member owner;
     private HashMap<Character, ArrayList<Integer>> secretWordMap;
@@ -70,7 +71,7 @@ public class Hangman {
      * @param word    Word to guess
      * @param owner   Creator of hangman game
      */
-    public void startGame(MessageChannel channel, String word, Member owner) {
+    public void startGame(MessageChannel channel, DictWord word, Member owner) {
         this.running = true;
         this.paused = true;
         this.victory = false;
@@ -80,7 +81,7 @@ public class Hangman {
         this.owner = owner;
 
         this.secretWord = word;
-        this.currentGuess = word.replaceAll("[a-z]", "_");
+        this.currentGuess = word.getWord().replaceAll("[a-z]", "_");
 
         this.currentFails = 0;
         this.currentHints = 0;
@@ -88,7 +89,7 @@ public class Hangman {
         this.secretWordMap = new HashMap<>();
         this.guesses = new LinkedHashSet<>();
         this.hints = new ArrayList<>();
-        char[] characters = secretWord.toCharArray();
+        char[] characters = secretWord.getWord().toCharArray();
 
         for(int i = 0; i < characters.length; i++) {
             char c = characters[i];
@@ -125,7 +126,7 @@ public class Hangman {
      * Update the game message and check the current status of the game
      */
     private void updateGame() {
-        if(currentGuess.equals(secretWord)) {
+        if(currentGuess.equals(secretWord.getWord())) {
             running = false;
             victory = true;
         }
@@ -161,16 +162,19 @@ public class Hangman {
      * @return Game message
      */
     private MessageEmbed buildGameMessage() {
-        return new EmbedBuilder()
+        EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
                 .setFooter("Try: " + helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .setThumbnail("https://i.imgur.com/5kyZ42Q.png")
                 .setImage("attachment://image.png")
-                .setColor(getColour())
-                .setDescription(
-                        "\n**Guesses**: " + formatGuesses() + "\n**Hints**: "
-                                + ((hints.size() == 1 && running) ? "No hints available for the final character " : currentHints + "/" + MAX_HINTS)
-                )
+                .setColor(getColour());
+
+        String desc = "\n**Guesses**: " + getGuessSummary() + "\n**Hints**: " + getHintSummary();
+        if(!running) {
+            desc += "\n\n**Definition**: " + ((secretWord.hasDefinition()) ? secretWord.getDefinition() : "Fuck knows");
+        }
+        return builder
+                .setDescription(desc)
                 .build();
     }
 
@@ -197,16 +201,32 @@ public class Hangman {
     }
 
     /**
-     * Format the guesses for the message embed
+     * Get the hint summary for the game embed
+     * Either message informing that no hints are available or x/y hints where x = used hints & y = total hints
      *
-     * @return Formatted guesses
+     * @return Hint summary
      */
-    private String formatGuesses() {
+    private String getHintSummary() {
+        if(hints.size() == 1 && running) {
+            return "No hints available for the final character.";
+        }
+        return currentHints + "/" + MAX_HINTS;
+    }
+
+    /**
+     * Get the guess summary for the game embed
+     * Return guessed characters in the order they were guessed
+     * Display in bold if the guess was correct or struck through if not
+     * Show total guessed characters in parenthesis
+     *
+     * @return Guess summary
+     */
+    private String getGuessSummary() {
         ArrayList<String> guesses = this.guesses
                 .stream()
                 .map(e -> {
                     String guess = e.toUpperCase();
-                    if((e.length() == 1 && secretWordMap.containsKey(e.charAt(0))) || e.equals(secretWord)) {
+                    if((e.length() == 1 && secretWordMap.containsKey(e.charAt(0))) || e.equals(secretWord.getWord())) {
                         return "**" + guess + "**";
                     }
                     return "~~" + guess + "~~";
@@ -229,7 +249,7 @@ public class Hangman {
             FontMetrics fm = g.getFontMetrics(font);
 
             String guess = StringUtils.join(
-                    (running ? currentGuess : secretWord)
+                    (running ? currentGuess : secretWord.getWord())
                             .toUpperCase().split(""), " "
             );
 
@@ -302,6 +322,7 @@ public class Hangman {
      */
     private boolean guessWord(String guess, Member player) {
         int guessLength = guess.length();
+        String secretWord = this.secretWord.getWord();
         int secretLength = secretWord.length();
         if(guessLength != secretLength) {
             channel.sendMessage(
