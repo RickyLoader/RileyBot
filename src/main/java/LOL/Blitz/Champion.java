@@ -23,7 +23,10 @@ public class Champion {
     public Champion(String name, String id, String key, Ability[] abilities) {
         this.name = name;
         this.id = id;
-        this.championImage = new ResourceHandler().getImageResource("/LOL/Champions/Thumbnails/" + key + ".png");
+        String path = "/LOL/Champions/Thumbnails/";
+        ResourceHandler resourceHandler = new ResourceHandler();
+        BufferedImage image = resourceHandler.getImageResource(path + key + ".png");
+        this.championImage = (image == null) ? resourceHandler.getImageResource(path + "Default.png") : image;
         this.abilities = abilities;
     }
 

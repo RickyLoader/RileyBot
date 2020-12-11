@@ -211,7 +211,7 @@ public class Blitz {
             words[i] = StringUtils.capitalize(words[i]);
         }
 
-        Champion champion = champions.getOrDefault(StringUtils.join(words, ""), null);
+        Champion champion = champions.get(StringUtils.join(words, ""));
         if(champion == null) {
             for(Champion c : champions.values()) {
                 if(c.getName().toLowerCase().contains(query)) {
@@ -359,10 +359,11 @@ public class Blitz {
                 continue;
             }
             String id = String.valueOf(o);
+
             items.add(
-                    this.items.getOrDefault(
+                    this.items.computeIfAbsent(
                             id,
-                            getDeletedItem(id)
+                            key -> getDeletedItem(id)
                     )
             );
         }

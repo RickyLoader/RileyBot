@@ -17,9 +17,11 @@ public class Ability {
      * @param image      Ability image name - JaxLeapStrike.png
      */
     public Ability(String buttonText, String image) {
-        ResourceHandler handler = new ResourceHandler();
-        this.abilityImage = handler.getImageResource("/LOL/Champions/Abilities/" + image);
-        this.buttonImage = handler.getImageResource("/LOL/Champions/Abilities/Order/" + buttonText + ".png");
+        ResourceHandler resourceHandler = new ResourceHandler();
+        String path = "/LOL/Champions/Abilities/";
+        BufferedImage ability = resourceHandler.getImageResource(path + image);
+        this.abilityImage = (ability == null) ? resourceHandler.getImageResource(path + "Default.png") : ability;
+        this.buttonImage = resourceHandler.getImageResource(path + "/Order/" + buttonText + ".png");
     }
 
     /**
