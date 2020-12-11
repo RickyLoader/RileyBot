@@ -459,7 +459,7 @@ public class Summoner {
                     JSONObject champion = champions.getJSONObject(championName);
                     if(champion.getString("key").equals(String.valueOf(id))) {
                         this.name = championName;
-                        this.imagePath = res + "Champions/Thumbnails/" + champion.getString("id") + ".png";
+                        this.imagePath = res + "Champions/Images/" + champion.getString("id") + ".png";
                     }
                 }
             }

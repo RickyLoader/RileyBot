@@ -61,7 +61,7 @@ public class LOLLookupCommand extends LookupCommand {
         SummonerImage summonerImage = new SummonerImage(context.getMessageChannel(), context.getEmoteHelper());
         summonerImage.buildImage(
                 name,
-                getHelpName(),
+                "Type " + getTrigger() + " for help",
                 displayRegion.toUpperCase(),
                 apiRegion
         );

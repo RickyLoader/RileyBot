@@ -26,7 +26,7 @@ public abstract class LookupCommand extends DiscordCommand {
         super(
                 trigger,
                 desc,
-                (getDefaultHelpText(trigger))
+                getDefaultHelpText(trigger)
         );
         this.maxLength = maxLength;
     }
