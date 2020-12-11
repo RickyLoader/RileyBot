@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 public class NetworkRequest {
     private final OkHttpClient client;
@@ -20,7 +21,9 @@ public class NetworkRequest {
     public NetworkRequest(String url, boolean local) {
         client = new OkHttpClient();
         try {
-            builder = new Request.Builder().url(new URL(local ? NetworkInfo.getAddress() + "/DiscordBotAPI/api/" + url : url));
+            builder = new Request.Builder().url(
+                    new URL(local ? NetworkInfo.getAddress() + "/DiscordBotAPI/api/" + url : url)
+            );
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -32,9 +35,11 @@ public class NetworkRequest {
      *
      * @return Response from request
      */
-    public String get() {
+    public NetworkResponse get() {
         try {
-            Response response = client.newCall(builder.addHeader("accept", "application/json").build()).execute();
+            Response response = client.newCall(
+                    builder.addHeader("accept", "application/json").build()
+            ).execute();
             return handleResponse(response);
         }
         catch(Exception e) {
@@ -56,7 +61,7 @@ public class NetworkRequest {
      *
      * @return Response from request
      */
-    public String get(HashMap<String, String> headers) {
+    public NetworkResponse get(HashMap<String, String> headers) {
         try {
             headers.put("accept", "application/json");
             parseHeaders(headers);
@@ -77,7 +82,7 @@ public class NetworkRequest {
      * @param async   Async request
      * @return Response from request
      */
-    public String post(RequestBody body, HashMap<String, String> headers, boolean async) {
+    public NetworkResponse post(RequestBody body, HashMap<String, String> headers, boolean async) {
         try {
             if(headers != null) {
                 parseHeaders(headers);
@@ -123,7 +128,7 @@ public class NetworkRequest {
      * @param async Async request
      * @return Response from request
      */
-    public String post(String body, boolean async) {
+    public NetworkResponse post(String body, boolean async) {
         return post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body), null, async);
     }
 
@@ -132,7 +137,7 @@ public class NetworkRequest {
      *
      * @param body Body to send
      */
-    public String post(String body) {
+    public NetworkResponse post(String body) {
         return post(body, false);
     }
 
@@ -142,28 +147,20 @@ public class NetworkRequest {
      * @param response Response from network call
      * @return String response
      */
-    private String handleResponse(Response response) {
-        String data = null;
+    private NetworkResponse handleResponse(Response response) {
         try {
-            if(response.body() == null) {
-                return null;
+            boolean timeout = response == null;
+            NetworkResponse networkResponse = new NetworkResponse(
+                    (timeout || response.body() == null) ? null : response.body().string(),
+                    timeout ? -1 : response.code()
+            );
+            if(!timeout) {
+                response.close();
             }
-            if(response.code() == 200 || response.code() == 201 || response.code() == 406 || response.code() == 429) {
-                data = response.body().string();
-            }
-            else if(response.code() == 404 || response.code() == 501 || response.code() == 500 || response.code() == 504) {
-                data = "err";
-            }
-            else {
-                System.out.println(response.body().string());
-                System.out.println(response.code());
-            }
-            response.close();
+            return networkResponse;
         }
         catch(Exception e) {
-            e.printStackTrace();
             return null;
         }
-        return data;
     }
 }

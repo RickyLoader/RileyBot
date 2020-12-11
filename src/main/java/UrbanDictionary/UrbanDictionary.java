@@ -106,8 +106,8 @@ public class UrbanDictionary {
      * @return Random definition from provided results
      */
     private ArrayList<Definition> definitionRequest(String url) {
-        String json = new NetworkRequest(url, false).get();
-        if(json.equals("err")) {
+        String json = new NetworkRequest(url, false).get().body;
+        if(json == null) {
             return null;
         }
         JSONArray results = new JSONObject(json).getJSONArray("list");

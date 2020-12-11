@@ -80,12 +80,20 @@ public class GIFCommand extends DiscordCommand {
     private ArrayList<GIF> searchGIFs(String query) {
         ArrayList<GIF> gifs = new ArrayList<>();
         try {
-            String url = "https://api.redgifs.com/v1/gfycats/search?search_text=" + URLEncoder.encode(query, "UTF-8") + "&count=50";
-            String json = new NetworkRequest(url, false).get();
+            String url = "https://api.redgifs.com/v1/gfycats/search?search_text="
+                    + URLEncoder.encode(query, "UTF-8")
+                    + "&count=50";
+            String json = new NetworkRequest(url, false).get().body;
             JSONArray results = new JSONObject(json).getJSONArray("gfycats");
             for(int i = 0; i < results.length(); i++) {
                 JSONObject o = results.getJSONObject(i);
-                gifs.add(new GIF(o.getString("gifUrl"), o.getString("title"), o.getString("posterUrl")));
+                gifs.add(
+                        new GIF(
+                                o.getString("gifUrl"),
+                                o.getString("title"),
+                                o.getString("posterUrl")
+                        )
+                );
             }
             return gifs;
         }

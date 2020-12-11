@@ -84,7 +84,7 @@ public class Summoner {
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
             String url = urlPrefix + "summoner/v4/summoners/by-name/" + name + apiKey;
-            json = new NetworkRequest(url, false).get();
+            json = new NetworkRequest(url, false).get().body;
             if(json == null) {
                 return false;
             }
@@ -96,7 +96,7 @@ public class Summoner {
             this.profileBorder = handler.getImageResource(res + "Summoner/Borders/" + roundLevel(level) + ".png");
 
             url = urlPrefix + "league/v4/entries/by-summoner/" + id + apiKey;
-            json = new NetworkRequest(url, false).get();
+            json = new NetworkRequest(url, false).get().body;
             if(json != null) {
                 JSONArray queues = new JSONArray(json);
                 for(int i = 0; i < queues.length(); i++) {
@@ -116,7 +116,7 @@ public class Summoner {
             }
             this.profileBanner = handler.getImageResource(res + "Summoner/Banners/" + getHighestRank() + ".png");
             url = urlPrefix + "champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
-            json = new NetworkRequest(url, false).get();
+            json = new NetworkRequest(url, false).get().body;
             if(json != null) {
                 JSONArray champions = new JSONArray(json);
                 for(int i = 0; i < champions.length(); i++) {

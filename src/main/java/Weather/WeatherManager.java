@@ -273,7 +273,7 @@ public class WeatherManager {
      */
     private Forecast getForecastData(SearchResult location, boolean tomorrow) {
         try {
-            String data = new NetworkRequest(location.getDataUrl(), false).get();
+            String data = new NetworkRequest(location.getDataUrl(), false).get().body;
             System.out.println(location.getDataUrl());
             if(data == null) {
                 return null;

@@ -302,7 +302,7 @@ public class OSRSHiscores extends Hiscores {
         return new NetworkRequest(
                 "https://" + getTrackerDomain(league) + "/api/players/username/" + name + "/gained",
                 false
-        ).get();
+        ).get().body;
     }
 
     /**

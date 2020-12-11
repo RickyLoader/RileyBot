@@ -33,7 +33,7 @@ public class DiscordUser {
      * @return Saved name for given table
      */
     public static String getSavedName(long id, String nameType) {
-        String json = new NetworkRequest("users/names/" + nameType + "/" + id, true).get();
+        String json = new NetworkRequest("users/names/" + nameType + "/" + id, true).get().body;
         return json.isEmpty() || new JSONObject(json).isNull(nameType) ? null : new JSONObject(json).getString(nameType);
     }
 
@@ -44,7 +44,7 @@ public class DiscordUser {
      * @return User's millionaire bank stats
      */
     public static String getMillionaireBankData(long id) {
-        String json = new NetworkRequest("millionaire/bank/" + id, true).get();
+        String json = new NetworkRequest("millionaire/bank/" + id, true).get().body;
         return json.isEmpty() ? null : json;
     }
 
@@ -54,7 +54,7 @@ public class DiscordUser {
      * @return All user millionaire bank stats
      */
     public static String getMillionaireBankLeaderboard() {
-        String json = new NetworkRequest("millionaire/leaderboard", true).get();
+        String json = new NetworkRequest("millionaire/leaderboard", true).get().body;
         return json.isEmpty() ? null : json;
     }
 
@@ -65,7 +65,7 @@ public class DiscordUser {
      * @return Saved names of user
      */
     public static String getUserData(long id) {
-        return new NetworkRequest("users/info/" + id, true).get();
+        return new NetworkRequest("users/info/" + id, true).get().body;
     }
 
     /**
@@ -75,6 +75,6 @@ public class DiscordUser {
      * @return OSRS league data
      */
     public static String getOSRSLeagueData(String playerName) {
-        return new NetworkRequest("osrs/league/player/" + playerName, true).get();
+        return new NetworkRequest("osrs/league/player/" + playerName, true).get().body;
     }
 }

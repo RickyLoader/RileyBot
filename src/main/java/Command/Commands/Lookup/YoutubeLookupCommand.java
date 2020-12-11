@@ -105,8 +105,10 @@ public class YoutubeLookupCommand extends LookupCommand {
          * @return Channel exists
          */
         private boolean getChannelInfo(String channelName) {
-            String searchChannel = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=" + channelName + Secret.getYoutubeKey();
-            String json = new NetworkRequest(searchChannel, false).get();
+            String searchChannel = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q="
+                    + channelName
+                    + Secret.getYoutubeKey();
+            String json = new NetworkRequest(searchChannel, false).get().body;
             if(json == null) {
                 return false;
             }
@@ -132,8 +134,10 @@ public class YoutubeLookupCommand extends LookupCommand {
          */
         private ArrayList<Video> findVideos() {
             HashMap<String, Video> videos = new HashMap<>();
-            String videoSearch = "https://www.googleapis.com/youtube/v3/search?channelId=" + id + "&part=snippet,id&order=date&maxResults=50" + Secret.getYoutubeKey();
-            String json = new NetworkRequest(videoSearch, false).get();
+            String videoSearch = "https://www.googleapis.com/youtube/v3/search?channelId="
+                    + id
+                    + "&part=snippet,id&order=date&maxResults=50" + Secret.getYoutubeKey();
+            String json = new NetworkRequest(videoSearch, false).get().body;
             if(json == null) {
                 return null;
             }
@@ -156,17 +160,35 @@ public class YoutubeLookupCommand extends LookupCommand {
                         )
                 );
             }
-            ArrayList<String> videoIds = videos.values().stream().map(Video::getId).collect(Collectors.toCollection(ArrayList::new));
-            String idList = videoIds.toString().replace("[", "").replace("]", "").replace(" ", "");
-            String statSearch = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=" + idList + Secret.getYoutubeKey();
-            String statInfo = new NetworkRequest(statSearch, false).get();
+            ArrayList<String> videoIds = videos
+                    .values()
+                    .stream()
+                    .map(Video::getId)
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            String idList = videoIds
+                    .toString()
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", "");
+
+            String statSearch = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id="
+                    + idList
+                    + Secret.getYoutubeKey();
+
+            String statInfo = new NetworkRequest(statSearch, false).get().body;
             if(statInfo == null) {
                 return null;
             }
             JSONArray videoStats = new JSONObject(statInfo).getJSONArray("items");
             for(int i = 0; i < videoStats.length(); i++) {
                 JSONObject video = videoStats.getJSONObject(i);
-                videos.get(video.getString("id")).setViews(Integer.parseInt(video.getJSONObject("statistics").getString("viewCount")));
+                videos.get(video.getString("id"))
+                        .setViews(
+                                Integer.parseInt(
+                                        video.getJSONObject("statistics").getString("viewCount")
+                                )
+                        );
             }
             return new ArrayList<>(videos.values());
         }

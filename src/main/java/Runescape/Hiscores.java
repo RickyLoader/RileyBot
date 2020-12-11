@@ -5,6 +5,7 @@ import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.image.BufferedImage;
@@ -51,16 +52,15 @@ public abstract class Hiscores extends ImageBuilder {
      * @return Response from API
      */
     public String[] hiscoresRequest(String url) {
-        String response = new NetworkRequest(url, false).get();
-        if(response == null) {
+        NetworkResponse response = new NetworkRequest(url, false).get();
+        if(response.code == 504) {
             timeout = true;
             return null;
         }
-        if(response.equals("err")) {
+        if(response.code == 404) {
             return null;
         }
-        response += "," + url;
-        return response.replace("\n", ",").split(",");
+        return (response.body + "," + url).replace("\n", ",").split(",");
     }
 
     /**

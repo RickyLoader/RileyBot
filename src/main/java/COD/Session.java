@@ -99,7 +99,7 @@ public class Session {
      * @return Gunfight history
      */
     public static ArrayList<Session> getHistory() {
-        String json = new NetworkRequest(endPoint + "/fetch", true).get();
+        String json = new NetworkRequest(endPoint + "/fetch", true).get().body;
         if(json == null) {
             return null;
         }
@@ -146,7 +146,7 @@ public class Session {
      * @return Total match numbers
      */
     static int getTotalMatches() {
-        String json = new NetworkRequest(endPoint + "/total", true).get();
+        String json = new NetworkRequest(endPoint + "/total", true).get().body;
         if(json == null) {
             return 0;
         }

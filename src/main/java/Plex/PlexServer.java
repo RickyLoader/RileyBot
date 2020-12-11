@@ -4,6 +4,7 @@ import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -76,8 +77,9 @@ public class PlexServer {
      */
     private HashMap<String, String> parsePlex() {
         HashMap<String, String> plexURLs = new HashMap<>();
-        String json = new NetworkRequest(getPlexLibraryURL(), false).get();
-        if(json == null || json.equals("err")) {
+        NetworkResponse response = new NetworkRequest(getPlexLibraryURL(), false).get();
+        String json = response.body;
+        if(json == null || response.code == 504) {
             System.out.println("Failed to contact Plex");
             return plexURLs;
         }
@@ -114,8 +116,9 @@ public class PlexServer {
      */
     private ArrayList<Movie> getLibraryOverview() {
         ArrayList<Movie> library = new ArrayList<>();
-        String json = new NetworkRequest(getRadarrLibraryURL(), false).get();
-        if(json == null || json.equals("err")) {
+        NetworkResponse response = new NetworkRequest(getRadarrLibraryURL(), false).get();
+        String json = response.body;
+        if(json == null || response.code == 504) {
             System.out.println("Failed to contact Radarr");
             return library;
         }
@@ -263,8 +266,10 @@ public class PlexServer {
      * @return MessageEmbed detailing search result
      */
     private MessageEmbed searchRadarr(String query, boolean idSearch, Member member, String webhook) {
-        String json = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get();
-        if(json == null || json.equals("err")) {
+        NetworkResponse response = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get();
+        System.out.println(getRadarrSearchURL(query, idSearch));
+        String json = response.body;
+        if(json == null) {
             return buildFailedEmbed();
         }
         // ID search returns a JSON object rather than an array of results

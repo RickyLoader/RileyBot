@@ -45,7 +45,7 @@ public class TrailblazerCommand extends DiscordCommand {
      */
     private ArrayList<RelicTier> getRelics() {
         return RelicTier.parseRelics(new JSONArray(
-                new NetworkRequest("osrs/league/relics", true).get()
+                new NetworkRequest("osrs/league/relics", true).get().body
         ));
     }
 
@@ -231,7 +231,7 @@ public class TrailblazerCommand extends DiscordCommand {
         try {
             String response = new NetworkRequest("osrs/league/player/update", true).post(
                     getUpdateJSON(new JSONObject(data), name)
-            );
+            ).body;
             if(response.contains("updated")) {
                 channel.sendMessage(
                         member.getAsMention()

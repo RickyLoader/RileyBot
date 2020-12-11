@@ -58,7 +58,7 @@ public class Blitz {
      */
     private String[] getVersions() {
         JSONArray versionData = new JSONArray(
-                new NetworkRequest(ddragonPrefix + "versions.json", false).get()
+                new NetworkRequest(ddragonPrefix + "versions.json", false).get().body
         );
         String[] versions = new String[5];
         for(int i = 0; i < 5; i++) {
@@ -75,7 +75,7 @@ public class Blitz {
      */
     private HashMap<Integer, Rune> getRunes(String version) {
         JSONArray runeData = new JSONArray(
-                new NetworkRequest(ddragonPrefix + version + "runes.json", false).get()
+                new NetworkRequest(ddragonPrefix + version + "runes.json", false).get().body
         );
         HashMap<Integer, Rune> runes = new HashMap<>();
         for(int i = 0; i < runeData.length(); i++) {
@@ -117,7 +117,7 @@ public class Blitz {
      */
     private HashMap<String, SummonerSpell> getSummonerSpells(String version) {
         JSONObject spellData = new JSONObject(
-                new NetworkRequest(ddragonPrefix + version + "summoners.json", false).get()
+                new NetworkRequest(ddragonPrefix + version + "summoners.json", false).get().body
         ).getJSONObject("data");
         HashMap<String, SummonerSpell> spells = new HashMap<>();
         for(String spellKey : spellData.keySet()) {
@@ -141,7 +141,7 @@ public class Blitz {
      */
     private HashMap<String, Champion> getChampions(String version) {
         JSONObject championData = new JSONObject(
-                new NetworkRequest(ddragonPrefix + version + "champions.json", false).get()
+                new NetworkRequest(ddragonPrefix + version + "champions.json", false).get().body
         ).getJSONObject("data");
 
         HashMap<String, Champion> champions = new HashMap<>();
@@ -182,7 +182,7 @@ public class Blitz {
      */
     private HashMap<String, Item> getItems(String version) {
         JSONObject itemData = new JSONObject(
-                new NetworkRequest(ddragonPrefix + version + "items.json", false).get()
+                new NetworkRequest(ddragonPrefix + version + "items.json", false).get().body
         ).getJSONObject("data");
         HashMap<String, Item> items = new HashMap<>();
         for(String itemId : itemData.keySet()) {
@@ -342,7 +342,7 @@ public class Blitz {
                 + "&queue=420&region=world&tier=PLATINUM_PLUS&role="
                 + role;
 
-        return new NetworkRequest(url, false).get();
+        return new NetworkRequest(url, false).get().body;
     }
 
     /**

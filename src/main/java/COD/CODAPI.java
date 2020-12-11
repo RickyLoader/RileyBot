@@ -25,7 +25,7 @@ public class CODAPI {
             json = new NetworkRequest(
                     MODERN_WARFARE_URL + nameEncode + "/" + platform,
                     false
-            ).get();
+            ).get().body;
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -70,7 +70,7 @@ public class CODAPI {
             json = new NetworkRequest(
                     gameURL + "history/" + nameEncode + "/" + platform,
                     false)
-                    .get();
+                    .get().body;
         }
         catch(Exception e) {
             e.printStackTrace();
