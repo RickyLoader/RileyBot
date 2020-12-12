@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Play Hangman! Fun!
@@ -72,7 +73,7 @@ public class HangmanCommand extends DiscordCommand {
         Hangman game = hangmanGames.get(channel);
 
         if(game == null) {
-            game = new Hangman(getHelpName().replace("\n", " | "), gallows.get(0));
+            game = new Hangman(getHelpName().replace("\n", " | "));
             hangmanGames.put(channel, game);
         }
 
@@ -110,10 +111,24 @@ public class HangmanCommand extends DiscordCommand {
                         channel.sendMessage(player.getAsMention() + " Stop the current game if you want to play Hangman with me cunt").queue();
                         return;
                     }
-                    finalGame.startGame(channel, dictionary.getRandomWord(), context.getSelfMember());
+                    finalGame.startGame(
+                            getRandomGallows(),
+                            channel,
+                            dictionary.getRandomWord(),
+                            context.getSelfMember()
+                    );
                     break;
             }
         }).start();
+    }
+
+    /**
+     * Get a random gallows
+     *
+     * @return Random gallows
+     */
+    private Gallows getRandomGallows() {
+        return gallows.get(new Random().nextInt(gallows.size()));
     }
 
     /**
@@ -181,6 +196,7 @@ public class HangmanCommand extends DiscordCommand {
         DictWord dictWord = dictionary.getWord(word);
 
         game.startGame(
+                getRandomGallows(),
                 channel,
                 dictWord == null ? new DictWord(word) : dictWord,
                 player

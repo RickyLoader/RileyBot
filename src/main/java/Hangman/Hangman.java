@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Play Hangman!
  */
 public class Hangman {
-    private final Gallows gallows;
+    private Gallows gallows;
     private final int MAX_HINTS;
     private final String helpMessage;
     private long gameID;
@@ -37,20 +37,21 @@ public class Hangman {
      *
      * @param helpMessage Help message to display
      */
-    public Hangman(String helpMessage, Gallows gallows) {
+    public Hangman(String helpMessage) {
         this.helpMessage = helpMessage;
-        this.gallows = gallows;
         this.MAX_HINTS = 3;
     }
 
     /**
      * Start the Hangman game and reset variables
      *
+     * @param gallows Gallows to play on
      * @param channel Channel for game to take place
      * @param word    Word to guess
      * @param owner   Creator of hangman game
      */
-    public void startGame(MessageChannel channel, DictWord word, Member owner) {
+    public void startGame(Gallows gallows, MessageChannel channel, DictWord word, Member owner) {
+        this.gallows = gallows;
         this.running = true;
         this.paused = true;
         this.victory = false;
