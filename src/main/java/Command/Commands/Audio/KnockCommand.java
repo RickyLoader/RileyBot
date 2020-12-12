@@ -16,8 +16,8 @@ public class KnockCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         context.getMessage().delete().queue(
                 delete -> {
-                    lastKnock = lastKnock.equals(leftKnock) ? rightKnock : leftKnock;
                     context.playAudio(lastKnock);
+                    lastKnock = lastKnock.equals(leftKnock) ? rightKnock : leftKnock;
                 }
         );
     }
