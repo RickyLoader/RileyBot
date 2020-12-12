@@ -154,6 +154,8 @@ public class Blitz {
                 handler.getImageResource(Ability.ORDER_PATH + "R.png")
         };
 
+        BufferedImage missingImage = handler.getImageResource(Ability.PATH + "Default.png");
+
         for(String championKey : championData.keySet()) {
             JSONObject champion = championData.getJSONObject(championKey);
             JSONArray abilityData = champion.getJSONArray("spells");
@@ -164,11 +166,12 @@ public class Blitz {
             for(int i = 1; i < abilityData.length(); i++) {
                 JSONObject ability = abilityData.getJSONObject(i);
                 int index = i - 1;
+                BufferedImage abilityImage = handler.getImageResource(
+                        Ability.PATH + ability.getJSONObject("image").getString("full")
+                );
                 abilities[index] = new Ability(
                         buttons[index],
-                        handler.getImageResource(
-                                Ability.PATH + ability.getJSONObject("image").getString("full")
-                        )
+                        abilityImage == null ? missingImage : abilityImage
                 );
             }
             champions.put(
