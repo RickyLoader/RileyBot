@@ -1,6 +1,5 @@
 package Hangman;
 
-import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -19,11 +18,11 @@ import java.util.stream.Collectors;
  * Play Hangman!
  */
 public class Hangman {
-    private final BufferedImage[] images;
-    private final int MAX_FAILS, MAX_HINTS;
+    private final Gallows gallows;
+    private final int MAX_HINTS;
     private final String helpMessage;
     private long gameID;
-    private int currentFails, currentHints;
+    private int currentHints;
     private String currentGuess;
     private DictWord secretWord;
     private MessageChannel channel;
@@ -38,30 +37,10 @@ public class Hangman {
      *
      * @param helpMessage Help message to display
      */
-    public Hangman(String helpMessage) {
+    public Hangman(String helpMessage, Gallows gallows) {
         this.helpMessage = helpMessage;
-        this.images = getImages(new ResourceHandler());
-        this.MAX_FAILS = 6;
+        this.gallows = gallows;
         this.MAX_HINTS = 3;
-    }
-
-    /**
-     * Get the images required to play Hangman
-     *
-     * @param handler Resource handler
-     * @return Array of images displaying each stage of the game
-     */
-    private BufferedImage[] getImages(ResourceHandler handler) {
-        String path = "/Hangman/";
-        return new BufferedImage[]{
-                handler.getImageResource(path + "board.png"),
-                handler.getImageResource(path + "head.png"),
-                handler.getImageResource(path + "head_body.png"),
-                handler.getImageResource(path + "head_body_leg_1.png"),
-                handler.getImageResource(path + "head_body_leg_2.png"),
-                handler.getImageResource(path + "head_body_leg_2_arm_1.png"),
-                handler.getImageResource(path + "head_body_leg_2_arm_2.png")
-        };
     }
 
     /**
@@ -83,7 +62,6 @@ public class Hangman {
         this.secretWord = word;
         this.currentGuess = word.getWord().replaceAll("[a-z]", "_");
 
-        this.currentFails = 0;
         this.currentHints = 0;
 
         this.secretWordMap = new HashMap<>();
@@ -130,10 +108,15 @@ public class Hangman {
             running = false;
             victory = true;
         }
-        else if(MAX_FAILS - currentFails == 0) {
+        else if(gallows.MAX_STAGES - gallows.getStage() == 0) {
             running = false;
         }
-        channel.deleteMessageById(gameID).queue(aVoid -> sendGameMessage());
+        channel.deleteMessageById(gameID).queue(delete -> {
+            sendGameMessage();
+            if(!running) {
+                gallows.resetStages();
+            }
+        });
     }
 
     /**
@@ -165,7 +148,7 @@ public class Hangman {
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
                 .setFooter("Try: " + helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
-                .setThumbnail("https://i.imgur.com/5kyZ42Q.png")
+                .setThumbnail(gallows.getImagePreview())
                 .setImage("attachment://image.png")
                 .setColor(getColour());
 
@@ -194,7 +177,7 @@ public class Hangman {
      */
     private String getGameStatus() {
         if(running) {
-            int chances = MAX_FAILS - currentFails;
+            int chances = gallows.MAX_STAGES - gallows.getStage();
             return chances + (chances == 1 ? " Chance" : " Chances") + " remaining!";
         }
         return victory ? "Victory!" : (stopped ? "Forfeited!" : "Defeat!");
@@ -243,7 +226,7 @@ public class Hangman {
     private byte[] buildImage() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            BufferedImage gallows = images[currentFails];
+            BufferedImage gallows = this.gallows.getCurrentImage();
             Graphics g = gallows.getGraphics();
             Font font = g.getFontMetrics().getFont().deriveFont(50f);
             FontMetrics fm = g.getFontMetrics(font);
@@ -261,7 +244,12 @@ public class Hangman {
             g.drawString(guess, 0, playerGuess.getHeight() - fm.getMaxDescent());
 
             BufferedImage canvas = new BufferedImage(
-                    Math.max(gallows.getWidth(), playerGuess.getWidth()), gallows.getHeight() + playerGuess.getHeight(), BufferedImage.TYPE_INT_ARGB
+                    Math.max(
+                            gallows.getWidth(),
+                            playerGuess.getWidth()
+                    ),
+                    gallows.getHeight() + playerGuess.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB
             );
             g = canvas.getGraphics();
             g.drawImage(gallows, 0, 0, null);
@@ -284,7 +272,9 @@ public class Hangman {
      */
     public void guess(String guess, Member player) {
         if(guesses.contains(guess)) {
-            channel.sendMessage(player.getAsMention() + " " + guess + " has already been guessed, should've gone to Specsavers").queue();
+            channel.sendMessage(
+                    player.getAsMention() + " " + guess + " has already been guessed, should've gone to Specsavers"
+            ).queue();
             return;
         }
 
@@ -306,7 +296,7 @@ public class Hangman {
      */
     private void guessCharacter(Character guess) {
         if(!secretWordMap.containsKey(guess)) {
-            currentFails++;
+            gallows.incrementStage();
             return;
         }
         hints.remove(String.valueOf(guess));
@@ -337,7 +327,7 @@ public class Hangman {
         }
 
         if(!secretWord.equals(guess)) {
-            currentFails++;
+            gallows.incrementStage();
         }
         else {
             currentGuess = guess;
@@ -377,7 +367,8 @@ public class Hangman {
     public void getHint(Member player) {
         if(currentHints == MAX_HINTS) {
             channel.sendMessage(
-                    player.getAsMention() + " You've already exceeded the maximum of " + MAX_HINTS + " hints, time to use your brain"
+                    player.getAsMention()
+                            + " You've already exceeded the maximum of " + MAX_HINTS + " hints, time to use your brain"
             ).queue();
             return;
         }

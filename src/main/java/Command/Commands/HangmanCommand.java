@@ -6,8 +6,11 @@ import Command.Structure.DiscordCommand;
 import Hangman.*;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -17,11 +20,14 @@ public class HangmanCommand extends DiscordCommand {
     private final HashMap<MessageChannel, Hangman> hangmanGames;
     private final Dictionary dictionary;
     private final int MIN_LENGTH = 5, MAX_LENGTH = 25;
+    private final ArrayList<Gallows> gallows;
+    private final String PATH = "/Hangman/";
 
     public HangmanCommand() {
         super("hm start [word]\nhm guess [word/letter]\nhm hint\nhm stop\nhm ai", "Play hangman!");
         this.hangmanGames = new HashMap<MessageChannel, Hangman>();
         this.dictionary = createDictionary();
+        this.gallows = createGallows();
     }
 
     /**
@@ -32,7 +38,7 @@ public class HangmanCommand extends DiscordCommand {
     private Dictionary createDictionary() {
         System.out.println("Parsing Webster's English dictionary...");
         JSONObject data = new JSONObject(
-                new ResourceHandler().getResourceFileAsString("/Hangman/dictionary.json")
+                new ResourceHandler().getResourceFileAsString(PATH + "dictionary.json")
         );
         Dictionary dictionary = new Dictionary();
         for(String word : data.keySet()) {
@@ -66,7 +72,7 @@ public class HangmanCommand extends DiscordCommand {
         Hangman game = hangmanGames.get(channel);
 
         if(game == null) {
-            game = new Hangman(getHelpName().replace("\n", " | "));
+            game = new Hangman(getHelpName().replace("\n", " | "), gallows.get(0));
             hangmanGames.put(channel, game);
         }
 
@@ -194,5 +200,35 @@ public class HangmanCommand extends DiscordCommand {
     @Override
     public boolean matches(String query) {
         return query.startsWith("hm") || query.startsWith("hangman");
+    }
+
+
+    /**
+     * Create the list of gallows instances that may be used for the game of Hangman
+     *
+     * @return List of gallows instances
+     */
+    private ArrayList<Gallows> createGallows() {
+        ResourceHandler handler = new ResourceHandler();
+        ArrayList<Gallows> gallows = new ArrayList<>();
+        JSONObject gallowsData = readJSONFile(PATH + "gallows.json");
+
+        for(String gallowsName : gallowsData.keySet()) {
+            JSONObject info = gallowsData.getJSONObject(gallowsName);
+            String imagePath = PATH + info.getString("folder") + "/";
+            JSONArray imageNames = info.getJSONArray("images");
+            BufferedImage[] images = new BufferedImage[imageNames.length()];
+
+            for(int i = 0; i < imageNames.length(); i++) {
+                images[i] = handler.getImageResource(imagePath + imageNames.getString(i));
+            }
+            gallows.add(
+                    new Gallows(
+                            images,
+                            info.getString("thumbnail")
+                    )
+            );
+        }
+        return gallows;
     }
 }
