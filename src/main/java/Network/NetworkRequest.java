@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 public class NetworkRequest {
     private final OkHttpClient client;
+    private final NetworkResponse timeout;
     private Request.Builder builder;
 
     /**
@@ -19,6 +20,8 @@ public class NetworkRequest {
      */
     public NetworkRequest(String url, boolean local) {
         client = new OkHttpClient();
+        timeout = new NetworkResponse(null, -1);
+
         try {
             builder = new Request.Builder().url(
                     new URL(local ? NetworkInfo.getAddress() + "/DiscordBotAPI/api/" + url : url)
@@ -43,7 +46,7 @@ public class NetworkRequest {
         }
         catch(Exception e) {
             e.printStackTrace();
-            return null;
+            return timeout;
         }
     }
 
@@ -70,7 +73,7 @@ public class NetworkRequest {
         }
         catch(Exception e) {
             e.printStackTrace();
-            return null;
+            return timeout;
         }
     }
 
@@ -107,7 +110,7 @@ public class NetworkRequest {
         }
         catch(Exception e) {
             System.out.println(e.getMessage());
-            return null;
+            return timeout;
         }
     }
 
@@ -149,19 +152,20 @@ public class NetworkRequest {
      */
     private NetworkResponse handleResponse(Response response) {
         try {
-            boolean timeout = response == null;
-            NetworkResponse networkResponse = new NetworkResponse(
-                    (timeout || response.body() == null) ? null : response.body().string(),
-                    timeout ? -1 : response.code()
-            );
-            if(!timeout) {
-                response.close();
+            if(response == null || response.body() == null) {
+                return timeout;
             }
+
+            NetworkResponse networkResponse = new NetworkResponse(
+                    response.body().string(),
+                    response.code()
+            );
+            response.close();
             return networkResponse;
         }
         catch(Exception e) {
             e.printStackTrace();
-            return null;
+            return timeout;
         }
     }
 }
