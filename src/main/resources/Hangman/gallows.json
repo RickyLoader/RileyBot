@@ -1,6 +1,6 @@
 {
   "shrek": {
-    "folder":"Shrek",
+    "folder": "Shrek",
     "images": [
       "board.png",
       "head.png",
@@ -10,6 +10,19 @@
       "head_body_leg_2_arm_1.png",
       "head_body_leg_2_arm_2.png"
     ],
-    "thumbnail":"https://i.imgur.com/5kyZ42Q.png"
+    "thumbnail": "https://i.imgur.com/5kyZ42Q.png"
+  },
+  "donkey": {
+    "folder": "Donkey",
+    "images": [
+      "board.png",
+      "head.png",
+      "head_body.png",
+      "head_body_leg_1.png",
+      "head_body_leg_2.png",
+      "head_body_leg_3.png",
+      "head_body_leg_4.png"
+    ],
+    "thumbnail": "https://i.imgur.com/FzltZg6.png"
   }
 }
