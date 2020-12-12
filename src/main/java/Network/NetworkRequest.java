@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 public class NetworkRequest {
     private final OkHttpClient client;
@@ -43,6 +42,7 @@ public class NetworkRequest {
             return handleResponse(response);
         }
         catch(Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -160,6 +160,7 @@ public class NetworkRequest {
             return networkResponse;
         }
         catch(Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
