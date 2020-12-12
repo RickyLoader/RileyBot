@@ -363,7 +363,7 @@ public class OSRSHiscores extends Hiscores {
      */
     private LEAGUE_TIER calculateTier(long rank) {
         JSONArray tiers = new JSONArray(
-                new NetworkRequest("https://trailblazer.wiseoldman.net/api/league/tiers", false).get()
+                new NetworkRequest("https://trailblazer.wiseoldman.net/api/league/tiers", false).get().body
         );
         LEAGUE_TIER tier = LEAGUE_TIER.UNQUALIFIED;
         for(int i = 0; i < tiers.length(); i++) {
