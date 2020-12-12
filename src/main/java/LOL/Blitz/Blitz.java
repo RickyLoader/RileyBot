@@ -145,7 +145,15 @@ public class Blitz {
         ).getJSONObject("data");
 
         HashMap<String, Champion> champions = new HashMap<>();
-        String[] buttons = new String[]{"Q", "W", "E", "R"};
+        ResourceHandler handler = new ResourceHandler();
+
+        BufferedImage[] buttons = new BufferedImage[]{
+                handler.getImageResource(Ability.ORDER_PATH + "Q.png"),
+                handler.getImageResource(Ability.ORDER_PATH + "W.png"),
+                handler.getImageResource(Ability.ORDER_PATH + "E.png"),
+                handler.getImageResource(Ability.ORDER_PATH + "R.png")
+        };
+
         for(String championKey : championData.keySet()) {
             JSONObject champion = championData.getJSONObject(championKey);
             JSONArray abilityData = champion.getJSONArray("spells");
@@ -158,7 +166,9 @@ public class Blitz {
                 int index = i - 1;
                 abilities[index] = new Ability(
                         buttons[index],
-                        ability.getJSONObject("image").getString("full")
+                        handler.getImageResource(
+                                Ability.PATH + ability.getJSONObject("image").getString("full")
+                        )
                 );
             }
             champions.put(

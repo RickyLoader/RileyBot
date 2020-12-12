@@ -1,7 +1,5 @@
 package LOL.Blitz;
 
-import Bot.ResourceHandler;
-
 import java.awt.image.BufferedImage;
 
 /**
@@ -9,19 +7,17 @@ import java.awt.image.BufferedImage;
  */
 public class Ability {
     private final BufferedImage buttonImage, abilityImage;
+    public static String PATH = "/LOL/Champions/Abilities/", ORDER_PATH = PATH + "Order/";
 
     /**
      * Create an ability
      *
-     * @param buttonText Button to activate ability
-     * @param image      Ability image name - JaxLeapStrike.png
+     * @param buttonImage  Image of button used to activate ability
+     * @param abilityImage Ability image
      */
-    public Ability(String buttonText, String image) {
-        ResourceHandler resourceHandler = new ResourceHandler();
-        String path = "/LOL/Champions/Abilities/";
-        BufferedImage ability = resourceHandler.getImageResource(path + image);
-        this.abilityImage = (ability == null) ? resourceHandler.getImageResource(path + "Default.png") : ability;
-        this.buttonImage = resourceHandler.getImageResource(path + "/Order/" + buttonText + ".png");
+    public Ability(BufferedImage buttonImage, BufferedImage abilityImage) {
+        this.buttonImage = buttonImage;
+        this.abilityImage = abilityImage;
     }
 
     /**
