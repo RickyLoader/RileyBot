@@ -165,6 +165,7 @@ public class DiscordCommandManager {
         addCommand(new MWHistoryCommand());
         addCommand(new CWHistoryCommand());
         addCommand(new DealOrNoDealCommand());
+        addCommand(new JokeCommand());
     }
 
     /**

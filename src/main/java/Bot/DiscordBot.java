@@ -36,7 +36,8 @@ public class DiscordBot {
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_VOICE_STATES,
                             GatewayIntent.GUILD_EMOJIS,
-                            GatewayIntent.GUILD_MESSAGE_REACTIONS
+                            GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                            GatewayIntent.GUILD_PRESENCES
                     )
                     .setActivity(Activity.watching("the Hangman championship"))
                     .addEventListeners(new Listener())
