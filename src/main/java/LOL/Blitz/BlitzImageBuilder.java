@@ -19,7 +19,7 @@ public class BlitzImageBuilder {
         ResourceHandler handler = new ResourceHandler();
         this.blitzFont = registerFont("/LOL/blitz_font.ttf", handler);
         this.next = handler.getImageResource("/LOL/next.png");
-        this.abilityOrderTemplate = handler.getImageResource("/LOL/Champions/Abilities/Order/ability_order.png");
+        this.abilityOrderTemplate = handler.getImageResource(Ability.ORDER_PATH + "ability_order.png");
     }
 
     /**
