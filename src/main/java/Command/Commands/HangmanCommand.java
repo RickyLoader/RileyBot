@@ -73,7 +73,7 @@ public class HangmanCommand extends DiscordCommand {
         Hangman game = hangmanGames.get(channel);
 
         if(game == null) {
-            game = new Hangman(getHelpName().replace("\n", " | "));
+            game = new Hangman("Type hm for help");
             hangmanGames.put(channel, game);
         }
 
