@@ -118,7 +118,7 @@ public class WeatherManager {
      */
     private JSONArray getExtremeData() {
         return new JSONObject(
-                new NetworkRequest("https://www.metservice.com/publicData/webdata/national", false).get()
+                new NetworkRequest("https://www.metservice.com/publicData/webdata/national", false).get().body
         )
                 .getJSONObject("layout")
                 .getJSONObject("primary")
@@ -479,7 +479,7 @@ public class WeatherManager {
                         "https://qm8m7k2q6x-dsn.algolia.net/1/indexes/test_locations/query?" + Secret.getMetServiceAppID() + "&" + Secret.getMetServiceKey(),
                         false
                 )
-                        .post(new JSONObject().put("params", "query=" + location).toString())
+                        .post(new JSONObject().put("params", "query=" + location).toString()).body
 
         ).getJSONArray("hits");
         SearchResults results = new SearchResults(data);
