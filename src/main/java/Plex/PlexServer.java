@@ -267,7 +267,6 @@ public class PlexServer {
      */
     private MessageEmbed searchRadarr(String query, boolean idSearch, Member member, String webhook) {
         NetworkResponse response = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get();
-        System.out.println(getRadarrSearchURL(query, idSearch));
         String json = response.body;
         if(json == null) {
             return buildFailedEmbed();
@@ -605,7 +604,7 @@ public class PlexServer {
                 return;
             }
             String url = "https://api.themoviedb.org/3/movie/" + tmdbId + "?api_key=" + Secret.getTMDBKey() + "&append_to_response=credits,release_dates,videos,external_ids&language=en-US";
-            JSONObject movie = new JSONObject(new NetworkRequest(url, false).get());
+            JSONObject movie = new JSONObject(new NetworkRequest(url, false).get().body);
             this.genre = parseGenre(movie.getJSONArray("genres"));
             this.budget = movie.getLong("budget");
             this.revenue = movie.getLong("revenue");
