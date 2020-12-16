@@ -18,6 +18,7 @@ import java.util.*;
 public abstract class MatchHistoryCommand extends CODLookupCommand {
     private final HashMap<String, String> modes, maps;
     private String matchID;
+    private String win, loss, draw;
 
     /**
      * Create the command
@@ -79,6 +80,13 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
+        if(win == null) {
+            EmoteHelper helper = context.getEmoteHelper();
+            win = EmoteHelper.formatEmote(helper.getComplete());
+            loss = EmoteHelper.formatEmote(helper.getFail());
+            draw = EmoteHelper.formatEmote(helper.getDraw());
+        }
+
         MessageChannel channel = context.getMessageChannel();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), context.getEmoteHelper());
         if(matchHistory == null) {
@@ -122,17 +130,17 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 .addField("**K/D**", match.getKillDeathSummary(), true)
                 .addField("**Shots Fired/Hit**", match.getShotSummary(), true)
                 .addField("**Accuracy**", match.getAccuracySummary(), true)
-                .addField("**Damage Dealt**", String.valueOf(match.getDamageDealt()), true)
-                .addField("**Damage Taken**", String.valueOf(match.getDamageReceived()), true)
+                .addField("**Damage Dealt**", match.getDamageDealt(), true)
+                .addField("**Damage Taken**", match.getDamageReceived(), true)
                 .addField("**Highest Streak**", String.valueOf(match.getLongestStreak()), true)
                 .addField("**Distance Travelled**", match.getDistanceTravelled(), false)
                 .addField("**Nemesis**", match.getNemesis(), true)
                 .addField("**Most Killed**", match.getMostKilled(), true)
                 .addBlankField(true)
-                .addField("**Match XP**", String.valueOf(match.getExperience()), true)
+                .addField("**Match XP**", match.getExperience(), true)
                 .addField(
                         "**Result**",
-                        match.getResult().toString() + " (" + match.getScore() + ") " + match.getResultEmote(),
+                        match.getResult().toString() + " (" + match.getScore() + ") " + getResultEmote(match.getResult()),
                         true
                 )
                 .build();
@@ -154,6 +162,34 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 return EmbedHelper.YELLOW;
             default:
                 return EmbedHelper.PURPLE;
+        }
+    }
+
+    /**
+     * Get the result formatted for use in a message embed with an emote and score
+     *
+     * @param match Match
+     * @return Formatted result
+     */
+    public String getFormattedResult(Match match) {
+        Match.RESULT result = match.getResult();
+        return result.toString() + " " + getResultEmote(result) + "\n(" + match.getScore() + ")";
+    }
+
+    /**
+     * Get the emote to use for the match result
+     *
+     * @param result Match result
+     * @return Emote indicating the result of the match
+     */
+    public String getResultEmote(Match.RESULT result) {
+        switch(result) {
+            case WIN:
+                return win;
+            case LOSS:
+                return loss;
+            default:
+                return draw;
         }
     }
 
@@ -237,7 +273,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 return new String[]{
                         String.valueOf(position),
                         match.getMatchSummary(),
-                        match.getFormattedResult()
+                        getFormattedResult(match)
                 };
             }
 
@@ -275,17 +311,15 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         for(int i = 0; i < matchList.length(); i++) {
             JSONObject match = matchList.getJSONObject(i);
             JSONObject playerStats = match.getJSONObject("playerStats");
+            JSONObject playerSummary = match.getJSONObject("player");
             String mapName = match.getString("map");
             Match.RESULT result = parseResult(
                     (!match.getBoolean("isPresentAtEnd") || match.isNull("result")) ? "FORFEIT" : match.getString("result")
             );
 
             matches.add(
-                    new Match(
+                    new Match.MatchBuilder(
                             match.getString("matchID"),
-                            new Date(match.getLong("utcStartSeconds") * 1000),
-                            new Date(match.getLong("utcEndSeconds") * 1000),
-                            result,
                             new Map(
                                     maps.getOrDefault(
                                             mapName,
@@ -297,28 +331,31 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                                     match.getString("mode"),
                                     "MISSING: " + match.getString("mode")
                             ),
-                            new Ratio(
+                            new Date(match.getLong("utcStartSeconds") * 1000),
+                            new Date(match.getLong("utcEndSeconds") * 1000),
+                            result
+                    )
+                            .setKD(new Ratio(
                                     playerStats.getInt("kills"),
                                     playerStats.getInt("deaths")
-                            ),
-                            playerStats.has("shotsLanded") ? new Ratio(
+                            ))
+                            .setAccuracy(playerStats.has("shotsLanded") ? new Ratio(
                                     playerStats.getInt("shotsLanded"),
                                     playerStats.getInt("shotsFired")
-                            ) : null,
-                            new Score(
+                            ) : null)
+                            .setMatchScore(new Score(
                                     match.getInt("team1Score"),
                                     match.getInt("team2Score"),
                                     result
-                            ),
-                            getOptionalString(playerStats, "nemesis"),
-                            getOptionalString(playerStats, "mostKilled"),
-                            getLongestStreak(playerStats),
-                            getDamageDealt(playerStats),
-                            getOptionalInt(playerStats, "damageTaken"),
-                            getOptionalInt(playerStats, "matchXp"),
-                            getOptionalInt(playerStats, "distanceTraveled"),
-                            helper
-                    )
+                            ))
+                            .setNemesis(getOptionalString(playerSummary, "nemesis"))
+                            .setMostKilled(getOptionalString(playerSummary, "mostKilled"))
+                            .setLongestStreak(getLongestStreak(playerStats))
+                            .setDamageDealt(getDamageDealt(playerStats))
+                            .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
+                            .setXP(getOptionalInt(playerStats, "matchXp"))
+                            .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
+                            .build()
             );
         }
 

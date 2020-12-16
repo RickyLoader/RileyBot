@@ -1,7 +1,6 @@
 package COD;
 
 import Command.Structure.EmbedHelper;
-import Command.Structure.EmoteHelper;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -16,11 +15,12 @@ public class Match {
     private final Date start, end;
     private final long duration;
     private final RESULT result;
-    private final String winEmote, lossEmote, drawEmote, mode, id, nemesis, mostKilled;
     private final Map map;
+    private final String id, mode, nemesis, mostKilled;
     private final Ratio killDeath, accuracy;
     private final Score score;
-    private final int longestStreak, damageDealt, damageReceived, xp, distanceTravelled;
+    private final int longestStreak, damageDealt, damageReceived, xp;
+    private final double distanceTravelled;
 
     public enum RESULT {
         WIN,
@@ -30,83 +30,230 @@ public class Match {
     }
 
     /**
-     * Create a match
-     *
-     * @param id                Match id
-     * @param start             Date of match start
-     * @param end               Date of match end
-     * @param result            Match result
-     * @param map               Map the match was played on
-     * @param mode              Name of mode
-     * @param killDeath         Kill/Death ratio
-     * @param accuracy          Shots hit/Shots fired ratio
-     * @param score             Match score
-     * @param nemesis           Most killed by player
-     * @param mostKilled        Most killed player
-     * @param longestStreak     Longest killstreak
-     * @param damageDealt       Total damage dealt by the player
-     * @param damageReceived    Total damage received by the player
-     * @param xp                Total match xp
-     * @param distanceTravelled Distance travelled
-     * @param helper            Emote Helper
+     * Match builder
      */
-    public Match(String id, Date start, Date end, RESULT result, Map map, String mode, Ratio killDeath, Ratio accuracy, Score score, String nemesis, String mostKilled, int longestStreak, int damageDealt, int damageReceived, int xp, int distanceTravelled, EmoteHelper helper) {
-        this.id = id;
-        this.start = start;
-        this.end = end;
-        this.duration = end.getTime() - start.getTime();
-        this.result = result;
-        this.winEmote = EmoteHelper.formatEmote(helper.getComplete());
-        this.lossEmote = EmoteHelper.formatEmote(helper.getFail());
-        this.drawEmote = EmoteHelper.formatEmote(helper.getDraw());
-        this.map = map;
-        this.mode = mode;
-        this.killDeath = killDeath;
-        this.accuracy = accuracy;
-        this.score = score;
-        this.mostKilled = mostKilled;
-        this.nemesis = nemesis;
-        this.longestStreak = longestStreak;
-        this.damageDealt = damageDealt;
-        this.damageReceived = damageReceived;
-        this.xp = xp;
-        this.distanceTravelled = distanceTravelled;
+    public static class MatchBuilder {
+        private final Date start, end;
+        private final long duration;
+        private final RESULT result;
+        private final String mode, id;
+        private final Map map;
+        private String nemesis, mostKilled;
+        private Ratio killDeath, accuracy;
+        private Score score;
+        private int longestStreak, damageDealt, damageReceived, xp;
+        private double distanceTravelled;
+
+        /**
+         * Initialise the required values of the match
+         *
+         * @param id     Unique match id
+         * @param map    Map the match was played on
+         * @param mode   Match mode
+         * @param start  Start data
+         * @param end    End date
+         * @param result Result of match
+         */
+        public MatchBuilder(String id, Map map, String mode, Date start, Date end, RESULT result) {
+            this.id = id;
+            this.map = map;
+            this.mode = mode;
+            this.start = start;
+            this.end = end;
+            this.duration = end.getTime() - start.getTime();
+            this.result = result;
+        }
+
+        /**
+         * Set the kill/death ratio of player during the match
+         *
+         * @param kd Kill/death ratio
+         * @return Builder
+         */
+        public MatchBuilder setKD(Ratio kd) {
+            this.killDeath = kd;
+            return this;
+        }
+
+        /**
+         * Set the accuracy of the player during the match
+         *
+         * @param accuracy Accuracy
+         * @return Builder
+         */
+        public MatchBuilder setAccuracy(Ratio accuracy) {
+            this.accuracy = accuracy;
+            return this;
+        }
+
+        /**
+         * Set the final match score
+         *
+         * @param score Final match score
+         * @return Builder
+         */
+        public MatchBuilder setMatchScore(Score score) {
+            this.score = score;
+            return this;
+        }
+
+        /**
+         * Set the longest streak of the player during the match
+         *
+         * @param longestStreak Longest streak
+         * @return Builder
+         */
+        public MatchBuilder setLongestStreak(int longestStreak) {
+            this.longestStreak = longestStreak;
+            return this;
+        }
+
+        /**
+         * Set the total damage dealt by the player during the match
+         *
+         * @param damageDealt Total damage dealt
+         * @return Builder
+         */
+        public MatchBuilder setDamageDealt(int damageDealt) {
+            this.damageDealt = damageDealt;
+            return this;
+        }
+
+        /**
+         * Set the total received by the player during the match
+         *
+         * @param damageReceived Total damage received
+         * @return Builder
+         */
+        public MatchBuilder setDamageReceived(int damageReceived) {
+            this.damageReceived = damageReceived;
+            return this;
+        }
+
+        /**
+         * Set the distance travelled by the player during the match (in inches)
+         *
+         * @param distanceTravelledInches Distance travelled in inches
+         * @return Builder
+         */
+        public MatchBuilder setDistanceTravelled(int distanceTravelledInches) {
+            this.distanceTravelled = (distanceTravelledInches * 0.0254); // To metres
+            return this;
+        }
+
+        /**
+         * Set the XP gained by the player from the match
+         *
+         * @param xp XP gained
+         * @return Builder
+         */
+        public MatchBuilder setXP(int xp) {
+            this.xp = xp;
+            return this;
+        }
+
+        /**
+         * Set the player's match nemesis (most killed by)
+         *
+         * @param nemesis Name of nemesis
+         * @return Builder
+         */
+        public MatchBuilder setNemesis(String nemesis) {
+            this.nemesis = nemesis;
+            return this;
+        }
+
+        /**
+         * Set the player's most killed player during the match
+         *
+         * @param mostKilled Name of most killed player
+         * @return Builder
+         */
+        public MatchBuilder setMostKilled(String mostKilled) {
+            this.mostKilled = mostKilled;
+            return this;
+        }
+
+        /**
+         * Build the match
+         *
+         * @return Match
+         */
+        public Match build() {
+            return new Match(this);
+        }
     }
 
     /**
-     * Get the distance travelled TODO WHAT IS THE UNIT OF MEASUREMENT
+     * Create a match
+     * @param builder Match builder
+     */
+    private Match(MatchBuilder builder) {
+        this.id = builder.id;
+        this.map = builder.map;
+        this.mode = builder.mode;
+        this.start = builder.start;
+        this.end = builder.end;
+        this.duration = builder.duration;
+        this.result = builder.result;
+        this.nemesis = builder.nemesis;
+        this.mostKilled = builder.mostKilled;
+        this.accuracy = builder.accuracy;
+        this.killDeath = builder.killDeath;
+        this.score = builder.score;
+        this.longestStreak = builder.longestStreak;
+        this.damageReceived = builder.damageReceived;
+        this.damageDealt = builder.damageDealt;
+        this.xp = builder.xp;
+        this.distanceTravelled = builder.distanceTravelled;
+    }
+
+    /**
+     * Get the distance travelled (in metres)
      *
      * @return Distance travelled
      */
     public String getDistanceTravelled() {
-        return new DecimalFormat("#,### wobblies").format(distanceTravelled);
+        DecimalFormat df = new DecimalFormat("#,### metres");
+        df.setMaximumFractionDigits(2);
+        return df.format(distanceTravelled);
     }
 
     /**
      * Get the total match experience
      *
-     * @return Match XP
+     * @return Match XP (comma formatted)
      */
-    public int getExperience() {
-        return xp;
+    public String getExperience() {
+        return commaFormat(xp);
     }
 
     /**
      * Get the total damage dealt during the match by the player
      *
-     * @return Damage dealt
+     * @return Damage dealt (comma formatted)
      */
-    public int getDamageDealt() {
-        return damageDealt;
+    public String getDamageDealt() {
+        return commaFormat(damageDealt);
     }
 
     /**
      * Get the total damage the player received during the match
      *
-     * @return Damage received
+     * @return Damage received (comma formatted)
      */
-    public int getDamageReceived() {
-        return damageReceived;
+    public String getDamageReceived() {
+        return commaFormat(damageReceived);
+    }
+
+    /**
+     * Comma format the given value
+     *
+     * @param value Integer value to format
+     * @return Value formatted with comma - 1234 -> 1,234
+     */
+    private String commaFormat(int value) {
+        return new DecimalFormat("#,###").format(value);
     }
 
     /**
@@ -316,30 +463,5 @@ public class Match {
      */
     public RESULT getResult() {
         return result;
-    }
-
-    /**
-     * Get the result formatted for use in a message embed with an emote and score
-     *
-     * @return Formatted result
-     */
-    public String getFormattedResult() {
-        return result.toString() + " " + getResultEmote() + "\n(" + score.getScore() + ")";
-    }
-
-    /**
-     * Get the embed formatted emote associated with the result
-     *
-     * @return Result emote
-     */
-    public String getResultEmote() {
-        switch(result) {
-            case WIN:
-                return winEmote;
-            case LOSS:
-                return lossEmote;
-            default:
-                return drawEmote;
-        }
     }
 }
