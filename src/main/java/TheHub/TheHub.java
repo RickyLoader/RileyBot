@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class TheHub {
-    private final HashMap<String, Performer> performersByName = new HashMap<>();
-    private final HashMap<Integer, Performer> performersByRank = new HashMap<>();
     public static final int FIRST_PAGE = 54, OTHER_PAGE = 57;
     public final String BASE_URL = "https://www.pornhub.com/";
-    public long lastReset;
+    private final HashMap<String, Performer> performersByName = new HashMap<>();
+    private final HashMap<Integer, Performer> performersByRank = new HashMap<>();
+    public long lastReset = System.currentTimeMillis();
 
     /**
      * Reset the cached info if it has been more than an hour since the last reset
