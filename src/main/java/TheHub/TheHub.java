@@ -38,33 +38,55 @@ public class TheHub {
     private void mapPerformer(Performer performer) {
         performersByName.put(performer.getName().toLowerCase(), performer);
 
-        // Models & stars are ranked differently, don't cache models to prevent overwriting stars
+        // Models & channels are ranked differently, don't cache them to prevent overwriting stars
         if(performer.getType() == PROFILE_TYPE.PORNSTAR) {
             performersByRank.put(performer.getRank(), performer);
         }
     }
 
     /**
-     * Parse a performer's page into an object
+     * Parse the home page of a performer/channel/model into an object
+     * Determine which info to scrape based on page type
      *
      * @param url  URL to parse
      * @param type Profile type
      * @return Performer
      */
-    private Performer parsePerformerPage(String url, PROFILE_TYPE type) {
+    private Performer parseHomePage(String url, PROFILE_TYPE type) {
         Document doc = fetchPage(url);
 
-        if(doc == null || !doc.baseUri().equals(url)) { // Redirected because performer does not exist
+        if(doc == null) {
             return null;
         }
-
-        PerformerBuilder builder = new PerformerBuilder();
 
         Element thumbnail = doc.selectFirst(".thumbImage img");
         if(thumbnail == null) {
             thumbnail = doc.selectFirst(".previewAvatarPicture img");
         }
 
+        PerformerBuilder builder = new PerformerBuilder()
+                .setImage(thumbnail.absUrl("src"))
+                .setURL(url)
+                .setType(type);
+
+        Performer performer = (type == PROFILE_TYPE.CHANNELS)
+                ? completeChannelProfile(doc, builder)
+                : completePersonProfile(doc, builder);
+
+        mapPerformer(performer);
+        return performer;
+    }
+
+    /**
+     * Retrieve the required data from a person's page document to complete a
+     * PerformerBuilder.
+     * Name, rank, views, bio, subscribers, gender, and age
+     *
+     * @param doc     HTML document of person's profile
+     * @param builder Incomplete performer builder
+     * @return Completed Performer object
+     */
+    private Performer completePersonProfile(Document doc, PerformerBuilder builder) {
         String gender = null;
         int age = 0;
         Elements details = doc.select(".infoPiece");
@@ -85,26 +107,40 @@ public class TheHub {
         }
 
         Element desc = doc.selectFirst(".bio");
-        Performer performer = builder
+        return builder
+                .setViews(doc.selectFirst(".videoViews span").text())
+                .setSubscribers(doc.select(".infoBox span").last().text())
+                .setName(doc.selectFirst(".name").text())
+                .setRank(Integer.parseInt(doc.selectFirst("span.big").text()))
+                .setAge(age)
+                .setGender(gender)
                 .setDesc(desc == null ? "No bio provided" : desc
                         .text()
                         .replace("Bio ", "")
                         .trim()
                         .substring(0, 150) + "..."
                 )
-                .setImage(thumbnail.absUrl("src"))
-                .setSubscribers(doc.select(".infoBox span").last().text())
-                .setViews(doc.selectFirst(".videoViews span").text())
-                .setURL(url)
-                .setName(doc.selectFirst(".name").text())
-                .setRank(Integer.parseInt(doc.selectFirst("span.big").text()))
-                .setType(type)
-                .setAge(age)
-                .setGender(gender)
                 .build();
+    }
 
-        mapPerformer(performer);
-        return performer;
+    /**
+     * Retrieve the required data from a channel's page document to complete a
+     * PerformerBuilder.
+     * Name, rank, views, bio, and subscribers
+     *
+     * @param doc     HTML document of channel's profile
+     * @param builder Incomplete performer builder
+     * @return Completed Performer object
+     */
+    private Performer completeChannelProfile(Document doc, PerformerBuilder builder) {
+        Elements stats = doc.selectFirst("#stats").children();
+        return builder
+                .setDesc(doc.selectFirst("p.joined").text().substring(0, 150) + "...")
+                .setViews(stats.get(0).text().replace(" VIDEO VIEWS", ""))
+                .setSubscribers(stats.get(1).text().replace(" SUBSCRIBERS", ""))
+                .setName(doc.selectFirst(".title h1").text())
+                .setRank(Integer.parseInt(doc.selectFirst(".ranktext span").text()))
+                .build();
     }
 
     /**
@@ -115,7 +151,8 @@ public class TheHub {
      */
     private Document fetchPage(String url) {
         try {
-            return Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(url).get();
+            return doc.baseUri().equals(url) ? doc : null; // Redirected
         }
         catch(IOException e) {
             return null;
@@ -144,7 +181,7 @@ public class TheHub {
             return null;
         }
 
-        performer = parsePerformerPage(url, PROFILE_TYPE.PORNSTAR);
+        performer = parseHomePage(url, PROFILE_TYPE.PORNSTAR);
         mapPerformer(performer);
         return performer;
     }
@@ -204,10 +241,9 @@ public class TheHub {
         }
 
         name = name.replace(" ", "-");
-        PROFILE_TYPE[] types = new PROFILE_TYPE[]{PROFILE_TYPE.PORNSTAR, PROFILE_TYPE.MODEL};
 
-        for(PROFILE_TYPE type : types) {
-            performer = parsePerformerPage(BASE_URL + type.name().toLowerCase() + "/" + name, type);
+        for(PROFILE_TYPE type : PROFILE_TYPE.values()) {
+            performer = parseHomePage(BASE_URL + type.name().toLowerCase() + "/" + name, type);
             if(performer == null) {
                 continue;
             }

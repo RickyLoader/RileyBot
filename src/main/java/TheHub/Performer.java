@@ -10,7 +10,8 @@ public class Performer {
 
     public enum PROFILE_TYPE {
         PORNSTAR,
-        MODEL
+        MODEL,
+        CHANNELS
     }
 
     /**
