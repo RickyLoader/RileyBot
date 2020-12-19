@@ -62,9 +62,9 @@ public abstract class DiscordCommand {
     }
 
     /**
-     * Attempts to pull an integer from the given message when a Random type command is called.
+     * Attempts to pull an integer from the given message
      *
-     * @return The integer or 0 if not found. Determines how many times to repeat the command
+     * @return The integer or 0 if not found
      */
     public static int getQuantity(String arg) {
         try {

@@ -4,8 +4,10 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import XKCD.Comic;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -21,7 +23,7 @@ public class XKCDCommand extends DiscordCommand {
     private final Random random = new Random();
 
     public XKCDCommand() {
-        super("xkcd", "Get a random XKCD comic!");
+        super("xkcd\nxkcd [issue #]", "Get a random XKCD comic!");
         this.LATEST_COMIC = getLatestComic().getIssue();
     }
 
@@ -43,9 +45,11 @@ public class XKCDCommand extends DiscordCommand {
      * @return Comic
      */
     private Comic getComic(int issue) {
-        return parseComicJSON(
-                new NetworkRequest(BASE_URL + issue + "/info.0.json", false).get().body
-        );
+        NetworkResponse response = new NetworkRequest(BASE_URL + issue + "/info.0.json", false).get();
+        if(response.code == 404) {
+            return null;
+        }
+        return parseComicJSON(response.body);
     }
 
     /**
@@ -89,7 +93,28 @@ public class XKCDCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        Comic comic = getComic(1 + random.nextInt(LATEST_COMIC - 1));
+        MessageChannel channel = context.getMessageChannel();
+        String message = context
+                .getLowerCaseMessage()
+                .replace("xkcd", "")
+                .trim();
+
+        int comicIssue = message.isEmpty() ? getRandomIssueNumber() : getQuantity(message);
+
+        if(comicIssue <= 0) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
+        Comic comic = getComic(comicIssue);
+
+        if(comic == null) {
+            channel.sendMessage(
+                    context.getMember().getAsMention() + " They don't have that many bro, settle down"
+            ).queue();
+            return;
+        }
+
         String thumbnail = "https://i.imgur.com/gshCGA1.png";
 
         EmbedBuilder builder = new EmbedBuilder()
@@ -97,9 +122,28 @@ public class XKCDCommand extends DiscordCommand {
                 .setImage(comic.getImage())
                 .setDescription(comic.getDesc())
                 .setThumbnail(thumbnail)
-                .setFooter("Date: " + comic.getFormattedDate(), thumbnail)
+                .setFooter(
+                        "Date: " + comic.getFormattedDate()
+                                + " | "
+                                + "Try " + getTrigger().replace("\n", " or "),
+                        thumbnail
+                )
                 .setColor(EmbedHelper.GREEN);
 
-        context.getMessageChannel().sendMessage(builder.build()).queue();
+        channel.sendMessage(builder.build()).queue();
+    }
+
+    /**
+     * Get a random comic issue number between 1 and the most recently released issue (inclusive)
+     *
+     * @return Random comic issue number
+     */
+    private int getRandomIssueNumber() {
+        return 1 + random.nextInt(LATEST_COMIC);
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return query.startsWith("xkcd");
     }
 }
