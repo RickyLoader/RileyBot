@@ -197,7 +197,9 @@ public class TheHub {
     private String locateProfileByRank(int rank) {
         int page = 1;
         int indexOnPage;
-        if(rank <= FIRST_PAGE) {
+        boolean firstPage = rank <= FIRST_PAGE;
+
+        if(firstPage) {
             indexOnPage = rank - 1;
         }
         else {
@@ -215,9 +217,11 @@ public class TheHub {
 
         Document doc = fetchPage(BASE_URL + "pornstars?performerType=pornstar&t=a&page=" + page);
         String listID = "#popularPornstars";
+
         if(doc == null || doc.selectFirst(listID) == null) {
             return null;
         }
+
         Elements list = doc.selectFirst(listID).children();
         Element target = list.get(indexOnPage);
 
@@ -225,7 +229,8 @@ public class TheHub {
             return parseURL(target);
         }
 
-        for(Element performer : list) {
+        for(int i = firstPage ? 0 : 1; i < list.size(); i++) {
+            Element performer = list.get(i);
             if(parseRank(performer) == rank) {
                 return parseURL(performer);
             }
