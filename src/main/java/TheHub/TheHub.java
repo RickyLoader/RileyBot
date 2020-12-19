@@ -189,6 +189,7 @@ public class TheHub {
     /**
      * Attempt to locate the URL to a performer profile by the given rank.
      * Calculate which page of the list to query and the position on the list to find the performer.
+     * If the rank at that position does not match, loop through to find it
      *
      * @param rank Rank to locate
      * @return URL to performer page of given rank or null
@@ -212,16 +213,44 @@ public class TheHub {
             }
         }
 
-        Document doc = fetchPage(BASE_URL + "pornstars?performerType=pornstar&page=" + page);
+        Document doc = fetchPage(BASE_URL + "pornstars?performerType=pornstar&t=a&page=" + page);
         String listID = "#popularPornstars";
         if(doc == null || doc.selectFirst(listID) == null) {
             return null;
         }
-        return doc
-                .selectFirst(listID)
-                .child(indexOnPage)
-                .selectFirst(".title")
-                .absUrl("href");
+        Elements list = doc.selectFirst(listID).children();
+        Element target = list.get(indexOnPage);
+
+        if(parseRank(target) == rank) {
+            return parseURL(target);
+        }
+
+        for(Element performer : list) {
+            if(parseRank(performer) == rank) {
+                return parseURL(performer);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parse the displayed rank from a performer's list item
+     *
+     * @param performer Performer list element
+     * @return Rank
+     */
+    public int parseRank(Element performer) {
+        return Integer.parseInt(performer.selectFirst(".rank_number").text());
+    }
+
+    /**
+     * Parse the URL to a performer's page from their list item
+     *
+     * @param performer Performer list element
+     * @return URL
+     */
+    public String parseURL(Element performer) {
+        return performer.selectFirst(".title").absUrl("href");
     }
 
     /**
