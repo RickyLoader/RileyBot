@@ -167,6 +167,7 @@ public class DiscordCommandManager {
         addCommand(new DealOrNoDealCommand());
         addCommand(new JokeCommand());
         addCommand(new HubRankingCommand());
+        addCommand(new XKCDCommand());
     }
 
     /**
