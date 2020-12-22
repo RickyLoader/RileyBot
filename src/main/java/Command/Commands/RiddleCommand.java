@@ -114,7 +114,7 @@ public class RiddleCommand extends DiscordCommand {
         riddle = getRandomRiddle();
         riddle.resetGuesses();
         games.put(channel, riddle);
-        channel.sendMessage(riddle.getQuestion()).queue();
+        channel.sendMessage(getRiddleQuestion(riddle)).queue();
     }
 
     /**
@@ -188,7 +188,9 @@ public class RiddleCommand extends DiscordCommand {
         }
 
         if(!riddle.guessRiddle(guess)) {
-            channel.sendMessage(player.getAsMention() + " " + getIncorrectResponse()).queue();
+            channel.sendMessage(
+                    player.getAsMention() + " " + getIncorrectResponse() + "\n\n" + getRiddleQuestion(riddle)
+            ).queue();
             return;
         }
         channel.sendMessage(
