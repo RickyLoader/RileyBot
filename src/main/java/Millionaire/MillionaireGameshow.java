@@ -59,7 +59,7 @@ public class MillionaireGameshow {
         ArrayList<Question> questions = new ArrayList<>();
 
         JSONArray questionData = new JSONObject(
-                new NetworkRequest("https://opentdb.com/api.php?amount=15&type=multiple", false).get()
+                new NetworkRequest("https://opentdb.com/api.php?amount=15&type=multiple", false).get().body
         ).getJSONArray("results");
 
         Random rand = new Random();
