@@ -114,7 +114,6 @@ public class RiddleCommand extends DiscordCommand {
         riddle = getRandomRiddle();
         riddle.resetGuesses();
         games.put(channel, riddle);
-        System.out.println(riddle.getAnswer());
         channel.sendMessage(riddle.getQuestion()).queue();
     }
 
