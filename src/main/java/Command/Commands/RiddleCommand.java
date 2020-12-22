@@ -63,7 +63,7 @@ public class RiddleCommand extends DiscordCommand {
         message = message.replaceFirst(arg, "").trim();
 
         switch(arg) {
-            case "start":
+            case "play":
                 startRiddle(channel, player);
                 break;
             case "guess":
