@@ -63,7 +63,6 @@ public class TheHub {
         if(thumbnail == null) {
             thumbnail = doc.selectFirst(".previewAvatarPicture img");
         }
-
         PerformerBuilder builder = new PerformerBuilder()
                 .setImage(thumbnail.absUrl("src"))
                 .setURL(url)
@@ -111,7 +110,9 @@ public class TheHub {
                 .setViews(doc.selectFirst(".videoViews span").text())
                 .setSubscribers(doc.select(".infoBox span").last().text())
                 .setName(doc.selectFirst(".name").text())
-                .setRank(Integer.parseInt(doc.selectFirst("span.big").text()))
+                .setRank(
+                        Integer.parseInt(doc.selectFirst(".rankingInfo").child(4).selectFirst(".big").text())
+                )
                 .setAge(age)
                 .setGender(gender)
                 .setDesc(desc == null ? "No bio provided" : desc
@@ -221,7 +222,6 @@ public class TheHub {
         if(doc == null || doc.selectFirst(listID) == null) {
             return null;
         }
-
         Elements list = doc.selectFirst(listID).children();
         Element target = list.get(indexOnPage);
 
