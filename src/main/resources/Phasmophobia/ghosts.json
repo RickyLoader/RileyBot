@@ -1,0 +1,181 @@
+{
+    "ghosts": {
+        "spirit": {
+            "strength": [
+                "Increases hunting as sanity drops"
+            ],
+            "weakness": [
+                "Harsh reaction to Smudge Sticks"
+            ],
+            "evidence": [
+                0,
+                1,
+                2
+            ]
+        },
+        "poltergeist": {
+            "power": "Throws all nearby items, creating an EMF Level 3. Nearby players will have their sanity decreased by 2x the number of items thrown.",
+            "strength": [
+                "Manipulate multiple objects/doors at once",
+                "Manipulate more objects at once than any other Ghost"
+            ],
+            "weakness": [
+                "Ineffective in an empty room"
+            ],
+            "evidence": [
+                0,
+                2,
+                3
+            ]
+        },
+        "wraith": {
+            "power": "Teleports to a spot within 3 metres of a random player, creating an Interaction EMF.",
+            "strength": [
+                "Rarely touches the ground",
+                "Rarely produces footstep sounds",
+                "Ability to travel through walls and closed doors"
+            ],
+            "weakness": [
+                "Toxic reaction to salt, will cease attacking immediately upon contact"
+            ],
+            "evidence": [
+                0,
+                2,
+                4
+            ]
+        },
+        "phantom": {
+            "power": "Navigates to a random player's location, creating an Interaction EMF at the starting location.",
+            "strength": [
+                "Considerably drops player sanity when looked at",
+                "Can manifest with the appearance of a player"
+            ],
+            "weakness": [
+                "Disappears when a photo is taken of it"
+            ],
+            "evidence": [
+                3,
+                4,
+                5
+            ]
+        },
+        "banshee": {
+            "power": "Navigates directly to its chosen target regardless of the target hiding or breaking line of sight, only switching focus when the target is dead or leaves the building. It will begin a hunt soon after reaching the target.",
+            "strength": [
+                "Focuses on one player at a time until they are dead"
+            ],
+            "weakness": [
+                "Fears the Crucifix, which boosts the hunt-stopping range from 3m to 5m"
+            ],
+            "evidence": [
+                0,
+                4,
+                5
+            ]
+        },
+        "jinn": {
+            "power": "Interacts with electronics more than any other ghost. Causes phones to ring, lights to change, radios to activate, TVs to turn on, and car alarms to go off.",
+            "strength": [
+                "Travels at an increasing speed the further away the victim is"
+            ],
+            "weakness": [
+                "Turning off the power will prevent the Jinn from using its ability"
+            ],
+            "evidence": [
+                2,
+                3,
+                5
+            ]
+        },
+        "mare": {
+            "power": "Highly aggressive, initiates hunts against low sanity players with very little cooldown in between. Higher chance of hunting in darkness, will turn lights & power off to achieve this.",
+            "strength": [
+                "Increased chance to attack in the dark"
+            ],
+            "weakness": [
+                "Turning the lights on will lower the attack chance"
+            ],
+            "evidence": [
+                2,
+                3,
+                4
+            ]
+        },
+        "revenant": {
+            "power": "Does not focus exclusively on a single target, will freely switch when a new target is more convenient.",
+            "strength": [
+                "Travels at a significantly faster speed when hunting a victim"
+            ],
+            "weakness": [
+                "Hiding will cause it to move very slowly"
+            ],
+            "evidence": [
+                0,
+                1,
+                5
+            ]
+        },
+        "shade": {
+            "strength": [
+                "Shy, will rarely perform actions in the presence of two or more people"
+            ],
+            "weakness": [
+                "Rarely starts a hunt when players are grouped together"
+            ],
+            "evidence": [
+                1,
+                3,
+                5
+            ]
+        },
+        "demon": {
+            "power": "Highly aggressive, the most dangerous type of ghost. Will attack often and without warning.",
+            "strength": [
+                "Initiates hunts more frequently than any other ghost"
+            ],
+            "weakness": [
+                "Asking successful questions on the Ouija Board will not lower the player's sanity"
+            ],
+            "evidence": [
+                1,
+                2,
+                4
+            ]
+        },
+        "oni": {
+            "power": "Extremely strong, will throw objects around the room with great force.",
+            "strength": [
+                "More active when players are nearby"
+            ],
+            "weakness": [
+                "The high activity of an Oni makes them easier to find and identify"
+            ],
+            "evidence": [
+                1,
+                2,
+                5
+            ]
+        },
+        "yurei": {
+            "strength": [
+                "Has a strong effect on player's sanity"
+            ],
+            "weakness": [
+                "Using Smudge Sticks on the ghost room will cause it to cease wandering for 90 seconds"
+            ],
+            "evidence": [
+                1,
+                3,
+                4
+            ]
+        }
+    },
+    "evidence": {
+        "0": "Fingerprints",
+        "1": "Ghost Writing",
+        "2": "Spirit Box",
+        "3": "Ghost Orb",
+        "4": "Freezing Temperatures",
+        "5": "EMF Level 5"
+    }
+}
