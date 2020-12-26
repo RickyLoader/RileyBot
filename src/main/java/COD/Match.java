@@ -13,7 +13,7 @@ import static COD.MWPlayer.*;
  */
 public class Match {
     private final Date start, end;
-    private final long duration;
+    private final long duration, wobblies;
     private final RESULT result;
     private final Map map;
     private final String id, mode, nemesis, mostKilled;
@@ -42,6 +42,7 @@ public class Match {
         private Ratio killDeath, accuracy;
         private Score score;
         private int longestStreak, damageDealt, damageReceived, xp;
+        private long wobblies;
         private double distanceTravelled;
 
         /**
@@ -137,6 +138,7 @@ public class Match {
          * @return Builder
          */
         public MatchBuilder setDistanceTravelled(int distanceTravelledInches) {
+            this.wobblies = distanceTravelledInches;
             this.distanceTravelled = (distanceTravelledInches * 0.0254); // To metres
             return this;
         }
@@ -186,6 +188,7 @@ public class Match {
 
     /**
      * Create a match
+     *
      * @param builder Match builder
      */
     private Match(MatchBuilder builder) {
@@ -206,17 +209,38 @@ public class Match {
         this.damageDealt = builder.damageDealt;
         this.xp = builder.xp;
         this.distanceTravelled = builder.distanceTravelled;
+        this.wobblies = builder.wobblies;
+    }
+
+    /**
+     * Format a distance
+     *
+     * @param distance Distance to format
+     * @param unit     Unit of measurement
+     * @return Distance formatted with unit
+     */
+    private String formatDistance(double distance, String unit) {
+        DecimalFormat df = new DecimalFormat("#,### " + unit);
+        df.setMaximumFractionDigits(2);
+        return df.format(distance);
     }
 
     /**
      * Get the distance travelled (in metres)
      *
-     * @return Distance travelled
+     * @return Metres travelled
      */
     public String getDistanceTravelled() {
-        DecimalFormat df = new DecimalFormat("#,### metres");
-        df.setMaximumFractionDigits(2);
-        return df.format(distanceTravelled);
+        return formatDistance(distanceTravelled, "metres");
+    }
+
+    /**
+     * Get the distance travelled (in wobblies)
+     *
+     * @return Wobblies travelled
+     */
+    public String getWobblies() {
+        return formatDistance(wobblies, "wobblies");
     }
 
     /**

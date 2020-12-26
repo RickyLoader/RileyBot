@@ -133,7 +133,11 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 .addField("**Damage Dealt**", match.getDamageDealt(), true)
                 .addField("**Damage Taken**", match.getDamageReceived(), true)
                 .addField("**Highest Streak**", String.valueOf(match.getLongestStreak()), true)
-                .addField("**Distance Travelled**", match.getDistanceTravelled(), false)
+                .addField(
+                        "**Distance Travelled**",
+                        match.getWobblies() + "\n" + match.getDistanceTravelled(),
+                        false
+                )
                 .addField("**Nemesis**", match.getNemesis(), true)
                 .addField("**Most Killed**", match.getMostKilled(), true)
                 .addBlankField(true)
