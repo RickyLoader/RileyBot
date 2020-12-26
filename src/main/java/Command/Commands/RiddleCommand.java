@@ -64,6 +64,10 @@ public class RiddleCommand extends DiscordCommand {
 
         switch(arg) {
             case "play":
+            case "start":
+            case "commence":
+            case "begin":
+            case "go":
                 startRiddle(channel, player);
                 break;
             case "guess":
