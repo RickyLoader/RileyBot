@@ -68,12 +68,9 @@ public class TheHub {
                 .setURL(url)
                 .setType(type);
 
-        Performer performer = (type == PROFILE_TYPE.CHANNELS)
+        return (type == PROFILE_TYPE.CHANNELS)
                 ? completeChannelProfile(doc, builder)
                 : completePersonProfile(doc, builder);
-
-        mapPerformer(performer);
-        return performer;
     }
 
     /**
