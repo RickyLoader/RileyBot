@@ -427,7 +427,7 @@ public class RS3Hiscores extends Hiscores {
     private RuneMetrics getRuneMetrics(String name) {
         String url = "https://apps.runescape.com/runemetrics/profile/profile?user=" + encodeName(name);
         JSONObject profile = new JSONObject(
-                new NetworkRequest(url, false).get()
+                new NetworkRequest(url, false).get().body
         );
         String message = "Player's " + EmbedHelper.embedURL("RuneMetrics", url) + " is";
         if(profile.has("error")) {
