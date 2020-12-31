@@ -33,7 +33,7 @@ public class Hangman {
     private boolean running, victory, stopped, paused;
 
     /**
-     * Initialise images to be used
+     * Create the hangman instance
      *
      * @param helpMessage Help message to display
      */
