@@ -148,7 +148,7 @@ public class Hangman {
     private MessageEmbed buildGameMessage() {
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
-                .setFooter("Try: " + helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
+                .setFooter(helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .setThumbnail(gallows.getImagePreview())
                 .setImage("attachment://image.png")
                 .setColor(getColour());
