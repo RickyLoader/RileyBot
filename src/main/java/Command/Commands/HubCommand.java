@@ -14,10 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Check out some rankings on the hub
  */
-public class HubRankingCommand extends DiscordCommand {
+public class HubCommand extends DiscordCommand {
     private final TheHub theHub;
 
-    public HubRankingCommand() {
+    public HubCommand() {
         super("hub [#]\nhub [name]", "Check out your favourite hub homies!");
         theHub = new TheHub();
     }
@@ -68,11 +68,12 @@ public class HubRankingCommand extends DiscordCommand {
      */
     private MessageEmbed buildEmbed(Performer performer) {
         String thumbnail = "https://i.imgur.com/ngRnecW.png";
+        String rank = "Rank " + (performer.hasRank() ? "#" + performer.getRank() : "N/A");
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(
                         StringUtils.capitalize(
                                 performer.getType().name().toLowerCase()
-                        ) + " Rank #" + performer.getRank() + " - " + performer.getName()
+                        ) + " " + rank + " - " + performer.getName()
                 )
                 .setThumbnail(thumbnail)
                 .setFooter("Type " + getHelpName().replace("\n", " | "), thumbnail)

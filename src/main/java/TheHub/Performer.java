@@ -5,7 +5,8 @@ package TheHub;
  */
 public class Performer {
     private final String name, image, desc, url, views, subscribers, gender;
-    private final int rank, age;
+    private int rank;
+    private final int age;
     private final PROFILE_TYPE type;
 
     public enum PROFILE_TYPE {
@@ -66,6 +67,25 @@ public class Performer {
      */
     public boolean hasAge() {
         return age > 0;
+    }
+
+    /**
+     * Check if the performer has a rank
+     * Rank can sometimes be displayed as N/A when parsing the page
+     *
+     * @return Performer has a rank
+     */
+    public boolean hasRank() {
+        return rank > 0;
+    }
+
+    /**
+     * Set the performer rank
+     *
+     * @param rank Rank to set
+     */
+    public void setRank(int rank) {
+        this.rank = rank;
     }
 
     /**

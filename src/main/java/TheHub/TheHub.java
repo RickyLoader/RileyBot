@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class TheHub {
     public static final int FIRST_PAGE = 54, OTHER_PAGE = 57;
-    public final String BASE_URL = "https://www.pornhub.com/";
+    public final String BASE_URL = "https://www.pornhub.com/", LIST_URL = BASE_URL + "pornstars";
     private final HashMap<String, Performer> performersByName = new HashMap<>();
     private final HashMap<Integer, Performer> performersByRank = new HashMap<>();
     public long lastReset = System.currentTimeMillis();
@@ -103,13 +103,16 @@ public class TheHub {
         }
 
         Element desc = doc.selectFirst(".bio");
+
+        String rank = doc.selectFirst(".rankingInfo").child(4).selectFirst(".big").text();
+        if(!rank.equals("N/A")) {
+            builder.setRank(Integer.parseInt(rank));
+        }
+
         return builder
                 .setViews(doc.selectFirst(".videoViews span").text())
                 .setSubscribers(doc.select(".infoBox span").last().text())
                 .setName(doc.selectFirst(".name").text())
-                .setRank(
-                        Integer.parseInt(doc.selectFirst(".rankingInfo").child(4).selectFirst(".big").text())
-                )
                 .setAge(age)
                 .setGender(gender)
                 .setDesc(desc == null ? "No bio provided" : desc
@@ -132,12 +135,17 @@ public class TheHub {
      */
     private Performer completeChannelProfile(Document doc, PerformerBuilder builder) {
         Elements stats = doc.selectFirst("#stats").children();
+
+        String rank = doc.selectFirst(".ranktext span").text();
+        if(!rank.equals("N/A")) {
+            builder.setRank(Integer.parseInt(rank));
+        }
+
         return builder
                 .setDesc(doc.selectFirst("p.joined").text().substring(0, 150) + "...")
                 .setViews(stats.get(0).text().replace(" VIDEO VIEWS", ""))
                 .setSubscribers(stats.get(1).text().replace(" SUBSCRIBERS", ""))
                 .setName(doc.selectFirst(".title h1").text())
-                .setRank(Integer.parseInt(doc.selectFirst(".ranktext span").text()))
                 .build();
     }
 
@@ -150,9 +158,10 @@ public class TheHub {
     private Document fetchPage(String url) {
         try {
             Document doc = Jsoup.connect(url).get();
-            return doc.baseUri().equals(url) ? doc : null; // Redirected
+            return doc.baseUri().equals(LIST_URL) ? null : doc; // Redirected
         }
         catch(IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -180,6 +189,14 @@ public class TheHub {
         }
 
         performer = parseHomePage(url, PROFILE_TYPE.PORNSTAR);
+
+        if(performer == null) {
+            return null;
+        }
+
+        if(!performer.hasRank()) {
+            performer.setRank(rank);
+        }
         mapPerformer(performer);
         return performer;
     }
@@ -213,7 +230,7 @@ public class TheHub {
             }
         }
 
-        Document doc = fetchPage(BASE_URL + "pornstars?performerType=pornstar&t=a&page=" + page);
+        Document doc = fetchPage(LIST_URL + "?performerType=pornstar&t=a&page=" + page);
         String listID = "#popularPornstars";
 
         if(doc == null || doc.selectFirst(listID) == null) {
