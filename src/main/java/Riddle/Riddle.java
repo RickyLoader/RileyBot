@@ -8,10 +8,11 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class Riddle {
-    private final String question, answer;
+    private final String question;
     private String title;
     private final ArrayList<Guess> guesses;
-    private final HashSet<String> guessedWords;
+    private final HashSet<String> guessedWords, answerSet;
+    private final ArrayList<String> answers;
     private boolean running, solved;
     private long id;
     private Guess correct;
@@ -20,11 +21,12 @@ public class Riddle {
      * Create a riddle
      *
      * @param question Riddle question
-     * @param answer   Answer to riddle question
+     * @param answers  Potential answers to riddle question
      */
-    public Riddle(String question, String answer) {
+    public Riddle(String question, ArrayList<String> answers) {
         this.question = question;
-        this.answer = answer;
+        this.answers = answers;
+        this.answerSet = (HashSet<String>) answers.stream().map(String::toLowerCase).collect(Collectors.toSet());
         this.guesses = new ArrayList<>();
         this.guessedWords = new HashSet<>();
         this.running = true;
@@ -85,7 +87,8 @@ public class Riddle {
      * @return Guess is correct
      */
     public boolean guess(Member guesser, String guessedAnswer) {
-        boolean correct = guessedAnswer.equalsIgnoreCase(answer);
+        guessedAnswer = guessedAnswer.toLowerCase();
+        boolean correct = answerSet.contains(guessedAnswer);
 
         Guess guess = new Guess(
                 guesser,
@@ -94,7 +97,7 @@ public class Riddle {
         );
 
         this.guesses.add(guess);
-        this.guessedWords.add(guessedAnswer.toLowerCase());
+        this.guessedWords.add(guessedAnswer);
 
         if(correct) {
             this.running = false;
@@ -175,11 +178,20 @@ public class Riddle {
     }
 
     /**
-     * Get the answer to the riddle question
+     * Get the first answer to the riddle question
      *
      * @return Answer to riddle
      */
     public String getAnswer() {
-        return answer;
+        return answers.get(0);
+    }
+
+    /**
+     * Get the answers to the riddle
+     *
+     * @return Answers to riddle
+     */
+    public ArrayList<String> getAnswers() {
+        return answers;
     }
 }

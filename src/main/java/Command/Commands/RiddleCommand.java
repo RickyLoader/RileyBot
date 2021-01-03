@@ -79,10 +79,17 @@ public class RiddleCommand extends DiscordCommand {
 
         for(int i = 0; i < riddleData.length(); i++) {
             JSONObject riddle = riddleData.getJSONObject(i);
+            JSONArray answerData = riddle.getJSONArray("answers");
+
+            ArrayList<String> answers = new ArrayList<>();
+            for(int j = 0; j < answerData.length(); j++) {
+                answers.add(answerData.getString(j));
+            }
+
             riddles.add(
                     new Riddle(
                             riddle.getString("question"),
-                            riddle.getString("answer")
+                            answers
                     )
             );
         }
@@ -218,7 +225,7 @@ public class RiddleCommand extends DiscordCommand {
      */
     private Riddle getRandomRiddle() {
         Riddle riddle = riddles.get(random.nextInt(riddles.size()));
-        Riddle copy = new Riddle(riddle.getQuestion(), riddle.getAnswer());
+        Riddle copy = new Riddle(riddle.getQuestion(), riddle.getAnswers());
         copy.setTitle(getRiddleTitle());
         return copy;
     }
