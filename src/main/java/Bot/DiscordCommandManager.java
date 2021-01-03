@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -30,7 +31,7 @@ import java.util.Random;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands = new ArrayList<>();
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
-    private final EmoteHelper emoteHelper = new EmoteHelper();
+    private EmoteHelper emoteHelper;
 
     /**
      * Add the commands to the list
@@ -113,8 +114,8 @@ public class DiscordCommandManager {
             player = new DiscordAudioPlayer();
             audioPlayers.put(event.getGuild(), player);
         }
-        if(!emoteHelper.hasGuild()) {
-            emoteHelper.setGuild(event.getJDA().getGuildById("421443474391564299"));
+        if(emoteHelper == null) {
+            emoteHelper = new EmoteHelper(event.getJDA());
         }
         command.execute(new CommandContext(event, commands, player, emoteHelper));
     }

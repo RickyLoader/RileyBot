@@ -1,25 +1,34 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Guild;
 
 public class EmoteHelper {
-    private Guild guild;
+    private final JDA jda;
 
-    public EmoteHelper(Guild guild) {
-        this.guild = guild;
-    }
-
-    public EmoteHelper() {
-        this.guild = null;
-    }
-
-    private Emote get(String id) {
-        return guild.getEmoteById(id);
+    /**
+     * Create the Emote helper with the JDA
+     * Allows use of emotes from any server the bot is a part of
+     *
+     * @param jda Instance of JDA to retrieve emotes from
+     */
+    public EmoteHelper(JDA jda) {
+        this.jda = jda;
     }
 
     /**
-     * Get the String form of an emote to display within a message
+     * Retrieve an emote by its unique id from the servers that the bot
+     * is a member of
+     *
+     * @param id ID of emote
+     * @return Emote
+     */
+    private Emote get(String id) {
+        return jda.getEmoteById(id);
+    }
+
+    /**
+     * Get the String form of an emote used to display the image within a message
      *
      * @param e Emote to convert
      * @return String version of emote
@@ -28,211 +37,369 @@ public class EmoteHelper {
         return "<:" + e.getName() + ":" + e.getId() + ">";
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/742984226621620234.png"/>
+     */
     public Emote getUndo() {
         return get("742984226621620234");
     }
 
-    public void setGuild(Guild guild) {
-        this.guild = guild;
-    }
-
-    public boolean hasGuild() {
-        return guild != null;
-    }
-
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/742984225808187494.png"/>
+     */
     public Emote getStop() {
         return get("742984225808187494");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/754306729155756152.png"/>
+     */
     public Emote getPlex() {
         return get("754306729155756152");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/754306729860268082.png"/>
+     */
     public Emote getRadarr() {
         return get("754306729860268082");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/755358421678555136.png"/>
+     */
     public Emote getYoutube() {
         return get("755358421678555136");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/755358696162459718.png"/>
+     */
     public Emote getFacebook() {
         return get("755358696162459718");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/755356580613980190.png"/>
+     */
     public Emote getIMDB() {
         return get("755356580613980190");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/742984225959051331.png"/>
+     */
     public Emote getVictory() {
         return get("742984225959051331");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/742984225606860813.png"/>
+     */
     public Emote getDefeat() {
         return get("742984225606860813");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/747800793276481576.png"/>
+     */
     public Emote getSwordHandle() {
         return get("747800793276481576");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/747800793419350047.png"/>
+     */
     public Emote getSwordBlade() {
         return get("747800793419350047");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/747800793511624854.png"/>
+     */
     public Emote getSwordTip() {
         return get("747800793511624854");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/740917148125364234.png"/>
+     */
     public Emote getComplete() {
         return get("740917148125364234");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/740917148096135208.png"/>
+     */
     public Emote getNeutral() {
         return get("740917148096135208");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/770129906293014568.png"/>
+     */
     public Emote getDraw() {
         return get("770129906293014568");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/740917148091678742.png"/>
+     */
     public Emote getFail() {
         return get("740917148091678742");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/738290105227280445.png"/>
+     */
     public Emote getEmptyBeer() {
         return get("738290105227280445");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/738092614271893628.png"/>
+     */
     public Emote getSubtractBeer() {
         return get("738092614271893628");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/738092575340363787.png"/>
+     */
     public Emote getAddBeer() {
         return get("738092575340363787");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/728480325956665395.png"/>
+     */
     public Emote getForward() {
         return get("728480325956665395");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/728480346399834194.png"/>
+     */
     public Emote getBackward() {
         return get("728480346399834194");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/731016788732543057.png"/>
+     */
     public Emote getReverse() {
         return get("731016788732543057");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758598371757129768.png"/>
+     */
     public Emote getNightFine() {
         return get("758598371757129768");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758611377362305034.png"/>
+     */
     public Emote getNightPartlyCloudy() {
         return get("758611377362305034");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758611377337663508.png"/>
+     */
     public Emote getNightFewShowers() {
         return get("758611377337663508");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758617768189886465.png"/>
+     */
     public Emote getNightDrizzle() {
         return get("758617768189886465");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758598371685564467.png"/>
+     */
     public Emote getDayFine() {
         return get("758598371685564467");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758656025032654878.png"/>
+     */
     public Emote getRain() {
         return get("758656025032654878");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758935641630179378.png"/>
+     */
     public Emote getWindy() {
         return get("758935641630179378");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758598371698147328.png"/>
+     */
     public Emote getDayPartlyCloudy() {
         return get("758598371698147328");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758611612843507764.png"/>
+     */
     public Emote getShowers() {
         return get("758611612843507764");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758598371476111382.png"/>
+     */
     public Emote getCloudy() {
         return get("758598371476111382");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758611376993730621.png"/>
+     */
     public Emote getDayFewShowers() {
         return get("758611376993730621");
     }
 
+    /**
+     * <img src=https://cdn.discordapp.com/emojis/758598371719774219.png"/>
+     */
     public Emote getMaxTemp() {
         return get("758598371719774219");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758598371702472745.png"/>
+     */
     public Emote getMinTemp() {
         return get("758598371702472745");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758685947012710430.png"/>
+     */
     public Emote getHumidity() {
         return get("758685947012710430");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758688992602095647.png"/>
+     */
     public Emote getWind() {
         return get("758688992602095647");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758930591847940176.png"/>
+     */
     public Emote getPressure() {
         return get("758930591847940176");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/758690648642945034.png"/>
+     */
     public Emote getClothing() {
         return get("758690648642945034");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/759221421816807425.png"/>
+     */
     public Emote getWindRain() {
         return get("759221421816807425");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/759961872312696912.png"/>
+     */
     public Emote getSnow() {
         return get("759961872312696912");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/760119013145313310.png"/>
+     */
     public Emote getDownvote() {
         return get("760119013145313310");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/760118777253462047.png"/>
+     */
     public Emote getUpvote() {
         return get("760118777253462047");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/768689497327271958.png"/>
+     */
     public Emote getOptionA() {
         return get("768689497327271958");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/768689497625460776.png"/>
+     */
     public Emote getOptionB() {
         return get("768689497625460776");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/768689497294110721.png"/>
+     */
     public Emote getOptionC() {
         return get("768689497294110721");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/768689497616547840.png"/>
+     */
     public Emote getOptionD() {
         return get("768689497616547840");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/768695195783921694.png"/>
+     */
     public Emote getLifeline() {
         return get("768695195783921694");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/770829814424272936.png"/>
+     */
     public Emote getBlankGap() {
         return get("770829814424272936");
     }
 
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/779571150647721984.png"/>
+     */
     public Emote getGust() {
         return get("779571150647721984");
+    }
+
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/795108573658873857.png"/>
+     */
+    public Emote getDayThunder() {
+        return get("795108573658873857");
+    }
+
+    /**
+     * Exception to throw when the requested emote is not found
+     */
+    public static class MissingEmoteException extends Exception {
+        public MissingEmoteException(String message) {
+            super(message);
+        }
     }
 }
