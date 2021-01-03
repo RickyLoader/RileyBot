@@ -21,7 +21,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -170,6 +169,7 @@ public class DiscordCommandManager {
         addCommand(new HubCommand());
         addCommand(new XKCDCommand());
         addCommand(new RiddleCommand());
+        addCommand(new YuGiOhCommand());
     }
 
     /**

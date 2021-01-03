@@ -395,11 +395,9 @@ public class EmoteHelper {
     }
 
     /**
-     * Exception to throw when the requested emote is not found
+     * <img src="https://cdn.discordapp.com/emojis/795225898898817025.png"/>
      */
-    public static class MissingEmoteException extends Exception {
-        public MissingEmoteException(String message) {
-            super(message);
-        }
+    public Emote getNextImage() {
+        return get("795225898898817025");
     }
 }
