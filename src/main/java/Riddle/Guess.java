@@ -33,7 +33,7 @@ public class Guess {
     }
 
     /**
-     * Get the member's guess formatted in either bold (correct) or with a strikethrough
+     * Get the member's guess formatted in either bold (correct) or with a strikethrough (incorrect)
      *
      * @return Member's guess
      */
