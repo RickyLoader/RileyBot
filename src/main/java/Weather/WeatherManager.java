@@ -456,7 +456,7 @@ public class WeatherManager {
             return new SimpleDateFormat(format).parse(date);
         }
         catch(ParseException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return null;
         }
     }
