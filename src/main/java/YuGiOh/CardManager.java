@@ -5,6 +5,8 @@ import Network.NetworkResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -48,6 +50,7 @@ public class CardManager {
      * Get a Yu-Gi-Oh card by name
      * Check the currently mapped cards and then attempt to locate the card by an
      * exact match, before falling back to a fuzzy match
+     * Map the card to its name for faster re-retrieval
      *
      * @param cardName Name of card
      * @return Desired Yu-Gi-Oh card or null
@@ -74,6 +77,9 @@ public class CardManager {
         if(card == null) {
             card = cardSearch(cardName, false);
         }
+        if(card != null) {
+            cards.put(card.getName().toLowerCase(), card);
+        }
         return card;
     }
 
@@ -96,18 +102,47 @@ public class CardManager {
         if(response.code == 400) {
             return null;
         }
-        return parseCard(
-                new JSONObject(response.body)
-                        .getJSONArray("data")
-                        .getJSONObject(0)
-        );
+
+        JSONArray cards = new JSONObject(response.body).getJSONArray("data");
+
+        return exact ? parseCard(cards.getJSONObject(0)) : getMostPopularCard(cards);
+    }
+
+    /**
+     * Get the most popular card from the provided list of cards
+     * Used when fuzzy searching
+     *
+     * @param cards JSONArray of card data
+     * @return Most popular card
+     */
+    private Card getMostPopularCard(JSONArray cards) {
+        ArrayList<Card> results = new ArrayList<>();
+        for(int i = 0; i < cards.length(); i++) {
+            results.add(parseCard(cards.getJSONObject(i)));
+        }
+        results.sort((o1, o2) -> Long.compare(o2.getStats().getUpvotes(), o1.getStats().getUpvotes()));
+        return results.get(0);
+    }
+
+    /**
+     * Parse the popularity stats from the provided json into an object
+     *
+     * @param cardObj JSON representing card
+     * @return Card popularity stats
+     */
+    private CardStats parseCardStats(JSONObject cardObj) {
+        JSONObject stats = cardObj.getJSONArray("misc_info").getJSONObject(0);
+        return new CardStats.CardStatsBuilder()
+                .setTotalViews(stats.getLong("views"))
+                .setWeeklyViews(stats.getLong("viewsweek"))
+                .setUpvotes(stats.getLong("upvotes"))
+                .setDownvotes(stats.getLong("downvotes"))
+                .build();
     }
 
     /**
      * Parse a JSON object representing a Yu-Gi-Oh card in to
      * an instance of card
-     * <p>
-     * Map the card to its name for faster re-retrieval
      *
      * @param cardObj JSON representing card
      * @return Yu-Gi-Oh card from JSON
@@ -120,22 +155,13 @@ public class CardManager {
             artwork[i] = artworkData.getJSONObject(i).getString("image_url");
         }
 
-        JSONObject stats = cardObj.getJSONArray("misc_info").getJSONObject(0);
-
-        Card card = new Card(
+        return new Card(
                 cardObj.getString("name"),
                 cardObj.getLong("id"),
                 new CardType(TYPE.byName(cardObj.getString("type"))),
-                new CardStats.CardStatsBuilder()
-                        .setTotalViews(stats.getLong("views"))
-                        .setWeeklyViews(stats.getLong("viewsweek"))
-                        .setUpvotes(stats.getLong("upvotes"))
-                        .setDownvotes(stats.getLong("downvotes"))
-                        .build(),
+                parseCardStats(cardObj),
                 artwork
         );
-        cards.put(card.getName().toLowerCase(), card);
-        return card;
     }
 
     /**
