@@ -33,7 +33,7 @@ import static Runescape.Skill.SKILL_NAME.*;
  */
 public class OSRSHiscores extends Hiscores {
     private final String[] bossNames;
-    private final boolean league, virtual;
+    private final boolean league, virtual, xp;
     public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
 
@@ -44,12 +44,14 @@ public class OSRSHiscores extends Hiscores {
      * @param emoteHelper Emote helper
      * @param league      Use league hiscores or normal
      * @param virtual     Calculate virtual levels or display hiscores provided levels
+     * @param xp          Get the XP tracker info for the player
      */
-    public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual) {
+    public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual, boolean xp) {
         super(channel, emoteHelper, "/Runescape/OSRS/", "osrs.ttf");
         this.bossNames = Boss.getBossNames();
         this.league = league;
         this.virtual = virtual;
+        this.xp = xp;
         this.trackerFont = registerFont(getResourcePath() + "wise_old_man.ttf", getResourceHandler());
     }
 
@@ -65,7 +67,9 @@ public class OSRSHiscores extends Hiscores {
             criteria.add("Player exists...");
             criteria.add("Checking account type...");
         }
-        criteria.add("Checking XP tracker...");
+        if(xp){
+            criteria.add("Checking XP tracker...");
+        }
         return criteria;
     }
 
@@ -259,7 +263,9 @@ public class OSRSHiscores extends Hiscores {
             loading.completeStage("Player is " + leagueTier.getTierName() + "!");
         }
 
-        getTrackerData(stats);
+        if(xp){
+            getTrackerData(stats);
+        }
         return playerStats;
     }
 
@@ -499,7 +505,7 @@ public class OSRSHiscores extends Hiscores {
             baseImage = addLeagueInfo(baseImage, stats);
         }
 
-        if(stats.hasWeeklyGains()) {
+        if(xp && stats.hasWeeklyGains()) {
             baseImage = addXPTracker(baseImage, stats);
         }
         return baseImage;

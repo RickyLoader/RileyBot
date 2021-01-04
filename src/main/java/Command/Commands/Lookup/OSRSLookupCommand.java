@@ -11,13 +11,13 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a OSRS player and build an image with their stats
  */
 public class OSRSLookupCommand extends LookupCommand {
-    private boolean league = false, virtual = false;
+    private boolean league = false, virtual = false, xp = false;
 
     public OSRSLookupCommand() {
         super(
                 "osrslookup",
                 "Check out someone's stats on OSRS!",
-                "[league] [virtual] " + getDefaultLookupArgs("osrslookup"),
+                "[league] [virtual] [xp] " + getDefaultLookupArgs("osrslookup"),
                 12
         );
     }
@@ -28,7 +28,8 @@ public class OSRSLookupCommand extends LookupCommand {
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
                 league,
-                virtual
+                virtual,
+                xp
         );
         hiscores.buildImage(name, "Type " + getTrigger() + " for help");
     }
@@ -37,6 +38,7 @@ public class OSRSLookupCommand extends LookupCommand {
     public String stripArguments(String query) {
         league = false;
         virtual = false;
+        xp = false;
 
         if(query.equals(getTrigger())) {
             return query;
@@ -55,6 +57,8 @@ public class OSRSLookupCommand extends LookupCommand {
                 case "virtual":
                     virtual = true;
                     break;
+                case "xp":
+                    xp = true;
             }
             query = query.replaceFirst(arg, "").trim();
         }
@@ -75,6 +79,7 @@ public class OSRSLookupCommand extends LookupCommand {
     public boolean matches(String query) {
         return query.startsWith(getTrigger()) ||
                 query.startsWith("league") && query.contains(getTrigger()) ||
+                query.startsWith("xp") && query.contains(getTrigger()) ||
                 query.startsWith("virtual") && query.contains(getTrigger());
     }
 }

@@ -53,7 +53,7 @@ public abstract class Hiscores extends ImageBuilder {
      */
     public String[] hiscoresRequest(String url) {
         NetworkResponse response = new NetworkRequest(url, false).get();
-        if(response.code == 504) {
+        if(response.code == 504 || response.code == 408 || response.code == -1) {
             timeout = true;
             return null;
         }

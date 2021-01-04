@@ -45,7 +45,6 @@ public class NetworkRequest {
             return handleResponse(response);
         }
         catch(Exception e) {
-            e.printStackTrace();
             return timeout;
         }
     }
