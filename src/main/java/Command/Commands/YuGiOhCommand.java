@@ -132,7 +132,7 @@ public class YuGiOhCommand extends DiscordCommand {
      */
     private EmbedBuilder getDefaultEmbedBuilder() {
         return new EmbedBuilder()
-                .setThumbnail("https://i.imgur.com/5CGmPlb.png")
+                .setThumbnail("https://i.imgur.com/TT7tZia.png")
                 .setFooter(
                         "Try: " + getTrigger().replace("\n", " | "),
                         "https://i.imgur.com/g8KJAIl.png"
