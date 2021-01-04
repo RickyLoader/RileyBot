@@ -66,12 +66,12 @@ public class CardStats {
     }
 
     /**
-     * Get the lowest price of the card formatted with the Euro sign
+     * Get the lowest price of the card formatted with a dollar sign
      *
      * @return Price formatted as String
      */
     public String getFormattedPrice() {
-        return "€" + price;
+        return "$" + price;
     }
 
     public static class CardStatsBuilder {
@@ -123,9 +123,9 @@ public class CardStats {
         }
 
         /**
-         * Set the lowest price of the card (in Euros)
+         * Set the lowest price of the card in dollars
          *
-         * @param price Card price in euros
+         * @param price Card price
          * @return Builder
          */
         public CardStatsBuilder setPrice(double price) {

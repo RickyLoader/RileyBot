@@ -134,6 +134,9 @@ public class CardManager {
 
         double cardPrice = 0;
         for(String store : prices.keySet()) {
+            if(store.equals("coolmarket_price")) { // Euros
+                continue;
+            }
             double storePrice = prices.getDouble(store);
             if(cardPrice == 0 || storePrice < cardPrice) {
                 cardPrice = storePrice;
