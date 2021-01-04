@@ -1,7 +1,6 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 
 import java.util.List;
@@ -22,29 +21,28 @@ public abstract class PageableEmbed {
     /**
      * Initialise the values
      *
-     * @param jda         JDA for listener
-     * @param channel     Channel to send embed to
-     * @param emoteHelper Emote helper
-     * @param items       List of items to be displayed
-     * @param thumb       Thumbnail to use for embed
-     * @param title       Title to use for embed
-     * @param desc        Description to use for embed
-     * @param bound       Maximum items to display
-     * @param colour      Optional colour to use for embed
+     * @param context Command context
+     * @param items   List of items to be displayed
+     * @param thumb   Thumbnail to use for embed
+     * @param title   Title to use for embed
+     * @param desc    Description to use for embed
+     * @param bound   Maximum items to display
+     * @param colour  Optional colour to use for embed
      */
-    public PageableEmbed(JDA jda, MessageChannel channel, EmoteHelper emoteHelper, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
-        this.channel = channel;
+    public PageableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
+        this.channel = context.getMessageChannel();
         this.items = items;
         this.title = title;
         this.desc = desc;
-        this.forward = emoteHelper.getForward();
-        this.backward = emoteHelper.getBackward();
-        this.reverse = emoteHelper.getReverse();
         this.thumb = thumb;
         this.bound = bound;
         this.colour = colour.length == 1 ? colour[0] : EmbedHelper.YELLOW;
         this.pages = (int) Math.ceil(items.size() / (double) bound);
-        jda.addEventListener(new EmoteListener() {
+        EmoteHelper emoteHelper = context.getEmoteHelper();
+        this.forward = emoteHelper.getForward();
+        this.backward = emoteHelper.getBackward();
+        this.reverse = emoteHelper.getReverse();
+        context.getJDA().addEventListener(new EmoteListener() {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long reactID = reaction.getMessageIdLong();

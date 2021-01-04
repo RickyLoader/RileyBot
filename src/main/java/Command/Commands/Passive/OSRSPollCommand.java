@@ -71,9 +71,7 @@ public class OSRSPollCommand extends DiscordCommand {
          */
         public PollMessage(CommandContext context, Poll poll) {
             super(
-                    context.getJDA(),
-                    context.getMessageChannel(),
-                    context.getEmoteHelper(),
+                    context,
                     Arrays.asList(poll.getQuestions()),
                     "https://support.runescape.com/hc/article_attachments/360002485738/App_Icon-Circle.png",
                     "OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod(),

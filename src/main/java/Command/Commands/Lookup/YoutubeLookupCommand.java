@@ -48,9 +48,7 @@ public class YoutubeLookupCommand extends LookupCommand {
      */
     private PageableTableEmbed getYoutubeEmbed(CommandContext context, YoutubeChannel channel) {
         return new PageableTableEmbed(
-                context.getJDA(),
-                context.getMessageChannel(),
-                context.getEmoteHelper(),
+                context,
                 channel.getVideos(),
                 channel.getThumbnail(),
                 channel.getName(),

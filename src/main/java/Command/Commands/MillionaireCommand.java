@@ -82,9 +82,7 @@ public class MillionaireCommand extends DiscordCommand {
             return;
         }
         new PageableTableEmbed(
-                context.getJDA(),
-                channel,
-                context.getEmoteHelper(),
+                context,
                 Bank.getLeaderboard(),
                 MillionaireGameshow.thumb,
                 "Millionaire Leaderboard",

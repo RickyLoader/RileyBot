@@ -40,9 +40,7 @@ public class TweetsCommand extends DiscordCommand {
      */
     public PageableEmbed getTweetEmbed(CommandContext context) {
         return new PageableTableEmbed(
-                context.getJDA(),
-                context.getMessageChannel(),
-                context.getEmoteHelper(),
+                context,
                 tweets,
                 twitterManager.getThumbnail(),
                 "My Tweets",

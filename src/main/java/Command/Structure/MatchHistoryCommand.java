@@ -260,9 +260,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      */
     private PageableTableEmbed getMatchHistoryEmbed(CommandContext context, MatchHistory matchHistory) {
         return new PageableTableEmbed(
-                context.getJDA(),
-                context.getMessageChannel(),
-                context.getEmoteHelper(),
+                context,
                 matchHistory.getMatches(),
                 getEmbedThumbnail(),
                 getHistoryEmbedTitle(matchHistory.getName().toUpperCase()),

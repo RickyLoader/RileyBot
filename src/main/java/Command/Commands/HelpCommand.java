@@ -19,9 +19,7 @@ public class HelpCommand extends DiscordCommand {
 
     public PageableTableEmbed getHelpTable(CommandContext context) {
         return new PageableTableEmbed(
-                context.getJDA(),
-                context.getMessageChannel(),
-                context.getEmoteHelper(),
+                context,
                 context.getCommands(),
                 context.getJDA().getSelfUser().getAvatarUrl(),
                 "RileyBot Commands",

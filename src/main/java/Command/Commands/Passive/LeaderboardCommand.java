@@ -78,9 +78,7 @@ public class LeaderboardCommand extends DiscordCommand {
      */
     public PageableTableEmbed getLeaderboardEmbed(CommandContext context) {
         return new PageableTableEmbed(
-                context.getJDA(),
-                context.getMessageChannel(),
-                context.getEmoteHelper(),
+                context,
                 Session.getHistory(),
                 Gunfight.thumbnail,
                 "GUNFIGHT LEADERBOARD!",
