@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 /**
- * Look up a OSRS player and build an image with their stats
+ * Look up a RS3 player and build an image with their stats
  */
 public class RS3LookupCommand extends LookupCommand {
     private boolean virtual;
