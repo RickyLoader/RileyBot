@@ -146,7 +146,7 @@ public class YuGiOhCommand extends DiscordCommand {
      */
     private void registerListener(JDA jda) {
         jda.addEventListener(
-                new EmoteListener(jda) {
+                new EmoteListener() {
                     @Override
                     public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                         long id = reaction.getMessageIdLong();
