@@ -32,7 +32,6 @@ public abstract class EmoteListener extends ListenerAdapter {
         MessageReaction reaction = event.getReaction();
         reaction.removeReaction(eventUser).queue();
         handleReaction(reaction, eventUser, event.getGuild());
-
     }
 
     public abstract void handleReaction(MessageReaction reaction, User user, Guild guild);
