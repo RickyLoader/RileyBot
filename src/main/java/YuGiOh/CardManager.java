@@ -123,18 +123,29 @@ public class CardManager {
     }
 
     /**
-     * Parse the popularity stats from the provided json into an object
+     * Parse the popularity stats & price info from the provided json into an object
      *
      * @param cardObj JSON representing card
      * @return Card popularity stats
      */
     private CardStats parseCardStats(JSONObject cardObj) {
         JSONObject stats = cardObj.getJSONArray("misc_info").getJSONObject(0);
+        JSONObject prices = cardObj.getJSONArray("card_prices").getJSONObject(0);
+
+        double cardPrice = 0;
+        for(String store : prices.keySet()) {
+            double storePrice = prices.getDouble(store);
+            if(cardPrice == 0 || storePrice < cardPrice) {
+                cardPrice = storePrice;
+            }
+        }
+
         return new CardStats.CardStatsBuilder()
                 .setTotalViews(stats.getLong("views"))
                 .setWeeklyViews(stats.getLong("viewsweek"))
                 .setUpvotes(stats.getLong("upvotes"))
                 .setDownvotes(stats.getLong("downvotes"))
+                .setPrice(cardPrice)
                 .build();
     }
 

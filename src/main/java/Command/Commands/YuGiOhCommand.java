@@ -108,14 +108,21 @@ public class YuGiOhCommand extends DiscordCommand {
                                 + "\n"
                                 + downvote + " " + commaFormat.format(stats.getDownvotes()),
                         true)
-                .addField("View", EmbedHelper.embedURL("View page", card.getUrl()), true)
                 .setImage(card.getCurrentImage())
                 .setColor(card.getType().getColour());
 
         if(card.getTotalImages() > 1) {
             builder.setDescription("**Image**: " + (card.getImageIndex() + 1) + "/" + card.getTotalImages());
         }
-        return builder.build();
+
+        if(stats.hasPrice()) {
+            builder.addField("Price", stats.getFormattedPrice(), true);
+        }
+
+        return builder
+                .addField("View", EmbedHelper.embedURL("View page", card.getUrl()), true)
+                .addBlankField(true)
+                .build();
     }
 
     /**

@@ -1,10 +1,11 @@
 package YuGiOh;
 
 /**
- * Stats on card total & weekly views, upvotes, and downvotes
+ * Stats on card total & weekly views, upvotes, downvotes, and price
  */
 public class CardStats {
     private final long totalViews, weeklyViews, upvotes, downvotes;
+    private final double price;
 
     /**
      * Create the card stats
@@ -16,6 +17,7 @@ public class CardStats {
         this.weeklyViews = builder.weeklyViews;
         this.upvotes = builder.upvotes;
         this.downvotes = builder.downvotes;
+        this.price = builder.price;
     }
 
     /**
@@ -54,8 +56,27 @@ public class CardStats {
         return downvotes;
     }
 
+    /**
+     * Check if the card has a known lowest price
+     *
+     * @return Card has price
+     */
+    public boolean hasPrice() {
+        return price > 0;
+    }
+
+    /**
+     * Get the lowest price of the card formatted with the Euro sign
+     *
+     * @return Price formatted as String
+     */
+    public String getFormattedPrice() {
+        return "€" + price;
+    }
+
     public static class CardStatsBuilder {
         private long totalViews, weeklyViews, upvotes, downvotes;
+        private double price;
 
         /**
          * Set the total views of the card
@@ -102,6 +123,17 @@ public class CardStats {
         }
 
         /**
+         * Set the lowest price of the card (in Euros)
+         *
+         * @param price Card price in euros
+         * @return Builder
+         */
+        public CardStatsBuilder setPrice(double price) {
+            this.price = price;
+            return this;
+        }
+
+        /**
          * Build the card stats
          *
          * @return Card stats
@@ -109,5 +141,6 @@ public class CardStats {
         public CardStats build() {
             return new CardStats(this);
         }
+
     }
 }
