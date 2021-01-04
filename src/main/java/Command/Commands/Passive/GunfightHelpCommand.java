@@ -43,10 +43,11 @@ public class GunfightHelpCommand extends DiscordCommand {
     /**
      * Get an emote listener for calling the Gunfight instance when emotes are clicked
      *
+     * @param jda JDA to get bot user
      * @return Emote listener
      */
-    private EmoteListener getEmoteListener() {
-        return new EmoteListener() {
+    private EmoteListener getEmoteListener(JDA jda) {
+        return new EmoteListener(jda) {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long reactID = reaction.getMessageIdLong();
@@ -61,11 +62,11 @@ public class GunfightHelpCommand extends DiscordCommand {
     /**
      * Add an emote listener to listen for gunfight emotes if there isn't one already
      *
-     * @param jda BOT
+     * @param jda JDA to get bot user
      */
     private void addEmoteListener(JDA jda) {
         if(this.listener == null) {
-            this.listener = getEmoteListener();
+            this.listener = getEmoteListener(jda);
             jda.addEventListener(this.listener);
         }
     }

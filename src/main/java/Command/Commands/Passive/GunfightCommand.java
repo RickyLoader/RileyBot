@@ -4,6 +4,7 @@ import Command.Structure.EmoteListener;
 import COD.Gunfight;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 
 import java.util.HashMap;
@@ -40,8 +41,9 @@ public class GunfightCommand extends DiscordCommand {
         }
 
         if(this.listener == null) {
-            this.listener = getEmoteListener();
-            context.getJDA().addEventListener(this.listener);
+            JDA jda = context.getJDA();
+            this.listener = getEmoteListener(jda);
+            jda.addEventListener(this.listener);
         }
 
         if(context.getLowerCaseMessage().equals("gunfight!")) {
@@ -135,10 +137,11 @@ public class GunfightCommand extends DiscordCommand {
     /**
      * Get an emote listener for calling the Gunfight instance when emotes are clicked
      *
+     * @param jda JDA to get bot user
      * @return Emote listener
      */
-    private EmoteListener getEmoteListener() {
-        return new EmoteListener() {
+    private EmoteListener getEmoteListener(JDA jda) {
+        return new EmoteListener(jda) {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long reactID = reaction.getMessageIdLong();

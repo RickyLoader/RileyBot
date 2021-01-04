@@ -42,7 +42,7 @@ public abstract class PageableEmbed {
         this.forward = emoteHelper.getForward();
         this.backward = emoteHelper.getBackward();
         this.reverse = emoteHelper.getReverse();
-        context.getJDA().addEventListener(new EmoteListener() {
+        context.getJDA().addEventListener(new EmoteListener(context.getJDA()) {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long reactID = reaction.getMessageIdLong();
