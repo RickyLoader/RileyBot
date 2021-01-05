@@ -129,7 +129,7 @@ public class XKCDCommand extends DiscordCommand {
         return new EmbedBuilder()
                 .setTitle("#" + comic.getIssue() + " - " + comic.getTitle())
                 .setImage(comic.getImage())
-                .setDescription(comic.getDesc())
+                .setDescription(comic.getDesc() + " \n\n" + EmbedHelper.embedURL("View", BASE_URL + "/" + comic.getIssue()))
                 .setThumbnail(thumbnail)
                 .setFooter(
                         "Date: " + comic.getFormattedDate()
