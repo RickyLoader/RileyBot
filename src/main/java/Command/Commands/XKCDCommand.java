@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Random;
 
 /**
- * Fetch a random XKCD comic
+ * View XKCD comics
  */
 public class XKCDCommand extends DiscordCommand {
     private final String BASE_URL = "https://xkcd.com/";
