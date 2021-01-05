@@ -8,6 +8,7 @@ import Network.NetworkResponse;
 import XKCD.Comic;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -18,13 +19,13 @@ import java.util.Random;
  * Fetch a random XKCD comic
  */
 public class XKCDCommand extends DiscordCommand {
-    private final int LATEST_COMIC;
     private final String BASE_URL = "https://xkcd.com/";
     private final Random random = new Random();
+    private int LATEST_COMIC_ISSUE;
 
     public XKCDCommand() {
-        super("xkcd\nxkcd [issue #]", "Get a random XKCD comic!");
-        this.LATEST_COMIC = getLatestComic().getIssue();
+        super("xkcd\nxkcd [issue #/latest]", "Check out some XKCD comics!");
+        this.LATEST_COMIC_ISSUE = getLatestComic().getIssue();
     }
 
     /**
@@ -99,25 +100,33 @@ public class XKCDCommand extends DiscordCommand {
                 .replace("xkcd", "")
                 .trim();
 
-        int comicIssue = message.isEmpty() ? getRandomIssueNumber() : getQuantity(message);
-
-        if(comicIssue <= 0) {
-            channel.sendMessage(getHelpNameCoded()).queue();
-            return;
+        Comic comic;
+        if(message.equals("latest")) {
+            comic = getLatestComic();
+            LATEST_COMIC_ISSUE = comic.getIssue();
         }
-
-        Comic comic = getComic(comicIssue);
+        else {
+            comic = getComic(message.isEmpty() ? getRandomIssueNumber() : getQuantity(message));
+        }
 
         if(comic == null) {
             channel.sendMessage(
-                    context.getMember().getAsMention() + " They don't have that many bro, settle down"
+                    context.getMember().getAsMention() + " Couldn't find that one bro, settle down"
             ).queue();
             return;
         }
+        channel.sendMessage(buildComicEmbed(comic)).queue();
+    }
 
+    /**
+     * Build a message embed detailing the given comic
+     *
+     * @param comic Comic to build embed for
+     * @return Message embed detailing comic
+     */
+    private MessageEmbed buildComicEmbed(Comic comic) {
         String thumbnail = "https://i.imgur.com/gshCGA1.png";
-
-        EmbedBuilder builder = new EmbedBuilder()
+        return new EmbedBuilder()
                 .setTitle("#" + comic.getIssue() + " - " + comic.getTitle())
                 .setImage(comic.getImage())
                 .setDescription(comic.getDesc())
@@ -128,9 +137,8 @@ public class XKCDCommand extends DiscordCommand {
                                 + "Try " + getTrigger().replace("\n", " or "),
                         thumbnail
                 )
-                .setColor(EmbedHelper.GREEN);
-
-        channel.sendMessage(builder.build()).queue();
+                .setColor(EmbedHelper.GREEN)
+                .build();
     }
 
     /**
@@ -139,7 +147,7 @@ public class XKCDCommand extends DiscordCommand {
      * @return Random comic issue number
      */
     private int getRandomIssueNumber() {
-        return 1 + random.nextInt(LATEST_COMIC);
+        return 1 + random.nextInt(LATEST_COMIC_ISSUE);
     }
 
     @Override
