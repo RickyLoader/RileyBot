@@ -170,6 +170,7 @@ public class DiscordCommandManager {
         addCommand(new XKCDCommand());
         addCommand(new RiddleCommand());
         addCommand(new YuGiOhCommand());
+        addCommand(new NASACommand());
     }
 
     /**
