@@ -1,11 +1,13 @@
 package NASA;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.LocalDate;
 
 /**
  * NASA astronomy picture of the day
  */
-public class APOD {
+public class APOD implements Comparable<APOD> {
     private final LocalDate date;
     private final String explanation, image, title, url;
 
@@ -59,12 +61,41 @@ public class APOD {
     }
 
     /**
+     * Get the explanation of the image contents truncated
+     *
+     * @return Explanation of image contents truncated
+     */
+    public String getTruncatedExplanation() {
+        return explanation.substring(0, Math.min(explanation.length(), 150)) + "...";
+    }
+
+    /**
      * Get the explanation of the image contents
      *
      * @return Explanation of image contents
      */
-    public String getTruncatedExplanation() {
-        return explanation.substring(0, Math.min(explanation.length(), 150)) + "...";
+    public String getExplanation() {
+        return explanation;
+    }
+
+    /**
+     * Get the searchable text of the APOD
+     *
+     * @return Title + Explanation
+     */
+    public String getSearchText() {
+        return title + "\n" + explanation;
+    }
+
+    /**
+     * Sort in ascending order of date
+     *
+     * @param o APOD to compare to
+     * @return Date comparison
+     */
+    @Override
+    public int compareTo(@NotNull APOD o) {
+        return date.compareTo(o.getDate());
     }
 
     public static class APODBuilder {

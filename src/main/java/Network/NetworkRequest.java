@@ -154,7 +154,6 @@ public class NetworkRequest {
             if(response == null || response.body() == null) {
                 return timeout;
             }
-
             NetworkResponse networkResponse = new NetworkResponse(
                     response.body().string(),
                     response.code()
