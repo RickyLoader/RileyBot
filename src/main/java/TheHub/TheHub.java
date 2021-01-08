@@ -161,7 +161,6 @@ public class TheHub {
             return doc.baseUri().equals(LIST_URL) ? null : doc; // Redirected
         }
         catch(IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -236,7 +235,13 @@ public class TheHub {
         if(doc == null || doc.selectFirst(listID) == null) {
             return null;
         }
+
         Elements list = doc.selectFirst(listID).children();
+
+        if(indexOnPage >= list.size()) {
+            return null;
+        }
+
         Element target = list.get(indexOnPage);
 
         if(parseRank(target) == rank) {
