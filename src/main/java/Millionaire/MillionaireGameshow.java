@@ -221,8 +221,7 @@ public class MillionaireGameshow {
      * @return Game message
      */
     private MessageEmbed buildGameMessage() {
-        Question question = quiz.getCurrentQuestion();
-        ArrayList<Answer> answers = question.getAnswers();
+        ArrayList<Answer> answers = quiz.getCurrentQuestion().getAnswers();
         EmbedBuilder builder = new EmbedBuilder();
 
         for(int i = 0; i < answers.size(); i++) {
@@ -244,7 +243,7 @@ public class MillionaireGameshow {
 
         return builder
                 .setTitle(owner.getEffectiveName() + " " + getTitle() + " a millionaire!")
-                .setDescription(buildDescription(question))
+                .setDescription(buildDescription())
                 .setThumbnail(thumb)
                 .setFooter("Try: " + helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .setColor(getColour())
@@ -255,11 +254,10 @@ public class MillionaireGameshow {
     /**
      * Build the description of the game embed
      *
-     * @param question Current question
      * @return Description for embed
      */
-    private String buildDescription(Question question) {
-        String description = "**Question**: " + question.getTitle();
+    private String buildDescription() {
+        String description = "**Question**: " + quiz.getCurrentQuestion().getTitle();
         if(running) {
             description = "__**Reward Details**__"
                     + "\n\nCurrent/If forfeit: " + quiz.formatReward(quiz.getForfeitReward())
@@ -274,7 +272,14 @@ public class MillionaireGameshow {
                     + (reward == 0 ? getEmpatheticMessage() : quiz.formatReward(reward))
                     + "\n\n" + description;
         }
-        return getGameProgression() + "\n\n" + description;
+
+        String progression = getGameProgression();
+        if(!quiz.isFirstQuestion()) {
+            Answer previous = quiz.getPreviousQuestion().getSelectedAnswer();
+            progression += "\n\n"
+                    + "__**Previous Answer**__: " + "**" + previous.getOption() + "** " + previous.getTitle();
+        }
+        return progression + "\n\n" + description;
     }
 
     /**
@@ -302,8 +307,9 @@ public class MillionaireGameshow {
         StringBuilder progression = new StringBuilder();
         StringBuilder safetyNetLocation = new StringBuilder();
         String green = "🟢", white = "⚪", red = "\uD83D\uDD34", blue = "\uD83D\uDD35", yellow = "\uD83D\uDFE1";
+        int currentIndex = quiz.getCurrentQuestionIndex();
+
         for(int i = 0; i < quiz.getTotalQuestions(); i++) {
-            int currentIndex = quiz.getCurrentQuestionIndex();
             Question current = quiz.getCurrentQuestion();
             boolean safetyNet = quiz.isSafetyNetQuestion(i);
 
@@ -527,6 +533,15 @@ public class MillionaireGameshow {
         }
 
         /**
+         * Get the previous question
+         *
+         * @return Previous question
+         */
+        public Question getPreviousQuestion() {
+            return questions.get(index - 1);
+        }
+
+        /**
          * Move to the next question
          */
         public void nextQuestion() {
@@ -595,6 +610,15 @@ public class MillionaireGameshow {
         public int getCurrentQuestionIndex() {
             return index;
         }
+
+        /**
+         * Check if the quiz is currently on the first question
+         *
+         * @return Currently on first question
+         */
+        public boolean isFirstQuestion() {
+            return index == 0;
+        }
     }
 
     /**
@@ -636,6 +660,15 @@ public class MillionaireGameshow {
          */
         public boolean hasSelectedAnswer() {
             return selectedAnswer != null;
+        }
+
+        /**
+         * Get the selected answer for the question
+         *
+         * @return Selected answer
+         */
+        public Answer getSelectedAnswer() {
+            return selectedAnswer;
         }
 
         /**
