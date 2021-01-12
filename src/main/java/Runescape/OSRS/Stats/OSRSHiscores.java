@@ -867,7 +867,7 @@ public class OSRSHiscores extends Hiscores {
      * @return Sorted list of boss kill counts
      */
     private List<Boss> parseBossKills(String[] csv) {
-        List<String> stats = Arrays.asList(csv).subList(94, csv.length);
+        List<String> stats = Arrays.asList(csv).subList(96, csv.length);
         List<Boss> bosses = new ArrayList<>();
 
         int i = 1;
