@@ -238,7 +238,7 @@ public class NASACommand extends DiscordCommand {
      */
     private APOD fetchApodFromNASA(LocalDate date) {
         String url = "https://api.nasa.gov/planetary/apod?api_key="
-                + Secret.getNASAKey()
+                + Secret.NASA_KEY
                 + "&date=" + date.format(NASA_FORMAT) + "&thumbs=true";
 
         NetworkResponse response = new NetworkRequest(url, false).get();

@@ -83,10 +83,10 @@ public class TwitterManager {
 
     private void startTwitter() {
         ConfigurationBuilder builder = new ConfigurationBuilder()
-                .setOAuthConsumerKey(Secret.getTwitterOAuthConsumerKey())
-                .setOAuthConsumerSecret(Secret.getTwitterOAuthConsumerSecret())
-                .setOAuthAccessToken(Secret.getTwitterOAuthAccessToken())
-                .setOAuthAccessTokenSecret(Secret.getTwitterOAuthAccessTokenSecret());
+                .setOAuthConsumerKey(Secret.TWITTER_OAUTH_CONSUMER_KEY)
+                .setOAuthConsumerSecret(Secret.TWITTER_OAUTH_CONSUMER_SECRET)
+                .setOAuthAccessToken(Secret.TWITTER_OAUTH_ACCESS_TOKEN)
+                .setOAuthAccessTokenSecret(Secret.TWITTER_OAUTH_ACCESS_TOKEN_SECRET);
 
         this.twitter = new AsyncTwitterFactory(builder.build()).getInstance();
         this.twitter.addListener(listener);

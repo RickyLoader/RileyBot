@@ -477,7 +477,7 @@ public class WeatherManager {
     private SearchResult discernBestLocation(String location) {
         JSONArray data = new JSONObject(
                 new NetworkRequest(
-                        "https://qm8m7k2q6x-dsn.algolia.net/1/indexes/test_locations/query?" + Secret.getMetServiceAppID() + "&" + Secret.getMetServiceKey(),
+                        "https://qm8m7k2q6x-dsn.algolia.net/1/indexes/test_locations/query?" + Secret.METSERVICE_APP_ID + "&" + Secret.METSERVICE_KEY,
                         false
                 )
                         .post(new JSONObject().put("params", "query=" + location).toString()).body

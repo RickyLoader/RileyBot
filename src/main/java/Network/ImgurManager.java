@@ -79,7 +79,7 @@ public class ImgurManager {
 
         String url = "https://api.imgur.com/3/image";
         HashMap<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "CLIENT-ID " + Secret.getImgurClientID());
+        headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
 
         String response = new NetworkRequest(url, false).post(body, headers, false).body;
         return new JSONObject(response).getJSONObject("data").getString("link");
@@ -105,7 +105,7 @@ public class ImgurManager {
 
             String url = "https://api.imgur.com/3/image";
             HashMap<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "CLIENT-ID " + Secret.getImgurClientID());
+            headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
 
             String response = new NetworkRequest(url, false).post(body, headers, false).body;
             return new JSONObject(response).getJSONObject("data").getString("link");

@@ -94,7 +94,7 @@ public class PlexServer {
                     .getString("file");
             plexURLs.put(
                     folder.substring(0, folder.lastIndexOf('/')),
-                    "https://app.plex.tv/desktop#!/server/" + Secret.getPlexServerId() + "/details?key=/library/metadata/" + movie.getString("ratingKey")
+                    "https://app.plex.tv/desktop#!/server/" + Secret.PLEX_SERVER_ID + "/details?key=/library/metadata/" + movie.getString("ratingKey")
             );
         }
         return plexURLs;
@@ -462,7 +462,7 @@ public class PlexServer {
      * @return Radarr URL
      */
     private String getRadarrLibraryURL() {
-        return Secret.getRadarrIp() + "/api/movie?apikey=" + Secret.getRadarrKey();
+        return Secret.RADARR_IP + "/api/movie?apikey=" + Secret.RADARR_KEY;
     }
 
     /**
@@ -471,7 +471,7 @@ public class PlexServer {
      * @return Plex URL
      */
     private String getPlexLibraryURL() {
-        return Secret.getPlexIp() + Secret.getInternalPlexPort() + "/library/sections/" + Secret.getPlexLibraryId() + "/all/" + Secret.getPlexToken();
+        return Secret.PLEX_IP + Secret.PLEX_PORT + "/library/sections/" + Secret.PLEX_LIBRARY_ID + "/all/" + Secret.PLEX_TOKEN;
     }
 
     /**
@@ -483,7 +483,7 @@ public class PlexServer {
      */
     private String getRadarrSearchURL(String query, boolean idSearch) {
         try {
-            return Secret.getRadarrIp() + "/api/movie/lookup" + (idSearch ? ((query.startsWith("tt") ? "/imdb?imdbId=" : "/tmdb?tmdbId=") + query) : "?term=" + URLEncoder.encode(query, "UTF-8")) + "&apikey=" + Secret.getRadarrKey();
+            return Secret.RADARR_IP + "/api/movie/lookup" + (idSearch ? ((query.startsWith("tt") ? "/imdb?imdbId=" : "/tmdb?tmdbId=") + query) : "?term=" + URLEncoder.encode(query, "UTF-8")) + "&apikey=" + Secret.RADARR_KEY;
         }
         catch(Exception e) {
             return null;
@@ -603,7 +603,7 @@ public class PlexServer {
                 System.out.println("Movie is already complete!");
                 return;
             }
-            String url = "https://api.themoviedb.org/3/movie/" + tmdbId + "?api_key=" + Secret.getTMDBKey() + "&append_to_response=credits,release_dates,videos,external_ids&language=en-US";
+            String url = "https://api.themoviedb.org/3/movie/" + tmdbId + "?api_key=" + Secret.TMDB_KEY + "&append_to_response=credits,release_dates,videos,external_ids&language=en-US";
             JSONObject movie = new JSONObject(new NetworkRequest(url, false).get().body);
             this.genre = parseGenre(movie.getJSONArray("genres"));
             this.budget = movie.getLong("budget");

@@ -105,7 +105,7 @@ public class YoutubeLookupCommand extends LookupCommand {
         private boolean getChannelInfo(String channelName) {
             String searchChannel = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q="
                     + channelName
-                    + Secret.getYoutubeKey();
+                    + Secret.YOUTUBE_KEY;
             String json = new NetworkRequest(searchChannel, false).get().body;
             if(json == null) {
                 return false;
@@ -134,7 +134,7 @@ public class YoutubeLookupCommand extends LookupCommand {
             HashMap<String, Video> videos = new HashMap<>();
             String videoSearch = "https://www.googleapis.com/youtube/v3/search?channelId="
                     + id
-                    + "&part=snippet,id&order=date&maxResults=50" + Secret.getYoutubeKey();
+                    + "&part=snippet,id&order=date&maxResults=50" + Secret.YOUTUBE_KEY;
             String json = new NetworkRequest(videoSearch, false).get().body;
             if(json == null) {
                 return null;
@@ -172,7 +172,7 @@ public class YoutubeLookupCommand extends LookupCommand {
 
             String statSearch = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id="
                     + idList
-                    + Secret.getYoutubeKey();
+                    + Secret.YOUTUBE_KEY;
 
             String statInfo = new NetworkRequest(statSearch, false).get().body;
             if(statInfo == null) {

@@ -18,7 +18,7 @@ import static COD.MWPlayer.*;
 
 public class Summoner {
     private String name;
-    private final String apiKey = Secret.getLeagueKey(), res;
+    private final String apiKey = Secret.LEAGUE_KEY, res;
     private final HashMap<String, RankedQueue> queues = new HashMap<>();
     private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
