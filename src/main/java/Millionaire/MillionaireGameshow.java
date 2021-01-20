@@ -36,10 +36,10 @@ public class MillionaireGameshow {
     public MillionaireGameshow(Member owner, MessageChannel channel, EmoteHelper emoteHelper, String helpMessage) {
         this.owner = owner;
         this.channel = channel;
-        this.a = emoteHelper.getOptionA();
-        this.b = emoteHelper.getOptionB();
-        this.c = emoteHelper.getOptionC();
-        this.d = emoteHelper.getOptionD();
+        this.a = emoteHelper.getMillionaireOptionA();
+        this.b = emoteHelper.getMillionaireOptionB();
+        this.c = emoteHelper.getMillionaireOptionC();
+        this.d = emoteHelper.getMillionaireOptionD();
         this.lifeline = emoteHelper.getLifeline();
         this.correctEmote = EmoteHelper.formatEmote(emoteHelper.getComplete());
         this.incorrectEmote = EmoteHelper.formatEmote(emoteHelper.getFail());

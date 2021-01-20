@@ -341,28 +341,28 @@ public class EmoteHelper {
     /**
      * <img src="https://cdn.discordapp.com/emojis/768689497327271958.png"/>
      */
-    public Emote getOptionA() {
+    public Emote getMillionaireOptionA() {
         return get("768689497327271958");
     }
 
     /**
      * <img src="https://cdn.discordapp.com/emojis/768689497625460776.png"/>
      */
-    public Emote getOptionB() {
+    public Emote getMillionaireOptionB() {
         return get("768689497625460776");
     }
 
     /**
      * <img src="https://cdn.discordapp.com/emojis/768689497294110721.png"/>
      */
-    public Emote getOptionC() {
+    public Emote getMillionaireOptionC() {
         return get("768689497294110721");
     }
 
     /**
      * <img src="https://cdn.discordapp.com/emojis/768689497616547840.png"/>
      */
-    public Emote getOptionD() {
+    public Emote getMillionaireOptionD() {
         return get("768689497616547840");
     }
 
@@ -402,23 +402,132 @@ public class EmoteHelper {
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/801355286312910878.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/801394652141977600.png"/>
      */
     public Emote getYellowProgressSection() {
-        return get("801355286312910878");
+        return get("801394652141977600");
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/801357293035061279.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/801396267761795082.png"/>
      */
     public Emote getYellowProgressStart() {
-        return get("801357293035061279");
+        return get("801396267761795082");
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/801357322273554462.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/801396225936850944.png"/>
      */
     public Emote getYellowProgressEnd() {
-        return get("801357322273554462");
+        return get("801396225936850944");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801399141389041674.png"/>
+     */
+    public Emote getRedProgressEnd() {
+        return get("801399141389041674");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801397407149326336.png"/>
+     */
+    public Emote getRedProgressStart() {
+        return get("801397407149326336");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801397407048663050.png"/>
+     */
+    public Emote getRedProgressSection() {
+        return get("801397407048663050");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801398417762680862.png"/>
+     */
+    public Emote getGreenProgressEnd() {
+        return get("801398417762680862");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801397677098795058.png"/>
+     */
+    public Emote getGreenProgressSection() {
+        return get("801397677098795058");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801397677132611584.png"/>
+     */
+    public Emote getGreenProgressStart() {
+        return get("801397677132611584");
+    }
+
+    /**
+     * Get the required emotes for a green progress bar
+     *
+     * @return Green start, section, and end emotes
+     */
+    public Emote[] getGreenProgressBar() {
+        return new Emote[]{
+                getGreenProgressStart(),
+                getGreenProgressSection(),
+                getGreenProgressEnd()
+        };
+    }
+
+    /**
+     * Get the required emotes for a yellow progress bar
+     *
+     * @return Yellow start, section, and end emotes
+     */
+    public Emote[] getYellowProgressBar() {
+        return new Emote[]{
+                getYellowProgressStart(),
+                getYellowProgressSection(),
+                getYellowProgressEnd()
+        };
+    }
+
+    /**
+     * Get the required emotes for a red progress bar
+     *
+     * @return Red start, section, and end emotes
+     */
+    public Emote[] getRedProgressBar() {
+        return new Emote[]{
+                getRedProgressStart(),
+                getRedProgressSection(),
+                getRedProgressEnd()
+        };
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801427904197689354.png"/>
+     */
+    public Emote getPollOptionA() {
+        return get("801427904197689354");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801429096784592906.png"/>
+     */
+    public Emote getPollOptionB() {
+        return get("801429096784592906");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801429893644156978.png"/>
+     */
+    public Emote getPollOptionC() {
+        return get("801429893644156978");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801430434860367922.png"/>
+     */
+    public Emote getPollOptionD() {
+        return get("801430434860367922");
     }
 }
