@@ -4,6 +4,7 @@ import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
+import Countdown.Countdown;
 import Network.ImgurManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -86,7 +87,7 @@ public class CWCountdownCommand extends DiscordCommand {
         calendar.setTimeZone(timeZone);
         releaseDate = calendar.getTimeInMillis();
         lastFetched = Calendar.getInstance().getTimeInMillis();
-        Countdown countdown = getCountdown(lastFetched);
+        Countdown countdown = Countdown.from(lastFetched, releaseDate);
         buildCountdownEmbed(channel, buildImage(countdown), lastFetched >= releaseDate);
     }
 
@@ -140,27 +141,6 @@ public class CWCountdownCommand extends DiscordCommand {
     }
 
     /**
-     * Create a Countdown object to hold the remaining time
-     * until the release date
-     *
-     * @param currentTime Current time in ms
-     * @return Countdown object
-     */
-    private Countdown getCountdown(long currentTime) {
-        long period = Math.abs(releaseDate - currentTime);
-        long seconds = period / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-        return new Countdown(
-                days,
-                hours % 24,
-                minutes % 60,
-                seconds % 60
-        );
-    }
-
-    /**
      * Build the message embed and send to the channel
      *
      * @param channel  Channel to send message
@@ -182,63 +162,5 @@ public class CWCountdownCommand extends DiscordCommand {
     @Override
     public boolean matches(String query) {
         return query.startsWith("cold war");
-    }
-
-    /**
-     * Hold a period of time
-     */
-    private static class Countdown {
-        private final long days, hours, minutes, seconds;
-
-        /**
-         * Create a countdown
-         *
-         * @param days    Days until release
-         * @param hours   Hours until release
-         * @param minutes Minutes until release
-         * @param seconds Seconds until release
-         */
-        public Countdown(long days, long hours, long minutes, long seconds) {
-            this.days = days;
-            this.hours = hours;
-            this.minutes = minutes;
-            this.seconds = seconds;
-        }
-
-        /**
-         * Get remaining days
-         *
-         * @return Days
-         */
-        public long getDays() {
-            return days;
-        }
-
-        /**
-         * Get remaining hours
-         *
-         * @return Hours
-         */
-        public long getHours() {
-            return hours;
-        }
-
-        /**
-         * Get remaining minutes
-         *
-         * @return Minutes
-         */
-        public long getMinutes() {
-            return minutes;
-        }
-
-        /**
-         * Get remaining seconds
-         *
-         * @return Seconds
-         */
-        public long getSeconds() {
-            return seconds;
-        }
     }
 }
