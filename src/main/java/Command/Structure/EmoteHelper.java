@@ -400,4 +400,25 @@ public class EmoteHelper {
     public Emote getNextImage() {
         return get("795225898898817025");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801355286312910878.png"/>
+     */
+    public Emote getYellowProgressSection() {
+        return get("801355286312910878");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801357293035061279.png"/>
+     */
+    public Emote getYellowProgressStart() {
+        return get("801357293035061279");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/801357322273554462.png"/>
+     */
+    public Emote getYellowProgressEnd() {
+        return get("801357322273554462");
+    }
 }

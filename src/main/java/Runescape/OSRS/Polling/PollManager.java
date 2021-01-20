@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static Runescape.OSRS.Polling.PollManager.Poll.Question.*;
 
@@ -65,23 +64,49 @@ public class PollManager {
         Element titleElement = summary.child(1).child(0);
         try {
             Document doc = Jsoup.connect(titleElement.absUrl("href")).get();
+            Element container = doc.selectFirst(".pollWrapper");
             Elements dates = doc.select("b");
-            SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+            Elements details = container.select("p");
+            String votes = details.get(details.size() - 2)
+                    .selectFirst("b")
+                    .text()
+                    .replace("Total Number of Votes: ", "")
+                    .replace(",", "");
 
             poll = new Poll(
                     Integer.parseInt(summary.child(0).text()),
                     titleElement.text(),
-                    truncateDescription(doc.select("center").first().text()),
-                    isLatest ? 0 : Integer.parseInt(doc.select("center b").first().text().replace("Total Number of Votes: ", "")),
-                    format.parse(dates.get(0).text()),
-                    format.parse(dates.get(1).text()),
+                    truncateDescription(details.get(0).text()),
+                    isLatest ? 0 : Integer.parseInt(votes),
+                    parseWikiDate(dates.get(0).text()),
+                    parseWikiDate(dates.get(1).text()),
                     parseQuestions(doc)
             );
         }
-        catch(IOException | ParseException | NumberFormatException e) {
-            System.out.println("Error parsing: https://oldschool.runescape.wiki/w/Poll:" + titleElement.text().replaceAll(" ", "_"));
+        catch(IOException | NumberFormatException | NullPointerException e) {
+            e.printStackTrace();
+            System.out.println(
+                    "Error parsing: https://oldschool.runescape.wiki/w/Poll:"
+                            + titleElement.text().replaceAll(" ", "_")
+            );
         }
         return poll;
+    }
+
+    /**
+     * Attempt to parse the given date String from the wiki in to a date
+     *
+     * @param date Date String to parse
+     * @return Date object (or now if parsing fails)
+     */
+    private Date parseWikiDate(String date) {
+        SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+        try {
+            return format.parse(date);
+        }
+        catch(ParseException e) {
+            return new Date();
+        }
     }
 
     /**
@@ -91,19 +116,19 @@ public class PollManager {
      * @return Array of poll questions
      */
     private Question[] parseQuestions(Document doc) {
-        Elements questionElements = doc.select(".pollquestionborder");
+        Elements questionElements = doc.select(".pollquestion");
         Question[] questions = new Question[questionElements.size()];
         ArrayList<String> options = new ArrayList<>(Arrays.asList("Yes", "No", "Skip question"));
 
         for(int i = 0; i < questionElements.size(); i++) {
-            Element questionElement = questionElements.get(i);
-            Answer[] answers = parseAnswers(questionElement.select("div:not(.pollquestionborder)"));
+            Element questionElement = questionElements.get(i).selectFirst("table");
+            Answer[] answers = parseAnswers(questionElement.select("tr"));
 
             Answer winner = Arrays.stream(answers).max(Comparator.comparing(Answer::getPercentageVote)).orElse(null);
             boolean opinionQuestion = !Arrays.stream(answers).allMatch(a -> options.contains(a.getText()));
             questions[i] = new Question(
                     i + 1,
-                    questionElement.select("b").first().text(),
+                    questionElement.selectFirst("caption").text(),
                     answers,
                     winner != null && (winner.getText().equals("Yes") && winner.getPercentageVote() >= 75.0),
                     winner,
@@ -114,28 +139,30 @@ public class PollManager {
     }
 
     /**
-     * Create an array of answers from a given list of answer elements
+     * Create an array of answers from the given list of answer elements
      *
      * @param answerElements Answer elements from question
      * @return Array of answers
      */
     private Answer[] parseAnswers(Elements answerElements) {
-        answerElements = answerElements.stream().filter(e -> e.hasText() && !e.text().matches("Question \\d+")).collect(Collectors.toCollection(Elements::new));
         Answer[] answers = new Answer[answerElements.size()];
-
         for(int i = 0; i < answerElements.size(); i++) {
-            Elements row = answerElements.get(i).select("span");
-            String[] voteInfo = row
+            Elements columns = answerElements.get(i).select("td");
+            String[] voteInfo = columns
                     .get(2)
                     .text()
                     .replace(" (", "")
-                    .replace(" votes)", "")
+                    .replace(" votes", "")
+                    .replace(")", "")
+                    .replace(",", "")
                     .split("%");
 
+            boolean skipQuestion = voteInfo.length == 1;
+
             answers[i] = new Answer(
-                    Integer.parseInt(voteInfo[1]),
-                    Double.parseDouble(voteInfo[0]),
-                    row.get(0).text()
+                    Integer.parseInt(voteInfo[skipQuestion ? 0 : 1]),
+                    skipQuestion ? 0 : Double.parseDouble(voteInfo[0]),
+                    columns.get(0).text()
             );
         }
         return answers;
@@ -447,7 +474,9 @@ public class PollManager {
                  * @return Formatted String displaying vote summary
                  */
                 public String formatVotes() {
-                    return new DecimalFormat("0.00").format(percentageVote) + "%";
+                    return percentageVote == 0
+                            ? new DecimalFormat("#,### Votes").format(votes)
+                            : new DecimalFormat("0.00'%'").format(percentageVote);
                 }
             }
         }

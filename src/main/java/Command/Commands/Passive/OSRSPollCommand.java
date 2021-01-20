@@ -44,11 +44,11 @@ public class OSRSPollCommand extends DiscordCommand {
             channel.sendMessage("That poll doesn't exist (or I couldn't parse it)").queue();
             return;
         }
-
         new PollMessage(
                 context,
                 poll
         ).showMessage();
+
     }
 
     @Override
@@ -60,7 +60,8 @@ public class OSRSPollCommand extends DiscordCommand {
      * Pageable OSRS poll message
      */
     private static class PollMessage extends PageableListEmbed {
-        private final String handle, section, tip, pass, fail;
+        private final String pass, fail;
+        private final ProgressBar progressBar;
         private final boolean open;
 
         /**
@@ -80,9 +81,11 @@ public class OSRSPollCommand extends DiscordCommand {
                     EmbedHelper.GREEN
             );
             EmoteHelper emoteHelper = context.getEmoteHelper();
-            this.handle = EmoteHelper.formatEmote(emoteHelper.getSwordHandle());
-            this.section = EmoteHelper.formatEmote(emoteHelper.getSwordBlade());
-            this.tip = EmoteHelper.formatEmote(emoteHelper.getSwordTip());
+            this.progressBar = new ProgressBar(
+                    emoteHelper.getSwordHandle(),
+                    emoteHelper.getSwordBlade(),
+                    emoteHelper.getSwordTip()
+            );
             this.pass = EmoteHelper.formatEmote(emoteHelper.getComplete());
             this.fail = EmoteHelper.formatEmote(emoteHelper.getFail());
             this.open = poll.isOpen();
@@ -112,11 +115,15 @@ public class OSRSPollCommand extends DiscordCommand {
             Answer[] answers = question.getAnswers();
             for(int i = 0; i < answers.length; i++) {
                 Answer a = answers[i];
-                builder
-                        .append(buildSword(a.getPercentageVote(), question.isOpinionQuestion() && a == question.getWinner()))
+                builder.append(
+                        buildSword(
+                                a.getPercentageVote(),
+                                question.isOpinionQuestion() && a == question.getWinner()
+                        )
+                )
                         .append(" ")
                         .append(a.formatVotes())
-                        .append(" ")
+                        .append(" -> ")
                         .append(a.getText());
 
                 if(i < answers.length - 1) {
@@ -135,18 +142,11 @@ public class OSRSPollCommand extends DiscordCommand {
          */
         private String buildSword(double percentageVotes, boolean highestOpinion) {
             int sections = (int) (percentageVotes / 15);
-            StringBuilder sword = new StringBuilder();
+            String sword = progressBar.build(sections, true);
             if(!open && highestOpinion) {
-                sword.append(pass);
+                sword = pass + sword;
             }
-            sword.append(handle);
-            for(int i = 0; i < sections; i++) {
-                sword.append(section);
-            }
-            if(sections > 0) {
-                sword.append(tip);
-            }
-            return sword.toString();
+            return sword;
         }
 
         @Override
