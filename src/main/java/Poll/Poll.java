@@ -239,7 +239,7 @@ public class Poll {
      */
     private MessageEmbed buildPollMessage() {
         String clock = running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED;
-        int totalEmotes = 8;
+        final int totalEmotes = 8;
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setFooter(
@@ -256,10 +256,9 @@ public class Poll {
             int votes = option.getVotes();
             ProgressBar bar = running ? yellowBar : (votes == maxVotes && maxVotes > 0 ? greenBar : redBar);
             int displayVotes = Math.min(totalEmotes, option.getVotes());
-
             String pollImage = EmoteHelper.formatEmote(e)
                     + " "
-                    + bar.build(displayVotes, !running || displayVotes == totalVotes)
+                    + bar.build(displayVotes, !running || displayVotes == totalEmotes)
                     + " "
                     + votes;
 
