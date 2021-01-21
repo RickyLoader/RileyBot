@@ -42,6 +42,7 @@ public class Poll {
         this.pollTimer = new TimerTask() {
             @Override
             public void run() {
+                running = false;
                 stop(jda);
             }
         };
@@ -75,7 +76,7 @@ public class Poll {
         Timer timer = new Timer();
         timer.schedule(
                 pollTimer,
-                120000
+                2000
         );
         refreshPollMessage();
     }
@@ -88,9 +89,9 @@ public class Poll {
      */
     public void stop(JDA jda) {
         if(running) {
+            running = false;
             pollTimer.cancel();
         }
-        running = false;
         endTime = System.currentTimeMillis();
         jda.removeEventListener(voteListener);
         refreshPollMessage();
