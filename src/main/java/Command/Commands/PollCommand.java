@@ -21,7 +21,7 @@ public class PollCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        String message = context.getMessageContent().replaceFirst("poll", "").trim();
+        String message = context.getMessageContent().substring(4).trim();
         MessageChannel channel = context.getMessageChannel();
         Member pollMaster = context.getMember();
         long channelId = channel.getIdLong();
