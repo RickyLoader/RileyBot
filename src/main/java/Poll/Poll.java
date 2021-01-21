@@ -76,7 +76,7 @@ public class Poll {
         Timer timer = new Timer();
         timer.schedule(
                 pollTimer,
-                2000
+                120000
         );
         refreshPollMessage();
     }
