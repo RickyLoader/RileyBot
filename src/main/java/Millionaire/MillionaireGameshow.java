@@ -410,14 +410,14 @@ public class MillionaireGameshow {
      * @param reward Reward from quiz
      */
     private void addToBank(int reward) {
-        new NetworkRequest("millionaire/bank/update", true)
+        new Thread(() -> new NetworkRequest("millionaire/bank/update", true)
                 .post(
                         new JSONObject()
                                 .put("discord_id", owner.getIdLong())
                                 .put("name", owner.getEffectiveName())
                                 .put("reward", reward)
                                 .toString()
-                );
+                ));
     }
 
     /**
