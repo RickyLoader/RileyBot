@@ -22,8 +22,9 @@ public class Poll {
     private final TimerTask pollTimer;
     private final EmoteListener voteListener;
     private final ProgressBar yellowBar, redBar, greenBar;
+    private final String title;
     private long messageId, startTime, endTime;
-    private int totalVotes, maxVotes;
+    private int totalVotes, highestVotes;
     private boolean running;
 
 
@@ -32,12 +33,14 @@ public class Poll {
      *
      * @param channel     Channel where poll will take place
      * @param items       Poll items
+     * @param title       Title of the poll
      * @param jda         JDA for registering emote listener
      * @param emoteHelper Emote helper for voting emotes
      */
-    public Poll(MessageChannel channel, String[] items, JDA jda, EmoteHelper emoteHelper) {
+    public Poll(MessageChannel channel, String[] items, String title, JDA jda, EmoteHelper emoteHelper) {
         this.channel = channel;
         this.answers = createPollAnswers(items, emoteHelper);
+        this.title = title;
         this.voteListener = createVoteListener();
         this.pollTimer = new TimerTask() {
             @Override
@@ -47,7 +50,7 @@ public class Poll {
             }
         };
         this.totalVotes = 0;
-        this.maxVotes = 0;
+        this.highestVotes = 0;
         this.redBar = createProgressBar(emoteHelper.getRedProgressBar());
         this.yellowBar = createProgressBar(emoteHelper.getYellowProgressBar());
         this.greenBar = createProgressBar(emoteHelper.getGreenProgressBar());
@@ -112,8 +115,8 @@ public class Poll {
                 }
                 totalVotes++;
                 int votes = answers.get(selected).incrementVotes();
-                if(votes > maxVotes) {
-                    maxVotes = votes;
+                if(votes > highestVotes) {
+                    highestVotes = votes;
                 }
                 refreshPollMessage();
             }
@@ -249,13 +252,13 @@ public class Poll {
                 )
                 .setColor(running ? EmbedHelper.YELLOW : EmbedHelper.GREEN)
                 .setThumbnail("https://i.imgur.com/Vsjp0Og.png")
-                .setTitle("Poll - " + channel.getName() + " Channel - " + totalVotes + " votes counted")
+                .setTitle("Poll | " + title + " - " + totalVotes + " votes counted")
                 .setImage(EmbedHelper.SPACER_IMAGE);
 
         for(Emote e : answers.keySet()) {
             PollAnswer option = answers.get(e);
             int votes = option.getVotes();
-            ProgressBar bar = running ? yellowBar : (votes == maxVotes && maxVotes > 0 ? greenBar : redBar);
+            ProgressBar bar = running ? yellowBar : (votes == highestVotes && highestVotes > 0 ? greenBar : redBar);
             int displayVotes = Math.min(totalEmotes, option.getVotes());
             String pollImage = EmoteHelper.formatEmote(e)
                     + " "

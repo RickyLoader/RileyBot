@@ -16,7 +16,7 @@ public class PollCommand extends DiscordCommand {
     private final HashMap<Long, Poll> polls = new HashMap<>();
 
     public PollCommand() {
-        super("poll [item] | [item]\npoll resend\npoll stop", "Poll up to 4 items!");
+        super("poll [title] | [item] | [item]\npoll resend\npoll stop", "Poll up to 4 items!");
     }
 
     @Override
@@ -50,7 +50,19 @@ public class PollCommand extends DiscordCommand {
             return;
         }
 
-        String[] questions = message.split("\\|");
+        String title = message.substring(0, message.indexOf('|')).trim();
+        if(title.isEmpty()) {
+            channel.sendMessage(pollMaster.getAsMention() + "You forgot the title bro").queue();
+            return;
+        }
+
+        String delim = "\\|";
+        String[] questions = message
+                .replace(title, "")
+                .replaceFirst(delim, "")
+                .trim()
+                .split(delim);
+
         if(questions.length == 1) {
             channel.sendMessage(pollMaster.getAsMention() + " What kind of poll has 1 item?").queue();
             return;
@@ -69,7 +81,7 @@ public class PollCommand extends DiscordCommand {
             return;
         }
 
-        Poll poll = new Poll(channel, questions, jda, context.getEmoteHelper());
+        Poll poll = new Poll(channel, questions, title, jda, context.getEmoteHelper());
         polls.put(channelId, poll);
         poll.start();
     }
