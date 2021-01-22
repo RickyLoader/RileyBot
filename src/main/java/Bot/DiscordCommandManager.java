@@ -172,6 +172,7 @@ public class DiscordCommandManager {
         addCommand(new YuGiOhCommand());
         addCommand(new NASACommand());
         addCommand(new PollCommand());
+        addCommand(new StatusCommand());
     }
 
     /**
