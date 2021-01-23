@@ -173,6 +173,7 @@ public class DiscordCommandManager {
         addCommand(new NASACommand());
         addCommand(new PollCommand());
         addCommand(new StatusCommand());
+        addCommand(new GIFCommand());
     }
 
     /**
@@ -180,8 +181,9 @@ public class DiscordCommandManager {
      */
     private void addRandomCommands() {
         addCommand(new MemeCommand());
-        addCommand(new GIFCommand());
         addCommand(new GenerateNameCommand());
+        addCommand(new LeoCommand());
+        addCommand(new PhotographyCommand());
     }
 
     /**
