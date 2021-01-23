@@ -417,7 +417,7 @@ public class MillionaireGameshow {
                                 .put("name", owner.getEffectiveName())
                                 .put("reward", reward)
                                 .toString()
-                ));
+                )).start();
     }
 
     /**
