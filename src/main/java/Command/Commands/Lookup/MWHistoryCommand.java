@@ -47,7 +47,7 @@ public class MWHistoryCommand extends MatchHistoryCommand {
     }
 
     @Override
-    public String getMatchHistoryJSON(String name, String platform) {
+    public String getMatchHistoryJSON(String name, PLATFORM platform) {
         return CODAPI.getMWMatchHistory(name, platform);
     }
 }

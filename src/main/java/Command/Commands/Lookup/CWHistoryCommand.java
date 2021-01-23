@@ -37,7 +37,7 @@ public class CWHistoryCommand extends MatchHistoryCommand {
     }
 
     @Override
-    public String getMatchHistoryJSON(String name, String platform) {
+    public String getMatchHistoryJSON(String name, PLATFORM platform) {
         return CODAPI.getCWMatchHistory(name, platform);
     }
 

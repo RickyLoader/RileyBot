@@ -2,6 +2,7 @@ package COD;
 
 import COD.MWPlayer.FieldUpgrade;
 import COD.MWPlayer.Killstreak;
+import Command.Structure.CODLookupCommand.PLATFORM;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
@@ -346,7 +347,7 @@ public class CombatRecord extends ImageBuilder {
      * @param helpMessage Help message to display in loading message
      * @param platform    Platform
      */
-    public void buildImage(String nameQuery, String helpMessage, String platform) {
+    public void buildImage(String nameQuery, String helpMessage, PLATFORM platform) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getEmoteHelper(),

@@ -1,6 +1,7 @@
 package COD;
 
 import Bot.ResourceHandler;
+import Command.Structure.CODLookupCommand.PLATFORM;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
@@ -12,7 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class MWPlayer {
-    private final String name, platform, data, res;
+    private final String name, data, res;
+    private final PLATFORM platform;
     private String status;
     private Ratio wl, kd;
     private int streak;
@@ -24,7 +26,7 @@ public class MWPlayer {
     private ArrayList<Commendation> commendations;
     private final ResourceHandler handler;
 
-    public MWPlayer(String name, String platform) {
+    public MWPlayer(String name, PLATFORM platform) {
         this.name = name;
         this.platform = platform;
         this.res = "/COD/MW/";

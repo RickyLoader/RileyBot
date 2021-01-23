@@ -21,6 +21,7 @@ public class Match {
     private final Score score;
     private final int longestStreak, damageDealt, damageReceived, xp;
     private final double distanceTravelled;
+    private Team team1, team2;
 
     public enum RESULT {
         WIN,
@@ -487,5 +488,43 @@ public class Match {
      */
     public RESULT getResult() {
         return result;
+    }
+
+    /**
+     * Get team 1
+     *
+     * @return Team 1
+     */
+    public Team getTeam1() {
+        return team1;
+    }
+
+    /**
+     * Get team 2
+     *
+     * @return Team 2
+     */
+    public Team getTeam2() {
+        return team2;
+    }
+
+    /**
+     * Set the match teams
+     *
+     * @param team1 Team1
+     * @param team2 Team2
+     */
+    public void setTeams(Team team1, Team team2) {
+        this.team1 = team1;
+        this.team2 = team2;
+    }
+
+    /**
+     * Check if the match has team information
+     *
+     * @return Match has team information
+     */
+    public boolean hasTeams() {
+        return team1 != null && team2 != null;
     }
 }

@@ -6,6 +6,8 @@ import Network.NetworkRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import static Command.Structure.CODLookupCommand.*;
+
 public class CODAPI {
     private static final String BASE_URL = NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/";
     private static final String MODERN_WARFARE_URL = BASE_URL + "modernwarfare/";
@@ -18,12 +20,12 @@ public class CODAPI {
      * @param platform Player platform
      * @return Player stats
      */
-    public static String getMWStats(String name, String platform) {
+    public static String getMWStats(String name, PLATFORM platform) {
         String json = null;
         try {
             String nameEncode = encodeName(name);
             json = new NetworkRequest(
-                    MODERN_WARFARE_URL + nameEncode + "/" + platform,
+                    MODERN_WARFARE_URL + nameEncode + "/" + platform.name().toLowerCase(),
                     false
             ).get().body;
         }
@@ -40,7 +42,7 @@ public class CODAPI {
      * @param platform Player platform
      * @return Player match history
      */
-    public static String getMWMatchHistory(String name, String platform) {
+    public static String getMWMatchHistory(String name, PLATFORM platform) {
         return getMatchHistory(name, platform, MODERN_WARFARE_URL);
     }
 
@@ -51,7 +53,7 @@ public class CODAPI {
      * @param platform Player platform
      * @return Player match history
      */
-    public static String getCWMatchHistory(String name, String platform) {
+    public static String getCWMatchHistory(String name, PLATFORM platform) {
         return getMatchHistory(name, platform, COLD_WAR_URL);
     }
 
@@ -63,12 +65,12 @@ public class CODAPI {
      * @param gameURL  Base URL for game
      * @return Player match history
      */
-    private static String getMatchHistory(String name, String platform, String gameURL) {
+    private static String getMatchHistory(String name, PLATFORM platform, String gameURL) {
         String json = null;
         try {
             String nameEncode = encodeName(name);
             json = new NetworkRequest(
-                    gameURL + "history/" + nameEncode + "/" + platform,
+                    gameURL + "history/" + nameEncode + "/" + platform.name().toLowerCase(),
                     false)
                     .get().body;
         }

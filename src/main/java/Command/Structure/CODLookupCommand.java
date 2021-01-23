@@ -1,11 +1,31 @@
 package Command.Structure;
 
-import java.util.Arrays;
-import java.util.List;
-
 public abstract class CODLookupCommand extends LookupCommand {
-    private final List<String> platforms;
-    private String platform;
+    private PLATFORM platform;
+
+    public enum PLATFORM {
+        BATTLE,
+        ACTI,
+        XBOX,
+        PSN,
+        UNO,
+        NONE;
+
+        /**
+         * Get a platform by name
+         *
+         * @param name Name of platform - "acti"
+         * @return Platform
+         */
+        public static PLATFORM byName(String name) {
+            try {
+                return valueOf(name.toUpperCase());
+            }
+            catch(IllegalArgumentException e) {
+                return NONE;
+            }
+        }
+    }
 
     public CODLookupCommand(String trigger, String desc) {
         super(
@@ -14,7 +34,6 @@ public abstract class CODLookupCommand extends LookupCommand {
                 getHelpText(trigger),
                 30
         );
-        platforms = getPlatforms();
     }
 
     public CODLookupCommand(String trigger, String desc, String helpText) {
@@ -24,7 +43,6 @@ public abstract class CODLookupCommand extends LookupCommand {
                 getHelpText(trigger) + "\n" + helpText,
                 30
         );
-        platforms = getPlatforms();
     }
 
     /**
@@ -38,20 +56,11 @@ public abstract class CODLookupCommand extends LookupCommand {
     }
 
     /**
-     * Get the platforms that can be searched
-     *
-     * @return List of platforms
-     */
-    private List<String> getPlatforms() {
-        return Arrays.asList("battle", "acti", "xbox", "psn", "uno");
-    }
-
-    /**
      * Get the requested platform
      *
      * @return Platform
      */
-    public String getPlatform() {
+    public PLATFORM getPlatform() {
         return platform;
     }
 
@@ -92,13 +101,13 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @return Query with platform removed
      */
     public String setPlatform(String query) {
-        String platform = query.split(" ")[0];
-        if(platform.equals(getTrigger())) {
-            this.platform = "acti";
+        PLATFORM platform = PLATFORM.byName(query.split(" ")[0]);
+        if(platform == PLATFORM.NONE) {
+            this.platform = PLATFORM.ACTI;
         }
         else {
             this.platform = platform;
-            query = query.replaceFirst(platform, "").trim();
+            query = query.replaceFirst(platform.name().toLowerCase(), "").trim();
         }
         return query;
     }
@@ -106,6 +115,6 @@ public abstract class CODLookupCommand extends LookupCommand {
     @Override
     public boolean matches(String query) {
         String[] args = query.split(" ");
-        return query.startsWith(getTrigger()) || platforms.contains(args[0]) && args[1].matches(getTrigger());
+        return query.startsWith(getTrigger()) || PLATFORM.byName(args[0]) != PLATFORM.NONE && args[1].matches(getTrigger());
     }
 }
