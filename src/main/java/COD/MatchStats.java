@@ -11,7 +11,7 @@ import static COD.MWPlayer.*;
 /**
  * Hold data on a match played
  */
-public class Match {
+public class MatchStats {
     private final Date start, end;
     private final long duration, wobblies;
     private final RESULT result;
@@ -21,6 +21,7 @@ public class Match {
     private final Score score;
     private final int longestStreak, damageDealt, damageReceived, xp;
     private final double distanceTravelled;
+    private final MatchPlayer player;
     private Team team1, team2;
 
     public enum RESULT {
@@ -38,6 +39,7 @@ public class Match {
         private final long duration;
         private final RESULT result;
         private final String mode, id;
+        private final MatchPlayer player;
         private final Map map;
         private String nemesis, mostKilled;
         private Ratio killDeath, accuracy;
@@ -55,8 +57,9 @@ public class Match {
          * @param start  Start data
          * @param end    End date
          * @param result Result of match
+         * @param player Player who match stats belong to
          */
-        public MatchBuilder(String id, Map map, String mode, Date start, Date end, RESULT result) {
+        public MatchBuilder(String id, Map map, String mode, Date start, Date end, RESULT result, MatchPlayer player) {
             this.id = id;
             this.map = map;
             this.mode = mode;
@@ -64,6 +67,7 @@ public class Match {
             this.end = end;
             this.duration = end.getTime() - start.getTime();
             this.result = result;
+            this.player = player;
         }
 
         /**
@@ -182,8 +186,8 @@ public class Match {
          *
          * @return Match
          */
-        public Match build() {
-            return new Match(this);
+        public MatchStats build() {
+            return new MatchStats(this);
         }
     }
 
@@ -192,7 +196,7 @@ public class Match {
      *
      * @param builder Match builder
      */
-    private Match(MatchBuilder builder) {
+    private MatchStats(MatchBuilder builder) {
         this.id = builder.id;
         this.map = builder.map;
         this.mode = builder.mode;
@@ -211,6 +215,16 @@ public class Match {
         this.xp = builder.xp;
         this.distanceTravelled = builder.distanceTravelled;
         this.wobblies = builder.wobblies;
+        this.player = builder.player;
+    }
+
+    /**
+     * Get the player who the match stats belong to
+     *
+     * @return Match player
+     */
+    public MatchPlayer getPlayer() {
+        return player;
     }
 
     /**

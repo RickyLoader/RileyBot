@@ -5,7 +5,7 @@ package COD;
  */
 public class Score {
     private final int scoreA, scoreB;
-    private final Match.RESULT result;
+    private final MatchStats.RESULT result;
 
     /**
      * Create a score
@@ -13,7 +13,7 @@ public class Score {
      * @param scoreA Team a score
      * @param scoreB Team b score
      */
-    public Score(int scoreA, int scoreB, Match.RESULT result) {
+    public Score(int scoreA, int scoreB, MatchStats.RESULT result) {
         this.scoreA = scoreA;
         this.scoreB = scoreB;
         this.result = result;
@@ -28,6 +28,6 @@ public class Score {
     public String getScore() {
         int min = Math.min(scoreA, scoreB);
         int max = Math.max(scoreA, scoreB);
-        return result == Match.RESULT.WIN ? max + "/" + min : min + "/" + max;
+        return result == MatchStats.RESULT.WIN ? max + "/" + min : min + "/" + max;
     }
 }

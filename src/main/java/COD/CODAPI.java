@@ -81,6 +81,20 @@ public class CODAPI {
     }
 
     /**
+     * Get the list of players in a match
+     *
+     * @param matchID  Match id
+     * @param platform Match platform
+     * @return Match players
+     */
+    public static String getMWMatchPlayers(String matchID, PLATFORM platform) {
+        return new NetworkRequest(
+                MODERN_WARFARE_URL + "match/" + matchID + "/" + platform.name().toLowerCase(),
+                false
+        ).get().body;
+    }
+
+    /**
      * URL encode the given name
      *
      * @param name Name to encode

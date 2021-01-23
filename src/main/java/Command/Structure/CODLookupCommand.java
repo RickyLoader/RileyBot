@@ -18,11 +18,19 @@ public abstract class CODLookupCommand extends LookupCommand {
          * @return Platform
          */
         public static PLATFORM byName(String name) {
+            name = name.toUpperCase();
             try {
-                return valueOf(name.toUpperCase());
+                return valueOf(name);
             }
             catch(IllegalArgumentException e) {
-                return NONE;
+                switch(name) {
+                    case "XBL":
+                        return XBOX;
+                    case "BATTLENET":
+                        return BATTLE;
+                    default:
+                        return NONE;
+                }
             }
         }
     }
@@ -77,20 +85,15 @@ public abstract class CODLookupCommand extends LookupCommand {
 
     /**
      * Remove trailing zero from name in query if present
-     * and remove hashtag from beginning of uno name
      *
      * @param query Query containing name
      * @return Fixed query
      */
     public String fixName(String query) {
-        String name = query.replaceFirst(getTrigger(), "").trim();
-        if(name.endsWith("#0")) {
-            name = name.replace("#0", "");
+        if(query.endsWith("#0")) {
+            return query.replace("#0", "");
         }
-        else if(name.startsWith("#")) {
-            name = name.replace("#", "");
-        }
-        return getTrigger() + " " + name;
+        return query;
     }
 
     /**

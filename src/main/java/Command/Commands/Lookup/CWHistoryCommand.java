@@ -42,6 +42,11 @@ public class CWHistoryCommand extends MatchHistoryCommand {
     }
 
     @Override
+    public String getMatchPlayersJSON(String matchID, PLATFORM platform) {
+        return null;
+    }
+
+    @Override
     public String getSavedName(long id) {
         return DiscordUser.getSavedName(id, DiscordUser.CW);
     }

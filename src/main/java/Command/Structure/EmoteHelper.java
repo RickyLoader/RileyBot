@@ -530,4 +530,18 @@ public class EmoteHelper {
     public Emote getPollOptionD() {
         return get("801430434860367922");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/802472508438609940.png"/>
+     */
+    public Emote getPlayers() {
+        return get("802472508438609940");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/802472508112371753.png"/>
+     */
+    public Emote getStats() {
+        return get("802472508112371753");
+    }
 }

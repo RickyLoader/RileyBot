@@ -5,20 +5,22 @@ import COD.*;
 import COD.MWPlayer.Ratio;
 import COD.Map;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
+import java.util.List;
 
 /**
  * View a COD player's match history
  */
 public abstract class MatchHistoryCommand extends CODLookupCommand {
     private final HashMap<String, String> modes, maps;
+    private final HashMap<Long, MatchStats> matchMessages;
     private String matchID;
     private String win, loss, draw;
+    private Emote stats, players;
 
     /**
      * Create the command
@@ -36,6 +38,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         res = "/COD/" + res;
         this.modes = getItemMap(res + "modes.json", "modes");
         this.maps = getItemMap(res + "maps.json", "maps");
+        this.matchMessages = new HashMap<>();
+
     }
 
     @Override
@@ -85,6 +89,9 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             win = EmoteHelper.formatEmote(helper.getComplete());
             loss = EmoteHelper.formatEmote(helper.getFail());
             draw = EmoteHelper.formatEmote(helper.getDraw());
+            stats = helper.getStats();
+            players = helper.getPlayers();
+            context.getJDA().addEventListener(getMatchEmoteListener());
         }
 
         MessageChannel channel = context.getMessageChannel();
@@ -93,53 +100,169 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
         if(matchID != null) {
-            channel.sendMessage(getMatchEmbed(matchHistory)).queue();
+            sendMatchEmbed(matchHistory, channel);
             return;
         }
         getMatchHistoryEmbed(context, matchHistory).showMessage();
     }
 
     /**
-     * Create a message embed detailing the provided match id
+     * Create an emote listener to handle toggling a match embed between match stats
+     * and a list of players
+     *
+     * @return Emote listener
+     */
+    private EmoteListener getMatchEmoteListener() {
+        return new EmoteListener() {
+            @Override
+            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
+                long id = reaction.getMessageIdLong();
+                Emote emote = reaction.getReactionEmote().getEmote();
+                if(!matchMessages.containsKey(id) || emote != stats && emote != players) {
+                    return;
+                }
+                reaction.getChannel().retrieveMessageById(id).queue(message -> {
+                    MatchStats matchStats = matchMessages.get(id);
+                    MessageEmbed content = emote == stats
+                            ? buildMatchEmbed(matchStats)
+                            : buildMatchPlayersEmbed(matchStats);
+                    message.editMessage(content).queue();
+                });
+            }
+        };
+    }
+
+    /**
+     * Create and send an embed for a specific match
+     * Attach emotes if the match has player information to toggle between
+     * match stats and player information when clicked
      *
      * @param matchHistory Match history of player
-     * @return Message embed detailing match or error
+     * @param channel      Channel to send to
      */
-    private MessageEmbed getMatchEmbed(MatchHistory matchHistory) {
-        Match match = matchID.equals("latest") ? matchHistory.getMatches().get(0) : matchHistory.getMatch(matchID);
-        if(match == null) {
-            return getErrorEmbed(matchHistory);
+    private void sendMatchEmbed(MatchHistory matchHistory, MessageChannel channel) {
+        MatchStats matchStats = matchID.equals("latest") ? matchHistory.getMatches().get(0) : matchHistory.getMatch(matchID);
+        if(matchStats == null) {
+            channel.sendMessage(getErrorEmbed(matchHistory)).queue();
+            return;
         }
-        return getDefaultEmbedBuilder(matchHistory.getName().toUpperCase())
-                .setColor(getResultColour(match.getResult()))
-                .setImage(match.getMap().getImageURL())
-                .addField("**Date**", match.getDateString(), true)
-                .addField("**Time**", match.getTimeString(), true)
-                .addField("**Duration**", match.getDurationString(), true)
-                .addField("**Mode**", match.getMode(), true)
-                .addField("**Map**", match.getMap().getName(), true)
+        MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
+        if(!matchStats.hasTeams()) {
+            addTeams(matchStats);
+        }
+        channel.sendMessage(matchEmbed).queue(message -> {
+            if(matchStats.hasTeams() && matchStats.getTeam1().getPlayers().size() <= 12) {
+                matchMessages.put(message.getIdLong(), matchStats);
+                message.addReaction(stats).queue();
+                message.addReaction(players).queue();
+            }
+        });
+    }
+
+    /**
+     * Attempt to get and add the team information for the provided match
+     *
+     * @param matchStats Match to add teams to
+     */
+    private void addTeams(MatchStats matchStats) {
+        JSONObject response = new JSONObject(getMatchPlayersJSON(matchStats.getId(), getPlatform()));
+        if(response.has("status")) {
+            System.out.println("Error getting team data:" + response.getString("status"));
+            return;
+        }
+        JSONArray playerList = response.getJSONArray("allPlayers");
+        Team allies = new Team("Allies");
+        Team axis = new Team("Axis");
+        for(int i = 0; i < playerList.length(); i++) {
+            JSONObject playerData = playerList.getJSONObject(i).getJSONObject("player");
+            MatchPlayer player = new MatchPlayer(
+                    playerData.getString("username"),
+                    PLATFORM.byName(playerData.getString("platform"))
+            );
+            player.setUno(playerData.getString("uno"));
+            if(playerData.getString("team").equals("allies")) {
+                allies.addPlayer(player);
+            }
+            else {
+                axis.addPlayer(player);
+            }
+            if(player.getPlatform() == PLATFORM.NONE) {
+                System.out.println("Unable to match: " + playerData.getString("platform"));
+            }
+        }
+        matchStats.setTeams(allies, axis);
+    }
+
+    /**
+     * Create a message embed detailing a player's stats during the given match
+     *
+     * @param matchStats Match stats
+     * @return Message embed detailing match stats
+     */
+    private MessageEmbed buildMatchEmbed(MatchStats matchStats) {
+        return getDefaultMatchEmbedBuilder(matchStats)
+                .addField("**Date**", matchStats.getDateString(), true)
+                .addField("**Time**", matchStats.getTimeString(), true)
+                .addField("**Duration**", matchStats.getDurationString(), true)
+                .addField("**Mode**", matchStats.getMode(), true)
+                .addField("**Map**", matchStats.getMap().getName(), true)
                 .addBlankField(true)
-                .addField("**K/D**", match.getKillDeathSummary(), true)
-                .addField("**Shots Fired/Hit**", match.getShotSummary(), true)
-                .addField("**Accuracy**", match.getAccuracySummary(), true)
-                .addField("**Damage Dealt**", match.getDamageDealt(), true)
-                .addField("**Damage Taken**", match.getDamageReceived(), true)
-                .addField("**Highest Streak**", String.valueOf(match.getLongestStreak()), true)
+                .addField("**K/D**", matchStats.getKillDeathSummary(), true)
+                .addField("**Shots Fired/Hit**", matchStats.getShotSummary(), true)
+                .addField("**Accuracy**", matchStats.getAccuracySummary(), true)
+                .addField("**Damage Dealt**", matchStats.getDamageDealt(), true)
+                .addField("**Damage Taken**", matchStats.getDamageReceived(), true)
+                .addField("**Highest Streak**", String.valueOf(matchStats.getLongestStreak()), true)
                 .addField(
                         "**Distance Travelled**",
-                        match.getWobblies() + "\n" + match.getDistanceTravelled(),
+                        matchStats.getWobblies() + "\n" + matchStats.getDistanceTravelled(),
                         false
                 )
-                .addField("**Nemesis**", match.getNemesis(), true)
-                .addField("**Most Killed**", match.getMostKilled(), true)
+                .addField("**Nemesis**", matchStats.getNemesis(), true)
+                .addField("**Most Killed**", matchStats.getMostKilled(), true)
                 .addBlankField(true)
-                .addField("**Match XP**", match.getExperience(), true)
+                .addField("**Match XP**", matchStats.getExperience(), true)
                 .addField(
                         "**Result**",
-                        match.getResult().toString() + " (" + match.getScore() + ") " + getResultEmote(match.getResult()),
+                        matchStats.getResult().toString()
+                                + " (" + matchStats.getScore() + ") "
+                                + getResultEmote(matchStats.getResult()),
                         true
                 )
                 .build();
+    }
+
+    /**
+     * Create a message embed showing the list of players in the given match
+     *
+     * @param matchStats Match stats to display players from
+     * @return Message embed showing list of match players
+     */
+    private MessageEmbed buildMatchPlayersEmbed(MatchStats matchStats) {
+        EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats);
+        addTeamToEmbed(matchStats.getTeam1(), builder);
+        addTeamToEmbed(matchStats.getTeam2(), builder);
+        return builder.build();
+    }
+
+    /**
+     * Add the given team's name & players to the given embed builder
+     *
+     * @param team    Team to add to embed builder
+     * @param builder Embed builder
+     */
+    private void addTeamToEmbed(Team team, EmbedBuilder builder) {
+        ArrayList<MatchPlayer> players = team.getPlayers();
+        for(int i = 0; i < players.size(); i++) {
+            MatchPlayer player = players.get(i);
+            String value = "**" + player.getName() + "**"
+                    + "\n" + player.getPlatform().name()
+                    + "\n" + player.getUno();
+            builder.addField(i == 0
+                    ? EmbedHelper.getTitleField("__" + team.getName().toUpperCase() + "__", value)
+                    : EmbedHelper.getValueField(value)
+            );
+        }
     }
 
     /**
@@ -148,7 +271,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param result Match result
      * @return Colour to use
      */
-    public int getResultColour(Match.RESULT result) {
+    public int getResultColour(MatchStats.RESULT result) {
         switch(result) {
             case WIN:
                 return EmbedHelper.GREEN;
@@ -164,12 +287,12 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     /**
      * Get the result formatted for use in a message embed with an emote and score
      *
-     * @param match Match
+     * @param matchStats Match
      * @return Formatted result
      */
-    public String getFormattedResult(Match match) {
-        Match.RESULT result = match.getResult();
-        return result.toString() + " " + getResultEmote(result) + "\n(" + match.getScore() + ")";
+    public String getFormattedResult(MatchStats matchStats) {
+        MatchStats.RESULT result = matchStats.getResult();
+        return result.toString() + " " + getResultEmote(result) + "\n(" + matchStats.getScore() + ")";
     }
 
     /**
@@ -178,7 +301,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param result Match result
      * @return Emote indicating the result of the match
      */
-    public String getResultEmote(Match.RESULT result) {
+    public String getResultEmote(MatchStats.RESULT result) {
         switch(result) {
             case WIN:
                 return win;
@@ -218,6 +341,18 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                         "Type " + getTrigger() + " for help"
                 )
                 .setThumbnail(getEmbedThumbnail());
+    }
+
+    /**
+     * Create the default embed builder for a match
+     *
+     * @param matchStats Match
+     * @return Default embed builder for a match
+     */
+    private EmbedBuilder getDefaultMatchEmbedBuilder(MatchStats matchStats) {
+        return getDefaultEmbedBuilder(matchStats.getPlayer().getName().toUpperCase())
+                .setColor(getResultColour(matchStats.getResult()))
+                .setImage(matchStats.getMap().getImageURL());
     }
 
     /**
@@ -262,20 +397,20 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Match match = (Match) items.get(index);
+                MatchStats matchStats = (MatchStats) items.get(index);
                 int position = defaultSort ? (index + 1) : (items.size() - index);
                 return new String[]{
                         String.valueOf(position),
-                        match.getMatchSummary(),
-                        getFormattedResult(match)
+                        matchStats.getMatchSummary(),
+                        getFormattedResult(matchStats)
                 };
             }
 
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
                 items.sort((Comparator<Object>) (o1, o2) -> {
-                    Date d1 = ((Match) o1).getStart();
-                    Date d2 = ((Match) o2).getStart();
+                    Date d1 = ((MatchStats) o1).getStart();
+                    Date d2 = ((MatchStats) o2).getStart();
                     return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
                 });
             }
@@ -290,29 +425,32 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param channel  Channel to send errors to
      * @return Match history
      */
-    private MatchHistory getMatchHistory(String name, String platform, MessageChannel channel) {
-        ArrayList<Match> matches = new ArrayList<>();
+    private MatchHistory getMatchHistory(String name, PLATFORM platform, MessageChannel channel) {
+        ArrayList<MatchStats> matchStats = new ArrayList<>();
         JSONObject overview = new JSONObject(getMatchHistoryJSON(name, platform));
 
         if(overview.has("status")) {
-            channel.sendMessage(overview.getString("status")).queue();
+            channel.sendMessage(
+                    "Sorry bro I ran in to an error: **" + overview.getString("status") + "**"
+            ).queue();
             return null;
         }
 
         JSONArray matchList = overview.getJSONArray("matches");
         JSONObject summary = overview.getJSONObject("summary").getJSONObject("all");
+        MatchPlayer player = new MatchPlayer(name, platform);
 
         for(int i = 0; i < matchList.length(); i++) {
             JSONObject match = matchList.getJSONObject(i);
             JSONObject playerStats = match.getJSONObject("playerStats");
             JSONObject playerSummary = match.getJSONObject("player");
             String mapName = match.getString("map");
-            Match.RESULT result = parseResult(
+            MatchStats.RESULT result = parseResult(
                     (!match.getBoolean("isPresentAtEnd") || match.isNull("result")) ? "FORFEIT" : match.getString("result")
             );
 
-            matches.add(
-                    new Match.MatchBuilder(
+            matchStats.add(
+                    new MatchStats.MatchBuilder(
                             match.getString("matchID"),
                             new Map(
                                     maps.getOrDefault(
@@ -327,7 +465,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                             ),
                             new Date(match.getLong("utcStartSeconds") * 1000),
                             new Date(match.getLong("utcEndSeconds") * 1000),
-                            result
+                            result,
+                            player
                     )
                             .setKD(new Ratio(
                                     playerStats.getInt("kills"),
@@ -355,7 +494,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
 
         return new MatchHistory(
                 name,
-                matches,
+                matchStats,
                 new Ratio(
                         summary.getInt("kills"),
                         summary.getInt("deaths")
@@ -378,7 +517,16 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param platform Player platform
      * @return Match history JSON
      */
-    public abstract String getMatchHistoryJSON(String name, String platform);
+    public abstract String getMatchHistoryJSON(String name, PLATFORM platform);
+
+    /**
+     * Get the match players JSON
+     *
+     * @param matchID  Match id
+     * @param platform Match platform
+     * @return Match players JSON
+     */
+    public abstract String getMatchPlayersJSON(String matchID, PLATFORM platform);
 
     /**
      * Get an optional integer value from the player stats match JSON
@@ -438,17 +586,17 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param result Result of match - win, loss, draw, forfeit
      * @return Match result
      */
-    private Match.RESULT parseResult(String result) {
+    private MatchStats.RESULT parseResult(String result) {
         switch(result.toLowerCase()) {
             case "win":
-                return Match.RESULT.WIN;
+                return MatchStats.RESULT.WIN;
             case "loss":
             case "lose":
-                return Match.RESULT.LOSS;
+                return MatchStats.RESULT.LOSS;
             case "forfeit":
-                return Match.RESULT.FORFEIT;
+                return MatchStats.RESULT.FORFEIT;
             default:
-                return Match.RESULT.DRAW;
+                return MatchStats.RESULT.DRAW;
         }
     }
 }

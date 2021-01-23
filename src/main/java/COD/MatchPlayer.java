@@ -8,6 +8,7 @@ import Command.Structure.CODLookupCommand.PLATFORM;
 public class MatchPlayer {
     private final String name;
     private final PLATFORM platform;
+    private String uno;
 
     /**
      * Create the match player
@@ -27,6 +28,24 @@ public class MatchPlayer {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Set the uno identifier of the player
+     *
+     * @param uno Uno identifier
+     */
+    public void setUno(String uno) {
+        this.uno = "#" + uno;
+    }
+
+    /**
+     * Get the uno identifier of the player
+     *
+     * @return Uno identifier
+     */
+    public String getUno() {
+        return uno;
     }
 
     /**

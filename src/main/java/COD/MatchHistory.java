@@ -10,8 +10,8 @@ import java.util.HashMap;
  * Hold data on a player's match history
  */
 public class MatchHistory {
-    private final ArrayList<Match> matches;
-    private final HashMap<String, Match> matchMap;
+    private final ArrayList<MatchStats> matchStats;
+    private final HashMap<String, MatchStats> matchMap;
     private final String name;
     private int draws = 0, forfeits = 0;
     private Ratio winLoss;
@@ -21,15 +21,15 @@ public class MatchHistory {
      * Create the match history
      *
      * @param name      Player name
-     * @param matches   List of matches
+     * @param matchStats   List of matches
      * @param killDeath Kill/Death ratio
      */
-    public MatchHistory(String name, ArrayList<Match> matches, Ratio killDeath) {
-        this.matches = matches;
+    public MatchHistory(String name, ArrayList<MatchStats> matchStats, Ratio killDeath) {
+        this.matchStats = matchStats;
         this.name = name;
         this.killDeath = killDeath;
         this.matchMap = new HashMap<>();
-        for(Match m : matches) {
+        for(MatchStats m : matchStats) {
             matchMap.put(m.getId(), m);
         }
         calculateSummary();
@@ -40,8 +40,8 @@ public class MatchHistory {
      */
     private void calculateSummary() {
         int wins = 0, losses = 0;
-        for(Match match : matches) {
-            switch(match.getResult()) {
+        for(MatchStats matchStats : this.matchStats) {
+            switch(matchStats.getResult()) {
                 case WIN:
                     wins++;
                     break;
@@ -65,7 +65,7 @@ public class MatchHistory {
      * @param id ID of match
      * @return Match or null
      */
-    public Match getMatch(String id) {
+    public MatchStats getMatch(String id) {
         return matchMap.get(id);
     }
 
@@ -93,7 +93,7 @@ public class MatchHistory {
      * @return Match history summary
      */
     public String getSummary() {
-        StringBuilder summary = new StringBuilder("Here are the last " + matches.size() + " matches:");
+        StringBuilder summary = new StringBuilder("Here are the last " + matchStats.size() + " matches:");
         summary
                 .append("\n\nWins: ").append("**").append(getWins()).append("**")
                 .append(" | ")
@@ -137,7 +137,7 @@ public class MatchHistory {
      *
      * @return List of matches
      */
-    public ArrayList<Match> getMatches() {
-        return matches;
+    public ArrayList<MatchStats> getMatches() {
+        return matchStats;
     }
 }
