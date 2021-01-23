@@ -54,8 +54,7 @@ public class TheHub {
      */
     private Performer parseHomePage(String url, PROFILE_TYPE type) {
         Document doc = fetchPage(url);
-
-        if(doc == null) {
+        if(doc == null || !doc.baseUri().equals(url)) {
             return null;
         }
 
@@ -103,7 +102,6 @@ public class TheHub {
         }
 
         Element desc = doc.selectFirst(".bio");
-
         String rank = doc.selectFirst(".rankingInfo").child(4).selectFirst(".big").text();
         if(!rank.equals("N/A")) {
             builder.setRank(Integer.parseInt(rank));
