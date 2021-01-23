@@ -43,7 +43,7 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @return List of platforms
      */
     private List<String> getPlatforms() {
-        return Arrays.asList("battle", "acti", "xbox", "psn");
+        return Arrays.asList("battle", "acti", "xbox", "psn", "uno");
     }
 
     /**
@@ -67,13 +67,21 @@ public abstract class CODLookupCommand extends LookupCommand {
     }
 
     /**
-     * Remove trailing zero from name if present
+     * Remove trailing zero from name in query if present
+     * and remove hashtag from beginning of uno name
      *
-     * @param name Name to fix
-     * @return name#0 -> name
+     * @param query Query containing name
+     * @return Fixed query
      */
-    public String fixName(String name) {
-        return name.endsWith("#0") ? name.replace("#0", "") : name;
+    public String fixName(String query) {
+        String name = query.replaceFirst(getTrigger(), "").trim();
+        if(name.endsWith("#0")) {
+            name = name.replace("#0", "");
+        }
+        else if(name.startsWith("#")) {
+            name = name.replace("#", "");
+        }
+        return getTrigger() + " " + name;
     }
 
     /**

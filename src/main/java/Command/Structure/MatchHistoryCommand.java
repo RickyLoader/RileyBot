@@ -88,16 +88,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         }
 
         MessageChannel channel = context.getMessageChannel();
-        MatchHistory matchHistory = getMatchHistory(name, getPlatform(), context.getEmoteHelper());
+        MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
-            channel.sendMessage(
-                    "I didn't find any match history for **"
-                            + name
-                            + "** on platform: **"
-                            + getPlatform()
-                            + "**, try another platform or learn how to spell.\n"
-                            + getHelpNameCoded()
-            ).queue();
             return;
         }
         if(matchID != null) {
@@ -295,18 +287,18 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      *
      * @param name     Player name
      * @param platform Player platform
-     * @param helper   Emote helper
+     * @param channel  Channel to send errors to
      * @return Match history
      */
-    private MatchHistory getMatchHistory(String name, String platform, EmoteHelper helper) {
+    private MatchHistory getMatchHistory(String name, String platform, MessageChannel channel) {
         ArrayList<Match> matches = new ArrayList<>();
-        String matchJSON = getMatchHistoryJSON(name, platform);
+        JSONObject overview = new JSONObject(getMatchHistoryJSON(name, platform));
 
-        if(matchJSON == null || !new JSONObject(matchJSON).has("matches")) {
+        if(overview.has("status")) {
+            channel.sendMessage(overview.getString("status")).queue();
             return null;
         }
 
-        JSONObject overview = new JSONObject(matchJSON);
         JSONArray matchList = overview.getJSONArray("matches");
         JSONObject summary = overview.getJSONObject("summary").getJSONObject("all");
 
