@@ -24,13 +24,18 @@ public abstract class JSONListCommand extends DiscordCommand {
 
     private String[] parseJSON(String filename, String root) {
         ArrayList<String> links = new ArrayList<>();
-        JSONObject o = readJSONFile("/Commands/" + filename);
-        if(o == null) {
+        String path = "/Commands/" + filename;
+        JSONObject file = readJSONFile(path);
+
+        if(file == null) {
+            System.out.println("MISSING: " + path);
             return null;
         }
-        JSONArray ja = o.getJSONArray(root);
-        for(int i = 0; i < ja.length(); i++) {
-            links.add(ja.getJSONObject(i).getString("possibility"));
+
+        JSONArray list = file.getJSONArray(root);
+        for(int i = 0; i < list.length(); i++) {
+            String link = list.getJSONObject(i).getString("possibility");
+            links.add(link);
         }
         return links.toArray(new String[0]);
     }
