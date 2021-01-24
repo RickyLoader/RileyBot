@@ -16,12 +16,14 @@ import java.util.regex.Pattern;
  * Guess how many trees have been planted
  */
 public class TeamTreesGuessingCommand extends DiscordCommand {
+    private final TreeGuess lastKnown;
     private TreeGuess guess;
 
     public TeamTreesGuessingCommand() {
         super("teamtrees", "Guess how many trees!");
         setBotInput(true);
         setSecret(true);
+        this.lastKnown = new TreeGuess(fetchTrees());
     }
 
     @Override
@@ -33,7 +35,8 @@ public class TeamTreesGuessingCommand extends DiscordCommand {
             if(guess != null && (System.currentTimeMillis() - guess.getGuessTime()) < 120000) {
                 return;
             }
-            guess = new TreeGuess();
+            long elapsedSeconds = (System.currentTimeMillis() - lastKnown.getGuessTime()) / 1000;
+            guess = new TreeGuess(lastKnown.getTrees() + elapsedSeconds);
             channel.sendMessage("I am going to guess: **" + df.format(guess.getTrees()) + " trees**").queue();
             return;
         }
@@ -57,6 +60,23 @@ public class TeamTreesGuessingCommand extends DiscordCommand {
                 (offBy == 0) ? "I was right!" : "Fuck, I was off by " + df.format(offBy) + " trees"
         ).queue();
         guess = null;
+        lastKnown.setTrees(trees);
+    }
+
+    /**
+     * Fetch the number of trees planted
+     *
+     * @return Number of trees planted
+     */
+    private long fetchTrees() {
+        try {
+            Document doc = Jsoup.connect("https://www.teamtrees.org").get();
+            return Long.parseLong(doc.getElementById("totalTrees").attr("data-count"));
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     @Override
@@ -73,27 +93,26 @@ public class TeamTreesGuessingCommand extends DiscordCommand {
      * Hold the tree guess
      */
     private static class TreeGuess {
-        private final long trees, guessTime;
+        private long trees, guessTime;
 
-        public TreeGuess() {
-            this.trees = fetchTrees();
-            this.guessTime = System.currentTimeMillis();
+        /**
+         * Create a tree guess
+         *
+         * @param trees Number of trees to guess
+         */
+        public TreeGuess(long trees) {
+            setTrees(trees);
         }
 
         /**
-         * Fetch the number of trees planted
+         * Set the number of trees to guess
+         * Refresh time of guess
          *
-         * @return Number of trees planted
+         * @param trees Number of trees to guess
          */
-        private long fetchTrees() {
-            try {
-                Document doc = Jsoup.connect("https://www.teamtrees.org").get();
-                return Long.parseLong(doc.getElementById("totalTrees").attr("data-count"));
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-                return 0;
-            }
+        public void setTrees(long trees) {
+            this.trees = trees;
+            this.guessTime = System.currentTimeMillis();
         }
 
         /**
