@@ -48,9 +48,6 @@ public class MWHistoryCommand extends MatchHistoryCommand {
 
     @Override
     public String getMatchHistoryJSON(String name, PLATFORM platform) {
-        if(platform == PLATFORM.UNO && name.startsWith("#")) {
-            name = name.replace("#", "");
-        }
         return CODAPI.getMWMatchHistory(name, platform);
     }
 

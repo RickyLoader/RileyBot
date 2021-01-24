@@ -13,13 +13,17 @@ public class MWStatsCommand extends MWLookupCommand {
     }
 
     @Override
-    public void processName(String name, CommandContext context) {
+    public void onArgumentsSet(String name, CommandContext context) {
         CombatRecord combatRecord = new CombatRecord(
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
                 "MW",
                 "ModernWarfare.otf"
         );
-        combatRecord.buildImage(name, "Type " + getTrigger() + " for help", getPlatform());
+        combatRecord.buildImage(
+                getLookupName(),
+                "Type " + getTrigger() + " for help",
+                getPlatform()
+        );
     }
 }

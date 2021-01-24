@@ -81,7 +81,7 @@ public class CODAPI {
     }
 
     /**
-     * Get the list of players in a match
+     * Get the list of players in a modern warfare match
      *
      * @param matchID  Match id
      * @param platform Match platform
@@ -95,6 +95,20 @@ public class CODAPI {
     }
 
     /**
+     * Get the list of players in a cold war match
+     *
+     * @param matchID  Match id
+     * @param platform Match platform
+     * @return Match players
+     */
+    public static String getCWMatchPlayers(String matchID, PLATFORM platform) {
+        return new NetworkRequest(
+                COLD_WAR_URL + "match/" + matchID + "/" + platform.name().toLowerCase(),
+                false
+        ).get().body;
+    }
+
+    /**
      * URL encode the given name
      *
      * @param name Name to encode
@@ -103,4 +117,5 @@ public class CODAPI {
     private static String encodeName(String name) throws UnsupportedEncodingException {
         return URLEncoder.encode(name, "UTF-8").replaceAll("\\+", "%20");
     }
+
 }

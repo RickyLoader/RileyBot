@@ -2,6 +2,7 @@ package Command.Structure;
 
 public abstract class CODLookupCommand extends LookupCommand {
     private PLATFORM platform;
+    private String lookupName;
 
     public enum PLATFORM {
         BATTLE,
@@ -80,20 +81,41 @@ public abstract class CODLookupCommand extends LookupCommand {
      */
     @Override
     public String stripArguments(String query) {
-        return fixName(setPlatform(query));
+        return setPlatform(query);
+    }
+
+    @Override
+    public void processName(String name, CommandContext context) {
+        if(platform == PLATFORM.UNO && name.startsWith("#")) {
+            lookupName = name.replace("#", "");
+        }
+        else if(name.endsWith("#0")) {
+            lookupName = name.replace("#0", "");
+        }
+        else {
+            lookupName = name;
+        }
+        onArgumentsSet(name, context);
     }
 
     /**
-     * Remove trailing zero from name in query if present
+     * Called when player name & platform are set
      *
-     * @param query Query containing name
-     * @return Fixed query
+     * @param name    Player name
+     * @param context Context of command
      */
-    public String fixName(String query) {
-        if(query.endsWith("#0")) {
-            return query.replace("#0", "");
-        }
-        return query;
+    public abstract void onArgumentsSet(String name, CommandContext context);
+
+    /**
+     * Get the lookup name
+     * Lookup name is the name stripped of any characters used only for display purposes
+     * e.g '#' in an UNO id is used only to discern between a match id & UNO id when
+     * calling the MWHistoryCommand
+     *
+     * @return Lookup name
+     */
+    public String getLookupName() {
+        return lookupName;
     }
 
     /**
@@ -104,13 +126,14 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @return Query with platform removed
      */
     public String setPlatform(String query) {
-        PLATFORM platform = PLATFORM.byName(query.split(" ")[0]);
+        String platformName = query.split(" ")[0];
+        PLATFORM platform = PLATFORM.byName(platformName);
         if(platform == PLATFORM.NONE) {
             this.platform = PLATFORM.ACTI;
         }
         else {
             this.platform = platform;
-            query = query.replaceFirst(platform.name().toLowerCase(), "").trim();
+            query = query.replaceFirst(platformName, "").trim();
         }
         return query;
     }

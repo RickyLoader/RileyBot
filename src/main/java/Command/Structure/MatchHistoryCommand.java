@@ -54,10 +54,10 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         String lastArg = args[args.length - 1];
         if(lastArg.matches("\\d+") || lastArg.equals("latest")) {
             matchID = lastArg;
-            return fixName(query.replace(lastArg, "").trim());
+            return query.replace(lastArg, "").trim();
         }
         matchID = null;
-        return fixName(query);
+        return query;
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     }
 
     @Override
-    public void processName(String name, CommandContext context) {
+    public void onArgumentsSet(String name, CommandContext context) {
         if(win == null) {
             EmoteHelper helper = context.getEmoteHelper();
             win = EmoteHelper.formatEmote(helper.getComplete());
@@ -93,7 +93,6 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             players = helper.getPlayers();
             context.getJDA().addEventListener(getMatchEmoteListener());
         }
-
         MessageChannel channel = context.getMessageChannel();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
@@ -151,7 +150,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             addTeams(matchStats);
         }
         channel.sendMessage(matchEmbed).queue(message -> {
-            if(matchStats.hasTeams() && matchStats.getTeam1().getPlayers().size() <= 12) {
+            if(matchStats.hasTeams() && matchStats.getTeam1().getPlayers().size() <= 6) {
                 matchMessages.put(message.getIdLong(), matchStats);
                 message.addReaction(stats).queue();
                 message.addReaction(players).queue();
@@ -257,7 +256,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             MatchPlayer player = players.get(i);
             String value = "**" + player.getName() + "**"
                     + "\n" + player.getPlatform().name()
-                    + "\n" + player.getUno();
+                    + "\n#" + player.getUno();
             builder.addField(i == 0
                     ? EmbedHelper.getTitleField("__" + team.getName().toUpperCase() + "__", value)
                     : EmbedHelper.getValueField(value)
@@ -427,7 +426,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      */
     private MatchHistory getMatchHistory(String name, PLATFORM platform, MessageChannel channel) {
         ArrayList<MatchStats> matchStats = new ArrayList<>();
-        JSONObject overview = new JSONObject(getMatchHistoryJSON(name, platform));
+        JSONObject overview = new JSONObject(getMatchHistoryJSON(getLookupName(), platform));
 
         if(overview.has("status")) {
             channel.sendMessage(

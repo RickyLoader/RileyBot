@@ -43,7 +43,7 @@ public class CWHistoryCommand extends MatchHistoryCommand {
 
     @Override
     public String getMatchPlayersJSON(String matchID, PLATFORM platform) {
-        return null;
+        return CODAPI.getCWMatchPlayers(matchID, platform);
     }
 
     @Override

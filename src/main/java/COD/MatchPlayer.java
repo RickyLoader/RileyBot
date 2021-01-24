@@ -36,7 +36,7 @@ public class MatchPlayer {
      * @param uno Uno identifier
      */
     public void setUno(String uno) {
-        this.uno = "#" + uno;
+        this.uno = uno;
     }
 
     /**
