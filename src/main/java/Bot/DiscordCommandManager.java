@@ -180,6 +180,7 @@ public class DiscordCommandManager {
         addCommand(new PollCommand());
         addCommand(new StatusCommand());
         addCommand(new GIFCommand());
+        addCommand(new TeamTreesGuessingCommand());
     }
 
     /**
