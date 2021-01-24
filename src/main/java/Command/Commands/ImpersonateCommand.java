@@ -21,7 +21,7 @@ public class ImpersonateCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.contains("impersonate ");
     }
 

@@ -5,6 +5,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import DOND.DealOrNoDeal;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.HashMap;
@@ -170,7 +171,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(TRIGGER);
     }
 }

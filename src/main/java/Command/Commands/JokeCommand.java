@@ -3,17 +3,19 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Network.NetworkRequest;
+import Network.Secret;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Member;
 import org.json.JSONObject;
 
 import java.util.Random;
 
+import static Network.Secret.BROCK_ID;
+
 /**
  * Get a random dad joke if brock ain't around
  */
 public class JokeCommand extends DiscordCommand {
-    private final long BROCK_ID = 603034463936708608L;
     private final Random random = new Random();
     private final String[] brockMessages;
 

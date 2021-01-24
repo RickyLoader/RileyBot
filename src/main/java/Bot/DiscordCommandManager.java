@@ -18,6 +18,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmoteHelper;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import java.util.Random;
  * Hold a list of commands and handle incoming text input to check for command triggers
  */
 public class DiscordCommandManager {
-    private final ArrayList<DiscordCommand> commands = new ArrayList<>();
+    private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
     private EmoteHelper emoteHelper;
 
@@ -36,19 +37,21 @@ public class DiscordCommandManager {
      * Add the commands to the list
      */
     public DiscordCommandManager() {
+        this.commands = new ArrayList<>();
+        this.viewableCommands = new ArrayList<>();
         addCommands();
     }
 
     /**
      * Check a given query against the matches method of each command
      *
-     * @param query String query from chat
+     * @param message Message from chat
      * @return Command if found or null
      */
-    private DiscordCommand getCommand(String query) {
-        query = query.toLowerCase();
+    private DiscordCommand getCommand(Message message) {
+        String query = message.getContentRaw().toLowerCase();
         for(DiscordCommand c : commands) {
-            if(c.matches(query)) {
+            if(c.matches(query, message)) {
                 return c;
             }
         }
@@ -66,9 +69,9 @@ public class DiscordCommandManager {
         ArrayList<DiscordCommand> seen = new ArrayList<>();
         Random rand = new Random();
         for(int i = 0; i < bound; i++) {
-            DiscordCommand j = this.commands.get(rand.nextInt(this.commands.size()));
+            DiscordCommand j = this.viewableCommands.get(rand.nextInt(this.viewableCommands.size()));
             while(seen.contains(j)) {
-                j = this.commands.get(rand.nextInt(this.commands.size()));
+                j = this.viewableCommands.get(rand.nextInt(this.viewableCommands.size()));
             }
             commands[i] = j;
             seen.add(j);
@@ -96,6 +99,9 @@ public class DiscordCommandManager {
             return;
         }
         commands.add(c);
+        if(!c.isSecret()) {
+            viewableCommands.add(c);
+        }
     }
 
     /**
@@ -104,8 +110,8 @@ public class DiscordCommandManager {
      * @param event MessageReceivedEvent
      */
     public void handleCommand(GuildMessageReceivedEvent event) {
-        DiscordCommand command = getCommand(event.getMessage().getContentRaw());
-        if(command == null) {
+        DiscordCommand command = getCommand(event.getMessage());
+        if(command == null || event.getAuthor().isBot() && !command.acceptsBotInput()) {
             return;
         }
         DiscordAudioPlayer player = audioPlayers.get(event.getGuild());
@@ -116,7 +122,7 @@ public class DiscordCommandManager {
         if(emoteHelper == null) {
             emoteHelper = new EmoteHelper(event.getJDA());
         }
-        command.execute(new CommandContext(event, commands, player, emoteHelper));
+        command.execute(new CommandContext(event, viewableCommands, player, emoteHelper));
     }
 
     /**

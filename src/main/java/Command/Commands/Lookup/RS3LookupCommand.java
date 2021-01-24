@@ -4,6 +4,7 @@ import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
 import Runescape.Stats.RS3Hiscores;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -55,7 +56,7 @@ public class RS3LookupCommand extends LookupCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger()) || query.startsWith("virtual") && query.contains(getTrigger());
     }
 }

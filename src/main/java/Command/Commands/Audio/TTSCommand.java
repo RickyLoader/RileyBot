@@ -105,7 +105,7 @@ public class TTSCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("gtts ") || query.startsWith("dtts ");
     }
 }

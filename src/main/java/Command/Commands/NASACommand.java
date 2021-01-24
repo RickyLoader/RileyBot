@@ -9,6 +9,7 @@ import Network.NetworkResponse;
 import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
@@ -297,7 +298,7 @@ public class NASACommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("nasa");
     }
 }

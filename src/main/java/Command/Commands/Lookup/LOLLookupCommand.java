@@ -4,6 +4,7 @@ import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
 import LOL.SummonerImage;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -78,7 +79,7 @@ public class LOLLookupCommand extends LookupCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         String[] args = query.split(" ");
         return query.startsWith(getTrigger()) || regions.containsKey(args[0]) && args[1].matches(getTrigger());
     }

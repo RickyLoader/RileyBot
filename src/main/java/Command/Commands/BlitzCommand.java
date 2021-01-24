@@ -7,6 +7,7 @@ import LOL.Blitz.Blitz;
 import LOL.Blitz.BlitzImageBuilder;
 import LOL.Blitz.BuildData;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
@@ -126,7 +127,7 @@ public class BlitzCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("blitz");
     }
 }

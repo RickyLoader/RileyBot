@@ -3,6 +3,7 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import UrbanDictionary.*;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 /**
@@ -48,7 +49,7 @@ public class UrbanDictionaryCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("urbandict");
     }
 }

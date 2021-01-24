@@ -151,7 +151,7 @@ public class GunfightCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
-        return super.matches(query) || query.startsWith("gunfight!") && query.split(" ").length == 5;
+    public boolean matches(String query, Message message) {
+        return super.matches(query, message) || query.startsWith("gunfight!") && query.split(" ").length == 5;
     }
 }

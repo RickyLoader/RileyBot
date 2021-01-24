@@ -182,14 +182,8 @@ public abstract class LookupCommand extends DiscordCommand {
      */
     public abstract void saveName(String name, MessageChannel channel, User user);
 
-    /**
-     * Enter the command if the message begins with the trigger
-     *
-     * @param query Message query
-     * @return Message starts with query
-     */
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger());
     }
 }

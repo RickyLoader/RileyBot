@@ -1,5 +1,7 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.entities.Message;
+
 public abstract class CODLookupCommand extends LookupCommand {
     private PLATFORM platform;
     private String lookupName;
@@ -139,7 +141,7 @@ public abstract class CODLookupCommand extends LookupCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         String[] args = query.split(" ");
         return query.startsWith(getTrigger()) || PLATFORM.byName(args[0]) != PLATFORM.NONE && args[1].matches(getTrigger());
     }

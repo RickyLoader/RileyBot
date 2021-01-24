@@ -3,6 +3,7 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.managers.Presence;
 
 /**
@@ -57,7 +58,7 @@ public class StatusCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("status");
     }
 }

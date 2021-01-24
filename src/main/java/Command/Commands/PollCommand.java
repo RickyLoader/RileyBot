@@ -5,6 +5,7 @@ import Command.Structure.DiscordCommand;
 import Poll.Poll;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.HashMap;
@@ -104,7 +105,7 @@ public class PollCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("poll");
     }
 }

@@ -69,9 +69,6 @@ public class Listener extends ListenerAdapter {
      */
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        if(event.getAuthor().isBot()) {
-            return;
-        }
         commandManager.handleCommand(event);
     }
 

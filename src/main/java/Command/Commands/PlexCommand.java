@@ -4,6 +4,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Plex.PlexServer;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class PlexCommand extends DiscordCommand {
@@ -70,7 +71,7 @@ public class PlexCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("plex");
     }
 }

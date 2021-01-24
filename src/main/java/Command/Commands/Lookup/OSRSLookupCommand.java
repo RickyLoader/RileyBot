@@ -4,6 +4,7 @@ import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
 import Runescape.OSRS.Stats.OSRSHiscores;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -76,7 +77,7 @@ public class OSRSLookupCommand extends LookupCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger()) ||
                 query.startsWith("league") && query.contains(getTrigger()) ||
                 query.startsWith("xp") && query.contains(getTrigger()) ||

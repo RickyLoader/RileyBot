@@ -6,6 +6,7 @@ import Command.Structure.EmbedHelper;
 import TheHub.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
@@ -103,7 +104,7 @@ public class HubCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("hub");
     }
 }

@@ -5,6 +5,7 @@ import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
@@ -103,7 +104,7 @@ public class GIFCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger());
     }
 

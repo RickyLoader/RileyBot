@@ -4,6 +4,7 @@ import COD.Gunfight;
 import Command.Structure.*;
 import COD.Session;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
@@ -106,7 +107,7 @@ public class LeaderboardCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger());
     }
 }

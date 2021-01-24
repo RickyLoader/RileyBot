@@ -5,6 +5,7 @@ import Runescape.OSRS.Polling.PollManager;
 import Runescape.OSRS.Polling.PollManager.Poll;
 import Runescape.OSRS.Polling.PollManager.Poll.Question;
 import Runescape.OSRS.Polling.PollManager.Poll.Question.Answer;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public class OSRSPollCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("osrspoll");
     }
 

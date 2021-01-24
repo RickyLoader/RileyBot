@@ -5,6 +5,7 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Hangman.*;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,7 +27,7 @@ public class HangmanCommand extends DiscordCommand {
 
     public HangmanCommand() {
         super("hm start [word]\nhm guess [word/letter]\nhm hint\nhm stop\nhm ai", "Play hangman!");
-        this.hangmanGames = new HashMap<MessageChannel, Hangman>();
+        this.hangmanGames = new HashMap<>();
         this.dictionary = createDictionary();
         this.gallows = createGallows();
     }
@@ -214,7 +215,7 @@ public class HangmanCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("hm") || query.startsWith("hangman");
     }
 

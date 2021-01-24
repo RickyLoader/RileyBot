@@ -3,6 +3,7 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Weather.WeatherManager;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 /**
@@ -45,7 +46,7 @@ public class WeatherCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("weather");
     }
 }

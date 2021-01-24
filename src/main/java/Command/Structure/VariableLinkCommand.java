@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.entities.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
@@ -32,7 +33,7 @@ public class VariableLinkCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return versions.containsKey(query);
     }
 }

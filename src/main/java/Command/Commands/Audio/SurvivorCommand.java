@@ -3,6 +3,7 @@ package Command.Commands.Audio;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Network.NetworkInfo;
+import net.dv8tion.jda.api.entities.Message;
 
 import java.net.URLEncoder;
 
@@ -31,7 +32,7 @@ public class SurvivorCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith("survivor ");
     }
 }

@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import Bot.ResourceHandler;
+import net.dv8tion.jda.api.entities.Message;
 import org.json.JSONObject;
 
 import java.util.regex.Pattern;
@@ -9,12 +10,15 @@ public abstract class DiscordCommand {
     private String trigger;
     private final String desc;
     private final String helpName;
+    private boolean botInput, secret;
 
     public DiscordCommand(String trigger, String desc, String helpName) {
         System.out.println("Loading " + trigger + "...");
         this.trigger = trigger;
         this.helpName = helpName == null ? trigger : helpName;
         this.desc = desc;
+        this.botInput = false;
+        this.secret = false;
     }
 
     public DiscordCommand(String trigger, String desc) {
@@ -39,7 +43,14 @@ public abstract class DiscordCommand {
         return helpName;
     }
 
-    public boolean matches(String query) {
+    /**
+     * Check whether the command matches the given message
+     *
+     * @param query   Lower case message content
+     * @param message Message object
+     * @return Query matches command
+     */
+    public boolean matches(String query, Message message) {
         return Pattern.compile(this.getTrigger().toLowerCase()).matcher(query).matches();
     }
 
@@ -73,5 +84,41 @@ public abstract class DiscordCommand {
         catch(Exception e) {
             return 0;
         }
+    }
+
+    /**
+     * Set whether the command accepts bot input
+     *
+     * @param botInput Command accepts bot input
+     */
+    public void setBotInput(boolean botInput) {
+        this.botInput = botInput;
+    }
+
+    /**
+     * Set whether the command is secret - Prevents it from displaying in help command
+     *
+     * @param secret Command is secret
+     */
+    public void setSecret(boolean secret) {
+        this.secret = secret;
+    }
+
+    /**
+     * Check whether the command is secret
+     *
+     * @return Command is secret
+     */
+    public boolean isSecret() {
+        return secret;
+    }
+
+    /**
+     * Check whether the command accepts bot input
+     *
+     * @return Command accepts bot input
+     */
+    public boolean acceptsBotInput() {
+        return botInput;
     }
 }

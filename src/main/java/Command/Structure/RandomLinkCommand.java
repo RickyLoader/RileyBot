@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.Random;
@@ -38,7 +39,7 @@ public class RandomLinkCommand extends JSONListCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger());
     }
 }

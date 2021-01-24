@@ -2,6 +2,7 @@ package Command.Commands.Audio;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import net.dv8tion.jda.api.entities.Message;
 
 /**
  * Play a given youtube video in the voice chat of the user
@@ -21,7 +22,7 @@ public class PlayYoutubeCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.split(" ")[0].equalsIgnoreCase("!play");
     }
 }

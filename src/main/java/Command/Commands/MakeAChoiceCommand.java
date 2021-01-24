@@ -2,6 +2,7 @@ package Command.Commands;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import net.dv8tion.jda.api.entities.Message;
 
 import java.util.Random;
 
@@ -18,7 +19,7 @@ public class MakeAChoiceCommand extends DiscordCommand {
     }
 
     @Override
-    public boolean matches(String query) {
+    public boolean matches(String query, Message message) {
         return query.split(" or ").length >= 2;
     }
 }
