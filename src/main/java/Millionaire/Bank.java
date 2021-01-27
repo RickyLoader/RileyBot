@@ -155,7 +155,7 @@ public class Bank {
      * Sort the bank entries for leaderboard purposes
      *
      * @param banks     Banks to sort
-     * @param ascending Ascending rank or not
+     * @param ascending Ascending rank
      */
     public static void sortBanks(ArrayList<Bank> banks, boolean ascending) {
         Comparator<Bank> sort = Comparator.comparingLong(Bank::getReward)
