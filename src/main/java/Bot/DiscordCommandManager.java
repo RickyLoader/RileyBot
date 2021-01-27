@@ -10,6 +10,7 @@ import Command.Commands.CWCountdownCommand;
 import Command.Commands.Lookup.*;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
+import Command.Commands.Runescape.OSRSPollCommand;
 import Command.Commands.Runescape.TrailblazerCommand;
 import Command.Commands.Lookup.OSRSLookupCommand;
 import Command.Commands.Lookup.RS3LookupCommand;
