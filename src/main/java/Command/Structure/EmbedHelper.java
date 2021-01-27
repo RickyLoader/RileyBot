@@ -25,6 +25,7 @@ public class EmbedHelper {
             CLOCK_GIF = "https://i.imgur.com/v2u22T6.gif",
             CLOCK_STOPPED = "https://i.imgur.com/SnoP3Bf.png",
             SPACER_IMAGE = "https://i.imgur.com/24Xf03H.png",
+            OSRS_LOGO = "https://i.imgur.com/Hoke7jA.png",
             BLANK_CHAR = "\u200e";
 
 

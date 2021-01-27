@@ -1,6 +1,7 @@
 package Runescape.OSRS.Stats;
 
 import Bot.DiscordUser;
+import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 
 import Network.NetworkRequest;
@@ -67,7 +68,7 @@ public class OSRSHiscores extends Hiscores {
             criteria.add("Player exists...");
             criteria.add("Checking account type...");
         }
-        if(xp){
+        if(xp) {
             criteria.add("Checking XP tracker...");
         }
         return criteria;
@@ -80,7 +81,7 @@ public class OSRSHiscores extends Hiscores {
 
     @Override
     public String getLoadingThumbnail() {
-        return league ? leagueThumbnail : "https://i.imgur.com/Hoke7jA.png";
+        return league ? leagueThumbnail : EmbedHelper.OSRS_LOGO;
     }
 
     /**
@@ -263,7 +264,7 @@ public class OSRSHiscores extends Hiscores {
             loading.completeStage("Player is " + leagueTier.getTierName() + "!");
         }
 
-        if(xp){
+        if(xp) {
             getTrackerData(stats);
         }
         return playerStats;

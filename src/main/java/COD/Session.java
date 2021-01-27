@@ -59,7 +59,7 @@ public class Session {
      * Sort the gunfight sessions for leaderboard purposes
      *
      * @param sessions  Sessions to sort
-     * @param ascending Ascending rank or not
+     * @param ascending Ascending rank
      */
     public static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
         Comparator<Session> sort = Comparator.comparing(Session::getLongestStreak)
