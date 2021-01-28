@@ -1,12 +1,13 @@
-package COD;
+package COD.Match;
 
+import COD.Assets.Map;
+import COD.Assets.Mode;
+import COD.Assets.Ratio;
 import Command.Structure.EmbedHelper;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static COD.MWPlayer.*;
 
 /**
  * Hold data on a match played
@@ -16,7 +17,8 @@ public class MatchStats {
     private final long duration, wobblies;
     private final RESULT result;
     private final Map map;
-    private final String id, mode, nemesis, mostKilled;
+    private final Mode mode;
+    private final String id, nemesis, mostKilled;
     private final Ratio killDeath, accuracy;
     private final Score score;
     private final int longestStreak, damageDealt, damageReceived, xp;
@@ -38,9 +40,10 @@ public class MatchStats {
         private final Date start, end;
         private final long duration;
         private final RESULT result;
-        private final String mode, id;
+        private final String id;
         private final MatchPlayer player;
         private final Map map;
+        private final Mode mode;
         private String nemesis, mostKilled;
         private Ratio killDeath, accuracy;
         private Score score;
@@ -59,7 +62,7 @@ public class MatchStats {
          * @param result Result of match
          * @param player Player who match stats belong to
          */
-        public MatchBuilder(String id, Map map, String mode, Date start, Date end, RESULT result, MatchPlayer player) {
+        public MatchBuilder(String id, Map map, Mode mode, Date start, Date end, RESULT result, MatchPlayer player) {
             this.id = id;
             this.map = map;
             this.mode = mode;
@@ -384,7 +387,7 @@ public class MatchStats {
      *
      * @return Mode
      */
-    public String getMode() {
+    public Mode getMode() {
         return mode;
     }
 

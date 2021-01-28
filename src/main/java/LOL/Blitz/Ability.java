@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
  */
 public class Ability {
     private final BufferedImage buttonImage, abilityImage;
-    public static String PATH = "/LOL/Champions/Abilities/", ORDER_PATH = PATH + "Order/";
+    public static final String PATH = "/LOL/Champions/Abilities/", ORDER_PATH = PATH + "Order/";
 
     /**
      * Create an ability

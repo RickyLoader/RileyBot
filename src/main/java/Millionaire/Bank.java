@@ -1,7 +1,6 @@
 package Millionaire;
 
 import Bot.DiscordUser;
-import COD.Session;
 import Command.Structure.EmbedHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;

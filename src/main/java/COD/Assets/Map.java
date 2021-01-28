@@ -1,21 +1,30 @@
-package COD;
-
+package COD.Assets;
 
 /**
  * Hold map name and image info
  */
 public class Map {
-    private final String name, imageURL;
+    private final String codename, name, imageURL;
 
     /**
      * Create a map
      *
-     * @param name     Map name
+     * @param codename Map codename e.g "mp_euphrates"
+     * @param name     Map real name e.g "Euphrates Bridge"
      * @param imageURL URL to map image
      */
-    public Map(String name, String imageURL) {
+    public Map(String codename, String name, String imageURL) {
+        this.codename = codename;
         this.name = name;
         this.imageURL = imageURL;
+    }
+    /**
+     * Get the codename of the map e.g "mp_euphrates"
+     *
+     * @return Codename of map
+     */
+    public String getCodename() {
+        return codename;
     }
 
     /**

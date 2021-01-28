@@ -12,6 +12,7 @@ public class CODAPI {
     private static final String BASE_URL = NetworkInfo.getAddress() + ":8080/DiscordBotAPI/api/";
     private static final String MODERN_WARFARE_URL = BASE_URL + "modernwarfare/";
     private static final String COLD_WAR_URL = BASE_URL + "coldwar/";
+    public static final CODManager COD_ASSET_MANAGER = new CODManager();
 
     /**
      * Get a player's Modern Warfare stats

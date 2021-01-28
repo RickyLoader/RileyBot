@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.entities.User;
 public class CWHistoryCommand extends MatchHistoryCommand {
 
     public CWHistoryCommand() {
-        super("cwhistory", "CW/Data/");
+        super("cwhistory");
     }
 
     @Override
@@ -29,11 +29,6 @@ public class CWHistoryCommand extends MatchHistoryCommand {
     @Override
     public String getEmbedThumbnail() {
         return CWCountdownCommand.thumbnail;
-    }
-
-    @Override
-    public String getMapImageURL(String mapName) {
-        return "https://www.callofduty.com/cdn/app/base-maps/cw/" + mapName + ".jpg";
     }
 
     @Override

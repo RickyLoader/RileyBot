@@ -1,25 +1,24 @@
-package COD;
+package COD.PlayerStats;
 
-import COD.MWPlayer.Ratio;
+import COD.Assets.Ratio;
+import COD.Assets.Weapon;
 
 /**
- * Lethal equipment
+ * Lethal equipment player stats
  */
-public class Lethal extends Weapon {
-
+public class LethalStats extends WeaponStats {
     private final Ratio killUse;
 
     /**
-     * Create a lethal equipment
+     * Create player stats for the given lethal weapon
      *
-     * @param iwName  Infinity Ward name of weapon e.g "equip_frag"
-     * @param name    Real name of weapon e.g "Frag Grenade"
-     * @param res     Resource location
-     * @param killUse Kill/Use ratio of equipment
+     * @param weapon Lethal weapon that stats pertain to
+     * @param kills  Number of kills with the lethal equipment
+     * @param uses   Number of uses of the lethal equipment
      */
-    public Lethal(String iwName, String name, String res, Ratio killUse) {
-        super(iwName, name, "lethals", TYPE.LETHAL, res);
-        this.killUse = killUse;
+    public LethalStats(Weapon weapon, int kills, int uses) {
+        super(weapon);
+        this.killUse = new Ratio(kills, uses);
     }
 
     /**

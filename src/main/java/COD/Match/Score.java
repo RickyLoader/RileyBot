@@ -1,4 +1,4 @@
-package COD;
+package COD.Match;
 
 /**
  * Hold score details

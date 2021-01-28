@@ -1,7 +1,6 @@
-package COD;
+package COD.Match;
 
-
-import COD.MWPlayer.Ratio;
+import COD.Assets.Ratio;
 
 import java.util.ArrayList;
 import java.util.HashMap;

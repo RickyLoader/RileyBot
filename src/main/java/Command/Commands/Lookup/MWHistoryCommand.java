@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.entities.User;
 public class MWHistoryCommand extends MatchHistoryCommand {
 
     public MWHistoryCommand() {
-        super("mwhistory", "MW/Data/");
+        super("mwhistory");
     }
 
     @Override
@@ -39,11 +39,6 @@ public class MWHistoryCommand extends MatchHistoryCommand {
     @Override
     public String getEmbedThumbnail() {
         return Gunfight.thumbnail;
-    }
-
-    @Override
-    public String getMapImageURL(String mapName) {
-        return "https://www.callofduty.com/cdn/app/base-maps/mw/" + mapName + ".jpg";
     }
 
     @Override

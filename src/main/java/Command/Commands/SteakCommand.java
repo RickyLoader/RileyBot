@@ -22,14 +22,11 @@ import java.util.Random;
  * Put the user's image in a selfie with Steak!
  */
 public class SteakCommand extends DiscordCommand {
-
-    private final ResourceHandler handler;
     private final BufferedImage steak;
 
     public SteakCommand() {
         super("steak", "Get a photo with steak!");
-        this.handler = new ResourceHandler();
-        this.steak = handler.getImageResource("/LOL/steak.png");
+        this.steak = new ResourceHandler().getImageResource("/LOL/steak.png");
     }
 
     @Override

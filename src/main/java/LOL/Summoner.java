@@ -1,6 +1,7 @@
 package LOL;
 
 import Bot.ResourceHandler;
+import COD.Assets.Ratio;
 import Network.Secret;
 import Network.NetworkRequest;
 import org.jetbrains.annotations.NotNull;
@@ -14,11 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static COD.MWPlayer.*;
-
 public class Summoner {
     private String name;
-    private final String apiKey = Secret.LEAGUE_KEY, res;
+    private final String res;
     private final HashMap<String, RankedQueue> queues = new HashMap<>();
     private final ArrayList<Champion> champions = new ArrayList<>();
     private int level;
@@ -83,7 +82,7 @@ public class Summoner {
         String json;
         try {
             String name = URLEncoder.encode(this.name, "UTF-8");
-            String url = urlPrefix + "summoner/v4/summoners/by-name/" + name + apiKey;
+            String url = urlPrefix + "summoner/v4/summoners/by-name/" + name + Secret.LEAGUE_KEY;
             json = new NetworkRequest(url, false).get().body;
             if(json == null) {
                 return false;
@@ -95,7 +94,7 @@ public class Summoner {
             this.profileIcon = handler.getImageResource(res + "Summoner/Icons/" + summoner.getInt("profileIconId") + ".png");
             this.profileBorder = handler.getImageResource(res + "Summoner/Borders/" + roundLevel(level) + ".png");
 
-            url = urlPrefix + "league/v4/entries/by-summoner/" + id + apiKey;
+            url = urlPrefix + "league/v4/entries/by-summoner/" + id + Secret.LEAGUE_KEY;
             json = new NetworkRequest(url, false).get().body;
             if(json != null) {
                 JSONArray queues = new JSONArray(json);
@@ -115,7 +114,7 @@ public class Summoner {
                 }
             }
             this.profileBanner = handler.getImageResource(res + "Summoner/Banners/" + getHighestRank() + ".png");
-            url = urlPrefix + "champion-mastery/v4/champion-masteries/by-summoner/" + id + apiKey;
+            url = urlPrefix + "champion-mastery/v4/champion-masteries/by-summoner/" + id + Secret.LEAGUE_KEY;
             json = new NetworkRequest(url, false).get().body;
             if(json != null) {
                 JSONArray champions = new JSONArray(json);

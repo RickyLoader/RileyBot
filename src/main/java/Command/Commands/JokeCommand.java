@@ -3,7 +3,6 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Network.NetworkRequest;
-import Network.Secret;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Member;
 import org.json.JSONObject;

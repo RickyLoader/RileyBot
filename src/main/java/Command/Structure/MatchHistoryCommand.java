@@ -1,22 +1,19 @@
 package Command.Structure;
 
-import Bot.ResourceHandler;
 import COD.*;
-import COD.MWPlayer.Ratio;
-import COD.Map;
+import COD.Assets.Ratio;
+import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
-import java.util.List;
 
 /**
  * View a COD player's match history
  */
 public abstract class MatchHistoryCommand extends CODLookupCommand {
-    private final HashMap<String, String> modes, maps;
     private final HashMap<Long, MatchStats> matchMessages;
     private String matchID;
     private String win, loss, draw;
@@ -26,20 +23,15 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * Create the command
      *
      * @param trigger Command trigger
-     * @param res     Resource location
      */
-    public MatchHistoryCommand(String trigger, String res) {
+    public MatchHistoryCommand(String trigger) {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
                 getDefaultLookupArgs(trigger) + " [match id/latest]\n"
                         + getHelpText(trigger) + " [match id/latest]"
         );
-        res = "/COD/" + res;
-        this.modes = getItemMap(res + "modes.json", "modes");
-        this.maps = getItemMap(res + "maps.json", "maps");
         this.matchMessages = new HashMap<>();
-
     }
 
     @Override
@@ -58,28 +50,6 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         }
         matchID = null;
         return query;
-    }
-
-    /**
-     * Parse map/mode names from local JSON
-     *
-     * @param location Location of file
-     * @param key      JSON parent key
-     * @return Map of code names -> real names
-     */
-    private HashMap<String, String> getItemMap(String location, String key) {
-        HashMap<String, String> items = new HashMap<>();
-        JSONObject itemData = new JSONObject(
-                new ResourceHandler().getResourceFileAsString(location)
-        ).getJSONObject(key);
-
-        for(String iwName : itemData.keySet()) {
-            items.put(
-                    iwName,
-                    itemData.getJSONObject(iwName).getString("real_name")
-            );
-        }
-        return items;
     }
 
     @Override
@@ -203,7 +173,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 .addField("**Date**", matchStats.getDateString(), true)
                 .addField("**Time**", matchStats.getTimeString(), true)
                 .addField("**Duration**", matchStats.getDurationString(), true)
-                .addField("**Mode**", matchStats.getMode(), true)
+                .addField("**Mode**", matchStats.getMode().getName(), true)
                 .addField("**Map**", matchStats.getMap().getName(), true)
                 .addBlankField(true)
                 .addField("**K/D**", matchStats.getKillDeathSummary(), true)
@@ -451,17 +421,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             matchStats.add(
                     new MatchStats.MatchBuilder(
                             match.getString("matchID"),
-                            new Map(
-                                    maps.getOrDefault(
-                                            mapName,
-                                            "MISSING: " + mapName
-                                    ),
-                                    getMapImageURL(mapName)
-                            ),
-                            modes.getOrDefault(
-                                    match.getString("mode"),
-                                    "MISSING: " + match.getString("mode")
-                            ),
+                            CODAPI.COD_ASSET_MANAGER.getMapByCodename(mapName),
+                            CODAPI.COD_ASSET_MANAGER.getModeByCodename(match.getString("mode")),
                             new Date(match.getLong("utcStartSeconds") * 1000),
                             new Date(match.getLong("utcEndSeconds") * 1000),
                             result,
@@ -500,14 +461,6 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 )
         );
     }
-
-    /**
-     * Get the map image URL
-     *
-     * @param mapName Map code name e.g mp_aniyah
-     * @return URL to map image
-     */
-    public abstract String getMapImageURL(String mapName);
 
     /**
      * Get the match history JSON

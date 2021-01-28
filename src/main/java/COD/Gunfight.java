@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Consumer;
 
 import COD.GameStatus.*;
 

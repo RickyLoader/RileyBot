@@ -1,4 +1,4 @@
-package COD;
+package COD.Match;
 
 import Command.Structure.CODLookupCommand.PLATFORM;
 
