@@ -1,5 +1,6 @@
 package COD.PlayerStats;
 
+import Bot.DiscordCommandManager;
 import COD.Assets.*;
 import COD.CODAPI;
 import Command.Structure.CODLookupCommand.PLATFORM;
@@ -25,8 +26,8 @@ public class MWPlayerStats {
     /**
      * Create a Modern Warfare player's stats
      *
-     * @param name     Player name
-     * @param platform Player platform
+     * @param name       Player name
+     * @param platform   Player platform
      */
     public MWPlayerStats(String name, PLATFORM platform) {
         this.name = name;
@@ -245,7 +246,7 @@ public class MWPlayerStats {
         ArrayList<CommendationStats> commendationStats = new ArrayList<>();
         try {
             for(String commendationName : commendations.keySet()) {
-                Commendation commendation = CODAPI.COD_ASSET_MANAGER.getCommendationByCodename(commendationName);
+                Commendation commendation = DiscordCommandManager.codManager.getCommendationByCodename(commendationName);
                 commendationStats.add(
                         new CommendationStats(
                                 commendation,
@@ -278,7 +279,7 @@ public class MWPlayerStats {
 
         for(String name : supportStreaks.keySet()) {
             JSONObject killstreakData = supportStreaks.getJSONObject(name).getJSONObject("properties");
-            Killstreak killstreak = CODAPI.COD_ASSET_MANAGER.getKillstreakByCodename(name);
+            Killstreak killstreak = DiscordCommandManager.codManager.getKillstreakByCodename(name);
             stats.add(
                     new KillstreakStats(
                             killstreak,
@@ -303,7 +304,7 @@ public class MWPlayerStats {
 
         for(String superName : superData.keySet()) {
             JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
-            FieldUpgrade fieldUpgrade = CODAPI.COD_ASSET_MANAGER.getSuperByCodename(superName);
+            FieldUpgrade fieldUpgrade = DiscordCommandManager.codManager.getSuperByCodename(superName);
             fieldUpgradeStats.add(
                     new FieldUpgradeStats(
                             fieldUpgrade,
@@ -329,7 +330,7 @@ public class MWPlayerStats {
             JSONObject category = weapons.getJSONObject(categoryName);
             for(String weaponName : category.keySet()) {
                 JSONObject weaponData = category.getJSONObject(weaponName).getJSONObject("properties");
-                Weapon weapon = CODAPI.COD_ASSET_MANAGER.getWeaponByCodename(weaponName);
+                Weapon weapon = DiscordCommandManager.codManager.getWeaponByCodename(weaponName);
                 WeaponStats stats;
                 switch(weapon.getType()) {
                     case LETHAL:
