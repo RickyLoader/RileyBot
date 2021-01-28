@@ -36,7 +36,7 @@ public class FontManager {
      * @param fontPath Path to font relative to resource directory
      */
     public static Font registerFont(String fontPath) {
-        System.out.println(fontPath);
+        System.out.println("Registering font:" + fontPath);
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             Font gameFont = Font.createFont(
