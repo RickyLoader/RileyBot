@@ -1,5 +1,6 @@
 package Command.Commands.Lookup;
 
+import Bot.FontManager;
 import COD.CombatRecord;
 import Command.Structure.*;
 
@@ -18,7 +19,7 @@ public class MWStatsCommand extends MWLookupCommand {
                 context.getMessageChannel(),
                 context.getEmoteHelper(),
                 "MW",
-                "ModernWarfare.otf"
+                FontManager.MODERN_WARFARE_FONT
         );
         combatRecord.buildImage(
                 getLookupName(),

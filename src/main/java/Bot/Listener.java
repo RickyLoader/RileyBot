@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -18,48 +17,11 @@ import java.util.*;
  * Event listener for bot
  */
 public class Listener extends ListenerAdapter {
-
     private final DiscordCommandManager commandManager = new DiscordCommandManager();
 
-    /**
-     * Send a message to the default channel of all guilds the bot is a member of when it starts up
-     *
-     * @param event Bot is ready
-     */
     @Override
     public void onReady(@Nonnull ReadyEvent event) {
         System.out.println("\n\nBot is now running!");
-        for(Guild g : event.getJDA().getGuilds()) {
-            TextChannel channel = g.getDefaultChannel() == null ? g.getTextChannels().get(0) : g.getDefaultChannel();
-            channel.sendMessage(getUpMessage()).queue();
-        }
-    }
-
-    /**
-     * Get a start up message
-     *
-     * @return Bot is up message
-     */
-    private String getUpMessage() {
-        String[] messages = new String[]{
-                "I have been restarted",
-                "I'm back!",
-                "Let's do this!",
-                "I'm back, I was wriggling the wobbly"
-        };
-        return jiggle(messages[new Random().nextInt(messages.length)]);
-    }
-
-    /**
-     * Alternate upper and lower case randomly
-     *
-     * @param message String to jiggle
-     * @return Jiggled string
-     */
-    private String jiggle(String message) {
-        Random rand = new Random();
-        message = message.toLowerCase();
-        return StringUtils.join(Arrays.stream(message.split("")).map(s -> rand.nextInt(2) == 0 ? s.toUpperCase() : s).toArray());
     }
 
     /**

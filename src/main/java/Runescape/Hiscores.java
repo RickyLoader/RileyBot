@@ -8,6 +8,7 @@ import Network.NetworkRequest;
 import Network.NetworkResponse;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -23,10 +24,9 @@ public abstract class Hiscores extends ImageBuilder {
      * @param channel      Channel to send message to
      * @param emoteHelper  Emote helper
      * @param resourcePath Path to resources
-     * @param fontName     Font name
      */
-    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
-        super(channel, emoteHelper, resourcePath, fontName);
+    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
+        super(channel, emoteHelper, resourcePath, font);
     }
 
     /**

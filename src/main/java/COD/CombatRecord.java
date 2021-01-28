@@ -19,8 +19,8 @@ import java.util.Comparator;
 public class CombatRecord extends ImageBuilder {
     private MWPlayerStats playerStats;
 
-    public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
-        super(channel, emoteHelper, "/COD/" + resourcePath + "/", fontName);
+    public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
+        super(channel, emoteHelper, "/COD/" + resourcePath + "/", font);
     }
 
     /**

@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.FontManager;
 import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -22,15 +23,12 @@ import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
 
-import static Command.Structure.ImageBuilder.registerFont;
-
 /**
  * Show how long until Cold War releases
  */
 public class CWCountdownCommand extends DiscordCommand {
     private long lastFetched, releaseDate;
     private final Font font;
-    private final String res = "/COD/CW/";
     private final ResourceHandler handler;
     private String type;
     private final String[] bgImages;
@@ -42,7 +40,7 @@ public class CWCountdownCommand extends DiscordCommand {
     public CWCountdownCommand() {
         super("cold war\ncold war beta\ncold war early beta", "How long until Cold War!");
         this.handler = new ResourceHandler();
-        this.font = registerFont(res + "ColdWar.ttf", handler);
+        this.font = FontManager.COLD_WAR_FONT;
         this.bgImages = new String[]{
                 "1.png",
                 "2.png",
@@ -102,7 +100,7 @@ public class CWCountdownCommand extends DiscordCommand {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             BufferedImage countdownImage = handler.getImageResource(
-                    res + "Templates/Countdown/" + bgImages[new Random().nextInt(bgImages.length)]
+                    "/COD/CW/Templates/Countdown/" + bgImages[new Random().nextInt(bgImages.length)]
             );
             Graphics g = countdownImage.getGraphics();
             g.setFont(font.deriveFont(80f));

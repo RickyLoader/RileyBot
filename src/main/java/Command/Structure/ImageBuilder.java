@@ -12,15 +12,12 @@ public abstract class ImageBuilder {
     private final ResourceHandler handler;
     private Font gameFont;
 
-    public ImageBuilder(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, String fontName) {
+    public ImageBuilder(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
         this.channel = channel;
         this.emoteHelper = emoteHelper;
         this.resourcePath = resourcePath;
         this.handler = new ResourceHandler();
-        this.gameFont = registerFont(resourcePath + fontName, handler);
-        if(gameFont == null) {
-            System.out.println("Error loading font at: " + resourcePath + fontName);
-        }
+        this.gameFont = font;
     }
 
     /**
@@ -75,23 +72,5 @@ public abstract class ImageBuilder {
      */
     public MessageChannel getChannel() {
         return channel;
-    }
-
-    /**
-     * Register the font with the graphics environment
-     *
-     * @param fontPath Path to font relative to resource directory
-     * @param handler  Resource handler
-     */
-    public static Font registerFont(String fontPath, ResourceHandler handler) {
-        try {
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            Font gameFont = Font.createFont(Font.TRUETYPE_FONT, handler.getResourceFileAsStream(fontPath));
-            ge.registerFont(gameFont);
-            return gameFont;
-        }
-        catch(Exception e) {
-            return null;
-        }
     }
 }

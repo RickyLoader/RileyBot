@@ -1,5 +1,6 @@
 package LOL.Blitz;
 
+import Bot.FontManager;
 import Bot.ResourceHandler;
 
 import javax.imageio.ImageIO;
@@ -9,15 +10,13 @@ import java.io.ByteArrayOutputStream;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
-import static Command.Structure.ImageBuilder.registerFont;
-
 public class BlitzImageBuilder {
     private final Font blitzFont;
     private final BufferedImage next, abilityOrderTemplate;
 
     public BlitzImageBuilder() {
         ResourceHandler handler = new ResourceHandler();
-        this.blitzFont = registerFont("/LOL/blitz_font.ttf", handler);
+        this.blitzFont = FontManager.BLITZ_FONT;
         this.next = handler.getImageResource("/LOL/next.png");
         this.abilityOrderTemplate = handler.getImageResource(Ability.ORDER_PATH + "ability_order.png");
     }

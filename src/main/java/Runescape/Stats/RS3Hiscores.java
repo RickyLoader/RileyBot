@@ -1,5 +1,6 @@
 package Runescape.Stats;
 
+import Bot.FontManager;
 import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
@@ -38,7 +39,7 @@ public class RS3Hiscores extends Hiscores {
      * @param virtual     Calculate virtual levels or display hiscores provided levels
      */
     public RS3Hiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean virtual) {
-        super(channel, emoteHelper, "/Runescape/RS3/", "rs3.ttf");
+        super(channel, emoteHelper, "/Runescape/RS3/", FontManager.RS3_FONT);
         this.orange = new Color(EmbedHelper.RUNESCAPE_ORANGE);
         this.yellow = new Color(EmbedHelper.RUNESCAPE_YELLOW);
         this.blue = new Color(EmbedHelper.RUNESCAPE_BLUE);

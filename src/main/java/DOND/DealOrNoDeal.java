@@ -1,5 +1,6 @@
 package DOND;
 
+import Bot.FontManager;
 import Bot.ResourceHandler;
 import Command.Commands.DealOrNoDealCommand;
 import Command.Structure.EmbedHelper;
@@ -79,7 +80,7 @@ public class DealOrNoDeal {
      * @param handler Resource handler
      */
     public static void registerAssets(ResourceHandler handler) {
-        FONT = ImageBuilder.registerFont(PATH + "dond.ttf", handler);
+        FONT = FontManager.DEAL_OR_NO_DEAL_FONT;
         BRIEFCASE_CLOSED = handler.getImageResource(PATH + "briefcase_closed.png");
         BRIEFCASE_CLOSED_CHOSEN = handler.getImageResource(PATH + "briefcase_closed_chosen.png");
         BRIEFCASE_OPEN_CHOSEN = handler.getImageResource(PATH + "briefcase_open_chosen.png");

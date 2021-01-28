@@ -1,6 +1,7 @@
 package Runescape.OSRS.Stats;
 
 import Bot.DiscordUser;
+import Bot.FontManager;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 
@@ -48,12 +49,12 @@ public class OSRSHiscores extends Hiscores {
      * @param xp          Get the XP tracker info for the player
      */
     public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual, boolean xp) {
-        super(channel, emoteHelper, "/Runescape/OSRS/", "osrs.ttf");
+        super(channel, emoteHelper, "/Runescape/OSRS/", FontManager.OSRS_FONT);
         this.bossNames = Boss.getBossNames();
         this.league = league;
         this.virtual = virtual;
         this.xp = xp;
-        this.trackerFont = registerFont(getResourcePath() + "wise_old_man.ttf", getResourceHandler());
+        this.trackerFont = FontManager.WISE_OLD_MAN_FONT;
     }
 
     @Override

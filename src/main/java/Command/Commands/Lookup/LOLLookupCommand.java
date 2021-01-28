@@ -1,6 +1,7 @@
 package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
+import Bot.FontManager;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
 import LOL.SummonerImage;
@@ -59,7 +60,11 @@ public class LOLLookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
-        SummonerImage summonerImage = new SummonerImage(context.getMessageChannel(), context.getEmoteHelper());
+        SummonerImage summonerImage = new SummonerImage(
+                context.getMessageChannel(),
+                context.getEmoteHelper(),
+                FontManager.LEAGUE_FONT
+        );
         summonerImage.buildImage(
                 name,
                 "Type " + getTrigger() + " for help",

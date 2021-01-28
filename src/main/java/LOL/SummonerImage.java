@@ -18,8 +18,8 @@ public class SummonerImage extends ImageBuilder {
      * @param channel     Channel to send built image to
      * @param emoteHelper Emote helper
      */
-    public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper) {
-        super(channel, emoteHelper, "/LOL/", "riot_font.otf");
+    public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper, Font font) {
+        super(channel, emoteHelper, "/LOL/", font);
     }
 
     /**
