@@ -18,7 +18,7 @@ public class OSRSPollCommand extends DiscordCommand {
     private final PollManager pollManager;
 
     public OSRSPollCommand() {
-        super("osrspoll\nosrspoll [poll number]", "Look at poll results!");
+        super("osrspoll\nosrspoll [poll number/poll name]", "Look at poll results!");
         this.pollManager = new PollManager();
     }
 
