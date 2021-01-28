@@ -117,5 +117,4 @@ public class CODAPI {
     private static String encodeName(String name) throws UnsupportedEncodingException {
         return URLEncoder.encode(name, "UTF-8").replaceAll("\\+", "%20");
     }
-
 }
