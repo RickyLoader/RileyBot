@@ -1,19 +1,17 @@
 package Bot;
 
 import Audio.DiscordAudioPlayer;
+import COD.CODManager;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
-import Command.Commands.CWCountdownCommand;
 import Command.Commands.Lookup.*;
 import Command.Commands.Passive.*;
 import Command.Commands.JSON.*;
 import Command.Commands.Runescape.OSRSPollCommand;
 import Command.Commands.Runescape.TrailblazerCommand;
-import Command.Commands.Lookup.OSRSLookupCommand;
-import Command.Commands.Lookup.RS3LookupCommand;
 import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -32,12 +30,14 @@ import java.util.Random;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
+    public static final CODManager codManager = new CODManager();
     private EmoteHelper emoteHelper;
 
     /**
      * Add the commands to the list
      */
     public DiscordCommandManager() {
+        FontManager.initialiseFonts();
         this.commands = new ArrayList<>();
         this.viewableCommands = new ArrayList<>();
         addCommands();

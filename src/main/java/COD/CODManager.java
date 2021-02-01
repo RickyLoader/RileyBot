@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
+import static COD.Assets.Attachment.*;
+
 /**
  * Manage resources, weapons, maps, and modes for COD
  */
@@ -18,6 +20,7 @@ public class CODManager {
     private final HashMap<String, Killstreak> killstreaks;
     private final HashMap<String, Map> maps;
     private final HashMap<String, Mode> modes;
+    private final HashMap<String, Perk> perks;
     private final static String BASE_PATH = "/COD/MW/";
 
     public CODManager() {
@@ -28,6 +31,7 @@ public class CODManager {
         this.killstreaks = readKillstreaks();
         this.maps = readMaps();
         this.modes = readModes();
+        this.perks = readPerks();
     }
 
     /**
@@ -81,6 +85,34 @@ public class CODManager {
     }
 
     /**
+     * Parse perk JSON in to objects and map to the codename
+     *
+     * @return Map of codename -> perk
+     */
+    private HashMap<String, Perk> readPerks() {
+        HashMap<String, Perk> perks = new HashMap<>();
+        JSONObject perkList = getAssetJSON("perks.json", "perks");
+
+        for(String colour : perkList.keySet()) {
+            Perk.CATEGORY category = Perk.CATEGORY.valueOf(colour.toUpperCase());
+            JSONObject perkCategory = perkList.getJSONObject(colour);
+            for(String perkName : perkCategory.keySet()) {
+                JSONObject perk = perkCategory.getJSONObject(perkName);
+                perks.put(
+                        perkName,
+                        new Perk(
+                                perkName,
+                                perk.getString("real_name"),
+                                category,
+                                resourceHandler.getImageResource(BASE_PATH + "/Perks/" + perkName + ".png")
+                        )
+                );
+            }
+        }
+        return perks;
+    }
+
+    /**
      * Parse weapon JSON in to objects and map to the codename
      *
      * @return Map of codename -> weapon
@@ -88,7 +120,6 @@ public class CODManager {
     private HashMap<String, Weapon> readWeapons() {
         HashMap<String, Weapon> weapons = new HashMap<>();
         JSONObject weaponList = getAssetJSON("weapons.json", "weapons");
-
         for(String categoryName : weaponList.keySet()) {
             JSONObject categoryData = weaponList.getJSONObject(categoryName);
             for(String weaponName : categoryData.keySet()) {
@@ -97,22 +128,48 @@ public class CODManager {
                 BufferedImage image = resourceHandler.getImageResource(
                         BASE_PATH + "Weapons/" + categoryName + "/" + weaponName + ".png"
                 );
+                String imageURL = weaponData.getString("image_url");
                 Weapon weapon;
                 if(categoryName.equals("tacticals")) {
                     weapon = new TacticalWeapon(
                             weaponName,
                             gameName,
                             categoryName,
+                            imageURL,
                             weaponData.has("property") ? weaponData.getString("property") : null,
                             image
                     );
                 }
                 else {
+                    HashMap<String, Attachment> attachments = new HashMap<>();
+                    if(weaponData.has("attachments")) {
+                        JSONObject attachmentData = weaponData.getJSONObject("attachments");
+                        for(String attachmentName : attachmentData.keySet()) {
+                            JSONObject attachment = attachmentData.getJSONObject(attachmentName);
+                            attachments.put(
+                                    attachmentName,
+                                    new Attachment(
+                                            attachmentName,
+                                            attachment.getString("real_name"),
+                                            CATEGORY.valueOf(attachment.getString("category").toUpperCase()),
+                                            resourceHandler.getImageResource(
+                                                    BASE_PATH
+                                                            + "Attachments/"
+                                                            + categoryName + "/"
+                                                            + weaponName + "/"
+                                                            + attachmentName + ".png"
+                                            )
+                                    )
+                            );
+                        }
+                    }
                     weapon = new Weapon(
                             weaponName,
                             gameName,
                             categoryName,
-                            image
+                            imageURL,
+                            image,
+                            attachments
                     );
                 }
                 weapons.put(
@@ -167,7 +224,8 @@ public class CODManager {
                     new Map(
                             name,
                             mapData.getString("real_name"),
-                            "https://www.callofduty.com/cdn/app/base-maps/mw/" + name + ".jpg"
+                            "https://www.callofduty.com/cdn/app/base-maps/mw/" + name + ".jpg",
+                            resourceHandler.getImageResource(BASE_PATH + "Maps/" + name + ".png")
                     )
             );
         }
@@ -266,5 +324,15 @@ public class CODManager {
      */
     public FieldUpgrade getSuperByCodename(String codename) {
         return supers.get(codename);
+    }
+
+    /**
+     * Get a perk by its codename
+     *
+     * @param codename Perk codename
+     * @return Perk with codename or null
+     */
+    public Perk getPerkByCodename(String codename) {
+        return perks.get(codename);
     }
 }
