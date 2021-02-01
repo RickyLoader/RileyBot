@@ -89,11 +89,12 @@ public class ImgurManager {
      * Upload a given BufferedImage to Imgur and return the link to the image
      *
      * @param image Buffered image to be uploaded
+     * @param png   Upload as PNG instead of JPG
      * @return Link to image or null
      */
-    public static String uploadImage(BufferedImage image) {
+    public static String uploadImage(BufferedImage image, boolean png) {
         try {
-            String base64 = toBase64JPEG(image);
+            String base64 = png ? toBase64PNG(image) : toBase64JPEG(image);
             if(base64 == null) {
                 return null;
             }
