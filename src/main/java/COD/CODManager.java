@@ -104,7 +104,7 @@ public class CODManager {
                                 perkName,
                                 perk.getString("real_name"),
                                 category,
-                                resourceHandler.getImageResource(BASE_PATH + "/Perks/" + perkName + ".png")
+                                resourceHandler.getImageResource(BASE_PATH + "Perks/" + perkName + ".png")
                         )
                 );
             }
@@ -134,8 +134,8 @@ public class CODManager {
                     weapon = new TacticalWeapon(
                             weaponName,
                             gameName,
-                            categoryName,
                             imageURL,
+                            categoryName,
                             weaponData.has("property") ? weaponData.getString("property") : null,
                             image
                     );
@@ -262,7 +262,7 @@ public class CODManager {
      */
     private JSONObject getAssetJSON(String filename, String key) {
         return new JSONObject(
-                resourceHandler.getResourceFileAsString(BASE_PATH + "/Data/" + filename)
+                resourceHandler.getResourceFileAsString(BASE_PATH + "Data/" + filename)
         ).getJSONObject(key);
     }
 

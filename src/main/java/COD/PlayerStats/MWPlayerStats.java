@@ -26,8 +26,8 @@ public class MWPlayerStats {
     /**
      * Create a Modern Warfare player's stats
      *
-     * @param name       Player name
-     * @param platform   Player platform
+     * @param name     Player name
+     * @param platform Player platform
      */
     public MWPlayerStats(String name, PLATFORM platform) {
         this.name = name;
@@ -331,6 +331,10 @@ public class MWPlayerStats {
             for(String weaponName : category.keySet()) {
                 JSONObject weaponData = category.getJSONObject(weaponName).getJSONObject("properties");
                 Weapon weapon = DiscordCommandManager.codManager.getWeaponByCodename(weaponName);
+                if(weapon == null) {
+                    System.out.println("Skipping: " + weaponName);
+                    continue;
+                }
                 WeaponStats stats;
                 switch(weapon.getType()) {
                     case LETHAL:
