@@ -24,7 +24,9 @@ public class MatchStats {
     private final int longestStreak, damageDealt, damageReceived, xp;
     private final double distanceTravelled;
     private final MatchPlayer player;
+    private final Loadout[] loadouts;
     private Team team1, team2;
+    private byte[] loadoutImage;
 
     public enum RESULT {
         WIN,
@@ -50,6 +52,7 @@ public class MatchStats {
         private int longestStreak, damageDealt, damageReceived, xp;
         private long wobblies;
         private double distanceTravelled;
+        private Loadout[] loadouts;
 
         /**
          * Initialise the required values of the match
@@ -92,6 +95,17 @@ public class MatchStats {
          */
         public MatchBuilder setAccuracy(Ratio accuracy) {
             this.accuracy = accuracy;
+            return this;
+        }
+
+        /**
+         * Set the loadouts used by the player during the match
+         *
+         * @param loadouts Array of player loadouts
+         * @return Builder
+         */
+        public MatchBuilder setLoadouts(Loadout[] loadouts) {
+            this.loadouts = loadouts;
             return this;
         }
 
@@ -219,6 +233,16 @@ public class MatchStats {
         this.distanceTravelled = builder.distanceTravelled;
         this.wobblies = builder.wobblies;
         this.player = builder.player;
+        this.loadouts = builder.loadouts;
+    }
+
+    /**
+     * Get the array of loadouts the player used during the match
+     *
+     * @return Array of player loadouts
+     */
+    public Loadout[] getLoadouts() {
+        return loadouts;
     }
 
     /**
@@ -347,6 +371,15 @@ public class MatchStats {
     }
 
     /**
+     * Check if there any player loadouts available
+     *
+     * @return Player loadouts available
+     */
+    public boolean hasLoadouts() {
+        return loadouts.length > 0;
+    }
+
+    /**
      * Get the total number of shots fired
      *
      * @return Shots fired
@@ -437,7 +470,7 @@ public class MatchStats {
                 "\n**Date**: " + getDateString() +
                 "\n**Time**: " + getTimeString() +
                 "\n**Duration**: " + getDurationString() +
-                "\n\n**Mode**: " + mode +
+                "\n\n**Mode**: " + mode.getName() +
                 "\n**Map**: " + map.getName() +
                 "\n**K/D**: " + getKillDeathSummary();
     }
@@ -543,5 +576,23 @@ public class MatchStats {
      */
     public boolean hasTeams() {
         return team1 != null && team2 != null;
+    }
+
+    /**
+     * Set the image for the loadout
+     *
+     * @param loadoutImage Loadout image
+     */
+    public void setLoadoutImage(byte[] loadoutImage) {
+        this.loadoutImage = loadoutImage;
+    }
+
+    /**
+     * Get the image for the loadout
+     *
+     * @return Loadout image
+     */
+    public byte[] getLoadoutImage() {
+        return loadoutImage;
     }
 }

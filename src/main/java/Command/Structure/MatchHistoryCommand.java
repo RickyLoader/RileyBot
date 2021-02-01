@@ -1,23 +1,27 @@
 package Command.Structure;
 
-import COD.*;
-import COD.Assets.Ratio;
+import Bot.DiscordCommandManager;
+import COD.Assets.*;
+import COD.LoadoutImageManager;
 import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.List;
 
 /**
  * View a COD player's match history
  */
 public abstract class MatchHistoryCommand extends CODLookupCommand {
     private final HashMap<Long, MatchStats> matchMessages;
-    private String matchID;
-    private String win, loss, draw;
-    private Emote stats, players;
+    private final LoadoutImageManager loadoutImageManager;
+    private String win, loss, draw, matchID;
+    private Emote stats, players, loadouts;
 
     /**
      * Create the command
@@ -32,6 +36,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                         + getHelpText(trigger) + " [match id/latest]"
         );
         this.matchMessages = new HashMap<>();
+        this.loadoutImageManager = new LoadoutImageManager();
     }
 
     @Override
@@ -61,11 +66,25 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             draw = EmoteHelper.formatEmote(helper.getDraw());
             stats = helper.getStats();
             players = helper.getPlayers();
+            loadouts = helper.getLoadouts();
             context.getJDA().addEventListener(getMatchEmoteListener());
         }
         MessageChannel channel = context.getMessageChannel();
+        if(name.equals("missing")) {
+            ArrayList<MissingWeaponAttachments> missing = MissingWeaponAttachments.getMissingAttachments();
+            if(missing.isEmpty()) {
+                channel.sendMessage("No missing attachments!").queue();
+            }
+            else {
+                showMissingAttachments(context, missing);
+            }
+            return;
+        }
+
+        channel.sendTyping().queue();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
+            channel.sendMessage("Something went wrong when I tried to grab that match history!").queue();
             return;
         }
         if(matchID != null) {
@@ -73,6 +92,61 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
         getMatchHistoryEmbed(context, matchHistory).showMessage();
+    }
+
+    /**
+     * Show the missing weapon attachments in a pageable embed
+     *
+     * @param context Command context
+     * @param missing Missing weapon attachments
+     */
+    private void showMissingAttachments(CommandContext context, ArrayList<MissingWeaponAttachments> missing) {
+        int total = (int) missing.stream().mapToLong(m -> m.attachmentCodenames.size()).sum();
+        new PageableEmbed(
+                context,
+                missing,
+                getEmbedThumbnail(),
+                total + " Missing attachments",
+                null,
+                1,
+                EmbedHelper.GREEN
+        ) {
+            @Override
+            public void addFields(EmbedBuilder builder, int currentIndex) {
+                MissingWeaponAttachments current = (MissingWeaponAttachments) getItems().get(currentIndex);
+                Weapon weapon = current.getWeapon();
+                ArrayList<String> attachments = current.getAttachmentCodenames();
+                StringBuilder description = new StringBuilder();
+                description
+                        .append("**Weapon**: ")
+                        .append(weapon.getName()).append(" (").append(weapon.getCodename()).append(")")
+                        .append("\n")
+                        .append("**Missing**: ").append(attachments.size()).append(" attachments")
+                        .append("\n\n");
+
+                for(int i = 0; i < attachments.size(); i++) {
+                    description.append(i + 1).append(": ").append(attachments.get(i));
+                    if(i < attachments.size() - 1) {
+                        description.append("\n");
+                    }
+                }
+                builder
+                        .setDescription(description.toString())
+                        .setImage(weapon.getImageURL());
+            }
+
+            @Override
+            public void sortItems(List<?> items, boolean defaultSort) {
+                items.sort((o1, o2) -> {
+                    String a = ((MissingWeaponAttachments) o1).getWeapon().getName();
+                    String b = ((MissingWeaponAttachments) o2).getWeapon().getName();
+                    if(defaultSort) {
+                        return a.compareTo(b);
+                    }
+                    return b.compareTo(a);
+                });
+            }
+        }.showMessage();
     }
 
     /**
@@ -87,14 +161,24 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long id = reaction.getMessageIdLong();
                 Emote emote = reaction.getReactionEmote().getEmote();
-                if(!matchMessages.containsKey(id) || emote != stats && emote != players) {
+                if(!matchMessages.containsKey(id) || (emote != stats && emote != players && emote != loadouts)) {
                     return;
                 }
                 reaction.getChannel().retrieveMessageById(id).queue(message -> {
                     MatchStats matchStats = matchMessages.get(id);
-                    MessageEmbed content = emote == stats
-                            ? buildMatchEmbed(matchStats)
-                            : buildMatchPlayersEmbed(matchStats);
+                    MessageEmbed content = null;
+                    if(emote == stats) {
+                        content = buildMatchEmbed(matchStats);
+                    }
+                    else if(emote == players) {
+                        content = buildMatchPlayersEmbed(matchStats);
+                    }
+                    else if(emote == loadouts && matchStats.hasLoadouts()) {
+                        content = buildMatchLoadoutEmbed(matchStats);
+                    }
+                    if(content == null) {
+                        return;
+                    }
                     message.editMessage(content).queue();
                 });
             }
@@ -115,17 +199,59 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             channel.sendMessage(getErrorEmbed(matchHistory)).queue();
             return;
         }
-        MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
-        if(!matchStats.hasTeams()) {
-            addTeams(matchStats);
+        if(matchStats.hasLoadouts()) {
+            matchStats.setLoadoutImage(buildLoadoutImage(matchStats.getLoadouts()));
         }
-        channel.sendMessage(matchEmbed).queue(message -> {
-            if(matchStats.hasTeams() && matchStats.getTeam1().getPlayers().size() <= 6) {
-                matchMessages.put(message.getIdLong(), matchStats);
-                message.addReaction(stats).queue();
-                message.addReaction(players).queue();
+        MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
+        channel.sendMessage(matchEmbed)
+                /*
+                 * Setting the attached loadout image file as the embed footer icon prevents it from displaying as
+                 * a separate message.
+                 * When viewing the loadout embed, both the embed footer icon & embed image can use the file.
+                 */
+                .addFile(matchStats.getLoadoutImage(), "image.png")
+                .queue(message -> {
+                    matchMessages.put(message.getIdLong(), matchStats);
+                    message.addReaction(stats).queue();
+                    message.addReaction(players).queue();
+                    if(matchStats.hasLoadouts()) {
+                        message.addReaction(loadouts).queue();
+                    }
+                });
+    }
+
+    /**
+     * Build an image displaying all of the given loadouts
+     *
+     * @param loadouts Loadouts to display
+     * @return Byte array of image
+     */
+    private byte[] buildLoadoutImage(Loadout[] loadouts) {
+        BufferedImage[] loadoutImages = new BufferedImage[loadouts.length];
+        int tallest = 0;
+        for(int i = 0; i < loadouts.length; i++) {
+            BufferedImage loadoutImage = loadoutImageManager.buildLoadoutImage(
+                    loadouts[i],
+                    "Loadout " + (i + 1) + "/" + loadouts.length
+            );
+            if(loadoutImage.getHeight() > tallest) {
+                tallest = loadoutImage.getHeight();
             }
-        });
+            loadoutImages[i] = loadoutImage;
+        }
+        BufferedImage background = new BufferedImage(
+                (loadoutImages[0].getWidth() * loadoutImages.length) + (loadoutImages.length + 1) * 10,
+                tallest + 20,
+                BufferedImage.TYPE_INT_RGB
+        );
+        Graphics g = background.getGraphics();
+        int x = 10, y = 10;
+        for(BufferedImage image : loadoutImages) {
+            g.drawImage(image, x, y, null);
+            x += image.getWidth() + 10;
+        }
+        g.dispose();
+        return ImageLoadingMessage.imageToByteArray(background);
     }
 
     /**
@@ -134,12 +260,12 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param matchStats Match to add teams to
      */
     private void addTeams(MatchStats matchStats) {
-        JSONObject response = new JSONObject(getMatchPlayersJSON(matchStats.getId(), getPlatform()));
-        if(response.has("status")) {
-            System.out.println("Error getting team data:" + response.getString("status"));
+        JSONObject matchDetails = new JSONObject(getMatchPlayersJSON(matchStats.getId(), getPlatform()));
+        if(matchDetails.has("status")) {
+            System.out.println("Error getting team data:" + matchDetails.getString("status"));
             return;
         }
-        JSONArray playerList = response.getJSONArray("allPlayers");
+        JSONArray playerList = matchDetails.getJSONArray("allPlayers");
         Team allies = new Team("Allies");
         Team axis = new Team("Axis");
         for(int i = 0; i < playerList.length(); i++) {
@@ -208,6 +334,9 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @return Message embed showing list of match players
      */
     private MessageEmbed buildMatchPlayersEmbed(MatchStats matchStats) {
+        if(!matchStats.hasTeams()) {
+            addTeams(matchStats);
+        }
         EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats);
         addTeamToEmbed(matchStats.getTeam1(), builder);
         addTeamToEmbed(matchStats.getTeam2(), builder);
@@ -215,10 +344,28 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     }
 
     /**
-     * Add the given team's name & players to the given embed builder
+     * Create a message embed showing the loadouts used by the player in the given match
+     *
+     * @param matchStats Match stats to display loadouts from
+     * @return Message embed showing player loadouts
+     */
+    private MessageEmbed buildMatchLoadoutEmbed(MatchStats matchStats) {
+        int size = matchStats.getLoadouts().length;
+        String summary = "**Match Loadouts**: " + size;
+        if(size > 5) {
+            summary += " (A good builder would never need " + size + " sets of tools!)";
+        }
+        summary += "\n\nSome attachments haven't been mapped yet and they will be **RED**!";
+        return getDefaultMatchEmbedBuilder(matchStats)
+                .setDescription(summary)
+                .setImage("attachment://image.png").build();
+    }
+
+    /**
+     * Add the given team to the embed builder
      *
      * @param team    Team to add to embed builder
-     * @param builder Embed builder
+     * @param builder Embed builder with team name and players
      */
     private void addTeamToEmbed(Team team, EmbedBuilder builder) {
         ArrayList<MatchPlayer> players = team.getPlayers();
@@ -307,7 +454,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         return new EmbedBuilder()
                 .setTitle(getSummaryEmbedTitle(name))
                 .setFooter(
-                        "Type " + getTrigger() + " for help"
+                        "Type " + getTrigger() + " for help", "attachment://image.png"
                 )
                 .setThumbnail(getEmbedThumbnail());
     }
@@ -397,7 +544,6 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     private MatchHistory getMatchHistory(String name, PLATFORM platform, MessageChannel channel) {
         ArrayList<MatchStats> matchStats = new ArrayList<>();
         JSONObject overview = new JSONObject(getMatchHistoryJSON(getLookupName(), platform));
-
         if(overview.has("status")) {
             channel.sendMessage(
                     "Sorry bro I ran in to an error: **" + overview.getString("status") + "**"
@@ -421,8 +567,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             matchStats.add(
                     new MatchStats.MatchBuilder(
                             match.getString("matchID"),
-                            CODAPI.COD_ASSET_MANAGER.getMapByCodename(mapName),
-                            CODAPI.COD_ASSET_MANAGER.getModeByCodename(match.getString("mode")),
+                            DiscordCommandManager.codManager.getMapByCodename(mapName),
+                            DiscordCommandManager.codManager.getModeByCodename(match.getString("mode")),
                             new Date(match.getLong("utcStartSeconds") * 1000),
                             new Date(match.getLong("utcEndSeconds") * 1000),
                             result,
@@ -448,6 +594,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                             .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
                             .setXP(getOptionalInt(playerStats, "matchXp"))
                             .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
+                            .setLoadouts(parseLoadouts(playerSummary))
                             .build()
             );
         }
@@ -460,6 +607,88 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                         summary.getInt("deaths")
                 )
         );
+    }
+
+    /**
+     * Parse the provided match JSON for the player loadouts
+     *
+     * @param playerSummary Player match summary JSON
+     * @return Array of player loadouts
+     */
+    private Loadout[] parseLoadouts(JSONObject playerSummary) {
+        JSONArray loadoutList = playerSummary.getJSONArray("loadout");
+        ArrayList<Loadout> loadouts = new ArrayList<>();
+        for(int i = 0; i < loadoutList.length(); i++) {
+            JSONObject loadoutData = loadoutList.getJSONObject(i);
+            loadouts.add(
+                    new Loadout(
+                            parseLoadoutWeapon(loadoutData.getJSONObject("primaryWeapon")),
+                            parseLoadoutWeapon(loadoutData.getJSONObject("secondaryWeapon")),
+                            parseWeapon(loadoutData.getJSONObject("lethal")),
+                            (TacticalWeapon) parseWeapon(loadoutData.getJSONObject("tactical")),
+                            parsePerks(loadoutData.getJSONArray("perks"))
+                    )
+            );
+        }
+        return loadouts.stream().distinct().toArray(Loadout[]::new);
+    }
+
+    /**
+     * Parse an array of perks from the match loadout JSON
+     *
+     * @param perkJSONArray JSON array of perks
+     * @return Array of perks
+     */
+    private Perk[] parsePerks(JSONArray perkJSONArray) {
+        Perk[] perks = new Perk[perkJSONArray.length()];
+        for(int i = 0; i < perkJSONArray.length(); i++) {
+            perks[i] = DiscordCommandManager.codManager.getPerkByCodename(
+                    perkJSONArray.getJSONObject(i).getString("name")
+            );
+        }
+        return perks;
+    }
+
+    /**
+     * Parse a weapon from the match loadout weapon JSON
+     *
+     * @param loadoutWeapon Match loadout weapon JSON
+     * @return Weapon
+     */
+    private Weapon parseWeapon(JSONObject loadoutWeapon) {
+        return DiscordCommandManager.codManager.getWeaponByCodename(loadoutWeapon.getString("name"));
+    }
+
+    /**
+     * Parse a loadout weapon from the match loadout weapon JSON
+     *
+     * @param loadoutWeapon Match loadout weapon JSON
+     * @return Loadout weapon containing weapon & attachments
+     */
+    private LoadoutWeapon parseLoadoutWeapon(JSONObject loadoutWeapon) {
+        Weapon weapon = parseWeapon(loadoutWeapon);
+        ArrayList<Attachment> attachments = new ArrayList<>();
+        if(loadoutWeapon.has("attachments")) {
+            JSONArray attachmentData = loadoutWeapon.getJSONArray("attachments");
+            for(int i = 0; i < attachmentData.length(); i++) {
+                String attachmentName = attachmentData.getJSONObject(i).getString("name");
+                if(attachmentName.equals("none")) {
+                    continue;
+                }
+                Attachment attachment = weapon.getAttachmentByCodename(attachmentName);
+                if(attachment == null) {
+                    MissingWeaponAttachments.addMissingAttachment(attachmentName, weapon.getCodename());
+                    attachment = new Attachment(
+                            attachmentName,
+                            "MISSING: " + attachmentName,
+                            Attachment.CATEGORY.UNKNOWN,
+                            null
+                    );
+                }
+                attachments.add(attachment);
+            }
+        }
+        return new LoadoutWeapon(weapon, attachments);
     }
 
     /**

@@ -1,14 +1,16 @@
 package COD.Assets;
 
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 /**
  * Hold weapon information
  */
 public class Weapon {
-    private final String codename, name, category;
+    private final String codename, name, category, imageURL;
     private final TYPE type;
     private final BufferedImage image;
+    private final HashMap<String, Attachment> attachments;
 
     public enum TYPE {
         PRIMARY,
@@ -67,17 +69,51 @@ public class Weapon {
     /**
      * Create a weapon
      *
-     * @param codename Codename of weapon e.g "iw8_me_akimboblunt"
-     * @param name     Real name of weapon e.g "Kali Sticks"
-     * @param category Codename of weapon category e.g "weapon_melee"
-     * @param image    Weapon image
+     * @param codename    Codename of weapon e.g "iw8_me_akimboblunt"
+     * @param name        Real name of weapon e.g "Kali Sticks"
+     * @param category    Codename of weapon category e.g "weapon_melee"
+     * @param imageURL    URL to image
+     * @param image       Weapon image
+     * @param attachments Map of attachments available for the weapon codename -> attachment
      */
-    public Weapon(String codename, String name, String category, BufferedImage image) {
+    public Weapon(String codename, String name, String category, String imageURL, BufferedImage image, HashMap<String, Attachment> attachments) {
         this.codename = codename;
         this.name = name;
         this.category = category;
         this.type = TYPE.discernType(category);
+        this.imageURL = imageURL;
         this.image = image;
+        this.attachments = attachments;
+    }
+
+    /**
+     * Get the URL to the weapon image
+     *
+     * @return URL to weapon image
+     */
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    /**
+     * Check if the weapon has any equipable attachments
+     * Some secondary weapons/all equipment have no attachments
+     *
+     * @return Weapon has attachments
+     */
+    public boolean hasEquipableAttachments() {
+        return !attachments.isEmpty();
+    }
+
+    /**
+     * Get an attachment for the weapon by its codename e.g "gripang" to retrieve the
+     * Commando Foregrip attachment
+     *
+     * @param codename Attachment codename
+     * @return Attachments
+     */
+    public Attachment getAttachmentByCodename(String codename) {
+        return attachments.get(codename);
     }
 
     /**
