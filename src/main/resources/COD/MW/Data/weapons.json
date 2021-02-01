@@ -1054,8 +1054,8 @@
             "category": "backpiece"
           }
         },
-        "image_url": "https://i.imgur.com/7BASgQU.png",
-        "real_name": "Bruen Mk9"
+        "image_url": "https://i.imgur.com/KnAM8uV.png",
+        "real_name": "M91"
       },
       "iw8_lm_mkilo3": {
         "attachments": {
@@ -1328,10 +1328,15 @@
             "description": "The ultimate run and gun modification when agility is more important than precision.  Removing the stock greatly increases movement.",
             "real_name": "No Stock",
             "category": "backpiece"
+          },
+          "stockcust":{
+            "real_name":"Skeleton Stock",
+            "category":"backpiece",
+            "description":"Ultralight stock speeds up weapon handling and movement at the expense of aiming stability."
           }
         },
-        "image_url": "https://i.imgur.com/KnAM8uV.png",
-        "real_name": "M91"
+        "image_url": "https://i.imgur.com/7BASgQU.png",
+        "real_name": "Bruen Mk9"
       },
       "iw8_lm_mgolf34": {
         "attachments": {

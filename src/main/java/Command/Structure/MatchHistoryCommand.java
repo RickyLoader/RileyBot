@@ -125,7 +125,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                         .append("\n\n");
 
                 for(int i = 0; i < attachments.size(); i++) {
-                    description.append(i + 1).append(": ").append(attachments.get(i));
+                    description.append(i + 1).append(". ").append(attachments.get(i));
                     if(i < attachments.size() - 1) {
                         description.append("\n");
                     }
