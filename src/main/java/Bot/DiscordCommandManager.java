@@ -182,6 +182,7 @@ public class DiscordCommandManager {
         addCommand(new StatusCommand());
         addCommand(new GIFCommand());
         addCommand(new TeamTreesGuessingCommand());
+        addCommand(new StocksCommand());
     }
 
     /**
