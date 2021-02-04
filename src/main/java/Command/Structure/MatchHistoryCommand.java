@@ -32,8 +32,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getDefaultLookupArgs(trigger) + " [match id/latest]\n"
-                        + getHelpText(trigger) + " [match id/latest]"
+                getHelpText(trigger) + " [match id/latest]"
         );
         this.matchMessages = new HashMap<>();
         this.loadoutImageManager = new LoadoutImageManager();
