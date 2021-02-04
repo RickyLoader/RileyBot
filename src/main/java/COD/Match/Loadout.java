@@ -14,21 +14,87 @@ public class Loadout {
     private final Perk[] perks;
 
     /**
-     * Create the player loadout
-     *
-     * @param primary   Primary weapon
-     * @param secondary Secondary weapon
-     * @param lethal    Lethal equipment
-     * @param tactical  Tactical equipment
-     * @param perks     Perks
+     * Create the player loadout from the builder values
      */
-    public Loadout(LoadoutWeapon primary, LoadoutWeapon secondary, Weapon lethal, TacticalWeapon tactical, Perk[] perks) {
-        this.primary = primary;
-        this.secondary = secondary;
-        this.lethal = lethal;
-        this.tactical = tactical;
-        this.perks = perks;
+    private Loadout(LoadoutBuilder builder) {
+        this.primary = builder.primary;
+        this.secondary = builder.secondary;
+        this.lethal = builder.lethal;
+        this.tactical = builder.tactical;
+        this.perks = builder.perks;
     }
+
+    public static class LoadoutBuilder {
+        private LoadoutWeapon primary, secondary;
+        private Weapon lethal;
+        private TacticalWeapon tactical;
+        private Perk[] perks;
+
+        /**
+         * Set the player's primary loadout weapon
+         *
+         * @param primary Primary loadout weapon
+         * @return Builder
+         */
+        public LoadoutBuilder setPrimaryWeapon(LoadoutWeapon primary) {
+            this.primary = primary;
+            return this;
+        }
+
+        /**
+         * Set the player's secondary loadout weapon
+         *
+         * @param secondary Secondary loadout weapon
+         * @return Builder
+         */
+        public LoadoutBuilder setSecondaryWeapon(LoadoutWeapon secondary) {
+            this.secondary = secondary;
+            return this;
+        }
+
+        /**
+         * Set the player's lethal equipment
+         *
+         * @param lethal Lethal equipment
+         * @return Builder
+         */
+        public LoadoutBuilder setLethalEquipment(Weapon lethal) {
+            this.lethal = lethal;
+            return this;
+        }
+
+        /**
+         * Set the player's tactical equipment
+         *
+         * @param tactical Tactical equipment
+         * @return Builder
+         */
+        public LoadoutBuilder setTacticalEquipment(TacticalWeapon tactical) {
+            this.tactical = tactical;
+            return this;
+        }
+
+        /**
+         * Set the player's loadout perks
+         *
+         * @param perks Array of perks
+         * @return Builder
+         */
+        public LoadoutBuilder setPerks(Perk[] perks) {
+            this.perks = perks;
+            return this;
+        }
+
+        /**
+         * Build the loadout from the provided values
+         *
+         * @return Loadout
+         */
+        public Loadout build() {
+            return new Loadout(this);
+        }
+    }
+
 
     /**
      * Get the loadout perks

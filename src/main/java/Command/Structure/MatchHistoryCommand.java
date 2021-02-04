@@ -84,7 +84,6 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         channel.sendTyping().queue();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
-            channel.sendMessage("Something went wrong when I tried to grab that match history!").queue();
             return;
         }
         if(matchID != null) {
@@ -196,7 +195,13 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     private void sendMatchEmbed(MatchHistory matchHistory, MessageChannel channel) {
         MatchStats matchStats = matchID.equals("latest") ? matchHistory.getMatches().get(0) : matchHistory.getMatch(matchID);
         if(matchStats == null) {
-            channel.sendMessage(getErrorEmbed(matchHistory)).queue();
+            channel.sendMessage(
+                    buildErrorEmbed(
+                            matchHistory.getName(),
+                            "No match found with id: **" + matchID + "**" +
+                                    " for player: **" + matchHistory.getName().toUpperCase() + "**"
+                    )
+            ).queue();
             return;
         }
         if(matchStats.hasLoadouts()) {
@@ -429,18 +434,16 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     }
 
     /**
-     * Get an embed detailing an error for a non existent match
+     * Build a message embed detailing an error which has occurred
      *
-     * @param matchHistory Player match history
-     * @return Error embed
+     * @param name  Player name to use in embed title
+     * @param error Error which has occurred
+     * @return Message embed detailing error
      */
-    private MessageEmbed getErrorEmbed(MatchHistory matchHistory) {
-        return getDefaultEmbedBuilder(matchHistory.getName().toUpperCase())
+    private MessageEmbed buildErrorEmbed(String name, String error) {
+        return getDefaultEmbedBuilder(name.toUpperCase())
                 .setColor(EmbedHelper.RED)
-                .setDescription(
-                        "No match found with id: **" + matchID + "**" +
-                                " for player: **" + matchHistory.getName().toUpperCase() + "**"
-                )
+                .setDescription(error)
                 .build();
     }
 
@@ -545,9 +548,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         ArrayList<MatchStats> matchStats = new ArrayList<>();
         JSONObject overview = new JSONObject(getMatchHistoryJSON(getLookupName(), platform));
         if(overview.has("status")) {
-            channel.sendMessage(
-                    "Sorry bro I ran in to an error: **" + overview.getString("status") + "**"
-            ).queue();
+            channel.sendMessage(buildErrorEmbed(name, overview.getString("status"))).queue();
             return null;
         }
 
@@ -621,13 +622,13 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         for(int i = 0; i < loadoutList.length(); i++) {
             JSONObject loadoutData = loadoutList.getJSONObject(i);
             loadouts.add(
-                    new Loadout(
-                            parseLoadoutWeapon(loadoutData.getJSONObject("primaryWeapon")),
-                            parseLoadoutWeapon(loadoutData.getJSONObject("secondaryWeapon")),
-                            parseWeapon(loadoutData.getJSONObject("lethal")),
-                            (TacticalWeapon) parseWeapon(loadoutData.getJSONObject("tactical")),
-                            parsePerks(loadoutData.getJSONArray("perks"))
-                    )
+                    new Loadout.LoadoutBuilder()
+                            .setPrimaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("primaryWeapon")))
+                            .setSecondaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("secondaryWeapon")))
+                            .setLethalEquipment(parseWeapon(loadoutData.getJSONObject("lethal")))
+                            .setTacticalEquipment((TacticalWeapon) parseWeapon(loadoutData.getJSONObject("tactical")))
+                            .setPerks(parsePerks(loadoutData.getJSONArray("perks")))
+                            .build()
             );
         }
         return loadouts.stream().distinct().toArray(Loadout[]::new);
