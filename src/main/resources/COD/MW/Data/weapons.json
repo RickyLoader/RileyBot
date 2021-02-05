@@ -3323,7 +3323,12 @@
             "category": "frontpiece"
           },
           "xmags": {
-            "description": "High capacity magazines hold ^215 rounds^7 of .45 ACP ammunition with a moderate weight increase.",
+            "description": "High capacity magazines hold 10 rounds of .45 ACP ammunition with a slight weight increase.",
+            "real_name": "10 Round Mags",
+            "category": "magazine"
+          },
+          "xmagslrg": {
+            "description": "High capacity magazines hold 15 rounds of .45 ACP ammunition with a moderate weight increase.",
             "real_name": "15 Round Mags",
             "category": "magazine"
           },
@@ -6747,6 +6752,11 @@
             "real_name": "12-Gauge Deputy",
             "category": "undermount"
           },
+          "xmagslrg": {
+            "description": "High capacity magazines hold 30 rounds of 7.62 NATO ammunition with a moderate weight increase ammunition with a moderate weight increase.",
+            "real_name": "30 Round Mags",
+            "category": "magazine"
+          },
           "fastreload": {
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
@@ -6858,12 +6868,12 @@
             "category": "optic"
           },
           "hybrid2": {
-            "description": "^23.25x^7 Scout with integral reflex sight for quickly transitioning between sights. ",
+            "description": "3.25x Scout with integral reflex sight for quickly transitioning between sights. ",
             "real_name": "Integral Hybrid",
             "category": "optic"
           },
           "hybrid3": {
-            "description": "^23.25x^7 Thermal scope with a side-mounting reflex sight toggles thermal imaging with a flick of the wrist.  ^1Not compatible with Night Vision Goggles.^7 ",
+            "description": "3.25x Thermal scope with a side-mounting reflex sight toggles thermal imaging with a flick of the wrist.  ^1Not compatible with Night Vision Goggles.^7 ",
             "real_name": "Thermal Hybrid",
             "category": "optic"
           },
@@ -6898,7 +6908,7 @@
             "category": "muzzle"
           },
           "hybrid": {
-            "description": "^23.25x^7 Scout with integral reflex sight for quickly transitioning between sights. ",
+            "description": "3.25x Scout with integral reflex sight for quickly transitioning between sights. ",
             "real_name": "Integral Hybrid",
             "category": "optic"
           },
@@ -6908,8 +6918,8 @@
             "category": "frontpiece"
           },
           "xmags": {
-            "description": "High capacity magazines hold ^230 rounds^7 of 7.62 NATO ammunition with a moderate weight increase.",
-            "real_name": "30 Round Mags",
+            "description": "Extended magazines hold 24 rounds of 7.62 NATO ammunition with a slight weight increase.",
+            "real_name": "24 Round Mags",
             "category": "magazine"
           },
           "reflexmini": {
@@ -11544,6 +11554,11 @@
             "description": "Increases bullet penetration and damage against equipment and killstreaks.",
             "real_name": "FMJ",
             "category": "gunperk"
+          },
+          "gripcust": {
+            "real_name": "Ranger Foregrip",
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "category": "undermount"
           },
           "ammomod_slow": {
             "description": "Bullets slow enemy movement and briefly disable tactical sprint when shooting legs.",
