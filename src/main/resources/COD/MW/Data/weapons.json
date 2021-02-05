@@ -11671,7 +11671,7 @@
             "category": "muzzle"
           },
           "xmags": {
-            "description": "Extended magazines hold ^240 rounds^7 of 9mm Parabellum ammunition with a slight weight increase.",
+            "description": "Extended magazines hold 40 rounds of 9mm Parabellum ammunition with a slight weight increase.",
             "real_name": "40 Round Mags",
             "category": "magazine"
           },
@@ -11721,8 +11721,13 @@
             "category": "muzzle"
           },
           "xmagslrg": {
-            "description": "High capacity magazines hold ^250 rounds^7 of 9mm Parabellum ammunition with a moderate weight increase.",
+            "description": "High capacity magazines hold 50 rounds of 9mm Parabellum ammunition with a moderate weight increase.",
             "real_name": "50 Round Mags",
+            "category": "magazine"
+          },
+          "calcust": {
+            "description": "Conversion kit to use 32-round magazines of higher caliber .41 AE ammunition for increased range and stopping power.",
+            "real_name": ".41 AE 32-Round Mags",
             "category": "magazine"
           },
           "laser": {

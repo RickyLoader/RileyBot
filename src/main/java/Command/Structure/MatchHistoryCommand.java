@@ -315,8 +315,10 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 .addField(
                         "**Distance Travelled**",
                         matchStats.getWobblies() + "\n" + matchStats.getDistanceTravelled(),
-                        false
+                        true
                 )
+                .addField("**Time Spent Moving**", matchStats.getPercentTimeMovingString(), true)
+                .addBlankField(true)
                 .addField("**Nemesis**", matchStats.getNemesis(), true)
                 .addField("**Most Killed**", matchStats.getMostKilled(), true)
                 .addBlankField(true)
@@ -574,19 +576,26 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                             result,
                             player
                     )
-                            .setKD(new Ratio(
-                                    playerStats.getInt("kills"),
-                                    playerStats.getInt("deaths")
-                            ))
-                            .setAccuracy(playerStats.has("shotsLanded") ? new Ratio(
-                                    playerStats.getInt("shotsLanded"),
-                                    playerStats.getInt("shotsFired")
-                            ) : null)
-                            .setMatchScore(new Score(
-                                    match.getInt("team1Score"),
-                                    match.getInt("team2Score"),
-                                    result
-                            ))
+                            .setKD(
+                                    new Ratio(
+                                            playerStats.getInt("kills"),
+                                            playerStats.getInt("deaths")
+                                    )
+                            )
+                            .setAccuracy(
+                                    playerStats.has("shotsLanded") ? new Ratio(
+                                            playerStats.getInt("shotsLanded"),
+                                            playerStats.getInt("shotsFired")
+                                    ) : null
+                            )
+                            .setMatchScore(
+                                    new Score(
+                                            match.getInt("team1Score"),
+                                            match.getInt("team2Score"),
+                                            result
+                                    )
+                            )
+                            .setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"))
                             .setNemesis(getOptionalString(playerSummary, "nemesis"))
                             .setMostKilled(getOptionalString(playerSummary, "mostKilled"))
                             .setLongestStreak(getLongestStreak(playerStats))

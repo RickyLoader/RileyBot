@@ -22,7 +22,7 @@ public class MatchStats {
     private final Ratio killDeath, accuracy;
     private final Score score;
     private final int longestStreak, damageDealt, damageReceived, xp;
-    private final double distanceTravelled;
+    private final double distanceTravelled, percentTimeMoving;
     private final MatchPlayer player;
     private final Loadout[] loadouts;
     private Team team1, team2;
@@ -51,7 +51,7 @@ public class MatchStats {
         private Score score;
         private int longestStreak, damageDealt, damageReceived, xp;
         private long wobblies;
-        private double distanceTravelled;
+        private double distanceTravelled, percentTimeMoving;
         private Loadout[] loadouts;
 
         /**
@@ -166,6 +166,17 @@ public class MatchStats {
         }
 
         /**
+         * Set the percentage of the match spent moving by the player
+         *
+         * @param percentTimeMoving Percentage of match spent moving
+         * @return Builder
+         */
+        public MatchBuilder setPercentTimeMoving(double percentTimeMoving) {
+            this.percentTimeMoving = percentTimeMoving;
+            return this;
+        }
+
+        /**
          * Set the XP gained by the player from the match
          *
          * @param xp XP gained
@@ -230,6 +241,7 @@ public class MatchStats {
         this.damageReceived = builder.damageReceived;
         this.damageDealt = builder.damageDealt;
         this.xp = builder.xp;
+        this.percentTimeMoving = builder.percentTimeMoving;
         this.distanceTravelled = builder.distanceTravelled;
         this.wobblies = builder.wobblies;
         this.player = builder.player;
@@ -511,6 +523,15 @@ public class MatchStats {
      */
     public String getDurationString() {
         return EmbedHelper.formatDuration(duration);
+    }
+
+    /**
+     * Get the percentage of the match spent moving as a String e.g 32.50%
+     *
+     * @return Percent time moving String
+     */
+    public String getPercentTimeMovingString() {
+        return new DecimalFormat("#.##'%'").format(percentTimeMoving);
     }
 
     /**
