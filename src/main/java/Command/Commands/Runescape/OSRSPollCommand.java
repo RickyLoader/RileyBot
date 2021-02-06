@@ -26,6 +26,7 @@ public class OSRSPollCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         String message = context.getLowerCaseMessage().replace("osrspoll", "").trim();
         MessageChannel channel = context.getMessageChannel();
+        channel.sendTyping().queue();
 
         int number = 0;
         if(!message.isEmpty()) {
