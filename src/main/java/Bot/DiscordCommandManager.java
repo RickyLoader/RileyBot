@@ -186,6 +186,7 @@ public class DiscordCommandManager {
         addCommand(new TeamTreesGuessingCommand());
         addCommand(new StocksCommand());
         addCommand(new MWDataCommand());
+        addCommand(new TFTLookupCommand());
     }
 
     /**

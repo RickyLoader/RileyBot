@@ -25,30 +25,24 @@ public class SummonerImage extends ImageBuilder {
     /**
      * Build the various sections of the image and draw them each on to the background image
      *
-     * @param nameQuery     Player name
-     * @param helpMessage   Help message to display in loading message
-     * @param displayRegion Region as displayed in game - "OCE"
-     * @param apiRegion     Region code for API - "oc1"
+     * @param summonerOverview Basic summoner overview
+     * @param helpMessage      Help message to display in loading message
      */
-    public void buildImage(String nameQuery, String helpMessage, String displayRegion, String apiRegion) {
+    public void buildImage(SummonerOverview summonerOverview, String helpMessage) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
                 getChannel(),
                 getEmoteHelper(),
-                "Summoner lookup: " + nameQuery.toUpperCase(),
-                "One moment please, checking the " + displayRegion + " region.",
+                "Summoner lookup: " + summonerOverview.getName(),
+                "One moment please - Slobbering up the summoner's stats from the "
+                        + summonerOverview.getRegion().getDisplayName().toUpperCase() + " region.",
                 "https://img.pngio.com/league-of-legends-needs-a-new-game-icon-league-of-legends-icon-png-256_256.png",
                 helpMessage,
                 new String[]{
                         "Fetching summoner data...",
-                        "Building image...",
+                        "Building image..."
                 }
         );
         loading.showLoading();
-        SummonerOverview summonerOverview = new SummonerOverview(nameQuery, apiRegion);
-        if(!summonerOverview.exists()) {
-            loading.failLoading("That summoner doesn't exist  on the " + displayRegion + " server cunt");
-            return;
-        }
         this.summonerStats = new SummonerStats(summonerOverview, getResourcePath());
         loading.completeStage();
         try {

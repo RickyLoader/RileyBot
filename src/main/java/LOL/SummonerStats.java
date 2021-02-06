@@ -34,7 +34,7 @@ public class SummonerStats {
      */
     public SummonerStats(SummonerOverview summonerOverview, String res) {
         this.summonerOverview = summonerOverview;
-        this.apiURL = summonerOverview.getApiURL() + "lol/";
+        this.apiURL = summonerOverview.getApiURL();
         this.res = res;
         this.handler = new ResourceHandler();
         this.champions = fetchChampions();

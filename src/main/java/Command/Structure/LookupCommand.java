@@ -119,7 +119,7 @@ public abstract class LookupCommand extends DiscordCommand {
     }
 
     /**
-     * Strip and save extra arguments such that the query equals [trigger] [name]
+     * Strip and save extra arguments such that the query equals [trigger] [name] or [trigger] save [name]
      *
      * @param query String which triggered command
      * @return Query to correct format

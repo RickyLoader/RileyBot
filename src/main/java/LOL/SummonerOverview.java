@@ -13,7 +13,8 @@ import java.net.URLEncoder;
  */
 public class SummonerOverview {
     public static final String BASE_PATH = "/LOL/Summoner/";
-    private final String region, apiURL;
+    private final String apiURL;
+    private final Region region;
     private final boolean exists;
     private String name, id;
     private int level;
@@ -25,10 +26,10 @@ public class SummonerOverview {
      * @param nameQuery Summoner name to search (case insensitive, the case appropriate name is retrieved via the API)
      * @param region    Summoner region (for deciding API endpoint to use)
      */
-    public SummonerOverview(String nameQuery, String region) {
+    public SummonerOverview(String nameQuery, Region region, boolean TFT) {
         this.region = region;
-        this.apiURL = "https://" + region + ".api.riotgames.com/";
-        this.exists = findSummoner(nameQuery);
+        this.apiURL = "https://" + region.getApiName() + ".api.riotgames.com/" + (TFT ? "tft/" : "lol/");
+        this.exists = findSummoner(nameQuery, TFT);
     }
 
     /**
@@ -36,12 +37,16 @@ public class SummonerOverview {
      * Return whether the summoner exists
      *
      * @param nameQuery Summoner name to search
+     * @param TFT       Search for TFT summoner
      * @return Summoner exists
      */
-    private boolean findSummoner(String nameQuery) {
+    private boolean findSummoner(String nameQuery, boolean TFT) {
         try {
             String nameEncode = URLEncoder.encode(nameQuery, "UTF-8");
-            String url = apiURL + "lol/summoner/v4/summoners/by-name/" + nameEncode + "?api_key=" + Secret.LEAGUE_KEY;
+            String endpoint = TFT ? "summoner/v1" : "summoner/v4";
+            String url = apiURL + endpoint + "/summoners/by-name/" + nameEncode + "?api_key="
+                    + (TFT ? Secret.TFT_KEY : Secret.LEAGUE_KEY);
+
             String json = new NetworkRequest(url, false).get().body;
             if(json == null) {
                 return false;
@@ -138,7 +143,7 @@ public class SummonerOverview {
      *
      * @return Region
      */
-    public String getRegion() {
+    public Region getRegion() {
         return region;
     }
 
@@ -166,5 +171,39 @@ public class SummonerOverview {
             return 30;
         }
         return (int) (25 * Math.floor((double) level / 25));
+    }
+
+    /**
+     * Summoner region
+     */
+    public static class Region {
+        private final String apiName, displayName;
+
+        /**
+         * @param displayName Display name - e.g "oce"
+         * @param apiName     API name - e.g "oc1"
+         */
+        public Region(String displayName, String apiName) {
+            this.displayName = displayName;
+            this.apiName = apiName;
+        }
+
+        /**
+         * Get the region display name- e.g "oce"
+         *
+         * @return Region display name
+         */
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        /**
+         * Get the region API name - e.g "oc1"
+         *
+         * @return Region API name
+         */
+        public String getApiName() {
+            return apiName;
+        }
     }
 }
