@@ -307,6 +307,34 @@ public class CODManager {
     }
 
     /**
+     * Get an array of weapons by name
+     *
+     * @param name In-game weapon name
+     * @return Array of weapons containing given name
+     */
+    public Weapon[] getWeaponsByName(String name) {
+        return weapons
+                .values()
+                .stream()
+                .filter(w -> w.getName().toLowerCase().contains(name.toLowerCase()))
+                .toArray(Weapon[]::new);
+    }
+
+    /**
+     * Get an array of weapons by category
+     *
+     * @param category Weapon category
+     * @return Array of weapons of given category
+     */
+    public Weapon[] getWeaponsByCategory(String category) {
+        return weapons
+                .values()
+                .stream()
+                .filter(w -> w.getCategory().equalsIgnoreCase(category))
+                .toArray(Weapon[]::new);
+    }
+
+    /**
      * Get a commendation by its codename
      *
      * @param codename Commendation codename

@@ -4,6 +4,8 @@ import Audio.DiscordAudioPlayer;
 import COD.CODManager;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
+import Command.Commands.COD.CWCountdownCommand;
+import Command.Commands.COD.MWDataCommand;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
@@ -183,6 +185,7 @@ public class DiscordCommandManager {
         addCommand(new GIFCommand());
         addCommand(new TeamTreesGuessingCommand());
         addCommand(new StocksCommand());
+        addCommand(new MWDataCommand());
     }
 
     /**

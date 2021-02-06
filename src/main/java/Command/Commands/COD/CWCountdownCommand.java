@@ -1,4 +1,4 @@
-package Command.Commands;
+package Command.Commands.COD;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;

@@ -2,7 +2,7 @@ package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
 import COD.CODAPI;
-import Command.Commands.CWCountdownCommand;
+import Command.Commands.COD.CWCountdownCommand;
 import Command.Structure.MatchHistoryCommand;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
