@@ -27,7 +27,7 @@ public class SummonerOverview {
      */
     public SummonerOverview(String nameQuery, String region) {
         this.region = region;
-        this.apiURL = "https://" + region + ".api.riotgames.com/lol/";
+        this.apiURL = "https://" + region + ".api.riotgames.com/";
         this.exists = findSummoner(nameQuery);
     }
 
@@ -41,7 +41,7 @@ public class SummonerOverview {
     private boolean findSummoner(String nameQuery) {
         try {
             String nameEncode = URLEncoder.encode(nameQuery, "UTF-8");
-            String url = apiURL + "summoner/v4/summoners/by-name/" + nameEncode + "?api_key=" + Secret.LEAGUE_KEY;
+            String url = apiURL + "lol/summoner/v4/summoners/by-name/" + nameEncode + "?api_key=" + Secret.LEAGUE_KEY;
             String json = new NetworkRequest(url, false).get().body;
             if(json == null) {
                 return false;

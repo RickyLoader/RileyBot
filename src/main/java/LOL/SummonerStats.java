@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class SummonerStats {
     private final HashMap<String, RankedQueue> queues = new HashMap<>();
     private final ArrayList<Champion> champions;
-    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", res;
+    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", res, apiURL;
     private final ResourceHandler handler;
     private final SummonerOverview summonerOverview;
     private final BufferedImage profileBanner;
@@ -34,6 +34,7 @@ public class SummonerStats {
      */
     public SummonerStats(SummonerOverview summonerOverview, String res) {
         this.summonerOverview = summonerOverview;
+        this.apiURL = summonerOverview.getApiURL() + "lol/";
         this.res = res;
         this.handler = new ResourceHandler();
         this.champions = fetchChampions();
@@ -48,7 +49,7 @@ public class SummonerStats {
      * @return List of champions with summoner mastery info sorted by mastery points descending
      */
     private ArrayList<Champion> fetchChampions() {
-        String url = summonerOverview.getApiURL()
+        String url = apiURL
                 + "champion-mastery/v4/champion-masteries/by-summoner/"
                 + summonerOverview.getId() + "?api_key=" + Secret.LEAGUE_KEY;
         String json = new NetworkRequest(url, false).get().body;
@@ -78,7 +79,7 @@ public class SummonerStats {
      * to unranked.
      */
     private void fetchRankedQueues() {
-        String url = summonerOverview.getApiURL()
+        String url = apiURL
                 + "league/v4/entries/by-summoner/"
                 + summonerOverview.getId() + "?api_key=" + Secret.LEAGUE_KEY;
 
