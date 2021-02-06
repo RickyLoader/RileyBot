@@ -9,131 +9,114 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class Summoner {
-    private String name;
-    private final String res;
+/**
+ * Hold summoner ranked & champion stats
+ */
+public class SummonerStats {
     private final HashMap<String, RankedQueue> queues = new HashMap<>();
-    private final ArrayList<Champion> champions = new ArrayList<>();
-    private int level;
-    final boolean exists;
-    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", urlPrefix;
-    private BufferedImage profileBorder, profileIcon, profileBanner;
+    private final ArrayList<Champion> champions;
+    private final String FLEX = "RANKED_FLEX_SR", SOLO = "RANKED_SOLO_5x5", res;
     private final ResourceHandler handler;
+    private final SummonerOverview summonerOverview;
+    private final BufferedImage profileBanner;
 
     /**
      * Create a summoner
      *
-     * @param name    Summoner name
-     * @param region  Summoner region
-     * @param res     Resource path
-     * @param handler Resource handler
+     * @param summonerOverview Overview of summoner - name, region, etc
+     * @param res              Resource path
      */
-    public Summoner(String name, String region, String res, ResourceHandler handler) {
-        this.name = name;
-        this.urlPrefix = "https://" + region + ".api.riotgames.com/lol/";
+    public SummonerStats(SummonerOverview summonerOverview, String res) {
+        this.summonerOverview = summonerOverview;
         this.res = res;
-        this.handler = handler;
+        this.handler = new ResourceHandler();
+        this.champions = fetchChampions();
+        fetchRankedQueues();
+        this.profileBanner = handler.getImageResource(res + "Summoner/Banners/" + getHighestRank() + ".png");
+    }
+
+    /**
+     * Fetch a list of all champions with summoner mastery info attached.
+     * Sort the list in order of mastery points descending.
+     *
+     * @return List of champions with summoner mastery info sorted by mastery points descending
+     */
+    private ArrayList<Champion> fetchChampions() {
+        String url = summonerOverview.getApiURL()
+                + "champion-mastery/v4/champion-masteries/by-summoner/"
+                + summonerOverview.getId() + "?api_key=" + Secret.LEAGUE_KEY;
+        String json = new NetworkRequest(url, false).get().body;
+
+        ArrayList<Champion> champions = new ArrayList<>();
+
+        if(json != null) {
+            JSONArray championData = new JSONArray(json);
+            for(int i = 0; i < championData.length(); i++) {
+                JSONObject champion = championData.getJSONObject(i);
+                champions.add(new Champion(
+                        champion.getInt("championId"),
+                        champion.getInt("championLevel"),
+                        champion.getInt("championPoints"),
+                        res
+                ));
+            }
+            Collections.sort(champions);
+        }
+        return champions;
+    }
+
+    /**
+     * Fetch the ranked queue information for the summoner.
+     * Map the queue type -> RankedQueue
+     * If information is not found for a given queue, initialise the queue
+     * to unranked.
+     */
+    private void fetchRankedQueues() {
+        String url = summonerOverview.getApiURL()
+                + "league/v4/entries/by-summoner/"
+                + summonerOverview.getId() + "?api_key=" + Secret.LEAGUE_KEY;
+
+        String json = new NetworkRequest(url, false).get().body;
+        if(json != null) {
+            JSONArray queues = new JSONArray(json);
+            for(int i = 0; i < queues.length(); i++) {
+                JSONObject queue = queues.getJSONObject(i);
+                String type = queue.getString("queueType");
+                this.queues.put(type, new RankedQueue(
+                                queue.getInt("wins"),
+                                queue.getInt("losses"),
+                                queue.getInt("leaguePoints"),
+                                queue.getString("tier"),
+                                queue.getString("rank"),
+                                res,
+                                type.equals(SOLO)
+                        )
+                );
+            }
+        }
 
         // Create default unranked queues
-        queues.put(FLEX, new RankedQueue(res, false));
-        queues.put(SOLO, new RankedQueue(res, true));
-        this.exists = fetchSummonerData();
-    }
-
-    /**
-     * Get the summoner name
-     *
-     * @return Summoner name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Check if a summoner was found on the API
-     *
-     * @return Boolean account exists
-     */
-    public boolean exists() {
-        return exists;
-    }
-
-    /**
-     * Get the profile icon border based on summoner level
-     *
-     * @return Profile icon border
-     */
-    public BufferedImage getProfileBorder() {
-        return profileBorder;
-    }
-
-    /**
-     * Fetch summoner data from Riot API
-     *
-     * @return JSON from API
-     */
-    private boolean fetchSummonerData() {
-        String json;
-        try {
-            String name = URLEncoder.encode(this.name, "UTF-8");
-            String url = urlPrefix + "summoner/v4/summoners/by-name/" + name + Secret.LEAGUE_KEY;
-            json = new NetworkRequest(url, false).get().body;
-            if(json == null) {
-                return false;
-            }
-            JSONObject summoner = new JSONObject(json);
-            String id = summoner.getString("id");
-            this.name = summoner.getString("name");
-            this.level = summoner.getInt("summonerLevel");
-            this.profileIcon = handler.getImageResource(res + "Summoner/Icons/" + summoner.getInt("profileIconId") + ".png");
-            this.profileBorder = handler.getImageResource(res + "Summoner/Borders/" + roundLevel(level) + ".png");
-
-            url = urlPrefix + "league/v4/entries/by-summoner/" + id + Secret.LEAGUE_KEY;
-            json = new NetworkRequest(url, false).get().body;
-            if(json != null) {
-                JSONArray queues = new JSONArray(json);
-                for(int i = 0; i < queues.length(); i++) {
-                    JSONObject queue = queues.getJSONObject(i);
-                    String type = queue.getString("queueType");
-                    this.queues.put(type, new RankedQueue(
-                                    queue.getInt("wins"),
-                                    queue.getInt("losses"),
-                                    queue.getInt("leaguePoints"),
-                                    queue.getString("tier"),
-                                    queue.getString("rank"),
-                                    res,
-                                    type.equals(SOLO)
-                            )
-                    );
-                }
-            }
-            this.profileBanner = handler.getImageResource(res + "Summoner/Banners/" + getHighestRank() + ".png");
-            url = urlPrefix + "champion-mastery/v4/champion-masteries/by-summoner/" + id + Secret.LEAGUE_KEY;
-            json = new NetworkRequest(url, false).get().body;
-            if(json != null) {
-                JSONArray champions = new JSONArray(json);
-                for(int i = 0; i < champions.length(); i++) {
-                    JSONObject champion = champions.getJSONObject(i);
-                    this.champions.add(new Champion(
-                            champion.getInt("championId"),
-                            champion.getInt("championLevel"),
-                            champion.getInt("championPoints"),
-                            res
-                    ));
-                }
-                Collections.sort(this.champions);
-            }
+        if(!queues.containsKey(FLEX)) {
+            queues.put(FLEX, new RankedQueue(res, false));
         }
-        catch(Exception e) {
-            return false;
+        if(!queues.containsKey(SOLO)) {
+            queues.put(SOLO, new RankedQueue(res, true));
         }
-        return true;
+    }
+
+    /**
+     * Get the summoner overview - name, region, etc
+     *
+     * @return Summoner overview
+     */
+    public SummonerOverview getSummonerOverview() {
+        return summonerOverview;
     }
 
     /**
@@ -146,36 +129,27 @@ public class Summoner {
     }
 
     /**
-     * Get the highest rank achieved across all ranked queues
+     * Get the highest rank achieved across the solo and flex ranked queues
      *
-     * @return Highest rank
+     * @return Highest rank achieved between solo and flex queues
      */
     private String getHighestRank() {
-        ArrayList<String> tiers = new ArrayList<>();
-        tiers.add("default");
-        tiers.add("iron");
-        tiers.add("bronze");
-        tiers.add("silver");
-        tiers.add("gold");
-        tiers.add("platinum");
-        tiers.add("master");
-        tiers.add("grandmaster");
-        tiers.add("challenger");
+        ArrayList<String> tiers = new ArrayList<>(
+                Arrays.asList(
+                        "default",
+                        "iron",
+                        "bronze",
+                        "silver",
+                        "gold",
+                        "platinum",
+                        "master",
+                        "grandmaster",
+                        "challenger"
+                )
+        );
         String solo = getSoloQueue().getTier().toLowerCase();
         String flex = getFlexQueue().getTier().toLowerCase();
-        if(tiers.indexOf(solo) > tiers.indexOf(flex)) {
-            return solo;
-        }
-        return flex;
-    }
-
-    /**
-     * Get the summoner level
-     *
-     * @return Summoner level
-     */
-    public int getLevel() {
-        return level;
+        return (tiers.indexOf(solo) > tiers.indexOf(flex)) ? solo : flex;
     }
 
     /**
@@ -203,32 +177,6 @@ public class Summoner {
      */
     public RankedQueue getSoloQueue() {
         return queues.get(SOLO);
-    }
-
-    /**
-     * Get the profile icon of the summoner
-     *
-     * @return Summoner profile icon
-     */
-    public BufferedImage getProfileIcon() {
-        return profileIcon == null ? handler.getImageResource(res + "Summoner/Icons/0.png") : profileIcon;
-    }
-
-    /**
-     * Round the summoner level to the nearest floor multiple of 25.
-     * Summoner icon border is based on level and is rewarded every 25 levels from 50 onward
-     *
-     * @param level Summoner level
-     * @return Closest floor multiple of 25
-     */
-    private int roundLevel(int level) {
-        if(level < 30) {
-            return 1;
-        }
-        if(level < 50) {
-            return 30;
-        }
-        return (int) (25 * Math.floor((double) level / 25));
     }
 
     /**
@@ -474,7 +422,7 @@ public class Summoner {
          * @return Mastery point comparison
          */
         @Override
-        public int compareTo(@NotNull Summoner.Champion o) {
+        public int compareTo(@NotNull SummonerStats.Champion o) {
             return o.getPoints() - getPoints();
         }
     }
