@@ -43,7 +43,7 @@ public class SummonerImage extends ImageBuilder {
                 }
         );
         loading.showLoading();
-        this.summonerStats = new SummonerStats(summonerOverview, getResourcePath());
+        this.summonerStats = new SummonerStats(summonerOverview);
         loading.completeStage();
         try {
             BufferedImage bg = getResourceHandler().getImageResource(getResourcePath() + "map.png");
@@ -102,7 +102,7 @@ public class SummonerImage extends ImageBuilder {
      * @param queue Ranked queue to build image for
      * @return Ranked queue summary image
      */
-    private BufferedImage buildRankedImage(SummonerStats.RankedQueue queue) {
+    private BufferedImage buildRankedImage(RankedQueue queue) {
         try {
             BufferedImage bg = queue.getBanner();
             BufferedImage helmet = queue.getHelmet();
