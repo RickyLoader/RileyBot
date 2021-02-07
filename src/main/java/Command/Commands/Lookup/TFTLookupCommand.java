@@ -1,15 +1,15 @@
 package Command.Commands.Lookup;
 
 import Command.Structure.CommandContext;
+import Command.Structure.ImageLoadingMessage;
 import LOL.SummonerOverview;
+import LOL.TFTRankedQueue;
 import Network.NetworkRequest;
 import Network.Secret;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.text.DecimalFormat;
 
 /**
  * Look up a LOL summoner and create an image displaying their TFT stats
@@ -39,36 +39,42 @@ public class TFTLookupCommand extends SummonerLookupCommand {
             ).queue();
             return;
         }
-        StringBuilder builder = new StringBuilder("```" + summonerOverview.getName() + " TFT Stats:```");
-        for(int i = 0; i < leagues.length(); i++) {
-            builder.append(parseQueue(leagues.getJSONObject(i)));
-            if(i < leagues.length() - 1) {
-                builder.append("\n\n");
-            }
-        }
-        channel.sendMessage(builder.toString()).queue();
+        TFTRankedQueue queue = parseQueue(leagues.getJSONObject(0));
+        String message = "```" + summonerOverview.getName() + " TFT Stats:```"
+                + "```Tier: " + queue.getRankSummary()
+                + "\nWins: " + queue.getWins()
+                + "\nLosses: " + queue.getLosses()
+                + "\nRatio: " + queue.getRatio()
+                + "\nLP: " + queue.getPoints()
+                + "\nVeteran: " + queue.isVeteran()
+                + "\nInactive: " + queue.isInactive()
+                + "\nFresh Blood: " + queue.isFreshBlood()
+                + "\nHot Streak: " + queue.onHotStreak()
+                + "```";
+        channel.sendMessage(message)
+                .addFile(ImageLoadingMessage.imageToByteArray(queue.getHelmet()), "helmet.png")
+                .addFile(ImageLoadingMessage.imageToByteArray(queue.getBanner()), "banner.png")
+                .addFile(ImageLoadingMessage.imageToByteArray(summonerOverview.getLevelBorder()), "border.png")
+                .addFile(ImageLoadingMessage.imageToByteArray(summonerOverview.getProfileIcon()), "profile.png")
+                .queue();
     }
 
     /**
-     * Parse a JSONObject representing a summoner's stats in a TFT queue in to a String
+     * Parse a JSONObject representing a summoner's stats in a TFT queue
+     * in to a TFTRankedQueue object
      *
      * @param queue TFT queue stats
-     * @return String summary of queue
+     * @return TFTRankedQueue object
      */
-    private String parseQueue(JSONObject queue) {
-        int wins = queue.getInt("wins");
-        int losses = queue.getInt("losses");
-        return "```" + queue.getString("queueType")
-                + ":"
-                + "\n\nTier: " + queue.getString("tier") + " " + queue.getString("rank")
-                + "\nWin/Loss/Ratio: " + wins
-                + "/" + losses
-                + "/" + new DecimalFormat("#.##").format((double) wins / losses)
-                + "\nLP: " + queue.getInt("leaguePoints")
-                + "\nVeteran: " + queue.getBoolean("veteran")
-                + "\nInactive: " + queue.getBoolean("inactive")
-                + "\nFresh Blood: " + queue.getBoolean("freshBlood")
-                + "\nHot Streak: " + queue.getBoolean("hotStreak")
-                + "```";
+    private TFTRankedQueue parseQueue(JSONObject queue) {
+        return new TFTRankedQueue.TFTRankedQueueBuilder()
+                .setWinLoss(queue.getInt("wins"), queue.getInt("losses"))
+                .setTierRank(queue.getString("tier"), queue.getString("rank"))
+                .setLeaguePoints(queue.getInt("leaguePoints"))
+                .setVeteran(queue.getBoolean("veteran"))
+                .setHotStreak(queue.getBoolean("hotStreak"))
+                .setFreshBlood(queue.getBoolean("freshBlood"))
+                .setInactive(queue.getBoolean("inactive"))
+                .build();
     }
 }
