@@ -181,31 +181,6 @@ public class SummonerImage extends ImageBuilder {
     }
 
     /**
-     * Build the profile icon from the summoner's chosen icon. Add a border around the icon based on summoner level
-     * and add summoner level to the icon.
-     *
-     * @return Summoner profile icon
-     */
-    private BufferedImage buildProfileIcon() {
-        BufferedImage profileIcon = null;
-        try {
-            profileIcon = summonerStats.getSummonerOverview().getProfileIcon();
-            BufferedImage borderOutline = summonerStats.getSummonerOverview().getLevelBorder();
-            Graphics g = profileIcon.getGraphics();
-            g.drawImage(
-                    borderOutline,
-                    getCenterX(profileIcon, borderOutline),
-                    getCenterY(profileIcon, borderOutline),
-                    null
-            );
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return profileIcon;
-    }
-
-    /**
      * Build the profile banner displaying the summoner name, icon, level, and appropriate border based on rank
      *
      * @return Summoner profile banner
@@ -214,35 +189,16 @@ public class SummonerImage extends ImageBuilder {
         BufferedImage banner = null;
         try {
             banner = summonerStats.getProfileBanner();
-            BufferedImage profileIcon = buildProfileIcon();
-            BufferedImage levelCircle = getResourceHandler().getImageResource(
-                    getResourcePath() + "Summoner/Banners/level_circle.png"
-            );
-            BufferedImage borderOutline = summonerStats.getSummonerOverview().getLevelBorder();
+            BufferedImage profileIcon = summonerStats.getSummonerOverview().getProfileIcon();
+            BufferedImage levelIcon = summonerStats.getSummonerOverview().getLevelIcon();
 
-            Graphics g = levelCircle.getGraphics();
-            g.setFont(getGameFont().deriveFont(50f));
-            FontMetrics fm = g.getFontMetrics();
-            String level = String.valueOf(summonerStats.getSummonerOverview().getLevel());
-            g.drawString(
-                    level,
-                    (levelCircle.getWidth() - fm.stringWidth(level)) / 2,
-                    (levelCircle.getHeight() / 2) + (fm.getMaxAscent() / 2)
-            );
-            g.drawImage(
-                    borderOutline,
-                    getCenterX(levelCircle, borderOutline),
-                    getCenterY(levelCircle, borderOutline),
-                    null
-            );
-
-            g = banner.getGraphics();
+            Graphics g = banner.getGraphics();
             g.setFont(getGameFont().deriveFont(80f));
-            fm = g.getFontMetrics();
+            FontMetrics fm = g.getFontMetrics();
             g.drawImage(
-                    levelCircle,
-                    banner.getWidth() - (levelCircle.getWidth() * 2),
-                    getCenterY(banner, levelCircle),
+                    levelIcon,
+                    banner.getWidth() - (levelIcon.getWidth() * 2),
+                    getCenterY(banner, levelIcon),
                     null
             );
             String name = summonerStats.getSummonerOverview().getName();

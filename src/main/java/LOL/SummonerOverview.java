@@ -1,10 +1,12 @@
 package LOL;
 
+import Bot.FontManager;
 import Bot.ResourceHandler;
 import Network.NetworkRequest;
 import Network.Secret;
 import org.json.JSONObject;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URLEncoder;
 
@@ -18,7 +20,7 @@ public class SummonerOverview {
     private final boolean exists;
     private String name, id;
     private int level;
-    private BufferedImage profileIcon, levelBorder;
+    private BufferedImage profileIcon, levelIcon;
 
     /**
      * Create the summoner overview
@@ -57,10 +59,11 @@ public class SummonerOverview {
             this.level = summoner.getInt("summonerLevel");
 
             ResourceHandler handler = new ResourceHandler();
-            this.profileIcon = getProfileIconImage(summoner.getInt("profileIconId"), handler);
-            this.levelBorder = handler.getImageResource(
+            BufferedImage border = handler.getImageResource(
                     BASE_PATH + "Borders/" + roundLevel(level) + ".png"
             );
+            this.profileIcon = buildProfileIconImage(summoner.getInt("profileIconId"), border, handler);
+            this.levelIcon = buildLevelIconImage(level, border, handler);
         }
         catch(Exception e) {
             return false;
@@ -69,17 +72,69 @@ public class SummonerOverview {
     }
 
     /**
-     * Get the summoner profile icon image. If the icon of the given id is not found,
-     * return a default icon.
+     * Build the profile icon image.
+     * Display the summoner's selected profile icon inside the given border (determined by summoner level)
      *
-     * @param id      Unique id of profile icon
-     * @param handler Resource handler
-     * @return Summoner profile icon image
+     * @param profileIconId Unique id of profile icon
+     * @param border        Border to display around the profile icon
+     * @param handler       Resource handler
+     * @return Image displaying profile icon surrounded by the level border
      */
-    private BufferedImage getProfileIconImage(int id, ResourceHandler handler) {
+    private BufferedImage buildProfileIconImage(int profileIconId, BufferedImage border, ResourceHandler handler) {
         String path = BASE_PATH + "Icons/";
-        BufferedImage desired = handler.getImageResource(path + id + ".png");
-        return desired == null ? handler.getImageResource(path + 0 + ".png") : desired;
+        BufferedImage profileIcon = handler.getImageResource(path + profileIconId + ".png");
+
+        // May not have the summoner's selected profile icon
+        if(profileIcon == null) {
+            profileIcon = handler.getImageResource(path + 0 + ".png");
+        }
+
+        return addBorderToIcon(border, profileIcon);
+    }
+
+    /**
+     * Draw the given icon inside the provided border (determined by summoner level)
+     *
+     * @param border Border to display around the icon
+     * @param icon   Icon to be displayed inside the border
+     * @return Image displaying icon surrounded by the level border
+     */
+    private BufferedImage addBorderToIcon(BufferedImage border, BufferedImage icon) {
+        Graphics g = icon.getGraphics();
+        g.drawImage(
+                border,
+                (icon.getWidth() / 2) - (border.getWidth() / 2),
+                (icon.getHeight() / 2) - (border.getHeight() / 2),
+                null
+        );
+        g.dispose();
+        return icon;
+    }
+
+    /**
+     * Build the summoner level icon image.
+     * Display the summoner's level inside the given border (determined by level)
+     *
+     * @param level   Summoner level
+     * @param border  Border to display around the summoner level
+     * @param handler Resource handler
+     * @return Image displaying summoner level surrounded by the level border
+     */
+    private BufferedImage buildLevelIconImage(int level, BufferedImage border, ResourceHandler handler) {
+        BufferedImage levelCircle = handler.getImageResource(
+                BASE_PATH + "Banners/level_circle.png"
+        );
+
+        Graphics g = levelCircle.getGraphics();
+        g.setFont(FontManager.LEAGUE_FONT.deriveFont(50f));
+        FontMetrics fm = g.getFontMetrics();
+        String levelString = String.valueOf(level);
+        g.drawString(
+                levelString,
+                (levelCircle.getWidth() - fm.stringWidth(levelString)) / 2,
+                (levelCircle.getHeight() / 2) + (fm.getMaxAscent() / 2)
+        );
+        return addBorderToIcon(border, levelCircle);
     }
 
     /**
@@ -111,16 +166,18 @@ public class SummonerOverview {
     }
 
     /**
-     * Get the border shown around the summoner level
+     * Get an image displaying the summoner's level inside the
+     * appropriate level border
      *
-     * @return Summoner level border
+     * @return Summoner level icon
      */
-    public BufferedImage getLevelBorder() {
-        return levelBorder;
+    public BufferedImage getLevelIcon() {
+        return levelIcon;
     }
 
     /**
-     * Get the profile icon of the summoner
+     * Get an image displaying the summoner's profile icon surrounded
+     * by the appropriate level border
      *
      * @return Summoner profile icon
      */
