@@ -11,16 +11,20 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Random;
+
 
 /**
  * Check out some rankings on the hub
  */
 public class HubCommand extends DiscordCommand {
     private final TheHub theHub;
+    private final Random random;
 
     public HubCommand() {
-        super("hub [#]\nhub [name]", "Check out your favourite hub homies!");
-        theHub = new TheHub();
+        super("hub [#]\nhub [name]\nhub random", "Check out your favourite hub homies!");
+        this.theHub = new TheHub();
+        this.random = new Random();
     }
 
     @Override
@@ -28,24 +32,34 @@ public class HubCommand extends DiscordCommand {
         Member member = context.getMember();
         MessageChannel channel = context.getMessageChannel();
         String message = context.getLowerCaseMessage();
-        String arg = message.replaceFirst("hub", "").replaceAll("\\s+", " ").trim();
+        String arg = message
+                .replaceFirst("hub", "")
+                .replaceAll("\\s+", " ")
+                .trim();
 
-        if(message.split(" ").length == 1 || arg.isEmpty()) {
+        if(arg.isEmpty()) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-
-        int rank = getQuantity(arg);
-
-        if(rank < 0) {
-            channel.sendMessage(
-                    member.getAsMention()
-                            + " How the fuck could someone be ranked in the negatives? What kind of ogres do you watch?"
-            ).queue();
-            return;
-        }
-
         new Thread(() -> {
+            channel.sendTyping().queue();
+            if(arg.equals("random")) {
+                Performer performer = null;
+                while(performer == null) {
+                    performer = theHub.getPerformerByRank(random.nextInt(15000) + 1);
+                }
+                channel.sendMessage(buildEmbed(performer)).queue();
+                return;
+            }
+            int rank = getQuantity(arg);
+            if(rank < 0) {
+                channel.sendMessage(
+                        member.getAsMention()
+                                + " How the fuck could someone be ranked in the negatives? What kind of ogres do you watch?"
+                ).queue();
+                return;
+            }
+
             Performer performer = rank == 0 ? theHub.getPerformerByName(arg) : theHub.getPerformerByRank(rank);
             if(performer == null) {
                 String info = rank > 0 ? "I couldn't find a **rank " + rank + "** cunt"
