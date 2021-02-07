@@ -23,7 +23,7 @@ public class Poll {
     private final EmoteListener voteListener;
     private final ProgressBar yellowBar, redBar, greenBar;
     private final String title;
-    private long messageId, startTime, endTime;
+    private long messageId, startTime, endTime, lastRefresh;
     private int totalVotes, highestVotes;
     private boolean running;
 
@@ -110,6 +110,7 @@ public class Poll {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 Emote selected = reaction.getReactionEmote().getEmote();
+                long currentTime = System.currentTimeMillis();
                 if(!running || !answers.containsKey(selected) || reaction.getMessageIdLong() != messageId) {
                     return;
                 }
@@ -118,6 +119,10 @@ public class Poll {
                 if(votes > highestVotes) {
                     highestVotes = votes;
                 }
+                if(lastRefresh != 0 && currentTime - lastRefresh < 2000) {
+                    return;
+                }
+                lastRefresh = currentTime;
                 refreshPollMessage();
             }
         };
