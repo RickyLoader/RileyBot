@@ -249,6 +249,9 @@ public class PlexServer {
      */
     public MessageEmbed searchRadarr(String query, Member member, String webhook) {
         boolean idSearch = query.matches("([t][td])\\d+");
+        if(idSearch) {
+            query = query.replaceFirst("td", "");
+        }
         String response = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get().body;
         if(response == null) {
             return buildFailedEmbed();
