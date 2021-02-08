@@ -18,12 +18,13 @@ public abstract class PageableTableEmbed extends PageableEmbed {
      * @param thumb   Thumbnail to use for embed
      * @param title   Title to use for embed
      * @param desc    Description to use for embed
+     * @param footer  Footer to use in the embed
      * @param columns Column headers to display at the top of message
      * @param bound   Maximum items to display
      * @param colour  Optional colour to use for embed
      */
-    public PageableTableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String[] columns, int bound, int... colour) {
-        super(context, items, thumb, title, desc, bound, colour);
+    public PageableTableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, String[] columns, int bound, int... colour) {
+        super(context, items, thumb, title, desc, footer, bound, colour);
         this.columns = columns;
         try {
             if(columns.length > 3) {

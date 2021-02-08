@@ -189,7 +189,7 @@ public class RiddleCommand extends DiscordCommand {
                 .setTitle(riddle.getTitle())
                 .setColor(getRiddleColour(riddle))
                 .setThumbnail("https://i.imgur.com/BGdvfJd.png")
-                .setFooter("Type riddle for help", "https://i.imgur.com/wKYK3c7.png")
+                .setFooter("Type: riddle for help", "https://i.imgur.com/wKYK3c7.png")
                 .setImage(EmbedHelper.SPACER_IMAGE);
 
         String desc = "**Riddle**: " + riddle.getQuestion() + "\n\n" + "**Guesses**: " + riddle.formatGuesses();

@@ -106,6 +106,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 getEmbedThumbnail(),
                 total + " Missing attachments",
                 null,
+                "Try: " + getHelpName(),
                 1,
                 EmbedHelper.GREEN
         ) {
@@ -512,6 +513,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 getEmbedThumbnail(),
                 getHistoryEmbedTitle(matchHistory.getName().toUpperCase()),
                 matchHistory.getSummary(),
+                "Type: " + getTrigger() + " for help",
                 new String[]{"Match", "Details", "Result"},
                 3
         ) {

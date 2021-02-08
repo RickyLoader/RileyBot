@@ -14,7 +14,7 @@ public class PlexCommand extends DiscordCommand {
 
     public PlexCommand() {
         super("plex! random\nplex! [movie query/movie id]\nplex! add: [movie query/movie id]", "Search & add movies to Plex!");
-        this.plex = new PlexServer("Type plex! for help");
+        this.plex = new PlexServer("Type: plex! for help");
     }
 
     @Override
@@ -76,11 +76,11 @@ public class PlexCommand extends DiscordCommand {
                         channel.sendMessage("I need a webhook named: ```plex``` to do that!").queue();
                         return;
                     }
-                    channel.sendMessage(plex.searchRadarr(finalQuery, context.getMember(), webhook)).queue();
+                    plex.searchRadarr(finalQuery, webhook, context);
                 });
                 return;
             }
-            channel.sendMessage(plex.searchLibrary(query)).queue();
+            plex.searchLibrary(query, context);
         }).start());
     }
 

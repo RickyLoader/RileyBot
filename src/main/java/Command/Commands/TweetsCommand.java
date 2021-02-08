@@ -45,6 +45,7 @@ public class TweetsCommand extends DiscordCommand {
                 twitterManager.getThumbnail(),
                 "My Tweets",
                 "Here are my latest " + tweets.size() + " tweets:",
+                "Try: " + getTrigger(),
                 new String[]{"Date", "Content"},
                 5,
                 EmbedHelper.BLUE

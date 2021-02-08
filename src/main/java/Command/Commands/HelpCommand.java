@@ -24,6 +24,7 @@ public class HelpCommand extends DiscordCommand {
                 context.getJDA().getSelfUser().getAvatarUrl(),
                 "RileyBot Commands",
                 "Here's some stuff I can do, now fuck off.",
+                "Type: " + getTrigger(),
                 new String[]{"Trigger", "Description"},
                 5
         ) {

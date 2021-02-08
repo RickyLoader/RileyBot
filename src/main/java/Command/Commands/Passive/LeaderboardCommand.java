@@ -84,6 +84,7 @@ public class LeaderboardCommand extends DiscordCommand {
                 Gunfight.thumbnail,
                 "GUNFIGHT LEADERBOARD!",
                 "Here are the top gunfight performances!",
+                "Try: " + getTrigger(),
                 new String[]{"RANK", "W/L", "STREAK"},
                 5
         ) {

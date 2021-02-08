@@ -22,8 +22,9 @@ public class PollMessage extends PageableListEmbed {
      *
      * @param context Command context
      * @param poll    Poll to display
+     * @param footer  Footer to use in the embed
      */
-    public PollMessage(CommandContext context, Poll poll) {
+    public PollMessage(CommandContext context, Poll poll, String footer) {
         super(
                 context,
                 Arrays.asList(poll.getQuestions()),
@@ -32,6 +33,7 @@ public class PollMessage extends PageableListEmbed {
                 "**Title**: "
                         + EmbedHelper.embedURL(poll.getTitle(), poll.getUrl())
                         + "\n**Votes**: " + (poll.isOpen() ? "None" : poll.getFormattedTotalVotes()),
+                footer,
                 3,
                 EmbedHelper.GREEN
         );

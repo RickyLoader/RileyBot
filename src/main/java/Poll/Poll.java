@@ -276,7 +276,6 @@ public class Poll {
                 pollImage += " (" + new DecimalFormat("#.##").format(percent) + "%)";
             }
 
-
             builder.addField(option.getTitle(), pollImage, false);
         }
         return builder.build();
@@ -288,7 +287,7 @@ public class Poll {
      * @return Footer text
      */
     private String getFooter() {
-        String suffix = "Type poll for help";
+        String suffix = "Type: poll for help";
         if(running) {
             return "Ends at: " + getEndTime() + " | " + getTimeRemaining() + " remaining | " + suffix;
         }

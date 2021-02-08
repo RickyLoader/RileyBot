@@ -19,9 +19,10 @@ public class PollSearchResultsMessage extends PageableTableEmbed {
      *
      * @param results Polls containing search query
      * @param query   Search query used to find results
+     * @param footer  Footer to use in the embed
      * @param context Command context
      */
-    public PollSearchResultsMessage(ArrayList<Poll> results, String query, CommandContext context) {
+    public PollSearchResultsMessage(ArrayList<Poll> results, String query, String footer, CommandContext context) {
         super(
                 context,
                 results,
@@ -30,6 +31,7 @@ public class PollSearchResultsMessage extends PageableTableEmbed {
                 results.size() + " "
                         + (results.size() == 1 ? "result" : "results")
                         + " found for: **" + query + "**",
+                footer,
                 new String[]{
                         "#",
                         "Title",

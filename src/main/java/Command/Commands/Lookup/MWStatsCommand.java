@@ -23,7 +23,7 @@ public class MWStatsCommand extends MWLookupCommand {
         );
         combatRecord.buildImage(
                 getLookupName(),
-                "Type " + getTrigger() + " for help",
+                "Type: " + getTrigger() + " for help",
                 getPlatform()
         );
     }

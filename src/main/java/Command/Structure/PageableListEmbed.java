@@ -14,11 +14,12 @@ public abstract class PageableListEmbed extends PageableEmbed {
      * @param thumb   Thumbnail to use for embed
      * @param title   Title to use for embed
      * @param desc    Description to use for embed
+     * @param footer  Footer to use in the embed
      * @param bound   Maximum items to display
      * @param colour  Optional colour to use for embed
      */
-    public PageableListEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
-        super(context, items, thumb, title, desc, bound, colour);
+    public PageableListEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
+        super(context, items, thumb, title, desc, footer, bound, colour);
     }
 
     /**

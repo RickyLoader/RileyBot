@@ -32,7 +32,7 @@ public class OSRSLookupCommand extends LookupCommand {
                 virtual,
                 xp
         );
-        hiscores.buildImage(name, "Type " + getTrigger() + " for help");
+        hiscores.buildImage(name, "Type: " + getTrigger() + " for help");
     }
 
     @Override

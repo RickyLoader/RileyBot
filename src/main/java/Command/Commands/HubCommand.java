@@ -91,7 +91,7 @@ public class HubCommand extends DiscordCommand {
                         ) + " " + rank + " - " + performer.getName()
                 )
                 .setThumbnail(thumbnail)
-                .setFooter("Type " + getHelpName().replace("\n", " | "), thumbnail)
+                .setFooter("Type: " + getHelpName().replace("\n", " | "), thumbnail)
                 .setImage(performer.getImage())
                 .setDescription(performer.getDesc())
                 .addField("Views", performer.getViews(), true)

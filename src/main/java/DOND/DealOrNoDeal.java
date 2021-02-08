@@ -184,15 +184,15 @@ public class DealOrNoDeal {
     private String getHelpMessage() {
         switch(status) {
             case SELECTING_CASE:
-                return "Type " + DealOrNoDealCommand.SELECT_CASE + " to select your case";
+                return "Type: " + DealOrNoDealCommand.SELECT_CASE + " to select your case";
             case OPENING_CASES:
-                return "Type " + DealOrNoDealCommand.OPEN_CASE + " to open a case";
+                return "Type: " + DealOrNoDealCommand.OPEN_CASE + " to open a case";
             case DEAL_OFFERED:
-                return "Type " + DealOrNoDealCommand.DEAL_OFFER + " to answer the banker";
+                return "Type: " + DealOrNoDealCommand.DEAL_OFFER + " to answer the banker";
             case OFFER_SWAP:
-                return "Type " + DealOrNoDealCommand.SWAP_OFFER + " to make your choice";
+                return "Type: " + DealOrNoDealCommand.SWAP_OFFER + " to make your choice";
             default:
-                return "Type " + DealOrNoDealCommand.TRIGGER + " for help";
+                return "Type: " + DealOrNoDealCommand.TRIGGER + " for help";
         }
     }
 

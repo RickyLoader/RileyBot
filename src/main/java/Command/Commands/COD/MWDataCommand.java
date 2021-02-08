@@ -108,6 +108,7 @@ public class MWDataCommand extends DiscordCommand {
                 Gunfight.thumbnail,
                 title,
                 null,
+                "Type: " + getTrigger() + " for help",
                 1,
                 EmbedHelper.PURPLE
         ) {

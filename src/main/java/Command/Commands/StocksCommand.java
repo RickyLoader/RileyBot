@@ -94,6 +94,7 @@ public class StocksCommand extends DiscordCommand {
                 THUMBNAIL,
                 "Stock Search Results",
                 companies.length + " results found for **" + query + "**",
+                "Try: " + getHelpName(),
                 new String[]{"Symbol", "Name"},
                 5
         ) {

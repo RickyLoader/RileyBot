@@ -87,6 +87,7 @@ public class MillionaireCommand extends DiscordCommand {
                 MillionaireGameshow.thumb,
                 "Millionaire Leaderboard",
                 "Check out **millionaire bank** to view your personal stats!",
+                "Type: " + getTrigger() + " for help",
                 new String[]{
                         "Rank",
                         "Details",

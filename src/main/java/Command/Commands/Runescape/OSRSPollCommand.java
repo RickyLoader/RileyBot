@@ -41,7 +41,12 @@ public class OSRSPollCommand extends DiscordCommand {
                     return;
                 }
                 if(results.size() > 1) {
-                    new PollSearchResultsMessage(results, message, context).showMessage();
+                    new PollSearchResultsMessage(
+                            results,
+                            message,
+                            "Try: " + getHelpName(),
+                            context
+                    ).showMessage();
                     return;
                 }
                 number = results.get(0).getNumber();
@@ -56,7 +61,7 @@ public class OSRSPollCommand extends DiscordCommand {
             ).queue();
             return;
         }
-        new PollMessage(context, poll).showMessage();
+        new PollMessage(context, poll, "Try: " + getHelpName() + " for help").showMessage();
     }
 
     @Override

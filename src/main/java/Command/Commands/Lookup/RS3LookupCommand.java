@@ -30,7 +30,7 @@ public class RS3LookupCommand extends LookupCommand {
                 context.getEmoteHelper(),
                 virtual
         );
-        hiscores.buildImage(name, "Type " + getTrigger() + " for help");
+        hiscores.buildImage(name, "Type: " + getTrigger() + " for help");
     }
 
     @Override

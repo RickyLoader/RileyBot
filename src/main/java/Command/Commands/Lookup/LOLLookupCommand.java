@@ -21,6 +21,6 @@ public class LOLLookupCommand extends SummonerLookupCommand {
                 context.getEmoteHelper(),
                 FontManager.LEAGUE_FONT
         );
-        summonerImage.buildImage(summonerOverview, "Type " + getTrigger() + " for help");
+        summonerImage.buildImage(summonerOverview, "Type: " + getTrigger() + " for help");
     }
 }

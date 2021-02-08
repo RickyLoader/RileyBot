@@ -16,7 +16,7 @@ public abstract class PageableEmbed {
     private final int bound, colour, pages;
     private final Emote forward, backward, reverse;
     private boolean defaultSort = true;
-    private final String title, desc, thumb;
+    private final String title, desc, thumb, footer;
 
     /**
      * Initialise the values
@@ -26,16 +26,18 @@ public abstract class PageableEmbed {
      * @param thumb   Thumbnail to use for embed
      * @param title   Title to use for embed
      * @param desc    Description to use for embed
+     * @param footer  Footer to use in the embed
      * @param bound   Maximum items to display
      * @param colour  Optional colour to use for embed
      */
-    public PageableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, int bound, int... colour) {
+    public PageableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
         this.channel = context.getMessageChannel();
         this.items = items;
         this.title = title;
         this.desc = desc;
         this.thumb = thumb;
         this.bound = bound;
+        this.footer = footer;
         this.colour = colour.length == 1 ? colour[0] : EmbedHelper.YELLOW;
         this.pages = (int) Math.ceil(items.size() / (double) bound);
         EmoteHelper emoteHelper = context.getEmoteHelper();
@@ -159,8 +161,12 @@ public abstract class PageableEmbed {
                 .setColor(colour)
                 .setTitle(title)
                 .setThumbnail(thumb)
-                .setFooter("Page: " + page + "/" + pages)
                 .setImage(EmbedHelper.SPACER_IMAGE);
+        String footer = this.footer;
+        if(pages > 1) {
+            footer = "Page: " + page + "/" + pages + " | " + footer;
+        }
+        builder.setFooter(footer);
 
         if(desc != null) {
             builder.setDescription(desc);
