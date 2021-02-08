@@ -220,6 +220,7 @@ public class PlexServer {
 
         if(results.length == 1) {
             context.getMessageChannel().sendMessage(getMovieEmbed(results[0], false)).queue();
+            return;
         }
         new PageableMovieSearchEmbed(context, query, results, helpMessage, true).showMessage();
     }
