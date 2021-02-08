@@ -1,6 +1,6 @@
 package Plex;
 
-import Bot.ResourceHandler;
+import Command.Structure.CommandContext;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
@@ -9,33 +9,29 @@ import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class PlexServer {
+    private final String helpMessage;
+    public static final String
+            RADARR_ICON = "https://i.imgur.com/d5p0ftd.png",
+            PLEX_ICON = "https://i.imgur.com/FdabwCm.png";
     private long timeFetched;
     private ArrayList<Movie> library;
     private EmoteHelper emoteHelper;
-    private final String helpMessage, plexIcon = "https://i.imgur.com/FdabwCm.png", radarrIcon = "https://i.imgur.com/d5p0ftd.png";
-    private String plexEmote, radarrEmote, imdbEmote, facebookEmote, youtubeEmote;
     private HashMap<String, String> plexUrls;
-    private final ResourceHandler handler;
 
     /**
      * Read in the Radarr library and remember the timestamp
      */
     public PlexServer(String helpMessage) {
         this.helpMessage = helpMessage;
-        this.handler = new ResourceHandler();
         refreshData();
     }
 
@@ -55,11 +51,6 @@ public class PlexServer {
      */
     public void setEmoteHelper(EmoteHelper emoteHelper) {
         this.emoteHelper = emoteHelper;
-        this.plexEmote = EmoteHelper.formatEmote(emoteHelper.getPlex());
-        this.radarrEmote = EmoteHelper.formatEmote(emoteHelper.getRadarr());
-        this.facebookEmote = EmoteHelper.formatEmote(emoteHelper.getFacebook());
-        this.imdbEmote = EmoteHelper.formatEmote(emoteHelper.getIMDB());
-        this.youtubeEmote = EmoteHelper.formatEmote(emoteHelper.getYoutube());
     }
 
     /**
@@ -162,14 +153,15 @@ public class PlexServer {
             String folder = movie.getString("path");
             plexUrl = folder.endsWith("/") ? plexUrls.get(folder.substring(0, folder.length() - 1)) : plexUrls.get(folder);
         }
-        return new Movie(
-                movie.has("imdbId") ? movie.getString("imdbId") : null,
-                String.valueOf(movie.getInt("tmdbId")),
-                movie.getString("title"),
-                movie.has("overview") ? movie.getString("overview") : null,
-                movie.has("inCinemas") ? movie.getString("inCinemas") : null,
-                plexUrl,
-                downloaded);
+        return new Movie.MovieBuilder()
+                .setImdbId(movie.has("imdbId") ? movie.getString("imdbId") : null)
+                .setTmdbId(String.valueOf(movie.getInt("tmdbId")))
+                .setTitle(movie.getString("title"))
+                .setSummary(movie.has("overview") ? movie.getString("overview") : null)
+                .setReleaseDate(movie.has("inCinemas") ? movie.getString("inCinemas") : null)
+                .setPlexURL(plexUrl)
+                .setOnPlex(downloaded)
+                .build();
     }
 
     /**
@@ -184,13 +176,20 @@ public class PlexServer {
             movie.completeMovieDetails();
         }
         EmbedBuilder builder = new EmbedBuilder()
-                .setThumbnail(movie.isOnPlex() ? plexIcon : radarrIcon)
+                .setThumbnail(movie.isOnPlex() ? PLEX_ICON : RADARR_ICON)
                 .setColor(movie.isOnPlex() ? EmbedHelper.ORANGE : EmbedHelper.BLUE)
                 .setTitle(adding ? movie.getTitle() + " - Added to Radarr queue" : movie.getTitle());
         if(movie.getPoster() != null) {
             builder.setImage(movie.getPoster());
         }
-        builder.setDescription(movie.buildEmbedDescription(imdbEmote, facebookEmote, youtubeEmote, plexEmote));
+        builder.setDescription(
+                movie.buildEmbedDescription(
+                        EmoteHelper.formatEmote(emoteHelper.getIMDB()),
+                        EmoteHelper.formatEmote(emoteHelper.getFacebook()),
+                        EmoteHelper.formatEmote(emoteHelper.getYoutube()),
+                        EmoteHelper.formatEmote(emoteHelper.getPlex())
+                )
+        );
         double rating = movie.getRating();
         builder.setFooter("TMDB: " + ((rating == 0) ? "N/A" : rating) + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getFormattedReleaseDate(), "https://i.imgur.com/J1JGC4J.png");
         return builder.build();
@@ -198,11 +197,13 @@ public class PlexServer {
 
     /**
      * Search for a movie currently in the Radarr library
+     * Display either a message embed detailing the singular movie found, or a pageable message embed
+     * displaying the search results.
      *
-     * @param query Search query - id or title
-     * @return Single movie embed or embed containing search results
+     * @param query   Search query - id or title
+     * @param context Command context for initialising pageable embed
      */
-    public MessageEmbed searchLibrary(String query) {
+    public void searchLibrary(String query, CommandContext context) {
         Movie[] results;
 
         // tt12345 or td12345
@@ -218,9 +219,9 @@ public class PlexServer {
         }
 
         if(results.length == 1) {
-            return getMovieEmbed(results[0], false);
+            context.getMessageChannel().sendMessage(getMovieEmbed(results[0], false)).queue();
         }
-        return buildSearchEmbed(query, results, true);
+        new PageableMovieSearchEmbed(context, query, results, helpMessage, true).showMessage();
     }
 
     /**
@@ -233,7 +234,7 @@ public class PlexServer {
                 .setTitle("Plex Movie Search")
                 .setDescription("Something went wrong, try again in a bit.")
                 .setColor(EmbedHelper.RED)
-                .setThumbnail(plexIcon)
+                .setThumbnail(PLEX_ICON)
                 .setFooter(helpMessage)
                 .build();
     }
@@ -241,20 +242,22 @@ public class PlexServer {
     /**
      * Search Radarr for a movie not currently in the library.
      * If a singular result is found, send a request to Radarr to add it to the library.
+     * Display either a message embed detailing the singular movie found, or a pageable message embed
+     * displaying the search results.
      *
      * @param query   Search query - id or title
-     * @param member  Member who requested search
      * @param webhook Webhook URL to respond to
-     * @return MessageEmbed detailing search results or a movie being added to the library
+     * @param context Command context for initialising pageable embed
      */
-    public MessageEmbed searchRadarr(String query, Member member, String webhook) {
+    public void searchRadarr(String query, String webhook, CommandContext context) {
         boolean idSearch = query.matches("([t][td])\\d+");
         if(idSearch) {
             query = query.replaceFirst("td", "");
         }
         String response = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get().body;
         if(response == null) {
-            return buildFailedEmbed();
+            context.getMessageChannel().sendMessage(buildFailedEmbed()).queue();
+            return;
         }
         JSONArray searchResults = idSearch ? new JSONArray().put(new JSONObject(response)) : new JSONArray(response);
         Movie[] movies = parseMovies(searchResults, true).toArray(new Movie[0]);
@@ -262,11 +265,14 @@ public class PlexServer {
             for(int i = 0; i < searchResults.length(); i++) {
                 JSONObject result = searchResults.getJSONObject(i);
                 if(result.getInt("tmdbId") == Integer.parseInt(movies[0].getTmdbId())) {
-                    return getMovieEmbed(addToRadarr(result, member, webhook), true);
+                    context.getMessageChannel().sendMessage(
+                            getMovieEmbed(addToRadarr(result, context.getMember(), webhook), true)
+                    ).queue();
+                    return;
                 }
             }
         }
-        return buildSearchEmbed(query, movies, false);
+        new PageableMovieSearchEmbed(context, query, movies, helpMessage, false).showMessage();
     }
 
     /**
@@ -317,7 +323,7 @@ public class PlexServer {
      * @return Filtered array of movies that contain the query in the title
      */
     private Movie[] searchByQuery(String query) {
-        return getMatchingMovies(movie -> movie.title.toLowerCase().contains(query));
+        return getMatchingMovies(movie -> movie.getTitle().toLowerCase().contains(query));
     }
 
     /**
@@ -327,7 +333,7 @@ public class PlexServer {
      * @return Filtered array of movies that match the title
      */
     private Movie[] searchByTitle(String title) {
-        return getMatchingMovies(movie -> movie.title.equalsIgnoreCase(title));
+        return getMatchingMovies(movie -> movie.getTitle().equalsIgnoreCase(title));
     }
 
     /**
@@ -350,81 +356,6 @@ public class PlexServer {
      */
     private Movie[] getMatchingMovies(Predicate<Movie> p) {
         return library.stream().filter(p).toArray(Movie[]::new);
-    }
-
-    /**
-     * Build an embed displaying the library search results of a query
-     *
-     * @param query   Search query
-     * @param movies  Movie search results
-     * @param library Library search results
-     * @return Embed displaying search results
-     */
-    private MessageEmbed buildSearchEmbed(String query, Movie[] movies, boolean library) {
-        Arrays.sort(movies);
-        int bound = Math.min(5, movies.length);
-        EmbedBuilder builder = new EmbedBuilder()
-                .setColor(library ? EmbedHelper.ORANGE : EmbedHelper.BLUE)
-                .setThumbnail(library ? plexIcon : radarrIcon)
-                .setTitle(library ? "Plex Movie Search" : "Radarr Movie Search")
-                .setFooter(helpMessage);
-        if(bound == 0) {
-            String description = "No movie results found for: **" + query + "**, try again cunt.";
-            if(!library) {
-                description += "\n\nI won't find movies that are already on Radarr.";
-            }
-            builder.setDescription(description);
-            return builder.build();
-        }
-
-        String description = buildEmoteKey(movies, bound, library)
-                + "I found "
-                + movies.length
-                + " results for: **"
-                + query
-                + "**"
-                + "\n\nNarrow it down next time cunt, here"
-                + ((bound == movies.length) ? " they are:" : "'s " + bound + " of them:");
-
-        builder.setDescription(description);
-
-        for(int i = 0; i < bound; i++) {
-            Movie movie = movies[i];
-            String title = movie.getFormattedTitle();
-            String platform = movie.isOnPlex() ? plexEmote + " Plex" : radarrEmote + " Radarr";
-            String date = movie.getFormattedReleaseDate();
-            if(i == 0) {
-                builder.addField(EmbedHelper.getTitleField("Platform", platform))
-                        .addField(EmbedHelper.getTitleField("Title", title))
-                        .addField(EmbedHelper.getTitleField("Release Date", date));
-            }
-            else {
-                builder.addField(EmbedHelper.getValueField(platform))
-                        .addField(EmbedHelper.getValueField(title))
-                        .addField(EmbedHelper.getValueField(date));
-            }
-        }
-        return builder.build();
-    }
-
-    /**
-     * Build the emote key to explain the platform emotes that are required
-     * based on the list of movies
-     *
-     * @param movies  List of movies
-     * @param bound   Number of movies to check
-     * @param library Movies are from library
-     * @return Emote key
-     */
-    private String buildEmoteKey(Movie[] movies, long bound, boolean library) {
-        StringBuilder key = new StringBuilder();
-        if(Arrays.stream(movies).limit(bound).anyMatch(Movie::isOnPlex)) {
-            key.append(plexEmote).append(" = On Plex\n\n");
-        }
-        if(Arrays.stream(movies).limit(bound).anyMatch(movie -> !movie.isOnPlex())) {
-            key.append(radarrEmote).append(library ? " = On Radarr - Movie **is not** on Plex but is being monitored.\n\n" : " = Available on Radarr - Search by the id to add to Plex.\n\n");
-        }
-        return key.toString();
     }
 
     /**
@@ -480,565 +411,5 @@ public class PlexServer {
      */
     public long getTimeFetched() {
         return timeFetched;
-    }
-
-    /**
-     * Hold information about a movie on Radarr
-     */
-    public class Movie implements Comparable<Movie> {
-        private final String tmdbId, title, summary, plexURL;
-        private String contentRating, tagline, director, cast, language, genre, poster, imdbId, imdbURL, trailer, facebook;
-        private final Date releaseDate;
-        private double rating;
-        private long budget, revenue, duration;
-        private boolean complete;
-        private final boolean onPlex;
-
-        /**
-         * Construct the movie
-         *
-         * @param imdbId  IMDB (tt6053438) id of movie
-         * @param tmdbId  TMDB (14161) id of movie
-         * @param title   Title of movie
-         * @param summary Movie synopsis
-         * @param plexURL Plex direct URL to movie
-         * @param onPlex  Movie is on Plex
-         */
-        public Movie(String imdbId, String tmdbId, String title, String summary, String releaseDate, String plexURL, boolean onPlex) {
-            this.imdbId = imdbId;
-            this.imdbURL = buildIMDBUrl(imdbId);
-            this.tmdbId = tmdbId;
-            this.title = title;
-            this.summary = (summary == null || summary.length() < 175) ? summary : summary.substring(0, 175) + "...";
-            this.releaseDate = releaseDate == null ? null : parseReleaseDate(releaseDate);
-            this.onPlex = onPlex;
-            this.plexURL = plexURL;
-            this.complete = false;
-        }
-
-        /**
-         * Parse the movie to JSON
-         *
-         * @param member    Member who requested movie
-         * @param requested Time of request
-         * @param webhook   Webhook URL to respond to
-         * @return JSON formatted movie
-         */
-        public String toJSON(Member member, long requested, String webhook) {
-            return new JSONObject()
-                    .put("imdb_id", imdbId)
-                    .put("title", title)
-                    .put("tagline", tagline == null ? JSONObject.NULL : tagline)
-                    .put("summary", summary == null ? JSONObject.NULL : summary)
-                    .put("cast", cast == null ? JSONObject.NULL : cast)
-                    .put("language", language)
-                    .put("genre", genre == null ? JSONObject.NULL : genre)
-                    .put("poster", poster == null ? JSONObject.NULL : poster)
-                    .put("imdb_url", imdbURL)
-                    .put("director", director == null ? JSONObject.NULL : director)
-                    .put("release_date", getFormattedReleaseDate())
-                    .put("content_rating", contentRating)
-                    .put("trailer", trailer == null ? JSONObject.NULL : trailer)
-                    .put("facebook", facebook == null ? JSONObject.NULL : facebook)
-                    .put("rating", rating == 0 ? JSONObject.NULL : rating)
-                    .put("budget", budget > 0 ? formatUSD(budget) : JSONObject.NULL)
-                    .put("revenue", revenue > 0 ? formatUSD(revenue) : JSONObject.NULL)
-                    .put("member", member.getAsMention())
-                    .put("duration", duration > 0 ? getDuration() : JSONObject.NULL)
-                    .put("requested", requested)
-                    .put("webhook", webhook)
-                    .toString();
-        }
-
-        /**
-         * Build the youtube trailer URL from the id
-         *
-         * @param trailerId Youtube trailer id (Z9q1qJi1nMs)
-         * @return Youtube trailer URL
-         */
-        private String buildTrailerURL(String trailerId) {
-            return "https://www.youtube.com/watch?v=" + trailerId;
-        }
-
-        /**
-         * Return whether movie is on Plex (Radarr knows it is downloaded)
-         *
-         * @return Movie is on Plex
-         */
-        public boolean isOnPlex() {
-            return onPlex;
-        }
-
-        /**
-         * Does the movie have the required data from The Movie Database
-         *
-         * @return Movie has complete data for display
-         */
-        public boolean isComplete() {
-            return complete;
-        }
-
-        /**
-         * Complete the movie details that aren't provided by Radarr using The Movie Database
-         */
-        public void completeMovieDetails() {
-            if(complete) {
-                System.out.println("Movie is already complete!");
-                return;
-            }
-            String url = "https://api.themoviedb.org/3/movie/" + tmdbId + "?api_key=" + Secret.TMDB_KEY + "&append_to_response=credits,release_dates,videos,external_ids&language=en-US";
-            JSONObject movie = new JSONObject(new NetworkRequest(url, false).get().body);
-            this.genre = parseGenre(movie.getJSONArray("genres"));
-            this.budget = movie.getLong("budget");
-            this.revenue = movie.getLong("revenue");
-            this.language = parseLanguage(movie);
-            this.rating = movie.getDouble("vote_average");
-            this.trailer = parseTrailer(movie.getJSONObject("videos").getJSONArray("results"));
-            this.facebook = parseFacebook(movie.getJSONObject("external_ids"));
-            String tagline = movie.getString("tagline");
-            this.tagline = tagline.isEmpty() ? null : tagline;
-            this.contentRating = parseContentRating(movie.getJSONObject("release_dates").getJSONArray("results"));
-            this.duration = movie.getInt("runtime");
-            this.poster = movie.isNull("poster_path") ? null : "https://image.tmdb.org/t/p/original/" + movie.getString("poster_path");
-            JSONObject credits = movie.getJSONObject("credits");
-            this.cast = parseCast(credits.getJSONArray("cast"));
-            this.director = parseDirectors(credits.getJSONArray("crew"));
-            if(this.imdbId == null) {
-                this.imdbId = movie.getString("imdb_id");
-                this.imdbURL = buildIMDBUrl(this.imdbId);
-            }
-            this.complete = true;
-        }
-
-        /**
-         * Parse the trailer from the TMDB response
-         *
-         * @param videos Videos for movie
-         * @return Trailer URL
-         */
-        private String parseTrailer(JSONArray videos) {
-            for(int i = 0; i < videos.length(); i++) {
-                JSONObject video = videos.getJSONObject(i);
-                if(video.getString("site").equals("YouTube") && video.getString("type").equals("Trailer")) {
-                    return buildTrailerURL(video.getString("key"));
-                }
-            }
-            return null;
-        }
-
-        /**
-         * Parse the Facebook URL from the TMDB response
-         *
-         * @param socials Social media locations
-         * @return Facebook URL
-         */
-        private String parseFacebook(JSONObject socials) {
-            return socials.isNull("facebook_id") ? null : buildFacebookUrl(socials.getString("facebook_id"));
-        }
-
-        /**
-         * Parse the director(s) from the TMDB response
-         *
-         * @param crew Crew list
-         * @return String containing director(s)
-         */
-        private String parseDirectors(JSONArray crew) {
-            ArrayList<String> directors = new ArrayList<>();
-            for(int i = 0; i < crew.length(); i++) {
-                JSONObject member = crew.getJSONObject(i);
-                if(member.getString("department").equals("Directing") && member.getString("job").equals("Director")) {
-                    directors.add(member.getString("name"));
-                }
-            }
-            return StringUtils.join(directors, ", ");
-        }
-
-        /**
-         * Parse the top 3 cast members from the TMDB response
-         *
-         * @param cast Cast list
-         * @return String containing top 3 cast members
-         */
-        private String parseCast(JSONArray cast) {
-            int quantity = Math.min(3, cast.length());
-            String[] topCast = new String[quantity];
-            for(int i = 0; i < quantity; i++) {
-                topCast[i] = cast.getJSONObject(i).getString("name");
-            }
-            return StringUtils.join(topCast, ", ");
-        }
-
-        /**
-         * Parse the US content rating from the TMDB response
-         *
-         * @param releases Country release array
-         * @return Movie content rating/certification - G, PG..
-         */
-        private String parseContentRating(JSONArray releases) {
-            String contentRating = null;
-            for(int i = 0; i < releases.length(); i++) {
-                JSONObject release = releases.getJSONObject(i);
-                if(!release.getString("iso_3166_1").equals("US")) {
-                    continue;
-                }
-                contentRating = release.getJSONArray("release_dates").getJSONObject(0).getString("certification");
-            }
-            return contentRating == null || contentRating.isEmpty() ? "N/A" : contentRating;
-        }
-
-        /**
-         * Parse the genre data from The Movie Database
-         *
-         * @param genres Genre JSON
-         * @return Movie genre(s)
-         */
-        private String parseGenre(JSONArray genres) {
-            String[] genre = new String[genres.length()];
-            for(int i = 0; i < genres.length(); i++) {
-                genre[i] = genres.getJSONObject(i).getString("name");
-            }
-            return StringUtils.join(genre, ", ");
-        }
-
-        /**
-         * Get the URL to the IMDB page of the movie from The Movie Database
-         *
-         * @return IMDB URL
-         */
-        public String getIMDBUrl() {
-            return imdbURL;
-        }
-
-        /**
-         * Build the URL to the IMDB page of the movie from the imdb id
-         *
-         * @return IMDB URL
-         */
-        private String buildIMDBUrl(String id) {
-            return "https://www.imdb.com/title/" + id;
-        }
-
-        /**
-         * Build the URL to the Facebook page of the movie from page id
-         *
-         * @return Facebook URL
-         */
-        private String buildFacebookUrl(String id) {
-            return "https://www.facebook.com/" + id;
-        }
-
-        /**
-         * Get the movie genre(s)
-         *
-         * @return Movie genre(s)
-         */
-        public String getGenre() {
-            return genre;
-        }
-
-        /**
-         * Get the movie poster
-         *
-         * @return Movie poster thumbnail
-         */
-        public String getPoster() {
-            return poster;
-        }
-
-        /**
-         * Get the movie budget
-         *
-         * @return Movie budget
-         */
-        public long getBudget() {
-            return budget;
-        }
-
-        /**
-         * Get the box office revenue
-         *
-         * @return Movie revenue
-         */
-        public long getRevenue() {
-            return revenue;
-        }
-
-        /**
-         * Format a long n to $n USD
-         *
-         * @param amount Long amount
-         * @return Formatted USD currency string
-         */
-        private String formatUSD(long amount) {
-            return String.format("$%,d USD", amount);
-        }
-
-        /**
-         * Parse the movie language data from The Movie Database
-         *
-         * @param movie Movie JSON from The Movie Database
-         * @return Movie language
-         */
-        public String parseLanguage(JSONObject movie) {
-            String iso = movie.getString("original_language");
-            JSONArray spokenLanguages = movie.getJSONArray("spoken_languages");
-
-            for(int i = 0; i < spokenLanguages.length(); i++) {
-                JSONObject lang = spokenLanguages.getJSONObject(i);
-                if(lang.getString("iso_639_1").equals(iso)) {
-                    language = lang.getString("name");
-                    break;
-                }
-            }
-
-            /*
-             * Original language is based on where the movie was filmed - English movie filmed in Germany
-             * would show German as the original language but wouldn't be present in spoken languages.
-             */
-            if(language == null) {
-                if(spokenLanguages.length() > 0) {
-                    language = spokenLanguages.getJSONObject(0).getString("name");
-                }
-                else {
-                    language = "N/A";
-                }
-            }
-
-            // Get the English name of the language
-            if(!language.equals("English")) {
-                language = getISOEnglishName(iso);
-            }
-            return language;
-        }
-
-        /**
-         * Get the English name of a language from the ISO code
-         *
-         * @return English name of language
-         */
-        private String getISOEnglishName(String iso) {
-            String language = iso;
-            try {
-                JSONArray allLanguages = new JSONArray(
-                        handler.getResourceFileAsString("/Movie/languages.json")
-                );
-                for(int i = 0; i < allLanguages.length(); i++) {
-                    JSONObject lang = allLanguages.getJSONObject(i);
-                    if(lang.getString("iso_639_1").equals(iso)) {
-                        language = lang.getString("english_name");
-                        break;
-                    }
-                }
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-            }
-            return language;
-        }
-
-        /**
-         * Get the movie language
-         *
-         * @return Movie language
-         */
-        public String getLanguage() {
-            return language;
-        }
-
-        /**
-         * Format the release date to NZ format
-         *
-         * @param releaseDate String date
-         * @return NZ formatted release date
-         */
-        private Date parseReleaseDate(String releaseDate) {
-            try {
-                return new SimpleDateFormat("yyyy-MM-dd").parse(releaseDate);
-            }
-            catch(ParseException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        /**
-         * Get the release date formatted to NZ standard
-         *
-         * @return Formatted release date
-         */
-        public String getFormattedReleaseDate() {
-            return releaseDate == null ? "N/A" : new SimpleDateFormat("dd/MM/yyyy").format(releaseDate);
-        }
-
-        /**
-         * Get the release date
-         *
-         * @return Release date
-         */
-        public Date getReleaseDate() {
-            return releaseDate;
-        }
-
-        /**
-         * Get the IMDB rating of the movie
-         *
-         * @return IMDB rating
-         */
-        public double getRating() {
-            return rating;
-        }
-
-        /**
-         * Get the duration of the movie in HH:mm:ss
-         *
-         * @return Formatted duration of movie
-         */
-        public String getDuration() {
-            return EmbedHelper.formatDuration(duration * 60000);
-        }
-
-        /**
-         * Get the title of the movie
-         *
-         * @return Movie title
-         */
-        public String getTitle() {
-            return title;
-        }
-
-        /**
-         * Get the title with the id attached
-         *
-         * @return Title with id
-         */
-        public String getFormattedTitle() {
-            return title + "\n(" + (imdbId == null ? "td" + tmdbId : imdbId) + ")";
-        }
-
-        /**
-         * Get the content rating of the movie - G, PG..
-         *
-         * @return Content rating of movie
-         */
-        public String getContentRating() {
-            return contentRating;
-        }
-
-        /**
-         * Get the IMDB ID of the movie
-         *
-         * @return IMDB ID
-         */
-        public String getImdbId() {
-            return imdbId;
-        }
-
-        /**
-         * Get the TMDB ID of the movie
-         *
-         * @return TMDB ID
-         */
-        public String getTmdbId() {
-            return tmdbId;
-        }
-
-        /**
-         * Build a summary String of movie Facebook, IMDB, and trailer
-         *
-         * @param facebookEmote Facebook emote
-         * @param imdbEmote     IMDB emote
-         * @param youtubeEmote  Youtube emote
-         * @param plexEmote     Plex emote
-         * @return Movie social summary
-         */
-        private String buildSocialSummary(String facebookEmote, String imdbEmote, String youtubeEmote, String plexEmote) {
-            ArrayList<String> elements = new ArrayList<>();
-            if(imdbURL != null) {
-                elements.add(EmbedHelper.embedURL(imdbEmote + " IMDB", imdbURL));
-            }
-            if(trailer != null) {
-                elements.add(EmbedHelper.embedURL(youtubeEmote + " Trailer", trailer));
-            }
-            if(facebook != null) {
-                elements.add(EmbedHelper.embedURL(facebookEmote + " Facebook", facebook));
-            }
-            if(plexURL != null) {
-                elements.add(EmbedHelper.embedURL(plexEmote + " Plex", plexURL));
-            }
-            return elements.isEmpty() ? null : StringUtils.join(elements, " | ");
-        }
-
-        /**
-         * Format the movie information in to a String summary
-         *
-         * @param facebookEmote Facebook emote
-         * @param imdbEmote     IMDB emote
-         * @param youtubeEmote  Youtube emote
-         * @param plexEmote     Plex emote
-         * @return Summary of movie information
-         */
-        public String buildEmbedDescription(String imdbEmote, String facebookEmote, String youtubeEmote, String plexEmote) {
-            StringBuilder desc = new StringBuilder();
-            desc.append(onPlex ? "Movie **is** on Plex" : "Movie **is not** on Plex but is being monitored.");
-
-            if(summary != null) {
-                desc.append("\n\n**Synopsis**: ").append(summary);
-            }
-
-            if(tagline != null) {
-                desc.append("\n\n**Tagline**: ").append(tagline);
-            }
-
-            if(!director.isEmpty()) {
-                desc.append("\n\n**Director**: ").append(director);
-            }
-
-            if(!cast.isEmpty()) {
-                desc.append("\n\n**Cast**: ").append(cast);
-            }
-
-            if(!genre.isEmpty()) {
-                desc.append("\n\n**Genre**: ").append(getGenre());
-            }
-
-            if(!language.equals("English")) {
-                desc.append("\n\n**Language**: ").append(language);
-            }
-
-            if(duration > 0) {
-                desc.append("\n\n**Duration**: ").append(getDuration());
-            }
-
-            if(budget > 0) {
-                desc.append("\n\n**Budget**: ").append(formatUSD(budget));
-            }
-
-            if(revenue > 0) {
-                desc.append("\n\n**Box Office**: ").append(formatUSD(revenue));
-            }
-            String infoSummary = buildSocialSummary(facebookEmote, imdbEmote, youtubeEmote, plexEmote);
-            if(infoSummary != null) {
-                desc.append("\n\n").append(infoSummary);
-            }
-
-            return desc.toString();
-        }
-
-        /**
-         * Sort in descending order of release date
-         */
-        @Override
-        public int compareTo(@NotNull PlexServer.Movie o) {
-            // Movies without a known release date should be treated as the highest date
-            Date a = o.getReleaseDate();
-            Date b = getReleaseDate();
-            if(a == null) {
-                return 1;
-            }
-            if(b == null) {
-                return -1;
-            }
-            return a.compareTo(b);
-        }
     }
 }
