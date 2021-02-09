@@ -2,6 +2,7 @@ package Runescape.Stats;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
+import Command.Structure.DonutChart;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import static Command.Structure.DonutChart.*;
 import static Runescape.Skill.SKILL_NAME.*;
 
 /**
@@ -140,7 +142,7 @@ public class RS3Hiscores extends Hiscores {
      */
     private BufferedImage buildClueSection(String[] clues) {
         BufferedImage clueSection = null;
-        try{
+        try {
             clueSection = handler.getImageResource(getResourcePath() + "Templates/clue_section.png");
             Graphics g = clueSection.getGraphics();
             g.setFont(getGameFont().deriveFont(40f));
@@ -154,7 +156,7 @@ public class RS3Hiscores extends Hiscores {
             }
             g.dispose();
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
         }
         return clueSection;
@@ -168,7 +170,7 @@ public class RS3Hiscores extends Hiscores {
      */
     private BufferedImage buildSkillSection(RS3PlayerStats playerStats) {
         BufferedImage skillSection = null;
-        try{
+        try {
             setGameFont(new Font("TrajanPro-Regular", Font.PLAIN, 55));
             skillSection = getResourceHandler().getImageResource(
                     getResourcePath() + "Templates/skills_section.png"
@@ -213,7 +215,7 @@ public class RS3Hiscores extends Hiscores {
             g.drawString(String.valueOf(playerStats.getCombatLevel()), 730, totalY);
             g.dispose();
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
         }
         return skillSection;
@@ -227,7 +229,7 @@ public class RS3Hiscores extends Hiscores {
      */
     private BufferedImage buildTitleSection(RS3PlayerStats playerStats) {
         BufferedImage titleSection = null;
-        try{
+        try {
             String name = playerStats.getName();
             titleSection = handler.getImageResource(getResourcePath() + "Templates/title_section.png");
             BufferedImage avatar = ImageIO.read(
@@ -306,7 +308,7 @@ public class RS3Hiscores extends Hiscores {
             }
             g.dispose();
         }
-        catch(Exception e){
+        catch(Exception e) {
             e.printStackTrace();
         }
         return titleSection;
@@ -319,43 +321,29 @@ public class RS3Hiscores extends Hiscores {
      * @return Quest section displaying player quest stats
      */
     private BufferedImage buildQuestSection(RuneMetrics runeMetrics) {
-        BufferedImage questSection = null;
-        try{
-            double completed = runeMetrics.getQuestsCompleted();
-            double notStarted = runeMetrics.getQuestsNotStarted();
-            double started = runeMetrics.getQuestsStarted();
-            double total = runeMetrics.getTotalQuests();
+        Section[] sections = new Section[]{
+                new Section("Not Started", runeMetrics.getQuestsNotStarted(), red),
+                new Section("In Progress", runeMetrics.getQuestsStarted(), blue),
+                new Section("Completed", runeMetrics.getQuestsCompleted(), orange)
+        };
+        BufferedImage questSection = handler.getImageResource(getResourcePath() + "Templates/quest_section.png");
+        DonutChart donutChart = new DonutChart(sections, getGameFont());
+        Graphics g = questSection.getGraphics();
+        int y = 150;
+        g.drawImage(
+                donutChart.getChart(),
+                (questSection.getWidth() / 2) - (donutChart.getChart().getWidth() / 2),
+                y,
+                null
+        );
 
-            questSection = handler.getImageResource(getResourcePath() + "Templates/quest_section.png");
-            Graphics2D g = (Graphics2D) questSection.getGraphics();
-            g.setStroke(new BasicStroke(80f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            int radius = 150;
-            int diameter = radius * 2;
-            int x = (questSection.getWidth() / 2) - radius;
-            int y = (questSection.getHeight() / 4);
-            double angle = 360;
-
-            int notStartedAngle = (int) (angle * (notStarted / total));
-            int startedAngle = (int) (angle * (started / total));
-            int completeAngle = (int) (angle - (startedAngle + notStartedAngle));
-            g.setColor(red);
-            g.drawArc(x, y, diameter, diameter, 90, notStartedAngle);
-            g.setColor(blue);
-            g.drawArc(x, y, diameter, diameter, notStartedAngle + 90, startedAngle);
-            g.setColor(orange);
-            g.drawArc(x, y, diameter, diameter, notStartedAngle + startedAngle + 90, completeAngle);
-            g.setFont(getGameFont().deriveFont(40f));
-            g.setColor(orange);
-            FontMetrics fm = g.getFontMetrics();
-            g.drawString(String.valueOf((int) completed), 385, 619 - (fm.getHeight() / 2) + fm.getAscent());
-            g.drawString(String.valueOf((int) started), 385, 693 - (fm.getHeight() / 2) + fm.getAscent());
-            g.drawString(String.valueOf((int) notStarted), 385, 767 - (fm.getHeight() / 2) + fm.getAscent());
-            g.dispose();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+        g.drawImage(
+                donutChart.getKey(),
+                (questSection.getWidth() / 2) - (donutChart.getKey().getWidth() / 2),
+                y + donutChart.getChart().getHeight() + 20,
+                null
+        );
+        g.dispose();
         return questSection;
     }
 
