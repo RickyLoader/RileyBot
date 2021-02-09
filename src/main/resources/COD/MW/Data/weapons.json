@@ -5812,6 +5812,16 @@
             "description": "The ultimate run and gun modification when agility is more important than precision.  Removing the stock greatly increases movement.",
             "real_name": "No Stock",
             "category": "backpiece"
+          },
+          "stockl": {
+            "description": "Ultralight stock speeds up weapon handling and movement at the expense of aiming stability.",
+            "real_name": "Skeleton Stock",
+            "category": "backpiece"
+          },
+          "stockh": {
+            "description": "Heavy duty stock provides stability while aiming.",
+            "real_name": "Field LMG Stock",
+            "category": "backpiece"
           }
         },
         "image_url": "https://i.imgur.com/WW41vIv.png",
@@ -5820,7 +5830,7 @@
       "iw8_ar_asierra12": {
         "attachments": {
           "ubshtgn": {
-            "description": "Single fire underbarrel ^2shotgun^7 provides reliable backup for close quarters encounters.",
+            "description": "Single fire underbarrel shotgun provides reliable backup for close quarters encounters.",
             "real_name": "12-Gauge Deputy",
             "category": "undermount"
           },
