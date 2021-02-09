@@ -49,6 +49,8 @@ public class DonutChart {
                 (squareSize * sections.length) + (gap * (sections.length + 1)),
                 BufferedImage.TYPE_INT_ARGB
         );
+
+        Arrays.sort(sections, (o1, o2) -> o2.getQuantity() - o1.getQuantity());
         Graphics g = key.getGraphics();
 
         for(Section section : sections) {
