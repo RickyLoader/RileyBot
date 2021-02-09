@@ -7,7 +7,7 @@ public class Mode {
     private final String codename, name;
 
     /**
-     * Create a map
+     * Create a mode
      *
      * @param codename Mode codename e.g "war"
      * @param name     Mode real name e.g "Team Deathmatch"
