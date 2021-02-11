@@ -67,6 +67,7 @@ public class StocksCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
+        channel.sendTyping().queue();
         Company[] companies = getCompaniesByQuery(query.toLowerCase());
         if(companies.length == 0) {
             channel.sendMessage(member.getAsMention() + " I couldn't find anything for **" + query + "**!").queue();
