@@ -551,4 +551,11 @@ public class EmoteHelper {
     public Emote getLoadouts() {
         return get("804264824170217473");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/809291495257014322.png"/>
+     */
+    public Emote getBreakdown() {
+        return get("809291495257014322");
+    }
 }
