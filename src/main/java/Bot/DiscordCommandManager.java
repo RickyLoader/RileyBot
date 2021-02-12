@@ -32,7 +32,7 @@ import java.util.Random;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
-    public static final CODManager codManager = new CODManager();
+    public static final CODManager codManager = null;
     private EmoteHelper emoteHelper;
 
     /**
@@ -187,6 +187,7 @@ public class DiscordCommandManager {
         addCommand(new StocksCommand());
         addCommand(new MWDataCommand());
         addCommand(new TFTLookupCommand());
+        addCommand(new TTVLookupCommand());
     }
 
     /**
