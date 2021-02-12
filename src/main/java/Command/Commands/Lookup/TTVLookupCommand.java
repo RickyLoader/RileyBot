@@ -151,10 +151,17 @@ public class TTVLookupCommand extends LookupCommand {
         boolean live = streamer.isStreaming();
         String footer = this.footer;
         String description = "**Followers**: " + streamer.formatFollowers();
+        String title = streamer.getDisplayName() + " | " + (live ? "LIVE" : "OFFLINE");
 
+        if(!streamer.getLanguage().equalsIgnoreCase("english")) {
+            title += " (" + streamer.getLanguage() + ")";
+        }
         EmbedBuilder builder = new EmbedBuilder()
                 .setThumbnail(streamer.getThumbnail())
-                .setTitle(streamer.getDisplayName() + " | " + (live ? "LIVE" : "OFFLINE"), streamer.getUrl())
+                .setTitle(
+                        title,
+                        streamer.getUrl()
+                )
                 .setColor(live ? EmbedHelper.GREEN : EmbedHelper.RED);
 
         if(live) {
@@ -218,7 +225,7 @@ public class TTVLookupCommand extends LookupCommand {
                 .setLoginName(streamer.getString("broadcaster_login"))
                 .setDisplayName(streamer.getString("display_name"))
                 .setId(id)
-                .setLanguage(streamer.getString("broadcaster_language"))
+                .setLanguage(EmbedHelper.getLanguageFromISO(streamer.getString("broadcaster_language")))
                 .setThumbnail(streamer.getString("thumbnail_url"));
 
         if(streamer.getBoolean("is_live")) {
