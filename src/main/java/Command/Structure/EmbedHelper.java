@@ -1,7 +1,11 @@
 package Command.Structure;
 
+import Bot.ResourceHandler;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,6 +32,35 @@ public class EmbedHelper {
             OSRS_LOGO = "https://i.imgur.com/Hoke7jA.png",
             BLANK_CHAR = "\u200e";
 
+
+    public static final HashMap<String, String> languages = parseLanguages();
+
+    /**
+     * Parse the language JSON in to a map of ISO code -> Language name
+     *
+     * @return Map of ISO code -> Language name
+     */
+    private static HashMap<String, String> parseLanguages() {
+        HashMap<String, String> languages = new HashMap<>();
+        JSONArray allLanguages = new JSONArray(
+                new ResourceHandler().getResourceFileAsString("/Movie/languages.json")
+        );
+        for(int i = 0; i < allLanguages.length(); i++) {
+            JSONObject lang = allLanguages.getJSONObject(i);
+            languages.put(lang.getString("iso_639_1"), lang.getString("english_name"));
+        }
+        return languages;
+    }
+
+    /**
+     * Get a language full name - e.g "English" from the ISO code - e.g "en"
+     *
+     * @param iso Language ISO code - e.g "en"
+     * @return Language name - e.g "English"
+     */
+    public static String getLanguageFromISO(String iso) {
+        return languages.get(iso);
+    }
 
     /**
      * Create a field with an invisible character for a title, and the value as a value.

@@ -1,6 +1,5 @@
 package Plex;
 
-import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
@@ -443,32 +442,7 @@ public class Movie implements Comparator<Movie> {
 
         // Get the English name of the language
         if(!language.equals("English")) {
-            language = getISOEnglishName(iso);
-        }
-        return language;
-    }
-
-    /**
-     * Get the English name of a language from the ISO code
-     *
-     * @return English name of language
-     */
-    private String getISOEnglishName(String iso) {
-        String language = iso;
-        try {
-            JSONArray allLanguages = new JSONArray(
-                    new ResourceHandler().getResourceFileAsString("/Movie/languages.json")
-            );
-            for(int i = 0; i < allLanguages.length(); i++) {
-                JSONObject lang = allLanguages.getJSONObject(i);
-                if(lang.getString("iso_639_1").equals(iso)) {
-                    language = lang.getString("english_name");
-                    break;
-                }
-            }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
+            language = EmbedHelper.getLanguageFromISO(iso);
         }
         return language;
     }
