@@ -1,24 +1,29 @@
 package Countdown;
 
+import java.text.DecimalFormat;
+
 /**
  * Hold a period of time
  */
 public class Countdown {
-    private final long days, hours, minutes, seconds;
+    private final long days, hours, minutes, seconds, totalDays, totalHours, totalMinutes, totalSeconds;
+    private final DecimalFormat timeFormat = new DecimalFormat("00");
 
     /**
      * Create a countdown
      *
-     * @param days    Days until release
-     * @param hours   Hours until release
-     * @param minutes Minutes until release
-     * @param seconds Seconds until release
+     * @param period Millisecond period to create countdown for
      */
-    private Countdown(long days, long hours, long minutes, long seconds) {
-        this.days = days;
-        this.hours = hours;
-        this.minutes = minutes;
-        this.seconds = seconds;
+    private Countdown(long period) {
+        this.totalSeconds = period / 1000;
+        this.totalMinutes = totalSeconds / 60;
+        this.totalHours = totalMinutes / 60;
+        this.totalDays = totalHours / 24;
+
+        this.seconds = totalSeconds % 60;
+        this.minutes = totalMinutes % 60;
+        this.hours = totalHours % 24;
+        this.days = totalDays;
     }
 
     /**
@@ -29,17 +34,27 @@ public class Countdown {
      * @return Countdown object
      */
     public static Countdown from(long from, long to) {
-        long period = Math.abs(to - from);
-        long seconds = period / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-        return new Countdown(
-                days,
-                hours % 24,
-                minutes % 60,
-                seconds % 60
-        );
+        return new Countdown(Math.abs(to - from));
+    }
+
+    /**
+     * Format the given countdown in to a String showing mm:ss
+     * Show total minutes instead of modulo as hours are not being displayed.
+     *
+     * @return Countdown formatted in String
+     */
+    public String formatMinutesSeconds() {
+        return timeFormat.format(totalMinutes) + ":" + timeFormat.format(seconds);
+    }
+
+    /**
+     * Format the countdown in to a String showing HH:mm:ss
+     * Show total hours instead of modulo as days are not being displayed.
+     *
+     * @return Countdown formatted in String
+     */
+    public String formatHoursMinutesSeconds() {
+        return timeFormat.format(totalHours) + ":" + timeFormat.format(minutes) + ":" + timeFormat.format(seconds);
     }
 
     /**

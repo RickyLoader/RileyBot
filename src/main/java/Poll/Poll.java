@@ -159,7 +159,7 @@ public class Poll {
      * @return Time remaining
      */
     public String getTimeRemaining() {
-        return formatCountdown(Countdown.from(System.currentTimeMillis(), pollTimer.scheduledExecutionTime()));
+        return Countdown.from(System.currentTimeMillis(), pollTimer.scheduledExecutionTime()).formatMinutesSeconds();
     }
 
     /**
@@ -168,18 +168,7 @@ public class Poll {
      * @return Running time
      */
     public String getDuration() {
-        return formatCountdown(Countdown.from(startTime, endTime));
-    }
-
-    /**
-     * Format the given countdown in to a String showing mm:ss
-     *
-     * @param countdown Countdown to format
-     * @return Countdown formatted in String
-     */
-    private String formatCountdown(Countdown countdown) {
-        DecimalFormat timeFormat = new DecimalFormat("00");
-        return timeFormat.format(countdown.getMinutes()) + ":" + timeFormat.format(countdown.getSeconds());
+        return Countdown.from(startTime, endTime).formatMinutesSeconds();
     }
 
     /**
