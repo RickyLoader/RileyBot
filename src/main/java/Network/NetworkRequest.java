@@ -138,16 +138,26 @@ public class NetworkRequest {
      * Make a JSON POST request
      *
      * @param body Body to send
+     * @return Response
      */
     public NetworkResponse post(String body) {
         return post(body, false);
     }
 
     /**
+     * Make a POST request without a body
+     *
+     * @return Response
+     */
+    public NetworkResponse post() {
+        return post("");
+    }
+
+    /**
      * Return the message of a response
      *
      * @param response Response from network call
-     * @return String response
+     * @return Response
      */
     private NetworkResponse handleResponse(Response response) {
         try {
