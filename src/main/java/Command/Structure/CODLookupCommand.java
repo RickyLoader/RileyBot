@@ -128,10 +128,11 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @return Query with platform removed
      */
     public String setPlatform(String query) {
-        String platformName = query.split(" ")[0];
+        String[] args = query.split(" ");
+        String platformName = args[0];
         PLATFORM platform = PLATFORM.byName(platformName);
         if(platform == PLATFORM.NONE) {
-            this.platform = PLATFORM.ACTI;
+            this.platform = args[1].startsWith("#") ? PLATFORM.UNO : PLATFORM.ACTI;
         }
         else {
             this.platform = platform;
