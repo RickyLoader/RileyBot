@@ -132,7 +132,7 @@ public abstract class CODLookupCommand extends LookupCommand {
         String platformName = args[0];
         PLATFORM platform = PLATFORM.byName(platformName);
         if(platform == PLATFORM.NONE) {
-            this.platform = args[1].startsWith("#") ? PLATFORM.UNO : PLATFORM.ACTI;
+            this.platform = args.length > 1 && args[1].startsWith("#") ? PLATFORM.UNO : PLATFORM.ACTI;
         }
         else {
             this.platform = platform;

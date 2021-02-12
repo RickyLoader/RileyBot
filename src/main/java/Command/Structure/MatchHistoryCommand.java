@@ -32,7 +32,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getHelpText(trigger) + " [match id/latest]"
+                getHelpText(trigger) + " [match id/latest]\n\n"+trigger+" missing"
         );
         this.matchMessages = new HashMap<>();
         this.loadoutImageManager = new LoadoutImageManager();
@@ -106,7 +106,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 getEmbedThumbnail(),
                 total + " Missing attachments",
                 null,
-                "Try: " + getHelpName(),
+                "Type: " + getTrigger() + " for help",
                 1,
                 EmbedHelper.GREEN
         ) {
