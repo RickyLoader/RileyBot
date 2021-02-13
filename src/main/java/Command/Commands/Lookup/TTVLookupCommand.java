@@ -7,6 +7,7 @@ import Command.Structure.LookupCommand;
 import Command.Structure.PageableTableEmbed;
 import Countdown.Countdown;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import Network.Secret;
 import Twitch.Game;
 import Twitch.OAuth;
@@ -176,6 +177,7 @@ public class TTVLookupCommand extends LookupCommand {
                     + "\n\n**Streaming**: " + game.getName()
                     + "\n**Online for**: "
                     + streamDuration.formatHoursMinutesSeconds()
+                    + "\n**Viewers**: " + stream.formatViewers()
                     + "\n\n" + description;
         }
         if(replace) {
@@ -221,6 +223,7 @@ public class TTVLookupCommand extends LookupCommand {
      */
     private Streamer parseStreamer(JSONObject streamer, boolean showFollowers) {
         String id = streamer.getString("id");
+
         StreamerBuilder builder = new StreamerBuilder()
                 .setLoginName(streamer.getString("broadcaster_login"))
                 .setDisplayName(streamer.getString("display_name"))
@@ -233,7 +236,8 @@ public class TTVLookupCommand extends LookupCommand {
                     new Stream(
                             streamer.getString("title"),
                             fetchGame(streamer.getString("game_id")),
-                            parseDate(streamer.getString("started_at"))
+                            parseDate(streamer.getString("started_at")),
+                            fetchViewers(id)
                     )
             );
         }
@@ -281,6 +285,19 @@ public class TTVLookupCommand extends LookupCommand {
         catch(ParseException e) {
             return new Date();
         }
+    }
+
+    /**
+     * Fetch the number of stream viewers via the streamer's unique id
+     *
+     * @param id Streamer id
+     * @return Number of viewers watching streamer's current stream
+     */
+    private int fetchViewers(String id) {
+        JSONObject response = new JSONObject(
+                new NetworkRequest(baseURL + "streams?user_id=" + id, false).get(getAuthHeaders()).body
+        ).getJSONArray("data").getJSONObject(0);
+        return response.getInt("viewer_count");
     }
 
     /**
