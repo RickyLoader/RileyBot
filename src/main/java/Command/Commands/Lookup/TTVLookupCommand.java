@@ -300,7 +300,9 @@ public class TTVLookupCommand extends LookupCommand {
         Game game = new Game(
                 gameData.getString("name"),
                 gameData.getString("id"),
-                gameData.getString("box_art_url").replace("-{width}x{height}", "")
+                gameData.getString("box_art_url")
+                        .replace("-{width}x{height}", "")
+                        .replace("/./", "/")
         );
         games.put(game.getId(), game);
         return game;
