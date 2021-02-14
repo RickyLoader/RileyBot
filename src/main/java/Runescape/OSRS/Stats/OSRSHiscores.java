@@ -325,7 +325,10 @@ public class OSRSHiscores extends Hiscores {
             boolean league = playerStats.isLeague();
             String name = playerStats.getName();
             String json = fetchPlayerTrackingData(name, league); // Check if player exists
-
+            if(json == null) {
+                loading.failStage("XP tracker didn't respond, unlucky cunt");
+                return;
+            }
             if(json.equals("err")) {
                 updatePlayerTracking(name, league, false); // Tracking a new player can take 20+ seconds, don't wait
                 loading.completeStage("Player not tracked - They will be *soon*™");
