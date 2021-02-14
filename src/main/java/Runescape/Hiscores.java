@@ -16,7 +16,8 @@ import java.util.ArrayList;
 
 public abstract class Hiscores extends ImageBuilder {
     public ImageLoadingMessage loading;
-    public boolean timeout = false;
+    private boolean timeout = false;
+    private final MessageChannel channel;
 
     /**
      * Create a Runescape Hiscores instance
@@ -24,9 +25,11 @@ public abstract class Hiscores extends ImageBuilder {
      * @param channel      Channel to send message to
      * @param emoteHelper  Emote helper
      * @param resourcePath Path to resources
+     * @param font         Font to use in image
      */
     public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
-        super(channel, emoteHelper, resourcePath, font);
+        super(emoteHelper, resourcePath, font);
+        this.channel = channel;
     }
 
     /**
@@ -152,7 +155,7 @@ public abstract class Hiscores extends ImageBuilder {
         loadingCriteria.add("Building image...");
 
         this.loading = new ImageLoadingMessage(
-                getChannel(),
+                channel,
                 getEmoteHelper(),
                 getLoadingTitle(nameQuery),
                 "Give me a second, their website can be slow as fuck.",

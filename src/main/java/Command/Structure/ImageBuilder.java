@@ -1,19 +1,23 @@
 package Command.Structure;
 
 import Bot.ResourceHandler;
-import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.*;
 
 public abstract class ImageBuilder {
     private final EmoteHelper emoteHelper;
-    private final MessageChannel channel;
     private final String resourcePath;
     private final ResourceHandler handler;
     private Font gameFont;
 
-    public ImageBuilder(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
-        this.channel = channel;
+    /**
+     * Create the image builder
+     *
+     * @param emoteHelper  Emote helper
+     * @param resourcePath Base resource path
+     * @param font         Font to use in image
+     */
+    public ImageBuilder(EmoteHelper emoteHelper, String resourcePath, Font font) {
         this.emoteHelper = emoteHelper;
         this.resourcePath = resourcePath;
         this.handler = new ResourceHandler();
@@ -63,14 +67,5 @@ public abstract class ImageBuilder {
      */
     public EmoteHelper getEmoteHelper() {
         return emoteHelper;
-    }
-
-    /**
-     * Get the channel
-     *
-     * @return Channel
-     */
-    public MessageChannel getChannel() {
-        return channel;
     }
 }

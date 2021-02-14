@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class SummonerImage extends ImageBuilder {
+    private final MessageChannel channel;
     private SummonerStats summonerStats;
 
     /**
@@ -17,9 +18,11 @@ public class SummonerImage extends ImageBuilder {
      *
      * @param channel     Channel to send built image to
      * @param emoteHelper Emote helper
+     * @param font        Font to use in image
      */
     public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper, Font font) {
-        super(channel, emoteHelper, "/LOL/", font);
+        super(emoteHelper, "/LOL/", font);
+        this.channel = channel;
     }
 
     /**
@@ -30,12 +33,12 @@ public class SummonerImage extends ImageBuilder {
      */
     public void buildImage(SummonerOverview summonerOverview, String helpMessage) {
         ImageLoadingMessage loading = new ImageLoadingMessage(
-                getChannel(),
+                channel,
                 getEmoteHelper(),
                 "Summoner lookup: " + summonerOverview.getName(),
                 "One moment please - Slobbering up the summoner's stats from the "
                         + summonerOverview.getRegion().getDisplayName().toUpperCase() + " region.",
-                "https://img.pngio.com/league-of-legends-needs-a-new-game-icon-league-of-legends-icon-png-256_256.png",
+                "https://i.imgur.com/a1v9G28.png",
                 helpMessage,
                 new String[]{
                         "Fetching summoner data...",
