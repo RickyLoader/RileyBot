@@ -150,7 +150,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             BufferedImage superImage = fieldUpgrade.getImage();
 
             Graphics g = image.getGraphics();
-            g.setFont(getGameFont().deriveFont(50f));
+            g.setFont(getGameFont().deriveFont(40f));
             FontMetrics fm = g.getFontMetrics();
 
 
@@ -168,6 +168,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             );
 
             int x = 277;
+            g.setFont(getGameFont().deriveFont(50f));
             g.drawString(fieldUpgradeStats.formatUses(), x, 500);
 
             int y = 570;

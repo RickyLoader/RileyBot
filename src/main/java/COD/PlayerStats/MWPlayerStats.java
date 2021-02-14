@@ -336,6 +336,11 @@ public class MWPlayerStats {
         ArrayList<FieldUpgradeStats> fieldUpgradeStats = new ArrayList<>();
 
         for(String superName : superData.keySet()) {
+
+            // Counts Field Upgrade Pro (Running 2 field upgrades) as a field upgrade itself
+            if(superName.equals("super_select")){
+                continue;
+            }
             JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
             FieldUpgrade fieldUpgrade = DiscordCommandManager.codManager.getSuperByCodename(superName);
             fieldUpgradeStats.add(
