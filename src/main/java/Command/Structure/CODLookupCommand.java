@@ -8,7 +8,6 @@ public abstract class CODLookupCommand extends LookupCommand {
 
     public enum PLATFORM {
         BATTLE,
-        ACTI,
         XBOX,
         PSN,
         UNO,
@@ -17,7 +16,7 @@ public abstract class CODLookupCommand extends LookupCommand {
         /**
          * Get a platform by name
          *
-         * @param name Name of platform - "acti"
+         * @param name Name of platform - "battle"
          * @return Platform
          */
         public static PLATFORM byName(String name) {
@@ -122,7 +121,8 @@ public abstract class CODLookupCommand extends LookupCommand {
 
     /**
      * Strip the platform from the given query
-     * and save to a variable
+     * and save to a variable. If no platform is provided,
+     * assume Battle.net.
      *
      * @param query Query to remove platform from
      * @return Query with platform removed
@@ -132,7 +132,7 @@ public abstract class CODLookupCommand extends LookupCommand {
         String platformName = args[0];
         PLATFORM platform = PLATFORM.byName(platformName);
         if(platform == PLATFORM.NONE) {
-            this.platform = args.length > 1 && args[1].startsWith("#") ? PLATFORM.UNO : PLATFORM.ACTI;
+            this.platform = args.length > 1 && args[1].startsWith("#") ? PLATFORM.UNO : PLATFORM.BATTLE;
         }
         else {
             this.platform = platform;
