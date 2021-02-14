@@ -6,10 +6,6 @@ import net.dv8tion.jda.api.entities.User;
 
 public abstract class MWLookupCommand extends CODLookupCommand {
 
-    public MWLookupCommand(String trigger, String desc) {
-        super(trigger, desc);
-    }
-
     public MWLookupCommand(String trigger, String desc, String helpText) {
         super(trigger, desc, helpText);
     }

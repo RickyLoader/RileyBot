@@ -37,20 +37,14 @@ public abstract class CODLookupCommand extends LookupCommand {
         }
     }
 
-    public CODLookupCommand(String trigger, String desc) {
-        super(
-                trigger,
-                desc,
-                getHelpText(trigger),
-                30
-        );
-    }
-
     public CODLookupCommand(String trigger, String desc, String helpText) {
         super(
                 trigger,
                 desc,
-                getHelpText(trigger) + "\n" + helpText,
+                getHelpText(trigger)
+                        + "\n" + helpText
+                        + "\n\nPlatform is assumed to be Battle.net (name#123) or UNO (#123) unless a platform is specified."
+                        + "\n\nAccepted platforms: XBOX, XBL, PSN, UNO, BATTLE",
                 30
         );
     }
