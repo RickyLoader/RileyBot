@@ -6,8 +6,7 @@ import COD.CODAPI;
 import Command.Structure.CODLookupCommand.PLATFORM;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MWPlayerStats {
@@ -22,6 +21,7 @@ public class MWPlayerStats {
     private FieldUpgradeStats fieldUpgradeStats;
     private ArrayList<KillstreakStats> killstreakStats;
     private ArrayList<CommendationStats> commendationStats;
+    private HashMap<String, WeaponStats> weaponStats;
 
     /**
      * Create a Modern Warfare player's stats
@@ -202,6 +202,7 @@ public class MWPlayerStats {
         weapons.remove("supers");
 
         ArrayList<WeaponStats> weaponStats = parseWeaponStats(weapons);
+        this.weaponStats = mapWeaponStats(weaponStats);
         this.primaryStats = (StandardWeaponStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.PRIMARY);
         this.secondaryStats = (StandardWeaponStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.SECONDARY);
         this.lethalStats = (LethalStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.LETHAL);
@@ -219,6 +220,38 @@ public class MWPlayerStats {
         return json;
     }
 
+    /**
+     * Create a map of weapon/equipment name -> player weapon stats
+     *
+     * @param weaponStats List of player weapon stats
+     * @return Map of weapon/equipment name ->player weapon stats
+     */
+    private HashMap<String, WeaponStats> mapWeaponStats(ArrayList<WeaponStats> weaponStats) {
+        HashMap<String, WeaponStats> weaponStatsMap = new HashMap<>();
+        for(WeaponStats stats : weaponStats) {
+            weaponStatsMap.put(stats.getWeapon().getName().toLowerCase(), stats);
+        }
+        return weaponStatsMap;
+    }
+
+    /**
+     * Get the player's weapon stats for the given weapon name
+     *
+     * @param name Weapon name
+     * @return Player weapon stats or null
+     */
+    public WeaponStats getWeaponStatsByName(String name) {
+        WeaponStats stats = weaponStats.get(name.toLowerCase());
+        if(stats == null) {
+            for(String weaponName : weaponStats.keySet()) {
+                if(weaponName.contains(name)) {
+                    stats = weaponStats.get(weaponName);
+                    break;
+                }
+            }
+        }
+        return stats;
+    }
 
     /**
      * Get the player's favourite weapon for the given weapon type

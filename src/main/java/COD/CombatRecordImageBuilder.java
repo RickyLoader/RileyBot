@@ -16,11 +16,20 @@ import java.util.Comparator;
 /**
  * Build an image containing the user's Modern Warfare stats
  */
-public class CombatRecord extends ImageBuilder {
-    private MWPlayerStats playerStats;
+public class CombatRecordImageBuilder extends ImageBuilder {
+    private final String helpMessage;
 
-    public CombatRecord(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
-        super(channel, emoteHelper, "/COD/" + resourcePath + "/", font);
+    /**
+     * Create the combat record image builder
+     *
+     * @param helpMessage  Help message to use in image embed
+     * @param emoteHelper  Emote helper
+     * @param resourcePath Base resource path
+     * @param font         Font to use in image
+     */
+    public CombatRecordImageBuilder(String helpMessage, EmoteHelper emoteHelper, String resourcePath, Font font) {
+        super(emoteHelper, "/COD/" + resourcePath + "/", font);
+        this.helpMessage = helpMessage;
     }
 
     /**
@@ -213,9 +222,10 @@ public class CombatRecord extends ImageBuilder {
     /**
      * Draw the win loss ratio on to the win loss section
      *
+     * @param playerStats Player stats
      * @return Win loss section
      */
-    private BufferedImage drawWinLoss() {
+    private BufferedImage drawWinLoss(MWPlayerStats playerStats) {
         BufferedImage image = null;
         try {
             image = getResourceHandler().getImageResource(getResourcePath() + "Templates/wl_section.png");
@@ -239,9 +249,10 @@ public class CombatRecord extends ImageBuilder {
     /**
      * Draw the player commendation stats on to the commendation section
      *
+     * @param playerStats Player stats
      * @return Commendation section
      */
-    private BufferedImage drawCommendations() {
+    private BufferedImage drawCommendations(MWPlayerStats playerStats) {
         ArrayList<CommendationStats> allCommendationStats = playerStats.getCommendationStats();
         BufferedImage image = null;
         try {
@@ -293,9 +304,10 @@ public class CombatRecord extends ImageBuilder {
     /**
      * Draw the kill death ratio on to the kill death section
      *
+     * @param playerStats Player stats
      * @return Kill death section
      */
-    private BufferedImage drawKillDeath() {
+    private BufferedImage drawKillDeath(MWPlayerStats playerStats) {
         BufferedImage image = null;
         try {
             image = getResourceHandler().getImageResource(getResourcePath() + "Templates/kd_section.png");
@@ -314,9 +326,10 @@ public class CombatRecord extends ImageBuilder {
     /**
      * Draw the player killstreak stats on to the killstreak section
      *
+     * @param playerStats Player stats
      * @return Killstreak section
      */
-    private BufferedImage drawKillstreaks() {
+    private BufferedImage drawKillstreaks(MWPlayerStats playerStats) {
         ArrayList<KillstreakStats> topKillstreakStats = new ArrayList<>(playerStats.getKillstreakStats().subList(0, 5));
         BufferedImage image = null;
         try {
@@ -381,17 +394,67 @@ public class CombatRecord extends ImageBuilder {
     }
 
     /**
-     * Build the various sections of the image and draw them each on to the background image
+     * Attempt to find the desired player's stats.
+     * Display the given loading message and complete the fetching stats stage
+     * based on whether the player stats are found.
      *
-     * @param nameQuery   Player name
-     * @param helpMessage Help message to display in loading message
-     * @param platform    Platform
+     * @param nameQuery Player name to search for
+     * @param platform  Player platform
+     * @param loading   Loading message
+     * @return Player stats found
      */
-    public void buildImage(String nameQuery, String helpMessage, PLATFORM platform) {
-        ImageLoadingMessage loading = new ImageLoadingMessage(
-                getChannel(),
+    private MWPlayerStats initialisePlayerStats(String nameQuery, PLATFORM platform, ImageLoadingMessage loading) {
+        loading.showLoading();
+        MWPlayerStats playerStats = new MWPlayerStats(nameQuery, platform);
+        if(playerStats.success()) {
+            loading.completeStage();
+        }
+        else {
+            loading.failLoading(playerStats.getStatus());
+        }
+        return playerStats;
+    }
+
+    /**
+     * Build an image displaying the player's stats for the weapon/equipment of
+     * the given name.
+     *
+     * @param nameQuery  Player name to search for
+     * @param platform   Player platform
+     * @param weaponName Name of weapon to display stats for
+     * @param channel    Channel to send image to
+     */
+    public void buildWeaponRecordImage(String nameQuery, PLATFORM platform, String weaponName, MessageChannel channel) {
+        ImageLoadingMessage loadingMessage = buildImageLoadingMessage(
+                "MW " + weaponName.toUpperCase() + " Stats: " + nameQuery.toUpperCase(),
+                channel
+        );
+        MWPlayerStats playerStats = initialisePlayerStats(nameQuery, platform, loadingMessage);
+        if(!playerStats.success()) {
+            return;
+        }
+        WeaponStats weaponStats = playerStats.getWeaponStatsByName(weaponName);
+        if(weaponStats == null) {
+            loadingMessage.failLoading("I didn't any weapon/equipment for: **" + weaponName + "**");
+            return;
+        }
+        BufferedImage weaponImage = drawWeapon(weaponStats);
+        loadingMessage.completeStage();
+        loadingMessage.completeLoading(weaponImage);
+    }
+
+    /**
+     * Create the loading message to display while building an image
+     *
+     * @param title   Title to use in loading message
+     * @param channel Channel to send loading message to
+     * @return Loading message
+     */
+    private ImageLoadingMessage buildImageLoadingMessage(String title, MessageChannel channel) {
+        return new ImageLoadingMessage(
+                channel,
                 getEmoteHelper(),
-                "MW Player Stats: " + nameQuery.toUpperCase(),
+                title,
                 "One moment please.",
                 Gunfight.thumbnail,
                 helpMessage,
@@ -400,13 +463,25 @@ public class CombatRecord extends ImageBuilder {
                         "Building image...",
                 }
         );
-        loading.showLoading();
-        this.playerStats = new MWPlayerStats(nameQuery, platform);
+    }
+
+    /**
+     * Build an image displaying the player's combat record.
+     * Display favourite weapons, killstreaks, etc.
+     *
+     * @param nameQuery Player name to search for
+     * @param platform  Player platform
+     * @param channel   Channel to send loading message to
+     */
+    public void buildCombatRecordImage(String nameQuery, PLATFORM platform, MessageChannel channel) {
+        ImageLoadingMessage loadingMessage = buildImageLoadingMessage(
+                "MW Player Stats: " + nameQuery.toUpperCase(),
+                channel
+        );
+        MWPlayerStats playerStats = initialisePlayerStats(nameQuery, platform, loadingMessage);
         if(!playerStats.success()) {
-            loading.failLoading(playerStats.getStatus());
             return;
         }
-        loading.completeStage();
         try {
             BufferedImage main = getResourceHandler().getImageResource(getResourcePath() + "Templates/template.png");
             Graphics g = main.getGraphics();
@@ -416,17 +491,17 @@ public class CombatRecord extends ImageBuilder {
             g.drawImage(drawWeapon(playerStats.getLethalStats()), 1067, 119, null);
             g.drawImage(drawWeapon(playerStats.getTacticalStats()), 1592, 119, null);
             g.drawImage(drawSuper(playerStats.getSuperStats()), 1067, 1030, null);
-            g.drawImage(drawKillDeath(), 1592, 1030, null);
-            g.drawImage(drawWinLoss(), 1592, 1609, null);
-            g.drawImage(drawCommendations(), 17, 1290, null);
-            g.drawImage(drawKillstreaks(), 17, 1869, null);
+            g.drawImage(drawKillDeath(playerStats), 1592, 1030, null);
+            g.drawImage(drawWinLoss(playerStats), 1592, 1609, null);
+            g.drawImage(drawCommendations(playerStats), 17, 1290, null);
+            g.drawImage(drawKillstreaks(playerStats), 17, 1869, null);
             g.setFont(getGameFont().deriveFont(100f));
             g.setColor(Color.BLACK);
             String name = playerStats.getName().toUpperCase();
             g.drawString(name, (main.getWidth() / 2) - (g.getFontMetrics().stringWidth(name) / 2), 100);
             g.dispose();
-            loading.completeStage();
-            loading.completeLoading(main);
+            loadingMessage.completeStage();
+            loadingMessage.completeLoading(main);
         }
         catch(Exception e) {
             e.printStackTrace();

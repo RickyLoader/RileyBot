@@ -54,15 +54,14 @@ public class Weapon {
         public String getTitle() {
             switch(this) {
                 case PRIMARY:
-                    return "Primary Weapon of Choice";
+                    return "Primary Weapon";
                 case SECONDARY:
-                    return "Secondary Weapon of Choice";
+                    return "Secondary Weapon";
                 case LETHAL:
-                    return "Lethal Equipment of Choice";
-                case TACTICAL:
-                    return "Tactical Equipment of Choice";
+                    return "Lethal Equipment";
+                default:
+                    return "Tactical Equipment";
             }
-            return "Weapon of Choice";
         }
     }
 
