@@ -1,5 +1,7 @@
 package Bot;
 
+import COD.CODManager.GAME;
+import COD.Match.MatchStats;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -63,6 +65,36 @@ public class DiscordUser {
     public static String getMillionaireBankLeaderboard() {
         String json = new NetworkRequest("millionaire/leaderboard", true).get().body;
         return json.isEmpty() ? null : json;
+    }
+
+    /**
+     * Get the wobbly leaderboard
+     *
+     * @param game COD game
+     * @return Wobbly leaderboard
+     */
+    public static String getWobbliesLeaderboard(GAME game) {
+        String json = new NetworkRequest("wobblies/" + game.name().toUpperCase(), true).get().body;
+        return json.isEmpty() ? null : json;
+    }
+
+    /**
+     * Add an entry to the wobblies leaderboard
+     *
+     * @param matchStats Match stats
+     * @param game       COD game
+     */
+    public static void addToWobblyLeaderboard(GAME game, MatchStats matchStats) {
+        JSONObject body = new JSONObject()
+                .put("wobblies", matchStats.getWobblies())
+                .put("player_name", matchStats.getPlayer().getName())
+                .put("game", game.name().toUpperCase())
+                .put("map_id", matchStats.getMap().getCodename())
+                .put("mode_id", matchStats.getMode().getCodename())
+                .put("match_id", matchStats.getId())
+                .put("metres", matchStats.getMetres())
+                .put("dateMs", matchStats.getStart().getTime());
+        new NetworkRequest("wobblies", true).post(body.toString());
     }
 
     /**

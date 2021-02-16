@@ -32,6 +32,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private final LoadoutImageManager loadoutImageManager;
     private final CODManager codManager;
     private final Font font;
+    private final String footer;
     private String win, loss, draw, matchID;
     private Emote stats, players, loadouts;
 
@@ -45,11 +46,15 @@ public class MatchHistoryCommand extends CODLookupCommand {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getHelpText(trigger) + " [match id/latest/maps/modes]\n\n" + trigger + " missing"
+                getHelpText(trigger) + " [match id/latest/maps/modes]\n\n"
+                        + trigger + " missing\n"
+                        + trigger + " wobblies\n"
+                        + trigger + " wobblies [rank]"
         );
         this.matchMessages = new HashMap<>();
         this.loadoutImageManager = new LoadoutImageManager();
         this.codManager = codManager;
+        this.footer = "Type " + getTrigger() + " for help";
         this.font = codManager.getGame() == CODManager.GAME.MW
                 ? FontManager.MODERN_WARFARE_FONT
                 : FontManager.COLD_WAR_FONT;
@@ -104,6 +109,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             context.getJDA().addEventListener(getMatchEmoteListener());
         }
         MessageChannel channel = context.getMessageChannel();
+        channel.sendTyping().queue();
         if(name.equals("missing")) {
             ArrayList<MissingWeaponAttachments> missing = MissingWeaponAttachments.getMissingAttachments();
             if(missing.isEmpty()) {
@@ -115,7 +121,16 @@ public class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
 
-        channel.sendTyping().queue();
+        if(name.equals("wobblies")) {
+            ArrayList<WobblyScore> leaderboard = getWobblyLeaderboard();
+            if(matchID != null) {
+                showSpecificWobblyScore(leaderboard, channel);
+                return;
+            }
+            showWobblyLeaderboard(context, leaderboard);
+            return;
+        }
+
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
             return;
@@ -135,6 +150,141 @@ public class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
         getMatchHistoryEmbed(context, matchHistory).showMessage();
+    }
+
+    /**
+     * Show a specific entry on the wobbly leaderboard
+     *
+     * @param leaderboard Wobbly leaderboard
+     * @param channel     Channel to send entry to
+     */
+    private void showSpecificWobblyScore(ArrayList<WobblyScore> leaderboard, MessageChannel channel) {
+        int index = 0;
+        try {
+            index = Integer.parseInt(matchID) - 1;
+        }
+        catch(NumberFormatException e) {
+            e.printStackTrace();
+        }
+        if(index < 0 || index > leaderboard.size()) {
+            channel.sendMessage("That's not a rank!").queue();
+            return;
+        }
+        WobblyScore score = leaderboard.get(index);
+        MessageEmbed entryEmbed = getDefaultEmbedBuilder(
+                codManager.getGame().name().toUpperCase() + " Wobbly Rank #" + (index + 1)
+        )
+                .setDescription("Use **" + getTrigger() + " wobblies** to view the full leaderboard.")
+                .addField("Name", score.getPlayerName(), true)
+                .addField("Date", score.getDateString(), true)
+                .addBlankField(true)
+                .addField("Wobblies", MatchStats.formatDistance(score.getWobblies(), "wobblies"), true)
+                .addField("Metres", MatchStats.formatDistance(score.getMetres(), "metres"), true)
+                .addBlankField(true)
+                .addField("Map", score.getMap().getName(), true)
+                .addField("Mode", score.getMode().getName(), true)
+                .addBlankField(true)
+                .addField("Match ID", score.getMatchId(), true)
+                .setColor(EmbedHelper.PURPLE)
+                .setImage(score.getMap().getImageURL())
+                .build();
+        channel.sendMessage(entryEmbed).queue();
+    }
+
+    /**
+     * Get the wobbly leaderboard rank for the given match stats
+     *
+     * @param matchStats Match stats to get wobbly rank for
+     * @return Wobbly leaderboard rank
+     */
+    private int getWobblyRank(MatchStats matchStats) {
+        ArrayList<WobblyScore> leaderboard = getWobblyLeaderboard();
+        for(int i = 0; i < leaderboard.size(); i++) {
+            WobblyScore score = leaderboard.get(i);
+            boolean nameMatch = score.getPlayerName().equals(matchStats.getPlayer().getName());
+            boolean idMatch = score.getMatchId().equals(matchStats.getId());
+            if(nameMatch && idMatch) {
+                return i + 1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Build and send the wobbly leaderboard (top distance travelled)
+     *
+     * @param context Command context
+     * @param scores  Scores to show
+     */
+    private void showWobblyLeaderboard(CommandContext context, ArrayList<WobblyScore> scores) {
+        if(scores.isEmpty()) {
+            context.getMessageChannel().sendMessage(
+                    "There are no wobblies on the leaderboard for " + codManager.getGame().name().toUpperCase() + "!"
+            ).queue();
+            return;
+        }
+        new PageableTableEmbed(
+                context,
+                scores,
+                getEmbedThumbnail(),
+                codManager.getGame().name().toUpperCase() + " Wobbly Leaderboard",
+                "Use **" + getTrigger() + " wobblies [rank]** to view more detail.\n\n"
+                        + "Here are the " + scores.size() + " wobbly scores:",
+                footer,
+                new String[]{"Rank", "Name", "Wobblies"},
+                5
+        ) {
+            @Override
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
+                WobblyScore score = (WobblyScore) items.get(index);
+                int rank = defaultSort ? (index + 1) : (items.size() - index);
+                return new String[]{
+                        String.valueOf(rank),
+                        score.getPlayerName(),
+                        MatchStats.formatDistance(score.getWobblies(), "wobblies")
+                };
+            }
+
+            @Override
+            public void sortItems(List<?> items, boolean defaultSort) {
+                ArrayList<WobblyScore> scores = new ArrayList<>();
+                for(Object o : items) {
+                    scores.add((WobblyScore) o);
+                }
+                WobblyScore.sortLeaderboard(scores, defaultSort);
+                updateItems(scores);
+            }
+        }.showMessage();
+    }
+
+    /**
+     * Get the list of wobbly scores from the database
+     *
+     * @return List of wobbly scores
+     */
+    private ArrayList<WobblyScore> getWobblyLeaderboard() {
+        ArrayList<WobblyScore> wobblyScores = new ArrayList<>();
+        String json = DiscordUser.getWobbliesLeaderboard(codManager.getGame());
+        if(json == null) {
+            return wobblyScores;
+        }
+        JSONArray scores = new JSONArray(json);
+        for(int i = 0; i < scores.length(); i++) {
+            JSONObject scoreData = scores.getJSONObject(i);
+            wobblyScores.add(
+                    new WobblyScore(
+                            scoreData.getLong("wobblies"),
+                            scoreData.getDouble("metres"),
+                            scoreData.getString("player_name"),
+                            scoreData.getLong("dateMs"),
+                            codManager.getMapByCodename(scoreData.getString("map_id")),
+                            codManager.getModeByCodename(scoreData.getString("mode_id")),
+                            scoreData.getString("match_id")
+                    )
+            );
+        }
+        WobblyScore.sortLeaderboard(wobblyScores, true);
+        return wobblyScores;
     }
 
     /**
@@ -434,6 +584,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Message embed detailing match stats
      */
     private MessageEmbed buildMatchEmbed(MatchStats matchStats) {
+        int wobblyRank = getWobblyRank(matchStats);
         return getDefaultMatchEmbedBuilder(matchStats)
                 .addField("**Date**", matchStats.getDateString(), true)
                 .addField("**Time**", matchStats.getTimeString(), true)
@@ -449,11 +600,15 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .addField("**Highest Streak**", String.valueOf(matchStats.getLongestStreak()), true)
                 .addField(
                         "**Distance Travelled**",
-                        matchStats.getWobblies() + "\n" + matchStats.getDistanceTravelled(),
+                        matchStats.formatWobblies() + "\n" + matchStats.formatMetres(),
                         true
                 )
                 .addField("**Time Spent Moving**", matchStats.getPercentTimeMovingString(), true)
-                .addBlankField(true)
+                .addField(
+                        "**Wobbly Rank**",
+                        wobblyRank == 0 ? "-" : String.valueOf(wobblyRank),
+                        true
+                )
                 .addField("**Nemesis**", matchStats.getNemesis(), true)
                 .addField("**Most Killed**", matchStats.getMostKilled(), true)
                 .addBlankField(true)
@@ -598,7 +753,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private EmbedBuilder getDefaultEmbedBuilder(String title, String footerImage) {
         return new EmbedBuilder()
                 .setTitle(title)
-                .setFooter("Type " + getTrigger() + " for help", footerImage)
+                .setFooter(footer, footerImage)
                 .setThumbnail(getEmbedThumbnail());
     }
 
@@ -777,7 +932,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
             if(playerStats.has("percentTimeMoving")) {
                 matchBuilder.setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"));
             }
-            matchStats.add(matchBuilder.build());
+            MatchStats stats = matchBuilder.build();
+            new Thread(() -> DiscordUser.addToWobblyLeaderboard(codManager.getGame(), stats)).start();
+            matchStats.add(stats);
         }
 
         return new MatchHistory(

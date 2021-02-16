@@ -273,10 +273,28 @@ public class MatchStats {
      * @param unit     Unit of measurement
      * @return Distance formatted with unit
      */
-    private String formatDistance(double distance, String unit) {
+    public static String formatDistance(double distance, String unit) {
         DecimalFormat df = new DecimalFormat("#,### " + unit);
         df.setMaximumFractionDigits(2);
         return df.format(distance);
+    }
+
+    /**
+     * Get the distance travelled (in metres) formatted as a String
+     *
+     * @return Metres travelled String
+     */
+    public String formatMetres() {
+        return formatDistance(distanceTravelled, "metres");
+    }
+
+    /**
+     * Get the distance travelled (in wobblies) formatted as a String
+     *
+     * @return Wobblies travelled String
+     */
+    public String formatWobblies() {
+        return formatDistance(wobblies, "wobblies");
     }
 
     /**
@@ -284,8 +302,8 @@ public class MatchStats {
      *
      * @return Metres travelled
      */
-    public String getDistanceTravelled() {
-        return formatDistance(distanceTravelled, "metres");
+    public double getMetres() {
+        return distanceTravelled;
     }
 
     /**
@@ -293,8 +311,8 @@ public class MatchStats {
      *
      * @return Wobblies travelled
      */
-    public String getWobblies() {
-        return formatDistance(wobblies, "wobblies");
+    public long getWobblies() {
+        return wobblies;
     }
 
     /**
