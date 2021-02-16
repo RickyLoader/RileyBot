@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import java.awt.*;
+import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -9,7 +10,7 @@ import java.util.Comparator;
 /**
  * Create a pie chart image
  */
-public class DonutChart {
+public class PieChart {
     private final BufferedImage chart, key;
     private final int total;
     private final Font font;
@@ -19,11 +20,12 @@ public class DonutChart {
      *
      * @param sections Sections to use in chart
      * @param font     Font to use in key
+     * @param donut    Display as a donut chart
      */
-    public DonutChart(Section[] sections, Font font) {
+    public PieChart(Section[] sections, Font font, boolean donut) {
         this.font = font;
         this.total = Arrays.stream(sections).mapToInt(Section::getQuantity).sum();
-        this.chart = buildChart(sections);
+        this.chart = buildChart(sections, donut);
         this.key = buildKey(sections);
     }
 
@@ -126,9 +128,10 @@ public class DonutChart {
      * Build an image displaying a donut chart from the given sections
      *
      * @param sections Sections to display
+     * @param donut    Display as a donut chart
      * @return Image displaying donut chart
      */
-    private BufferedImage buildChart(Section[] sections) {
+    private BufferedImage buildChart(Section[] sections, boolean donut) {
         int radius = 150;
         int diameter = radius * 2;
         int sectionWidth = 80;
@@ -151,7 +154,21 @@ public class DonutChart {
                     ? (int) (completeAngle - (startingAngle - ogStartingAngle))
                     : (int) (completeAngle * ((double) section.getQuantity() / total));
             g.setColor(section.getColour());
-            g.drawArc(x, y, diameter, diameter, (int) startingAngle, angle);
+            if(donut) {
+                g.drawArc(x, y, diameter, diameter, (int) startingAngle, angle);
+            }
+            else {
+                Arc2D arc = new Arc2D.Double(
+                        x,
+                        y,
+                        diameter,
+                        diameter,
+                        (int) startingAngle,
+                        angle,
+                        Arc2D.PIE
+                );
+                g.fill(arc);
+            }
             startingAngle += angle;
         }
         g.dispose();

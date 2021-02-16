@@ -2,7 +2,7 @@ package Runescape.Stats;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
-import Command.Structure.DonutChart;
+import Command.Structure.PieChart;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import static Command.Structure.DonutChart.*;
+import static Command.Structure.PieChart.*;
 import static Runescape.Skill.SKILL_NAME.*;
 
 /**
@@ -327,20 +327,20 @@ public class RS3Hiscores extends Hiscores {
                 new Section("Completed", runeMetrics.getQuestsCompleted(), orange)
         };
         BufferedImage questSection = handler.getImageResource(getResourcePath() + "Templates/quest_section.png");
-        DonutChart donutChart = new DonutChart(sections, getGameFont());
+        PieChart pieChart = new PieChart(sections, getGameFont(), true);
         Graphics g = questSection.getGraphics();
         int y = 150;
         g.drawImage(
-                donutChart.getChart(),
-                (questSection.getWidth() / 2) - (donutChart.getChart().getWidth() / 2),
+                pieChart.getChart(),
+                (questSection.getWidth() / 2) - (pieChart.getChart().getWidth() / 2),
                 y,
                 null
         );
 
         g.drawImage(
-                donutChart.getKey(),
-                (questSection.getWidth() / 2) - (donutChart.getKey().getWidth() / 2),
-                y + donutChart.getChart().getHeight() + 20,
+                pieChart.getKey(),
+                (questSection.getWidth() / 2) - (pieChart.getKey().getWidth() / 2),
+                y + pieChart.getChart().getHeight() + 20,
                 null
         );
         g.dispose();

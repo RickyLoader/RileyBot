@@ -10,7 +10,7 @@ import COD.Gunfight;
 import COD.LoadoutImageManager;
 import COD.Match.*;
 import Command.Commands.COD.CWCountdownCommand;
-import Command.Structure.DonutChart.Section;
+import Command.Structure.PieChart.Section;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
@@ -197,7 +197,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @param channel       Channel to send embed to
      */
     private void sendBreakdownEmbed(Section[] sections, MatchHistory matchHistory, String breakdownItem, MessageChannel channel) {
-        DonutChart donutChart = new DonutChart(sections, font);
+        PieChart pieChart = new PieChart(sections, font, false);
         MessageEmbed embed = getDefaultEmbedBuilder(getBreakdownEmbedTitle(matchHistory.getName(), breakdownItem))
                 .setImage("attachment://image.png")
                 .setDescription("Breakdown for the last " + matchHistory.getMatches().size() + " matches:")
@@ -205,7 +205,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .build();
 
         channel.sendMessage(embed).
-                addFile(ImageLoadingMessage.imageToByteArray(donutChart.getFullImage()), "image.png")
+                addFile(ImageLoadingMessage.imageToByteArray(pieChart.getFullImage()), "image.png")
                 .queue();
     }
 
