@@ -190,6 +190,7 @@ public class DiscordCommandManager {
         addCommand(new MWDataCommand());
         addCommand(new TFTLookupCommand());
         addCommand(new TTVLookupCommand());
+        addCommand(new PhasmophobiaCommand());
     }
 
     /**
