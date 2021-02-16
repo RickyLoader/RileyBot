@@ -595,13 +595,21 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @param title Title to use
      * @return Default embed builder
      */
-    private EmbedBuilder getDefaultEmbedBuilder(String title) {
+    private EmbedBuilder getDefaultEmbedBuilder(String title, String footerImage) {
         return new EmbedBuilder()
                 .setTitle(title)
-                .setFooter(
-                        "Type " + getTrigger() + " for help", "attachment://image.png"
-                )
+                .setFooter("Type " + getTrigger() + " for help", footerImage)
                 .setThumbnail(getEmbedThumbnail());
+    }
+
+    /**
+     * Create the default embed builder with the default game thumbnail
+     *
+     * @param title Title to use in embed
+     * @return Default embed builder
+     */
+    private EmbedBuilder getDefaultEmbedBuilder(String title) {
+        return getDefaultEmbedBuilder(title, getEmbedThumbnail());
     }
 
     /**
@@ -611,7 +619,10 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Default embed builder for a match
      */
     private EmbedBuilder getDefaultMatchEmbedBuilder(MatchStats matchStats) {
-        return getDefaultEmbedBuilder(getSummaryEmbedTitle(matchStats.getPlayer().getName().toUpperCase()))
+        return getDefaultEmbedBuilder(
+                getSummaryEmbedTitle(matchStats.getPlayer().getName().toUpperCase()),
+                "attachment://image.png"
+        )
                 .setColor(getResultColour(matchStats.getResult()))
                 .setImage(matchStats.getMap().getImageURL());
     }
