@@ -281,4 +281,13 @@ public class CODManager {
                 .filter(w -> w.getCategory().equalsIgnoreCase(category))
                 .toArray(Weapon[]::new);
     }
+
+    /**
+     * Get the COD game
+     *
+     * @return Game
+     */
+    public GAME getGame() {
+        return game;
+    }
 }

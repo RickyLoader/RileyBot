@@ -1,9 +1,16 @@
 package Command.Structure;
 
+import Bot.DiscordUser;
+import Bot.FontManager;
 import COD.Assets.*;
+import COD.Assets.Map;
+import COD.CODAPI;
 import COD.CODManager;
+import COD.Gunfight;
 import COD.LoadoutImageManager;
 import COD.Match.*;
+import Command.Commands.COD.CWCountdownCommand;
+import Command.Structure.DonutChart.Section;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
@@ -15,14 +22,16 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * View a COD player's match history
  */
-public abstract class MatchHistoryCommand extends CODLookupCommand {
+public class MatchHistoryCommand extends CODLookupCommand {
     private final HashMap<Long, MatchStats> matchMessages;
     private final LoadoutImageManager loadoutImageManager;
     private final CODManager codManager;
+    private final Font font;
     private String win, loss, draw, matchID;
     private Emote stats, players, loadouts;
 
@@ -36,11 +45,14 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getHelpText(trigger) + " [match id/latest]\n\n" + trigger + " missing"
+                getHelpText(trigger) + " [match id/latest/maps/modes]\n\n" + trigger + " missing"
         );
         this.matchMessages = new HashMap<>();
         this.loadoutImageManager = new LoadoutImageManager();
         this.codManager = codManager;
+        this.font = codManager.getGame() == CODManager.GAME.MW
+                ? FontManager.MODERN_WARFARE_FONT
+                : FontManager.COLD_WAR_FONT;
     }
 
     @Override
@@ -53,12 +65,30 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         }
 
         String lastArg = args[args.length - 1];
-        if(lastArg.matches("\\d+") || lastArg.equals("latest")) {
+        if(lastArg.matches("\\d+") || lastArg.equals("latest") || lastArg.equals("maps") || lastArg.equals("modes")) {
             matchID = lastArg;
             return query.replace(lastArg, "").trim();
         }
         matchID = null;
         return query;
+    }
+
+    @Override
+    public String getSavedName(long id) {
+        return DiscordUser.getSavedName(
+                id,
+                codManager.getGame() == CODManager.GAME.MW ? DiscordUser.MW : DiscordUser.CW
+        );
+    }
+
+    @Override
+    public void saveName(String name, MessageChannel channel, User user) {
+        DiscordUser.saveName(
+                name,
+                codManager.getGame() == CODManager.GAME.MW ? DiscordUser.MW : DiscordUser.CW,
+                channel,
+                user
+        );
     }
 
     @Override
@@ -91,10 +121,106 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
         if(matchID != null) {
-            sendMatchEmbed(matchHistory, channel);
+            switch(matchID) {
+                case "maps":
+                    sendMapBreakdownEmbed(matchHistory, channel);
+                    break;
+                case "modes":
+                    sendModeBreakdownEmbed(matchHistory, channel);
+                    break;
+                case "latest":
+                default:
+                    sendMatchEmbed(matchHistory, channel);
+            }
             return;
         }
         getMatchHistoryEmbed(context, matchHistory).showMessage();
+    }
+
+    /**
+     * Build and send a message embed breaking down the maps played in the match history
+     *
+     * @param matchHistory Player match history
+     * @param channel      Channel to send embed to
+     */
+    private void sendMapBreakdownEmbed(MatchHistory matchHistory, MessageChannel channel) {
+        ArrayList<Map> mapsPlayed = matchHistory
+                .getMatches()
+                .stream()
+                .map(MatchStats::getMap).collect(Collectors.toCollection(ArrayList::new));
+        HashMap<Map, Integer> mapFrequency = new HashMap<>();
+        for(Map map : mapsPlayed) {
+            if(!mapFrequency.containsKey(map)) {
+                mapFrequency.put(map, 0);
+            }
+            mapFrequency.put(map, mapFrequency.get(map) + 1);
+        }
+        Section[] sections = mapFrequency
+                .keySet()
+                .stream()
+                .map(m -> new Section(m.getName(), mapFrequency.get(m), getRandomColour()))
+                .toArray(Section[]::new);
+        sendBreakdownEmbed(sections, matchHistory, "Map", channel);
+    }
+
+    /**
+     * Build and send a message embed breaking down the modes played in the match history
+     *
+     * @param matchHistory Player match history
+     * @param channel      Channel to send embed to
+     */
+    private void sendModeBreakdownEmbed(MatchHistory matchHistory, MessageChannel channel) {
+        ArrayList<Mode> modesPlayed = matchHistory
+                .getMatches()
+                .stream()
+                .map(MatchStats::getMode).collect(Collectors.toCollection(ArrayList::new));
+        HashMap<Mode, Integer> modeFrequency = new HashMap<>();
+        for(Mode mode : modesPlayed) {
+            if(!modeFrequency.containsKey(mode)) {
+                modeFrequency.put(mode, 0);
+            }
+            modeFrequency.put(mode, modeFrequency.get(mode) + 1);
+        }
+        Section[] sections = modeFrequency
+                .keySet()
+                .stream()
+                .map(m -> new Section(m.getName(), modeFrequency.get(m), getRandomColour()))
+                .toArray(Section[]::new);
+        sendBreakdownEmbed(sections, matchHistory, "Mode", channel);
+    }
+
+    /**
+     * Build and send a message embed displaying a breakdown of the match history
+     *
+     * @param sections      Donut chart sections showing frequency of the breakdown items
+     * @param breakdownItem Name of item being broken down
+     * @param channel       Channel to send embed to
+     */
+    private void sendBreakdownEmbed(Section[] sections, MatchHistory matchHistory, String breakdownItem, MessageChannel channel) {
+        DonutChart donutChart = new DonutChart(sections, font);
+        MessageEmbed embed = getDefaultEmbedBuilder(getBreakdownEmbedTitle(matchHistory.getName(), breakdownItem))
+                .setImage("attachment://image.png")
+                .setDescription("Breakdown for the last " + matchHistory.getMatches().size() + " matches:")
+                .setColor(EmbedHelper.GREEN)
+                .build();
+
+        channel.sendMessage(embed).
+                addFile(ImageLoadingMessage.imageToByteArray(donutChart.getFullImage()), "image.png")
+                .queue();
+    }
+
+    /**
+     * Get a random colour
+     *
+     * @return Random colour
+     */
+    private Color getRandomColour() {
+        Random rand = new Random();
+        return new Color(
+                rand.nextFloat(),
+                rand.nextFloat(),
+                rand.nextFloat()
+        );
     }
 
     /**
@@ -373,7 +499,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
         summary += "\n\nSome attachments haven't been mapped yet and they will be **RED**!";
         return getDefaultMatchEmbedBuilder(matchStats)
                 .setDescription(summary)
-                .setImage("attachment://image.png").build();
+                .setImage("attachment://image.png")
+                .build();
     }
 
     /**
@@ -456,7 +583,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @return Message embed detailing error
      */
     private MessageEmbed buildErrorEmbed(String name, String error) {
-        return getDefaultEmbedBuilder(name.toUpperCase())
+        return getDefaultEmbedBuilder(getSummaryEmbedTitle(name.toUpperCase()))
                 .setColor(EmbedHelper.RED)
                 .setDescription(error)
                 .build();
@@ -465,12 +592,12 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     /**
      * Create the default embed builder
      *
-     * @param name Player name
+     * @param title Title to use
      * @return Default embed builder
      */
-    private EmbedBuilder getDefaultEmbedBuilder(String name) {
+    private EmbedBuilder getDefaultEmbedBuilder(String title) {
         return new EmbedBuilder()
-                .setTitle(getSummaryEmbedTitle(name))
+                .setTitle(title)
                 .setFooter(
                         "Type " + getTrigger() + " for help", "attachment://image.png"
                 )
@@ -484,7 +611,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @return Default embed builder for a match
      */
     private EmbedBuilder getDefaultMatchEmbedBuilder(MatchStats matchStats) {
-        return getDefaultEmbedBuilder(matchStats.getPlayer().getName().toUpperCase())
+        return getDefaultEmbedBuilder(getSummaryEmbedTitle(matchStats.getPlayer().getName().toUpperCase()))
                 .setColor(getResultColour(matchStats.getResult()))
                 .setImage(matchStats.getMap().getImageURL());
     }
@@ -495,7 +622,9 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param name Player name
      * @return Embed title
      */
-    public abstract String getSummaryEmbedTitle(String name);
+    public String getSummaryEmbedTitle(String name) {
+        return codManager.getGame().name().toUpperCase() + " Match Summary: " + name.toUpperCase();
+    }
 
     /**
      * Get the title to use for the match history embed
@@ -503,14 +632,30 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param name Player name
      * @return Embed title
      */
-    public abstract String getHistoryEmbedTitle(String name);
+    private String getHistoryEmbedTitle(String name) {
+        return codManager.getGame().name().toUpperCase() + " Match History: " + name.toUpperCase();
+    }
+
+    /**
+     * Get the title to use for breakdown embeds
+     *
+     * @param name          Player name
+     * @param breakdownItem Item that is being broken down e.g - "map"
+     * @return Embed title
+     */
+    private String getBreakdownEmbedTitle(String name, String breakdownItem) {
+        return codManager.getGame().name().toUpperCase()
+                + " Match History " + breakdownItem + " Breakdown: " + name.toUpperCase();
+    }
 
     /**
      * Get the thumbnail to use in the embed
      *
      * @return Embed thumbnail
      */
-    public abstract String getEmbedThumbnail();
+    private String getEmbedThumbnail() {
+        return codManager.getGame() == CODManager.GAME.MW ? Gunfight.thumbnail : CWCountdownCommand.thumbnail;
+    }
 
     /**
      * Create the match history pageable embed
@@ -723,7 +868,11 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param platform Player platform
      * @return Match history JSON
      */
-    public abstract String getMatchHistoryJSON(String name, PLATFORM platform);
+    private String getMatchHistoryJSON(String name, PLATFORM platform) {
+        return codManager.getGame() == CODManager.GAME.MW
+                ? CODAPI.getMWMatchHistory(name, platform)
+                : CODAPI.getCWMatchHistory(name, platform);
+    }
 
     /**
      * Get the match players JSON
@@ -732,7 +881,11 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @param platform Match platform
      * @return Match players JSON
      */
-    public abstract String getMatchPlayersJSON(String matchID, PLATFORM platform);
+    private String getMatchPlayersJSON(String matchID, PLATFORM platform) {
+        return codManager.getGame() == CODManager.GAME.MW
+                ? CODAPI.getMWMatchPlayers(matchID, platform)
+                : CODAPI.getCWMatchPlayers(matchID, platform);
+    }
 
     /**
      * Get an optional integer value from the player stats match JSON

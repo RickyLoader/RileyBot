@@ -94,6 +94,26 @@ public class DonutChart {
     }
 
     /**
+     * Get an image displaying the chart and key
+     *
+     * @return Image displaying chart and key
+     */
+    public BufferedImage getFullImage() {
+        int gap = 20;
+        BufferedImage fullImage = new BufferedImage(
+                Math.max(chart.getWidth(), key.getWidth()),
+                chart.getHeight() + gap + key.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics g = fullImage.getGraphics();
+        int mid = fullImage.getWidth() / 2;
+        g.drawImage(chart, mid - (chart.getWidth() / 2), 0, null);
+        g.drawImage(key, mid - (key.getWidth() / 2), chart.getHeight() + gap, null);
+        g.dispose();
+        return fullImage;
+    }
+
+    /**
      * Get the donut chart colour key
      *
      * @return Donut chart colour key
