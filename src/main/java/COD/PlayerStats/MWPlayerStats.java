@@ -279,7 +279,7 @@ public class MWPlayerStats {
         ArrayList<CommendationStats> commendationStats = new ArrayList<>();
         try {
             for(String commendationName : commendations.keySet()) {
-                Commendation commendation = DiscordCommandManager.codManager.getCommendationByCodename(commendationName);
+                Commendation commendation = DiscordCommandManager.mwAssetManager.getCommendationByCodename(commendationName);
                 commendationStats.add(
                         new CommendationStats(
                                 commendation,
@@ -312,7 +312,7 @@ public class MWPlayerStats {
 
         for(String name : supportStreaks.keySet()) {
             JSONObject killstreakData = supportStreaks.getJSONObject(name).getJSONObject("properties");
-            Killstreak killstreak = DiscordCommandManager.codManager.getKillstreakByCodename(name);
+            Killstreak killstreak = DiscordCommandManager.mwAssetManager.getKillstreakByCodename(name);
             stats.add(
                     new KillstreakStats(
                             killstreak,
@@ -342,7 +342,7 @@ public class MWPlayerStats {
                 continue;
             }
             JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
-            FieldUpgrade fieldUpgrade = DiscordCommandManager.codManager.getSuperByCodename(superName);
+            FieldUpgrade fieldUpgrade = DiscordCommandManager.mwAssetManager.getSuperByCodename(superName);
             fieldUpgradeStats.add(
                     new FieldUpgradeStats(
                             fieldUpgrade,
@@ -368,7 +368,7 @@ public class MWPlayerStats {
             JSONObject category = weapons.getJSONObject(categoryName);
             for(String weaponName : category.keySet()) {
                 JSONObject weaponData = category.getJSONObject(weaponName).getJSONObject("properties");
-                Weapon weapon = DiscordCommandManager.codManager.getWeaponByCodename(weaponName);
+                Weapon weapon = DiscordCommandManager.mwAssetManager.getWeaponByCodename(weaponName);
                 if(weapon == null) {
                     System.out.println("Skipping: " + weaponName);
                     continue;

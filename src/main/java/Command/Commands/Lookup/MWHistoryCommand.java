@@ -1,5 +1,6 @@
 package Command.Commands.Lookup;
 
+import Bot.DiscordCommandManager;
 import Bot.DiscordUser;
 import COD.CODAPI;
 import COD.Gunfight;
@@ -13,7 +14,7 @@ import net.dv8tion.jda.api.entities.User;
 public class MWHistoryCommand extends MatchHistoryCommand {
 
     public MWHistoryCommand() {
-        super("mwhistory");
+        super("mwhistory", DiscordCommandManager.mwAssetManager);
     }
 
     @Override

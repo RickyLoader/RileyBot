@@ -1,5 +1,6 @@
 package Command.Commands.Lookup;
 
+import Bot.DiscordCommandManager;
 import Bot.DiscordUser;
 import COD.CODAPI;
 import Command.Commands.COD.CWCountdownCommand;
@@ -13,7 +14,7 @@ import net.dv8tion.jda.api.entities.User;
 public class CWHistoryCommand extends MatchHistoryCommand {
 
     public CWHistoryCommand() {
-        super("cwhistory");
+        super("cwhistory", DiscordCommandManager.cwManager);
     }
 
     @Override

@@ -75,6 +75,24 @@
       "real_name": "Fireteam: Dirty Bomb",
       "extra_stat_1:": "Objective",
       "extra_stat_2:": "Eliminations"
+    },
+    "prop":{
+      "real_name":"Prop Hunt"
+    },
+    "gunfight":{
+      "real_name":"Gunfight"
+    },
+    "dropkick":{
+      "real_name":"Dropkick"
+    },
+    "dom_snipe_bb":{
+      "real_name":"Snipers Only Domination"
+    },
+    "tdm_snipe_bb":{
+      "real_name":"Snipers Only TDM"
+    },
+    "fireteam_dirty_bomb_endurance":{
+      "real_name":"Fireteam: Endurance Dirty Bomb"
     }
   }
 }

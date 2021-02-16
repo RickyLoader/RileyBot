@@ -2,6 +2,7 @@ package Bot;
 
 import Audio.DiscordAudioPlayer;
 import COD.CODManager;
+import COD.MWManager;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
 import Command.Commands.COD.CWCountdownCommand;
@@ -32,7 +33,8 @@ import java.util.Random;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
-    public static final CODManager codManager = new CODManager();
+    public static final MWManager mwAssetManager = new MWManager();
+    public static final CODManager cwManager = new CODManager(CODManager.GAME.CW);
     private EmoteHelper emoteHelper;
 
     /**

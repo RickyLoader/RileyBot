@@ -70,7 +70,7 @@ public class MissingWeaponAttachments {
             MissingWeaponAttachments missingWeaponAttachments = missing.get(weaponName);
             if(missingWeaponAttachments == null) {
                 missingWeaponAttachments = new MissingWeaponAttachments(
-                        DiscordCommandManager.codManager.getWeaponByCodename(info.getString("weapon_name"))
+                        DiscordCommandManager.mwAssetManager.getWeaponByCodename(info.getString("weapon_name"))
                 );
             }
             missingWeaponAttachments.addMissingAttachment(info.getString("attachment_name"));

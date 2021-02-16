@@ -24,11 +24,35 @@
     "mp_kgb": {
       "real_name": "Checkmate"
     },
+    "mp_nuketown6": {
+      "real_name": "Nuketown '84"
+    },
     "wz_forest": {
       "real_name": "Ruka"
     },
     "wz_ski_slopes": {
       "real_name": "Alpine"
+    },
+    "wz_sanatorium": {
+      "real_name": "Sanatorium"
+    },
+    "mp_mall": {
+      "real_name": "The Pines"
+    },
+    "mp_raid_rm": {
+      "real_name": "Raid"
+    },
+    "mp_sm_berlin_tunnel": {
+      "real_name": "U-Bahn"
+    },
+    "mp_sm_finance": {
+      "real_name": "KGB"
+    },
+    "mp_sm_game_show": {
+      "real_name": "Game Show"
+    },
+    "mp_sm_central": {
+      "real_name": "ICBM"
     }
   }
 }

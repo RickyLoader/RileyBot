@@ -2,90 +2,115 @@
     "weapons": {
         "weapon_sniper": {
             "sniper_quickscope_t9": {
+                "image_url":"https://i.imgur.com/YPGghnB.png",
                 "real_name": "Pelington 703"
             },
             "sniper_standard_t9": {
+                "image_url":"https://i.imgur.com/EO7kuoD.png",
                 "real_name": "LW3 - Tundra"
             },
             "sniper_powersemi_t9": {
+                "image_url":"https://i.imgur.com/l8ifRUL.png",
                 "real_name": "M82"
             }
         },
         "weapon_lmg": {
             "lmg_light_t9": {
+                "image_url":"https://i.imgur.com/WKxrLIa.png",
                 "real_name": "RPD"
             },
             "lmg_slowfire_t9": {
+                "image_url":"https://i.imgur.com/FGsLj0r.png",
                 "real_name": "M60"
             },
             "lmg_accurate_t9": {
+                "image_url":"https://i.imgur.com/4UmhWsA.png",
                 "real_name": "Stoner 63"
             }
         },
         "weapon_pistol": {
             "pistol_semiauto_t9": {
+                "image_url":"https://i.imgur.com/XzorRyu.png",
                 "real_name": "1911"
             },
             "pistol_burst_t9": {
+                "image_url":"https://i.imgur.com/XstOYQ2.png",
                 "real_name": "Diamatti"
             },
             "pistol_revolver_t9": {
+                "image_url":"https://i.imgur.com/wLIbR0B.png",
                 "real_name": "Magnum"
             }
         },
         "weapon_assault_rifle": {
             "ar_fastfire_t9": {
+                "image_url":"https://i.imgur.com/4ixEalD.png",
                 "real_name": "FFAR 1"
             },
             "ar_standard_t9": {
+                "image_url":"https://i.imgur.com/fNMyclq.png",
                 "real_name": "XM4"
             },
             "ar_mobility_t9": {
+                "image_url":"https://i.imgur.com/in0hIDZ.png",
                 "real_name": "QBZ-83"
             },
             "ar_damage_t9": {
+                "image_url":"https://i.imgur.com/z1q1ueB.png",
                 "real_name": "AK-47"
             },
             "ar_accurate_t9": {
+                "image_url":"https://i.imgur.com/k98DKj0.png",
                 "real_name": "Krig 6"
             }
         },
         "weapon_shotgun": {
             "shotgun_semiauto_t9": {
+                "image_url":"https://i.imgur.com/gQjupXW.png",
                 "real_name": "Gallo SA12"
             },
             "shotgun_pump_t9": {
+                "image_url":"https://i.imgur.com/VoysyH9.png",
                 "real_name": "Hauer 77"
             }
         },
         "weapon_smg": {
             "smg_capacity_t9": {
+                "image_url":"https://i.imgur.com/1SWPLz1.png",
                 "real_name": "Bullfrog"
             },
             "smg_heavy_t9": {
+                "image_url":"https://i.imgur.com/imPkuzq.png",
                 "real_name": "AK-74u"
             },
             "smg_handling_t9": {
+                "image_url":"https://i.imgur.com/k51t4zy.png",
                 "real_name": "Milano 821"
             },
             "smg_standard_t9": {
+                "image_url":"https://i.imgur.com/s9ZWqey.png",
                 "real_name": "MP5"
             },
             "smg_burst_t9": {
+                "image_url":"https://i.imgur.com/4g854fg.png",
                 "real_name": "KSP 45"
             }
         },
         "weapon_marksman": {
             "tr_longburst_t9": {
+                "image_url":"https://i.imgur.com/i3798AO.png",
                 "real_name": "M16"
             },
             "tr_damagesemi_t9": {
+                "image_url":"https://i.imgur.com/fw3GrWX.png",
                 "real_name": "Type 63"
             },
             "tr_precisionsemi_t9": {
+                "image_url":"https://i.imgur.com/PnKEqkb.png",
                 "real_name": "DMR 14"
             },
             "tr_powerburst_t9": {
+                "image_url":"https://i.imgur.com/AkfqFKM.png",
                 "real_name": "AUG"
             }
         }

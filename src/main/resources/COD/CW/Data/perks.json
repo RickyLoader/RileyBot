@@ -1,0 +1,55 @@
+{
+    "perks": {
+        "blue": {
+            "perk_high_value": {
+                "real_name": "Assassin"
+            },
+            "perk_logistics": {
+                "real_name": "Gearhead"
+            },
+            "perk_scavenger": {
+                "real_name": "Scavenger"
+            },
+            "perk_quartermaster": {
+                "real_name": "Quartermaster"
+            },
+            "perk_tracker": {
+                "real_name": "Tracker"
+            }
+        },
+        "red": {
+            "perk_engineer": {
+                "real_name": "Engineer"
+            },
+            "perk_threat_perception": {
+                "real_name": "Paranoia"
+            },
+            "perk_flakjacket": {
+                "real_name": "Flak Jacket"
+            },
+            "perk_resistance": {
+                "real_name": "Tactical Mask"
+            },
+            "perk_espionage": {
+                "real_name": "Forward Intel"
+            }
+        },
+        "yellow": {
+            "perk_gungho": {
+                "real_name": "Gung-Ho"
+            },
+            "perk_ghost": {
+                "real_name": "Ghost"
+            },
+            "perk_coldblooded": {
+                "real_name": "Cold Blooded"
+            },
+            "perk_ninja": {
+                "real_name": "Ninja"
+            },
+            "perk_spycraft": {
+                "real_name": "Spycraft"
+            }
+        }
+    }
+}

@@ -1,11 +1,12 @@
 package Command.Structure;
 
-import Bot.DiscordCommandManager;
 import COD.Assets.*;
+import COD.CODManager;
 import COD.LoadoutImageManager;
 import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -13,6 +14,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * View a COD player's match history
@@ -20,22 +22,25 @@ import java.util.List;
 public abstract class MatchHistoryCommand extends CODLookupCommand {
     private final HashMap<Long, MatchStats> matchMessages;
     private final LoadoutImageManager loadoutImageManager;
+    private final CODManager codManager;
     private String win, loss, draw, matchID;
     private Emote stats, players, loadouts;
 
     /**
      * Create the command
      *
-     * @param trigger Command trigger
+     * @param trigger    Command trigger
+     * @param codManager COD asset manager
      */
-    public MatchHistoryCommand(String trigger) {
+    public MatchHistoryCommand(String trigger, CODManager codManager) {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getHelpText(trigger) + " [match id/latest]\n\n"+trigger+" missing"
+                getHelpText(trigger) + " [match id/latest]\n\n" + trigger + " missing"
         );
         this.matchMessages = new HashMap<>();
         this.loadoutImageManager = new LoadoutImageManager();
+        this.codManager = codManager;
     }
 
     @Override
@@ -204,25 +209,28 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             ).queue();
             return;
         }
+
+        MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
+        MessageAction sendMessage = channel.sendMessage(matchEmbed);
+        Consumer<Message> callback = message -> {
+            matchMessages.put(message.getIdLong(), matchStats);
+            message.addReaction(stats).queue();
+            message.addReaction(players).queue();
+            if(matchStats.hasLoadouts()) {
+                message.addReaction(loadouts).queue();
+            }
+        };
         if(matchStats.hasLoadouts()) {
             matchStats.setLoadoutImage(buildLoadoutImage(matchStats.getLoadouts()));
+            /*
+             * Setting the attached loadout image file as the embed footer icon prevents it from displaying as
+             * a separate message.
+             * When viewing the loadout embed, both the embed footer icon & embed image can use the file.
+             */
+            sendMessage.addFile(matchStats.getLoadoutImage(), "image.png").queue(callback);
+            return;
         }
-        MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
-        channel.sendMessage(matchEmbed)
-                /*
-                 * Setting the attached loadout image file as the embed footer icon prevents it from displaying as
-                 * a separate message.
-                 * When viewing the loadout embed, both the embed footer icon & embed image can use the file.
-                 */
-                .addFile(matchStats.getLoadoutImage(), "image.png")
-                .queue(message -> {
-                    matchMessages.put(message.getIdLong(), matchStats);
-                    message.addReaction(stats).queue();
-                    message.addReaction(players).queue();
-                    if(matchStats.hasLoadouts()) {
-                        message.addReaction(loadouts).queue();
-                    }
-                });
+        sendMessage.queue(callback);
     }
 
     /**
@@ -376,13 +384,18 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      */
     private void addTeamToEmbed(Team team, EmbedBuilder builder) {
         ArrayList<MatchPlayer> players = team.getPlayers();
+        String teamName = "__" + team.getName().toUpperCase() + "__";
+        if(players.isEmpty()) {
+            builder.addField(teamName, "No players found!", true);
+            return;
+        }
         for(int i = 0; i < players.size(); i++) {
             MatchPlayer player = players.get(i);
             String value = "**" + player.getName() + "**"
                     + "\n" + player.getPlatform().name()
                     + "\n#" + player.getUno();
             builder.addField(i == 0
-                    ? EmbedHelper.getTitleField("__" + team.getName().toUpperCase() + "__", value)
+                    ? EmbedHelper.getTitleField(teamName, value)
                     : EmbedHelper.getValueField(value)
             );
         }
@@ -563,51 +576,52 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
             JSONObject match = matchList.getJSONObject(i);
             JSONObject playerStats = match.getJSONObject("playerStats");
             JSONObject playerSummary = match.getJSONObject("player");
-            String mapName = match.getString("map");
             MatchStats.RESULT result = parseResult(
                     (!match.getBoolean("isPresentAtEnd") || match.isNull("result")) ? "FORFEIT" : match.getString("result")
             );
 
-            matchStats.add(
-                    new MatchStats.MatchBuilder(
-                            match.getString("matchID"),
-                            DiscordCommandManager.codManager.getMapByCodename(mapName),
-                            DiscordCommandManager.codManager.getModeByCodename(match.getString("mode")),
-                            new Date(match.getLong("utcStartSeconds") * 1000),
-                            new Date(match.getLong("utcEndSeconds") * 1000),
-                            result,
-                            player
-                    )
-                            .setKD(
-                                    new Ratio(
-                                            playerStats.getInt("kills"),
-                                            playerStats.getInt("deaths")
-                                    )
-                            )
-                            .setAccuracy(
-                                    playerStats.has("shotsLanded") ? new Ratio(
-                                            playerStats.getInt("shotsLanded"),
-                                            playerStats.getInt("shotsFired")
-                                    ) : null
-                            )
-                            .setMatchScore(
-                                    new Score(
-                                            match.getInt("team1Score"),
-                                            match.getInt("team2Score"),
-                                            result
-                                    )
-                            )
-                            .setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"))
-                            .setNemesis(getOptionalString(playerSummary, "nemesis"))
-                            .setMostKilled(getOptionalString(playerSummary, "mostKilled"))
-                            .setLongestStreak(getLongestStreak(playerStats))
-                            .setDamageDealt(getDamageDealt(playerStats))
-                            .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
-                            .setXP(getOptionalInt(playerStats, "matchXp"))
-                            .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
-                            .setLoadouts(parseLoadouts(playerSummary))
-                            .build()
+            MatchStats.MatchBuilder matchBuilder = new MatchStats.MatchBuilder(
+                    match.getString("matchID"),
+                    codManager.getMapByCodename(match.getString("map")),
+                    codManager.getModeByCodename(match.getString("mode")),
+                    new Date(match.getLong("utcStartSeconds") * 1000),
+                    new Date(match.getLong("utcEndSeconds") * 1000),
+                    result,
+                    player
             );
+
+            matchBuilder
+                    .setKD(
+                            new Ratio(
+                                    playerStats.getInt("kills"),
+                                    playerStats.getInt("deaths")
+                            )
+                    )
+                    .setAccuracy(
+                            playerStats.has("shotsLanded") ? new Ratio(
+                                    playerStats.getInt("shotsLanded"),
+                                    playerStats.getInt("shotsFired")
+                            ) : null
+                    )
+                    .setMatchScore(
+                            new Score(
+                                    match.getInt("team1Score"),
+                                    match.getInt("team2Score"),
+                                    result
+                            )
+                    )
+                    .setNemesis(getOptionalString(playerSummary, "nemesis"))
+                    .setMostKilled(getOptionalString(playerSummary, "mostKilled"))
+                    .setLongestStreak(getLongestStreak(playerStats))
+                    .setDamageDealt(getDamageDealt(playerStats))
+                    .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
+                    .setXP(getOptionalInt(playerStats, "matchXp"))
+                    .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
+                    .setLoadouts(parseLoadouts(playerSummary));
+            if(playerStats.has("percentTimeMoving")) {
+                matchBuilder.setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"));
+            }
+            matchStats.add(matchBuilder.build());
         }
 
         return new MatchHistory(
@@ -653,7 +667,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     private Perk[] parsePerks(JSONArray perkJSONArray) {
         Perk[] perks = new Perk[perkJSONArray.length()];
         for(int i = 0; i < perkJSONArray.length(); i++) {
-            perks[i] = DiscordCommandManager.codManager.getPerkByCodename(
+            perks[i] = codManager.getPerkByCodename(
                     perkJSONArray.getJSONObject(i).getString("name")
             );
         }
@@ -667,7 +681,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      * @return Weapon
      */
     private Weapon parseWeapon(JSONObject loadoutWeapon) {
-        return DiscordCommandManager.codManager.getWeaponByCodename(loadoutWeapon.getString("name"));
+        return codManager.getWeaponByCodename(loadoutWeapon.getString("name"));
     }
 
     /**

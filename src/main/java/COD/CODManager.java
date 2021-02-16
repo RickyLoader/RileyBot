@@ -13,103 +13,32 @@ import static COD.Assets.Attachment.*;
  * Manage resources, weapons, maps, and modes for COD
  */
 public class CODManager {
-    private final ResourceHandler resourceHandler;
+    final ResourceHandler resourceHandler;
+    final String basePath;
     private final HashMap<String, Weapon> weapons;
-    private final HashMap<String, FieldUpgrade> supers;
-    private final HashMap<String, Commendation> commendations;
-    private final HashMap<String, Killstreak> killstreaks;
     private final HashMap<String, Map> maps;
     private final HashMap<String, Mode> modes;
     private final HashMap<String, Perk> perks;
-    private final static String BASE_PATH = "/COD/MW/";
+    private final GAME game;
 
-    public CODManager() {
+    public enum GAME {
+        CW,
+        MW
+    }
+
+    /**
+     * Create the COD manager
+     *
+     * @param game COD game
+     */
+    public CODManager(GAME game) {
+        this.game = game;
+        this.basePath = "/COD/" + game.name() + "/";
         this.resourceHandler = new ResourceHandler();
         this.weapons = readWeapons();
-        this.supers = readSupers();
-        this.commendations = readCommendations();
-        this.killstreaks = readKillstreaks();
         this.maps = readMaps();
         this.modes = readModes();
         this.perks = readPerks();
-    }
-
-    /**
-     * Parse commendation JSON in to objects and map to the codename
-     *
-     * @return Map of codename -> commendation
-     */
-    private HashMap<String, Commendation> readCommendations() {
-        HashMap<String, Commendation> commendations = new HashMap<>();
-        JSONObject commendationList = getAssetJSON("commendations.json", "commendations");
-
-        for(String name : commendationList.keySet()) {
-            JSONObject commendationData = commendationList.getJSONObject(name);
-            commendations.put(
-                    name,
-                    new Commendation(
-                            name,
-                            commendationData.getString("title"),
-                            commendationData.getString("desc"),
-                            resourceHandler.getImageResource(BASE_PATH + "Accolades/" + name + ".png")
-                    )
-            );
-        }
-        return commendations;
-    }
-
-    /**
-     * Parse supers JSON in to objects and map to the codename
-     *
-     * @return Map of codename -> super
-     */
-    private HashMap<String, FieldUpgrade> readSupers() {
-        HashMap<String, FieldUpgrade> supers = new HashMap<>();
-        JSONObject supersList = getAssetJSON("supers.json", "supers");
-
-        for(String name : supersList.keySet()) {
-            JSONObject superData = supersList.getJSONObject(name);
-            supers.put(
-                    name,
-                    new FieldUpgrade(
-                            name,
-                            superData.getString("real_name"),
-                            superData.has("misc1_name")
-                                    ? superData.getString("misc1_name")
-                                    : null,
-                            resourceHandler.getImageResource(BASE_PATH + "Supers/" + name + ".png")
-                    )
-            );
-        }
-        return supers;
-    }
-
-    /**
-     * Parse perk JSON in to objects and map to the codename
-     *
-     * @return Map of codename -> perk
-     */
-    private HashMap<String, Perk> readPerks() {
-        HashMap<String, Perk> perks = new HashMap<>();
-        JSONObject perkList = getAssetJSON("perks.json", "perks");
-
-        for(String colour : perkList.keySet()) {
-            Perk.CATEGORY category = Perk.CATEGORY.valueOf(colour.toUpperCase());
-            JSONObject perkCategory = perkList.getJSONObject(colour);
-            for(String perkName : perkCategory.keySet()) {
-                JSONObject perk = perkCategory.getJSONObject(perkName);
-                perks.put(
-                        perkName,
-                        new Perk(
-                                perkName,
-                                perk.getString("real_name"),
-                                category,
-                                resourceHandler.getImageResource(BASE_PATH + "Perks/" + perkName + ".png")
-                        )
-                );
-            }
-        }
-        return perks;
     }
 
     /**
@@ -126,7 +55,7 @@ public class CODManager {
                 JSONObject weaponData = categoryData.getJSONObject(weaponName);
                 String gameName = weaponData.getString("real_name");
                 BufferedImage image = resourceHandler.getImageResource(
-                        BASE_PATH + "Weapons/" + categoryName + "/" + weaponName + ".png"
+                        basePath + "Weapons/" + categoryName + "/" + weaponName + ".png"
                 );
                 String imageURL = weaponData.getString("image_url");
                 Weapon weapon;
@@ -153,7 +82,7 @@ public class CODManager {
                                             attachment.getString("real_name"),
                                             CATEGORY.valueOf(attachment.getString("category").toUpperCase()),
                                             resourceHandler.getImageResource(
-                                                    BASE_PATH
+                                                    basePath
                                                             + "Attachments/"
                                                             + categoryName + "/"
                                                             + weaponName + "/"
@@ -182,34 +111,6 @@ public class CODManager {
     }
 
     /**
-     * Parse killstreak JSON in to objects and map to the codename
-     *
-     * @return Map of codename -> killstreak
-     */
-    private HashMap<String, Killstreak> readKillstreaks() {
-        HashMap<String, Killstreak> killstreaks = new HashMap<>();
-        JSONObject killstreakList = getAssetJSON("streaks.json", "streaks");
-
-        for(String name : killstreakList.keySet()) {
-            JSONObject killstreakData = killstreakList.getJSONObject(name);
-            killstreaks.put(
-                    name,
-                    new Killstreak(
-                            name,
-                            killstreakData.getString("real_name"),
-                            killstreakData.has("extra_stat")
-                                    ? killstreakData.getString("extra_stat")
-                                    : null,
-                            resourceHandler.getImageResource(
-                                    BASE_PATH + "Killstreaks/" + name + ".png"
-                            )
-                    )
-            );
-        }
-        return killstreaks;
-    }
-
-    /**
      * Parse map JSON in to objects and map to the codename
      *
      * @return Map of codename -> map
@@ -224,12 +125,23 @@ public class CODManager {
                     new Map(
                             name,
                             mapData.getString("real_name"),
-                            "https://www.callofduty.com/cdn/app/base-maps/mw/" + name + ".jpg",
-                            resourceHandler.getImageResource(BASE_PATH + "Maps/" + name + ".png")
+                            getMapImageUrl(name),
+                            resourceHandler.getImageResource(basePath + "Maps/" + name + ".png")
                     )
             );
         }
         return maps;
+    }
+
+    /**
+     * Get the image URL for a map given the codename
+     *
+     * @param codename Codename to retrieve
+     * @return Image URL for map
+     */
+    private String getMapImageUrl(String codename) {
+        return "https://www.callofduty.com/cdn/app/base-maps/"
+                + game.name().toLowerCase() + "/" + codename + ".jpg";
     }
 
     /**
@@ -254,15 +166,43 @@ public class CODManager {
     }
 
     /**
+     * Parse perk JSON in to objects and map to the codename
+     *
+     * @return Map of codename -> perk
+     */
+    private HashMap<String, Perk> readPerks() {
+        HashMap<String, Perk> perks = new HashMap<>();
+        JSONObject perkList = getAssetJSON("perks.json", "perks");
+
+        for(String colour : perkList.keySet()) {
+            Perk.CATEGORY category = Perk.CATEGORY.valueOf(colour.toUpperCase());
+            JSONObject perkCategory = perkList.getJSONObject(colour);
+            for(String perkName : perkCategory.keySet()) {
+                JSONObject perk = perkCategory.getJSONObject(perkName);
+                perks.put(
+                        perkName,
+                        new Perk(
+                                perkName,
+                                perk.getString("real_name"),
+                                category,
+                                resourceHandler.getImageResource(basePath + "Perks/" + perkName + ".png")
+                        )
+                );
+            }
+        }
+        return perks;
+    }
+
+    /**
      * Read in the JSON of the given filename
      *
      * @param filename JSON filename
      * @param key      Key to JSON object
      * @return JSON object of file at given path
      */
-    private JSONObject getAssetJSON(String filename, String key) {
+    public JSONObject getAssetJSON(String filename, String key) {
         return new JSONObject(
-                resourceHandler.getResourceFileAsString(BASE_PATH + "Data/" + filename)
+                resourceHandler.getResourceFileAsString(basePath + "Data/" + filename)
         ).getJSONObject(key);
     }
 
@@ -270,30 +210,28 @@ public class CODManager {
      * Get a map by its codename
      *
      * @param codename Map codename
-     * @return Map with codename or null
+     * @return Map with codename or unknown map
      */
     public Map getMapByCodename(String codename) {
-        return maps.get(codename);
+        Map map = maps.get(codename);
+        if(map == null) {
+            map = new Map(codename, "MISSING: " + codename, getMapImageUrl(codename), null);
+        }
+        return map;
     }
 
     /**
      * Get a mode by its codename
      *
      * @param codename Mode codename
-     * @return Mode with codename or null
+     * @return Mode with codename or unknown mode
      */
     public Mode getModeByCodename(String codename) {
-        return modes.get(codename);
-    }
-
-    /**
-     * Get a killstreak by its codename
-     *
-     * @param codename Killstreak codename
-     * @return Killstreak with codename or null
-     */
-    public Killstreak getKillstreakByCodename(String codename) {
-        return killstreaks.get(codename);
+        Mode mode = modes.get(codename);
+        if(mode == null) {
+            mode = new Mode(codename, "MISSING: " + codename);
+        }
+        return mode;
     }
 
     /**
@@ -321,6 +259,16 @@ public class CODManager {
     }
 
     /**
+     * Get a perk by its codename
+     *
+     * @param codename Perk codename
+     * @return Perk with codename or null
+     */
+    public Perk getPerkByCodename(String codename) {
+        return perks.get(codename);
+    }
+
+    /**
      * Get an array of weapons by category
      *
      * @param category Weapon category
@@ -332,35 +280,5 @@ public class CODManager {
                 .stream()
                 .filter(w -> w.getCategory().equalsIgnoreCase(category))
                 .toArray(Weapon[]::new);
-    }
-
-    /**
-     * Get a commendation by its codename
-     *
-     * @param codename Commendation codename
-     * @return Commendation with codename or null
-     */
-    public Commendation getCommendationByCodename(String codename) {
-        return commendations.get(codename);
-    }
-
-    /**
-     * Get a super by its codename
-     *
-     * @param codename Super codename
-     * @return Super with codename or null
-     */
-    public FieldUpgrade getSuperByCodename(String codename) {
-        return supers.get(codename);
-    }
-
-    /**
-     * Get a perk by its codename
-     *
-     * @param codename Perk codename
-     * @return Perk with codename or null
-     */
-    public Perk getPerkByCodename(String codename) {
-        return perks.get(codename);
     }
 }
