@@ -44,7 +44,7 @@ public class OSRSPollCommand extends DiscordCommand {
                     new PollSearchResultsMessage(
                             results,
                             message,
-                            "Try: " + getHelpName(),
+                            "Try: " + getTrigger() + " for help",
                             context
                     ).showMessage();
                     return;
