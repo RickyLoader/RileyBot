@@ -2,6 +2,7 @@ package COD.Assets;
 
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Hold weapon information
@@ -173,5 +174,19 @@ public class Weapon {
      */
     public String getCategory() {
         return category;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Weapon)) {
+            return false;
+        }
+        Weapon weapon = (Weapon) obj;
+        return weapon.getCodename().equals(codename);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codename);
     }
 }

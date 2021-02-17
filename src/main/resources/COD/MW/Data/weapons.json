@@ -13305,6 +13305,10 @@
       "iw8_knife": {
         "image_url": "https://i.imgur.com/MiBa0HP.png",
         "real_name": "Combat Knife"
+      },
+      "iw8_fists": {
+        "image_url": "https://i.imgur.com/lrwEZKq.png",
+        "real_name": "Fists"
       }
     }
   }

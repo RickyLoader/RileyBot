@@ -4,6 +4,10 @@ import COD.Assets.Perk;
 import COD.Assets.TacticalWeapon;
 import COD.Assets.Weapon;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+
 /**
  * Player match loadout
  */
@@ -139,5 +143,69 @@ public class Loadout {
      */
     public LoadoutWeapon getSecondary() {
         return secondary;
+    }
+
+    /**
+     * Check if the loadout contains a primary weapon
+     *
+     * @return Loadout contains a primary weapon
+     */
+    public boolean hasPrimary() {
+        return primary != null;
+    }
+
+    /**
+     * Check if the loadout contains a secondary weapon
+     *
+     * @return Loadout contains a secondary weapon
+     */
+    public boolean hasSecondary() {
+        return secondary != null;
+    }
+
+    /**
+     * Check if the loadout contains tactical equipment
+     *
+     * @return Loadout contains tactical equipment
+     */
+    public boolean hasTactical() {
+        return tactical != null;
+    }
+
+    /**
+     * Check if the loadout contains lethal equipment
+     *
+     * @return Loadout contains lethal equipment
+     */
+    public boolean hasLethal() {
+        return lethal != null;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if(!(object instanceof Loadout)) {
+            return false;
+        }
+        Loadout loadout = (Loadout) object;
+        if(hasTactical() != loadout.hasTactical() || hasLethal() != loadout.hasLethal() || hasPrimary() != loadout.hasPrimary() || hasSecondary() != loadout.hasSecondary() || perks.length != loadout.getPerks().length) {
+            return false;
+        }
+        boolean tactical = !hasTactical() || getTactical().equals(loadout.getTactical());
+        boolean lethal = !hasLethal() || getLethal().equals(loadout.getLethal());
+        boolean primary = !hasPrimary() || getPrimary().equals(loadout.getPrimary());
+        boolean secondary = !hasSecondary() || getSecondary().equals(loadout.getSecondary());
+
+        HashSet<Perk> perks = new HashSet<>(Arrays.asList(this.perks));
+        for(Perk perk : loadout.getPerks()) {
+            if(!perks.contains(perk)) {
+                return false;
+            }
+        }
+        return primary && secondary && lethal && tactical;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tactical, lethal, primary, secondary);
     }
 }
