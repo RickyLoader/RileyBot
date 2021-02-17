@@ -1,5 +1,9 @@
 package COD.Assets;
 
+import COD.CODManager;
+import COD.CODManager.GAME;
+import org.json.JSONObject;
+
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,11 +13,12 @@ import java.util.ArrayList;
  */
 public class WobblyScore {
     private final long wobblies;
-    private final String name, matchId;
+    private final String name, matchId, key;
     private final long dateMs;
     private final double metres;
     private final Map map;
     private final Mode mode;
+    private final GAME game;
 
     /**
      * Create a wobbly score
@@ -25,8 +30,9 @@ public class WobblyScore {
      * @param map      Map
      * @param mode     Mode
      * @param matchId  Match Id
+     * @param game     COD game
      */
-    public WobblyScore(long wobblies, double metres, String name, long dateMs, Map map, Mode mode, String matchId) {
+    public WobblyScore(long wobblies, double metres, String name, long dateMs, Map map, Mode mode, String matchId, GAME game) {
         this.wobblies = wobblies;
         this.name = name;
         this.dateMs = dateMs;
@@ -34,6 +40,17 @@ public class WobblyScore {
         this.mode = mode;
         this.matchId = matchId;
         this.metres = metres;
+        this.game = game;
+        this.key = matchId + name;
+    }
+
+    /**
+     * Get the unique score key (match id + name)
+     *
+     * @return Score key
+     */
+    public String getKey() {
+        return key;
     }
 
     /**
@@ -112,5 +129,42 @@ public class WobblyScore {
      */
     public double getMetres() {
         return metres;
+    }
+
+    /**
+     * WobblyScore -> JSON Object
+     *
+     * @return JSON object of WobblyScore
+     */
+    public JSONObject toJSON() {
+        return new JSONObject()
+                .put("wobblies", wobblies)
+                .put("player_name", name)
+                .put("game", game.name().toUpperCase())
+                .put("map_id", map.getCodename())
+                .put("mode_id", mode.getCodename())
+                .put("match_id", matchId)
+                .put("metres", metres)
+                .put("dateMs", dateMs);
+    }
+
+    /**
+     * Create a WobblyScore from JSON
+     *
+     * @param json       JSON object
+     * @param codManager COD asset manager
+     * @return WobblyScore
+     */
+    public static WobblyScore fromJSON(JSONObject json, CODManager codManager) {
+        return new WobblyScore(
+                json.getLong("wobblies"),
+                json.getDouble("metres"),
+                json.getString("player_name"),
+                json.getLong("dateMs"),
+                codManager.getMapByCodename(json.getString("map_id")),
+                codManager.getModeByCodename(json.getString("mode_id")),
+                json.getString("match_id"),
+                codManager.getGame()
+        );
     }
 }

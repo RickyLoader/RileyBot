@@ -1,11 +1,14 @@
 package Bot;
 
+import COD.Assets.WobblyScore;
 import COD.CODManager.GAME;
-import COD.Match.MatchStats;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * Helper methods for storing and retrieving information based on User id
@@ -79,22 +82,17 @@ public class DiscordUser {
     }
 
     /**
-     * Add an entry to the wobblies leaderboard
+     * Add wobbly scores to the wobblies leaderboard (async)
      *
-     * @param matchStats Match stats
-     * @param game       COD game
+     * @param scores Scores to add
      */
-    public static void addToWobblyLeaderboard(GAME game, MatchStats matchStats) {
-        JSONObject body = new JSONObject()
-                .put("wobblies", matchStats.getWobblies())
-                .put("player_name", matchStats.getPlayer().getName())
-                .put("game", game.name().toUpperCase())
-                .put("map_id", matchStats.getMap().getCodename())
-                .put("mode_id", matchStats.getMode().getCodename())
-                .put("match_id", matchStats.getId())
-                .put("metres", matchStats.getMetres())
-                .put("dateMs", matchStats.getStart().getTime());
-        new NetworkRequest("wobblies", true).post(body.toString());
+    public static void addWobbliesToLeaderboard(ArrayList<WobblyScore> scores) {
+        JSONArray scoreArray = new JSONArray();
+        for(WobblyScore score : scores) {
+            scoreArray.put(score.toJSON());
+        }
+        JSONObject body = new JSONObject().put("wobblies", scoreArray);
+        new NetworkRequest("wobblies", true).post(body.toString(), true);
     }
 
     /**
