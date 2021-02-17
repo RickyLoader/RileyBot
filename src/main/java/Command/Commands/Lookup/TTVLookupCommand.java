@@ -7,7 +7,6 @@ import Command.Structure.LookupCommand;
 import Command.Structure.PageableTableEmbed;
 import Countdown.Countdown;
 import Network.NetworkRequest;
-import Network.NetworkResponse;
 import Network.Secret;
 import Twitch.Game;
 import Twitch.OAuth;
@@ -154,7 +153,7 @@ public class TTVLookupCommand extends LookupCommand {
         String description = "**Followers**: " + streamer.formatFollowers();
         String title = streamer.getDisplayName() + " | " + (live ? "LIVE" : "OFFLINE");
 
-        if(!streamer.getLanguage().equalsIgnoreCase("english")) {
+        if(streamer.hasLanguage() && !streamer.getLanguage().equalsIgnoreCase("english")) {
             title += " (" + streamer.getLanguage() + ")";
         }
         EmbedBuilder builder = new EmbedBuilder()
@@ -223,14 +222,16 @@ public class TTVLookupCommand extends LookupCommand {
      */
     private Streamer parseStreamer(JSONObject streamer, boolean showFollowers) {
         String id = streamer.getString("id");
-
         StreamerBuilder builder = new StreamerBuilder()
                 .setLoginName(streamer.getString("broadcaster_login"))
                 .setDisplayName(streamer.getString("display_name"))
                 .setId(id)
-                .setLanguage(EmbedHelper.getLanguageFromISO(streamer.getString("broadcaster_language")))
                 .setThumbnail(streamer.getString("thumbnail_url"));
 
+        String langISO = streamer.getString("broadcaster_language");
+        if(!langISO.isEmpty()) {
+            builder.setLanguage(EmbedHelper.getLanguageFromISO(langISO));
+        }
         if(streamer.getBoolean("is_live")) {
             builder.setStream(
                     new Stream(

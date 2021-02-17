@@ -212,4 +212,13 @@ public class Streamer {
     public Stream getStream() {
         return stream;
     }
+
+    /**
+     * Check if the streamer has a known language
+     *
+     * @return Streamer has language
+     */
+    public boolean hasLanguage() {
+        return language != null;
+    }
 }
