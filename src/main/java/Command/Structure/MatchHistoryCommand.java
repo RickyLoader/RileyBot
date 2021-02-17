@@ -116,7 +116,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
             context.getJDA().addEventListener(getMatchEmoteListener());
         }
         MessageChannel channel = context.getMessageChannel();
-        channel.sendTyping().queue();
         if(name.equals("missing")) {
             ArrayList<MissingWeaponAttachments> missing = MissingWeaponAttachments.getMissingAttachments();
             if(missing.isEmpty()) {
@@ -136,7 +135,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             showWobblyLeaderboard(context);
             return;
         }
-
+        channel.sendTyping().queue();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
             return;
@@ -171,7 +170,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         catch(NumberFormatException e) {
             e.printStackTrace();
         }
-        if(index < 0 || index > leaderboard.size()) {
+        if(index < 0 || index > leaderboard.size() - 1) {
             channel.sendMessage("That's not a rank!").queue();
             return;
         }
