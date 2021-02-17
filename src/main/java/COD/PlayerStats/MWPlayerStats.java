@@ -338,7 +338,7 @@ public class MWPlayerStats {
         for(String superName : superData.keySet()) {
 
             // Counts Field Upgrade Pro (Running 2 field upgrades) as a field upgrade itself
-            if(superName.equals("super_select")){
+            if(superName.equals("super_select")) {
                 continue;
             }
             JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
@@ -368,12 +368,9 @@ public class MWPlayerStats {
             JSONObject category = weapons.getJSONObject(categoryName);
             for(String weaponName : category.keySet()) {
                 JSONObject weaponData = category.getJSONObject(weaponName).getJSONObject("properties");
-                Weapon weapon = DiscordCommandManager.mwAssetManager.getWeaponByCodename(weaponName);
-                if(weapon == null) {
-                    System.out.println("Skipping: " + weaponName);
-                    continue;
-                }
+                Weapon weapon = DiscordCommandManager.mwAssetManager.getWeaponByCodename(weaponName, categoryName);
                 WeaponStats stats;
+
                 switch(weapon.getType()) {
                     case LETHAL:
                         stats = new LethalStats(

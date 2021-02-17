@@ -14,7 +14,7 @@ import java.util.Date;
  */
 public class MatchStats {
     private final Date start, end;
-    private final long duration, wobblies;
+    private final long duration, wobblies, timePlayed;
     private final RESULT result;
     private final Map map;
     private final Mode mode;
@@ -40,7 +40,7 @@ public class MatchStats {
      */
     public static class MatchBuilder {
         private final Date start, end;
-        private final long duration;
+        private final long duration, timePlayed;
         private final RESULT result;
         private final String id;
         private final MatchPlayer player;
@@ -57,15 +57,16 @@ public class MatchStats {
         /**
          * Initialise the required values of the match
          *
-         * @param id     Unique match id
-         * @param map    Map the match was played on
-         * @param mode   Match mode
-         * @param start  Start data
-         * @param end    End date
-         * @param result Result of match
-         * @param player Player who match stats belong to
+         * @param id         Unique match id
+         * @param map        Map the match was played on
+         * @param mode       Match mode
+         * @param start      Start data
+         * @param end        End date
+         * @param timePlayed Match time played (in ms)
+         * @param result     Result of match
+         * @param player     Player who match stats belong to
          */
-        public MatchBuilder(String id, Map map, Mode mode, Date start, Date end, RESULT result, MatchPlayer player) {
+        public MatchBuilder(String id, Map map, Mode mode, Date start, Date end, long timePlayed, RESULT result, MatchPlayer player) {
             this.id = id;
             this.map = map;
             this.mode = mode;
@@ -74,6 +75,7 @@ public class MatchStats {
             this.duration = end.getTime() - start.getTime();
             this.result = result;
             this.player = player;
+            this.timePlayed = timePlayed;
         }
 
         /**
@@ -246,6 +248,7 @@ public class MatchStats {
         this.wobblies = builder.wobblies;
         this.player = builder.player;
         this.loadouts = builder.loadouts;
+        this.timePlayed = builder.timePlayed;
     }
 
     /**
@@ -499,7 +502,7 @@ public class MatchStats {
         return "**ID**: " + id +
                 "\n**Date**: " + getDateString() +
                 "\n**Time**: " + getTimeString() +
-                "\n**Duration**: " + getDurationString() +
+                "\n**Duration**: " + getMatchDurationString() +
                 "\n\n**Mode**: " + mode.getName() +
                 "\n**Map**: " + map.getName() +
                 "\n**K/D**: " + getKillDeathSummary();
@@ -537,10 +540,28 @@ public class MatchStats {
     /**
      * Get the match duration formatted to a String
      *
-     * @return Match String
+     * @return Match duration String
      */
-    public String getDurationString() {
+    public String getMatchDurationString() {
         return EmbedHelper.formatDuration(duration);
+    }
+
+    /**
+     * Get the time played formatted to a String
+     *
+     * @return Time played String
+     */
+    public String getTimePlayedString() {
+        return EmbedHelper.formatDuration(timePlayed);
+    }
+
+    /**
+     * Get the match time played by the player (in ms)
+     *
+     * @return Match time played
+     */
+    public long getTimePlayed() {
+        return timePlayed;
     }
 
     /**
@@ -577,6 +598,14 @@ public class MatchStats {
      */
     public RESULT getResult() {
         return result;
+    }
+
+    /**
+     * Check if the player completed the match
+     * @return Player completed match
+     */
+    public boolean playerCompleted(){
+        return result!=RESULT.FORFEIT;
     }
 
     /**

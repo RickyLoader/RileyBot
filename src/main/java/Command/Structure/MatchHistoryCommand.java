@@ -558,13 +558,19 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private MessageEmbed buildMatchEmbed(MatchStats matchStats) {
         int wobblyRank = getWobblyRank(matchStats);
-        return getDefaultMatchEmbedBuilder(matchStats)
+        EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats)
                 .addField("**Date**", matchStats.getDateString(), true)
                 .addField("**Time**", matchStats.getTimeString(), true)
-                .addField("**Duration**", matchStats.getDurationString(), true)
+                .addField("**Duration**", matchStats.getMatchDurationString(), true)
                 .addField("**Mode**", matchStats.getMode().getName(), true)
-                .addField("**Map**", matchStats.getMap().getName(), true)
-                .addBlankField(true)
+                .addField("**Map**", matchStats.getMap().getName(), true);
+        if(matchStats.playerCompleted()) {
+            builder.addBlankField(true);
+        }
+        else {
+            builder.addField("**Time Played**", matchStats.getTimePlayedString(), true);
+        }
+        return builder
                 .addField("**K/D**", matchStats.getKillDeathSummary(), true)
                 .addField("**Shots Fired/Hit**", matchStats.getShotSummary(), true)
                 .addField("**Accuracy**", matchStats.getAccuracySummary(), true)
@@ -887,6 +893,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                     codManager.getModeByCodename(match.getString("mode")),
                     new Date(match.getLong("utcStartSeconds") * 1000),
                     new Date(match.getLong("utcEndSeconds") * 1000),
+                    playerStats.getLong("timePlayed") * 1000,
                     result,
                     player
             );
@@ -970,9 +977,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
                     new Loadout.LoadoutBuilder()
                             .setPrimaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("primaryWeapon")))
                             .setSecondaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("secondaryWeapon")))
+                            .setPerks(parsePerks(loadoutData.getJSONArray("perks")))
                             .setLethalEquipment(parseWeapon(loadoutData.getJSONObject("lethal")))
                             .setTacticalEquipment((TacticalWeapon) parseWeapon(loadoutData.getJSONObject("tactical")))
-                            .setPerks(parsePerks(loadoutData.getJSONArray("perks")))
                             .build()
             );
         }
@@ -1002,7 +1009,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Weapon
      */
     private Weapon parseWeapon(JSONObject loadoutWeapon) {
-        return codManager.getWeaponByCodename(loadoutWeapon.getString("name"));
+        String codename = loadoutWeapon.getString("name");
+        if(codename.equals("none")) {
+            return null;
+        }
+        return codManager.getWeaponByCodename(codename);
     }
 
     /**
@@ -1013,6 +1024,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private LoadoutWeapon parseLoadoutWeapon(JSONObject loadoutWeapon) {
         Weapon weapon = parseWeapon(loadoutWeapon);
+        if(weapon == null) {
+            return null;
+        }
         ArrayList<Attachment> attachments = new ArrayList<>();
         if(loadoutWeapon.has("attachments")) {
             JSONArray attachmentData = loadoutWeapon.getJSONArray("attachments");

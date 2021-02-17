@@ -19,26 +19,36 @@ public class LoadoutImageManager {
     private final BufferedImage
             WEAPON_SECTION,
             WEAPON_NAME_SECTION,
+            WEAPON_CONTAINER,
             LOADOUT_HEADER,
             ATTACHMENT_SECTION,
-            ATTACHMENTS_SECTION,
+            ATTACHMENTS_CONTAINER,
             ATTACHMENT_NAME_SECTION,
             EQUIPMENT_NAME_SECTION,
             EQUIPMENT_SECTION,
-            UNKNOWN;
+            EQUIPMENT_CONTAINER,
+            PERKS_CONTAINER,
+            UNKNOWN_WEAPON,
+            UNKNOWN_ATTACHMENT,
+            UNKNOWN_EQUIPMENT;
 
     public LoadoutImageManager() {
         ResourceHandler handler = new ResourceHandler();
         String basePath = "/COD/MW/Templates/Loadout/";
         this.LOADOUT_HEADER = handler.getImageResource(basePath + "loadout_header.png");
         this.WEAPON_SECTION = handler.getImageResource(basePath + "weapon_section.png");
+        this.WEAPON_CONTAINER = handler.getImageResource(basePath + "weapon_container.png");
         this.WEAPON_NAME_SECTION = handler.getImageResource(basePath + "weapon_name_section.png");
         this.ATTACHMENT_SECTION = handler.getImageResource(basePath + "attachment_section.png");
-        this.ATTACHMENTS_SECTION = handler.getImageResource(basePath + "attachments_section.png");
+        this.ATTACHMENTS_CONTAINER = handler.getImageResource(basePath + "attachments_container.png");
         this.ATTACHMENT_NAME_SECTION = handler.getImageResource(basePath + "attachment_name_section.png");
         this.EQUIPMENT_SECTION = handler.getImageResource(basePath + "equipment_section.png");
         this.EQUIPMENT_NAME_SECTION = handler.getImageResource(basePath + "equipment_name_section.png");
-        this.UNKNOWN = handler.getImageResource(basePath + "unknown_attachment.png");
+        this.EQUIPMENT_CONTAINER = handler.getImageResource(basePath + "equipment_container.png");
+        this.PERKS_CONTAINER = handler.getImageResource(basePath + "perks_container.png");
+        this.UNKNOWN_WEAPON = handler.getImageResource(basePath + "unknown_weapon.png");
+        this.UNKNOWN_ATTACHMENT = handler.getImageResource(basePath + "unknown_attachment.png");
+        this.UNKNOWN_EQUIPMENT = handler.getImageResource(basePath + "unknown_equipment.png");
     }
 
     /**
@@ -95,14 +105,13 @@ public class LoadoutImageManager {
      * @return Image displaying perks
      */
     private BufferedImage buildPerksImage(Perk[] perks) {
-        BufferedImage perksImage = new BufferedImage(
-                (ATTACHMENT_SECTION.getWidth() * 3) + 20,
-                ATTACHMENT_SECTION.getHeight() + ATTACHMENT_NAME_SECTION.getHeight() + 10,
-                BufferedImage.TYPE_INT_ARGB
-        );
+        BufferedImage perksImage = copyImage(PERKS_CONTAINER);
         int x = 0;
         Graphics g = perksImage.getGraphics();
         for(Perk perk : perks) {
+            if(perk == null) {
+                continue;
+            }
             BufferedImage perkImage = buildLabelledImage(
                     perk.getImage(),
                     perk.getName(),
@@ -144,8 +153,11 @@ public class LoadoutImageManager {
      * @return Image displaying equipment
      */
     private BufferedImage buildEquipmentImage(Weapon equipment) {
+        if(equipment == null) {
+            return EQUIPMENT_CONTAINER;
+        }
         return buildLabelledImage(
-                equipment.getImage(),
+                equipment.getType() == Weapon.TYPE.UNKNOWN ? UNKNOWN_EQUIPMENT : equipment.getImage(),
                 equipment.getName(),
                 EQUIPMENT_SECTION,
                 EQUIPMENT_NAME_SECTION
@@ -159,13 +171,13 @@ public class LoadoutImageManager {
      * @return Image displaying weapon attachments
      */
     private BufferedImage buildAttachmentsImage(ArrayList<Attachment> attachments) {
-        BufferedImage image = copyImage(ATTACHMENTS_SECTION);
+        BufferedImage image = copyImage(ATTACHMENTS_CONTAINER);
         Graphics g = image.getGraphics();
         int x = 0, y = 0;
         for(int i = 0; i < attachments.size(); i++) {
             Attachment attachment = attachments.get(i);
             BufferedImage attachmentImage = buildLabelledImage(
-                    attachment.getCategory() == Attachment.CATEGORY.UNKNOWN ? UNKNOWN : attachment.getImage(),
+                    attachment.getCategory() == Attachment.CATEGORY.UNKNOWN ? UNKNOWN_ATTACHMENT : attachment.getImage(),
                     attachment.getName(),
                     ATTACHMENT_SECTION,
                     ATTACHMENT_NAME_SECTION
@@ -234,9 +246,12 @@ public class LoadoutImageManager {
      * @return Image displaying weapon
      */
     private BufferedImage buildWeaponImage(LoadoutWeapon loadoutWeapon) {
+        if(loadoutWeapon == null) {
+            return WEAPON_CONTAINER;
+        }
         Weapon weapon = loadoutWeapon.getWeapon();
         BufferedImage weaponImage = buildLabelledImage(
-                weapon.getImage(),
+                weapon.getType() == Weapon.TYPE.UNKNOWN ? UNKNOWN_WEAPON : weapon.getImage(),
                 weapon.getName(),
                 WEAPON_SECTION,
                 WEAPON_NAME_SECTION

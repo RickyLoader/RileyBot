@@ -20,6 +20,7 @@ public class CODManager {
     private final HashMap<String, Mode> modes;
     private final HashMap<String, Perk> perks;
     private final GAME game;
+    private final BufferedImage missingWeaponImage;
 
     public enum GAME {
         CW,
@@ -39,6 +40,7 @@ public class CODManager {
         this.maps = readMaps();
         this.modes = readModes();
         this.perks = readPerks();
+        this.missingWeaponImage = resourceHandler.getImageResource(basePath + "Weapons/missing_weapon.png");
     }
 
     /**
@@ -238,10 +240,14 @@ public class CODManager {
      * Get a weapon by its codename
      *
      * @param codename Weapon codename
-     * @return Weapon with codename or null
+     * @param category Optional weapon category
+     * @return Weapon with codename or missing weapon
      */
-    public Weapon getWeaponByCodename(String codename) {
-        return weapons.get(codename);
+    public Weapon getWeaponByCodename(String codename, String... category) {
+        if(weapons.containsKey(codename)) {
+            return weapons.get(codename);
+        }
+        return new Weapon(codename, category.length == 0 ? null : category[0], missingWeaponImage);
     }
 
     /**

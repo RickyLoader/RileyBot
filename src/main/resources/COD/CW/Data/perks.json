@@ -1,7 +1,7 @@
 {
     "perks": {
         "blue": {
-            "perk_high_value": {
+            "perk_high_value_target": {
                 "real_name": "Assassin"
             },
             "perk_logistics": {

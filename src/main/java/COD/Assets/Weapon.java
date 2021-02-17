@@ -16,7 +16,8 @@ public class Weapon {
         PRIMARY,
         SECONDARY,
         LETHAL,
-        TACTICAL;
+        TACTICAL,
+        UNKNOWN;
 
         /**
          * Get a weapon type for the given category
@@ -25,6 +26,9 @@ public class Weapon {
          * @return Weapon type by category
          */
         public static TYPE discernType(String category) {
+            if(category == null) {
+                return UNKNOWN;
+            }
             switch(category) {
                 case "weapon_sniper":
                 case "weapon_lmg":
@@ -83,6 +87,17 @@ public class Weapon {
         this.imageURL = imageURL;
         this.image = image;
         this.attachments = attachments;
+    }
+
+    /**
+     * Create a missing weapon
+     *
+     * @param codename Weapon codename
+     * @param category Weapon category
+     * @param image    Weapon image
+     */
+    public Weapon(String codename, String category, BufferedImage image) {
+        this(codename, "MISSING: " + codename, category, null, image, new HashMap<>());
     }
 
     /**
