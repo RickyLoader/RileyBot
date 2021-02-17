@@ -52,6 +52,7 @@ public class NASACommand extends DiscordCommand {
 
     /**
      * Check if there are any missing dates and add them to the database
+     * Add the APOD to any relevant cached search results
      */
     private void updateData() {
         LocalDate now = LocalDate.now(ZoneId.of("America/New_York"));
@@ -277,8 +278,6 @@ public class NASACommand extends DiscordCommand {
      * Fetch all of the astronomy pictures of the day
      * from the database and store in an ordered list by date,
      * and a map of date String->APOD
-     * <p>
-     * Add the APOD to any relevant cached search results
      */
     private void fetchApodData() {
         JSONArray apodList = new JSONArray(new NetworkRequest("nasa", true).get().body);
