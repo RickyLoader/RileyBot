@@ -36,6 +36,7 @@ public class PhasmophobiaCommand extends DiscordCommand {
                 .setTitle("Phasmophobia Invite Code (Maybe?)")
                 .setDescription("**Code**: " + code + "\n**Posted by**: " + context.getMember().getAsMention())
                 .build();
+        context.getMessage().delete().queue();
         channel.sendMessage(inviteMessage).queue(message -> inviteMessages.put(channel, message.getIdLong()));
     }
 
