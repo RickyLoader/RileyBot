@@ -1,64 +1,67 @@
 {
-    "perks": {
-        "blue": {
-            "specialty_covert_ops": {
-                "real_name": "Cold Blooded"
-            },
-            "specialty_eod": {
-                "real_name": "E.O.D"
-            },
-            "specialty_heavy_metal": {
-                "real_name": "Kill Chain"
-            },
-            "specialty_quick_fix": {
-                "real_name": "Quick Fix"
-            },
-            "specialty_scavenger_plus": {
-                "real_name": "Scavenger"
-            },
-            "specialty_hustle": {
-                "real_name": "Double Time"
-            }
-        },
-        "red": {
-            "specialty_restock": {
-                "real_name": "Restock"
-            },
-            "specialty_munitions_2": {
-                "real_name": "Overkill"
-            },
-            "specialty_guerrilla": {
-                "real_name": "Ghost"
-            },
-            "specialty_hardline": {
-                "real_name": "Hardline"
-            },
-            "specialty_strategist": {
-                "real_name": "Pointman"
-            },
-            "specialty_surveillance": {
-                "real_name": "High Alert"
-            }
-        },
-        "yellow": {
-            "specialty_extra_shrapnel": {
-                "real_name": "Shrapnel"
-            },
-            "specialty_huntmaster": {
-                "real_name": "Tracker"
-            },
-            "specialty_tac_resist": {
-                "real_name": "Battle Hardened"
-            },
-            "specialty_tactical_recon": {
-                "real_name": "Spotter"
-            },
-            "specialty_tune_up": {
-                "real_name": "Tune Up"
-            },
-            "specialty_warhead": {
-                "real_name": "Amped"
-            }
-        }
+  "perks": {
+    "blue": {
+      "specialty_covert_ops": {
+        "real_name": "Cold Blooded"
+      },
+      "specialty_eod": {
+        "real_name": "E.O.D"
+      },
+      "specialty_blastshield": {
+        "real_name": "Gunfight E.O.D"
+      },
+      "specialty_heavy_metal": {
+        "real_name": "Kill Chain"
+      },
+      "specialty_quick_fix": {
+        "real_name": "Quick Fix"
+      },
+      "specialty_scavenger_plus": {
+        "real_name": "Scavenger"
+      },
+      "specialty_hustle": {
+        "real_name": "Double Time"
+      }
+    },
+    "red": {
+      "specialty_restock": {
+        "real_name": "Restock"
+      },
+      "specialty_munitions_2": {
+        "real_name": "Overkill"
+      },
+      "specialty_guerrilla": {
+        "real_name": "Ghost"
+      },
+      "specialty_hardline": {
+        "real_name": "Hardline"
+      },
+      "specialty_strategist": {
+        "real_name": "Pointman"
+      },
+      "specialty_surveillance": {
+        "real_name": "High Alert"
+      }
+    },
+    "yellow": {
+      "specialty_extra_shrapnel": {
+        "real_name": "Shrapnel"
+      },
+      "specialty_huntmaster": {
+        "real_name": "Tracker"
+      },
+      "specialty_tac_resist": {
+        "real_name": "Battle Hardened"
+      },
+      "specialty_tactical_recon": {
+        "real_name": "Spotter"
+      },
+      "specialty_tune_up": {
+        "real_name": "Tune Up"
+      },
+      "specialty_warhead": {
+        "real_name": "Amped"
+      }
     }
+  }
 }
