@@ -6,22 +6,33 @@ import java.awt.image.BufferedImage;
  * Hold map name and image info
  */
 public class Map {
-    private final String codename, name, imageURL;
+    private final String codename, name, imageURL, compassURL;
     private final BufferedImage image;
 
     /**
      * Create a map
      *
-     * @param codename Map codename e.g "mp_euphrates"
-     * @param name     Map real name e.g "Euphrates Bridge"
-     * @param imageURL URL to map image
-     * @param image    Map image
+     * @param codename   Map codename e.g "mp_euphrates"
+     * @param name       Map real name e.g "Euphrates Bridge"
+     * @param imageURL   URL to map image
+     * @param compassURL URL to compass image
+     * @param image      Map image
      */
-    public Map(String codename, String name, String imageURL, BufferedImage image) {
+    public Map(String codename, String name, String imageURL, String compassURL, BufferedImage image) {
         this.codename = codename;
         this.name = name;
         this.imageURL = imageURL;
+        this.compassURL = compassURL;
         this.image = image;
+    }
+
+    /**
+     * Get the URL to an image displaying the map compass
+     *
+     * @return Compass image URL
+     */
+    public String getCompassURL() {
+        return compassURL;
     }
 
     /**

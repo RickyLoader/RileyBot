@@ -150,6 +150,7 @@ public class CODManager {
                             name,
                             mapData.getString("real_name"),
                             getMapImageUrl(name),
+                            getMapCompassImageUrl(name),
                             resourceHandler.getImageResource(basePath + "Maps/" + name + ".png")
                     )
             );
@@ -167,6 +168,18 @@ public class CODManager {
         return "https://www.callofduty.com/cdn/app/base-maps/"
                 + game.name().toLowerCase() + "/" + codename + ".jpg";
     }
+
+    /**
+     * Get the image URL for a map compass given the codename
+     *
+     * @param codename Codename to retrieve
+     * @return Image URL for map compass
+     */
+    private String getMapCompassImageUrl(String codename) {
+        return "https://www.callofduty.com/cdn/app/maps/"
+                + game.name().toLowerCase() + "/compass_map_" + codename + ".jpg";
+    }
+
 
     /**
      * Parse mode JSON in to objects and map to the codename
@@ -239,7 +252,13 @@ public class CODManager {
     public Map getMapByCodename(String codename) {
         Map map = maps.get(codename);
         if(map == null) {
-            map = new Map(codename, "MISSING: " + codename, getMapImageUrl(codename), null);
+            map = new Map(
+                    codename,
+                    "MISSING: " + codename,
+                    getMapImageUrl(codename),
+                    getMapCompassImageUrl(codename),
+                    null
+            );
         }
         return map;
     }

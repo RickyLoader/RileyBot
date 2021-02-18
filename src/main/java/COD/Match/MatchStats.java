@@ -27,6 +27,7 @@ public class MatchStats {
     private final Loadout[] loadouts;
     private Team team1, team2;
     private byte[] loadoutImage;
+    private String displayImageURL;
 
     public enum RESULT {
         WIN,
@@ -249,6 +250,23 @@ public class MatchStats {
         this.player = builder.player;
         this.loadouts = builder.loadouts;
         this.timePlayed = builder.timePlayed;
+        this.displayImageURL = map.getImageURL();
+    }
+
+    /**
+     * Get the display image URL for the match - by default the map loading screen image
+     *
+     * @return Display image URL
+     */
+    public String getDisplayImageURL() {
+        return displayImageURL;
+    }
+
+    /**
+     * Switch the display image URL between the map compass and map loading screen image
+     */
+    public void switchDisplayImageURL() {
+        this.displayImageURL = displayImageURL.equals(map.getImageURL()) ? map.getCompassURL() : map.getImageURL();
     }
 
     /**
@@ -602,10 +620,11 @@ public class MatchStats {
 
     /**
      * Check if the player completed the match
+     *
      * @return Player completed match
      */
-    public boolean playerCompleted(){
-        return result!=RESULT.FORFEIT;
+    public boolean playerCompleted() {
+        return result != RESULT.FORFEIT;
     }
 
     /**

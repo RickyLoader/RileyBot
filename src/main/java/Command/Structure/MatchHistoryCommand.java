@@ -36,7 +36,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private final Font font;
     private final String footer;
     private String win, loss, draw, matchID;
-    private Emote stats, players, loadouts;
+    private Emote stats, players, loadouts, switchImage;
 
     /**
      * Create the command
@@ -113,6 +113,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             stats = helper.getStats();
             players = helper.getPlayers();
             loadouts = helper.getLoadouts();
+            switchImage = helper.getNextImage();
             context.getJDA().addEventListener(getMatchEmoteListener());
         }
         MessageChannel channel = context.getMessageChannel();
@@ -410,11 +411,13 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private EmoteListener getMatchEmoteListener() {
         return new EmoteListener() {
+            private Emote last = stats;
+
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
                 long id = reaction.getMessageIdLong();
                 Emote emote = reaction.getReactionEmote().getEmote();
-                if(!matchMessages.containsKey(id) || (emote != stats && emote != players && emote != loadouts)) {
+                if(!matchMessages.containsKey(id) || (emote != stats && emote != players && emote != loadouts && emote != switchImage)) {
                     return;
                 }
                 reaction.getChannel().retrieveMessageById(id).queue(message -> {
@@ -429,10 +432,19 @@ public class MatchHistoryCommand extends CODLookupCommand {
                     else if(emote == loadouts && matchStats.hasLoadouts()) {
                         content = buildMatchLoadoutEmbed(matchStats);
                     }
+                    else if(emote == switchImage && last != loadouts) {
+                        matchStats.switchDisplayImageURL();
+                        System.out.println(matchStats.getDisplayImageURL());
+                        content = last == stats ? buildMatchEmbed(matchStats) : buildMatchPlayersEmbed(matchStats);
+                    }
                     if(content == null) {
                         return;
                     }
-                    message.editMessage(content).queue();
+                    message.editMessage(content).queue(messageEdit -> {
+                        if(emote != switchImage) {
+                            last = emote;
+                        }
+                    });
                 });
             }
         };
@@ -468,6 +480,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             if(matchStats.hasLoadouts()) {
                 message.addReaction(loadouts).queue();
             }
+            message.addReaction(switchImage).queue();
         };
         if(matchStats.hasLoadouts()) {
             matchStats.setLoadoutImage(buildLoadoutImage(matchStats.getLoadouts()));
@@ -774,7 +787,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 "attachment://image.png"
         )
                 .setColor(getResultColour(matchStats.getResult()))
-                .setImage(matchStats.getMap().getImageURL());
+                .setImage(matchStats.getDisplayImageURL());
     }
 
     /**
