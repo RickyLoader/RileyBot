@@ -20,7 +20,7 @@ public class CODManager {
     private final HashMap<String, Mode> modes;
     private final HashMap<String, Perk> perks;
     private final GAME game;
-    private final BufferedImage missingWeaponImage;
+    private final HashMap<Weapon.CATEGORY, BufferedImage> missingWeaponImages = new HashMap<>();
 
     public enum GAME {
         CW,
@@ -40,7 +40,6 @@ public class CODManager {
         this.maps = readMaps();
         this.modes = readModes();
         this.perks = readPerks();
-        this.missingWeaponImage = resourceHandler.getImageResource(basePath + "Weapons/missing_weapon.png");
     }
 
     /**
@@ -51,22 +50,25 @@ public class CODManager {
     private HashMap<String, Weapon> readWeapons() {
         HashMap<String, Weapon> weapons = new HashMap<>();
         JSONObject weaponList = getAssetJSON("weapons.json", "weapons");
+
         for(String categoryName : weaponList.keySet()) {
             JSONObject categoryData = weaponList.getJSONObject(categoryName);
+            Weapon.CATEGORY category = Weapon.CATEGORY.discernCategory(categoryName);
             for(String weaponName : categoryData.keySet()) {
                 JSONObject weaponData = categoryData.getJSONObject(weaponName);
                 String gameName = weaponData.getString("real_name");
-                BufferedImage image = resourceHandler.getImageResource(
-                        basePath + "Weapons/" + categoryName + "/" + weaponName + ".png"
-                );
+                String path = basePath + "Weapons/" + categoryName + "/";
+                if(!missingWeaponImages.containsKey(category)) {
+                    missingWeaponImages.put(category, resourceHandler.getImageResource(path + "missing.png"));
+                }
+                BufferedImage image = resourceHandler.getImageResource(path + weaponName + ".png");
                 String imageURL = weaponData.getString("image_url");
                 Weapon weapon;
-                if(categoryName.equals("tacticals")) {
+                if(category == Weapon.CATEGORY.TACTICALS) {
                     weapon = new TacticalWeapon(
                             weaponName,
                             gameName,
                             imageURL,
-                            categoryName,
                             weaponData.has("property") ? weaponData.getString("property") : null,
                             image
                     );
@@ -97,7 +99,7 @@ public class CODManager {
                     weapon = new Weapon(
                             weaponName,
                             gameName,
-                            categoryName,
+                            category,
                             imageURL,
                             image,
                             attachments
@@ -109,6 +111,10 @@ public class CODManager {
                 );
             }
         }
+        missingWeaponImages.put(
+                Weapon.CATEGORY.UNKNOWN,
+                resourceHandler.getImageResource(basePath + "Weapons/unknown_category.png")
+        );
         return weapons;
     }
 
@@ -239,15 +245,19 @@ public class CODManager {
     /**
      * Get a weapon by its codename
      *
-     * @param codename Weapon codename
-     * @param category Optional weapon category
+     * @param codename        Weapon codename
+     * @param defaultCategory Default weapon category (If weapon is missing a default category image is used)
      * @return Weapon with codename or missing weapon
      */
-    public Weapon getWeaponByCodename(String codename, String... category) {
+    public Weapon getWeaponByCodename(String codename, Weapon.CATEGORY defaultCategory) {
         if(weapons.containsKey(codename)) {
             return weapons.get(codename);
         }
-        return new Weapon(codename, category.length == 0 ? null : category[0], missingWeaponImage);
+        return new Weapon(
+                codename,
+                defaultCategory,
+                missingWeaponImages.get(defaultCategory)
+        );
     }
 
     /**
@@ -280,11 +290,11 @@ public class CODManager {
      * @param category Weapon category
      * @return Array of weapons of given category
      */
-    public Weapon[] getWeaponsByCategory(String category) {
+    public Weapon[] getWeaponsByCategory(Weapon.CATEGORY category) {
         return weapons
                 .values()
                 .stream()
-                .filter(w -> w.getCategory().equalsIgnoreCase(category))
+                .filter(w -> w.getCategory() == category)
                 .toArray(Weapon[]::new);
     }
 

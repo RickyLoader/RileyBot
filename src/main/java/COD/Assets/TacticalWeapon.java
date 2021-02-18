@@ -12,15 +12,14 @@ public class TacticalWeapon extends Weapon {
     /**
      * Create a weapon
      *
-     * @param codename Codename of weapon e.g "iw8_me_akimboblunt"
-     * @param name     Real name of weapon e.g "Kali Sticks"
+     * @param codename Codename of weapon e.g "equip_flash"
+     * @param name     Real name of weapon e.g "Flash Grenade"
      * @param imageURL URL to image
-     * @param category Codename of weapon category e.g "weapon_melee"
      * @param property Unique property of tactical weapon e.g "Hits"
      * @param image    Weapon image
      */
-    public TacticalWeapon(String codename, String name, String imageURL, String category, String property, BufferedImage image) {
-        super(codename, name, category, imageURL, image, new HashMap<>());
+    public TacticalWeapon(String codename, String name, String imageURL, String property, BufferedImage image) {
+        super(codename, name, CATEGORY.TACTICALS, imageURL, image, new HashMap<>());
         this.property = property;
     }
 

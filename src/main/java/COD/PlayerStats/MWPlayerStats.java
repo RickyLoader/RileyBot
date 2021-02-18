@@ -365,10 +365,11 @@ public class MWPlayerStats {
     private ArrayList<WeaponStats> parseWeaponStats(JSONObject weapons) {
         ArrayList<WeaponStats> weaponStats = new ArrayList<>();
         for(String categoryName : weapons.keySet()) {
-            JSONObject category = weapons.getJSONObject(categoryName);
-            for(String weaponName : category.keySet()) {
-                JSONObject weaponData = category.getJSONObject(weaponName).getJSONObject("properties");
-                Weapon weapon = DiscordCommandManager.mwAssetManager.getWeaponByCodename(weaponName, categoryName);
+            JSONObject categoryData = weapons.getJSONObject(categoryName);
+            Weapon.CATEGORY category = Weapon.CATEGORY.discernCategory(categoryName);
+            for(String weaponName : categoryData.keySet()) {
+                JSONObject weaponData = categoryData.getJSONObject(weaponName).getJSONObject("properties");
+                Weapon weapon = DiscordCommandManager.mwAssetManager.getWeaponByCodename(weaponName, category);
                 WeaponStats stats;
 
                 switch(weapon.getType()) {

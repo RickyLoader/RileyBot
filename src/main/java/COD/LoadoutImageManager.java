@@ -251,9 +251,9 @@ public class LoadoutImageManager {
         }
         Weapon weapon = loadoutWeapon.getWeapon();
         BufferedImage weaponImage = buildLabelledImage(
-                weapon.getType() == Weapon.TYPE.UNKNOWN ? UNKNOWN_WEAPON : weapon.getImage(),
+                weapon.getImage(),
                 weapon.getName(),
-                WEAPON_SECTION,
+                weapon.getType() == Weapon.TYPE.UNKNOWN ? UNKNOWN_WEAPON : WEAPON_SECTION,
                 WEAPON_NAME_SECTION
         );
 

@@ -1013,7 +1013,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         if(codename.equals("none")) {
             return null;
         }
-        return codManager.getWeaponByCodename(codename);
+        return codManager.getWeaponByCodename(codename, Weapon.getCategoryFromWeaponCodename(codename));
     }
 
     /**

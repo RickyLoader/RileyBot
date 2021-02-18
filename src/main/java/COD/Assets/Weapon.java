@@ -8,10 +8,74 @@ import java.util.Objects;
  * Hold weapon information
  */
 public class Weapon {
-    private final String codename, name, category, imageURL;
+    private final String codename, name, imageURL;
     private final TYPE type;
+    private final CATEGORY category;
     private final BufferedImage image;
     private final HashMap<String, Attachment> attachments;
+
+    public enum CATEGORY {
+        SNIPER,
+        LMG,
+        ASSAULT_RIFLE,
+        OTHER,
+        SHOTGUN,
+        SMG,
+        MARKSMAN,
+        LAUNCHER,
+        PISTOL,
+        MELEE,
+        LETHALS,
+        TACTICALS,
+        UNKNOWN;
+
+        /**
+         * Get a weapon category by name
+         *
+         * @param category Category name e.g - "weapon_smg" or category shorthand e.g - "iw8_sn_romeo700" -> "sn"
+         * @return Category e.g - SMG
+         */
+        public static CATEGORY discernCategory(String category) {
+            switch(category) {
+                case "weapon_sniper":
+                case "sn":
+                    return SNIPER;
+                case "weapon_lmg":
+                case "lmg":
+                    return LMG;
+                case "weapon_assault_rifle":
+                case "ar":
+                    return ASSAULT_RIFLE;
+                case "weapon_other":
+                    return OTHER;
+                case "weapon_shotgun":
+                case "sh":
+                    return SHOTGUN;
+                case "weapon_smg":
+                case "sm":
+                    return SMG;
+                case "weapon_marksman":
+                    return MARKSMAN;
+                case "weapon_launcher":
+                case "la":
+                    return LAUNCHER;
+                case "weapon_pistol":
+                case "pi":
+                    return PISTOL;
+                case "weapon_melee":
+                case "":
+                case "me":
+                    return MELEE;
+                case "lethals":
+                case "equip":
+                    return LETHALS;
+                case "tacticals":
+                    return TACTICALS;
+                default:
+                    return UNKNOWN;
+            }
+        }
+    }
 
     public enum TYPE {
         PRIMARY,
@@ -23,30 +87,30 @@ public class Weapon {
         /**
          * Get a weapon type for the given category
          *
-         * @param category Type for given category
-         * @return Weapon type by category
+         * @param category Weapon category e.g - ASSAULT_RIFLE
+         * @return Weapon type e.g - PRIMARY
          */
-        public static TYPE discernType(String category) {
-            if(category == null) {
+        public static TYPE discernType(CATEGORY category) {
+            if(category == CATEGORY.UNKNOWN) {
                 return UNKNOWN;
             }
             switch(category) {
-                case "weapon_sniper":
-                case "weapon_lmg":
-                case "weapon_assault_rifle":
-                case "weapon_other":
-                case "weapon_shotgun":
-                case "weapon_smg":
-                case "weapon_marksman":
+                case SNIPER:
+                case LMG:
+                case ASSAULT_RIFLE:
+                case OTHER:
+                case SHOTGUN:
+                case SMG:
+                case MARKSMAN:
                 default:
                     return PRIMARY;
-                case "weapon_launcher":
-                case "weapon_pistol":
-                case "weapon_melee":
+                case LAUNCHER:
+                case PISTOL:
+                case MELEE:
                     return SECONDARY;
-                case "lethals":
+                case LETHALS:
                     return LETHAL;
-                case "tacticals":
+                case TACTICALS:
                     return TACTICAL;
             }
         }
@@ -75,12 +139,12 @@ public class Weapon {
      *
      * @param codename    Codename of weapon e.g "iw8_me_akimboblunt"
      * @param name        Real name of weapon e.g "Kali Sticks"
-     * @param category    Codename of weapon category e.g "weapon_melee"
+     * @param category    Weapon category e.g MELEE
      * @param imageURL    URL to image
      * @param image       Weapon image
      * @param attachments Map of attachments available for the weapon codename -> attachment
      */
-    public Weapon(String codename, String name, String category, String imageURL, BufferedImage image, HashMap<String, Attachment> attachments) {
+    public Weapon(String codename, String name, CATEGORY category, String imageURL, BufferedImage image, HashMap<String, Attachment> attachments) {
         this.codename = codename;
         this.name = name;
         this.category = category;
@@ -97,7 +161,7 @@ public class Weapon {
      * @param category Weapon category
      * @param image    Weapon image
      */
-    public Weapon(String codename, String category, BufferedImage image) {
+    public Weapon(String codename, CATEGORY category, BufferedImage image) {
         this(codename, "MISSING: " + codename, category, null, image, new HashMap<>());
     }
 
@@ -168,11 +232,11 @@ public class Weapon {
     }
 
     /**
-     * Get the name of the weapon category
+     * Get the weapon category
      *
-     * @return Weapon category name
+     * @return Weapon category
      */
-    public String getCategory() {
+    public CATEGORY getCategory() {
         return category;
     }
 
@@ -183,6 +247,17 @@ public class Weapon {
         }
         Weapon weapon = (Weapon) obj;
         return weapon.getCodename().equals(codename);
+    }
+
+    /**
+     * Get a category from a weapon codename e.g - "iw8_sn_alpha50" -> "sn" -> SNIPER
+     *
+     * @param weaponCodename e.g - "iw8_sn_alpha50"
+     * @return Weapon category e.g - SNIPER
+     */
+    public static CATEGORY getCategoryFromWeaponCodename(String weaponCodename) {
+        String categoryShorthand = weaponCodename.matches(".*_.*_.*") ? weaponCodename.split("_")[1] : "";
+        return CATEGORY.discernCategory(categoryShorthand);
     }
 
     @Override
