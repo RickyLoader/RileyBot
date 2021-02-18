@@ -41,12 +41,12 @@ public class LoadoutWeapon {
                 continue;
             }
             Attributes attachmentAttributes = attachment.getAttributes();
-            accuracy += attachmentAttributes.getAccuracyStat();
-            damage += attachmentAttributes.getDamageStat();
-            range += attachmentAttributes.getRangeStat();
-            firerate += attachmentAttributes.getFirerateStat();
-            mobility += attachmentAttributes.getMobilityStat();
-            control += attachmentAttributes.getControlStat();
+            accuracy += attachmentAttributes.getAccuracyStat().getValue();
+            damage += attachmentAttributes.getDamageStat().getValue();
+            range += attachmentAttributes.getRangeStat().getValue();
+            firerate += attachmentAttributes.getFirerateStat().getValue();
+            mobility += attachmentAttributes.getMobilityStat().getValue();
+            control += attachmentAttributes.getControlStat().getValue();
         }
         return new Attributes.AttributesBuilder()
                 .setAccuracyStat(accuracy)

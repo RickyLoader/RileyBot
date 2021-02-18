@@ -1,10 +1,13 @@
 package COD.Assets;
 
+import java.util.ArrayList;
+
 /**
  * Weapon/Attachment stat attributes
  */
 public class Attributes {
-    private final int accuracy, damage, range, firerate, mobility, control;
+    private final Attribute accuracy, damage, range, firerate, mobility, control;
+    private final ArrayList<Attribute> attributes;
 
     /**
      * Create the Attributes from the builder values
@@ -18,10 +21,12 @@ public class Attributes {
         this.firerate = builder.firerate;
         this.mobility = builder.mobility;
         this.control = builder.control;
+        this.attributes = builder.attributes;
     }
 
     public static class AttributesBuilder {
-        private int accuracy, damage, range, firerate, mobility, control;
+        private final ArrayList<Attribute> attributes = new ArrayList<>();
+        private Attribute accuracy, damage, range, firerate, mobility, control;
 
         /**
          * Set the accuracy stat
@@ -30,7 +35,8 @@ public class Attributes {
          * @return Builder
          */
         public AttributesBuilder setAccuracyStat(int accuracy) {
-            this.accuracy = accuracy;
+            this.accuracy = new Attribute(accuracy, "Accuracy:");
+            attributes.add(this.accuracy);
             return this;
         }
 
@@ -41,7 +47,8 @@ public class Attributes {
          * @return Builder
          */
         public AttributesBuilder setDamageStat(int damage) {
-            this.damage = damage;
+            this.damage = new Attribute(damage, "Damage:");
+            attributes.add(this.damage);
             return this;
         }
 
@@ -53,7 +60,8 @@ public class Attributes {
          * @return Builder
          */
         public AttributesBuilder setControlStat(int control) {
-            this.control = control;
+            this.control = new Attribute(control, "Recoil Control:");
+            attributes.add(this.control);
             return this;
         }
 
@@ -64,7 +72,8 @@ public class Attributes {
          * @return Builder
          */
         public AttributesBuilder setRangeStat(int range) {
-            this.range = range;
+            this.range = new Attribute(range, "Range:");
+            attributes.add(this.range);
             return this;
         }
 
@@ -75,7 +84,8 @@ public class Attributes {
          * @return Builder
          */
         public AttributesBuilder setFireRateStat(int firerate) {
-            this.firerate = firerate;
+            this.firerate = new Attribute(firerate, "Fire Rate:");
+            attributes.add(this.firerate);
             return this;
         }
 
@@ -86,7 +96,8 @@ public class Attributes {
          * @return Builder
          */
         public AttributesBuilder setMobilityStat(int mobility) {
-            this.mobility = mobility;
+            this.mobility = new Attribute(mobility, "Mobility:");
+            attributes.add(this.mobility);
             return this;
         }
 
@@ -101,11 +112,20 @@ public class Attributes {
     }
 
     /**
+     * Get a list of all initialised attributes
+     *
+     * @return List of initialised attributes
+     */
+    public ArrayList<Attribute> getAttributes() {
+        return attributes;
+    }
+
+    /**
      * Get the accuracy stat - Effect on weapon accuracy
      *
      * @return Accuracy stat
      */
-    public int getAccuracyStat() {
+    public Attribute getAccuracyStat() {
         return accuracy;
     }
 
@@ -114,7 +134,7 @@ public class Attributes {
      *
      * @return Damage stat
      */
-    public int getDamageStat() {
+    public Attribute getDamageStat() {
         return damage;
     }
 
@@ -123,7 +143,7 @@ public class Attributes {
      *
      * @return Control stat
      */
-    public int getControlStat() {
+    public Attribute getControlStat() {
         return control;
     }
 
@@ -132,7 +152,7 @@ public class Attributes {
      *
      * @return Fire rate stat
      */
-    public int getFirerateStat() {
+    public Attribute getFirerateStat() {
         return firerate;
     }
 
@@ -141,7 +161,7 @@ public class Attributes {
      *
      * @return Mobility stat
      */
-    public int getMobilityStat() {
+    public Attribute getMobilityStat() {
         return mobility;
     }
 
@@ -150,20 +170,56 @@ public class Attributes {
      *
      * @return Range stat
      */
-    public int getRangeStat() {
+    public Attribute getRangeStat() {
         return range;
     }
 
     /**
-     * Format an attribute in to a String either "x", "+x", or "-x"
-     *
-     * @param attribute Attribute to format
-     * @return Formatted attribute
+     * Stat attribute
      */
-    public static String formatAttribute(int attribute) {
-        if(attribute == 0) {
-            return String.valueOf(attribute);
+    public static class Attribute {
+        private final int value;
+        private final String name;
+
+        /**
+         * Create the attribute
+         *
+         * @param value Attribute value e.g 5
+         * @param name  Attribute name e.g "Range"
+         */
+        public Attribute(int value, String name) {
+            this.value = value;
+            this.name = name;
         }
-        return attribute < 0 ? String.valueOf(attribute) : "+" + attribute;
+
+        /**
+         * Get the attribute name
+         *
+         * @return Attribute name
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * Get the attribute value
+         *
+         * @return Attribute value
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Format the value in to a String either "x", "+x", or "-x"
+         *
+         * @return Formatted value
+         */
+        public String formatValue() {
+            if(value == 0) {
+                return String.valueOf(value);
+            }
+            return value < 0 ? String.valueOf(value) : "+" + value;
+        }
     }
 }
