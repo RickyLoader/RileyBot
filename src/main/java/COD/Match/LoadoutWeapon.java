@@ -1,6 +1,7 @@
 package COD.Match;
 
 import COD.Assets.Attachment;
+import COD.Assets.Attributes;
 import COD.Assets.Weapon;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Objects;
 public class LoadoutWeapon {
     private final Weapon weapon;
     private final ArrayList<Attachment> attachments;
+    private final Attributes attributes;
 
     /**
      * Create a loadout weapon
@@ -23,6 +25,46 @@ public class LoadoutWeapon {
     public LoadoutWeapon(Weapon weapon, ArrayList<Attachment> attachments) {
         this.weapon = weapon;
         this.attachments = attachments;
+        this.attributes = calculateAttributes(attachments);
+    }
+
+    /**
+     * Calculate the attributes for the weapon with the given attachments
+     *
+     * @param attachments List of attachments
+     * @return Weapon attributes (Combined effect of attachments)
+     */
+    private Attributes calculateAttributes(ArrayList<Attachment> attachments) {
+        int accuracy = 0, damage = 0, range = 0, firerate = 0, mobility = 0, control = 0;
+        for(Attachment attachment : attachments) {
+            if(attachment.getCategory() == Attachment.CATEGORY.UNKNOWN) {
+                continue;
+            }
+            Attributes attachmentAttributes = attachment.getAttributes();
+            accuracy += attachmentAttributes.getAccuracyStat();
+            damage += attachmentAttributes.getDamageStat();
+            range += attachmentAttributes.getRangeStat();
+            firerate += attachmentAttributes.getFirerateStat();
+            mobility += attachmentAttributes.getMobilityStat();
+            control += attachmentAttributes.getControlStat();
+        }
+        return new Attributes.AttributesBuilder()
+                .setAccuracyStat(accuracy)
+                .setDamageStat(damage)
+                .setRangeStat(range)
+                .setFireRateStat(firerate)
+                .setMobilityStat(mobility)
+                .setControlStat(control)
+                .build();
+    }
+
+    /**
+     * Get the attributes for the loadout weapon (combined effect of attachments)
+     *
+     * @return Attributes
+     */
+    public Attributes getAttributes() {
+        return attributes;
     }
 
     /**

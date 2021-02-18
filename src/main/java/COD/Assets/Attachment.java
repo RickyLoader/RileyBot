@@ -9,6 +9,7 @@ public class Attachment {
     private final String codename, name;
     private final BufferedImage image;
     private final CATEGORY category;
+    private final Attributes attributes;
 
     public enum CATEGORY {
         GUNPERK,
@@ -34,16 +35,27 @@ public class Attachment {
     /**
      * Create a weapon attachment
      *
-     * @param codename Codename of attachment e.g "gripang"
-     * @param name     Real name of attachment e.g "Commando Foregrip"
-     * @param category Attachment category
-     * @param image    Attachment image
+     * @param codename   Codename of attachment e.g "gripang"
+     * @param name       Real name of attachment e.g "Commando Foregrip"
+     * @param category   Attachment category
+     * @param attributes Attachment attributes - Increases/Decreases to weapon stats
+     * @param image      Attachment image
      */
-    public Attachment(String codename, String name, CATEGORY category, BufferedImage image) {
+    public Attachment(String codename, String name, CATEGORY category, Attributes attributes, BufferedImage image) {
         this.codename = codename;
         this.name = name;
         this.image = image;
         this.category = category;
+        this.attributes = attributes;
+    }
+
+    /**
+     * Get the attachment attributes - Increases/Decreases to weapon stats
+     *
+     * @return Attachment attributes
+     */
+    public Attributes getAttributes() {
+        return attributes;
     }
 
     /**

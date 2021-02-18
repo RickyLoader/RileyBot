@@ -76,28 +76,7 @@ public class CODManager {
                     );
                 }
                 else {
-                    HashMap<String, Attachment> attachments = new HashMap<>();
-                    if(weaponData.has("attachments")) {
-                        JSONObject attachmentData = weaponData.getJSONObject("attachments");
-                        for(String attachmentName : attachmentData.keySet()) {
-                            JSONObject attachment = attachmentData.getJSONObject(attachmentName);
-                            attachments.put(
-                                    attachmentName,
-                                    new Attachment(
-                                            attachmentName,
-                                            attachment.getString("real_name"),
-                                            CATEGORY.valueOf(attachment.getString("category").toUpperCase()),
-                                            resourceHandler.getImageResource(
-                                                    basePath
-                                                            + "Attachments/"
-                                                            + categoryName + "/"
-                                                            + weaponName + "/"
-                                                            + attachmentName + ".png"
-                                            )
-                                    )
-                            );
-                        }
-                    }
+                    HashMap<String, Attachment> attachments = parseAttachments(weaponData, weaponName, categoryName);
                     weapon = new Weapon(weaponName, gameName, category, imageURL, image, attachments);
                 }
                 weapons.put(weaponName, weapon);
@@ -108,6 +87,51 @@ public class CODManager {
                 resourceHandler.getImageResource(basePath + "Weapons/unknown_category.png")
         );
         return weapons;
+    }
+
+    /**
+     * Parse the attachments from the given weapon JSON to a map of attachment codename -> attachment
+     *
+     * @param weaponData     Weapon JSON
+     * @param weaponName     Weapon codename
+     * @param weaponCategory Weapon category codename
+     * @return Map of attachment codename -> attachment
+     */
+    private HashMap<String, Attachment> parseAttachments(JSONObject weaponData, String weaponName, String weaponCategory) {
+        HashMap<String, Attachment> attachments = new HashMap<>();
+        if(!weaponData.has("attachments")) {
+            return attachments;
+        }
+        JSONObject attachmentData = weaponData.getJSONObject("attachments");
+        for(String attachmentName : attachmentData.keySet()) {
+            JSONObject attachment = attachmentData.getJSONObject(attachmentName);
+            String imagePath = basePath + "Attachments/"
+                    + weaponCategory + "/"
+                    + weaponName + "/"
+                    + attachmentName + ".png";
+
+            JSONObject stats = attachment.getJSONObject("stats");
+            Attributes attributes = new Attributes.AttributesBuilder()
+                    .setAccuracyStat(stats.getInt("accuracy"))
+                    .setDamageStat(stats.getInt("damage"))
+                    .setFireRateStat(stats.getInt("firerate"))
+                    .setMobilityStat(stats.getInt("mobility"))
+                    .setRangeStat(stats.getInt("range"))
+                    .setControlStat(stats.getInt("control"))
+                    .build();
+
+            attachments.put(
+                    attachmentName,
+                    new Attachment(
+                            attachmentName,
+                            attachment.getString("real_name"),
+                            CATEGORY.valueOf(attachment.getString("category").toUpperCase()),
+                            attributes,
+                            resourceHandler.getImageResource(imagePath)
+                    )
+            );
+        }
+        return attachments;
     }
 
     /**
