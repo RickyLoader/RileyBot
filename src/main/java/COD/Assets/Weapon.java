@@ -41,7 +41,7 @@ public class Weapon {
                 case "sn":
                     return SNIPER;
                 case "weapon_lmg":
-                case "lmg":
+                case "lm":
                     return LMG;
                 case "weapon_assault_rifle":
                 case "ar":
@@ -67,7 +67,6 @@ public class Weapon {
                 case "me":
                     return MELEE;
                 case "lethals":
-                case "equip":
                     return LETHALS;
                 case "tacticals":
                     return TACTICALS;

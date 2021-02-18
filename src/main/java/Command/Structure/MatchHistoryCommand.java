@@ -978,8 +978,18 @@ public class MatchHistoryCommand extends CODLookupCommand {
                             .setPrimaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("primaryWeapon")))
                             .setSecondaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("secondaryWeapon")))
                             .setPerks(parsePerks(loadoutData.getJSONArray("perks")))
-                            .setLethalEquipment(parseWeapon(loadoutData.getJSONObject("lethal")))
-                            .setTacticalEquipment((TacticalWeapon) parseWeapon(loadoutData.getJSONObject("tactical")))
+                            .setLethalEquipment(
+                                    parseWeapon(
+                                            loadoutData.getJSONObject("lethal"),
+                                            Weapon.CATEGORY.LETHALS
+                                    )
+                            )
+                            .setTacticalEquipment(
+                                    (TacticalWeapon) parseWeapon(
+                                            loadoutData.getJSONObject("tactical"),
+                                            Weapon.CATEGORY.TACTICALS
+                                    )
+                            )
                             .build()
             );
         }
@@ -1006,14 +1016,18 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * Parse a weapon from the match loadout weapon JSON
      *
      * @param loadoutWeapon Match loadout weapon JSON
+     * @param category      Weapon category
      * @return Weapon
      */
-    private Weapon parseWeapon(JSONObject loadoutWeapon) {
+    private Weapon parseWeapon(JSONObject loadoutWeapon, Weapon.CATEGORY category) {
         String codename = loadoutWeapon.getString("name");
         if(codename.equals("none")) {
             return null;
         }
-        return codManager.getWeaponByCodename(codename, Weapon.getCategoryFromWeaponCodename(codename));
+        if(category == Weapon.CATEGORY.UNKNOWN) {
+            category = Weapon.getCategoryFromWeaponCodename(codename);
+        }
+        return codManager.getWeaponByCodename(codename, category);
     }
 
     /**
@@ -1023,7 +1037,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Loadout weapon containing weapon & attachments
      */
     private LoadoutWeapon parseLoadoutWeapon(JSONObject loadoutWeapon) {
-        Weapon weapon = parseWeapon(loadoutWeapon);
+        Weapon weapon = parseWeapon(loadoutWeapon, Weapon.CATEGORY.UNKNOWN);
         if(weapon == null) {
             return null;
         }
