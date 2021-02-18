@@ -153,7 +153,6 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             g.setFont(getGameFont().deriveFont(40f));
             FontMetrics fm = g.getFontMetrics();
 
-
             g.drawImage(
                     superImage,
                     (image.getWidth() / 2) - (superImage.getWidth() / 2),

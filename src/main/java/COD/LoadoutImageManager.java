@@ -109,9 +109,6 @@ public class LoadoutImageManager {
         int x = 0;
         Graphics g = perksImage.getGraphics();
         for(Perk perk : perks) {
-            if(perk == null) {
-                continue;
-            }
             BufferedImage perkImage = buildLabelledImage(
                     perk.getImage(),
                     perk.getName(),

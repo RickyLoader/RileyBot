@@ -1003,13 +1003,15 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Array of perks
      */
     private Perk[] parsePerks(JSONArray perkJSONArray) {
-        Perk[] perks = new Perk[perkJSONArray.length()];
+        ArrayList<Perk> perks = new ArrayList<>();
         for(int i = 0; i < perkJSONArray.length(); i++) {
-            perks[i] = codManager.getPerkByCodename(
-                    perkJSONArray.getJSONObject(i).getString("name")
-            );
+            String codename = perkJSONArray.getJSONObject(i).getString("name");
+            if(codename.equals("specialty_null")) {
+                continue;
+            }
+            perks.add(codManager.getPerkByCodename(codename));
         }
-        return perks;
+        return perks.toArray(new Perk[0]);
     }
 
     /**

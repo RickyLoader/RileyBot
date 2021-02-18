@@ -21,6 +21,7 @@ public class CODManager {
     private final HashMap<String, Perk> perks;
     private final GAME game;
     private final HashMap<Weapon.CATEGORY, BufferedImage> missingWeaponImages = new HashMap<>();
+    private final BufferedImage missingPerkImage;
 
     public enum GAME {
         CW,
@@ -40,6 +41,7 @@ public class CODManager {
         this.maps = readMaps();
         this.modes = readModes();
         this.perks = readPerks();
+        this.missingPerkImage = resourceHandler.getImageResource(basePath + "Perks/missing.png");
     }
 
     /**
@@ -243,11 +245,25 @@ public class CODManager {
     }
 
     /**
+     * Get a perk by its codename
+     *
+     * @param codename Perk codename
+     * @return Perk with codename or unknown perk
+     */
+    public Perk getPerkByCodename(String codename) {
+        Perk perk = perks.get(codename);
+        if(perk == null) {
+            perk = new Perk(codename, "Missing: " + codename, Perk.CATEGORY.UNKNOWN, missingPerkImage);
+        }
+        return perk;
+    }
+
+    /**
      * Get a weapon by its codename
      *
      * @param codename        Weapon codename
      * @param defaultCategory Default weapon category (If weapon is missing a default category image is used)
-     * @return Weapon with codename or missing weapon
+     * @return Weapon with codename or unknown weapon
      */
     public Weapon getWeaponByCodename(String codename, Weapon.CATEGORY defaultCategory) {
         if(weapons.containsKey(codename)) {
@@ -272,16 +288,6 @@ public class CODManager {
                 .stream()
                 .filter(w -> w.getName().toLowerCase().contains(name.toLowerCase()))
                 .toArray(Weapon[]::new);
-    }
-
-    /**
-     * Get a perk by its codename
-     *
-     * @param codename Perk codename
-     * @return Perk with codename or null
-     */
-    public Perk getPerkByCodename(String codename) {
-        return perks.get(codename);
     }
 
     /**

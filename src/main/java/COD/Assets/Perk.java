@@ -1,6 +1,7 @@
 package COD.Assets;
 
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 /**
  * Hold perk information
@@ -14,7 +15,8 @@ public class Perk {
     public enum CATEGORY {
         BLUE,
         RED,
-        YELLOW
+        YELLOW,
+        UNKNOWN
     }
 
     /**
@@ -66,5 +68,19 @@ public class Perk {
      */
     public String getCodename() {
         return codename;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Perk)) {
+            return false;
+        }
+        Perk perk = (Perk) obj;
+        return perk.getCodename().equals(codename);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codename);
     }
 }
