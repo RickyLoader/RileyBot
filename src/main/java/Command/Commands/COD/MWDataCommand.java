@@ -23,7 +23,7 @@ import static Bot.DiscordCommandManager.mwAssetManager;
  * View Modern Warfare weapons
  */
 public class MWDataCommand extends DiscordCommand {
-    private final HashMap<String, Category> categories = new HashMap<>();
+    private final HashMap<String, Weapon.CATEGORY> categories = new HashMap<>();
 
     public MWDataCommand() {
         super("mwdata [weapon name/category]", "Have a look at Modern Warfare weapons!");
@@ -41,15 +41,13 @@ public class MWDataCommand extends DiscordCommand {
             return;
         }
 
-        Category weaponCategory = categories.get(message);
-        if(weaponCategory != null) {
-            Weapon[] categoryWeapons = mwAssetManager.getWeaponsByCategory(
-                    weaponCategory.getCodename()
-            );
+        Weapon.CATEGORY weaponCategory = categories.getOrDefault(message, Weapon.CATEGORY.UNKNOWN);
+        if(weaponCategory != Weapon.CATEGORY.UNKNOWN) {
+            Weapon[] categoryWeapons = mwAssetManager.getWeaponsByCategory(weaponCategory);
             showPageableWeapons(
                     context,
                     categoryWeapons,
-                    "Category: " + weaponCategory.getName() + " (" + categoryWeapons.length + " Items)"
+                    "Category: " + weaponCategory.name() + " (" + categoryWeapons.length + " Items)"
             );
             return;
         }
@@ -80,7 +78,7 @@ public class MWDataCommand extends DiscordCommand {
      * @return Message embed displaying weapon
      */
     private MessageEmbed buildWeaponEmbed(Weapon weapon) {
-        Category category = categories.get(weapon.getCategory());
+        Weapon.CATEGORY category = weapon.getCategory();
         return new EmbedBuilder()
                 .setThumbnail(Gunfight.thumbnail)
                 .setImage(weapon.getImageURL())
@@ -88,7 +86,7 @@ public class MWDataCommand extends DiscordCommand {
                 .setTitle(weapon.getName())
                 .setDescription(
                         "**Codename**: " + weapon.getCodename()
-                                + "\n**Category**: " + category.getName() + " (" + category.getCodename() + ")"
+                                + "\n**Category**: " + category.name() + " (" + category.getCodename() + ")"
                 )
                 .setFooter("Try: " + getHelpName())
                 .build();
@@ -116,11 +114,11 @@ public class MWDataCommand extends DiscordCommand {
             public void addFields(EmbedBuilder builder, int currentIndex) {
                 try {
                     Weapon current = (Weapon) getItems().get(currentIndex);
-                    Category weaponCategory = categories.get(current.getCategory());
+                    Weapon.CATEGORY weaponCategory = current.getCategory();
                     builder
                             .setDescription(
                                     "**Name**: " + current.getName() + " (" + current.getCodename() + ")"
-                                            + "\n**Category**: " + weaponCategory.getName()
+                                            + "\n**Category**: " + weaponCategory.name()
                                             + " (" + weaponCategory.getCodename() + ")"
                             )
                             .setImage(current.getImageURL());
@@ -150,102 +148,66 @@ public class MWDataCommand extends DiscordCommand {
     }
 
     /**
-     * Weapon category
-     */
-    private static class Category {
-        private final String name, codename;
-
-        /**
-         * Create the weapon category
-         *
-         * @param name     Category name - e.g "Assault Rifle"
-         * @param codename Category codename - e.g "weapon_assault_rifle"
-         */
-        public Category(String name, String codename) {
-            this.name = name;
-            this.codename = codename;
-        }
-
-        /**
-         * Get the category name - e.g "Assault Rifle"
-         *
-         * @return Category name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * Get the category codename - e.g "weapon_assault_rifle"
-         *
-         * @return Category codename
-         */
-        public String getCodename() {
-            return codename;
-        }
-    }
-
-    /**
      * Map category name -> categories
      */
     private void addCategories() {
         addCategory(
-                new String[]{"weapon_assault_rifle", "assault", "ar", "assault rifle", "assault rifles"},
-                new Category("Assault Rifle", "weapon_assault_rifle")
+                new String[]{Weapon.CATEGORY.CODENAME_ASSAULT_RIFLE, "assault", "ar", "assault rifle", "assault rifles"},
+                Weapon.CATEGORY.ASSAULT_RIFLE
         );
         addCategory(
-                new String[]{"weapon_sniper", "sniper", "sniper rifle", "sniper rifles"},
-                new Category("Sniper Rifle", "weapon_sniper")
+                new String[]{Weapon.CATEGORY.CODENAME_SNIPER, "sniper", "sniper rifle", "sniper rifles"},
+                Weapon.CATEGORY.SNIPER
         );
         addCategory(
-                new String[]{"weapon_marksman", "marksman", "marksman rifle", "marksman rifles"},
-                new Category("Marksman Rifle", "weapon_marksman")
+                new String[]{Weapon.CATEGORY.CODENAME_MARKSMAN, "marksman", "marksman rifle", "marksman rifles"},
+                Weapon.CATEGORY.MARKSMAN
         );
         addCategory(
-                new String[]{"tactical", "tacticals"},
-                new Category("Tactical", "tacticals")
+                new String[]{Weapon.CATEGORY.CODENAME_TACTICALS, "tacticals"},
+                Weapon.CATEGORY.TACTICALS
         );
         addCategory(
-                new String[]{"lethal", "lethals"},
-                new Category("Lethal", "lethals")
+                new String[]{Weapon.CATEGORY.CODENAME_LETHALS, "lethals"},
+                Weapon.CATEGORY.LETHALS
         );
         addCategory(
-                new String[]{"weapon_other", "other", "shield"},
-                new Category("Other", "weapon_other")
+                new String[]{Weapon.CATEGORY.CODENAME_OTHER, "other", "shield"},
+                Weapon.CATEGORY.OTHER
         );
         addCategory(
-                new String[]{"weapon_shotgun", "shotgun", "shotguns"},
-                new Category("Shotgun", "weapon_shotgun")
+                new String[]{Weapon.CATEGORY.CODENAME_SHOTGUN, "shotgun", "shotguns"},
+                Weapon.CATEGORY.SHOTGUN
         );
         addCategory(
-                new String[]{"weapon_melee", "melee"},
-                new Category("Melee", "weapon_melee")
+                new String[]{Weapon.CATEGORY.CODENAME_MELEE, "melee"},
+                Weapon.CATEGORY.MELEE
         );
         addCategory(
-                new String[]{"weapon_lmg", "lmg", "light machine gun", "light machine guns"},
-                new Category("Light Machine Gun", "weapon_lmg")
+                new String[]{Weapon.CATEGORY.CODENAME_LMG, "lmg", "light machine gun", "light machine guns"},
+                Weapon.CATEGORY.LMG
         );
         addCategory(
-                new String[]{"weapon_smg", "smg", "sub machine gun", "sub machine guns"},
-                new Category("Sub Machine Gun", "weapon_smg")
+                new String[]{Weapon.CATEGORY.CODENAME_SMG, "smg", "sub machine gun", "sub machine guns"},
+                Weapon.CATEGORY.SMG
         );
         addCategory(
-                new String[]{"weapon_pistol", "pistol", "pistols", "handgun", "handguns"},
-                new Category("Pistol", "weapon_pistol")
+                new String[]{Weapon.CATEGORY.CODENAME_PISTOL, "pistol", "pistols", "handgun", "handguns"},
+                Weapon.CATEGORY.PISTOL
         );
         addCategory(
-                new String[]{"weapon_launcher", "launcher", "launchers", "rocket launcher", "rocket launchers", "bazooka"},
-                new Category("Launcher", "weapon_launcher")
+                new String[]{Weapon.CATEGORY.CODENAME_LAUNCHER, "launcher", "launchers", "rocket launcher", "rocket launchers", "bazooka"},
+                Weapon.CATEGORY.LAUNCHER
         );
     }
 
     /**
-     * Map the given category to the array of keys.
+     * Map the given weapon category to the array of keys.
      *
      * @param keys     Keys to map category to
-     * @param category Category to map
+     * @param category Weapon category to map
      */
-    private void addCategory(String[] keys, Category category) {
+    private void addCategory(String[] keys, Weapon.CATEGORY category) {
         for(String key : keys) {
             categories.put(key, category);
         }

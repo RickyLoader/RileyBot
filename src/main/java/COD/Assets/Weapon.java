@@ -29,6 +29,57 @@ public class Weapon {
         TACTICALS,
         UNKNOWN;
 
+        public static final String
+                CODENAME_SNIPER = "weapon_sniper",
+                CODENAME_LMG = "weapon_lmg",
+                CODENAME_ASSAULT_RIFLE = "weapon_assault_rifle",
+                CODENAME_OTHER = "weapon_other",
+                CODENAME_SHOTGUN = "weapon_shotgun",
+                CODENAME_SMG = "weapon_smg",
+                CODENAME_MARKSMAN = "weapon_marksman",
+                CODENAME_LAUNCHER = "weapon_launcher",
+                CODENAME_PISTOL = "weapon_pistol",
+                CODENAME_MELEE = "weapon_melee",
+                CODENAME_TACTICALS = "tacticals",
+                CODENAME_LETHALS = "lethals",
+                CODENAME_UNKNOWN = "unknown";
+
+        /**
+         * Get the codename for the category
+         *
+         * @return Category codename
+         */
+        public String getCodename() {
+            switch(this) {
+                case LMG:
+                    return CODENAME_LMG;
+                case SMG:
+                    return CODENAME_SMG;
+                case MELEE:
+                    return CODENAME_MELEE;
+                case OTHER:
+                    return CODENAME_OTHER;
+                case PISTOL:
+                    return CODENAME_PISTOL;
+                case SNIPER:
+                    return CODENAME_SNIPER;
+                case LETHALS:
+                    return CODENAME_LETHALS;
+                case SHOTGUN:
+                    return CODENAME_SHOTGUN;
+                case LAUNCHER:
+                    return CODENAME_LAUNCHER;
+                case MARKSMAN:
+                    return CODENAME_MARKSMAN;
+                case TACTICALS:
+                    return CODENAME_TACTICALS;
+                case ASSAULT_RIFLE:
+                    return CODENAME_ASSAULT_RIFLE;
+                default:
+                    return CODENAME_UNKNOWN;
+            }
+        }
+
         /**
          * Get a weapon category by name
          *
@@ -37,38 +88,38 @@ public class Weapon {
          */
         public static CATEGORY discernCategory(String category) {
             switch(category) {
-                case "weapon_sniper":
+                case CODENAME_SNIPER:
                 case "sn":
                     return SNIPER;
-                case "weapon_lmg":
+                case CODENAME_LMG:
                 case "lm":
                     return LMG;
-                case "weapon_assault_rifle":
+                case CODENAME_ASSAULT_RIFLE:
                 case "ar":
                     return ASSAULT_RIFLE;
-                case "weapon_other":
+                case CODENAME_OTHER:
                     return OTHER;
-                case "weapon_shotgun":
+                case CODENAME_SHOTGUN:
                 case "sh":
                     return SHOTGUN;
-                case "weapon_smg":
+                case CODENAME_SMG:
                 case "sm":
                     return SMG;
-                case "weapon_marksman":
+                case CODENAME_MARKSMAN:
                     return MARKSMAN;
-                case "weapon_launcher":
+                case CODENAME_LAUNCHER:
                 case "la":
                     return LAUNCHER;
-                case "weapon_pistol":
+                case CODENAME_PISTOL:
                 case "pi":
                     return PISTOL;
-                case "weapon_melee":
+                case CODENAME_MELEE:
                 case "":
                 case "me":
                     return MELEE;
-                case "lethals":
+                case CODENAME_LETHALS:
                     return LETHALS;
-                case "tacticals":
+                case CODENAME_TACTICALS:
                     return TACTICALS;
                 default:
                     return UNKNOWN;
