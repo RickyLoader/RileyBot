@@ -98,19 +98,9 @@ public class CODManager {
                             );
                         }
                     }
-                    weapon = new Weapon(
-                            weaponName,
-                            gameName,
-                            category,
-                            imageURL,
-                            image,
-                            attachments
-                    );
+                    weapon = new Weapon(weaponName, gameName, category, imageURL, image, attachments);
                 }
-                weapons.put(
-                        weaponName,
-                        weapon
-                );
+                weapons.put(weaponName, weapon);
             }
         }
         missingWeaponImages.put(
