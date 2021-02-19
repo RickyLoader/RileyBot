@@ -1,178 +1,290 @@
 {
   "maps": {
-    "mp_hackney_yard": {
-      "real_name": "Hackney Yard (Night)"
-    },
-    "mp_aniyah": {
-      "real_name": "Aniyah Palace"
-    },
-    "mp_euphrates": {
-      "real_name": "Euphrates Bridge"
-    },
-    "mp_raid": {
-      "real_name": "Grazna Raid"
-    },
-    "mp_m_pine": {
-      "real_name": "Pine"
-    },
-    "mp_m_stack": {
-      "real_name": "Stack"
-    },
-    "mp_deadzone": {
-      "real_name": "Arklov Peak"
-    },
-    "mp_quarry2": {
-      "real_name": "Karst River Quarry"
-    },
-    "mp_m_overunder": {
-      "real_name": "Docks"
-    },
-    "mp_cave_am": {
-      "real_name": "Azhir Cave"
-    },
-    "mp_cave": {
-      "real_name": "Azhir Cave (Night)"
-    },
-    "mp_runner": {
-      "real_name": "Gun Runner"
-    },
-    "mp_runner_pm": {
-      "real_name": "Gun Runner (Night)"
-    },
-    "mp_hackney_am": {
-      "real_name": "Hackney Yard"
-    },
-    "mp_piccadilly": {
-      "real_name": "Piccadilly"
-    },
     "mp_spear": {
-      "real_name": "Rammaza"
-    },
-    "mp_spear_pm": {
-      "real_name": "Rammaza (Night)"
-    },
-    "mp_petrograd": {
-      "real_name": "St. Petrograd"
-    },
-    "mp_m_hill": {
-      "real_name": "Hill"
-    },
-    "mp_m_king": {
-      "real_name": "King"
-    },
-    "mp_m_speedball": {
-      "real_name": "Speedball"
-    },
-    "mp_m_showers": {
-      "real_name": "Gulag Showers"
-    },
-    "mp_downtown_gw": {
-      "real_name": "Tavorsk District"
-    },
-    "mp_m_speed": {
-      "real_name": "Shoot House"
+      "real_name": "Rammaza",
+      "loading_image_url": "https://i.imgur.com/Bb2rerw.jpg",
+      "compass_image_url": "https://i.imgur.com/J7KMD83.jpg"
     },
     "mp_farms2_gw": {
-      "real_name": "Krovnik Farmland"
-    },
-    "mp_port2_gw": {
-      "real_name": "Port of Verdansk"
-    },
-    "mp_crash2": {
-      "real_name": "Crash"
-    },
-    "mp_vacant": {
-      "real_name": "Vacant"
-    },
-    "mp_shipment": {
-      "real_name": "Shipment"
-    },
-    "mp_m_cargo": {
-      "real_name": "Cargo"
-    },
-    "mp_m_cage": {
-      "real_name": "Atrium"
-    },
-    "mp_m_overwinter": {
-      "real_name": "Winter Docks"
-    },
-    "mp_emporium": {
-      "real_name": "Atlas Superstore"
-    },
-    "mp_rust": {
-      "real_name": "Rust"
-    },
-    "mp_boneyard_gw": {
-      "real_name": "Zhokov Boneyard"
-    },
-    "mp_m_fork": {
-      "real_name": "Bazaar"
-    },
-    "mp_donetsk": {
-      "real_name": "Verdansk"
-    },
-    "mp_hideout": {
-      "real_name": "Khandor Hideout"
-    },
-    "mp_aniyah_tac": {
-      "real_name": "Aniyah Incursion"
-    },
-    "mp_backlot2": {
-      "real_name": "Talsik Backlot"
-    },
-    "mp_village2": {
-      "real_name": "Hovec Sawmill"
-    },
-    "mp_hardhat": {
-      "real_name": "Hardhat"
-    },
-    "mp_m_wallco2": {
-      "real_name": "Aisle 9"
-    },
-    "mp_donetsk2": {
-      "real_name": "Verdansk"
-    },
-    "mp_scrapyard": {
-      "real_name": "Scrapyard"
-    },
-    "mp_m_trench": {
-      "real_name": "Trench"
-    },
-    "mp_promenade_gw": {
-      "real_name": "Barakett Promenade"
-    },
-    "mp_don3": {
-      "real_name": "Verdansk"
-    },
-    "mp_garden": {
-      "real_name": "Cheshire Park"
+      "real_name": "Krovnik Farmland",
+      "loading_image_url": "https://i.imgur.com/FCJI3BD.jpg",
+      "compass_image_url": "https://i.imgur.com/9SRpeUh.jpg"
     },
     "mp_m_stadium": {
-      "real_name": "Verdansk Stadium"
+      "real_name": "Verdansk Stadium",
+      "loading_image_url": "https://i.imgur.com/NTYG7Hz.jpg",
+      "compass_image_url": "https://i.imgur.com/YRhSLG1.jpg"
+    },
+    "mp_m_showers": {
+      "real_name": "Gulag Showers",
+      "loading_image_url": "https://i.imgur.com/sCYf2rp.jpg",
+      "compass_image_url": "https://i.imgur.com/BwMzXsy.png"
+    },
+    "mp_promenade_gw": {
+      "real_name": "Barakett Promenade",
+      "loading_image_url": "https://i.imgur.com/IX0OM81.jpg",
+      "compass_image_url": "https://i.imgur.com/7XrjPLW.jpg"
     },
     "mp_riverside_gw": {
-      "real_name": "Verdansk Riverside"
+      "real_name": "Verdansk Riverside",
+      "loading_image_url": "https://i.imgur.com/8hdHXTt.jpg",
+      "compass_image_url": "https://i.imgur.com/Va7hK1g.jpg"
     },
-    "mp_layover_gw": {
-      "real_name": "Verdansk International Airport"
+    "mp_runner": {
+      "real_name": "Gun Runner",
+      "loading_image_url": "https://i.imgur.com/5W4V5ca.jpg",
+      "compass_image_url": "https://i.imgur.com/HXhCeBX.jpg"
     },
-    "mp_harbor": {
-      "real_name": "Suldal Harbor"
+    "mp_spear_pm": {
+      "real_name": "Rammaza (Night)",
+      "loading_image_url": "https://i.imgur.com/5lLO8GM.jpg",
+      "compass_image_url": "https://i.imgur.com/J7KMD83.jpg"
     },
-    "mp_m_train": {
-      "real_name": "Station"
+    "mp_vacant": {
+      "real_name": "Vacant",
+      "loading_image_url": "https://i.imgur.com/NAz7Okm.jpg",
+      "compass_image_url": "https://i.imgur.com/JKICmd0.jpg"
     },
-    "mp_oilrig": {
-      "real_name": "Petrov Oil Rig"
+    "mp_hackney_am": {
+      "real_name": "Hackney Yard",
+      "loading_image_url": "https://i.imgur.com/dQPWI2Q.jpg",
+      "compass_image_url": "https://i.imgur.com/sX6xugY.jpg"
     },
-    "mp_malyshev": {
-      "real_name": "Mialstor Tank Factory"
+    "mp_hackney_yard": {
+      "real_name": "Hackney Yard (Night)",
+      "loading_image_url": "https://i.imgur.com/Z2XStm1.png",
+      "compass_image_url": "https://i.imgur.com/sX6xugY.jpg"
+    },
+    "mp_shipment": {
+      "real_name": "Shipment",
+      "loading_image_url": "https://i.imgur.com/zxrz0uV.jpg",
+      "compass_image_url": "https://i.imgur.com/5DgWiOO.png"
+    },
+    "mp_rust": {
+      "real_name": "Rust",
+      "loading_image_url": "https://i.imgur.com/w6q1YkF.png",
+      "compass_image_url": "https://i.imgur.com/8GH15D5.jpg"
     },
     "mp_m_cornfield": {
-      "real_name": "Livestock"
+      "real_name": "Livestock",
+      "loading_image_url": "https://i.imgur.com/KZfTmeP.jpg",
+      "compass_image_url": "https://i.imgur.com/D5tmnfQ.png"
+    },
+    "mp_m_pine": {
+      "real_name": "Pine",
+      "loading_image_url": "https://i.imgur.com/AUm9Dwi.jpg",
+      "compass_image_url": "https://i.imgur.com/hTpufVN.jpg"
+    },
+    "mp_m_train": {
+      "real_name": "Station",
+      "loading_image_url": "https://i.imgur.com/59hsNoS.jpg",
+      "compass_image_url": "https://i.imgur.com/Ao4IkHF.png"
+    },
+    "mp_hideout": {
+      "real_name": "Khandor Hideout",
+      "loading_image_url": "https://i.imgur.com/mIGIJl5.jpg",
+      "compass_image_url": "https://i.imgur.com/9TEj9aH.jpg"
+    },
+    "mp_m_wallco2": {
+      "real_name": "Aisle 9",
+      "loading_image_url": "https://i.imgur.com/AtuWKR7.jpg",
+      "compass_image_url": "https://i.imgur.com/y0AELML.png"
+    },
+    "mp_layover_gw": {
+      "real_name": "Verdansk International Airport",
+      "loading_image_url": "https://i.imgur.com/KvpP1qf.jpg",
+      "compass_image_url": "https://i.imgur.com/Xt1ey6Y.jpg"
+    },
+    "mp_quarry2": {
+      "real_name": "Karst River Quarry",
+      "loading_image_url": "https://i.imgur.com/NYbqDlB.jpg",
+      "compass_image_url": "https://i.imgur.com/E4sLji1.jpg"
+    },
+    "mp_m_overwinter": {
+      "real_name": "Winter Docks",
+      "compass_image_url": "https://i.imgur.com/Zslm9SX.png",
+      "loading_image_url": "https://i.imgur.com/BGDgjxf.png"
+    },
+    "mp_cave": {
+      "real_name": "Azhir Cave (Night)",
+      "loading_image_url": "https://i.imgur.com/AyZX8WT.png",
+      "compass_image_url": "https://i.imgur.com/H1XvQS9.jpg"
+    },
+    "mp_cave_am": {
+      "real_name": "Azhir Cave",
+      "loading_image_url": "https://i.imgur.com/Z4TjXiq.jpg",
+      "compass_image_url": "https://i.imgur.com/H1XvQS9.jpg"
+    },
+    "mp_m_speed": {
+      "real_name": "Shoot House",
+      "loading_image_url": "https://i.imgur.com/092slAH.jpg",
+      "compass_image_url": "https://i.imgur.com/oXd1cIe.jpg"
+    },
+    "mp_village2": {
+      "real_name": "Hovec Sawmill",
+      "loading_image_url": "https://i.imgur.com/jjw4BHQ.jpg",
+      "compass_image_url": "https://i.imgur.com/DyyB0kV.jpg"
+    },
+    "mp_boneyard_gw": {
+      "real_name": "Zhokov Boneyard",
+      "loading_image_url": "https://i.imgur.com/JQffE9p.png",
+      "compass_image_url": "https://i.imgur.com/YpNrDVq.jpg"
+    },
+    "mp_donetsk2": {
+      "real_name": "Verdansk",
+      "loading_image_url": "https://i.imgur.com/ANQJDZi.jpg"
+    },
+    "mp_malyshev": {
+      "real_name": "Mialstor Tank Factory",
+      "loading_image_url": "https://i.imgur.com/pyr3nf3.jpg",
+      "compass_image_url": "https://i.imgur.com/mQTzrJ4.jpg"
+    },
+    "mp_petrograd": {
+      "real_name": "St. Petrograd",
+      "loading_image_url": "https://i.imgur.com/VhBn7cf.jpg",
+      "compass_image_url": "https://i.imgur.com/CLivrSY.png"
+    },
+    "mp_raid": {
+      "real_name": "Grazna Raid",
+      "loading_image_url": "https://i.imgur.com/32KJJ6s.jpg",
+      "compass_image_url": "https://i.imgur.com/40Gs1CL.jpg"
+    },
+    "mp_donetsk": {
+      "real_name": "Verdansk",
+      "loading_image_url": "https://i.imgur.com/26LfFNY.jpg"
+    },
+    "mp_harbor": {
+      "real_name": "Suldal Harbor",
+      "loading_image_url": "https://i.imgur.com/xPDHKNz.jpg",
+      "compass_image_url": "https://i.imgur.com/bV0Xu6z.jpg"
+    },
+    "mp_m_speedball": {
+      "real_name": "Speedball",
+      "loading_image_url": "https://i.imgur.com/Xt3OONC.jpg",
+      "compass_image_url": "https://i.imgur.com/IMxEsZm.jpg"
     },
     "mp_broadcast2": {
-      "real_name": "Broadcast"
+      "real_name": "Broadcast",
+      "loading_image_url": "https://i.imgur.com/YVrk6KQ.jpg",
+      "compass_image_url": "https://i.imgur.com/Qb08EHL.jpg"
+    },
+    "mp_garden": {
+      "real_name": "Cheshire Park",
+      "loading_image_url": "https://i.imgur.com/uL595Pb.jpg",
+      "compass_image_url": "https://i.imgur.com/RDGAWhZ.jpg"
+    },
+    "mp_m_king": {
+      "real_name": "King",
+      "loading_image_url": "https://i.imgur.com/gXvqxVl.jpg",
+      "compass_image_url": "https://i.imgur.com/xKWiW0f.png"
+    },
+    "mp_aniyah_tac": {
+      "real_name": "Aniyah Incursion",
+      "loading_image_url": "https://i.imgur.com/ZWt6odI.jpg",
+      "compass_image_url": "https://i.imgur.com/Xet30Sa.jpg"
+    },
+    "mp_m_cargo": {
+      "real_name": "Cargo",
+      "loading_image_url": "https://i.imgur.com/3Cc18r0.jpg",
+      "compass_image_url": "https://i.imgur.com/PAnl8BD.jpg"
+    },
+    "mp_euphrates": {
+      "real_name": "Euphrates Bridge",
+      "loading_image_url": "https://i.imgur.com/NzOjZF8.jpg",
+      "compass_image_url": "https://i.imgur.com/jfmmp3Z.jpg"
+    },
+    "mp_downtown_gw": {
+      "real_name": "Tavorsk District",
+      "loading_image_url": "https://i.imgur.com/SN4a76d.jpg",
+      "compass_image_url": "https://i.imgur.com/GtIpXsX.jpg"
+    },
+    "mp_backlot2": {
+      "real_name": "Talsik Backlot",
+      "loading_image_url": "https://i.imgur.com/coUmaLV.jpg",
+      "compass_image_url": "https://i.imgur.com/cVzwKyq.jpg"
+    },
+    "mp_scrapyard": {
+      "real_name": "Scrapyard",
+      "loading_image_url": "https://i.imgur.com/0wzJzCm.jpg",
+      "compass_image_url": "https://i.imgur.com/y1RsMS6.jpg"
+    },
+    "mp_deadzone": {
+      "real_name": "Arklov Peak",
+      "loading_image_url": "https://i.imgur.com/Rng0Jpg.jpg",
+      "compass_image_url": "https://i.imgur.com/QAeQU7C.jpg"
+    },
+    "mp_m_overunder": {
+      "real_name": "Docks",
+      "loading_image_url": "https://i.imgur.com/AVNy6lI.jpg",
+      "compass_image_url": "https://i.imgur.com/Zslm9SX.png"
+    },
+    "mp_piccadilly": {
+      "real_name": "Piccadilly",
+      "loading_image_url": "https://i.imgur.com/QKuNYdu.jpg",
+      "compass_image_url": "https://i.imgur.com/5Vxxm6q.jpg"
+    },
+    "mp_oilrig": {
+      "real_name": "Petrov Oil Rig",
+      "loading_image_url": "https://i.imgur.com/82LCT2a.jpg",
+      "compass_image_url": "https://i.imgur.com/lz6iGEl.png"
+    },
+    "mp_don3": {
+      "real_name": "Verdansk",
+      "loading_image_url": "https://i.imgur.com/5Tv7EZE.jpg"
+    },
+    "mp_m_trench": {
+      "real_name": "Trench",
+      "loading_image_url": "https://i.imgur.com/ftg2SVf.jpg",
+      "compass_image_url": "https://i.imgur.com/Y2nfTdG.jpg"
+    },
+    "mp_emporium": {
+      "real_name": "Atlas Superstore",
+      "loading_image_url": "https://i.imgur.com/0UtI9dn.png",
+      "compass_image_url": "https://i.imgur.com/tvwPxl1.jpg"
+    },
+    "mp_m_stack": {
+      "real_name": "Stack",
+      "loading_image_url": "https://i.imgur.com/ivK8Sf8.jpg",
+      "compass_image_url": "https://i.imgur.com/fVXEpKV.jpg"
+    },
+    "mp_m_cage": {
+      "real_name": "Atrium",
+      "loading_image_url": "https://i.imgur.com/2VHlltY.jpg",
+      "compass_image_url": "https://i.imgur.com/8iEHiyN.jpg"
+    },
+    "mp_runner_pm": {
+      "real_name": "Gun Runner (Night)",
+      "loading_image_url": "https://i.imgur.com/WmFowVT.jpg",
+      "compass_image_url": "https://i.imgur.com/HXhCeBX.jpg"
+    },
+    "mp_m_hill": {
+      "real_name": "Hill",
+      "loading_image_url": "https://i.imgur.com/8Ldewxa.jpg",
+      "compass_image_url": "https://i.imgur.com/7ju0Ewx.jpg"
+    },
+    "mp_m_fork": {
+      "real_name": "Bazaar",
+      "loading_image_url": "https://i.imgur.com/kHiFSM7.png",
+      "compass_image_url": "https://i.imgur.com/w8wMBmt.jpg"
+    },
+    "mp_port2_gw": {
+      "real_name": "Port of Verdansk",
+      "loading_image_url": "https://i.imgur.com/vFrTVJs.jpg",
+      "compass_image_url": "https://i.imgur.com/6v14d7n.jpg"
+    },
+    "mp_aniyah": {
+      "real_name": "Aniyah Palace",
+      "loading_image_url": "https://i.imgur.com/Pd410Q5.jpg",
+      "compass_image_url": "https://i.imgur.com/DuH0UnW.jpg"
+    },
+    "mp_crash2": {
+      "real_name": "Crash",
+      "loading_image_url": "https://i.imgur.com/5GICSCF.jpg"
+    },
+    "mp_hardhat": {
+      "real_name": "Hardhat",
+      "loading_image_url": "https://i.imgur.com/tSd3pGG.jpg",
+      "compass_image_url": "https://i.imgur.com/BY7j9m6.jpg"
     }
   }
 }

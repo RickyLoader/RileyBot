@@ -191,7 +191,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .addBlankField(true)
                 .addField("Match ID", score.getMatchId(), true)
                 .setColor(EmbedHelper.PURPLE)
-                .setImage(score.getMap().getImageURL())
+                .setImage(score.getMap().getLoadingImageURL())
                 .build();
         channel.sendMessage(entryEmbed).queue();
     }
@@ -434,7 +434,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
                     }
                     else if(emote == switchImage && last != loadouts) {
                         matchStats.switchDisplayImageURL();
-                        System.out.println(matchStats.getDisplayImageURL());
                         content = last == stats ? buildMatchEmbed(matchStats) : buildMatchPlayersEmbed(matchStats);
                     }
                     if(content == null) {

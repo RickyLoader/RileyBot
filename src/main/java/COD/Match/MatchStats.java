@@ -250,7 +250,7 @@ public class MatchStats {
         this.player = builder.player;
         this.loadouts = builder.loadouts;
         this.timePlayed = builder.timePlayed;
-        this.displayImageURL = map.getImageURL();
+        this.displayImageURL = map.getLoadingImageURL();
     }
 
     /**
@@ -266,7 +266,9 @@ public class MatchStats {
      * Switch the display image URL between the map compass and map loading screen image
      */
     public void switchDisplayImageURL() {
-        this.displayImageURL = displayImageURL.equals(map.getImageURL()) ? map.getCompassURL() : map.getImageURL();
+        this.displayImageURL = displayImageURL.equals(map.getLoadingImageURL())
+                ? map.getCompassImageURL()
+                : map.getLoadingImageURL();
     }
 
     /**

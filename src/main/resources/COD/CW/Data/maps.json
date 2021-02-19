@@ -1,58 +1,75 @@
 {
   "maps": {
-    "mp_black_sea": {
-      "real_name": "Armada"
-    },
-    "mp_cartel": {
-      "real_name": "Cartel"
-    },
-    "mp_tundra": {
-      "real_name": "Crossroads"
-    },
-    "mp_tank": {
-      "real_name": "Garrison"
-    },
     "mp_miami": {
-      "real_name": "Miami"
+      "real_name": "Miami",
+      "loading_image_url": "https://i.imgur.com/K3z0SlR.jpg"
     },
-    "mp_moscow": {
-      "real_name": "Moscow"
-    },
-    "mp_satellite": {
-      "real_name": "Satellite"
-    },
-    "mp_kgb": {
-      "real_name": "Checkmate"
-    },
-    "mp_nuketown6": {
-      "real_name": "Nuketown '84"
-    },
-    "wz_forest": {
-      "real_name": "Ruka"
+    "mp_mall": {
+      "real_name": "The Pines",
+      "loading_image_url": "https://i.imgur.com/vSa7PwO.jpg"
     },
     "wz_ski_slopes": {
-      "real_name": "Alpine"
+      "real_name": "Alpine",
+      "loading_image_url": "https://i.imgur.com/QmBPDUH.jpg"
+    },
+    "mp_sm_finance": {
+      "real_name": "KGB",
+      "loading_image_url": "https://i.imgur.com/WiUF2jQ.jpg"
+    },
+    "mp_sm_berlin_tunnel": {
+      "real_name": "U-Bahn",
+      "loading_image_url": "https://i.imgur.com/kdw7yF4.png"
+    },
+    "mp_nuketown6": {
+      "real_name": "Nuketown '84",
+      "loading_image_url": "https://i.imgur.com/nHQEYrF.jpg"
+    },
+    "mp_satellite": {
+      "real_name": "Satellite",
+      "loading_image_url": "https://i.imgur.com/T5WumQY.jpg"
+    },
+    "mp_tundra": {
+      "real_name": "Crossroads",
+      "loading_image_url": "https://i.imgur.com/Gt0Ak8b.jpg"
+    },
+    "mp_sm_game_show": {
+      "real_name": "Game Show",
+      "loading_image_url": "https://i.imgur.com/7c7hbz0.jpg"
+    },
+    "mp_cartel": {
+      "real_name": "Cartel",
+      "loading_image_url": "https://i.imgur.com/f33iSsY.jpg"
+    },
+    "mp_tank": {
+      "real_name": "Garrison",
+      "loading_image_url": "https://i.imgur.com/OUyFGWB.jpg"
+    },
+    "mp_black_sea": {
+      "real_name": "Armada",
+      "loading_image_url": "https://i.imgur.com/HS1sXVU.jpg"
+    },
+    "mp_sm_central": {
+      "real_name": "ICBM",
+      "loading_image_url": "https://i.imgur.com/f9R6BoB.jpg"
+    },
+    "wz_forest": {
+      "real_name": "Ruka",
+      "loading_image_url": "https://i.imgur.com/x3y1jrg.jpg"
     },
     "wz_sanatorium": {
       "real_name": "Sanatorium"
     },
-    "mp_mall": {
-      "real_name": "The Pines"
-    },
     "mp_raid_rm": {
-      "real_name": "Raid"
+      "real_name": "Raid",
+      "loading_image_url": "https://i.imgur.com/I7OusHp.jpg"
     },
-    "mp_sm_berlin_tunnel": {
-      "real_name": "U-Bahn"
+    "mp_kgb": {
+      "real_name": "Checkmate",
+      "loading_image_url": "https://i.imgur.com/I5on82v.jpg"
     },
-    "mp_sm_finance": {
-      "real_name": "KGB"
-    },
-    "mp_sm_game_show": {
-      "real_name": "Game Show"
-    },
-    "mp_sm_central": {
-      "real_name": "ICBM"
+    "mp_moscow": {
+      "real_name": "Moscow",
+      "loading_image_url": "https://i.imgur.com/uFlOKWo.jpg"
     }
   }
 }

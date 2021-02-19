@@ -143,43 +143,21 @@ public class CODManager {
         HashMap<String, Map> maps = new HashMap<>();
         JSONObject mapList = getAssetJSON("maps.json", "maps");
         for(String name : mapList.keySet()) {
+            String imagePath = basePath + "Maps/" + name;
             JSONObject mapData = mapList.getJSONObject(name);
-            maps.put(
-                    name,
-                    new Map(
-                            name,
-                            mapData.getString("real_name"),
-                            getMapImageUrl(name),
-                            getMapCompassImageUrl(name),
-                            resourceHandler.getImageResource(basePath + "Maps/" + name + ".png")
-                    )
-            );
+            Map.MapBuilder mapBuilder = new Map.MapBuilder(name, mapData.getString("real_name"), game)
+                    .setLoadingImage(resourceHandler.getImageResource(imagePath + ".png"))
+                    .setCompassImage(resourceHandler.getImageResource(imagePath + "_compass.png"));
+            if(mapData.has("compass_image_url")) {
+                mapBuilder.setCompassImageURL(mapData.getString("compass_image_url"));
+            }
+            if(mapData.has("loading_image_url")) {
+                mapBuilder.setLoadingImageURL(mapData.getString("loading_image_url"));
+            }
+            maps.put(name, mapBuilder.build());
         }
         return maps;
     }
-
-    /**
-     * Get the image URL for a map given the codename
-     *
-     * @param codename Codename to retrieve
-     * @return Image URL for map
-     */
-    private String getMapImageUrl(String codename) {
-        return "https://www.callofduty.com/cdn/app/base-maps/"
-                + game.name().toLowerCase() + "/" + codename + ".jpg";
-    }
-
-    /**
-     * Get the image URL for a map compass given the codename
-     *
-     * @param codename Codename to retrieve
-     * @return Image URL for map compass
-     */
-    private String getMapCompassImageUrl(String codename) {
-        return "https://www.callofduty.com/cdn/app/maps/"
-                + game.name().toLowerCase() + "/compass_map_" + codename + ".jpg";
-    }
-
 
     /**
      * Parse mode JSON in to objects and map to the codename
@@ -252,13 +230,7 @@ public class CODManager {
     public Map getMapByCodename(String codename) {
         Map map = maps.get(codename);
         if(map == null) {
-            map = new Map(
-                    codename,
-                    "MISSING: " + codename,
-                    getMapImageUrl(codename),
-                    getMapCompassImageUrl(codename),
-                    null
-            );
+            map = new Map(codename, game);
         }
         return map;
     }
