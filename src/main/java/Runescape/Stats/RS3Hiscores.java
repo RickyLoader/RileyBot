@@ -205,8 +205,17 @@ public class RS3Hiscores extends Hiscores {
                     x += 330;
                 }
             }
-
             g.setColor(Color.WHITE);
+            BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
+            String rank = "Rank: " + playerStats.getFormattedRank();
+            x = 365;
+            y = 1430 - rankImage.getHeight(); // Align with bottom skill row
+            g.drawImage(rankImage, x, y, null);
+            g.drawString(
+                    rank,
+                    x + rankImage.getWidth() + 20,
+                    y + (rankImage.getHeight() / 2) + (g.getFontMetrics().getMaxAscent() / 2)
+            );
             g.drawString(
                     String.valueOf(virtual ? playerStats.getVirtualTotalLevel() : playerStats.getTotalLevel()),
                     240,
@@ -244,68 +253,79 @@ public class RS3Hiscores extends Hiscores {
             g.drawImage(scaledAvatar, 110, 124, null);
 
             g.setFont(getGameFont().deriveFont(75f));
-            g.setColor(orange);
             FontMetrics fm = g.getFontMetrics();
+            g.setColor(orange);
 
-            int x = 1000;
-            int y = 375;
-            int width = fm.stringWidth(name.toUpperCase());
-            g.drawString(name.toUpperCase(), x - (width / 2), y - (fm.getHeight() / 2) + fm.getAscent());
+            int x = 445;
+            int y = 415;
 
             if(playerStats.hasAccountTypeImage()) {
                 BufferedImage typeImage = handler.getImageResource(
                         PlayerStats.getAccountTypeImagePath(playerStats.getAccountType())
                 );
-                g.drawImage(typeImage, 511 - (typeImage.getWidth() / 2), 423 - typeImage.getHeight(), null);
-
-                if(playerStats.hasHCIMStatus() && playerStats.getHcimStatus().isDead()) {
-                    HCIMStatus hcimStatus = playerStats.getHcimStatus();
-
-                    if(playerStats.isHardcore()) {
-                        g.setColor(red);
-                        ((Graphics2D) g).setStroke(new BasicStroke(10f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                        g.drawLine(x - (width / 2), y, x + (width / 2), y);
-                    }
-
-                    BufferedImage deathSection = getResourceHandler().getImageResource(
-                            getResourcePath() + "Templates/death_section.png"
-                    );
-
-                    g = deathSection.getGraphics();
-                    g.setFont(getGameFont().deriveFont(20f));
-                    fm = g.getFontMetrics();
-                    g.setColor(Color.WHITE);
-                    x = (deathSection.getWidth() / 2);
-                    y = 45 + fm.getHeight();
-
-                    g.drawString(hcimStatus.getDate(), x - (fm.stringWidth(hcimStatus.getDate()) / 2), y);
-                    y += fm.getHeight();
-
-
-                    String[] cause = (hcimStatus.getLocation() + " " + hcimStatus.getCause()).split(" ");
-                    String curr = "";
-
-                    for(String word : cause) {
-                        String attempt = curr + " " + word;
-                        if(fm.stringWidth(attempt) > deathSection.getWidth()) {
-                            g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
-                            y += fm.getHeight();
-                            curr = word;
-                            continue;
-                        }
-                        curr = attempt;
-                    }
-                    g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
-                    g = titleSection.getGraphics();
-                    g.drawImage(
-                            deathSection,
-                            titleSection.getWidth() - 65 - deathSection.getWidth(),
-                            titleSection.getHeight() - deathSection.getHeight(),
-                            null
-                    );
-                    return titleSection;
-                }
+                g.drawImage(typeImage, x, y - typeImage.getHeight(), null);
+                x += typeImage.getWidth() + 50;
             }
+            g.drawString(name.toUpperCase(), x, y);
+
+            x = 1000;
+            y = 375;
+            int width = fm.stringWidth(name.toUpperCase());
+
+            if(playerStats.hasHCIMStatus() && playerStats.getHcimStatus().isDead()) {
+                HCIMStatus hcimStatus = playerStats.getHcimStatus();
+
+                if(playerStats.isHardcore()) {
+                    g.setColor(red);
+                    ((Graphics2D) g).setStroke(
+                            new BasicStroke(
+                                    10f,
+                                    BasicStroke.CAP_ROUND,
+                                    BasicStroke.JOIN_ROUND
+                            )
+                    );
+                    g.drawLine(x - (width / 2), y, x + (width / 2), y);
+                }
+
+                BufferedImage deathSection = getResourceHandler().getImageResource(
+                        getResourcePath() + "Templates/death_section.png"
+                );
+
+                g = deathSection.getGraphics();
+                g.setFont(getGameFont().deriveFont(20f));
+                fm = g.getFontMetrics();
+                g.setColor(Color.WHITE);
+                x = (deathSection.getWidth() / 2);
+                y = 45 + fm.getHeight();
+
+                g.drawString(hcimStatus.getDate(), x - (fm.stringWidth(hcimStatus.getDate()) / 2), y);
+                y += fm.getHeight();
+
+
+                String[] cause = (hcimStatus.getLocation() + " " + hcimStatus.getCause()).split(" ");
+                String curr = "";
+
+                for(String word : cause) {
+                    String attempt = curr + " " + word;
+                    if(fm.stringWidth(attempt) > deathSection.getWidth()) {
+                        g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
+                        y += fm.getHeight();
+                        curr = word;
+                        continue;
+                    }
+                    curr = attempt;
+                }
+                g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
+                g = titleSection.getGraphics();
+                g.drawImage(
+                        deathSection,
+                        titleSection.getWidth() - 65 - deathSection.getWidth(),
+                        titleSection.getHeight() - deathSection.getHeight(),
+                        null
+                );
+                return titleSection;
+            }
+
             g.dispose();
         }
         catch(Exception e) {

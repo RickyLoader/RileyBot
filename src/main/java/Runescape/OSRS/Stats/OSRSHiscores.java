@@ -611,7 +611,6 @@ public class OSRSHiscores extends Hiscores {
         String rank = "Rank: " + stats.getFormattedRank();
         BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
         int rankX = baseImage.getWidth() - fm.stringWidth(rank) - 50;
-
         g.drawString(rank, rankX, centerVertical + (fm.getMaxAscent() / 2));
 
         g.drawImage(
