@@ -754,7 +754,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
     /**
      * Create the default embed builder
      *
-     * @param title Title to use
+     * @param title       Title to use
+     * @param footerImage Footer image
      * @return Default embed builder
      */
     private EmbedBuilder getDefaultEmbedBuilder(String title, String footerImage) {
@@ -1077,7 +1078,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 attachments.add(attachment);
             }
         }
-        return new LoadoutWeapon(weapon, attachments);
+        return new LoadoutWeapon(weapon, attachments, loadoutWeapon.getInt("variant"));
     }
 
     /**

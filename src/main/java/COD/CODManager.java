@@ -77,7 +77,16 @@ public class CODManager {
                 }
                 else {
                     HashMap<String, Attachment> attachments = parseAttachments(weaponData, weaponName, categoryName);
-                    weapon = new Weapon(weaponName, gameName, category, imageURL, image, attachments);
+                    HashMap<Integer, Variant> variants = parseVariants(weaponData, weaponName, categoryName);
+                    weapon = new Weapon(
+                            weaponName,
+                            gameName,
+                            category,
+                            imageURL,
+                            image,
+                            attachments,
+                            variants
+                    );
                 }
                 weapons.put(weaponName, weapon);
             }
@@ -87,6 +96,36 @@ public class CODManager {
                 resourceHandler.getImageResource(basePath + "Weapons/unknown_category.png")
         );
         return weapons;
+    }
+
+    /**
+     * Parse the weapon variants from the given weapon JSON to a map of variant id -> variant
+     *
+     * @param weaponData     Weapon JSON
+     * @param weaponName     Weapon codename
+     * @param weaponCategory Weapon category codename
+     * @return Map of weapon variant id -> weapon variant
+     */
+    private HashMap<Integer, Variant> parseVariants(JSONObject weaponData, String weaponName, String weaponCategory) {
+        HashMap<Integer, Variant> variants = new HashMap<>();
+        if(!weaponData.has("variants")) {
+            return variants;
+        }
+        JSONObject variantData = weaponData.getJSONObject("variants");
+        for(String variantIdString : variantData.keySet()) {
+            JSONObject variant = variantData.getJSONObject(variantIdString);
+            int variantId = Integer.parseInt(variantIdString);
+            String imagePath = basePath + "Weapons/" + weaponCategory + "/" + weaponName + "_v" + variantId + ".png";
+            variants.put(
+                    variantId,
+                    new Variant(
+                            variantId,
+                            variant.getString("real_name"),
+                            resourceHandler.getImageResource(imagePath)
+                    )
+            );
+        }
+        return variants;
     }
 
     /**

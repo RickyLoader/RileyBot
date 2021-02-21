@@ -2,8 +2,10 @@ package COD.Match;
 
 import COD.Assets.Attachment;
 import COD.Assets.Attributes;
+import COD.Assets.Variant;
 import COD.Assets.Weapon;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -15,17 +17,42 @@ public class LoadoutWeapon {
     private final Weapon weapon;
     private final ArrayList<Attachment> attachments;
     private final Attributes attributes;
+    private final Variant variant;
+
 
     /**
      * Create a loadout weapon
      *
      * @param weapon      Weapon
      * @param attachments List of weapon attachments
+     * @param variantId   Weapon variant id
      */
-    public LoadoutWeapon(Weapon weapon, ArrayList<Attachment> attachments) {
+    public LoadoutWeapon(Weapon weapon, ArrayList<Attachment> attachments, int variantId) {
         this.weapon = weapon;
         this.attachments = attachments;
         this.attributes = calculateAttributes(attachments);
+        this.variant = weapon.getVariantById(variantId);
+    }
+
+    /**
+     * Get the loadout weapon image.
+     * Return either the base weapon image, or the weapon variant image if present.
+     *
+     * @return Weapon image
+     */
+    public BufferedImage getImage() {
+        return variant == null ? weapon.getImage() : variant.getImage();
+    }
+
+    /**
+     * Get the name of the loadout weapon.
+     * Return the base weapon name - e.g "Combat Knife" with the
+     * variant name if present - e.g "Combat Knife (Espionage)"
+     *
+     * @return Weapon name
+     */
+    public String getName() {
+        return variant == null ? weapon.getName() : weapon.getName() + " (" + variant.getName() + ")";
     }
 
     /**
@@ -85,6 +112,24 @@ public class LoadoutWeapon {
         return attachments;
     }
 
+    /**
+     * Get the weapon variant
+     *
+     * @return Weapon variant
+     */
+    public Variant getVariant() {
+        return variant;
+    }
+
+    /**
+     * Check if the loadout weapon has a weapon variant
+     *
+     * @return Loadout weapon has weapon variant
+     */
+    public boolean hasVariant() {
+        return variant != null;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(!(obj instanceof LoadoutWeapon)) {
@@ -92,6 +137,12 @@ public class LoadoutWeapon {
         }
         LoadoutWeapon loadoutWeapon = (LoadoutWeapon) obj;
         if(!weapon.equals(loadoutWeapon.getWeapon())) {
+            return false;
+        }
+        if(!hasVariant() && loadoutWeapon.hasVariant() || hasVariant() && !loadoutWeapon.hasVariant()) {
+            return false;
+        }
+        if(hasVariant() && !variant.equals(loadoutWeapon.getVariant())) {
             return false;
         }
         if(attachments.size() != loadoutWeapon.getAttachments().size()) {

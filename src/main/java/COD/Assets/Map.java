@@ -12,9 +12,10 @@ public class Map {
     private final BufferedImage loadingImage, compassImage;
 
     public static class MapBuilder {
-        private String codename, name, loadingImageURL, compassImageURL;
+        private final String codename, name;
+        private String loadingImageURL, compassImageURL;
         private BufferedImage loadingImage, compassImage;
-        private GAME game;
+        private final GAME game;
 
         /**
          * Create the MapBuilder

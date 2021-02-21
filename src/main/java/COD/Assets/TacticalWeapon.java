@@ -19,7 +19,7 @@ public class TacticalWeapon extends Weapon {
      * @param image    Weapon image
      */
     public TacticalWeapon(String codename, String name, String imageURL, String property, BufferedImage image) {
-        super(codename, name, CATEGORY.TACTICALS, imageURL, image, new HashMap<>());
+        super(codename, name, CATEGORY.TACTICALS, imageURL, image, new HashMap<>(), new HashMap<>());
         this.property = property;
     }
 

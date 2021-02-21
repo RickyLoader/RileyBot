@@ -13,6 +13,7 @@ public class Weapon {
     private final CATEGORY category;
     private final BufferedImage image;
     private final HashMap<String, Attachment> attachments;
+    private final HashMap<Integer, Variant> variants;
 
     public enum CATEGORY {
         SNIPER,
@@ -192,9 +193,10 @@ public class Weapon {
      * @param category    Weapon category e.g MELEE
      * @param imageURL    URL to image
      * @param image       Weapon image
-     * @param attachments Map of attachments available for the weapon codename -> attachment
+     * @param attachments Map of attachments available for the weapon. Weapon codename -> attachment
+     * @param variants    Map of variants available for the weapon. Variant id -> variant
      */
-    public Weapon(String codename, String name, CATEGORY category, String imageURL, BufferedImage image, HashMap<String, Attachment> attachments) {
+    public Weapon(String codename, String name, CATEGORY category, String imageURL, BufferedImage image, HashMap<String, Attachment> attachments, HashMap<Integer, Variant> variants) {
         this.codename = codename;
         this.name = name;
         this.category = category;
@@ -202,6 +204,7 @@ public class Weapon {
         this.imageURL = imageURL;
         this.image = image;
         this.attachments = attachments;
+        this.variants = variants;
     }
 
     /**
@@ -212,7 +215,7 @@ public class Weapon {
      * @param image    Weapon image
      */
     public Weapon(String codename, CATEGORY category, BufferedImage image) {
-        this(codename, "MISSING: " + codename, category, null, image, new HashMap<>());
+        this(codename, "MISSING: " + codename, category, null, image, new HashMap<>(), new HashMap<>());
     }
 
     /**
@@ -239,10 +242,21 @@ public class Weapon {
      * Commando Foregrip attachment
      *
      * @param codename Attachment codename
-     * @return Attachments
+     * @return Attachment
      */
     public Attachment getAttachmentByCodename(String codename) {
         return attachments.get(codename);
+    }
+
+    /**
+     * Get a variant of the weapon by its variant id e.g 21 to retrieve the
+     * "Espionage" variant of the combat knife
+     *
+     * @param variantId Variant id
+     * @return Variant
+     */
+    public Variant getVariantById(int variantId) {
+        return variants.get(variantId);
     }
 
     /**
