@@ -7519,7 +7519,7 @@
             },
             "description": "Tactical stock provides a stable aiming platform and improved recoil control without sacrificing too much mobility.",
             "real_name": "FTAC SATUS CS-3",
-            "blocksCategory": "extrapstl",
+            "blocksCategory": "extra",
             "category": "backpiece"
           },
           "pistolgrip02": {
@@ -7598,7 +7598,7 @@
             },
             "description": "High power 5mW tactical green laser.  Improves accuracy while aiming down sights.  Exposes position when active.",
             "real_name": "Tac Laser",
-            "category": "extrapstl"
+            "category": "extra"
           },
           "ammomod_wound": {
             "stats": {
@@ -7781,7 +7781,7 @@
             "description": "Solo foregrip helps control recoil without hindering movement or stability.",
             "real_name": "FTAC G-X",
             "category": "backpiece",
-            "blocksCategory": "extrapstl"
+            "blocksCategory": "extra"
           },
           "reflexmini2": {
             "stats": {
@@ -7820,7 +7820,7 @@
             },
             "description": "Ultra bright 5mW green laser greatly improves hip fire accuracy and speeds up target acquisition after sprinting.  Exposes position when active.  Only for the aggressive.",
             "real_name": "5mW Laser",
-            "category": "extrapstl"
+            "category": "extra"
           },
           "brake": {
             "stats": {
@@ -8320,7 +8320,7 @@
             },
             "description": "Ultra bright 5mW green laser greatly improves hip fire accuracy and speeds up target acquisition after sprinting.  Exposes position when active.  Only for the aggressive.",
             "real_name": "5mW Laser",
-            "category": "extrapstl"
+            "category": "extra"
           },
           "silencer2": {
             "stats": {
@@ -9599,7 +9599,7 @@
             },
             "description": "High power 5mW tactical green laser.  Improves accuracy while aiming down sights.  Exposes position when active.",
             "real_name": "Tac Laser",
-            "category": "extrapstl"
+            "category": "extra"
           },
           "gunperk_fastmelee": {
             "stats": {

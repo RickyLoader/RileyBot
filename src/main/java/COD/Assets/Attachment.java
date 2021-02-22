@@ -22,7 +22,6 @@ public class Attachment {
         EXTRA,
         MAGAZINE,
         TRIGGER,
-        EXTRAPSTL,
         PUMPGRIP,
         GUARD,
         PUMP,
