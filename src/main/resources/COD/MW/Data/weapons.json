@@ -20420,7 +20420,18 @@
     "weapon_other": {
       "iw8_me_riotshield": {
         "image_url": "https://i.imgur.com/zAo3TSg.png",
-        "real_name": "Riot Shield"
+        "real_name": "Riot Shield",
+        "variants": {
+          "4": {
+            "real_name": "Cheater's Bane"
+          },
+          "6": {
+            "real_name": "Deredere"
+          },
+          "5": {
+            "real_name": "Shogun"
+          }
+        }
       }
     },
     "weapon_shotgun": {
@@ -33900,11 +33911,117 @@
       },
       "iw8_me_akimboblades": {
         "image_url": "https://i.imgur.com/1OvxpZ4.png",
-        "real_name": "Dual Kodachis"
+        "real_name": "Dual Kodachis",
+        "variants": {
+          "1": {
+            "real_name": "Aomi"
+          },
+          "2": {
+            "real_name": "Daimyo"
+          },
+          "3": {
+            "real_name": "Vorpal Blade"
+          }
+        }
       },
       "iw8_knife": {
         "image_url": "https://i.imgur.com/MiBa0HP.png",
-        "real_name": "Combat Knife"
+        "real_name": "Combat Knife",
+        "variants": {
+          "1": {
+            "real_name": "Blackspike"
+          },
+          "71": {
+            "real_name": "Auxiliary"
+          },
+          "66": {
+            "real_name": "Stalemate"
+          },
+          "65": {
+            "real_name": "Thyristor"
+          },
+          "2": {
+            "real_name": "Blue Silence"
+          },
+          "70": {
+            "real_name": "Velorum"
+          },
+          "67": {
+            "real_name": "Viper's Kiss"
+          },
+          "5": {
+            "real_name": "Hold Up"
+          },
+          "7": {
+            "real_name": "New Steel"
+          },
+          "33": {
+            "real_name": "Night Light"
+          },
+          "28": {
+            "real_name": "Ol' Cobber"
+          },
+          "18": {
+            "real_name": "The Quiet"
+          },
+          "49": {
+            "real_name": "Tall Tale"
+          },
+          "44": {
+            "real_name": "Stinging Nettle"
+          },
+          "63": {
+            "real_name": "Old Sins"
+          },
+          "16": {
+            "real_name": "Sandfly"
+          },
+          "38": {
+            "real_name": "Sacrifice"
+          },
+          "113": {
+            "real_name": "Riddle of Steel"
+          },
+          "23": {
+            "real_name": "Rasp"
+          },
+          "24": {
+            "real_name": "Unspoken Oath"
+          },
+          "13": {
+            "real_name": "Blood Letter"
+          },
+          "25": {
+            "real_name": "Chisholm"
+          },
+          "20": {
+            "real_name": "Dainsleif"
+          },
+          "21": {
+            "real_name": "Espionage"
+          },
+          "40": {
+            "real_name": "Coffin Nail"
+          },
+          "69": {
+            "real_name": "Phlebotomist"
+          },
+          "53": {
+            "real_name": "Innocence Lost"
+          },
+          "100": {
+            "real_name": "Golden Hew"
+          },
+          "47": {
+            "real_name": "Firecracker"
+          },
+          "50": {
+            "real_name": "Crevasse"
+          },
+          "64": {
+            "real_name": "Dandere"
+          }
+        }
       },
       "iw8_fists": {
         "image_url": "https://i.imgur.com/lrwEZKq.png",
