@@ -159,12 +159,17 @@ public class CODManager {
                     .setControlStat(stats.getInt("control"))
                     .build();
 
+            CATEGORY blockedCategory = attachment.has("blocksCategory")
+                    ? CATEGORY.valueOf(attachment.getString("blocksCategory").toUpperCase())
+                    : CATEGORY.NONE;
+
             attachments.put(
                     attachmentName,
                     new Attachment(
                             attachmentName,
                             attachment.getString("real_name"),
                             CATEGORY.valueOf(attachment.getString("category").toUpperCase()),
+                            blockedCategory,
                             attributes,
                             resourceHandler.getImageResource(imagePath)
                     )

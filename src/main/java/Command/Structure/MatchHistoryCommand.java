@@ -1071,6 +1071,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                             attachmentName,
                             "MISSING: " + attachmentName,
                             Attachment.CATEGORY.UNKNOWN,
+                            Attachment.CATEGORY.UNKNOWN,
                             null,
                             null
                     );

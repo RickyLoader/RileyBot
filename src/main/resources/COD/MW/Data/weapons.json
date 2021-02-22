@@ -644,7 +644,8 @@
             },
             "description": "This beast of a barrel provides maximum recoil control and  shot stability at the cost of mobility and bullet velocity.",
             "real_name": "26.0 Bull Barrel",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "stocks": {
             "stats": {
@@ -852,6 +853,7 @@
             },
             "description": "Heavy duty reinforced cylindrical barrel lightens recoil and stabilizes shots at the cost of bullet velocity and mobility.",
             "real_name": "17.2 Bull Barrel",
+            "blocksCategory": "muzzle",
             "category": "frontpiece"
           },
           "gunperk_hardmelee": {
@@ -1566,6 +1568,7 @@
             },
             "description": "This beast of a barrel provides maximum recoil control and  shot stability at the cost of mobility and bullet velocity.",
             "real_name": "XRK Harbinger",
+            "blocksCategory": "muzzle",
             "category": "frontpiece"
           },
           "stocks": {
@@ -6910,7 +6913,8 @@
             },
             "description": "Ability to hold a weapon in each hand",
             "real_name": "Akimbo",
-            "category": "gunperk"
+            "category": "gunperk",
+            "blocksCategory": "reargrip"
           },
           "fmj": {
             "stats": {
@@ -7410,7 +7414,8 @@
             },
             "description": "Ability to hold a weapon in each hand",
             "real_name": "Akimbo",
-            "category": "gunperk"
+            "category": "gunperk",
+            "blocksCategory": "backpiece"
           },
           "fastreload": {
             "stats": {
@@ -7514,6 +7519,7 @@
             },
             "description": "Tactical stock provides a stable aiming platform and improved recoil control without sacrificing too much mobility.",
             "real_name": "FTAC SATUS CS-3",
+            "blocksCategory": "extrapstl",
             "category": "backpiece"
           },
           "pistolgrip02": {
@@ -7774,7 +7780,8 @@
             },
             "description": "Solo foregrip helps control recoil without hindering movement or stability.",
             "real_name": "FTAC G-X",
-            "category": "backpiece"
+            "category": "backpiece",
+            "blocksCategory": "extrapstl"
           },
           "reflexmini2": {
             "stats": {
@@ -10891,9 +10898,10 @@
               "range": -6,
               "control": 0
             },
-            "description": "^3Integral suppressor^7 with lightweight aluminum baffles keep the weapon silent and agile, but reduce the muzzle velocity.",
+            "description": "Integral suppressor with lightweight aluminum baffles keep the weapon silent and agile, but reduce the muzzle velocity.",
             "real_name": "FSS 12.4 Predator",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "reflex4": {
             "stats": {
@@ -13405,8 +13413,9 @@
               "range": 4,
               "control": 0
             },
-            "description": "^3Integrated suppressor^7 with a heavy duty monolithic core increases muzzle velocity while maintaining a low sound signature.",
+            "description": "Integrated suppressor with a heavy duty monolithic core increases muzzle velocity while maintaining a low sound signature.",
             "real_name": "Tempus Cyclone",
+            "blocksCategory": "muzzle",
             "category": "frontpiece"
           },
           "reflex4": {
@@ -14700,7 +14709,8 @@
             },
             "description": "23.0 barrel with a built in solid wood grip is the most stable and accurate barrel available. Substantial weight slows movement and handling.",
             "real_name": "23.0 Romanian",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "undermount"
           },
           "barcust": {
             "stats": {
@@ -16785,6 +16795,7 @@
             },
             "description": "Ultra short 5.3 barrel with a built in foregrip allows first class agility and maneuverability without sacrificing recoil control.",
             "real_name": "ZLR Drifter A-08",
+            "blocksCategory": "undermount",
             "category": "frontpiece"
           },
           "xmags": {
@@ -19039,7 +19050,8 @@
             },
             "description": "Heavy duty ^3integrated suppressor^7 with a monolithic core increases muzzle velocity while maintaining a low sound signature.",
             "real_name": "Singuard Arms Whisper",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "hybrid4": {
             "stats": {
@@ -23304,9 +23316,10 @@
               "range": 1,
               "control": 4
             },
-            "description": "Custom XRK Eagle's Claw receiver with built in mag well to use ^26-round^7 detachable magazines for faster reloads.  ^1Not compatible with custom barrels.^7",
+            "description": "Custom XRK Eagle's Claw receiver with built in mag well to use 26-round detachable magazines for faster reloads.  ^1Not compatible with custom barrels.^7",
             "real_name": "12 Gauge 6-R Mags",
-            "category": "magazine"
+            "category": "magazine",
+            "blocksCategory": "frontpiece"
           },
           "gunperk_hardmelee": {
             "stats": {
@@ -24118,7 +24131,8 @@
             },
             "description": "437 gr hardcast slugs with a low muzzle velocity and tremendous stopping power. Imprecise and hard hitting, accuracy can be improved with longer barrels and chokes.",
             "real_name": "Slug Rounds",
-            "category": "magazine"
+            "category": "magazine",
+            "blocksCategory": "frontpiece"
           },
           "holo": {
             "stats": {
@@ -25040,9 +25054,10 @@
               "range": 7,
               "control": 5
             },
-            "description": "Monolithic ^3integral suppressor^7 keeps the weapon silent and increases range for longer distance stealth assaults.",
+            "description": "Monolithic integral suppressor keeps the weapon silent and increases range for longer distance stealth assaults.",
             "real_name": "FSS Nightshade",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "reflex4": {
             "stats": {
@@ -26879,8 +26894,9 @@
               "control": 0
             },
             "description": "Lightweight ^3aluminum suppressor^7 decreases muzzle velocity to subsonic speeds providing a smooth recoil, low sound signature, and no visible tracers.",
-            "real_name": "Subsonic Integral Suppressor",
-            "category": "frontpiece"
+            "real_name": "Monolithic Integral Suppressor",
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "calcust": {
             "stats": {
@@ -27008,9 +27024,10 @@
               "range": -6,
               "control": 0
             },
-            "description": "Lightweight ^3aluminum suppressor^7 decreases muzzle velocity to subsonic speeds providing a smooth recoil, low sound signature, and no visible tracers.",
+            "description": "Lightweight aluminum suppressor decreases muzzle velocity to subsonic speeds providing a smooth recoil, low sound signature, and no visible tracers.",
             "real_name": "Subsonic Integral Suppressor",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "reflex4": {
             "stats": {
@@ -27939,6 +27956,7 @@
             },
             "description": "Lightweight custom stock from FSS blends mobility with exceptional stability.",
             "real_name": "FSS Guardian",
+            "blocksCategory": "reargrip",
             "category": "backpiece"
           },
           "silencer": {
@@ -28965,6 +28983,7 @@
             },
             "description": "Monolithic ^3integral suppressor^7 keeps the weapon silent and increases range for longer distance stealth assaults.",
             "real_name": "ZLR 18 Deadfall",
+            "blocksCategory": "muzzle",
             "category": "frontpiece"
           },
           "hybrid4": {
@@ -31500,7 +31519,8 @@
             },
             "description": "Heavy duty integrated suppressor with a monolithic core increases muzzle velocity while maintaining a low sound signature.",
             "real_name": "XRK 208 Dragoon",
-            "category": "frontpiece"
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
           },
           "hybrid4": {
             "stats": {
