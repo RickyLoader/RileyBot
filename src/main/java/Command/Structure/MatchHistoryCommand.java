@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
  * View a COD player's match history
  */
 public class MatchHistoryCommand extends CODLookupCommand {
+    public final static LoadoutImageManager loadoutImageManager = new LoadoutImageManager();
     private final HashMap<Long, MatchStats> matchMessages;
     private final HashSet<String> leaderboardSeen;
     private final ArrayList<WobblyScore> leaderboard;
-    private final LoadoutImageManager loadoutImageManager;
     private final CODManager codManager;
     private final Font font;
     private final String footer;
@@ -54,7 +54,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
                         + trigger + " wobblies [rank]"
         );
         this.matchMessages = new HashMap<>();
-        this.loadoutImageManager = new LoadoutImageManager();
         this.codManager = codManager;
         this.footer = "Type " + getTrigger() + " for help";
         this.leaderboard = getWobblyLeaderboard();

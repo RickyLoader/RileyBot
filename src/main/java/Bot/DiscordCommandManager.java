@@ -7,6 +7,7 @@ import Command.Commands.*;
 import Command.Commands.Audio.*;
 import Command.Commands.COD.CWCountdownCommand;
 import Command.Commands.COD.MWDataCommand;
+import Command.Commands.COD.MWRandomCommand;
 import Command.Commands.ExecuteOrder.ExecuteOrder66Command;
 import Command.Commands.ExecuteOrder.KillListCommand;
 import Command.Commands.Link.*;
@@ -191,6 +192,7 @@ public class DiscordCommandManager {
         addCommand(new TFTLookupCommand());
         addCommand(new TTVLookupCommand());
         addCommand(new PhasmophobiaCommand());
+        addCommand(new MWRandomCommand());
     }
 
     /**

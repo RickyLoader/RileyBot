@@ -84,7 +84,7 @@ public class Weapon {
         /**
          * Get a weapon category by name
          *
-         * @param category Category name e.g - "weapon_smg" or category shorthand e.g - "iw8_sn_romeo700" -> "sn"
+         * @param category Category name e.g - "weapon_smg" or category shorthand e.g - "iw8_sm_uzulu" -> "sm"
          * @return Category e.g - SMG
          */
         public static CATEGORY discernCategory(String category) {
@@ -163,6 +163,50 @@ public class Weapon {
                     return LETHAL;
                 case TACTICALS:
                     return TACTICAL;
+            }
+        }
+
+        /**
+         * Get an array of weapon categories for the weapon type
+         *
+         * @return Array of weapon categories for weapon type
+         */
+        public CATEGORY[] getCategories() {
+            return getCategories(this);
+        }
+
+        /**
+         * Get an array of weapon categories for the given type
+         *
+         * @param type Type to get categories for
+         * @return Array of weapon categories for type
+         */
+        public static CATEGORY[] getCategories(TYPE type) {
+            if(type == TYPE.UNKNOWN) {
+                return new CATEGORY[]{CATEGORY.UNKNOWN};
+            }
+            switch(type) {
+                case PRIMARY:
+                default:
+                    return new CATEGORY[]{
+                            CATEGORY.SNIPER,
+                            CATEGORY.LMG,
+                            CATEGORY.ASSAULT_RIFLE,
+                            CATEGORY.OTHER,
+                            CATEGORY.SHOTGUN,
+                            CATEGORY.SMG,
+                            CATEGORY.MARKSMAN
+                    };
+                case SECONDARY:
+                    return new CATEGORY[]{
+                            CATEGORY.LAUNCHER,
+                            CATEGORY.PISTOL,
+                            CATEGORY.MELEE
+                    };
+                case LETHAL:
+                    return new CATEGORY[]{CATEGORY.LETHALS};
+                case TACTICAL:
+                    return new CATEGORY[]{CATEGORY.TACTICALS};
             }
         }
 
@@ -246,6 +290,44 @@ public class Weapon {
      */
     public Attachment getAttachmentByCodename(String codename) {
         return attachments.get(codename);
+    }
+
+    /**
+     * Get an array of attachment categories available for the weapon.
+     * Weapons may have unique categories e.g the "bolt" category is unique to the Crossbow.
+     *
+     * @return Attachment categories
+     */
+    public Attachment.CATEGORY[] getAttachmentCategories() {
+        return attachments
+                .values()
+                .stream()
+                .map(Attachment::getCategory)
+                .distinct()
+                .toArray(Attachment.CATEGORY[]::new);
+    }
+
+    /**
+     * Get an array of available attachments for the given attachment category
+     *
+     * @param category Attachment category
+     * @return Attachments by category
+     */
+    public Attachment[] getAttachmentsByCategory(Attachment.CATEGORY category) {
+        return attachments
+                .values()
+                .stream()
+                .filter(a -> a.getCategory() == category)
+                .toArray(Attachment[]::new);
+    }
+
+    /**
+     * Get an array of all available attachments for the weapon
+     *
+     * @return All available weapon attachments
+     */
+    public Attachment[] getAttachments() {
+        return attachments.values().toArray(new Attachment[0]);
     }
 
     /**

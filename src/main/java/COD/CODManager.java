@@ -308,6 +308,20 @@ public class CODManager {
     }
 
     /**
+     * Get an array of perks by colour category
+     *
+     * @param colour Colour category
+     * @return Array of perks of given colour
+     */
+    public Perk[] getPerksByColour(Perk.CATEGORY colour) {
+        return perks
+                .values()
+                .stream()
+                .filter(p -> p.getCategory() == colour)
+                .toArray(Perk[]::new);
+    }
+
+    /**
      * Get a weapon by its codename
      *
      * @param codename        Weapon codename
