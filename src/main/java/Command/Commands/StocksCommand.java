@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class StocksCommand extends DiscordCommand {
     private final String BASE_URL = "https://finnhub.io/api/v1/", THUMBNAIL = "https://i.imgur.com/HaSlhp2.png";
-    private final HashMap<String, Company> companies;
+    private HashMap<String, Company> companies;
 
     public StocksCommand() {
         super("$[symbol/search term]", "Check out some stocks!");
@@ -38,11 +38,14 @@ public class StocksCommand extends DiscordCommand {
      */
     private HashMap<String, Company> parseCompanies() {
         HashMap<String, Company> companies = new HashMap<>();
-        JSONArray data = new JSONArray(
-                new NetworkRequest(BASE_URL + "stock/symbol/?exchange=US&token=" + Secret.FINNHUB_KEY, false)
-                        .get()
-                        .body
-        );
+        String json = new NetworkRequest(
+                BASE_URL + "stock/symbol/?exchange=US&token=" + Secret.FINNHUB_KEY,
+                false
+        ).get().body;
+        if(json == null) {
+            return null;
+        }
+        JSONArray data = new JSONArray(json);
         for(int i = 0; i < data.length(); i++) {
             JSONObject companyData = data.getJSONObject(i);
             String symbol = companyData.getString("displaySymbol");
@@ -59,6 +62,9 @@ public class StocksCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
+        if(companies == null) {
+            companies = parseCompanies();
+        }
         String query = context.getMessageContent().replace("$", "").trim();
         MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
