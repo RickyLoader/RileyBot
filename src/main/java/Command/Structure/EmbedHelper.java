@@ -5,7 +5,9 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.awt.*;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +52,20 @@ public class EmbedHelper {
             languages.put(lang.getString("iso_639_1"), lang.getString("english_name"));
         }
         return languages;
+    }
+
+    /**
+     * Get a random colour
+     *
+     * @return Random colour
+     */
+    public static Color getRandomColour() {
+        Random rand = new Random();
+        return new Color(
+                rand.nextFloat(),
+                rand.nextFloat(),
+                rand.nextFloat()
+        );
     }
 
     /**

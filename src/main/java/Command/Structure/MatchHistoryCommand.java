@@ -281,7 +281,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         Section[] sections = mapFrequency
                 .keySet()
                 .stream()
-                .map(m -> new Section(m.getName(), mapFrequency.get(m), getRandomColour()))
+                .map(m -> new Section(m.getName(), mapFrequency.get(m), EmbedHelper.getRandomColour()))
                 .toArray(Section[]::new);
         sendBreakdownEmbed(sections, matchHistory, "Map", channel);
     }
@@ -307,7 +307,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         Section[] sections = modeFrequency
                 .keySet()
                 .stream()
-                .map(m -> new Section(m.getName(), modeFrequency.get(m), getRandomColour()))
+                .map(m -> new Section(m.getName(), modeFrequency.get(m), EmbedHelper.getRandomColour()))
                 .toArray(Section[]::new);
         sendBreakdownEmbed(sections, matchHistory, "Mode", channel);
     }
@@ -330,20 +330,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
         channel.sendMessage(embed).
                 addFile(ImageLoadingMessage.imageToByteArray(pieChart.getFullImage()), "image.png")
                 .queue();
-    }
-
-    /**
-     * Get a random colour
-     *
-     * @return Random colour
-     */
-    private Color getRandomColour() {
-        Random rand = new Random();
-        return new Color(
-                rand.nextFloat(),
-                rand.nextFloat(),
-                rand.nextFloat()
-        );
     }
 
     /**
