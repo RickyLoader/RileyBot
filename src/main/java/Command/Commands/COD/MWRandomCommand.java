@@ -4,15 +4,16 @@ import COD.Assets.Attachment;
 import COD.Assets.Perk;
 import COD.Assets.TacticalWeapon;
 import COD.Assets.Weapon;
+import COD.LoadoutAnalysis;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.ImageLoadingMessage;
-import Command.Structure.MatchHistoryCommand;
+import Command.Structure.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.json.JSONArray;
 
-import java.awt.image.BufferedImage;
 import java.util.*;
 
 import static Bot.DiscordCommandManager.mwAssetManager;
@@ -21,19 +22,95 @@ import static Bot.DiscordCommandManager.mwAssetManager;
  * Get a random MW loadout
  */
 public class MWRandomCommand extends DiscordCommand {
+    private final ArrayList<String> words;
+
     public MWRandomCommand() {
         super("mwrandom", "Generate a random Modern Warfare loadout!");
+        this.words = readWords();
     }
 
     @Override
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
+        Member member = context.getMember();
         channel.sendTyping().queue();
-        BufferedImage image = MatchHistoryCommand.loadoutImageManager.buildLoadoutImage(
-                generateRandomLoadout(),
-                "Random Loadout -  " + context.getMember().getEffectiveName()
+
+        String loadoutName = generateLoadoutName();
+        Loadout loadout = generateRandomLoadout();
+        byte[] loadoutImage = buildLoadoutImage(loadout, loadoutName, member);
+        String imageName = System.currentTimeMillis() + ".png";
+        channel.sendMessage(
+                buildLoadoutEmbed(member, loadout, imageName)
+        ).addFile(loadoutImage, imageName).queue();
+    }
+
+    /**
+     * Read the list of words to be used for loadout name generation from the JSON
+     * file
+     *
+     * @return List of words
+     */
+    private ArrayList<String> readWords() {
+        JSONArray wordList = readJSONFile("/COD/MW/Data/loadout_names.json").getJSONArray("words");
+        ArrayList<String> words = new ArrayList<>();
+        for(int i = 0; i < wordList.length(); i++) {
+            words.add(wordList.getString(i));
+        }
+        return words;
+    }
+
+    /**
+     * Generate a random loadout name from the list of words
+     *
+     * @return Random loadout name
+     */
+    private String generateLoadoutName() {
+        return "The " + getRandomWord() + " " + getRandomWord();
+    }
+
+    /**
+     * Get a random word from the list of words
+     *
+     * @return Random word
+     */
+    private String getRandomWord() {
+        return words.get(new Random().nextInt(words.size()));
+    }
+
+    /**
+     * Build an image displaying the given loadout
+     *
+     * @param loadout     Loadout to build image for
+     * @param loadoutName Name for loadout
+     * @param member      Member who requested loadout (for loadout title)
+     * @return Image displaying loadout
+     */
+    private byte[] buildLoadoutImage(Loadout loadout, String loadoutName, Member member) {
+        return ImageLoadingMessage.imageToByteArray(
+                MatchHistoryCommand.loadoutImageManager.buildLoadoutImage(
+                        loadout,
+                        loadoutName + " | " + member.getEffectiveName()
+                )
         );
-        channel.sendFile(ImageLoadingMessage.imageToByteArray(image), "loadout.png").queue();
+    }
+
+    /**
+     * Build an embed displaying the randomly generated loadout
+     *
+     * @param member    Member who requested loadout
+     * @param loadout   Randomly generated loadout
+     * @param imageName File image name (for attaching)
+     * @return Message embed displaying random loadout
+     */
+    private MessageEmbed buildLoadoutEmbed(Member member, Loadout loadout, String imageName) {
+        return new EmbedBuilder()
+                .setTitle("MW Random Loadout | " + member.getEffectiveName())
+                .setDescription(member.getAsMention() + " " + new LoadoutAnalysis(loadout).getRandomAnalysis())
+                .setThumbnail("https://i.imgur.com/x9ziS9u.png")
+                .setColor(EmbedHelper.getRandomColour())
+                .setImage("attachment://" + imageName)
+                .setFooter("Try: " + getTrigger(), "https://i.imgur.com/rNkulfS.png")
+                .build();
     }
 
     /**
@@ -98,7 +175,7 @@ public class MWRandomCommand extends DiscordCommand {
         int toEquip = rand.nextInt(5) + 1;
         HashMap<Attachment.CATEGORY, Attachment> equipped = new HashMap<>();
 
-        while(equipped.size() < toEquip) {
+        while(equipped.size() < toEquip && !availableCategories.isEmpty()) {
             Attachment.CATEGORY category = availableCategories.get(rand.nextInt(availableCategories.size()));
             Attachment[] categoryAttachments = weapon.getAttachmentsByCategory(category);
             Attachment attachment = categoryAttachments[rand.nextInt(categoryAttachments.length)];
