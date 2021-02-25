@@ -22256,6 +22256,19 @@
             "real_name": "Sleight of Hand",
             "category": "gunperk"
           },
+          "melee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Muzzle attachment that enables 1 hit melee kills",
+            "real_name": "Breacher Device",
+            "category": "Muzzle"
+          },
           "gripvertpro": {
             "stats": {
               "damage": 0,
