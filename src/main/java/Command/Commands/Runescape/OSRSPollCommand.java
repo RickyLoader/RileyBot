@@ -44,7 +44,7 @@ public class OSRSPollCommand extends DiscordCommand {
                     new PollSearchResultsMessage(
                             results,
                             message,
-                            "Try: " + getTrigger() + " for help",
+                            "Try: " + getHelpName(),
                             context
                     ).showMessage();
                     return;
@@ -61,7 +61,7 @@ public class OSRSPollCommand extends DiscordCommand {
             ).queue();
             return;
         }
-        new PollMessage(context, poll, "Try: " + getHelpName() + " for help").showMessage();
+        new PollMessage(context, poll, "Try: " + getHelpName()).showMessage();
     }
 
     @Override
