@@ -116,6 +116,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             context.getJDA().addEventListener(getMatchEmoteListener());
         }
         MessageChannel channel = context.getMessageChannel();
+        channel.sendTyping().queue();
         if(name.equals("missing")) {
             ArrayList<MissingWeaponAttachments> missing = MissingWeaponAttachments.getMissingAttachments();
             if(missing.isEmpty()) {
@@ -135,7 +136,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
             showWobblyLeaderboard(context);
             return;
         }
-        channel.sendTyping().queue();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
         if(matchHistory == null) {
             return;
@@ -212,7 +212,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 leaderboard,
                 getEmbedThumbnail(),
                 codManager.getGame().name().toUpperCase() + " Wobbly Leaderboard",
-                "Use **" + getTrigger() + " wobblies [rank]** to view more detail.\n\n"
+                "Use **" + getTrigger() + " wobblies [rank]** to view more details.\n\n"
                         + "Here are the " + leaderboard.size() + " wobbly scores:",
                 footer,
                 new String[]{"Rank", "Name", "Wobblies"},
