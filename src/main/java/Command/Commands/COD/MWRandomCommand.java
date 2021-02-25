@@ -107,7 +107,7 @@ public class MWRandomCommand extends DiscordCommand {
                 .setTitle("MW Random Loadout | " + member.getEffectiveName())
                 .setDescription(member.getAsMention() + " " + new LoadoutAnalysis(loadout).getRandomAnalysis())
                 .setThumbnail("https://i.imgur.com/x9ziS9u.png")
-                .setColor(EmbedHelper.getRandomColour())
+                .setColor(EmbedHelper.FIRE_ORANGE)
                 .setImage("attachment://" + imageName)
                 .setFooter("Try: " + getTrigger(), "https://i.imgur.com/rNkulfS.png")
                 .build();

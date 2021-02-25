@@ -25,7 +25,8 @@ public class EmbedHelper {
             RUNESCAPE_YELLOW = 16747520,
             RUNESCAPE_ORANGE = 13937190,
             RUNESCAPE_RED = 11672635,
-            RUNESCAPE_BLUE = 6206918;
+            RUNESCAPE_BLUE = 6206918,
+            FIRE_ORANGE = 16544773;
 
     public static final String
             CLOCK_GIF = "https://i.imgur.com/v2u22T6.gif",
