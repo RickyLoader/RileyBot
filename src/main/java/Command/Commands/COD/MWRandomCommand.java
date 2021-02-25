@@ -23,10 +23,14 @@ import static Bot.DiscordCommandManager.mwAssetManager;
  */
 public class MWRandomCommand extends DiscordCommand {
     private final ArrayList<String> words;
+    private final HashSet<String> excludedWeaponIds;
 
     public MWRandomCommand() {
         super("mwrandom", "Generate a random Modern Warfare loadout!");
         this.words = readWords();
+        this.excludedWeaponIds = new HashSet<>(
+                Arrays.asList("iw8_fists", "iw8_la_mike32", "iw8_sm_secho", "iw8_pi_mike", "iw8_lm_slima")
+        );
     }
 
     @Override
@@ -206,7 +210,7 @@ public class MWRandomCommand extends DiscordCommand {
         Random rand = new Random();
         Weapon.CATEGORY category = typeCategories[rand.nextInt(typeCategories.length)];
         Weapon[] categoryWeapons = Arrays.stream(mwAssetManager.getWeaponsByCategory(category))
-                .filter(weapon -> !weapon.equals(exclude) && !weapon.getName().equalsIgnoreCase("fists"))
+                .filter(weapon -> !weapon.equals(exclude) && !excludedWeaponIds.contains(weapon.getCodename()))
                 .toArray(Weapon[]::new);
         return categoryWeapons[rand.nextInt(categoryWeapons.length)];
     }
