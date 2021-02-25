@@ -344,7 +344,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 context,
                 missing,
                 getEmbedThumbnail(),
-                total + " Missing attachments",
+                total + " Missing attachments (" + missing.size() + " Weapons)",
                 null,
                 "Type: " + getTrigger() + " for help",
                 1,
