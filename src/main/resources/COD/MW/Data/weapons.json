@@ -29372,8 +29372,8 @@
               "range": 4,
               "control": 4
             },
-            "description": "Heavy duty steel barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots, but hinders mobility.",
-            "real_name": "8.7 Steel",
+            "description": "Heavy duty steel barrel increases muzzle velocity and extends range. Additional weight stabilizes shots, but hinders mobility.",
+            "real_name": "8.7\" Steel",
             "category": "frontpiece"
           },
           "reflexmini2": {
@@ -29464,7 +29464,7 @@
               "control": 0
             },
             "description": "Dimpled large bore barrel reduces weight for improved handling at the cost of muzzle velocity.",
-            "real_name": "8.7 Aluminum",
+            "real_name": "8.7\" Aluminum",
             "category": "frontpiece"
           },
           "reflexmini": {
@@ -29490,7 +29490,7 @@
               "control": 0
             },
             "description": "Slight length increase and polygonal rifling improve muzzle velocity and range with little additional weight.",
-            "real_name": "8.7 Polygonal",
+            "real_name": "8.7\" Polygonal",
             "category": "frontpiece"
           },
           "holo": {
