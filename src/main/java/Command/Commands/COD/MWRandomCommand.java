@@ -29,7 +29,17 @@ public class MWRandomCommand extends DiscordCommand {
         super("mwrandom", "Generate a random Modern Warfare loadout!");
         this.words = readWords();
         this.excludedWeaponIds = new HashSet<>(
-                Arrays.asList("iw8_fists", "iw8_la_mike32", "iw8_sm_secho", "iw8_pi_mike", "iw8_lm_slima")
+                Arrays.asList(
+                        "iw8_fists", // Fists - Unequippable
+                        "iw8_la_mike32", // MGL-32 Grenade Launcher - Only equippable in spec ops
+                        "iw8_sm_secho", // Unreleased Scorpion Evo
+                        "iw8_pi_mike", // Unreleased Makarov pistol
+                        "iw8_lm_slima", // Unreleased LMG
+                        // Purchasable Throwing knife variants
+                        "equip_throwing_knife_drill",
+                        "equip_throwing_knife_fire",
+                        "equip_throwing_knife_electric"
+                )
         );
     }
 

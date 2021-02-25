@@ -1928,8 +1928,20 @@
         "real_name": "Proximity Mine"
       },
       "equip_throwing_knife": {
-        "image_url": "https://i.imgur.com/ITtWx7d.png",
+        "image_url": "https://i.imgur.com/psabqrv.png",
         "real_name": "Throwing Knife"
+      },
+      "equip_throwing_knife_drill": {
+        "image_url": "https://i.imgur.com/5qa8pfC.png",
+        "real_name": "Phlebotomist"
+      },
+      "equip_throwing_knife_electric": {
+        "image_url": "https://i.imgur.com/iwnb7ha.png",
+        "real_name": "EHV Throwing Knife"
+      },
+      "equip_throwing_knife_fire": {
+        "image_url": "https://i.imgur.com/pH0xW67.png",
+        "real_name": "Flaming Throwing Knife"
       },
       "equip_molotov": {
         "image_url": "https://i.imgur.com/t2xhrld.png",
