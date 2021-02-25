@@ -734,7 +734,7 @@
               "range": 0,
               "control": -2
             },
-            "description": "High-powered ^28x^7 thermal sniper scope uses heat signatures to highlight targets and provides visibility in all lighting conditions. ^1Not compatible with Night Vision Goggles.^7 ^1Optic glint visible to enemies.^7",
+            "description": "High-powered 8x thermal sniper scope uses heat signatures to highlight targets and provides visibility in all lighting conditions. ^1Not compatible with Night Vision Goggles.^7 ^1Optic glint visible to enemies.^7",
             "real_name": "Thermal Sniper Scope",
             "category": "optic"
           },
@@ -1170,7 +1170,7 @@
               "range": 4,
               "control": -3
             },
-            "description": "Precision optic with ^23.25x^7 magnification for long range target acquisition.",
+            "description": "Precision optic with 3.25x magnification for long range target acquisition.",
             "real_name": "Scout Combat Optic",
             "category": "optic"
           },
@@ -1183,7 +1183,7 @@
               "range": 0,
               "control": -2
             },
-            "description": "High-powered ^28x^7 thermal sniper scope uses heat signatures to highlight targets and provides visibility in all lighting conditions. ^1Not compatible with Night Vision Goggles.^7 ^1Optic glint visible to enemies.^7",
+            "description": "High-powered 8x thermal sniper scope uses heat signatures to highlight targets and provides visibility in all lighting conditions. Not compatible with Night Vision Goggles. Optic glint visible to enemies.",
             "real_name": "Thermal Sniper Scope",
             "category": "optic"
           },
@@ -1937,6 +1937,10 @@
       }
     },
     "weapon_lmg": {
+      "iw8_lm_slima": {
+        "image_url": "https://i.imgur.com/dVEjdQY.png",
+        "real_name": "Raal MG"
+      },
       "iw8_lm_kilo121": {
         "attachments": {
           "fastreload": {
@@ -5531,6 +5535,72 @@
       },
       "iw8_lm_sierrax": {
         "attachments": {
+          "stockcust": {
+            "real_name": "XRK ChainSAW",
+            "blocksCategory": "undermount",
+            "category": "backpiece",
+            "description": "Combination handled grips allow for highly maneuverable assaults. For operators who care less about where their shot lands and more about getting rounds down range fast.",
+            "stats": {
+              "accuracy": -5,
+              "damage": 0,
+              "range": -2,
+              "firerate": 0,
+              "mobility": 6,
+              "control": 3
+            }
+          },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 8,
+              "control": -9
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "barcust2": {
+            "real_name": "XRK LongShot Adverse",
+            "category": "frontpiece",
+            "description": "Longest available barrel with Adverse fire mode tuning.  Improved range and an insane ^3rate of fire^7 with a smaller increase to recoil.",
+            "stats": {
+              "accuracy": -3,
+              "damage": 0,
+              "range": 1,
+              "firerate": 14,
+              "mobility": -3,
+              "control": 4
+            }
+          },
+          "barshort": {
+            "real_name": "FTAC VC-8 Harrier",
+            "category": "frontpiece",
+            "description": "Ultra Light Forge Tac barrel with a milled aluminium shroud and large bore reduces weight for improved handling at the cost of muzzle velocity.",
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": -3,
+              "firerate": 0,
+              "mobility": 3,
+              "control": 0
+            }
+          },
           "fastreload": {
             "stats": {
               "damage": 0,
@@ -6884,9 +6954,17 @@
       "iw8_la_kgolf": {
         "image_url": "https://i.imgur.com/7QArcl1.png",
         "real_name": "Strela-P"
+      },
+      "iw8_la_mike32": {
+        "image_url": "https://i.imgur.com/OSd8gTR.png",
+        "real_name": "MGL-32"
       }
     },
     "weapon_pistol": {
+      "iw8_pi_mike": {
+        "image_url": "https://i.imgur.com/EIpoPjq.png",
+        "real_name": "Sykov"
+      },
       "iw8_pi_cpapa": {
         "attachments": {
           "fastreload": {
@@ -6901,6 +6979,19 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "stockh": {
+            "real_name": "Lockwood .357 Custom Stock",
+            "category": "reargrip",
+            "description": "Solid wood stock provides a superior and stable sight picture while aiming down the sights.",
+            "stats": {
+              "accuracy": 6,
+              "damage": 0,
+              "range": 2,
+              "firerate": 0,
+              "mobility": -6,
+              "control": 5
+            }
           },
           "akimbo": {
             "stats": {
@@ -7396,6 +7487,19 @@
             "description": "Russian combat optic with ^23.0x^7 magnification provides reliable target acquisition.",
             "real_name": "VLK 3.0x Optic",
             "category": "optic"
+          },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -4,
+              "firerate": 0,
+              "accuracy": 6,
+              "range": 10,
+              "control": -6
+            },
+            "description": "High power 4.0x scope converts this pistol into an accurate long range weapon. Optic glint visible to enemies",
+            "real_name": "Lockwood Pistol Scope",
+            "category": "optic"
           }
         },
         "image_url": "https://i.imgur.com/InYDfKD.png",
@@ -7416,6 +7520,32 @@
             "real_name": "Akimbo",
             "category": "gunperk",
             "blocksCategory": "backpiece"
+          },
+          "barcust": {
+            "real_name": "Mk3 Burst Mod",
+            "category": "frontpiece",
+            "description": "Custom pistol mod features a durable stainless steel barrel, Mk3 series slide, and advanced trigger group that allows a blazing fast 3 round burst.",
+            "stats": {
+              "accuracy": -3,
+              "damage": 2,
+              "range": 0,
+              "firerate": 6,
+              "mobility": -1,
+              "control": -1
+            }
+          },
+          "scope": {
+            "real_name": "XRK 4.0x Pistol Scope",
+            "category": "optic",
+            "description": "High power ^24.0x^7 scope converts this pistol into an accurate long range weapon. ^1Optic glint visible to enemies.^7",
+            "stats": {
+              "accuracy": 6,
+              "damage": 0,
+              "range": 10,
+              "firerate": 0,
+              "mobility": -4,
+              "control": -6
+            }
           },
           "fastreload": {
             "stats": {
@@ -7483,17 +7613,17 @@
             "category": "gunperk"
           },
           "pistolgrip03": {
+            "real_name": "XRK Pro Grip",
+            "category": "reargrip",
+            "description": "Ergonomic pistol grip keeps gun tight in hand.  Exceptional recoil control at the cost of aiming stability.",
             "stats": {
-              "damage": 0,
-              "mobility": 0,
-              "firerate": 0,
               "accuracy": 4,
+              "damage": 0,
               "range": 0,
+              "firerate": 0,
+              "mobility": 0,
               "control": -2
-            },
-            "description": "Rubberized grip keeps gun tight in hand.  Less steady, but helps control recoil.",
-            "real_name": "Rubberized Grip Tape",
-            "category": "reargrip"
+            }
           },
           "gunperk_xp": {
             "stats": {
@@ -7522,18 +7652,32 @@
             "blocksCategory": "extra",
             "category": "backpiece"
           },
-          "pistolgrip02": {
+          "stockcust": {
+            "real_name": "FTAC SATUS CS-X",
+            "category": "backpiece",
+            "description": "Tactical stock and foregrip combo provide an extremely stable firing platform.",
+            "blocksCategory": "extra",
             "stats": {
+              "accuracy": 6,
               "damage": 0,
-              "mobility": 3,
+              "range": 3,
               "firerate": 0,
-              "accuracy": 0,
-              "range": 0,
+              "mobility": -3,
               "control": -2
-            },
-            "description": "Stippled pistol grip tape maintains control when performing high-speed maneuvers. Less stable but very agile.",
-            "real_name": "Stippled Grip Tape",
-            "category": "reargrip"
+            }
+          },
+          "pistolgrip02": {
+            "real_name": "XRK Speed Grip",
+            "category": "reargrip",
+            "description": "Tactical pistol grip maintains control when performing high-speed maneuvers. Less stable but very agile.",
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": 4,
+              "control": -2
+            }
           },
           "silencer": {
             "stats": {
@@ -7557,7 +7701,7 @@
               "range": 0,
               "control": -3
             },
-            "description": "High capacity magazines hold ^227 rounds^7 of 9mm Parabellum ammunition with a moderate weight increase.",
+            "description": "High capacity magazines hold 27 rounds of 9mm Parabellum ammunition with a moderate weight increase.",
             "real_name": "27 Round Mags",
             "category": "magazine"
           },
@@ -7896,7 +8040,7 @@
               "range": 0,
               "control": -2
             },
-            "description": "Extended magazines hold ^221 rounds^7 of 9mm Parabellum ammunition with a slight weight increase.",
+            "description": "Extended magazines hold 21 rounds of 9mm Parabellum ammunition with a slight weight increase.",
             "real_name": "21 Round Mags",
             "category": "magazine"
           },
@@ -8431,6 +8575,19 @@
             "description": "Ability to hold a weapon in each hand",
             "real_name": "Akimbo",
             "category": "gunperk"
+          },
+          "stockcust": {
+            "real_name": "X16 Stock",
+            "category": "reargrip",
+            "description": "Stock provides a stable sight picture and helps control recoil while aiming down the sights.",
+            "stats": {
+              "accuracy": 5,
+              "damage": 0,
+              "range": 2,
+              "firerate": 0,
+              "mobility": -4,
+              "control": 3
+            }
           },
           "fastreload": {
             "stats": {
@@ -9419,6 +9576,19 @@
       },
       "iw8_pi_papa320": {
         "attachments": {
+          "barcust": {
+            "real_name": "XRK V Extended",
+            "category": "frontpiece",
+            "description": "Extended slide slightly increases muzzle velocity and improves range.  Lightweight construction adds only a minor increase to weight.",
+            "stats": {
+              "accuracy": 1,
+              "damage": 0,
+              "range": 4,
+              "firerate": 0,
+              "mobility": -2,
+              "control": 0
+            }
+          },
           "fastreload": {
             "stats": {
               "damage": 0,
@@ -9545,7 +9715,7 @@
               "range": 0,
               "control": -3
             },
-            "description": "High capacity magazines hold ^232 rounds^7 of 9mm Parabellum ammunition with a moderate weight increase.",
+            "description": "High capacity magazines hold 32 rounds of 9mm Parabellum ammunition with a moderate weight increase.",
             "real_name": "32 Round Mags",
             "category": "magazine"
           },
@@ -9818,7 +9988,7 @@
               "range": 0,
               "control": -2
             },
-            "description": "Extended magazines hold ^221 rounds^7 of 9mm Parabellum ammunition with a slight weight increase.",
+            "description": "Extended magazines hold 21 rounds of 9mm Parabellum ammunition with a slight weight increase.",
             "real_name": "21 Round Mags",
             "category": "magazine"
           },
@@ -10642,6 +10812,58 @@
             "real_name": "Sleight of Hand",
             "category": "gunperk"
           },
+          "calcust": {
+            "real_name": ".458 SOCOM 10-Round Mags",
+            "category": "magazine",
+            "description": "Conversion kit to use high caliber .458 SOCOM ammunition for increased stopping power.  Slower cyclic rate helps control recoil. ",
+            "stats": {
+              "accuracy": 4,
+              "damage": 5,
+              "range": 3,
+              "firerate": -3,
+              "mobility": 0,
+              "control": -2
+            }
+          },
+          "melee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Muzzle attachment that enables 1 hit melee kills",
+            "real_name": "Breacher Device",
+            "category": "Muzzle"
+          },
+          "gl": {
+            "real_name": "M203 40mm High-explosive",
+            "category": "undermount",
+            "description": "Underbarrel mounted grenade launcher loaded with highly ^2explosive^7 rounds.",
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": -2,
+              "control": -3
+            }
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
           "ubshtgn": {
             "stats": {
               "damage": 0,
@@ -11224,7 +11446,7 @@
               "range": -3,
               "control": 3
             },
-            "description": "Conversion kit to use ^39mm parabellum^7 ammunition.  Cycles at a much higher rate with less recoil. ",
+            "description": "Conversion kit to use 9mm parabellum ammunition.  Cycles at a much higher rate with less recoil. ",
             "real_name": "9mm Para 32-Round Mags",
             "category": "magazine"
           },
@@ -13144,6 +13366,32 @@
             "real_name": "12-Gauge Deputy",
             "category": "undermount"
           },
+          "melee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Muzzle attachment that enables 1 hit melee kills",
+            "real_name": "Breacher Device",
+            "category": "Muzzle"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
           "fastreload": {
             "stats": {
               "damage": 0,
@@ -13970,6 +14218,32 @@
       },
       "iw8_ar_akilo47": {
         "attachments": {
+          "scope": {
+            "stats": {
+              "accuracy": 6,
+              "damage": 0,
+              "range": 10,
+              "firerate": 0,
+              "mobility": -4,
+              "control": -6
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
+          },
+          "gripcust": {
+            "stats": {
+              "accuracy": 5,
+              "damage": 0,
+              "range": 3,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 3
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
           "ubshtgn": {
             "stats": {
               "damage": 0,
@@ -14700,17 +14974,30 @@
           },
           "barcustnoguard": {
             "stats": {
-              "damage": 0,
-              "mobility": -5,
-              "firerate": 0,
               "accuracy": 5,
+              "damage": 0,
               "range": 6,
+              "firerate": 0,
+              "mobility": -5,
               "control": 4
             },
             "description": "23.0 barrel with a built in solid wood grip is the most stable and accurate barrel available. Substantial weight slows movement and handling.",
             "real_name": "23.0 Romanian",
             "category": "frontpiece",
             "blocksCategory": "undermount"
+          },
+          "barlong": {
+            "stats": {
+              "accuracy": 3,
+              "damage": 0,
+              "range": 5,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 4
+            },
+            "description": "Heavy duty 23.0\" barrel increases muzzle velocity and extends range. Additional weight stabilizes shots but hinders mobility",
+            "real_name": "23.0\" RPK Barrel",
+            "category": "frontpiece"
           },
           "barcust": {
             "stats": {
@@ -14795,6 +15082,19 @@
             "description": "Single fire underbarrel shotgun provides reliable backup for close quarters encounters.",
             "real_name": "12-Gauge Deputy",
             "category": "undermount"
+          },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 8,
+              "control": -9
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
           },
           "fastreload": {
             "stats": {
@@ -15608,6 +15908,45 @@
             "real_name": "12-Gauge Deputy",
             "category": "undermount"
           },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 8,
+              "control": -9
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
+          },
+          "gripcust": {
+            "stats": {
+              "accuracy": 5,
+              "damage": 0,
+              "range": 3,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 3
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "barmid": {
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": -3,
+              "firerate": 0,
+              "mobility": 3,
+              "control": 0
+            },
+            "description": "Lightweight shroud and large bore barrel reduce weight for improved handling at the cost of muzzle velocity. ",
+            "real_name": "FSS 11.8 Squall",
+            "category": "frontpiece"
+          },
           "fastreload": {
             "stats": {
               "damage": 0,
@@ -16076,6 +16415,32 @@
             "real_name": "FTAC Hunter",
             "category": "backpiece"
           },
+          "stockfold": {
+            "stats": {
+              "accuracy": -2,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": 6,
+              "control": -1
+            },
+            "description": "Ultralight stock speeds up weapon handling and movement at the expense of aiming stability.",
+            "real_name": "CR-56 EXO",
+            "category": "backpiece"
+          },
+          "stockcust": {
+            "stats": {
+              "accuracy": 4,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 4
+            },
+            "description": "The most stable stock available, provides exceptional control while aiming at the cost of mobility.",
+            "real_name": "XRK Gatekeeper",
+            "category": "backpiece"
+          },
           "flashhider": {
             "stats": {
               "damage": 0,
@@ -16406,6 +16771,19 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 8,
+              "control": -9
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
           },
           "ubshtgn": {
             "stats": {
@@ -16795,6 +17173,33 @@
             },
             "description": "Ultra short 5.3 barrel with a built in foregrip allows first class agility and maneuverability without sacrificing recoil control.",
             "real_name": "ZLR Drifter A-08",
+            "blocksCategory": "undermount",
+            "category": "frontpiece"
+          },
+          "barmid": {
+            "stats": {
+              "accuracy": 1,
+              "damage": 0,
+              "range": 4,
+              "firerate": 0,
+              "mobility": -2,
+              "control": 0
+            },
+            "description": "Ultra short 5.3 barrel with a built in foregrip allows first class agility and maneuverability without sacrificing recoil control.",
+            "real_name": "XRK CZEN mk2",
+            "category": "frontpiece"
+          },
+          "barcust": {
+            "stats": {
+              "accuracy": 4,
+              "damage": 0,
+              "range": 7,
+              "firerate": 0,
+              "mobility": -6,
+              "control": 5
+            },
+            "description": "Partially shrouded 26.4 barrel from FSS provides the ultimate in range and accuracy.  This heavy weight barrel is ideal for improving long range marksmanship.",
+            "real_name": "Tempus 26.4\" Archangel",
             "blocksCategory": "undermount",
             "category": "frontpiece"
           },
@@ -17986,6 +18391,19 @@
             "description": "The ultimate run and gun modification when agility is more important than precision.  Removing the stock greatly increases movement.",
             "real_name": "No Stock",
             "category": "backpiece"
+          },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 8,
+              "control": -9
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
           }
         },
         "image_url": "https://i.imgur.com/Y8xWxVn.png",
@@ -18817,6 +19235,32 @@
             "description": "Single fire underbarrel ^2shotgun^7 provides reliable backup for close quarters encounters.",
             "real_name": "12-Gauge Deputy",
             "category": "undermount"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "scope": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 8,
+              "control": -9
+            },
+            "description": "High power 4.4x scope for longer range encounters. Optic glint visible to enemies.",
+            "real_name": "Sniper Scope",
+            "category": "optic"
           },
           "fastreload": {
             "stats": {
@@ -21117,6 +21561,32 @@
         "real_name": "VLK Rogue"
       },
       "iw8_sh_charlie725": {
+        "gripcust": {
+          "stats": {
+            "accuracy": 5,
+            "damage": 0,
+            "range": 3,
+            "firerate": 0,
+            "mobility": -3,
+            "control": 3
+          },
+          "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+          "real_name": "Ranger Foregrip",
+          "category": "undermount"
+        },
+        "melee": {
+          "stats": {
+            "accuracy": 0,
+            "damage": 0,
+            "range": 0,
+            "firerate": 0,
+            "mobility": -2,
+            "control": -2
+          },
+          "description": "Muzzle attachment that enables 1 hit melee kills",
+          "real_name": "Breacher Device",
+          "category": "Muzzle"
+        },
         "attachments": {
           "fastreload": {
             "stats": {
@@ -21773,6 +22243,71 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "gripvertpro": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": 1
+            },
+            "description": "No frills foregrip helps control vertical recoil for faster follow-up shots.",
+            "real_name": "Operator Foregrip",
+            "category": "undermount"
+          },
+          "gripcust": {
+            "stats": {
+              "accuracy": 5,
+              "damage": 0,
+              "range": 3,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 3
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "stockh": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Tactical comb wrap for rapid target aquisition.",
+            "real_name": "ZLR Tsunami",
+            "category": "backpiece"
+          },
+          "stocks": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Lead lined weighted wrap balances center mass for stability when aiming.",
+            "real_name": "FFS Power Wrap",
+            "category": "backpiece"
+          },
+          "stockl": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Custom hollowed out stock with a lightweight recoil pad that keeps the shooter agile when aiming down sights.",
+            "real_name": "JAK Rabbit Ultralight",
+            "category": "backpiece"
           },
           "fmj": {
             "stats": {
@@ -22995,6 +23530,59 @@
             "real_name": "XRK Truegrip Tactical",
             "category": "undermount"
           },
+          "xmags": {
+            "real_name": "Tube Extension",
+            "category": "magazine",
+            "description": "Tube extension carries an extra 2 rounds of 12 gauge with a very slight weight increase.",
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": -2,
+              "control": -2
+            }
+          },
+          "calcust2": {
+            "real_name": "Slug Rounds",
+            "category": "magazine",
+            "description": "437 gr hardcast slugs with a low muzzle velocity and tremendous stopping power.  Imprecise and hard hitting, accuracy can be improved with longer barrels and chokes.",
+            "stats": {
+              "accuracy": -6,
+              "damage": 3,
+              "range": 8,
+              "firerate": 0,
+              "mobility": 0,
+              "control": 0
+            }
+          },
+          "calcust": {
+            "real_name": "Dragon's Breath Rounds",
+            "category": "magazine",
+            "description": "12 Gauge incendiary ammunition engulfs targets in a wall of fire and sparks. 3000 °F magnesium shards torch enemies, dealing heavy damage over time while ignited. ",
+            "stats": {
+              "accuracy": 0,
+              "damage": 4,
+              "range": -3,
+              "firerate": 0,
+              "mobility": 0,
+              "control": 0
+            }
+          },
+          "calcustmags2": {
+            "real_name": "Dragon's Breath 6-R Mags",
+            "category": "magazine",
+            "description": "XRK Eagle's Claw receiver with 6-round magazines of 12 gauge incendiary ammunition for faster reloads. Not compatible with custom barrels.",
+            "blocksCategory": "frontpiece",
+            "stats": {
+              "accuracy": 2,
+              "damage": 3,
+              "range": -2,
+              "firerate": 0,
+              "mobility": -2,
+              "control": 4
+            }
+          },
           "fastreload": {
             "stats": {
               "damage": 0,
@@ -23600,6 +24188,32 @@
             "real_name": "Sleight of Hand",
             "category": "gunperk"
           },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "melee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Muzzle attachment that enables 1 hit melee kills",
+            "real_name": "Breacher Device",
+            "category": "Muzzle"
+          },
           "fmj": {
             "stats": {
               "damage": 5,
@@ -24192,6 +24806,10 @@
       }
     },
     "weapon_smg": {
+      "iw8_sm_secho": {
+        "image_url": "https://i.imgur.com/ejgoAKS.png",
+        "real_name": "CX-9"
+      },
       "iw8_sm_mpapa7": {
         "attachments": {
           "fastreload": {
@@ -24206,6 +24824,32 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "melee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Muzzle attachment that enables 1 hit melee kills",
+            "real_name": "Breacher Device",
+            "category": "Muzzle"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
           },
           "fmj": {
             "stats": {
@@ -24320,7 +24964,7 @@
               "range": 4,
               "control": -4
             },
-            "description": "^23.25x^7 scope with thermal imaging highlights targets and provides visibility in all lighting conditions. ^1Not compatible with Night Vision Goggles.^7",
+            "description": "3.25x scope with thermal imaging highlights targets and provides visibility in all lighting conditions. Not compatible with Night Vision Goggles.",
             "real_name": "Merc Thermal Optic",
             "category": "optic"
           },
@@ -24533,17 +25177,17 @@
             "category": "frontpiece"
           },
           "xmags": {
+            "real_name": "50 Round Mags",
+            "category": "magazine",
+            "description": "Extended magazines hold 50 rounds of 4.6×30mm ammunition with a slight weight increase.",
             "stats": {
-              "damage": 0,
-              "mobility": -4,
-              "firerate": 0,
               "accuracy": 0,
+              "damage": 0,
               "range": 0,
-              "control": -3
-            },
-            "description": "High capacity magazines hold ^260 rounds^7 of 4.6×30mm ammunition with a moderate weight increase.",
-            "real_name": "60 Round Mags",
-            "category": "magazine"
+              "firerate": 0,
+              "mobility": -2,
+              "control": -2
+            }
           },
           "reflexmini": {
             "stats": {
@@ -24663,17 +25307,17 @@
             "category": "muzzle"
           },
           "xmagslrg": {
-            "stats": {
-              "damage": 0,
-              "mobility": 0,
-              "firerate": 0,
-              "accuracy": 0,
-              "range": 0,
-              "control": 0
-            },
-            "description": "High capacity magazines hold 60 rounds of 4.6x30mm ammuninition with a moderate weight increase.",
             "real_name": "60 Round Mags",
-            "category": "magazine"
+            "category": "magazine",
+            "description": "High capacity magazines hold 60 rounds of 4.6×30mm ammunition with a moderate weight increase.",
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": -4,
+              "control": -3
+            }
           },
           "laser": {
             "stats": {
@@ -25224,7 +25868,7 @@
               "range": 0,
               "control": -2
             },
-            "description": "Extended magazines hold ^230 rounds^7 of 9mm Parabellum ammunition with a slight weight increase.",
+            "description": "Extended magazines hold 30 rounds of 9mm Parabellum ammunition with a slight weight increase.",
             "real_name": "30 Round Mags",
             "category": "magazine"
           },
@@ -25559,6 +26203,19 @@
             "real_name": "Sleight of Hand",
             "category": "gunperk"
           },
+          "calcust": {
+            "stats": {
+              "accuracy": -2,
+              "damage": 8,
+              "range": 10,
+              "firerate": -4,
+              "mobility": 0,
+              "control": -2
+            },
+            "description": "Conversion kit to use 30 round 5.56 NATO magazines for increased stopping power. Slightly lower cycle rate to help control recoil.",
+            "real_name": "5.56 NATO 30-Round Mags",
+            "category": "magazine"
+          },
           "fmj": {
             "stats": {
               "damage": 5,
@@ -25780,6 +26437,19 @@
             "real_name": "Thermal Hybrid",
             "category": "optic"
           },
+          "gripcust": {
+            "stats": {
+              "accuracy": 5,
+              "damage": 0,
+              "range": 3,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 3
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
           "gripvert": {
             "stats": {
               "damage": 0,
@@ -25869,6 +26539,32 @@
             },
             "description": "Dimpled aluminum alloy barrel extension extends range and muzzle velocity with minimal additional weight.",
             "real_name": "407mm Lightweight",
+            "category": "frontpiece"
+          },
+          "barlong": {
+            "stats": {
+              "accuracy": 4,
+              "damage": 0,
+              "range": 7,
+              "firerate": 0,
+              "mobility": -6,
+              "control": 5
+            },
+            "description": "Maximum barrel extension pushes this weapon's range to the extreme.  Heavy weight, smooth handling.",
+            "real_name": "622mm Long Barrel",
+            "category": "frontpiece"
+          },
+          "barmid": {
+            "stats": {
+              "accuracy": 2,
+              "damage": 0,
+              "range": 4,
+              "firerate": 0,
+              "mobility": -2,
+              "control": 2
+            },
+            "description": "Stainless steel barrel extension increases muzzle velocity and extends range. Additional weight stabilizes shots but slows handling.",
+            "real_name": "407mm Extended Barrel",
             "category": "frontpiece"
           },
           "xmags": {
@@ -26657,18 +27353,44 @@
             "real_name": "FSS 10.6 Pro",
             "category": "frontpiece"
           },
-          "gripvert": {
+          "barcust": {
+            "real_name": "FORGE TAC Retribution",
+            "category": "frontpiece",
+            "description": "Extended front shroud houses a 16 polygonal rifled barrel. Greatly increases muzzle velocity and extends range.  Additional weight stabilizes shots, but hinders mobility.",
             "stats": {
+              "accuracy": 4,
               "damage": 0,
-              "mobility": -2,
+              "range": 7,
               "firerate": 0,
+              "mobility": -6,
+              "control": 5
+            }
+          },
+          "gripcust": {
+            "real_name": "Stippled Grip Tape",
+            "category": "undermount",
+            "description": "Stippled foregrip improves vertical recoil and steadies aiming for improved long range combat. ",
+            "stats": {
               "accuracy": 5,
+              "damage": 0,
+              "range": 3,
+              "firerate": 0,
+              "mobility": -3,
+              "control": 3
+            }
+          },
+          "gripvert": {
+            "real_name": "Granulated Grip Tape",
+            "category": "undermount",
+            "description": "Smooth and granulated foregrip provides a relaxed and controlled grip for precision aiming.",
+            "stats": {
+              "accuracy": 1,
+              "damage": 0,
               "range": 1,
-              "control": 2
-            },
-            "description": "Extended foregrip reduces vertical recoil and provides stability from the hip for fast-paced guerrilla tactics.",
-            "real_name": "Merc Foregrip",
-            "category": "undermount"
+              "firerate": 0,
+              "mobility": -1,
+              "control": 6
+            }
           },
           "reflexmini2": {
             "stats": {
@@ -26819,6 +27541,32 @@
             "real_name": "Sleight of Hand",
             "category": "gunperk"
           },
+          "barmid": {
+            "real_name": "FSS Light",
+            "category": "frontpiece",
+            "description": "Lightweight shroud and large bore barrel reduce weight for improved handling at the cost of muzzle velocity. ",
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": -3,
+              "firerate": 0,
+              "mobility": 3,
+              "control": 0
+            }
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
           "fmj": {
             "stats": {
               "damage": 5,
@@ -26893,7 +27641,7 @@
               "range": -6,
               "control": 0
             },
-            "description": "Lightweight ^3aluminum suppressor^7 decreases muzzle velocity to subsonic speeds providing a smooth recoil, low sound signature, and no visible tracers.",
+            "description": "Lightweight aluminum suppressor decreases muzzle velocity to subsonic speeds providing a smooth recoil, low sound signature, and no visible tracers.",
             "real_name": "Monolithic Integral Suppressor",
             "category": "frontpiece",
             "blocksCategory": "muzzle"
@@ -27515,6 +28263,19 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
           },
           "fmj": {
             "stats": {
@@ -29466,6 +30227,19 @@
             "description": "The ultimate run and gun modification when agility is more important than precision.  Removing the stock greatly increases movement.",
             "real_name": "No Stock",
             "category": "backpiece"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
           }
         },
         "image_url": "https://i.imgur.com/BPNDCHe.png",
@@ -30222,6 +30996,19 @@
             "real_name": "Sleight of Hand",
             "category": "gunperk"
           },
+          "stockcust": {
+            "real_name": "Cartridge Sleeve",
+            "category": "backpiece",
+            "description": "Carry 6 additional rounds.  Extra weight slightly improves stability while aiming.",
+            "stats": {
+              "accuracy": 1,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": -1,
+              "control": 2
+            }
+          },
           "vzscope": {
             "stats": {
               "damage": 0,
@@ -30806,6 +31593,19 @@
             "description": "Russian combat optic with ^23.0x^7 magnification provides reliable target acquisition.",
             "real_name": "VLK 3.0x Optic",
             "category": "optic"
+          },
+          "scope": {
+            "real_name": "Sniper Scope",
+            "category": "optic",
+            "description": "High power 7x scope for long distance encounters. Optic glint visible to enemies.",
+            "stats": {
+              "accuracy": 6,
+              "damage": 0,
+              "range": 10,
+              "firerate": 0,
+              "mobility": -4,
+              "control": -6
+            }
           }
         },
         "image_url": "https://i.imgur.com/SKpUflH.png",
@@ -30943,14 +31743,40 @@
             "real_name": "FORGE TAC SpeedTrak",
             "category": "backpiece"
           },
+          "barshort": {
+            "stats": {
+              "accuracy": -2,
+              "damage": 0,
+              "range": -4,
+              "firerate": 0,
+              "mobility": 6,
+              "control": 2
+            },
+            "description": "Lightweight arms fire bolts at a slower velocity, but greatly improve agility and handling.",
+            "real_name": "XRK Quill 100 Lb",
+            "category": "frontpiece"
+          },
+          "barlong": {
+            "stats": {
+              "accuracy": 0,
+              "damage": 0,
+              "range": -4,
+              "firerate": 0,
+              "mobility": 5,
+              "control": 0
+            },
+            "description": "Carbon fiber arms improve handling with a slightly slower bolt velocity.",
+            "real_name": "XRK Carbon Elite",
+            "category": "frontpiece"
+          },
           "barmid": {
             "stats": {
+              "accuracy": 3,
               "damage": 0,
-              "mobility": 0,
+              "range": 5,
               "firerate": 0,
-              "accuracy": 0,
-              "range": 0,
-              "control": 0
+              "mobility": -3,
+              "control": -3
             },
             "description": "Heavyweight 200 Lb draw for maximum bolt velocity.",
             "real_name": "XRK Thunder 200 Lb",
@@ -31613,6 +32439,19 @@
             "real_name": "SP-R 26\"",
             "category": "frontpiece"
           },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
           "gripvert": {
             "stats": {
               "damage": 0,
@@ -31691,19 +32530,6 @@
             "real_name": "ZLR Asp",
             "category": "frontpiece"
           },
-          "xmags": {
-            "stats": {
-              "damage": 0,
-              "mobility": -2,
-              "firerate": 0,
-              "accuracy": 0,
-              "range": 0,
-              "control": -2
-            },
-            "description": "Extended magazines hold ^27 rounds^7 of .50 BMG ammunition with a slight weight increase.",
-            "real_name": "7 Round Mags",
-            "category": "magazine"
-          },
           "reflexmini": {
             "stats": {
               "damage": 0,
@@ -31752,8 +32578,8 @@
               "range": 0,
               "control": 3
             },
-            "description": "Heavy duty stock keeps your aim steady for precision shots.",
-            "real_name": "Singuard Arms Marksman",
+            "description": "Machine milled titanium body, ergonomic match grade stock, and ported aluminium shroud put your sights on target with exceptional speed and accuracy.",
+            "real_name": "XRK SP-TAC 208 Ultimate",
             "category": "backpiece"
           },
           "bolthvy": {
@@ -31817,8 +32643,21 @@
               "range": 0,
               "control": -1
             },
-            "description": "Tactical stock designed for rapid target acquisition and engagement.",
-            "real_name": "Singuard Arms Assassin",
+            "description": "FSS all-aluminium chassis and fully adjustable stock provides the precision and strength required for fast moving shot-over-shot accuracy.",
+            "real_name": "FSS Virtuoso Pro",
+            "category": "backpiece"
+          },
+          "stockcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 3,
+              "firerate": 0,
+              "accuracy": -2,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Perfectly balanced weight districution allows the highest stability and recoil control available.",
+            "real_name": "ZLR SP-R Overseer",
             "category": "backpiece"
           },
           "silencer": {
@@ -31952,69 +32791,95 @@
             "category": "undermount"
           },
           "calcust2": {
-            "stats": {
-              "damage": 6,
-              "mobility": 0,
-              "firerate": -4,
-              "accuracy": -2,
-              "range": -3,
-              "control": 0
-            },
-            "description": "Powerful 250gr ^3.338 Lapua Mag^7 ammunition hits harder at all ranges.",
             "real_name": ".338 Lapua Mag 5-R Mags",
-            "category": "magazine"
-          },
-          "barcust": {
+            "category": "magazine",
+            "description": "Powerful 250gr .338 Lapua Mag ammunition hits harder at all ranges.",
             "stats": {
-              "damage": 0,
+              "accuracy": -2,
+              "damage": 6,
+              "range": -3,
+              "firerate": -4,
               "mobility": 0,
-              "firerate": 0,
-              "accuracy": 0,
-              "range": 0,
+              "control": 0
+            }
+          },
+          "calcust": {
+            "real_name": ".300 Norma Mag 5-R Mags",
+            "category": "magazine",
+            "description": "5 Round mags of .300 Norma Mag ammunition with superior external ballistics for a flatter trajectory and longer range.",
+            "stats": {
+              "accuracy": -2,
+              "damage": 8,
+              "range": -4,
+              "firerate": -4,
+              "mobility": 0,
               "control": 0
             },
-            "description": "Stainless steel barrel with chrome lined polygonal rifling holds a 1:9.6 twist rate on higher grain rounds, and significantly improves muzzle velocity and range.",
-            "real_name": "ZLR VeraTwist 9.6",
-            "category": "frontpiece"
-          },
-          "holo": {
-            "stats": {
-              "damage": 0,
-              "mobility": -2,
-              "firerate": 0,
-              "accuracy": 4,
-              "range": 2,
-              "control": -2
+            "xmags": {
+              "real_name": "10 Round Mags",
+              "category": "magazine",
+              "description": "Extended magazines hold 10 rounds of .300 Win Mag ammunition with a slight weight increase.",
+              "stats": {
+                "accuracy": 0,
+                "damage": 0,
+                "range": 0,
+                "firerate": 0,
+                "mobility": -2,
+                "control": -2
+              }
             },
-            "description": "Advanced holographic sight of American origin.",
-            "real_name": "Corp Combat Holo Sight",
-            "category": "optic"
-          },
-          "acog3": {
-            "stats": {
-              "damage": 0,
-              "mobility": -4,
-              "firerate": 0,
-              "accuracy": 6,
-              "range": 4,
-              "control": -3
+            "barmid": {
+              "stats": {
+                "damage": 0,
+                "mobility": 0,
+                "firerate": 0,
+                "accuracy": 0,
+                "range": 0,
+                "control": 0
+              },
+              "description": "Stainless steel barrel with chrome lined polygonal rifling holds a 1:9.6 twist rate on higher grain rounds, and significantly improves muzzle velocity and range.",
+              "real_name": "ZLR VeraTwist 9.6",
+              "category": "frontpiece"
             },
-            "description": "Advanced optic with ^23.5x^7 magnification provides excellent target acquisition.",
-            "real_name": "Cronen C480 Pro Optic",
-            "category": "optic"
-          },
-          "acog2": {
-            "stats": {
-              "damage": 0,
-              "mobility": -3,
-              "firerate": 0,
-              "accuracy": 5,
-              "range": 4,
-              "control": -3
+            "holo": {
+              "stats": {
+                "damage": 0,
+                "mobility": -2,
+                "firerate": 0,
+                "accuracy": 4,
+                "range": 2,
+                "control": -2
+              },
+              "description": "Advanced holographic sight of American origin.",
+              "real_name": "Corp Combat Holo Sight",
+              "category": "optic"
             },
-            "description": "Russian combat optic with ^23.0x^7 magnification provides reliable target acquisition.",
-            "real_name": "VLK 3.0x Optic",
-            "category": "optic"
+            "acog3": {
+              "stats": {
+                "damage": 0,
+                "mobility": -4,
+                "firerate": 0,
+                "accuracy": 6,
+                "range": 4,
+                "control": -3
+              },
+              "description": "Advanced optic with ^23.5x^7 magnification provides excellent target acquisition.",
+              "real_name": "Cronen C480 Pro Optic",
+              "category": "optic"
+            },
+            "acog2": {
+              "stats": {
+                "damage": 0,
+                "mobility": -3,
+                "firerate": 0,
+                "accuracy": 5,
+                "range": 4,
+                "control": -3
+              },
+              "description": "Russian combat optic with ^23.0x^7 magnification provides reliable target acquisition.",
+              "real_name": "VLK 3.0x Optic",
+              "category": "optic"
+            }
           }
         },
         "image_url": "https://i.imgur.com/t2lFCkm.png",
@@ -32034,6 +32899,20 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "stockcust": {
+            "real_name": "FTAC Sport Comb",
+            "category": "backpiece",
+            "description": "Tactical comb add-on streamlined for close quarters combat.  Gets you on target faster.",
+            "perk": "",
+            "stats": {
+              "accuracy": -2,
+              "damage": 0,
+              "range": 0,
+              "firerate": 0,
+              "mobility": 3,
+              "control": -1
+            }
           },
           "vzscope": {
             "stats": {
@@ -32619,6 +33498,20 @@
             "description": "Russian combat optic with ^23.0x^7 magnification provides reliable target acquisition.",
             "real_name": "VLK 3.0x Optic",
             "category": "optic"
+          },
+          "scope": {
+            "real_name": "Sniper Scope",
+            "category": "optic",
+            "description": "High power 7x scope for long distance encounters. Optic glint visible to enemies.",
+            "stats": {
+              "blocksCategory": "",
+              "accuracy": 6,
+              "damage": 0,
+              "range": 10,
+              "firerate": 0,
+              "mobility": -4,
+              "control": -6
+            }
           }
         },
         "image_url": "https://i.imgur.com/b0Apk1I.png",
@@ -33294,6 +34187,32 @@
             "description": "Training in reloading faster when under pressure.",
             "real_name": "Sleight of Hand",
             "category": "gunperk"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "scope": {
+            "real_name": "PU Scope",
+            "category": "optic",
+            "description": "High power 7x scope for long distance encounters. Optic glint visible to enemies.",
+            "stats": {
+              "accuracy": 6,
+              "damage": 0,
+              "range": 10,
+              "firerate": 0,
+              "mobility": -4,
+              "control": -6
+            }
           },
           "fmj": {
             "stats": {
