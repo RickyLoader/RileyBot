@@ -155,7 +155,7 @@ public class XKCDCommand extends DiscordCommand {
         Comic comic;
         switch(message) {
             case "latest":
-                comic = getComic(archive.size());
+                comic = getComic(archive.size() + 1);
                 break;
             case "random":
                 comic = getComic(getRandomIssueNumber());
