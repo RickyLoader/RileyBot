@@ -107,7 +107,7 @@ public class LoadoutAnalysis {
                 c4
                         ? loadout.getLethal().getName() + " is the worst lethal."
                         : loadout.getLethal().getName() + "? At least it's not C4",
-                loadout.getTactical().getName().contains("stun")
+                loadout.getTactical().getName().toLowerCase().contains("stun")
                         ? loadout.getTactical().getName() + "s are for cunts who can't hit a moving target"
                         : "I'll take a " + loadout.getTactical().getName() + " over a Stun Grenade any day!"
         };
