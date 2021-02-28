@@ -7,11 +7,10 @@ import java.util.Objects;
 /**
  * Hold weapon information
  */
-public class Weapon {
-    private final String codename, name, imageURL;
+public class Weapon extends CODAsset {
+    private final String imageURL;
     private final TYPE type;
     private final CATEGORY category;
-    private final BufferedImage image;
     private final HashMap<String, Attachment> attachments;
     private final HashMap<Integer, Variant> variants;
 
@@ -241,12 +240,10 @@ public class Weapon {
      * @param variants    Map of variants available for the weapon. Variant id -> variant
      */
     public Weapon(String codename, String name, CATEGORY category, String imageURL, BufferedImage image, HashMap<String, Attachment> attachments, HashMap<Integer, Variant> variants) {
-        this.codename = codename;
-        this.name = name;
+        super(codename, name, image);
         this.category = category;
         this.type = TYPE.discernType(category);
         this.imageURL = imageURL;
-        this.image = image;
         this.attachments = attachments;
         this.variants = variants;
     }
@@ -342,33 +339,6 @@ public class Weapon {
     }
 
     /**
-     * Get the codename of the weapon e.g "iw8_me_akimboblunt"
-     *
-     * @return Codename of weapon
-     */
-    public String getCodename() {
-        return codename;
-    }
-
-    /**
-     * Get the weapon image
-     *
-     * @return Weapon image
-     */
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    /**
-     * Get the name of the weapon
-     *
-     * @return Weapon name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
      * Get the weapon type
      *
      * @return Weapon type
@@ -392,7 +362,7 @@ public class Weapon {
             return false;
         }
         Weapon weapon = (Weapon) obj;
-        return weapon.getCodename().equals(codename);
+        return weapon.getCodename().equals(getCodename());
     }
 
     /**
@@ -408,6 +378,6 @@ public class Weapon {
 
     @Override
     public int hashCode() {
-        return Objects.hash(codename);
+        return Objects.hash(getCodename());
     }
 }

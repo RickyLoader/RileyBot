@@ -7,9 +7,9 @@ import java.awt.image.BufferedImage;
 /**
  * Hold map name and image info
  */
-public class Map {
-    private final String codename, name, loadingImageURL, compassImageURL;
-    private final BufferedImage loadingImage, compassImage;
+public class Map extends CODAsset {
+    private final String loadingImageURL, compassImageURL;
+    private final BufferedImage compassImage;
 
     public static class MapBuilder {
         private final String codename, name;
@@ -96,11 +96,9 @@ public class Map {
      * @param builder Map builder
      */
     private Map(MapBuilder builder) {
-        this.codename = builder.codename;
-        this.name = builder.name;
+        super(builder.codename, builder.name, builder.loadingImage);
         this.loadingImageURL = builder.loadingImageURL;
         this.compassImageURL = builder.compassImageURL;
-        this.loadingImage = builder.loadingImage;
         this.compassImage = builder.compassImage;
     }
 
@@ -145,33 +143,6 @@ public class Map {
      */
     public String getCompassImageURL() {
         return compassImageURL;
-    }
-
-    /**
-     * Get the map image
-     *
-     * @return Map image
-     */
-    public BufferedImage getLoadingImage() {
-        return loadingImage;
-    }
-
-    /**
-     * Get the codename of the map e.g "mp_euphrates"
-     *
-     * @return Codename of map
-     */
-    public String getCodename() {
-        return codename;
-    }
-
-    /**
-     * Get the map name
-     *
-     * @return Map name
-     */
-    public String getName() {
-        return name;
     }
 
     /**

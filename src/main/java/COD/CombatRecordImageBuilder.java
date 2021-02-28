@@ -268,8 +268,8 @@ public class CombatRecordImageBuilder extends ImageBuilder {
                 BufferedImage icon = commendation.getImage();
 
                 g.drawImage(icon, x - (icon.getWidth() / 2), 250 - (icon.getHeight() / 2), null);
-                int titleWidth = g.getFontMetrics().stringWidth(commendation.getTitle()) / 2;
-                g.drawString(commendation.getTitle(), x - titleWidth, 155);
+                int titleWidth = g.getFontMetrics().stringWidth(commendation.getName()) / 2;
+                g.drawString(commendation.getName(), x - titleWidth, 155);
 
                 String[] descSplit = commendation.getDesc().split(" ");
                 String desc = "";

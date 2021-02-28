@@ -5,9 +5,8 @@ import java.awt.image.BufferedImage;
 /**
  * Hold killstreak information
  */
-public class Killstreak {
-    private final String codename, name, statName;
-    private final BufferedImage image;
+public class Killstreak extends CODAsset {
+    private final String statName;
 
     /**
      * Create a killstreak
@@ -18,37 +17,8 @@ public class Killstreak {
      * @param image    Killstreak image
      */
     public Killstreak(String codename, String name, String statName, BufferedImage image) {
-        this.codename = codename;
-        this.name = name;
+        super(codename, name, image);
         this.statName = statName;
-        this.image = image;
-    }
-
-    /**
-     * Get the killstreak name
-     *
-     * @return Killstreak name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Get the codename of the killstreak e.g "radar_drone_overwatch"
-     *
-     * @return Codename of killstreak
-     */
-    public String getCodename() {
-        return codename;
-    }
-
-    /**
-     * Get the killstreak image
-     *
-     * @return Killstreak image
-     */
-    public BufferedImage getImage() {
-        return image;
     }
 
     /**

@@ -3,9 +3,8 @@ package COD.Assets;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 
-public class FieldUpgrade {
-    private final String codename, name, propertyName;
-    private final BufferedImage image;
+public class FieldUpgrade extends CODAsset {
+    private final String propertyName;
 
     /**
      * Create a killstreak
@@ -16,10 +15,8 @@ public class FieldUpgrade {
      * @param image        Image of the field upgrade
      */
     public FieldUpgrade(String codename, String name, String propertyName, BufferedImage image) {
-        this.codename = codename;
-        this.name = name;
+        super(codename, name, image);
         this.propertyName = propertyName;
-        this.image = image;
     }
 
     /**
@@ -40,44 +37,17 @@ public class FieldUpgrade {
         return propertyName;
     }
 
-    /**
-     * Get the codename of the field upgrade e.g "super_deadsilence"
-     *
-     * @return Codename of field upgrade
-     */
-    public String getCodename() {
-        return codename;
-    }
-
-    /**
-     * Get the image of the field upgrade
-     *
-     * @return Field upgrade image
-     */
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    /**
-     * Get the name of the field upgrade
-     *
-     * @return Name of field upgrade
-     */
-    public String getName() {
-        return name;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if(!(obj instanceof FieldUpgrade)) {
             return false;
         }
         FieldUpgrade fieldUpgrade = (FieldUpgrade) obj;
-        return fieldUpgrade.getCodename().equals(codename);
+        return fieldUpgrade.getCodename().equals(getCodename());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(codename);
+        return Objects.hash(getCodename());
     }
 }

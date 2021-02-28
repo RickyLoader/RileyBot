@@ -7,9 +7,7 @@ import java.awt.image.BufferedImage;
 /**
  * Hold weapon attachment information
  */
-public class Attachment implements Comparable<Attachment> {
-    private final String codename, name;
-    private final BufferedImage image;
+public class Attachment extends CODAsset implements Comparable<Attachment> {
     private final CATEGORY category, blockedCategory;
     private final Attributes attributes;
 
@@ -83,9 +81,7 @@ public class Attachment implements Comparable<Attachment> {
      * @param image           Attachment image
      */
     public Attachment(String codename, String name, CATEGORY category, CATEGORY blockedCategory, Attributes attributes, BufferedImage image) {
-        this.codename = codename;
-        this.name = name;
-        this.image = image;
+        super(codename, name, image);
         this.category = category;
         this.blockedCategory = blockedCategory;
         this.attributes = attributes;
@@ -125,33 +121,6 @@ public class Attachment implements Comparable<Attachment> {
      */
     public CATEGORY getCategory() {
         return category;
-    }
-
-    /**
-     * Get the attachment image
-     *
-     * @return Attachment image
-     */
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    /**
-     * Get the codename of the weapon attachment e.g "gripang"
-     *
-     * @return Codename of attachment
-     */
-    public String getCodename() {
-        return codename;
-    }
-
-    /**
-     * Get the name of the attachment
-     *
-     * @return Attachment name
-     */
-    public String getName() {
-        return name;
     }
 
     @Override

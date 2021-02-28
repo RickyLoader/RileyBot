@@ -6,10 +6,7 @@ import java.util.Objects;
 /**
  * Hold perk information
  */
-public class Perk {
-
-    private final String name, codename;
-    private final BufferedImage image;
+public class Perk extends CODAsset {
     private final CATEGORY category;
 
     public enum CATEGORY {
@@ -28,10 +25,8 @@ public class Perk {
      * @param image    Perk image
      */
     public Perk(String codename, String name, CATEGORY category, BufferedImage image) {
-        this.codename = codename;
-        this.name = name;
+        super(codename, name, image);
         this.category = category;
-        this.image = image;
     }
 
     /**
@@ -43,32 +38,6 @@ public class Perk {
         return category;
     }
 
-    /**
-     * Get the image of the perk
-     *
-     * @return Perk image
-     */
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    /**
-     * Get the name of the perk
-     *
-     * @return Perk name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Get the codename of the perk e.g "specialty_covert_ops"
-     *
-     * @return Codename of perk
-     */
-    public String getCodename() {
-        return codename;
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -76,11 +45,11 @@ public class Perk {
             return false;
         }
         Perk perk = (Perk) obj;
-        return perk.getCodename().equals(codename);
+        return perk.getCodename().equals(getCodename());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(codename);
+        return Objects.hash(getCodename());
     }
 }
