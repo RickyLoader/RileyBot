@@ -114,6 +114,15 @@ public class MWManager extends CODManager {
     }
 
     /**
+     * Get an array of field upgrades
+     *
+     * @return Field upgrades
+     */
+    public FieldUpgrade[] getSupers() {
+        return supers.values().toArray(new FieldUpgrade[0]);
+    }
+
+    /**
      * Get a commendation by its codename
      *
      * @param codename Commendation codename

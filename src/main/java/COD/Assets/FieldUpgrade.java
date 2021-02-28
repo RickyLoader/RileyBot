@@ -1,6 +1,7 @@
 package COD.Assets;
 
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 public class FieldUpgrade {
     private final String codename, name, propertyName;
@@ -64,5 +65,19 @@ public class FieldUpgrade {
      */
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof FieldUpgrade)) {
+            return false;
+        }
+        FieldUpgrade fieldUpgrade = (FieldUpgrade) obj;
+        return fieldUpgrade.getCodename().equals(codename);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codename);
     }
 }

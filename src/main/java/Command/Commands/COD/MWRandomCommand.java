@@ -1,9 +1,6 @@
 package Command.Commands.COD;
 
-import COD.Assets.Attachment;
-import COD.Assets.Perk;
-import COD.Assets.TacticalWeapon;
-import COD.Assets.Weapon;
+import COD.Assets.*;
 import COD.LoadoutAnalysis;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
@@ -24,6 +21,7 @@ import static Bot.DiscordCommandManager.mwAssetManager;
 public class MWRandomCommand extends DiscordCommand {
     private final ArrayList<String> words;
     private final HashSet<String> excludedWeaponIds;
+    private final Random rand;
 
     public MWRandomCommand() {
         super("mwrandom", "Generate a random Modern Warfare loadout!");
@@ -41,6 +39,7 @@ public class MWRandomCommand extends DiscordCommand {
                         "equip_throwing_knife_electric"
                 )
         );
+        this.rand = new Random();
     }
 
     @Override
@@ -88,7 +87,7 @@ public class MWRandomCommand extends DiscordCommand {
      * @return Random word
      */
     private String getRandomWord() {
-        return words.get(new Random().nextInt(words.size()));
+        return words.get(rand.nextInt(words.size()));
     }
 
     /**
@@ -152,7 +151,38 @@ public class MWRandomCommand extends DiscordCommand {
                                 yellowPerk
                         }
                 )
+                .setFieldUpgrades(getFieldUpgrades())
                 .build();
+    }
+
+    /**
+     * Get the field upgrade(s) for the loadout
+     * Roll a 1/10 chance of having 2 field upgrades
+     *
+     * @return Field upgrade(s)
+     */
+    private FieldUpgrade[] getFieldUpgrades() {
+        int roll = rand.nextInt(10);
+        FieldUpgrade[] fieldUpgrades = new FieldUpgrade[roll == 9 ? 2 : 1];
+        FieldUpgrade first = getRandomFieldUpgrade(null);
+        fieldUpgrades[0] = first;
+        if(fieldUpgrades.length == 2) {
+            fieldUpgrades[1] = getRandomFieldUpgrade(first);
+        }
+        return fieldUpgrades;
+    }
+
+    /**
+     * Get a random field upgrade
+     *
+     * @param exclude Field upgrade to exclude
+     * @return Random field upgrade
+     */
+    private FieldUpgrade getRandomFieldUpgrade(FieldUpgrade exclude) {
+        FieldUpgrade[] fieldUpgrades = Arrays.stream(mwAssetManager.getSupers())
+                .filter(fieldUpgrade -> !fieldUpgrade.equals(exclude))
+                .toArray(FieldUpgrade[]::new);
+        return fieldUpgrades[rand.nextInt(fieldUpgrades.length)];
     }
 
     /**
@@ -168,7 +198,7 @@ public class MWRandomCommand extends DiscordCommand {
                     .filter(perk -> !perk.getName().equalsIgnoreCase("gunfight e.o.d"))
                     .toArray(Perk[]::new);
         }
-        return perks[new Random().nextInt(perks.length)];
+        return perks[rand.nextInt(perks.length)];
     }
 
     /**
@@ -185,7 +215,6 @@ public class MWRandomCommand extends DiscordCommand {
         ArrayList<Attachment.CATEGORY> availableCategories = new ArrayList<>(
                 Arrays.asList(weapon.getAttachmentCategories())
         );
-        Random rand = new Random();
         int toEquip = rand.nextInt(5) + 1;
         HashMap<Attachment.CATEGORY, Attachment> equipped = new HashMap<>();
 
@@ -217,7 +246,6 @@ public class MWRandomCommand extends DiscordCommand {
      */
     private Weapon getRandomWeapon(Weapon.TYPE type, Weapon exclude) {
         Weapon.CATEGORY[] typeCategories = type.getCategories();
-        Random rand = new Random();
         Weapon.CATEGORY category = typeCategories[rand.nextInt(typeCategories.length)];
         Weapon[] categoryWeapons = Arrays.stream(mwAssetManager.getWeaponsByCategory(category))
                 .filter(weapon -> !weapon.equals(exclude) && !excludedWeaponIds.contains(weapon.getCodename()))

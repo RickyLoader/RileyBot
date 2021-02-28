@@ -2,11 +2,8 @@ package COD;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
-import COD.Assets.Attachment;
-import COD.Assets.Attributes;
+import COD.Assets.*;
 import COD.Assets.Attributes.Attribute;
-import COD.Assets.Perk;
-import COD.Assets.Weapon;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
 
@@ -30,6 +27,9 @@ public class LoadoutImageManager {
             EQUIPMENT_SECTION,
             EQUIPMENT_CONTAINER,
             PERKS_CONTAINER,
+            SUPERS_CONTAINER,
+            SUPER_SECTION,
+            SUPER_NAME_SECTION,
             UNKNOWN_WEAPON,
             UNKNOWN_ATTACHMENT,
             UNKNOWN_EQUIPMENT;
@@ -48,6 +48,9 @@ public class LoadoutImageManager {
         this.EQUIPMENT_NAME_SECTION = handler.getImageResource(basePath + "equipment_name_section.png");
         this.EQUIPMENT_CONTAINER = handler.getImageResource(basePath + "equipment_container.png");
         this.PERKS_CONTAINER = handler.getImageResource(basePath + "perks_container.png");
+        this.SUPER_NAME_SECTION = handler.getImageResource(basePath + "super_name_section.png");
+        this.SUPER_SECTION = handler.getImageResource(basePath + "super_section.png");
+        this.SUPERS_CONTAINER = handler.getImageResource(basePath + "supers_container.png");
         this.UNKNOWN_WEAPON = handler.getImageResource(basePath + "unknown_weapon.png");
         this.UNKNOWN_ATTACHMENT = handler.getImageResource(basePath + "unknown_attachment.png");
         this.UNKNOWN_EQUIPMENT = handler.getImageResource(basePath + "unknown_equipment.png");
@@ -55,7 +58,7 @@ public class LoadoutImageManager {
 
     /**
      * Build an image displaying the given loadout.
-     * Display weapons, attachments, and equipment
+     * Display weapons, attachments, equipment etc
      *
      * @param loadout Loadout to build image for
      * @param title   Title to display above loadout
@@ -96,6 +99,19 @@ public class LoadoutImageManager {
         y += tactical.getHeight() + 10;
 
         g.drawImage(perks, x, y, null);
+
+        if(loadout.hasFieldUpgrades()) {
+            BufferedImage supersImage = buildFieldUpgradesImage(loadout.getFieldUpgrades());
+            BufferedImage containerCopy = new BufferedImage(
+                    container.getWidth(),
+                    container.getHeight() + 10 + supersImage.getHeight(),
+                    BufferedImage.TYPE_INT_RGB
+            );
+            g = containerCopy.getGraphics();
+            g.drawImage(container, 0, 0, null);
+            g.drawImage(supersImage, 0, y + perks.getHeight() + 10, null);
+            container = containerCopy;
+        }
         g.dispose();
         return container;
     }
@@ -161,6 +177,56 @@ public class LoadoutImageManager {
         }
         g.dispose();
         return perksImage;
+    }
+
+    /**
+     * Build an image displaying the loadout field upgrades
+     *
+     * @param fieldUpgrades Array of field upgrades to display
+     * @return Image displaying field upgrades
+     */
+    private BufferedImage buildFieldUpgradesImage(FieldUpgrade[] fieldUpgrades) {
+        BufferedImage supersImage = copyImage(SUPERS_CONTAINER);
+        int x = 0;
+        Graphics g = supersImage.getGraphics();
+        for(FieldUpgrade fieldUpgrade : fieldUpgrades) {
+            BufferedImage resizedSuper = resizeImage(
+                    fieldUpgrade.getImage(),
+                    SUPER_SECTION.getWidth(),
+                    SUPER_SECTION.getHeight()
+            );
+
+            BufferedImage superImage = buildLabelledImage(
+                    resizedSuper,
+                    fieldUpgrade.getName(),
+                    SUPER_SECTION,
+                    SUPER_NAME_SECTION
+            );
+            g.drawImage(superImage, x, 0, null);
+            x += superImage.getWidth() + 10;
+        }
+        g.dispose();
+        return supersImage;
+    }
+
+    /**
+     * Resize the given image
+     *
+     * @param image  Image to resize
+     * @param width  Desired width of resized image
+     * @param height Desired height of resized image
+     * @return Resized image
+     */
+    private BufferedImage resizeImage(BufferedImage image, int width, int height) {
+        BufferedImage resized = new BufferedImage(
+                width,
+                height,
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics g = resized.getGraphics();
+        g.drawImage(image, 0, 0, width, height, null);
+        g.dispose();
+        return resized;
     }
 
     /**

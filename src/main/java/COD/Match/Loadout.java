@@ -1,5 +1,6 @@
 package COD.Match;
 
+import COD.Assets.FieldUpgrade;
 import COD.Assets.Perk;
 import COD.Assets.TacticalWeapon;
 import COD.Assets.Weapon;
@@ -16,6 +17,7 @@ public class Loadout {
     private final Weapon lethal;
     private final TacticalWeapon tactical;
     private final Perk[] perks;
+    private final FieldUpgrade[] fieldUpgrades;
 
     /**
      * Create the player loadout from the builder values
@@ -26,6 +28,7 @@ public class Loadout {
         this.lethal = builder.lethal;
         this.tactical = builder.tactical;
         this.perks = builder.perks;
+        this.fieldUpgrades = builder.fieldUpgrades;
     }
 
     public static class LoadoutBuilder {
@@ -33,6 +36,18 @@ public class Loadout {
         private Weapon lethal;
         private TacticalWeapon tactical;
         private Perk[] perks;
+        private FieldUpgrade[] fieldUpgrades;
+
+        /**
+         * Set the loadout field upgrade(s)
+         *
+         * @param fieldUpgrades Loadout field upgrades
+         * @return Builder
+         */
+        public LoadoutBuilder setFieldUpgrades(FieldUpgrade[] fieldUpgrades) {
+            this.fieldUpgrades = fieldUpgrades;
+            return this;
+        }
 
         /**
          * Set the player's primary loadout weapon
@@ -181,13 +196,36 @@ public class Loadout {
         return lethal != null;
     }
 
+    /**
+     * Check if the loadout contains any field upgrades
+     *
+     * @return Loadout contains field upgrades
+     */
+    public boolean hasFieldUpgrades() {
+        return fieldUpgrades.length != 0;
+    }
+
+    /**
+     * Get the loadout field upgrade(s)
+     *
+     * @return Loadout field upgrade(s)
+     */
+    public FieldUpgrade[] getFieldUpgrades() {
+        return fieldUpgrades;
+    }
+
     @Override
     public boolean equals(Object object) {
         if(!(object instanceof Loadout)) {
             return false;
         }
         Loadout loadout = (Loadout) object;
-        if(hasTactical() != loadout.hasTactical() || hasLethal() != loadout.hasLethal() || hasPrimary() != loadout.hasPrimary() || hasSecondary() != loadout.hasSecondary() || perks.length != loadout.getPerks().length) {
+        if(hasTactical() != loadout.hasTactical()
+                || hasLethal() != loadout.hasLethal()
+                || hasPrimary() != loadout.hasPrimary()
+                || hasSecondary() != loadout.hasSecondary()
+                || perks.length != loadout.getPerks().length
+                || fieldUpgrades.length != loadout.getFieldUpgrades().length) {
             return false;
         }
         boolean tactical = !hasTactical() || getTactical().equals(loadout.getTactical());
@@ -198,6 +236,12 @@ public class Loadout {
         HashSet<Perk> perks = new HashSet<>(Arrays.asList(this.perks));
         for(Perk perk : loadout.getPerks()) {
             if(!perks.contains(perk)) {
+                return false;
+            }
+        }
+        HashSet<FieldUpgrade> fieldUpgrades = new HashSet<>(Arrays.asList(this.fieldUpgrades));
+        for(FieldUpgrade fieldUpgrade : loadout.getFieldUpgrades()) {
+            if(!fieldUpgrades.contains(fieldUpgrade)) {
                 return false;
             }
         }
