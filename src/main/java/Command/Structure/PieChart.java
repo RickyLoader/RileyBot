@@ -98,19 +98,30 @@ public class PieChart {
     /**
      * Get an image displaying the chart and key
      *
+     * @param horizontalJoin Join images horizontally (default is vertical join)
      * @return Image displaying chart and key
      */
-    public BufferedImage getFullImage() {
+    public BufferedImage getFullImage(boolean horizontalJoin) {
         int gap = 20;
         BufferedImage fullImage = new BufferedImage(
-                Math.max(chart.getWidth(), key.getWidth()),
-                chart.getHeight() + gap + key.getHeight(),
+                horizontalJoin
+                        ? chart.getWidth() + gap + key.getWidth()
+                        : Math.max(chart.getWidth(), key.getWidth()),
+                horizontalJoin
+                        ? Math.max(chart.getHeight(), key.getHeight())
+                        : chart.getHeight() + gap + key.getHeight(),
                 BufferedImage.TYPE_INT_ARGB
         );
         Graphics g = fullImage.getGraphics();
-        int mid = fullImage.getWidth() / 2;
-        g.drawImage(chart, mid - (chart.getWidth() / 2), 0, null);
-        g.drawImage(key, mid - (key.getWidth() / 2), chart.getHeight() + gap, null);
+        int mid = horizontalJoin ? (fullImage.getHeight() / 2) : (fullImage.getWidth() / 2);
+        if(horizontalJoin) {
+            g.drawImage(chart, 0, mid - (chart.getHeight() / 2), null);
+            g.drawImage(key, chart.getWidth() + gap, mid - (key.getHeight() / 2), null);
+        }
+        else {
+            g.drawImage(chart, mid - (chart.getWidth() / 2), 0, null);
+            g.drawImage(key, mid - (key.getWidth() / 2), chart.getHeight() + gap, null);
+        }
         g.dispose();
         return fullImage;
     }

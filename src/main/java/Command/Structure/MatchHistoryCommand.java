@@ -328,7 +328,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .build();
 
         channel.sendMessage(embed).
-                addFile(ImageLoadingMessage.imageToByteArray(pieChart.getFullImage()), "image.png")
+                addFile(ImageLoadingMessage.imageToByteArray(pieChart.getFullImage(true)), "image.png")
                 .queue();
     }
 
