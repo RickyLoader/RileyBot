@@ -110,6 +110,12 @@ public class Loadout {
          * @return Loadout
          */
         public Loadout build() {
+            if(perks == null){
+                perks = new Perk[0];
+            }
+            if(fieldUpgrades == null){
+                fieldUpgrades = new FieldUpgrade[0];
+            }
             return new Loadout(this);
         }
     }
