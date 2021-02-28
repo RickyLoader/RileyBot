@@ -1,35 +1,75 @@
 package COD.Assets;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.image.BufferedImage;
 
 /**
  * Hold weapon attachment information
  */
-public class Attachment {
+public class Attachment implements Comparable<Attachment> {
     private final String codename, name;
     private final BufferedImage image;
     private final CATEGORY category, blockedCategory;
     private final Attributes attributes;
 
     public enum CATEGORY {
-        GUNPERK,
-        OPTIC,
-        BACKPIECE,
+        CABLE,
         MUZZLE,
-        REARGRIP,
-        UNDERMOUNT,
         FRONTPIECE,
-        EXTRA,
-        MAGAZINE,
-        TRIGGER,
-        PUMPGRIP,
         GUARD,
         PUMP,
+        PUMPGRIP,
+        UNDERMOUNT,
+        EXTRA,
         BOLT,
-        CABLE,
+        MAGAZINE,
         BOLTACTION,
+        TRIGGER,
+        OPTIC,
+        REARGRIP,
+        BACKPIECE,
+        GUNPERK,
         UNKNOWN,
-        NONE
+        NONE;
+
+        /**
+         * Get the weapon position (left to right) of the attachment category
+         *
+         * @return Weapon position
+         */
+        public int getWeaponPosition() {
+            switch(this) {
+                case CABLE:
+                case MUZZLE:
+                    return 0;
+                case FRONTPIECE:
+                    return 1;
+                case GUARD:
+                case PUMP:
+                case PUMPGRIP:
+                case UNDERMOUNT:
+                    return 2;
+                case EXTRA:
+                    return 3;
+                case BOLT:
+                case MAGAZINE:
+                    return 4;
+                case BOLTACTION:
+                case TRIGGER:
+                    return 5;
+                case OPTIC:
+                    return 6;
+                case REARGRIP:
+                    return 7;
+                case BACKPIECE:
+                    return 8;
+                case GUNPERK:
+                    return 9;
+                default:
+                    return 10;
+            }
+        }
     }
 
     /**
@@ -112,5 +152,10 @@ public class Attachment {
      */
     public String getName() {
         return name;
+    }
+
+    @Override
+    public int compareTo(@NotNull Attachment o) {
+        return category.getWeaponPosition() - o.getCategory().getWeaponPosition();
     }
 }

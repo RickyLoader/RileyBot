@@ -7,6 +7,7 @@ import COD.Assets.Weapon;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -32,6 +33,7 @@ public class LoadoutWeapon {
         this.attachments = attachments;
         this.attributes = calculateAttributes(attachments);
         this.variant = weapon.getVariantById(variantId);
+        Collections.sort(attachments);
     }
 
     /**
