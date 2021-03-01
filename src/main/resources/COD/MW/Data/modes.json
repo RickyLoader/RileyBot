@@ -1,139 +1,445 @@
 {
   "modes": {
-    "war": {
-      "real_name": "Team Deathmatch"
-    },
-    "sd": {
-      "real_name": "Search and Destroy"
-    },
-    "dom": {
-      "real_name": "Domination"
-    },
-    "tdef": {
-      "real_name": "Headquarters"
-    },
-    "dm": {
-      "real_name": "Free For All"
-    },
-    "koth": {
-      "real_name": "Hardpoint"
-    },
-    "hq": {
-      "real_name": "Headquarters"
-    },
-    "arena": {
-      "real_name": "Gunfight"
-    },
-    "arm": {
-      "real_name": "Ground War"
-    },
-    "conf": {
-      "real_name": "Kill Confirmed"
-    },
-    "cyber": {
-      "real_name": "Cyber Attack"
-    },
-    "hc_war": {
-      "real_name": "HC Team Deathmatch"
-    },
-    "hc_arena": {
-      "real_name": "HC Gunfight"
-    },
-    "hq_arm": {
-      "real_name": "HC Ground War"
-    },
-    "hq_conf": {
-      "real_name": "HC Kill Confirmed"
-    },
     "hq_cyber": {
-      "real_name": "HC Cyber Attack"
-    },
-    "hc_dm": {
-      "real_name": "HC Free For All"
-    },
-    "hc_hq": {
-      "real_name": "HC Headquarters"
-    },
-    "hc_dom": {
-      "real_name": "HC Domination"
-    },
-    "hc_sd": {
-      "real_name": "HC Search and Destroy"
+      "image_url": "https://i.imgur.com/IbC2U1S.png",
+      "real_name": "Cyber Attack (HC)"
     },
     "gun": {
+      "image_url": "https://i.imgur.com/Nsqo9VB.png",
       "real_name": "Gun Game"
     },
-    "gun_hc": {
-      "real_name": "HC Gun Game"
+    "gun_realism": {
+      "image_url": "https://i.imgur.com/5kjTAZN.png",
+      "real_name": "Gun Game (Realism)"
     },
-    "siege": {
-      "real_name": "Reinforce"
+    "gun_tdm": {
+      "image_url":"https://i.imgur.com/TsvTgP0.png",
+      "real_name": "TDM Gun Game"
     },
-    "infect": {
-      "real_name": "Infected"
+    "gun_tdm_hc": {
+      "image_url":"https://i.imgur.com/UZBbJT2.png",
+      "real_name": "TDM Gun Game (HC)"
     },
-    "arena_op": {
-      "real_name": "Gunfight O.S.P"
+    "dom": {
+      "image_url": "https://i.imgur.com/BwXDQ4P.png",
+      "real_name": "Domination"
     },
-    "grind": {
-      "real_name": "Grind"
+    "cyber_hc": {
+      "image_url": "https://i.imgur.com/yLQw7GD.png",
+      "real_name": "Cyber Attack (HC)"
     },
-    "ctf": {
-      "real_name": "Capture the Flag"
+    "cyber_realism": {
+      "image_url": "https://i.imgur.com/qcoKHCf.png",
+      "real_name": "Cyber Attack (Realism)"
     },
-    "br_all": {
-      "real_name": "All"
+    "cyber_cdl": {
+      "image_url": "https://i.imgur.com/mx4LgxD.png",
+      "real_name": "Cyber Attack (CDL)"
     },
-    "br": {
-      "real_name": "Warzone"
+    "conf_hc": {
+      "image_url": "https://i.imgur.com/J2jx7GF.png",
+      "real_name": "Kill Confirmed (HC)"
+    },
+    "conf_realism": {
+      "image_url": "https://i.imgur.com/w6Kc9Po.png",
+      "real_name": "Kill Confirmed (Realism)"
+    },
+    "dm": {
+      "image_url": "https://i.imgur.com/HEtfclE.png",
+      "real_name": "Free For All"
+    },
+    "crank": {
+      "image_url": "https://i.imgur.com/dteWVDJ.png",
+      "real_name": "Cranked"
+    },
+    "crank_hc": {
+      "image_url": "https://i.imgur.com/SJETY7N.png",
+      "real_name": "Cranked (HC)"
+    },
+    "crank_realism": {
+      "image_url": "https://i.imgur.com/N2bLyR9.png",
+      "real_name": "Cranked (Realism)"
+    },
+    "hq": {
+      "image_url": "https://i.imgur.com/IebOA8J.png",
+      "real_name": "Headquarters"
+    },
+    "conf": {
+      "image_url": "https://i.imgur.com/iTI5v7b.png",
+      "real_name": "Kill Confirmed"
+    },
+    "arena": {
+      "image_url": "https://i.imgur.com/r5zJsUt.png",
+      "real_name": "Gunfight"
     },
     "br_dmz": {
+      "image_url": "https://i.imgur.com/cCaF4P0.png",
       "real_name": "Plunder"
     },
-    "br_dmz_38": {
-      "real_name": "Plunder Quads"
+    "br": {
+      "image_url": "https://i.imgur.com/DNb271x.png",
+      "real_name": "Warzone"
     },
-    "br_87": {
-      "real_name": "Warzone Solo"
+    "snr": {
+      "image_url": "https://i.imgur.com/qov1Zmo.png",
+      "real_name": "Search and Rescue"
     },
-    "br_dmz_104": {
-      "real_name": "Blood Money"
+    "snr_cdl": {
+      "image_url": "https://i.imgur.com/JJz0ERN.png",
+      "real_name": "Search and Rescue (CDL)"
+    },
+    "snr_realism": {
+      "image_url": "https://i.imgur.com/LiMVDm6.png",
+      "real_name": "Search and Rescue (Realism)"
+    },
+    "snr_hc": {
+      "image_url": "https://i.imgur.com/c3aZXW7.png",
+      "real_name": "Search and Rescue (HC)"
+    },
+    "sd": {
+      "image_url": "https://i.imgur.com/xi6lUAw.png",
+      "real_name": "Search and Destroy"
+    },
+    "sd_cdl": {
+      "image_url": "https://i.imgur.com/aBPvwZ8.png",
+      "real_name": "Search and Destroy (CDL)"
+    },
+    "sd_realism": {
+      "image_url": "https://i.imgur.com/QBTYK9i.png",
+      "real_name": "Search and Destroy (Realism)"
+    },
+    "ctf": {
+      "image_url": "https://i.imgur.com/xOzg4QV.png",
+      "real_name": "Capture the Flag"
+    },
+    "ctf_hc": {
+      "image_url": "https://i.imgur.com/Qc4nN32.png",
+      "real_name": "Capture the Flag (HC)"
+    },
+    "ctf_cdl": {
+      "image_url": "https://i.imgur.com/ArCDszX.png",
+      "real_name": "Capture the Flag (CDL)"
+    },
+    "ctf_realism": {
+      "image_url": "https://i.imgur.com/mRmoETn.png",
+      "real_name": "Capture the Flag (Realism)"
+    },
+    "hq_conf": {
+      "image_url": "https://i.imgur.com/vYL2Bgu.png",
+      "real_name": "Kill Confirmed (HC)"
+    },
+    "hq_hc": {
+      "image_url": "https://i.imgur.com/ovyMbie.png",
+      "real_name": "Headquarters (HC)"
+    },
+    "hq_cdl": {
+      "image_url": "https://i.imgur.com/3ioYtus.png",
+      "real_name": "Headquarters (CDL)"
+    },
+    "hq_realism": {
+      "image_url": "https://i.imgur.com/4JfOISQ.png",
+      "real_name": "Headquarters (Realism)"
+    },
+    "tdef": {
+      "image_url": "https://i.imgur.com/0wPb814.png",
+      "real_name": "Team Defender"
+    },
+    "tdef_realism": {
+      "image_url": "https://i.imgur.com/hgJt7Pm.png",
+      "real_name": "Team Defender (Realism)"
+    },
+    "tdef_hc": {
+      "image_url": "https://i.imgur.com/2xDVdup.png",
+      "real_name": "Team Defender (HC)"
+    },
+    "hc_arena": {
+      "image_url": "https://i.imgur.com/2zCN8wV.png",
+      "real_name": "Gunfight (HC)"
+    },
+    "siege": {
+      "image_url": "https://i.imgur.com/qVFzXMe.png",
+      "real_name": "Reinforce"
+    },
+    "war": {
+      "image_url": "https://i.imgur.com/1HmqEwQ.png",
+      "real_name": "Team Deathmatch"
+    },
+    "hc_dom": {
+      "image_url": "https://i.imgur.com/wTaqjXj.png",
+      "real_name": "Domination (HC)"
+    },
+    "dom_realism": {
+      "image_url": "https://i.imgur.com/jjvYJJt.png",
+      "real_name": "Domination (Realism)"
+    },
+    "dom_cdl": {
+      "image_url": "https://i.imgur.com/bbPhJat.png",
+      "real_name": "Domination (CDL)"
+    },
+    "demolition": {
+      "image_url": "https://i.imgur.com/PqSl9Rl.png",
+      "real_name": "Demolition"
+    },
+    "demolition_hc": {
+      "image_url": "https://i.imgur.com/Hk4S7Re.png",
+      "real_name": "Demolition (HC)"
+    },
+    "demolition_realism": {
+      "image_url": "https://i.imgur.com/UMyCpFf.png",
+      "real_name": "Demolition (Realism)"
+    },
+    "demolition_cdl": {
+      "image_url": "https://i.imgur.com/eqoZCXa.png",
+      "real_name": "Demolition (CDL)"
+    },
+    "dropzone_hc": {
+      "image_url": "https://i.imgur.com/RsDJHnR.png",
+      "real_name": "Dropzone (HC)"
+    },
+    "dropzone": {
+      "image_url": "https://i.imgur.com/oNozzVF.png",
+      "real_name": "Dropzone"
+    },
+    "dropzone_realism": {
+      "image_url": "https://i.imgur.com/x82bJl7.png",
+      "real_name": "Dropzone (Realism)"
+    },
+    "koth": {
+      "image_url": "https://i.imgur.com/zBGk0rP.png",
+      "real_name": "Hardpoint"
+    },
+    "hc_dm": {
+      "image_url": "https://i.imgur.com/eoeWRYS.png",
+      "real_name": "Free For All (HC)"
+    },
+    "dm_realism": {
+      "image_url": "https://i.imgur.com/LJCkKvv.png",
+      "real_name": "Free For All (Realism)"
+    },
+    "hc_hq": {
+      "image_url": "https://i.imgur.com/c7y1vCq.png",
+      "real_name": "Headquarters (HC)"
+    },
+    "sd_hc": {
+      "image_url": "https://i.imgur.com/i19ufkQ.png",
+      "real_name": "Search and Destroy (HC)"
+    },
+    "dom_hc": {
+      "image_url": "https://i.imgur.com/WedZoZu.png",
+      "real_name": "Domination (HC)"
+    },
+    "war_hc": {
+      "image_url": "https://i.imgur.com/kziszKc.png",
+      "real_name": "Team Deathmatch (HC)"
+    },
+    "cyber": {
+      "image_url": "https://i.imgur.com/VMUJJtJ.png",
+      "real_name": "Cyber Attack"
+    },
+    "grind": {
+      "image_url": "https://i.imgur.com/9dfDxBn.png",
+      "real_name": "Grind"
+    },
+    "grind_hc": {
+      "image_url": "https://i.imgur.com/mOtw9h2.png",
+      "real_name": "Grind (HC)"
+    },
+    "grind_realism": {
+      "image_url": "https://i.imgur.com/dQc5v11.png",
+      "real_name": "Grind (Realism)"
     },
     "koth_hc": {
-      "real_name": "HC Hardpoint"
+      "image_url": "https://i.imgur.com/TNJgY9q.png",
+      "real_name": "Hardpoint (HC)"
     },
-    "br_25": {
-      "real_name": "Warzone Trios"
+    "koth_cdl": {
+      "image_url": "https://i.imgur.com/MLa4ApB.png",
+      "real_name": "Hardpoint (CDL)"
     },
-    "br_89": {
-      "real_name": "Warzone Quads"
+    "koth_realism": {
+      "image_url": "https://i.imgur.com/Ph6wER4.png",
+      "real_name": "Hardpoint (Realism)"
     },
-    "br_dmz_76": {
-      "real_name": "Plunder Quads"
+    "hc_war": {
+      "image_url": "https://i.imgur.com/2GxOcVH.png",
+      "real_name": "Team Deathmatch (HC)"
     },
-    "br_77": {
-      "real_name": "Warzone Scopes & Scatter Guns"
+    "hc_sd": {
+      "image_url": "https://i.imgur.com/RvmlayY.png",
+      "real_name": "Search and Destroy (HC)"
+    },
+    "gun_hc": {
+      "image_url": "https://i.imgur.com/eM66uj4.png",
+      "real_name": "Gun Game (HC)"
+    },
+    "infect": {
+      "image_url": "https://i.imgur.com/kQCVTWR.png",
+      "real_name": "Infected"
+    },
+    "infect_hc": {
+      "image_url": "https://i.imgur.com/qftVcaW.png",
+      "real_name": "Infected (HC)"
+    },
+    "infect_realism": {
+      "image_url": "https://i.imgur.com/OXj7cnj.png",
+      "real_name": "Infected (Realism)"
+    },
+    "mosh_bare_bones": {
+      "image_url": "https://i.imgur.com/tXvB6Qs.png",
+      "real_name": "Bare Bones Moshpit"
+    },
+    "mosh_bare_bones_hc": {
+      "image_url": "https://i.imgur.com/qRs4HAn.png",
+      "real_name": "Bare Bones Moshpit (HC)"
+    },
+    "mosh_bare_bones_realism": {
+      "image_url": "https://i.imgur.com/29T0H6H.png",
+      "real_name": "Bare Bones Moshpit (Realism)"
+    },
+    "siege_cdl": {
+      "image_url": "https://i.imgur.com/zB6yqyF.png",
+      "real_name": "Reinforce (CDL)"
+    },
+    "siege_hc": {
+      "image_url": "https://i.imgur.com/7M5xPFx.png",
+      "real_name": "Reinforce (HC)"
+    },
+    "siege_realism": {
+      "image_url": "https://i.imgur.com/GCaDrwj.png",
+      "real_name": "Reinforce (Realism)"
+    },
+    "oic": {
+      "image_url": "https://i.imgur.com/wMassGt.png",
+      "real_name": "One in the Chamber"
+    },
+    "oic_cdl": {
+      "image_url": "https://i.imgur.com/s0A5soW.png",
+      "real_name": "One in the Chamber (CDL)"
+    },
+    "oic_hc": {
+      "image_url": "https://i.imgur.com/412LATs.png",
+      "real_name": "One in the Chamber (HC)"
+    },
+    "oic_realism": {
+      "image_url": "https://i.imgur.com/UWhgW1m.png",
+      "real_name": "One in the Chamber (Realism)"
+    },
+    "mosh_standard": {
+      "image_url": "https://i.imgur.com/98vU3jP.png",
+      "real_name": "Moshpit"
+    },
+    "mosh_standard_hc": {
+      "image_url": "https://i.imgur.com/Xz1Q0n6.png",
+      "real_name": "Moshpit (HC)"
+    },
+    "mosh_standard_realism": {
+      "image_url": "https://i.imgur.com/y8GLqbi.png",
+      "real_name": "Moshpit (Realism)"
+    },
+    "mosh_standard_cdl": {
+      "image_url": "https://i.imgur.com/Q2rHbxE.png",
+      "real_name": "Moshpit (CDL)"
+    },
+    "mosh_party": {
+      "image_url": "https://i.imgur.com/Il6hLea.png",
+      "real_name": "Party Mode Moshpit"
+    },
+    "mosh_party_hc": {
+      "image_url": "https://i.imgur.com/qYxewFT.png",
+      "real_name": "Party Mode Moshpit (HC)"
+    },
+    "mosh_party_realism": {
+      "image_url": "https://i.imgur.com/DkT8mIa.png",
+      "real_name": "Party Mode Moshpit (Realism)"
+    },
+    "mosh_party_cdl": {
+      "image_url": "https://i.imgur.com/JNnmTT4.png",
+      "real_name": "Party Mode Moshpit (CDL)"
+    },
+    "mosh_bomb": {
+      "image_url": "https://i.imgur.com/XyJFUYe.png",
+      "real_name": "Bomb Objective Moshpit"
+    },
+    "mosh_bomb_cdl": {
+      "image_url": "https://i.imgur.com/rVPmSiZ.png",
+      "real_name": "Bomb Objective Moshpit (CDL)"
+    },
+    "mosh_bomb_hc": {
+      "image_url": "https://i.imgur.com/Nee8U2w.png",
+      "real_name": "Bomb Objective Moshpit (HC)"
+    },
+    "mosh_bomb_realism": {
+      "image_url": "https://i.imgur.com/Z0ayVsA.png",
+      "real_name": "Bomb Objective Moshpit (Realism)"
+    },
+    "killstreak_confirmed": {
+      "real_name": "Killstreak Confirmed",
+      "image_url": "https://i.imgur.com/4Y5iL4V.png"
+    },
+    "killstreak_confirmed_hc": {
+      "real_name": "Killstreak Confirmed (HC)",
+      "image_url": "https://i.imgur.com/iXjm0UT.png"
+    },
+    "killstreak_confirmed_realism": {
+      "real_name": "Killstreak Confirmed (Realism)",
+      "image_url": "https://i.imgur.com/YaQSvRj.png"
+    },
+    "aon": {
+      "image_url": "https://i.imgur.com/YEFlJW5.png",
+      "real_name": "All or Nothing"
+    },
+    "aon_cdl": {
+      "image_url": "https://i.imgur.com/FDTNHQ4.png",
+      "real_name": "All or Nothing (CDL)"
+    },
+    "aon_hc": {
+      "image_url": "https://i.imgur.com/0J3jjwt.png",
+      "real_name": "All or Nothing (HC)"
+    },
+    "aon_realism": {
+      "image_url": "https://i.imgur.com/dyXq7mW.png",
+      "real_name": "All or Nothing (Realism)"
+    },
+    "arena_realism": {
+      "real_name": "Gunfight (Realism)",
+      "image_url": "https://i.imgur.com/yfByqNF.png"
     },
     "br_dmz_85": {
       "real_name": "Plunder Duos"
     },
-    "cyber_hc": {
-      "real_name": "HC Cyber Attack"
+    "hq_arm": {
+      "real_name": "HC Ground War"
     },
-    "war_hc": {
-      "real_name": "HC Team Deathmatch"
+    "arena_op": {
+      "real_name": "Gunfight O.S.P",
+      "image_url": "https://i.imgur.com/r5zJsUt.png"
     },
-    "dom_hc": {
-      "real_name": "HC Domination"
+    "br_dmz_38": {
+      "real_name": "Plunder Quads"
     },
-    "sd_hc": {
-      "real_name": "HC Search and Destroy"
+    "br_dmz_104": {
+      "real_name": "Blood Money"
     },
-    "conf_hc": {
-      "real_name": "HC Kill Confirmed"
+    "br_89": {
+      "real_name": "Warzone Quads"
     },
-    "hq_hc": {
-      "real_name": "HC Headquarters"
+    "br_25": {
+      "real_name": "Warzone Trios"
+    },
+    "br_87": {
+      "real_name": "Warzone Solo"
+    },
+    "br_dmz_76": {
+      "real_name": "Plunder Quads"
+    },
+    "br_all": {
+      "real_name": "All"
+    },
+    "arm": {
+      "real_name": "Ground War"
+    },
+    "br_77": {
+      "real_name": "Warzone Scopes & Scatter Guns"
     }
   }
 }

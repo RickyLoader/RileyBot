@@ -21,7 +21,8 @@ public class CODManager {
     private final HashMap<String, Perk> perks;
     private final GAME game;
     private final HashMap<Weapon.CATEGORY, BufferedImage> missingWeaponImages = new HashMap<>();
-    private final BufferedImage missingPerkImage;
+    private final BufferedImage missingPerkImage, missingModeImage;
+    private final String missingModeImageUrl = "https://i.imgur.com/mo1WSMb.png";
 
     public enum GAME {
         CW,
@@ -42,6 +43,7 @@ public class CODManager {
         this.modes = readModes();
         this.perks = readPerks();
         this.missingPerkImage = resourceHandler.getImageResource(basePath + "Perks/missing.png");
+        this.missingModeImage = resourceHandler.getImageResource(basePath + "Modes/missing.png");
     }
 
     /**
@@ -211,13 +213,17 @@ public class CODManager {
     private HashMap<String, Mode> readModes() {
         HashMap<String, Mode> modes = new HashMap<>();
         JSONObject modeList = getAssetJSON("modes.json", "modes");
+        String imagePath = basePath + "Modes/";
         for(String name : modeList.keySet()) {
             JSONObject modeData = modeList.getJSONObject(name);
+            BufferedImage modeIcon = resourceHandler.getImageResource(imagePath + name + ".png");
             modes.put(
                     name,
                     new Mode(
                             name,
-                            modeData.getString("real_name")
+                            modeData.getString("real_name"),
+                            modeIcon == null ? missingModeImage : modeIcon,
+                            modeIcon == null ? missingModeImageUrl : modeData.getString("image_url")
                     )
             );
         }
@@ -288,7 +294,12 @@ public class CODManager {
     public Mode getModeByCodename(String codename) {
         Mode mode = modes.get(codename);
         if(mode == null) {
-            mode = new Mode(codename, "MISSING: " + codename);
+            mode = new Mode(
+                    codename,
+                    "MISSING: " + codename,
+                    missingModeImage,
+                    missingModeImageUrl
+            );
         }
         return mode;
     }
