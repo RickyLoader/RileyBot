@@ -69,8 +69,8 @@ public class TTVLookupCommand extends LookupCommand {
     }
 
     /**
-     * Create and send a message embed when a Twitch.tv URL is posted and discord creates an embed for it.
-     * Discord's embed only shows the streamer name and URL, delete and display an embed with
+     * Create and send a message embed when a Twitch.tv URL is posted.
+     * Discord creates a basic embed showing the streamer name and URL, delete it and display an embed with
      * followers, current stream info, etc.
      *
      * @param streamerUrl URL to streamer Twitch.tv page
@@ -78,10 +78,6 @@ public class TTVLookupCommand extends LookupCommand {
      * @param channel     Channel to send better message embed to
      */
     private void showTwitchDetailsEmbed(String streamerUrl, Message message, MessageChannel channel) {
-        List<MessageEmbed> embeds = message.getEmbeds();
-        if(embeds.isEmpty()) {
-            return;
-        }
         String name = streamerUrl
                 .replace(twitchUrl, "")
                 .replace("/", "")
