@@ -6,10 +6,8 @@ import COD.Assets.*;
 import COD.Assets.Map;
 import COD.CODAPI;
 import COD.CODManager;
-import COD.Gunfight;
 import COD.LoadoutImageManager;
 import COD.Match.*;
-import Command.Commands.COD.CWCountdownCommand;
 import Command.Structure.PieChart.Section;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -178,6 +176,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         MessageEmbed entryEmbed = getDefaultEmbedBuilder(
                 codManager.getGame().name().toUpperCase() + " Wobbly Rank #" + (index + 1)
         )
+                .setThumbnail(getEmbedThumbnail())
                 .setDescription("Use **" + getTrigger() + " wobblies** to view the full leaderboard.")
                 .addField("Name", score.getPlayerName(), true)
                 .addField("Date", score.getDateString(), true)
@@ -325,6 +324,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .setImage("attachment://image.png")
                 .setDescription("Breakdown for the last " + matchHistory.getMatches().size() + " matches:")
                 .setColor(EmbedHelper.GREEN)
+                .setThumbnail(getEmbedThumbnail())
                 .build();
 
         channel.sendMessage(embed).
@@ -731,6 +731,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private MessageEmbed buildErrorEmbed(String name, String error) {
         return getDefaultEmbedBuilder(getSummaryEmbedTitle(name.toUpperCase()))
+                .setThumbnail(getEmbedThumbnail())
                 .setColor(EmbedHelper.RED)
                 .setDescription(error)
                 .build();
@@ -746,8 +747,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private EmbedBuilder getDefaultEmbedBuilder(String title, String footerImage) {
         return new EmbedBuilder()
                 .setTitle(title)
-                .setFooter(footer, footerImage)
-                .setThumbnail(getEmbedThumbnail());
+                .setFooter(footer, footerImage);
     }
 
     /**
@@ -771,6 +771,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 getSummaryEmbedTitle(matchStats.getPlayer().getName().toUpperCase()),
                 "attachment://image.png"
         )
+                .setThumbnail(matchStats.getMode().getImageURL())
                 .setColor(getResultColour(matchStats.getResult()))
                 .setImage(matchStats.getDisplayImageURL());
     }
@@ -813,7 +814,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Embed thumbnail
      */
     private String getEmbedThumbnail() {
-        return codManager.getGame() == CODManager.GAME.MW ? Gunfight.thumbnail : CWCountdownCommand.thumbnail;
+        return codManager.getGame() == CODManager.GAME.MW
+                ? "https://i.imgur.com/xjMwGhr.png"
+                : "https://i.imgur.com/0uCij2q.png";
     }
 
     /**
