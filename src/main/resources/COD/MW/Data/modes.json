@@ -13,11 +13,11 @@
       "real_name": "Gun Game (Realism)"
     },
     "gun_tdm": {
-      "image_url":"https://i.imgur.com/TsvTgP0.png",
+      "image_url": "https://i.imgur.com/TsvTgP0.png",
       "real_name": "TDM Gun Game"
     },
     "gun_tdm_hc": {
-      "image_url":"https://i.imgur.com/UZBbJT2.png",
+      "image_url": "https://i.imgur.com/UZBbJT2.png",
       "real_name": "TDM Gun Game (HC)"
     },
     "dom": {
@@ -73,8 +73,8 @@
       "real_name": "Gunfight"
     },
     "br_dmz": {
-      "image_url": "https://i.imgur.com/cCaF4P0.png",
-      "real_name": "Plunder"
+      "real_name": "Plunder",
+      "image_url": "https://i.imgur.com/cEj6unm.png"
     },
     "br": {
       "image_url": "https://i.imgur.com/DNb271x.png",
@@ -284,18 +284,6 @@
       "image_url": "https://i.imgur.com/OXj7cnj.png",
       "real_name": "Infected (Realism)"
     },
-    "mosh_bare_bones": {
-      "image_url": "https://i.imgur.com/tXvB6Qs.png",
-      "real_name": "Bare Bones Moshpit"
-    },
-    "mosh_bare_bones_hc": {
-      "image_url": "https://i.imgur.com/qRs4HAn.png",
-      "real_name": "Bare Bones Moshpit (HC)"
-    },
-    "mosh_bare_bones_realism": {
-      "image_url": "https://i.imgur.com/29T0H6H.png",
-      "real_name": "Bare Bones Moshpit (Realism)"
-    },
     "siege_cdl": {
       "image_url": "https://i.imgur.com/zB6yqyF.png",
       "real_name": "Reinforce (CDL)"
@@ -323,54 +311,6 @@
     "oic_realism": {
       "image_url": "https://i.imgur.com/UWhgW1m.png",
       "real_name": "One in the Chamber (Realism)"
-    },
-    "mosh_standard": {
-      "image_url": "https://i.imgur.com/98vU3jP.png",
-      "real_name": "Moshpit"
-    },
-    "mosh_standard_hc": {
-      "image_url": "https://i.imgur.com/Xz1Q0n6.png",
-      "real_name": "Moshpit (HC)"
-    },
-    "mosh_standard_realism": {
-      "image_url": "https://i.imgur.com/y8GLqbi.png",
-      "real_name": "Moshpit (Realism)"
-    },
-    "mosh_standard_cdl": {
-      "image_url": "https://i.imgur.com/Q2rHbxE.png",
-      "real_name": "Moshpit (CDL)"
-    },
-    "mosh_party": {
-      "image_url": "https://i.imgur.com/Il6hLea.png",
-      "real_name": "Party Mode Moshpit"
-    },
-    "mosh_party_hc": {
-      "image_url": "https://i.imgur.com/qYxewFT.png",
-      "real_name": "Party Mode Moshpit (HC)"
-    },
-    "mosh_party_realism": {
-      "image_url": "https://i.imgur.com/DkT8mIa.png",
-      "real_name": "Party Mode Moshpit (Realism)"
-    },
-    "mosh_party_cdl": {
-      "image_url": "https://i.imgur.com/JNnmTT4.png",
-      "real_name": "Party Mode Moshpit (CDL)"
-    },
-    "mosh_bomb": {
-      "image_url": "https://i.imgur.com/XyJFUYe.png",
-      "real_name": "Bomb Objective Moshpit"
-    },
-    "mosh_bomb_cdl": {
-      "image_url": "https://i.imgur.com/rVPmSiZ.png",
-      "real_name": "Bomb Objective Moshpit (CDL)"
-    },
-    "mosh_bomb_hc": {
-      "image_url": "https://i.imgur.com/Nee8U2w.png",
-      "real_name": "Bomb Objective Moshpit (HC)"
-    },
-    "mosh_bomb_realism": {
-      "image_url": "https://i.imgur.com/Z0ayVsA.png",
-      "real_name": "Bomb Objective Moshpit (Realism)"
     },
     "killstreak_confirmed": {
       "real_name": "Killstreak Confirmed",
@@ -405,41 +345,52 @@
       "image_url": "https://i.imgur.com/yfByqNF.png"
     },
     "br_dmz_85": {
-      "real_name": "Plunder Duos"
+      "real_name": "Plunder Duos",
+      "image_url": "https://i.imgur.com/cEj6unm.png"
     },
     "hq_arm": {
-      "real_name": "HC Ground War"
+      "real_name": "HC Ground War",
+      "image_url": "https://i.imgur.com/kziszKc.png"
     },
     "arena_op": {
       "real_name": "Gunfight O.S.P",
       "image_url": "https://i.imgur.com/r5zJsUt.png"
     },
     "br_dmz_38": {
-      "real_name": "Plunder Quads"
+      "real_name": "Plunder Quads",
+      "image_url": "https://i.imgur.com/cCaF4P0.png"
     },
     "br_dmz_104": {
-      "real_name": "Blood Money"
+      "real_name": "Blood Money",
+      "image_url": "https://i.imgur.com/cEj6unm.png"
     },
     "br_89": {
-      "real_name": "Warzone Quads"
+      "real_name": "Warzone Quads",
+      "image_url": "https://i.imgur.com/DNb271x.png"
     },
     "br_25": {
-      "real_name": "Warzone Trios"
+      "real_name": "Warzone Trios",
+      "image_url": "https://i.imgur.com/rU6L7Rq.png"
     },
     "br_87": {
-      "real_name": "Warzone Solo"
+      "real_name": "Warzone Solo",
+      "image_url": "https://i.imgur.com/n0xaA0Y.png"
     },
     "br_dmz_76": {
-      "real_name": "Plunder Quads"
+      "real_name": "Plunder Quads",
+      "image_url": "https://i.imgur.com/tJRX72I.png"
     },
     "br_all": {
-      "real_name": "All"
+      "real_name": "All",
+      "image_url": "https://i.imgur.com/DNb271x.png"
     },
     "arm": {
-      "real_name": "Ground War"
+      "real_name": "Ground War",
+      "image_url": "https://i.imgur.com/1HmqEwQ.png"
     },
     "br_77": {
-      "real_name": "Warzone Scopes & Scatter Guns"
+      "real_name": "Warzone Scopes & Scatter Guns",
+      "image_url": "https://i.imgur.com/moWOGXu.png"
     }
   }
 }

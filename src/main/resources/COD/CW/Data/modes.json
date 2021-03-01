@@ -2,97 +2,106 @@
   "modes": {
     "sd": {
       "real_name": "Search and Destroy",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/DdktD37.png"
     },
     "sd_hc": {
-      "real_name": "HC Search and Destroy",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "real_name": "Search and Destroy (HC)",
+      "image_url": "https://i.imgur.com/DdktD37.png"
+
     },
     "tdm": {
       "real_name": "Team Deathmatch",
-      "extra_stat_1:": "Eliminations",
-      "extra_stat_2:": "Deaths"
+      "image_url": "https://i.imgur.com/q9cz3YM.png"
+
     },
     "tdm_hc": {
-      "real_name": "HC Team Deathmatch",
-      "extra_stat_1:": "Eliminations",
-      "extra_stat_2:": "Deaths"
+      "real_name": "Team Deathmatch (HC)",
+      "image_url": "https://i.imgur.com/q9cz3YM.png"
+
     },
     "dm": {
-      "real_name": "Free For All"
+      "real_name": "Free For All",
+      "image_url": "https://i.imgur.com/NVb2f2b.png"
+
     },
     "dm_hc": {
-      "real_name": "HC Free For All"
+      "real_name": "Free For All (HC)",
+      "image_url": "https://i.imgur.com/NVb2f2b.png"
+
     },
     "dom": {
       "real_name": "Domination",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/bsmt4mY.png"
+
     },
     "dom_hc": {
-      "real_name": "HC Domination",
-      "extra_stat_1:": "Objectives",
-      "extra_stat_2:": "Eliminations"
+      "real_name": "Domination (HC)",
+      "image_url": "https://i.imgur.com/bsmt4mY.png"
+
     },
     "koth": {
       "real_name": "Hardpoint",
-      "extra_stat_1:": "Objective Time",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/LOwtmla.png"
+
     },
     "control": {
       "real_name": "Control",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/T7gVHrO.png"
+
     },
     "vip": {
       "real_name": "VIP Escort",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/B02iK05.png"
+
     },
     "conf": {
       "real_name": "Kill Confirmed",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/Dxu82me.png"
+
     },
     "conf_hc": {
-      "real_name": "HC Kill Confirmed",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "real_name": "Kill Confirmed (HC)",
+      "image_url": "https://i.imgur.com/Dxu82me.png"
+
     },
     "dom10v10": {
       "real_name": "Combined Arms: Domination",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/bsmt4mY.png"
+
     },
     "war12v12": {
       "real_name": "Combined Arms: Assault",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
-    },
-    "fireteam_dirty_bomb": {
-      "real_name": "Fireteam: Dirty Bomb",
-      "extra_stat_1:": "Objective",
-      "extra_stat_2:": "Eliminations"
+      "image_url": "https://i.imgur.com/q9cz3YM.png"
+
     },
     "prop":{
-      "real_name":"Prop Hunt"
+      "real_name":"Prop Hunt",
+      "image_url": "https://i.imgur.com/JWohodi.png"
+
     },
     "gunfight":{
-      "real_name":"Gunfight"
+      "real_name":"Gunfight",
+      "image_url": "https://i.imgur.com/TMCFXH6.png"
+
+    },
+    "gunfight_3v3":{
+      "real_name":"Gunfight 3v3",
+      "image_url": "https://i.imgur.com/TMCFXH6.png"
+
     },
     "dropkick":{
-      "real_name":"Dropkick"
+      "real_name":"Dropkick",
+      "image_url": "https://i.imgur.com/rpOmrF3.png"
+
     },
     "dom_snipe_bb":{
-      "real_name":"Snipers Only Domination"
+      "real_name":"Snipers Only Domination",
+      "image_url": "https://i.imgur.com/bsmt4mY.png"
+
     },
     "tdm_snipe_bb":{
-      "real_name":"Snipers Only TDM"
-    },
-    "fireteam_dirty_bomb_endurance":{
-      "real_name":"Fireteam: Endurance Dirty Bomb"
+      "real_name":"Snipers Only TDM",
+      "image_url": "https://i.imgur.com/q9cz3YM.png"
     }
   }
 }

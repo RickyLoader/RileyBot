@@ -1,7 +1,7 @@
 package Bot;
 
 import Audio.DiscordAudioPlayer;
-import COD.CODManager;
+import COD.CWManager;
 import COD.MWManager;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
@@ -35,7 +35,7 @@ public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
     public static final MWManager mwAssetManager = new MWManager();
-    public static final CODManager cwManager = new CODManager(CODManager.GAME.CW);
+    public static final CWManager cwManager = new CWManager();
     private EmoteHelper emoteHelper;
 
     /**

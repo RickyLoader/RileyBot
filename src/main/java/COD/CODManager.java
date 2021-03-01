@@ -12,7 +12,7 @@ import static COD.Assets.Attachment.*;
 /**
  * Manage resources, weapons, maps, and modes for COD
  */
-public class CODManager {
+public abstract class CODManager {
     final ResourceHandler resourceHandler;
     final String basePath;
     private final HashMap<String, Weapon> weapons;
@@ -22,7 +22,6 @@ public class CODManager {
     private final GAME game;
     private final HashMap<Weapon.CATEGORY, BufferedImage> missingWeaponImages = new HashMap<>();
     private final BufferedImage missingPerkImage, missingModeImage;
-    private final String missingModeImageUrl = "https://i.imgur.com/mo1WSMb.png";
 
     public enum GAME {
         CW,
@@ -45,6 +44,13 @@ public class CODManager {
         this.missingPerkImage = resourceHandler.getImageResource(basePath + "Perks/missing.png");
         this.missingModeImage = resourceHandler.getImageResource(basePath + "Modes/missing.png");
     }
+
+    /**
+     * Get the URL to an image representing a missing mode
+     *
+     * @return Missing mode image URL
+     */
+    public abstract String getMissingModeImageURL();
 
     /**
      * Parse weapon JSON in to objects and map to the codename
@@ -222,8 +228,8 @@ public class CODManager {
                     new Mode(
                             name,
                             modeData.getString("real_name"),
-                            modeIcon == null ? missingModeImage : modeIcon,
-                            modeIcon == null ? missingModeImageUrl : modeData.getString("image_url")
+                            modeIcon,
+                            modeData.getString("image_url")
                     )
             );
         }
@@ -298,7 +304,7 @@ public class CODManager {
                     codename,
                     "MISSING: " + codename,
                     missingModeImage,
-                    missingModeImageUrl
+                    getMissingModeImageURL()
             );
         }
         return mode;

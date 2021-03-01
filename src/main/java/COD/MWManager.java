@@ -141,4 +141,9 @@ public class MWManager extends CODManager {
     public Killstreak getKillstreakByCodename(String codename) {
         return killstreaks.get(codename);
     }
+
+    @Override
+    public String getMissingModeImageURL() {
+        return "https://i.imgur.com/mo1WSMb.png";
+    }
 }
