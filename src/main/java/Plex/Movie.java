@@ -170,8 +170,7 @@ public class Movie implements Comparator<Movie> {
      * @return JSON formatted movie
      */
     public String toJSON(Member member, long requested, String webhook) {
-        return new JSONObject()
-                .put("imdb_id", imdbId)
+        JSONObject json = new JSONObject()
                 .put("title", title)
                 .put("tagline", tagline == null ? JSONObject.NULL : tagline)
                 .put("summary", summary == null ? JSONObject.NULL : summary)
@@ -179,7 +178,6 @@ public class Movie implements Comparator<Movie> {
                 .put("language", language)
                 .put("genre", genre == null ? JSONObject.NULL : genre)
                 .put("poster", poster == null ? JSONObject.NULL : poster)
-                .put("imdb_url", imdbURL)
                 .put("director", director == null ? JSONObject.NULL : director)
                 .put("release_date", getFormattedReleaseDate())
                 .put("content_rating", contentRating)
@@ -191,8 +189,11 @@ public class Movie implements Comparator<Movie> {
                 .put("member", member.getAsMention())
                 .put("duration", duration > 0 ? getDuration() : JSONObject.NULL)
                 .put("requested", requested)
-                .put("webhook", webhook)
-                .toString();
+                .put("webhook", webhook);
+        if(imdbId != null) {
+            json.put("imdb_id", imdbId).put("imdb_url", imdbURL);
+        }
+        return json.toString();
     }
 
     /**
@@ -248,7 +249,7 @@ public class Movie implements Comparator<Movie> {
         JSONObject credits = movie.getJSONObject("credits");
         this.cast = parseCast(credits.getJSONArray("cast"));
         this.director = parseDirectors(credits.getJSONArray("crew"));
-        if(this.imdbId == null) {
+        if(this.imdbId == null && !movie.isNull("imdb_id")) {
             this.imdbId = movie.getString("imdb_id");
             this.imdbURL = MovieBuilder.buildIMDBUrl(this.imdbId);
         }

@@ -153,15 +153,17 @@ public class PlexServer {
             String folder = movie.getString("path");
             plexUrl = folder.endsWith("/") ? plexUrls.get(folder.substring(0, folder.length() - 1)) : plexUrls.get(folder);
         }
-        return new Movie.MovieBuilder()
-                .setImdbId(movie.has("imdbId") ? movie.getString("imdbId") : null)
+        Movie.MovieBuilder builder = new Movie.MovieBuilder()
                 .setTmdbId(String.valueOf(movie.getInt("tmdbId")))
                 .setTitle(movie.getString("title"))
                 .setSummary(movie.has("overview") ? movie.getString("overview") : null)
                 .setReleaseDate(movie.has("inCinemas") ? movie.getString("inCinemas") : null)
                 .setPlexURL(plexUrl)
-                .setOnPlex(downloaded)
-                .build();
+                .setOnPlex(downloaded);
+        if(movie.has("imdbId")) {
+            builder.setImdbId(movie.getString("imdbId"));
+        }
+        return builder.build();
     }
 
     /**
@@ -297,7 +299,6 @@ public class PlexServer {
                 .put("addOptions", new JSONObject().put("searchForMovie", true))
                 .toString();
 
-        long start = System.currentTimeMillis();
         Movie result = parseMovie(movie);
         result.completeMovieDetails();
 
@@ -309,11 +310,6 @@ public class PlexServer {
         new NetworkRequest(getRadarrLibraryURL(), false).post(body);
 
         library.add(result);
-        System.out.println(
-                result.getTitle()
-                        + " (" + result.getFormattedReleaseDate() + ") has been added to Radarr: "
-                        + result.getIMDBUrl() + " (" + (System.currentTimeMillis() - start) + " ms)"
-        );
         return result;
     }
 
