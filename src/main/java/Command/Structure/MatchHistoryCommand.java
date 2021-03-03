@@ -787,8 +787,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
                                 playerStats.getInt("shotsFired")
                         ) : null
                 )
-                .setTeam(player.getString("team"))
-                .setUno(player.getString("uno"))
+                .setTeam(getOptionalString(player, "team"))
+                .setUno(getOptionalString(player, "uno"))
                 .setNemesis(getOptionalString(player, "nemesis"))
                 .setMostKilled(getOptionalString(player, "mostKilled"))
                 .setLongestStreak(getLongestStreak(playerStats))
