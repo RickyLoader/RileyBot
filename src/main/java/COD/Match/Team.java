@@ -1,6 +1,7 @@
 package COD.Match;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Hold data on a team in a COD match
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 public class Team {
     private final String name;
     private final ArrayList<MatchPlayer> players;
+    private final HashMap<String, MatchPlayer> playerMap;
 
     /**
      * Create a team
@@ -17,6 +19,7 @@ public class Team {
     public Team(String name) {
         this.name = name;
         this.players = new ArrayList<>();
+        this.playerMap = new HashMap<>();
     }
 
     /**
@@ -26,6 +29,7 @@ public class Team {
      */
     public void addPlayer(MatchPlayer player) {
         this.players.add(player);
+        this.playerMap.put(player.getName(), player);
     }
 
     /**
@@ -35,6 +39,16 @@ public class Team {
      */
     public ArrayList<MatchPlayer> getPlayers() {
         return players;
+    }
+
+    /**
+     * Get a player by name
+     *
+     * @param name Name of player to get
+     * @return Player
+     */
+    public MatchPlayer getPlayerByName(String name) {
+        return playerMap.get(name);
     }
 
     /**

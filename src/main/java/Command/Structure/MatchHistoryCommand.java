@@ -166,8 +166,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .addField("Name", score.getPlayerName(), true)
                 .addField("Date", score.getDateString(), true)
                 .addBlankField(true)
-                .addField("Wobblies", MatchStats.formatDistance(score.getWobblies(), "wobblies"), true)
-                .addField("Metres", MatchStats.formatDistance(score.getMetres(), "metres"), true)
+                .addField("Wobblies", MatchPlayer.formatDistance(score.getWobblies(), "wobblies"), true)
+                .addField("Metres", MatchPlayer.formatDistance(score.getMetres(), "metres"), true)
                 .addBlankField(true)
                 .addField("Map", score.getMap().getName(), true)
                 .addField("Mode", score.getMode().getName(), true)
@@ -209,7 +209,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 return new String[]{
                         String.valueOf(rank),
                         score.getPlayerName(),
-                        MatchStats.formatDistance(score.getWobblies(), "wobblies")
+                        MatchPlayer.formatDistance(score.getWobblies(), "wobblies")
                 };
             }
 
@@ -262,7 +262,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 return new EmbedBuilder()
                         .setThumbnail(getEmbedThumbnail())
                         .setTitle(total + " Missing attachments (" + missing.size() + " Weapons)")
-                        .setFooter(pageDetails + "| Type: " + getTrigger() + " for help");
+                        .setFooter(pageDetails + " | Type: " + getTrigger() + " for help");
             }
 
             @Override
@@ -334,7 +334,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                     else if(emote == players) {
                         content = buildMatchPlayersEmbed(matchStats);
                     }
-                    else if(emote == loadouts && matchStats.hasLoadouts()) {
+                    else if(emote == loadouts && matchStats.getMainPlayer().hasLoadouts()) {
                         content = buildMatchLoadoutEmbed(matchStats);
                     }
                     else if(emote == switchImage && last != loadouts) {
@@ -363,7 +363,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @param channel      Channel to send to
      */
     private void sendMatchEmbed(MatchHistory matchHistory, MessageChannel channel) {
-        MatchStats matchStats = matchID.equals("latest") ? matchHistory.getMatches().get(0) : matchHistory.getMatch(matchID);
+        MatchStats matchStats = matchID.equals("latest")
+                ? matchHistory.getMatches().get(0)
+                : matchHistory.getMatch(matchID);
         if(matchStats == null) {
             channel.sendMessage(
                     buildErrorEmbed(
@@ -377,25 +379,27 @@ public class MatchHistoryCommand extends CODLookupCommand {
 
         MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
         MessageAction sendMessage = channel.sendMessage(matchEmbed);
+        MatchPlayer player = matchStats.getMainPlayer();
         Consumer<Message> callback = message -> {
             matchMessages.put(message.getIdLong(), matchStats);
             message.addReaction(stats).queue();
             message.addReaction(players).queue();
-            if(matchStats.hasLoadouts()) {
+            if(player.hasLoadouts()) {
                 message.addReaction(loadouts).queue();
             }
             message.addReaction(switchImage).queue();
         };
-        if(matchStats.hasLoadouts()) {
-            matchStats.setLoadoutImage(buildLoadoutImage(matchStats.getLoadouts()));
+        if(player.hasLoadouts()) {
+            player.setLoadoutImage(buildLoadoutImage(player.getLoadouts()));
             /*
              * Setting the attached loadout image file as the embed footer icon prevents it from displaying as
              * a separate message.
              * When viewing the loadout embed, both the embed footer icon & embed image can use the file.
              */
-            sendMessage.addFile(matchStats.getLoadoutImage(), "image.png").queue(callback);
+            sendMessage.addFile(player.getLoadoutImage(), "image.png").queue(callback);
             return;
         }
+        addTeams(matchStats);
         sendMessage.queue(callback);
     }
 
@@ -439,29 +443,30 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @param matchStats Match to add teams to
      */
     private void addTeams(MatchStats matchStats) {
+        Team allies = new Team("Allies");
+        Team axis = new Team("Axis");
         JSONObject matchDetails = new JSONObject(getMatchPlayersJSON(matchStats.getId(), getPlatform()));
         if(matchDetails.has("status")) {
-            System.out.println("Error getting team data:" + matchDetails.getString("status"));
+            matchStats.setTeams(allies, axis);
             return;
         }
         JSONArray playerList = matchDetails.getJSONArray("allPlayers");
-        Team allies = new Team("Allies");
-        Team axis = new Team("Axis");
+
         for(int i = 0; i < playerList.length(); i++) {
-            JSONObject playerData = playerList.getJSONObject(i).getJSONObject("player");
-            MatchPlayer player = new MatchPlayer(
-                    playerData.getString("username"),
-                    PLATFORM.byName(playerData.getString("platform"))
+            JSONObject stats = playerList.getJSONObject(i);
+            JSONObject playerInfo = stats.getJSONObject("player");
+            MatchPlayer player = parseMatchPlayer(
+                    stats,
+                    new MatchPlayer.MatchPlayerBuilder(
+                            playerInfo.getString("username"),
+                            PLATFORM.byName(playerInfo.getString("platform"))
+                    )
             );
-            player.setUno(playerData.getString("uno"));
-            if(playerData.getString("team").equals("allies")) {
+            if(player.getTeam().equals("allies")) {
                 allies.addPlayer(player);
             }
             else {
                 axis.addPlayer(player);
-            }
-            if(player.getPlatform() == PLATFORM.NONE) {
-                System.out.println("Unable to match: " + playerData.getString("platform"));
             }
         }
         matchStats.setTeams(allies, axis);
@@ -475,10 +480,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private MessageEmbed buildMatchEmbed(MatchStats matchStats) {
         int wobblyRank = getWobblyRank(matchStats);
+        MatchPlayer player = matchStats.getMainPlayer();
         EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats)
                 .setTitle(
                         codManager.getGame().name().toUpperCase()
-                                + " Match Summary: " + matchStats.getPlayer().getName().toUpperCase()
+                                + " Match Summary: " + matchStats.getMainPlayer().getName().toUpperCase()
                 )
                 .addField("**Date**", matchStats.getDateString(), true)
                 .addField("**Time**", matchStats.getTimeString(), true)
@@ -489,30 +495,30 @@ public class MatchHistoryCommand extends CODLookupCommand {
             builder.addBlankField(true);
         }
         else {
-            builder.addField("**Time Played**", matchStats.getTimePlayedString(), true);
+            builder.addField("**Time Played**", player.getTimePlayedString(), true);
         }
         return builder
-                .addField("**K/D**", matchStats.getKillDeathSummary(), true)
-                .addField("**Shots Fired/Hit**", matchStats.getShotSummary(), true)
-                .addField("**Accuracy**", matchStats.getAccuracySummary(), true)
-                .addField("**Damage Dealt**", matchStats.getDamageDealt(), true)
-                .addField("**Damage Taken**", matchStats.getDamageReceived(), true)
-                .addField("**Highest Streak**", String.valueOf(matchStats.getLongestStreak()), true)
+                .addField("**K/D**", player.getKillDeathSummary(), true)
+                .addField("**Shots Fired/Hit**", player.getShotSummary(), true)
+                .addField("**Accuracy**", player.getAccuracySummary(), true)
+                .addField("**Damage Dealt**", player.getDamageDealt(), true)
+                .addField("**Damage Taken**", player.getDamageReceived(), true)
+                .addField("**Highest Streak**", String.valueOf(player.getLongestStreak()), true)
                 .addField(
                         "**Distance Travelled**",
-                        matchStats.formatWobblies() + "\n" + matchStats.formatMetres(),
+                        player.formatWobblies() + "\n" + player.formatMetres(),
                         true
                 )
-                .addField("**Time Spent Moving**", matchStats.getPercentTimeMovingString(), true)
+                .addField("**Time Spent Moving**", player.getPercentTimeMovingString(), true)
                 .addField(
                         "**Wobbly Rank**",
                         wobblyRank == 0 ? "-" : String.valueOf(wobblyRank),
                         true
                 )
-                .addField("**Nemesis**", matchStats.getNemesis(), true)
-                .addField("**Most Killed**", matchStats.getMostKilled(), true)
+                .addField("**Nemesis**", player.getNemesis(), true)
+                .addField("**Most Killed**", player.getMostKilled(), true)
                 .addBlankField(true)
-                .addField("**Match XP**", matchStats.getExperience(), true)
+                .addField("**Match XP**", player.getExperience(), true)
                 .addField(
                         "**Result**",
                         matchStats.getResult().toString()
@@ -532,7 +538,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private int getWobblyRank(MatchStats matchStats) {
         for(int i = 0; i < leaderboard.size(); i++) {
             WobblyScore score = leaderboard.get(i);
-            if(score.getKey().equals(matchStats.getId() + matchStats.getPlayer().getName())) {
+            if(score.getKey().equals(matchStats.getId() + matchStats.getMainPlayer().getName())) {
                 return i + 1;
             }
         }
@@ -546,13 +552,10 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Message embed showing list of match players
      */
     private MessageEmbed buildMatchPlayersEmbed(MatchStats matchStats) {
-        if(!matchStats.hasTeams()) {
-            addTeams(matchStats);
-        }
         EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats)
-                .setTitle(codManager.getGame().name().toUpperCase() + " Match Players: "+matchStats.getId());
-        addTeamToEmbed(matchStats.getTeam1(), builder);
-        addTeamToEmbed(matchStats.getTeam2(), builder);
+                .setTitle(codManager.getGame().name().toUpperCase() + " Match Players: " + matchStats.getId());
+        addTeamToEmbed(matchStats.getAllies(), builder);
+        addTeamToEmbed(matchStats.getAxis(), builder);
         return builder.build();
     }
 
@@ -563,7 +566,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Message embed showing player loadouts
      */
     private MessageEmbed buildMatchLoadoutEmbed(MatchStats matchStats) {
-        int size = matchStats.getLoadouts().length;
+        MatchPlayer player = matchStats.getMainPlayer();
+        int size = player.getLoadouts().length;
         String summary = "**Match Loadouts**: " + size;
         if(size > 5) {
             summary += " (A good builder would never need " + size + " sets of tools!)";
@@ -572,7 +576,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         return getDefaultMatchEmbedBuilder(matchStats)
                 .setTitle(
                         codManager.getGame().name().toUpperCase()
-                                + " Match Loadouts: " + matchStats.getPlayer().getName().toUpperCase()
+                                + " Match Loadouts: " + player.getName().toUpperCase()
                 )
                 .setDescription(summary)
                 .setImage("attachment://image.png")
@@ -705,69 +709,37 @@ public class MatchHistoryCommand extends CODLookupCommand {
 
         JSONArray matchList = overview.getJSONArray("matches");
         JSONObject summary = overview.getJSONObject("summary").getJSONObject("all");
-        MatchPlayer player = new MatchPlayer(name, platform);
         ArrayList<WobblyScore> scores = new ArrayList<>();
-
         for(int i = 0; i < matchList.length(); i++) {
-            JSONObject match = matchList.getJSONObject(i);
-            JSONObject playerStats = match.getJSONObject("playerStats");
-            JSONObject playerSummary = match.getJSONObject("player");
+            JSONObject matchData = matchList.getJSONObject(i);
+            MatchPlayer player = parseMatchPlayer(matchData, new MatchPlayer.MatchPlayerBuilder(name, platform));
             MatchStats.RESULT result = parseResult(
-                    (!match.getBoolean("isPresentAtEnd") || match.isNull("result")) ? "FORFEIT" : match.getString("result")
+                    (!matchData.getBoolean("isPresentAtEnd") || matchData.isNull("result")) ? "FORFEIT" : matchData.getString("result")
             );
 
-            MatchStats.MatchBuilder matchBuilder = new MatchStats.MatchBuilder(
-                    match.getString("matchID"),
-                    codManager.getMapByCodename(match.getString("map")),
-                    codManager.getModeByCodename(match.getString("mode")),
-                    new Date(match.getLong("utcStartSeconds") * 1000),
-                    new Date(match.getLong("utcEndSeconds") * 1000),
-                    playerStats.getLong("timePlayed") * 1000,
+            MatchStats match = new MatchStats(
+                    matchData.getString("matchID"),
+                    codManager.getMapByCodename(matchData.getString("map")),
+                    codManager.getModeByCodename(matchData.getString("mode")),
+                    new Date(matchData.getLong("utcStartSeconds") * 1000),
+                    new Date(matchData.getLong("utcEndSeconds") * 1000),
                     result,
-                    player
+                    player,
+                    new Score(
+                            matchData.getInt("team1Score"),
+                            matchData.getInt("team2Score"),
+                            result
+                    )
             );
-
-            matchBuilder
-                    .setKD(
-                            new Ratio(
-                                    playerStats.getInt("kills"),
-                                    playerStats.getInt("deaths")
-                            )
-                    )
-                    .setAccuracy(
-                            playerStats.has("shotsLanded") ? new Ratio(
-                                    playerStats.getInt("shotsLanded"),
-                                    playerStats.getInt("shotsFired")
-                            ) : null
-                    )
-                    .setMatchScore(
-                            new Score(
-                                    match.getInt("team1Score"),
-                                    match.getInt("team2Score"),
-                                    result
-                            )
-                    )
-                    .setNemesis(getOptionalString(playerSummary, "nemesis"))
-                    .setMostKilled(getOptionalString(playerSummary, "mostKilled"))
-                    .setLongestStreak(getLongestStreak(playerStats))
-                    .setDamageDealt(getDamageDealt(playerStats))
-                    .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
-                    .setXP(getOptionalInt(playerStats, "matchXp"))
-                    .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
-                    .setLoadouts(parseLoadouts(playerSummary));
-            if(playerStats.has("percentTimeMoving")) {
-                matchBuilder.setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"));
-            }
-            MatchStats stats = matchBuilder.build();
-            matchStats.add(stats);
+            matchStats.add(match);
             WobblyScore wobblyScore = new WobblyScore(
-                    stats.getWobblies(),
-                    stats.getMetres(),
-                    stats.getPlayer().getName(),
-                    stats.getStart().getTime(),
-                    stats.getMap(),
-                    stats.getMode(),
-                    stats.getId(),
+                    player.getWobblies(),
+                    player.getMetres(),
+                    player.getName(),
+                    match.getStart().getTime(),
+                    match.getMap(),
+                    match.getMode(),
+                    match.getId(),
                     codManager.getGame()
             );
             if(leaderboardSeen.contains(wobblyScore.getKey())) {
@@ -793,13 +765,53 @@ public class MatchHistoryCommand extends CODLookupCommand {
     }
 
     /**
-     * Parse the provided match JSON for the player loadouts
+     * Parse a match player from the given match JSON
      *
-     * @param playerSummary Player match summary JSON
+     * @param matchData Match JSON
+     * @param builder   Player builder
+     * @return Match player
+     */
+    private MatchPlayer parseMatchPlayer(JSONObject matchData, MatchPlayer.MatchPlayerBuilder builder) {
+        JSONObject player = matchData.getJSONObject("player");
+        JSONObject playerStats = matchData.getJSONObject("playerStats");
+        builder.setTimePlayed(playerStats.getLong("timePlayed") * 1000)
+                .setKD(
+                        new Ratio(
+                                playerStats.getInt("kills"),
+                                playerStats.getInt("deaths")
+                        )
+                )
+                .setAccuracy(
+                        playerStats.has("shotsLanded") ? new Ratio(
+                                playerStats.getInt("shotsLanded"),
+                                playerStats.getInt("shotsFired")
+                        ) : null
+                )
+                .setTeam(player.getString("team"))
+                .setUno(player.getString("uno"))
+                .setNemesis(getOptionalString(player, "nemesis"))
+                .setMostKilled(getOptionalString(player, "mostKilled"))
+                .setLongestStreak(getLongestStreak(playerStats))
+                .setDamageDealt(getDamageDealt(playerStats))
+                .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
+                .setXP(getOptionalInt(playerStats, "matchXp"))
+                .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
+                .setLoadouts(parseLoadouts(player.getJSONArray("loadout")));
+
+        if(playerStats.has("percentTimeMoving")) {
+            builder.setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"));
+        }
+
+        return builder.build();
+    }
+
+    /**
+     * Parse the provided loadout JSON into an array of loadouts
+     *
+     * @param loadoutList JSON loadout array
      * @return Array of player loadouts
      */
-    private Loadout[] parseLoadouts(JSONObject playerSummary) {
-        JSONArray loadoutList = playerSummary.getJSONArray("loadout");
+    private Loadout[] parseLoadouts(JSONArray loadoutList) {
         ArrayList<Loadout> loadouts = new ArrayList<>();
         for(int i = 0; i < loadoutList.length(); i++) {
             JSONObject loadoutData = loadoutList.getJSONObject(i);
