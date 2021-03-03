@@ -389,6 +389,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             }
             message.addReaction(switchImage).queue();
         };
+        addTeams(matchStats);
         if(player.hasLoadouts()) {
             player.setLoadoutImage(buildLoadoutImage(player.getLoadouts()));
             /*
@@ -399,7 +400,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
             sendMessage.addFile(player.getLoadoutImage(), "image.png").queue(callback);
             return;
         }
-        addTeams(matchStats);
         sendMessage.queue(callback);
     }
 
