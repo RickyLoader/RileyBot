@@ -10,11 +10,13 @@ import java.util.List;
  */
 public abstract class PageableEmbed {
     private final MessageChannel channel;
+    private final int bound, pages;
+    private final Emote forward, backward;
+    private final EmoteHelper emoteHelper;
     private List<?> items;
     private long id;
     private int index = 0, page = 1;
-    private final int bound, pages;
-    private final Emote forward, backward;
+    private Emote lastAction;
 
     /**
      * Initialise the values
@@ -28,7 +30,7 @@ public abstract class PageableEmbed {
         this.items = items;
         this.bound = bound;
         this.pages = (int) Math.ceil(items.size() / (double) bound);
-        EmoteHelper emoteHelper = context.getEmoteHelper();
+        this.emoteHelper = context.getEmoteHelper();
         this.forward = emoteHelper.getForward();
         this.backward = emoteHelper.getBackward();
         context.getJDA().addEventListener(new EmoteListener() {
@@ -40,6 +42,15 @@ public abstract class PageableEmbed {
                 }
             }
         });
+    }
+
+    /**
+     * Get the emote helper
+     *
+     * @return Emote helper
+     */
+    public EmoteHelper getEmoteHelper() {
+        return emoteHelper;
     }
 
     /**
@@ -144,7 +155,7 @@ public abstract class PageableEmbed {
      *
      * @return Message embed
      */
-    private MessageEmbed buildMessage() {
+    public MessageEmbed buildMessage() {
         EmbedBuilder embedBuilder = getEmbedBuilder("Page: " + page + "/" + pages);
         int max = Math.min(bound, (items.size() - this.index));
         for(int index = this.index; index < (this.index + max); index++) {
@@ -160,6 +171,15 @@ public abstract class PageableEmbed {
      */
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    /**
+     * Get the last emote resulting in an action
+     *
+     * @return Last emote resulting in action
+     */
+    public Emote getLastAction() {
+        return lastAction;
     }
 
     /**
@@ -181,6 +201,7 @@ public abstract class PageableEmbed {
                 return;
             }
         }
+        lastAction = emote;
         this.page = (index / bound) + 1;
         updateMessage();
     }
@@ -197,7 +218,7 @@ public abstract class PageableEmbed {
     /**
      * Page the index forward
      */
-    private void pageForward() {
+    public void pageForward() {
         if((items.size() - 1) - index < bound) {
             return;
         }
@@ -207,7 +228,7 @@ public abstract class PageableEmbed {
     /**
      * Page the index backward
      */
-    private void pageBackward() {
+    public void pageBackward() {
         if(index == 0) {
             return;
         }

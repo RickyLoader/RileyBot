@@ -61,6 +61,15 @@ public abstract class PageableSortEmbed extends PageableEmbed {
     }
 
     /**
+     * Get the reverse sort emote
+     *
+     * @return Reverse sort emote
+     */
+    public Emote getReverse() {
+        return reverse;
+    }
+
+    /**
      * Sort the items based on the value of defaultSort
      *
      * @param items       List of objects to sort

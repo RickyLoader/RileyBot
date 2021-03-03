@@ -32,6 +32,24 @@ public abstract class PageableTemplateEmbed extends PageableSortEmbed {
         this.colour = colour.length == 0 ? EmbedHelper.YELLOW : colour[0];
     }
 
+    /**
+     * Get the thumbnail image URL
+     *
+     * @return Thumbnail image URL
+     */
+    public String getThumb() {
+        return thumb;
+    }
+
+    /**
+     * Get the footer text
+     *
+     * @return Footer text
+     */
+    public String getFooter() {
+        return footer;
+    }
+
     @Override
     public EmbedBuilder getEmbedBuilder(String pageDetails) {
         return new EmbedBuilder()
@@ -39,6 +57,7 @@ public abstract class PageableTemplateEmbed extends PageableSortEmbed {
                 .setThumbnail(thumb)
                 .setDescription(desc)
                 .setColor(colour)
+                .setImage(EmbedHelper.SPACER_IMAGE)
                 .setFooter(pageDetails + " | " + footer);
     }
 }
