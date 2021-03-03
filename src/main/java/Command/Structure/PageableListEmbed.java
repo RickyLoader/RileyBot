@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 
 import java.util.List;
 
-public abstract class PageableListEmbed extends PageableEmbed {
+public abstract class PageableListEmbed extends PageableTemplateEmbed {
 
     /**
      * Embedded message that can be paged through with emotes and displays as a list of fields
@@ -29,7 +29,7 @@ public abstract class PageableListEmbed extends PageableEmbed {
      * @param currentIndex Current index within list of items
      */
     @Override
-    public void addFields(EmbedBuilder builder, int currentIndex) {
+    public void displayItem(EmbedBuilder builder, int currentIndex) {
         builder.addField(getName(currentIndex), getValue(currentIndex), false);
     }
 

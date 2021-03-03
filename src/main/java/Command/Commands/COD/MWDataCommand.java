@@ -2,15 +2,9 @@ package Command.Commands.COD;
 
 import COD.Assets.Weapon;
 import COD.Gunfight;
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.EmbedHelper;
-import Command.Structure.PageableEmbed;
+import Command.Structure.*;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -100,18 +94,22 @@ public class MWDataCommand extends DiscordCommand {
      * @param title   Embed title to use
      */
     private void showPageableWeapons(CommandContext context, Weapon[] weapons, String title) {
-        new PageableEmbed(
+        new PageableSortEmbed(
                 context,
                 Arrays.asList(weapons),
-                Gunfight.thumbnail,
-                title,
-                null,
-                "Type: " + getTrigger() + " for help",
-                1,
-                EmbedHelper.PURPLE
+                1
         ) {
             @Override
-            public void addFields(EmbedBuilder builder, int currentIndex) {
+            public EmbedBuilder getEmbedBuilder(String pageDetails) {
+                return new EmbedBuilder()
+                        .setColor(EmbedHelper.PURPLE)
+                        .setTitle(title)
+                        .setThumbnail(Gunfight.thumbnail)
+                        .setFooter(pageDetails + " | " + "Type: " + getTrigger() + " for help");
+            }
+
+            @Override
+            public void displayItem(EmbedBuilder builder, int currentIndex) {
                 try {
                     Weapon current = (Weapon) getItems().get(currentIndex);
                     Weapon.CATEGORY weaponCategory = current.getCategory();
@@ -126,6 +124,11 @@ public class MWDataCommand extends DiscordCommand {
                 catch(Exception e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public boolean nonPagingEmoteAdded(Emote e) {
+                return false;
             }
 
             @Override

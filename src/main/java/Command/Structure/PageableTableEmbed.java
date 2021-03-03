@@ -7,7 +7,7 @@ import java.util.List;
 import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;
 
-public abstract class PageableTableEmbed extends PageableEmbed {
+public abstract class PageableTableEmbed extends PageableTemplateEmbed {
     private final String[] columns;
 
     /**
@@ -43,7 +43,7 @@ public abstract class PageableTableEmbed extends PageableEmbed {
      * @param currentIndex Current index within list of items
      */
     @Override
-    public void addFields(EmbedBuilder builder, int currentIndex) {
+    public void displayItem(EmbedBuilder builder, int currentIndex) {
         String[] rowValues = getRowValues(currentIndex, getItems(), isDefaultSort());
         try {
             if(rowValues.length != columns.length) {

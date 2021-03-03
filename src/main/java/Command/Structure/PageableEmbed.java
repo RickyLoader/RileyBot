@@ -13,37 +13,24 @@ public abstract class PageableEmbed {
     private List<?> items;
     private long id;
     private int index = 0, page = 1;
-    private final int bound, colour, pages;
-    private final Emote forward, backward, reverse;
-    private boolean defaultSort = true;
-    private final String title, desc, thumb, footer;
+    private final int bound, pages;
+    private final Emote forward, backward;
 
     /**
      * Initialise the values
      *
      * @param context Command context
      * @param items   List of items to be displayed
-     * @param thumb   Thumbnail to use for embed
-     * @param title   Title to use for embed
-     * @param desc    Description to use for embed
-     * @param footer  Footer to use in the embed
-     * @param bound   Maximum items to display
-     * @param colour  Optional colour to use for embed
+     * @param bound   Maximum items to display on one page
      */
-    public PageableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
+    public PageableEmbed(CommandContext context, List<?> items, int bound) {
         this.channel = context.getMessageChannel();
         this.items = items;
-        this.title = title;
-        this.desc = desc;
-        this.thumb = thumb;
         this.bound = bound;
-        this.footer = footer;
-        this.colour = colour.length == 1 ? colour[0] : EmbedHelper.YELLOW;
         this.pages = (int) Math.ceil(items.size() / (double) bound);
         EmoteHelper emoteHelper = context.getEmoteHelper();
         this.forward = emoteHelper.getForward();
         this.backward = emoteHelper.getBackward();
-        this.reverse = emoteHelper.getReverse();
         context.getJDA().addEventListener(new EmoteListener() {
             @Override
             public void handleReaction(MessageReaction reaction, User user, Guild guild) {
@@ -53,25 +40,6 @@ public abstract class PageableEmbed {
                 }
             }
         });
-        sortItems(items, defaultSort);
-    }
-
-    /**
-     * Get the title of the embedded message
-     *
-     * @return Title of embedded message
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Get the description of the embedded message
-     *
-     * @return Description of embedded message
-     */
-    public String getDesc() {
-        return desc;
     }
 
     /**
@@ -93,15 +61,6 @@ public abstract class PageableEmbed {
     }
 
     /**
-     * Get the current sort value
-     *
-     * @return Current sort value
-     */
-    public boolean isDefaultSort() {
-        return defaultSort;
-    }
-
-    /**
      * Get the current index
      *
      * @return Current index
@@ -111,16 +70,7 @@ public abstract class PageableEmbed {
     }
 
     /**
-     * Get the thumbnail of the embedded message
-     *
-     * @return Thumbnail of embedded message
-     */
-    public String getThumb() {
-        return thumb;
-    }
-
-    /**
-     * Get the bound, how many items to display per page
+     * Get the bound - how many items to display per page
      *
      * @return Bound
      */
@@ -134,14 +84,20 @@ public abstract class PageableEmbed {
     public void showMessage() {
         channel.sendMessage(buildMessage()).queue(message -> {
             id = message.getIdLong();
-            if(pages > 1) {
-                message.addReaction(backward).queue();
-                message.addReaction(forward).queue();
-            }
-            if(items.size() > 1) {
-                message.addReaction(reverse).queue();
-            }
+            addReactions(message);
         });
+    }
+
+    /**
+     * Add the required reactions to the message
+     *
+     * @param message Message to add reactions to
+     */
+    public void addReactions(Message message) {
+        if(pages > 1) {
+            message.addReaction(backward).queue();
+            message.addReaction(forward).queue();
+        }
     }
 
     /**
@@ -152,49 +108,20 @@ public abstract class PageableEmbed {
     }
 
     /**
-     * Build the message embed
+     * Get the embed builder to use
      *
-     * @return Message embed
+     * @param pageDetails Current page details - e.g "Page: 1/5"
+     * @return Embed builder
      */
-    public MessageEmbed buildMessage() {
-        EmbedBuilder builder = new EmbedBuilder()
-                .setColor(colour)
-                .setTitle(title)
-                .setThumbnail(thumb)
-                .setImage(EmbedHelper.SPACER_IMAGE);
-        String footer = this.footer;
-        if(pages > 1) {
-            footer = "Page: " + page + "/" + pages + " | " + footer;
-        }
-        builder.setFooter(footer);
-
-        if(desc != null) {
-            builder.setDescription(desc);
-        }
-
-        int max = Math.min(bound, (items.size() - this.index));
-
-        for(int index = this.index; index < (this.index + max); index++) {
-            addFields(builder, index);
-        }
-        return builder.build();
-    }
+    public abstract EmbedBuilder getEmbedBuilder(String pageDetails);
 
     /**
-     * Add fields to the embed based on the current index
+     * Display the item of the given index in the embed builder
      *
-     * @param builder      Embed builder to add fields to
+     * @param builder      Embed builder to display item in
      * @param currentIndex Current index within list of items
      */
-    public abstract void addFields(EmbedBuilder builder, int currentIndex);
-
-    /**
-     * Sort the items based on the value of defaultSort
-     *
-     * @param items       List of objects to sort
-     * @param defaultSort How to sort the items
-     */
-    public abstract void sortItems(List<?> items, boolean defaultSort);
+    public abstract void displayItem(EmbedBuilder builder, int currentIndex);
 
     /**
      * Get the id of the embed
@@ -209,13 +136,30 @@ public abstract class PageableEmbed {
      * Edit the embedded message in place
      */
     private void updateMessage() {
-        channel.retrieveMessageById(id).queue(message -> {
-            MessageEmbed update = buildMessage();
-            if(update == null) {
-                return;
-            }
-            message.editMessage(update).queue();
-        });
+        channel.retrieveMessageById(id).queue(message -> message.editMessage(buildMessage()).queue());
+    }
+
+    /**
+     * Build the message embed to send
+     *
+     * @return Message embed
+     */
+    private MessageEmbed buildMessage() {
+        EmbedBuilder embedBuilder = getEmbedBuilder("Page: " + page + "/" + pages);
+        int max = Math.min(bound, (items.size() - this.index));
+        for(int index = this.index; index < (this.index + max); index++) {
+            displayItem(embedBuilder, index);
+        }
+        return embedBuilder.build();
+    }
+
+    /**
+     * Set the current index
+     *
+     * @param index Index to set
+     */
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     /**
@@ -225,29 +169,49 @@ public abstract class PageableEmbed {
      */
     public void reactionAdded(MessageReaction reaction) {
         Emote emote = reaction.getReactionEmote().getEmote();
-        if(emote != forward && emote != backward && emote != reverse) {
-            return;
-        }
-
         if(emote == forward) {
-            if((items.size() - 1) - index < bound) {
-                return;
-            }
-            index += bound;
+            pageForward();
         }
         else if(emote == backward) {
-            if(index == 0) {
-                return;
-            }
-            index -= bound;
+            pageBackward();
         }
         else {
-            defaultSort = !defaultSort;
-            sortItems(items, defaultSort);
-            index = 0;
+            boolean actionPerformed = nonPagingEmoteAdded(emote);
+            if(!actionPerformed) {
+                return;
+            }
         }
         this.page = (index / bound) + 1;
         updateMessage();
+    }
+
+    /**
+     * Check for any extra action to perform based on an emote which was
+     * added and was not a paging emote.
+     *
+     * @param e Non paging emote which was added to the message
+     * @return Update the message
+     */
+    public abstract boolean nonPagingEmoteAdded(Emote e);
+
+    /**
+     * Page the index forward
+     */
+    private void pageForward() {
+        if((items.size() - 1) - index < bound) {
+            return;
+        }
+        index += bound;
+    }
+
+    /**
+     * Page the index backward
+     */
+    private void pageBackward() {
+        if(index == 0) {
+            return;
+        }
+        index -= bound;
     }
 
     /**

@@ -340,18 +340,21 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private void showMissingAttachments(CommandContext context, ArrayList<MissingWeaponAttachments> missing) {
         int total = (int) missing.stream().mapToLong(m -> m.attachmentCodenames.size()).sum();
-        new PageableEmbed(
+        new PageableSortEmbed(
                 context,
                 missing,
-                getEmbedThumbnail(),
-                total + " Missing attachments (" + missing.size() + " Weapons)",
-                null,
-                "Type: " + getTrigger() + " for help",
-                1,
-                EmbedHelper.GREEN
+                1
         ) {
             @Override
-            public void addFields(EmbedBuilder builder, int currentIndex) {
+            public EmbedBuilder getEmbedBuilder(String pageDetails) {
+                return new EmbedBuilder()
+                        .setThumbnail(getEmbedThumbnail())
+                        .setTitle(total + " Missing attachments (" + missing.size() + " Weapons)")
+                        .setFooter(pageDetails + "| Type: " + getTrigger() + " for help");
+            }
+
+            @Override
+            public void displayItem(EmbedBuilder builder, int currentIndex) {
                 MissingWeaponAttachments current = (MissingWeaponAttachments) getItems().get(currentIndex);
                 Weapon weapon = current.getWeapon();
                 ArrayList<String> attachments = current.getAttachmentCodenames();
@@ -372,6 +375,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 builder
                         .setDescription(description.toString())
                         .setImage(weapon.getImageURL());
+            }
+
+            @Override
+            public boolean nonPagingEmoteAdded(Emote e) {
+                return false;
             }
 
             @Override
