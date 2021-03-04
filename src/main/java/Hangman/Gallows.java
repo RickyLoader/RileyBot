@@ -1,6 +1,10 @@
 package Hangman;
 
+import Command.Structure.PageableTableEmbed;
+
 import java.awt.image.BufferedImage;
+
+import static Command.Structure.PageableTableEmbed.*;
 
 /**
  * Hold data on a Hangman Gallows
@@ -18,10 +22,13 @@ public class Gallows {
      * @param images       Array of images to be parsed through as the game progresses
      * @param imagePreview Image URL preview of gallows
      */
-    public Gallows(BufferedImage[] images, String imagePreview) {
+    public Gallows(BufferedImage[] images, String imagePreview) throws IncorrectQuantityException {
         this.images = images;
         this.imagePreview = imagePreview;
         this.MAX_STAGES = images.length - 1;
+        if(MAX_STAGES < 1) {
+            throw new IncorrectQuantityException("Gallows must have at least 2 images!");
+        }
         this.index = 0;
     }
 

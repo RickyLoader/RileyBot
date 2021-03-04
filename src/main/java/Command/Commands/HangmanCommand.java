@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import static Command.Structure.PageableTableEmbed.*;
+
 /**
  * Play Hangman! Fun!
  */
@@ -239,12 +241,17 @@ public class HangmanCommand extends DiscordCommand {
             for(int i = 0; i < imageNames.length(); i++) {
                 images[i] = handler.getImageResource(imagePath + imageNames.getString(i));
             }
-            gallows.add(
-                    new Gallows(
-                            images,
-                            info.getString("thumbnail")
-                    )
-            );
+            try {
+                gallows.add(
+                        new Gallows(
+                                images,
+                                info.getString("thumbnail")
+                        )
+                );
+            }
+            catch(IncorrectQuantityException e){
+                e.printStackTrace();
+            }
         }
         return gallows;
     }
