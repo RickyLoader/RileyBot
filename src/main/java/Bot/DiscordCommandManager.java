@@ -193,6 +193,7 @@ public class DiscordCommandManager {
         addCommand(new TTVLookupCommand());
         addCommand(new PhasmophobiaCommand());
         addCommand(new MWRandomCommand());
+        addCommand(new FacebookCommand());
     }
 
     /**

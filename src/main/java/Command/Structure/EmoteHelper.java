@@ -553,9 +553,30 @@ public class EmoteHelper {
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/809291495257014322.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/815871333358633010.png"/>
      */
-    public Emote getBreakdown() {
-        return get("809291495257014322");
+    public Emote getFacebookReactions() {
+        return get("815871333358633010");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/815867467557634048.png"/>
+     */
+    public Emote getFacebookComments() {
+        return get("815867467557634048");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/816570375793278986.png"/>
+     */
+    public Emote getModeBreakdown() {
+        return get("816570375793278986");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/816570375676231680.png"/>
+     */
+    public Emote getMapBreakdown() {
+        return get("816570375676231680");
     }
 }

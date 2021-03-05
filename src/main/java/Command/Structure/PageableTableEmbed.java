@@ -80,7 +80,7 @@ public abstract class PageableTableEmbed extends PageableTemplateEmbed {
     /**
      * Exception to throw when incorrect quantity of row or column values provided
      */
-    private static class IncorrectQuantityException extends Exception {
+    public static class IncorrectQuantityException extends Exception {
         public IncorrectQuantityException(String message) {
             super(message);
         }
