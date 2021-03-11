@@ -252,19 +252,24 @@ public class StocksCommand extends DiscordCommand {
      * @return Market quote for symbol
      */
     private MarketQuote getStockMarketQuote(Symbol symbol) {
-        JSONObject data = new JSONObject(
-                new NetworkRequest(
-                        finnhubBaseUrl + "quote?symbol=" + symbol.getSymbol() + "&token=" + Secret.FINNHUB_KEY,
-                        false
-                ).get().body
-        );
-        return new MarketQuote.MarketQuoteBuilder(symbol)
-                .setHighPrice(data.getDouble("h"))
-                .setLowPrice(data.getDouble("l"))
-                .setOpenPrice(data.getDouble("o"))
-                .setPreviousClosePrice(data.getDouble("pc"))
-                .setCurrentPrice(data.getDouble("c"))
-                .build();
+        try {
+            JSONObject data = new JSONObject(
+                    new NetworkRequest(
+                            finnhubBaseUrl + "quote?symbol=" + symbol.getSymbol() + "&token=" + Secret.FINNHUB_KEY,
+                            false
+                    ).get().body
+            );
+            return new MarketQuote.MarketQuoteBuilder(symbol)
+                    .setHighPrice(data.getDouble("h"))
+                    .setLowPrice(data.getDouble("l"))
+                    .setOpenPrice(data.getDouble("o"))
+                    .setPreviousClosePrice(data.getDouble("pc"))
+                    .setCurrentPrice(data.getDouble("c"))
+                    .build();
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -277,10 +282,11 @@ public class StocksCommand extends DiscordCommand {
         JSONObject data = new JSONObject(
                 messariRequest("v1/assets/" + symbol.getId() + "/metrics/market-data").body
         ).getJSONObject("data").getJSONObject("market_data");
-        if(data.isNull("ohlcv")) {
+        String marketDataKey = "ohlcv_last_24_hour";
+        if(data.isNull(marketDataKey)) {
             return null;
         }
-        JSONObject ohlcv = data.getJSONObject("ohlcv_last_24_hour"); // open, high, low, close, volume
+        JSONObject ohlcv = data.getJSONObject(marketDataKey); // open, high, low, close, volume
 
         return new MarketQuote.MarketQuoteBuilder(symbol)
                 .setHighPrice(ohlcv.getDouble("high"))
