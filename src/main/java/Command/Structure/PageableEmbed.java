@@ -29,7 +29,7 @@ public abstract class PageableEmbed {
         this.channel = context.getMessageChannel();
         this.items = items;
         this.bound = bound;
-        this.pages = (int) Math.ceil(items.size() / (double) bound);
+        this.pages = items.size() <= bound ? 1 : (int) Math.ceil(items.size() / (double) bound);
         this.emoteHelper = context.getEmoteHelper();
         this.forward = emoteHelper.getForward();
         this.backward = emoteHelper.getBackward();
@@ -147,7 +147,7 @@ public abstract class PageableEmbed {
      * Edit the embedded message in place
      */
     private void updateMessage() {
-        channel.retrieveMessageById(id).queue(message -> message.editMessage(buildMessage()).queue());
+        channel.editMessageById(id, buildMessage()).queue();
     }
 
     /**

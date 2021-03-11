@@ -579,4 +579,39 @@ public class EmoteHelper {
     public Emote getMapBreakdown() {
         return get("816570375676231680");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/818743385027510273.png"/>
+     */
+    public Emote getHome() {
+        return get("818743385027510273");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/818744837632950292.png"/>
+     */
+    public Emote getPointOfInterest() {
+        return get("818744837632950292");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/818745191900905472.png"/>
+     */
+    public Emote getResources() {
+        return get("818745191900905472");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/818745730466054147.png"/>
+     */
+    public Emote getCreatures() {
+        return get("818745730466054147");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/819440272264921122.png"/>
+     */
+    public Emote getCrypto() {
+        return get("819440272264921122");
+    }
 }
