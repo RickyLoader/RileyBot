@@ -8,7 +8,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class TheHub {
     public static final int FIRST_PAGE = 54, OTHER_PAGE = 57;
@@ -276,31 +278,103 @@ public class TheHub {
     }
 
     /**
-     * Retrieve a performer by their name.
-     * If the given name is not located in the map, attempt to navigate
-     * to the performer's page using their name and parse their profile
+     * Retrieve a list of performers by their name.
+     * If the given name is not located in the map, perform a search for each PROFILE_TYPE
+     * and append the results to a list.
+     * The resulting performers contain only the data available from a search request - name, url, and type
      *
      * @param name Performer name
-     * @return Performer of the given name or null
+     * @return List of performer results
      */
-    public Performer getPerformerByName(String name) {
+    public ArrayList<Performer> getPerformersByName(String name) {
         resetData();
+        ArrayList<Performer> performers = new ArrayList<>();
         Performer performer = performersByName.get(name.toLowerCase());
 
         if(performer != null) {
-            return performer;
+            performers.add(performer);
+            return performers;
         }
+        performers.addAll(getMembersByName(name));
+        performers.addAll(getStarsByName(name));
 
-        name = name.replace(" ", "-");
+        ArrayList<Performer> exactMatches = performers
+                .stream()
+                .filter(p -> p.getName().equalsIgnoreCase(name))
+                .collect(Collectors.toCollection(ArrayList::new));
 
-        for(PROFILE_TYPE type : PROFILE_TYPE.values()) {
-            performer = parseHomePage(BASE_URL + type.name().toLowerCase() + "/" + name, type);
-            if(performer == null) {
-                continue;
-            }
-            mapPerformer(performer);
-            return performer;
+        if(exactMatches.size() == 1) {
+            Performer incompleteMatch = exactMatches.get(0);
+            ArrayList<Performer> exactMatch = new ArrayList<>();
+            Performer match = parseHomePage(incompleteMatch.getURL(), incompleteMatch.getType());
+            mapPerformer(match);
+            exactMatch.add(match);
+            return exactMatch;
         }
-        return null;
+        return performers;
+    }
+
+    /**
+     * Get a list of members (includes channels) by the given name.
+     * Invoke a search with the given name and return the results.
+     * The resulting performers contain only the data available from a search request - name, url, and type
+     *
+     * @param name Name to search
+     * @return List of member search results
+     */
+    private ArrayList<Performer> getMembersByName(String name) {
+        ArrayList<Performer> members = new ArrayList<>();
+        Document searchPage = fetchPage(BASE_URL + "user/search/?username=" + name);
+        if(searchPage == null || searchPage.getElementsByClass("search-results").isEmpty()) {
+            return members;
+        }
+        searchPage.selectFirst(".search-results").children().forEach(element -> {
+
+            // [0] -> type, [1] -> name
+            String[] urlArgs = element.selectFirst(".userLink")
+                    .attr("href")
+                    .replaceFirst("/", "")
+                    .split("/");
+
+            PROFILE_TYPE type = urlArgs[0].equals("users") ? PROFILE_TYPE.CHANNELS : PROFILE_TYPE.MODEL;
+
+            members.add(
+                    new PerformerBuilder()
+                            .setURL(BASE_URL + type.name().toLowerCase() + "/" + urlArgs[1])
+                            .setName(element.selectFirst(".usernameLink").text())
+                            .setType(type)
+                            .build()
+            );
+        });
+        return members;
+
+    }
+
+    /**
+     * Get a list of stars by the given name.
+     * Invoke a search with the given name and return the results
+     * The resulting performers contain only the data available from a search request - name, url, and type
+     *
+     * @param name Name to search
+     * @return List of member search results
+     */
+    private ArrayList<Performer> getStarsByName(String name) {
+        ArrayList<Performer> stars = new ArrayList<>();
+        PROFILE_TYPE type = PROFILE_TYPE.PORNSTAR;
+        Document searchPage = fetchPage(BASE_URL + type.name().toLowerCase() + "/search?search=" + name);
+        if(searchPage == null || !searchPage.getElementsByClass("noResultsWrapper").isEmpty()) {
+            return stars;
+        }
+        searchPage.getElementById("pornstarsSearchResult").select("li:not(:first-child)").forEach(element -> {
+            Element url = element.selectFirst(".thumbnail-info-wrapper").selectFirst("a");
+            stars.add(
+                    new PerformerBuilder()
+                            .setURL(url.absUrl("href"))
+                            .setName(url.text())
+                            .setType(type)
+                            .build()
+            );
+        });
+        return stars;
     }
 }

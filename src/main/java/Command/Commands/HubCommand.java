@@ -3,6 +3,7 @@ package Command.Commands;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
+import Command.Structure.PageableTableEmbed;
 import TheHub.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -11,6 +12,9 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 
@@ -18,6 +22,7 @@ import java.util.Random;
  * Check out some rankings on the hub
  */
 public class HubCommand extends DiscordCommand {
+    private final String thumbnail = "https://i.imgur.com/ngRnecW.png";
     private final TheHub theHub;
     private final Random random;
 
@@ -60,19 +65,66 @@ public class HubCommand extends DiscordCommand {
                 return;
             }
 
-            Performer performer = rank == 0 ? theHub.getPerformerByName(arg) : theHub.getPerformerByRank(rank);
-            if(performer == null) {
-                String info = rank > 0 ? "I couldn't find a **rank " + rank + "** cunt"
-                        :
-                        "I couldn't find anything for **" + arg + "**!";
-                channel.sendMessage(
-                        member.getAsMention() + " " + info
-                ).queue();
-                return;
+            if(rank == 0) {
+                ArrayList<Performer> searchResults = theHub.getPerformersByName(arg);
+                if(searchResults.size() == 1) {
+                    channel.sendMessage(buildEmbed(searchResults.get(0))).queue();
+                    return;
+                }
+                showSearchResults(searchResults, arg, context);
             }
-            channel.sendMessage(buildEmbed(performer)).queue();
+            else {
+                Performer performer = theHub.getPerformerByRank(rank);
+                if(performer == null) {
+                    channel.sendMessage(
+                            member.getAsMention() + " I couldn't find a **rank " + rank + "**!"
+                    ).queue();
+                    return;
+                }
+                channel.sendMessage(buildEmbed(performer)).queue();
+            }
         }).start();
 
+    }
+
+    /**
+     * Show the performers found for the given search query in a pageable message embed
+     *
+     * @param searchResults List of performers found for the given query
+     * @param searchQuery   Query used to find results
+     * @param context       Command context
+     */
+    private void showSearchResults(ArrayList<Performer> searchResults, String searchQuery, CommandContext context) {
+        int results = searchResults.size();
+        new PageableTableEmbed(
+                context,
+                searchResults,
+                thumbnail,
+                "Hub Search",
+                searchResults.size() + " Results found for **" + searchQuery + "**:",
+                "Try: " + getHelpName().replace("\n", " | "),
+                new String[]{"Name", "Profile Type"},
+                5,
+                results == 0 ? EmbedHelper.RED : EmbedHelper.ORANGE
+        ) {
+            @Override
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
+                Performer performer = (Performer) items.get(index);
+                return new String[]{performer.getName(), performer.getType().name()};
+            }
+
+            @Override
+            public void sortItems(List<?> items, boolean defaultSort) {
+                items.sort((Comparator<Object>) (o1, o2) -> {
+                    String name1 = ((Performer) o1).getName();
+                    String name2 = ((Performer) o2).getName();
+                    if(defaultSort) {
+                        return levenshteinDistance(name1, searchQuery) - levenshteinDistance(name2, searchQuery);
+                    }
+                    return levenshteinDistance(name2, searchQuery) - levenshteinDistance(name1, searchQuery);
+                });
+            }
+        }.showMessage();
     }
 
     /**
@@ -82,7 +134,6 @@ public class HubCommand extends DiscordCommand {
      * @return Message embed detailing Performer
      */
     private MessageEmbed buildEmbed(Performer performer) {
-        String thumbnail = "https://i.imgur.com/ngRnecW.png";
         String rank = "Rank " + (performer.hasRank() ? "#" + performer.getRank() : "N/A");
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(
@@ -91,7 +142,7 @@ public class HubCommand extends DiscordCommand {
                         ) + " " + rank + " - " + performer.getName()
                 )
                 .setThumbnail(thumbnail)
-                .setFooter("Type: " + getHelpName().replace("\n", " | "), thumbnail)
+                .setFooter("Try: " + getHelpName().replace("\n", " | "), thumbnail)
                 .setImage(performer.getImage())
                 .setDescription(performer.getDesc())
                 .addField("Views", performer.getViews(), true)
