@@ -127,11 +127,10 @@ public class TTVLookupCommand extends LookupCommand {
                     String t1 = ((Streamer) o1).getLoginName();
                     String t2 = ((Streamer) o2).getLoginName();
                     if(defaultSort) {
-                        return t1.compareTo(t2);
+                        return levenshteinDistance(t1, query) - levenshteinDistance(t2, query);
                     }
-                    return t2.compareTo(t1);
+                    return levenshteinDistance(t2, query) - levenshteinDistance(t1, query);
                 });
-
             }
         }.showMessage();
     }

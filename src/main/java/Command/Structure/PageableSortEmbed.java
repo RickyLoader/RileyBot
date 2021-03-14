@@ -76,4 +76,36 @@ public abstract class PageableSortEmbed extends PageableEmbed {
      * @param defaultSort How to sort the items
      */
     public abstract void sortItems(List<?> items, boolean defaultSort);
+
+    /**
+     * Get the levenshtein distance between the given Strings.
+     * This is the edit distance (minimum number of operations required to transform one String to another)
+     *
+     * @param a String a
+     * @param b String b
+     * @return Edit distance
+     */
+    public int levenshteinDistance(String a, String b) {
+        int[][] distance = new int[a.length() + 1][b.length() + 1];
+        for(int i = 0; i <= a.length(); i++) {
+            for(int j = 0; j <= b.length(); j++) {
+                if(i == 0) {
+                    distance[i][j] = j;
+                }
+                else if(j == 0) {
+                    distance[i][j] = i;
+                }
+                else {
+                    int substitution = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                    distance[i][j] = Math.min(
+                            distance[i][j - 1] + 1,
+                            Math.min(
+                                    distance[i - 1][j - 1] + substitution,
+                                    distance[i - 1][j] + 1
+                            ));
+                }
+            }
+        }
+        return distance[a.length()][b.length()];
+    }
 }
