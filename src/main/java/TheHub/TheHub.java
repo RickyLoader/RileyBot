@@ -1,5 +1,8 @@
 package TheHub;
 
+import COD.Assets.Ratio;
+import TheHub.HubVideo.Channel;
+import TheHub.HubVideo.VideoInfo;
 import TheHub.Performer.PROFILE_TYPE;
 import TheHub.Performer.PerformerBuilder;
 import org.jsoup.Jsoup;
@@ -10,11 +13,14 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TheHub {
     public static final int FIRST_PAGE = 54, OTHER_PAGE = 57;
-    public final String BASE_URL = "https://www.pornhub.com/", LIST_URL = BASE_URL + "pornstars";
+    private static final String BASE_URL = "https://www.pornhub.com/";
+    private final String listUrl = BASE_URL + "pornstars";
     private final HashMap<String, Performer> performersByName = new HashMap<>();
     private final HashMap<Integer, Performer> performersByRank = new HashMap<>();
     public long lastReset = System.currentTimeMillis();
@@ -56,7 +62,7 @@ public class TheHub {
      */
     private Performer parseHomePage(String url, PROFILE_TYPE type) {
         Document doc = fetchPage(url);
-        if(doc == null || !doc.baseUri().equals(url)) {
+        if(doc == null) {
             return null;
         }
 
@@ -64,6 +70,7 @@ public class TheHub {
         if(thumbnail == null) {
             thumbnail = doc.selectFirst(".previewAvatarPicture img");
         }
+
         PerformerBuilder builder = new PerformerBuilder()
                 .setImage(thumbnail.absUrl("src"))
                 .setURL(url)
@@ -71,7 +78,7 @@ public class TheHub {
 
         return (type == PROFILE_TYPE.CHANNELS)
                 ? completeChannelProfile(doc, builder)
-                : completePersonProfile(doc, builder);
+                : completeModelProfile(doc, builder);
     }
 
     /**
@@ -83,7 +90,7 @@ public class TheHub {
      * @param builder Incomplete performer builder
      * @return Completed Performer object
      */
-    private Performer completePersonProfile(Document doc, PerformerBuilder builder) {
+    private Performer completeModelProfile(Document doc, PerformerBuilder builder) {
         String gender = null;
         int age = 0;
         Elements details = doc.select(".infoPiece");
@@ -158,7 +165,7 @@ public class TheHub {
     private Document fetchPage(String url) {
         try {
             Document doc = Jsoup.connect(url).get();
-            return doc.baseUri().equals(LIST_URL) ? null : doc; // Redirected
+            return doc.baseUri().equals(listUrl) ? null : doc; // Redirected
         }
         catch(IOException e) {
             return null;
@@ -229,7 +236,7 @@ public class TheHub {
             }
         }
 
-        Document doc = fetchPage(LIST_URL + "?performerType=pornstar&t=a&page=" + page);
+        Document doc = fetchPage(listUrl + "?performerType=pornstar&t=a&page=" + page);
         String listID = "#popularPornstars";
 
         if(doc == null || doc.selectFirst(listID) == null) {
@@ -288,15 +295,18 @@ public class TheHub {
      */
     public ArrayList<Performer> getPerformersByName(String name) {
         resetData();
-        ArrayList<Performer> performers = new ArrayList<>();
+        HashSet<Performer> performers = new HashSet<>();
         Performer performer = performersByName.get(name.toLowerCase());
 
         if(performer != null) {
             performers.add(performer);
-            return performers;
+            return new ArrayList<>(performers);
         }
-        performers.addAll(getMembersByName(name));
+
         performers.addAll(getStarsByName(name));
+        performers.addAll(getModelsByName(name));
+        performers.addAll(getCamModelsByName(name));
+        performers.addAll(getChannelsByName(name));
 
         ArrayList<Performer> exactMatches = performers
                 .stream()
@@ -311,43 +321,91 @@ public class TheHub {
             exactMatch.add(match);
             return exactMatch;
         }
-        return performers;
+        return new ArrayList<>(performers);
     }
 
     /**
-     * Get a list of members (includes channels) by the given name.
+     * Get a list of models by the given name.
      * Invoke a search with the given name and return the results.
      * The resulting performers contain only the data available from a search request - name, url, and type
      *
      * @param name Name to search
-     * @return List of member search results
+     * @return List of model search results
      */
-    private ArrayList<Performer> getMembersByName(String name) {
-        ArrayList<Performer> members = new ArrayList<>();
-        Document searchPage = fetchPage(BASE_URL + "user/search/?username=" + name);
-        if(searchPage == null || searchPage.getElementsByClass("search-results").isEmpty()) {
-            return members;
+    private ArrayList<Performer> getModelsByName(String name) {
+        return parseModelSearchResults(getUserSearchUrl(name) + "&isPornhubModel=1");
+    }
+
+    /**
+     * Get a list of cam models by the given name.
+     * Invoke a search with the given name and return the results.
+     * The resulting performers contain only the data available from a search request - name, url, and type
+     *
+     * @param name Name to search
+     * @return List of cam model search results
+     */
+    private ArrayList<Performer> getCamModelsByName(String name) {
+        return parseModelSearchResults(getUserSearchUrl(name) + "&hasCamShow=1");
+    }
+
+    /**
+     * Get the base URL to perform a user search for the given name
+     *
+     * @param name Name to search
+     * @return URL to search for users of the given name
+     */
+    private String getUserSearchUrl(String name) {
+        return BASE_URL + "user/search/?username=" + name;
+    }
+
+    /**
+     * Get a list of channels by the given name.
+     * Invoke a search with the given name and return the results.
+     * The resulting performers contain only the data available from a search request - name, url, and type
+     *
+     * @param name Name to search
+     * @return List of channel search results
+     */
+    private ArrayList<Performer> getChannelsByName(String name) {
+        ArrayList<Performer> channels = new ArrayList<>();
+        Document searchPage = fetchPage(BASE_URL + "channels/search?channelSearch=" + name);
+        if(searchPage == null || searchPage.select("#searchChannelsSection").isEmpty()) {
+            return channels;
         }
-        searchPage.selectFirst(".search-results").children().forEach(element -> {
-
-            // [0] -> type, [1] -> name
-            String[] urlArgs = element.selectFirst(".userLink")
-                    .attr("href")
-                    .replaceFirst("/", "")
-                    .split("/");
-
-            PROFILE_TYPE type = urlArgs[0].equals("users") ? PROFILE_TYPE.CHANNELS : PROFILE_TYPE.MODEL;
-
-            members.add(
+        searchPage.getElementById("searchChannelsSection").children().forEach(element -> {
+            Element info = element.selectFirst(".descriptionContainer").selectFirst(".usernameLink");
+            channels.add(
                     new PerformerBuilder()
-                            .setURL(BASE_URL + type.name().toLowerCase() + "/" + urlArgs[1])
-                            .setName(element.selectFirst(".usernameLink").text())
-                            .setType(type)
+                            .setURL(info.absUrl("href"))
+                            .setName(info.text())
+                            .setType(PROFILE_TYPE.CHANNELS)
                             .build()
             );
         });
-        return members;
+        return channels;
+    }
 
+    /**
+     * Parse the model search results from the given url
+     * The resulting performers contain only the data available from a search request - name, url, and type
+     *
+     * @param url URL to parse
+     * @return List of model search results
+     */
+    private ArrayList<Performer> parseModelSearchResults(String url) {
+        ArrayList<Performer> members = new ArrayList<>();
+        Document searchPage = fetchPage(url);
+        if(searchPage == null || searchPage.getElementsByClass("search-results").isEmpty()) {
+            return members;
+        }
+        searchPage.selectFirst(".search-results").children().forEach(element -> members.add(
+                new PerformerBuilder()
+                        .setURL(element.selectFirst(".userLink").absUrl("href"))
+                        .setName(element.selectFirst(".usernameLink").text())
+                        .setType(PROFILE_TYPE.MODEL)
+                        .build()
+        ));
+        return members;
     }
 
     /**
@@ -376,5 +434,85 @@ public class TheHub {
             );
         });
         return stars;
+    }
+
+    /**
+     * Get details on a video from the given URL
+     *
+     * @param url Video URL
+     * @return Video details or null
+     */
+    public HubVideo getVideo(String url) {
+        if(!isVideoUrl(url)) {
+            return null;
+        }
+        Document videoPage = fetchPage(url);
+        if(videoPage == null || videoPage.title().equalsIgnoreCase("page not found")) {
+            return null;
+        }
+
+        Ratio likeDislikeRatio = new Ratio(
+                Integer.parseInt(videoPage.selectFirst(".votesUp").attr("data-rating")),
+                Integer.parseInt(videoPage.selectFirst(".votesDown").attr("data-rating"))
+        );
+
+        Element channelInfo = videoPage.selectFirst(".userRow");
+        Element channelName = channelInfo.selectFirst(".userInfo").selectFirst("a");
+        Channel channel = new Channel(
+                channelName.text(),
+                channelName.absUrl("href"),
+                channelInfo.selectFirst(".userAvatar").selectFirst("img").attr("data-src")
+        );
+        Element video = videoPage.getElementById("player");
+        VideoInfo videoInfo = new VideoInfo(
+                videoPage.selectFirst(".title-container").selectFirst(".title").selectFirst(".inlineFree").text(),
+                videoPage.baseUri(),
+                video.selectFirst(".videoElementPoster").attr("src")
+        );
+
+        Element ratingInfo = videoPage.selectFirst(".ratingInfo");
+        String views = ratingInfo.selectFirst(".views").selectFirst("span").text().replace(",", "");
+
+        return new HubVideo(
+                videoInfo,
+                ratingInfo.selectFirst(".videoInfo").text(),
+                Long.parseLong(views),
+                likeDislikeRatio,
+                channel,
+                getVideoInfoRow(videoPage, ".pornstarsWrapper", ".pstar-list-btn"),
+                getVideoInfoRow(videoPage, ".categoriesWrapper", ".item")
+        );
+    }
+
+    /**
+     * Get an array of items from a video info row.
+     * Video info rows are rows of information displayed under a video, this includes categories, stars, etc.
+     *
+     * @param video        HTML document of video
+     * @param rowSelector  Outermost CSS selector of the desired row
+     * @param itemSelector CSS selector for the items within the row
+     * @return Array of items in the row (may be empty)
+     */
+    private String[] getVideoInfoRow(Document video, String rowSelector, String itemSelector) {
+        Elements rows = video.select(rowSelector);
+        if(rows.isEmpty()) {
+            return new String[]{};
+        }
+        Elements items = rows.select(itemSelector);
+        return items
+                .stream()
+                .map(Element::text)
+                .toArray(String[]::new);
+    }
+
+    /**
+     * Check if the given URL is a video URL
+     *
+     * @param url URL to check
+     * @return URL is a video URL
+     */
+    public static boolean isVideoUrl(String url) {
+        Pattern pattern = Pattern.compile(Pattern.quote(BASE_URL + "view_video.php?viewkey=ph") + "[\\w]+");
+        return pattern.matcher(url).matches();
     }
 }

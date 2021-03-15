@@ -1,5 +1,7 @@
 package TheHub;
 
+import java.util.Objects;
+
 /**
  * Highly respected performer of entertainment
  */
@@ -289,5 +291,18 @@ public class Performer {
             }
             return new Performer(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Performer)) {
+            return false;
+        }
+        return ((Performer) obj).getName().equalsIgnoreCase(name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

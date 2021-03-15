@@ -614,4 +614,18 @@ public class EmoteHelper {
     public Emote getCrypto() {
         return get("819440272264921122");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820572636588277760.png"/>
+     */
+    public Emote getThumbsUp() {
+        return get("820572636588277760");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820572636445802548.png"/>
+     */
+    public Emote getThumbsDown() {
+        return get("820572636445802548");
+    }
 }

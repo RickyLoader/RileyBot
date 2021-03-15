@@ -1,9 +1,6 @@
 package Command.Commands;
 
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.EmbedHelper;
-import Command.Structure.PageableTableEmbed;
+import Command.Structure.*;
 import TheHub.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -12,10 +9,10 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.text.DecimalFormat;
+import java.util.*;
+
+import static TheHub.HubVideo.*;
 
 
 /**
@@ -25,6 +22,7 @@ public class HubCommand extends DiscordCommand {
     private final String thumbnail = "https://i.imgur.com/ngRnecW.png";
     private final TheHub theHub;
     private final Random random;
+    private String thumbsUp, thumbsDown, blankGap;
 
     public HubCommand() {
         super("hub [#]\nhub [name]\nhub random", "Check out your favourite hub homies!");
@@ -34,19 +32,35 @@ public class HubCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        Member member = context.getMember();
-        MessageChannel channel = context.getMessageChannel();
-        String message = context.getLowerCaseMessage();
-        String arg = message
-                .replaceFirst("hub", "")
-                .replaceAll("\\s+", " ")
-                .trim();
-
-        if(arg.isEmpty()) {
-            channel.sendMessage(getHelpNameCoded()).queue();
-            return;
+        if(thumbsUp == null) {
+            EmoteHelper emoteHelper = context.getEmoteHelper();
+            this.thumbsUp = EmoteHelper.formatEmote(emoteHelper.getThumbsUp());
+            this.thumbsDown = EmoteHelper.formatEmote(emoteHelper.getThumbsDown());
+            this.blankGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
         }
         new Thread(() -> {
+            Member member = context.getMember();
+            MessageChannel channel = context.getMessageChannel();
+            String message = context.getMessageContent();
+
+            if(TheHub.isVideoUrl(message)) {
+                HubVideo video = theHub.getVideo(message);
+                if(video != null) {
+                    context.getMessage().delete().queue(deleted -> displayVideoEmbed(channel, video));
+                }
+                return;
+            }
+
+            String arg = message
+                    .replaceFirst("hub", "")
+                    .replaceAll("\\s+", " ")
+                    .trim();
+
+            if(arg.isEmpty()) {
+                channel.sendMessage(getHelpNameCoded()).queue();
+                return;
+            }
+
             channel.sendTyping().queue();
             if(arg.equals("random")) {
                 Performer performer = null;
@@ -88,6 +102,48 @@ public class HubCommand extends DiscordCommand {
     }
 
     /**
+     * Display a message embed detailing the given hub video
+     *
+     * @param channel Channel to send embed to
+     * @param video   Video to display details on
+     */
+    private void displayVideoEmbed(MessageChannel channel, HubVideo video) {
+        VideoInfo videoInfo = video.getVideoInfo();
+        Channel uploadChannel = video.getChannel();
+
+        EmbedBuilder builder = new EmbedBuilder()
+                .setAuthor(
+                        uploadChannel.getName(),
+                        uploadChannel.getUrl(),
+                        uploadChannel.getImageUrl()
+                )
+                .setFooter("Uploaded " + video.getDate())
+                .setColor(EmbedHelper.FIRE_ORANGE)
+                .setTitle(videoInfo.getTitle(), videoInfo.getUrl())
+                .setImage(videoInfo.getThumbnailUrl())
+                .setThumbnail(thumbnail);
+
+        DecimalFormat commaFormat = new DecimalFormat("#,###");
+
+        String desc = "**Views**: " + commaFormat.format(video.getViews());
+
+        if(video.hasCast()) {
+            desc += "\n**Cast**: " + StringUtils.join(video.getCast(3), ", ");
+        }
+
+        if(video.hasCategories()) {
+            desc += "\n**Categories**: " + StringUtils.join(video.getCategories(3), ", ");
+        }
+
+        desc += "\n\n"
+                + thumbsUp + " " + commaFormat.format(video.getLikes()) + " (" + video.getLikeRatio() + ")"
+                + blankGap
+                + thumbsDown + " " + commaFormat.format(video.getDislikes());
+
+        channel.sendMessage(builder.setDescription(desc).build()).queue();
+    }
+
+    /**
      * Show the performers found for the given search query in a pageable message embed
      *
      * @param searchResults List of performers found for the given query
@@ -110,7 +166,10 @@ public class HubCommand extends DiscordCommand {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 Performer performer = (Performer) items.get(index);
-                return new String[]{performer.getName(), performer.getType().name()};
+                return new String[]{
+                        performer.getName(),
+                        EmbedHelper.embedURL(performer.getType().name(), performer.getURL())
+                };
             }
 
             @Override
@@ -170,6 +229,6 @@ public class HubCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("hub");
+        return message.getContentRaw().startsWith("hub") || TheHub.isVideoUrl(query);
     }
 }
