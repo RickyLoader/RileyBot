@@ -107,7 +107,7 @@ public class ValheimWiki {
                     .select("tr:has(td)");
 
             for(Element page : pages) {
-                Element pageInfo = page.child(0).getElementsByAttribute("title").get(0);
+                Element pageInfo = page.getElementsByAttribute("title").get(0);
                 pageSummaries.add(
                         new ValheimPageSummary(
                                 pageInfo.attr("title"),
