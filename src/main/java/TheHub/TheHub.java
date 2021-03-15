@@ -21,7 +21,7 @@ public class TheHub {
     public static final int FIRST_PAGE = 54, OTHER_PAGE = 57;
     private static final String BASE_URL = "https://www.pornhub.com/";
     private final String listUrl = BASE_URL + "pornstars";
-    private final HashMap<String, Performer> performersByName = new HashMap<>();
+    private final HashMap<String, Performer> performersByName = new HashMap<>(), performersByUrl = new HashMap<>();
     private final HashMap<Integer, Performer> performersByRank = new HashMap<>();
     public long lastReset = System.currentTimeMillis();
 
@@ -34,17 +34,19 @@ public class TheHub {
         }
         performersByRank.clear();
         performersByName.clear();
+        performersByUrl.clear();
         lastReset = System.currentTimeMillis();
     }
 
     /**
      * Add the provided performer to the maps
-     * Map from name to instance & rank to instance
+     * Map from name to instance, rank to instance, and url to instance
      *
      * @param performer Performer to map
      */
     private void mapPerformer(Performer performer) {
         performersByName.put(performer.getName().toLowerCase(), performer);
+        performersByUrl.put(performer.getURL(), performer);
 
         // Models & channels are ranked differently, don't cache them to prevent overwriting stars
         if(performer.getType() == PROFILE_TYPE.PORNSTAR) {
@@ -170,6 +172,28 @@ public class TheHub {
         catch(IOException e) {
             return null;
         }
+    }
+
+    /**
+     * Retrieve a performer by their url
+     * If the given url is not located in the map, attempt to parse their page
+     *
+     * @param url URL to performer
+     * @return Performer of the given URL or null
+     */
+    public Performer getPerformerByUrl(String url) {
+        if(!isProfileUrl(url)) {
+            return null;
+        }
+        Performer performer = performersByUrl.get(url);
+        if(performer != null) {
+            return performer;
+        }
+        resetData();
+        String type = url.replace(BASE_URL, "").split("/")[0];
+        performer = parseHomePage(url, PROFILE_TYPE.valueOf(type.toUpperCase()));
+        mapPerformer(performer);
+        return performer;
     }
 
     /**
@@ -513,6 +537,17 @@ public class TheHub {
      */
     public static boolean isVideoUrl(String url) {
         Pattern pattern = Pattern.compile(Pattern.quote(BASE_URL + "view_video.php?viewkey=ph") + "[\\w]+");
+        return pattern.matcher(url).matches();
+    }
+
+    /**
+     * Check if the given URL is a profile URL
+     *
+     * @param url URL to check
+     * @return URL is a profile url
+     */
+    public static boolean isProfileUrl(String url) {
+        Pattern pattern = Pattern.compile(Pattern.quote(BASE_URL) + "\\b(?:channels|model|pornstar)\\b/[\\w-]+");
         return pattern.matcher(url).matches();
     }
 }

@@ -41,17 +41,26 @@ public class HubCommand extends DiscordCommand {
         new Thread(() -> {
             Member member = context.getMember();
             MessageChannel channel = context.getMessageChannel();
-            String message = context.getMessageContent();
+            Message message = context.getMessage();
+            String content = context.getMessageContent();
 
-            if(TheHub.isVideoUrl(message)) {
-                HubVideo video = theHub.getVideo(message);
+            if(TheHub.isVideoUrl(content)) {
+                HubVideo video = theHub.getVideo(content);
                 if(video != null) {
-                    context.getMessage().delete().queue(deleted -> displayVideoEmbed(channel, video));
+                    message.delete().queue(deleted -> displayVideoEmbed(channel, video));
                 }
                 return;
             }
 
-            String arg = message
+            if(TheHub.isProfileUrl(content)){
+                Performer performer = theHub.getPerformerByUrl(content);
+                if(performer!=null){
+                    message.delete().queue(deleted -> channel.sendMessage(buildEmbed(performer)).queue());
+                }
+                return;
+            }
+
+            String arg = content
                     .replaceFirst("hub", "")
                     .replaceAll("\\s+", " ")
                     .trim();
@@ -229,6 +238,6 @@ public class HubCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return message.getContentRaw().startsWith("hub") || TheHub.isVideoUrl(query);
+        return message.getContentRaw().startsWith("hub") || TheHub.isVideoUrl(query) || TheHub.isProfileUrl(query);
     }
 }
