@@ -34,7 +34,7 @@ import java.util.Random;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
-    public static final MWManager mwAssetManager =new MWManager();
+    public static final MWManager mwAssetManager = new MWManager();
     public static final CWManager cwManager = new CWManager();
     private EmoteHelper emoteHelper;
 
@@ -194,7 +194,7 @@ public class DiscordCommandManager {
         addCommand(new PhasmophobiaCommand());
         addCommand(new MWRandomCommand());
         addCommand(new ValheimWikiCommand());
-       // addCommand(new FacebookCommand());
+        // addCommand(new FacebookCommand());
     }
 
     /**
