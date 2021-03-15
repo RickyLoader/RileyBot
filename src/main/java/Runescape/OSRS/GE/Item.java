@@ -1,6 +1,7 @@
 package Runescape.OSRS.GE;
 
-import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.binary.Hex;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -166,7 +167,7 @@ public class Item {
                 filename = filename.replace(" ", "_");
                 MessageDigest md5 = MessageDigest.getInstance("MD5");
                 md5.update(filename.getBytes(StandardCharsets.UTF_8));
-                String hash = DatatypeConverter.printHexBinary(md5.digest()).toLowerCase();
+                String hash = Hex.encodeHexString(md5.digest()).toLowerCase();
                 String baseUrl = "https://oldschool.runescape.wiki/images/";
                 filename = filename.replace("(", "%28")
                         .replace(")", "%29")
