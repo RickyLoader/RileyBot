@@ -628,4 +628,53 @@ public class EmoteHelper {
     public Emote getThumbsDown() {
         return get("820572636445802548");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820911304712912916.png"/>
+     */
+    public Emote getSellPrice() {
+        return get("820911304712912916");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820911304611987476.png"/>
+     */
+    public Emote getBuyPrice() {
+        return get("820911304611987476");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820911304242888706.png"/>
+     */
+    public Emote getHighAlch() {
+        return get("820911304242888706");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820911304566243328.png"/>
+     */
+    public Emote getLowAlch() {
+        return get("820911304566243328");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820941335573692466.png"/>
+     */
+    public Emote getMembers() {
+        return get("820941335573692466");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820941335409852417.png"/>
+     */
+    public Emote getFreeToPlay() {
+        return get("820941335409852417");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/820980358550913076.png"/>
+     */
+    public Emote getBuyLimit() {
+        return get("820980358550913076");
+    }
 }

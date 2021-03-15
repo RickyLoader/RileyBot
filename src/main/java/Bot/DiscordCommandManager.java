@@ -194,6 +194,7 @@ public class DiscordCommandManager {
         addCommand(new PhasmophobiaCommand());
         addCommand(new MWRandomCommand());
         addCommand(new ValheimWikiCommand());
+        addCommand(new GrandExchangeCommand());
         // addCommand(new FacebookCommand());
     }
 
