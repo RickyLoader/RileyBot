@@ -105,6 +105,15 @@ public class MarketQuote {
     }
 
     /**
+     * Check if the market quote has open, high, low, and close data
+     *
+     * @return Market quote has OHLCV data
+     */
+    public boolean hasOHLCV() {
+        return openPrice > 0 && highPrice > 0 && lowPrice > 0 && previousClosePrice > 0;
+    }
+
+    /**
      * Get the symbol that the quote belongs to
      *
      * @return Symbol that quote belongs to

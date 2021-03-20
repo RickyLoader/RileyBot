@@ -18,6 +18,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 
+import static Stock.MarketQuote.*;
+
 /**
  * View info on some stocks/crypto
  */
@@ -158,7 +160,7 @@ public class StocksCommand extends DiscordCommand {
      * @param symbols Symbol search results
      */
     private void buildSearchResultsEmbed(CommandContext context, String query, Symbol[] symbols) {
-        String desc = symbols.length + " results found for **" + query + "**";
+        String desc = "__" + symbols.length + " results found for **" + query + "**__\n";
         Symbol[] cryptoResults = Arrays.stream(symbols).filter(Symbol::isCrypto).toArray(Symbol[]::new);
         if(cryptoResults.length > 0) {
             desc += "\n" + cryptoEmote + " = Crypto currency";
@@ -180,7 +182,7 @@ public class StocksCommand extends DiscordCommand {
                 if(symbol.isCrypto()) {
                     identifier = cryptoEmote + " " + identifier;
                 }
-                return new String[]{identifier, symbol.getName(), symbol.getId()};
+                return new String[]{identifier, symbol.getName(), "$" + symbol.getId()};
             }
 
             @Override
@@ -204,14 +206,16 @@ public class StocksCommand extends DiscordCommand {
      * @return Message embed displaying market quote
      */
     private MessageEmbed buildMarketQuoteEmbed(MarketQuote quote) {
-        NumberFormat currFormat = NumberFormat.getCurrencyInstance();
         DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        NumberFormat currFormat = NumberFormat.getCurrencyInstance();
+
         Symbol symbol = quote.getSymbol();
         boolean down = quote.getDiff() < 0;
         String image = symbol.isCrypto()
                 ? down ? "https://i.imgur.com/RGKvAAY.png" : "https://i.imgur.com/PfFFF8P.png"
                 : down ? "https://i.imgur.com/o2ohqxr.png" : "https://i.imgur.com/BNSHZDo.png";
-        return new EmbedBuilder()
+
+        EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(symbol.getName() + " (" + symbol.getSymbol() + ")")
                 .setFooter("Try: " + getHelpName())
                 .setThumbnail(symbol.hasLogoUrl() ? symbol.getLogoUrl() : thumbnail)
@@ -221,28 +225,32 @@ public class StocksCommand extends DiscordCommand {
                         "Current Price\n(C)",
                         currFormat.format(quote.getCurrentPrice()),
                         true
-                )
-                .addField(
-                        "Difference\n" + (symbol.isCrypto() ? "(O -> C)" : "(PC -> C)"),
-                        (down ? "-" : "+") + currFormat.format(Math.abs(quote.getDiff()))
-                                + " (" + decimalFormat.format(quote.getDiffPercent()) + "%)",
-                        true
-                )
-                .addBlankField(true)
-                .addField("Opening Price\n(O)", currFormat.format(quote.getOpenPrice()), true)
-                .addField(
-                        "Previous Close Price\n(PC)",
-                        currFormat.format(quote.getPreviousClosePrice()),
-                        true
-                )
-                .addBlankField(true)
-                .addField(
-                        "Day Range",
-                        currFormat.format(quote.getLowPrice())
-                                + " - "
-                                + currFormat.format(quote.getHighPrice()),
-                        true
-                ).build();
+                );
+
+        if(quote.hasOHLCV()) {
+            builder.addField(
+                    "Difference\n" + (symbol.isCrypto() ? "(O -> C)" : "(PC -> C)"),
+                    (down ? "-" : "+") + currFormat.format(Math.abs(quote.getDiff()))
+                            + " (" + decimalFormat.format(quote.getDiffPercent()) + "%)",
+                    true
+            )
+                    .addBlankField(true)
+                    .addField("Opening Price\n(O)", currFormat.format(quote.getOpenPrice()), true)
+                    .addField(
+                            "Previous Close Price\n(PC)",
+                            currFormat.format(quote.getPreviousClosePrice()),
+                            true
+                    )
+                    .addBlankField(true)
+                    .addField(
+                            "Day Range",
+                            currFormat.format(quote.getLowPrice())
+                                    + " - "
+                                    + currFormat.format(quote.getHighPrice()),
+                            true
+                    );
+        }
+        return builder.build();
     }
 
     /**
@@ -259,7 +267,7 @@ public class StocksCommand extends DiscordCommand {
                             false
                     ).get().body
             );
-            return new MarketQuote.MarketQuoteBuilder(symbol)
+            return new MarketQuoteBuilder(symbol)
                     .setHighPrice(data.getDouble("h"))
                     .setLowPrice(data.getDouble("l"))
                     .setOpenPrice(data.getDouble("o"))
@@ -279,22 +287,29 @@ public class StocksCommand extends DiscordCommand {
      * @return Market quote for symbol
      */
     private MarketQuote getCryptoMarketQuote(Symbol symbol) {
-        JSONObject data = new JSONObject(
-                messariRequest("v1/assets/" + symbol.getId() + "/metrics/market-data").body
-        ).getJSONObject("data").getJSONObject("market_data");
-        String marketDataKey = "ohlcv_last_24_hour";
-        if(data.isNull(marketDataKey)) {
+        try {
+            JSONObject data = new JSONObject(
+                    messariRequest("v1/assets/" + symbol.getId() + "/metrics/market-data").body
+            ).getJSONObject("data").getJSONObject("market_data");
+
+            MarketQuoteBuilder builder = new MarketQuoteBuilder(symbol)
+                    .setCurrentPrice(data.getDouble("price_usd"));
+
+            String marketDataKey = "ohlcv_last_24_hour";
+            if(data.isNull(marketDataKey)) {
+                return builder.build();
+            }
+            JSONObject ohlcv = data.getJSONObject(marketDataKey); // open, high, low, close, volume
+            return builder
+                    .setHighPrice(ohlcv.getDouble("high"))
+                    .setLowPrice(ohlcv.getDouble("low"))
+                    .setOpenPrice(ohlcv.getDouble("open"))
+                    .setPreviousClosePrice(ohlcv.getDouble("close"))
+                    .build();
+        }
+        catch(Exception e) {
             return null;
         }
-        JSONObject ohlcv = data.getJSONObject(marketDataKey); // open, high, low, close, volume
-
-        return new MarketQuote.MarketQuoteBuilder(symbol)
-                .setHighPrice(ohlcv.getDouble("high"))
-                .setLowPrice(ohlcv.getDouble("low"))
-                .setOpenPrice(ohlcv.getDouble("open"))
-                .setPreviousClosePrice(ohlcv.getDouble("close"))
-                .setCurrentPrice(data.getDouble("price_usd"))
-                .build();
     }
 
     /**
@@ -320,6 +335,12 @@ public class StocksCommand extends DiscordCommand {
         return symbols;
     }
 
+    /**
+     * Add the symbol logo
+     *
+     * @param symbol Symbol to add logo to
+     * @return Symbol with logo
+     */
     private Symbol completeSymbol(Symbol symbol) {
         if(!symbol.hasLogoUrl()) {
             String logo = symbol.isCrypto() ? getCryptoLogoUrl(symbol) : getStockLogoUrl(symbol);
