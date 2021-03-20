@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.Pattern;
@@ -319,33 +320,46 @@ public class TheHub {
      */
     public ArrayList<Performer> getPerformersByName(String name) {
         resetData();
-        HashSet<Performer> performers = new HashSet<>();
+        HashSet<Performer> performerSet = new HashSet<>();
         Performer performer = performersByName.get(name.toLowerCase());
 
         if(performer != null) {
-            performers.add(performer);
-            return new ArrayList<>(performers);
+            return new ArrayList<>(Collections.singletonList(performer));
         }
 
-        performers.addAll(getStarsByName(name));
-        performers.addAll(getModelsByName(name));
-        performers.addAll(getCamModelsByName(name));
-        performers.addAll(getChannelsByName(name));
+        performerSet.addAll(getStarsByName(name));
+        performerSet.addAll(getModelsByName(name));
+        performerSet.addAll(getCamModelsByName(name));
+        performerSet.addAll(getChannelsByName(name));
 
-        ArrayList<Performer> exactMatches = performers
+        ArrayList<Performer> searchResults = new ArrayList<>(performerSet);
+
+        if(searchResults.size() == 1) {
+            return completeSearchResult(searchResults.get(0));
+        }
+
+        ArrayList<Performer> exactMatches = searchResults
                 .stream()
                 .filter(p -> p.getName().equalsIgnoreCase(name))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         if(exactMatches.size() == 1) {
-            Performer incompleteMatch = exactMatches.get(0);
-            ArrayList<Performer> exactMatch = new ArrayList<>();
-            Performer match = parseHomePage(incompleteMatch.getURL(), incompleteMatch.getType());
-            mapPerformer(match);
-            exactMatch.add(match);
-            return exactMatch;
+            return completeSearchResult(exactMatches.get(0));
         }
-        return new ArrayList<>(performers);
+
+        return searchResults;
+    }
+
+    /**
+     * Parse and map the full performer details of an incomplete performer built from a search result.
+     *
+     * @param incomplete Incomplete performer built from a search result (containing only name, url, and type)
+     * @return List containing completed performer
+     */
+    private ArrayList<Performer> completeSearchResult(Performer incomplete) {
+        Performer match = parseHomePage(incomplete.getURL(), incomplete.getType());
+        mapPerformer(match);
+        return new ArrayList<>(Collections.singletonList(match));
     }
 
     /**
