@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+
 /**
  * Hold a list of commands and handle incoming text input to check for command triggers
  */
@@ -195,6 +196,7 @@ public class DiscordCommandManager {
         addCommand(new MWRandomCommand());
         addCommand(new ValheimWikiCommand());
         addCommand(new GrandExchangeCommand());
+        addCommand(new ValheimServerCommand());
         // addCommand(new FacebookCommand());
     }
 
