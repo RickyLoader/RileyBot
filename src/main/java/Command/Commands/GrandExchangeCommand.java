@@ -29,7 +29,7 @@ public class GrandExchangeCommand extends DiscordCommand {
     private String lowAlch, highAlch, sellPrice, buyPrice, freeToPlay, members, buyLimit;
 
     public GrandExchangeCommand() {
-        super("g.e", "View the latest Grand Exchange prices for an item!", "ge [item name/id]");
+        super("g.e", "View the latest Grand Exchange prices for an item!", "g.e [item name/id]");
     }
 
     @Override
