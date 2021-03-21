@@ -1,7 +1,7 @@
 package Command.Commands;
 
 import Command.Structure.*;
-import Valheim.*;
+import Valheim.Wiki.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -12,7 +12,7 @@ import org.apache.http.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static Valheim.ValheimPageSummary.*;
+import static Valheim.Wiki.ValheimPageSummary.*;
 
 
 /**
@@ -22,7 +22,7 @@ public class ValheimWikiCommand extends DiscordCommand {
     private final ValheimWiki valheimWiki;
 
     public ValheimWikiCommand() {
-        super("valheim", "Search the Valheim wiki!", "valheim [query/all]");
+        super("valwiki", "Search the Valheim wiki!", "valwiki [query/all]");
         this.valheimWiki = new ValheimWiki();
     }
 

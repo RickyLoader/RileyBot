@@ -1,6 +1,6 @@
 package Command.Structure;
 
-import Valheim.ValheimPageSummary;
+import Valheim.Wiki.ValheimPageSummary;
 
 import java.util.ArrayList;
 import java.util.Comparator;

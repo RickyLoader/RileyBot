@@ -1,4 +1,4 @@
-package Valheim;
+package Valheim.Wiki;
 
 /**
  * Worn item in Valheim - armour & accessories

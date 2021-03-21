@@ -1,7 +1,7 @@
-package Valheim;
+package Valheim.Wiki;
 
-import Valheim.ValheimItem.TYPE;
-import Valheim.ValheimPageSummary.CATEGORY;
+import Valheim.Wiki.ValheimItem.TYPE;
+import Valheim.Wiki.ValheimPageSummary.CATEGORY;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

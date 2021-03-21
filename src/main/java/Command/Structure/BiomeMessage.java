@@ -1,6 +1,6 @@
 package Command.Structure;
 
-import Valheim.ValheimBiome;
+import Valheim.Wiki.ValheimBiome;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;

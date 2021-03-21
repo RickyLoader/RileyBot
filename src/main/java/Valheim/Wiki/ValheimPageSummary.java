@@ -1,4 +1,4 @@
-package Valheim;
+package Valheim.Wiki;
 
 import Command.Structure.EmbedHelper;
 import org.apache.commons.lang3.StringUtils;

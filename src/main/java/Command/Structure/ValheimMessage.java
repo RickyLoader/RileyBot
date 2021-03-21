@@ -1,7 +1,7 @@
 package Command.Structure;
 
-import Valheim.ValheimPageSummary;
-import Valheim.ValheimWikiAsset;
+import Valheim.Wiki.ValheimPageSummary;
+import Valheim.Wiki.ValheimWikiAsset;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 

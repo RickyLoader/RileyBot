@@ -1,4 +1,4 @@
-package Valheim;
+package Valheim.Wiki;
 
 import java.util.HashMap;
 
