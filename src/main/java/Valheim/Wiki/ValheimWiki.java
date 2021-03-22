@@ -52,6 +52,19 @@ public class ValheimWiki {
     }
 
     /**
+     * Get the page summaries of all searchable pages for the given category
+     *
+     * @param category Category of page summaries to return
+     * @return Category page summaries
+     */
+    public ArrayList<ValheimPageSummary> getPageSummaries(CATEGORY category) {
+        return pageSummaries
+                .stream()
+                .filter(pageSummary -> pageSummary.getCategory() == category)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
      * Get pages where the title matches the given search query
      *
      * @param query Search query

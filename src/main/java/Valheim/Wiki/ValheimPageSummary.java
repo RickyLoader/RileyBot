@@ -14,7 +14,8 @@ public class ValheimPageSummary {
         BIOME,
         ITEM,
         CREATURE,
-        EVENT;
+        EVENT,
+        NONE;
 
         /**
          * Get the URL to the Valheim wiki page displaying all pages in the the given category
@@ -24,6 +25,35 @@ public class ValheimPageSummary {
          */
         public static String getWikiPageUrl(CATEGORY category) {
             return ValheimWiki.BASE_URL + StringUtils.capitalize(category.name().toLowerCase()) + "s";
+        }
+
+        /**
+         * Get a page summary category by name
+         *
+         * @param name Name of category
+         * @return Category of name or NONE
+         */
+        public static CATEGORY byName(String name) {
+            try {
+                name = name.toUpperCase();
+                return CATEGORY.valueOf(name.toUpperCase());
+            }
+            catch(IllegalArgumentException e) {
+                switch(name) {
+                    case "BIOMES":
+                        return BIOME;
+                    case "ITEMS":
+                        return ITEM;
+                    case "CREATURES":
+                        return CREATURE;
+                    case "EVENTS":
+                    case "RANDOM EVENTS":
+                    case "RANDOM EVENT":
+                        return EVENT;
+                    default:
+                        return NONE;
+                }
+            }
         }
 
         /**

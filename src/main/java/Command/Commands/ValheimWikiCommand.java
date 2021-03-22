@@ -22,7 +22,7 @@ import static Valheim.Wiki.ValheimPageSummary.*;
 public class ValheimWikiCommand extends DiscordCommand {
 
     public ValheimWikiCommand() {
-        super("valwiki", "Search the Valheim wiki!", "valwiki [query/all]");
+        super("valwiki", "Search the Valheim wiki!", "valwiki [query/category/all]");
     }
 
     @Override
@@ -33,7 +33,19 @@ public class ValheimWikiCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        ArrayList<ValheimPageSummary> searchResults = query.equals("all") ? valheimWiki.getPageSummaries() : valheimWiki.searchWiki(query);
+        ArrayList<ValheimPageSummary> searchResults;
+        CATEGORY category = CATEGORY.byName(query);
+
+        if(category != CATEGORY.NONE) {
+            searchResults = valheimWiki.getPageSummaries(category);
+        }
+        else if(query.equals("all")) {
+            searchResults = valheimWiki.getPageSummaries();
+        }
+        else {
+            searchResults = valheimWiki.searchWiki(query);
+        }
+
         if(searchResults.size() == 1) {
             showSearchResult(searchResults.get(0), channel, context);
             return;
