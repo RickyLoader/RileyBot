@@ -17,12 +17,14 @@ import java.util.stream.Collectors;
  */
 public class ValheimWiki {
     private final ArrayList<ValheimPageSummary> pageSummaries;
+    private final HashMap<String, ValheimEvent> eventMap;
     public static final String BASE_URL = "https://valheim.fandom.com/wiki/";
 
     /**
      * Create a list of summaries for all searchable Valheim wiki pages
      */
     public ValheimWiki() {
+        this.eventMap = new HashMap<>();
         this.pageSummaries = fetchPageTitles();
     }
 
@@ -85,7 +87,58 @@ public class ValheimWiki {
         pageTitles.addAll(fetchCategoryPageSummaries(CATEGORY.BIOME));
         pageTitles.addAll(fetchCategoryPageSummaries(CATEGORY.CREATURE));
         pageTitles.addAll(fetchItemPageSummaries());
+        pageTitles.addAll(fetchEventPageSummaries());
         return pageTitles;
+    }
+
+    /**
+     * Events do not have individual pages, and rather are all displayed on a single page.
+     * Create a page summary for each event which links back to the main event page, allowing them to be searched.
+     * Parse each event on the main page in to a map of codename -> event for later retrieval without revisiting.
+     *
+     * @return List of summaries for pages in the events category
+     */
+    private ArrayList<ValheimPageSummary> fetchEventPageSummaries() {
+        ArrayList<ValheimPageSummary> eventPageSummaries = new ArrayList<>();
+        String url = CATEGORY.getWikiPageUrl(CATEGORY.EVENT);
+        Document eventPage = fetchWikiPage(url);
+
+        if(eventPage == null) {
+            return eventPageSummaries;
+        }
+
+        Elements tables = eventPage.select("table.article-table");
+        for(Element table : tables) {
+            Elements events = table
+                    .selectFirst("tbody")
+                    .select("tr:has(td)");
+
+            for(Element event : events) {
+                Elements columns = event.select("td");
+                String codename = columns.get(0).text();
+
+                ValheimPageSummary pageSummary = new ValheimPageSummary(
+                        codename,
+                        url,
+                        CATEGORY.EVENT
+                );
+                eventPageSummaries.add(pageSummary);
+
+                eventMap.put(
+                        codename,
+                        new ValheimEvent(
+                                pageSummary,
+                                columns.get(4).text(),
+                                codename,
+                                columns.get(1).text(),
+                                columns.get(2).text(),
+                                columns.get(3).text(),
+                                Integer.parseInt(columns.get(5).text())
+                        )
+                );
+            }
+        }
+        return eventPageSummaries;
     }
 
     /**
@@ -582,5 +635,15 @@ public class ValheimWiki {
         catch(IOException e) {
             return null;
         }
+    }
+
+    /**
+     * Get an event by its codename (page title)
+     *
+     * @param codename Event codename
+     * @return Event with given codename
+     */
+    public ValheimEvent getEventByCodename(String codename) {
+        return eventMap.get(codename);
     }
 }

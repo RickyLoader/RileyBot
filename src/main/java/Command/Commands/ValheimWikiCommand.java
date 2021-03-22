@@ -12,6 +12,7 @@ import org.apache.http.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static Bot.DiscordCommandManager.valheimWiki;
 import static Valheim.Wiki.ValheimPageSummary.*;
 
 
@@ -19,11 +20,9 @@ import static Valheim.Wiki.ValheimPageSummary.*;
  * Search the Valheim wiki
  */
 public class ValheimWikiCommand extends DiscordCommand {
-    private final ValheimWiki valheimWiki;
 
     public ValheimWikiCommand() {
         super("valwiki", "Search the Valheim wiki!", "valwiki [query/all]");
-        this.valheimWiki = new ValheimWiki();
     }
 
     @Override
@@ -98,6 +97,10 @@ public class ValheimWikiCommand extends DiscordCommand {
                 }
                 channel.sendMessage(itemEmbed).queue();
             }
+            else if(category == CATEGORY.EVENT) {
+                ValheimEvent event = valheimWiki.getEventByCodename(valheimPageSummary.getTitle());
+                channel.sendMessage(buildEventEmbed(event)).queue();
+            }
             else {
                 ValheimCreature creature = valheimWiki.getCreature(valheimPageSummary);
                 if(creature == null) {
@@ -170,6 +173,23 @@ public class ValheimWikiCommand extends DiscordCommand {
             builder.addField("Trader Cost", itemStats.getCost() + " coins", true);
         }
         return builder;
+    }
+
+    /**
+     * Build a message embed detailing the given Valheim random event
+     *
+     * @param event Random game event
+     * @return Message embed detailing event
+     */
+    private MessageEmbed buildEventEmbed(ValheimEvent event) {
+        return getDefaultEmbedBuilder(event)
+                .addField("Codename", event.getCodename(), true)
+                .addField("Duration", event.getDuration() + " seconds", true)
+                .addBlankField(true)
+                .addField("Start Message", event.getStartMessage(), true)
+                .addField("End Message", event.getEndMessage(), true)
+                .addField("Creatures", event.getCreatures(), true)
+                .build();
     }
 
     /**

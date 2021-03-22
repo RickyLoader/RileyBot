@@ -13,7 +13,8 @@ public class ValheimPageSummary {
     public enum CATEGORY {
         BIOME,
         ITEM,
-        CREATURE;
+        CREATURE,
+        EVENT;
 
         /**
          * Get the URL to the Valheim wiki page displaying all pages in the the given category
