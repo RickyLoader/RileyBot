@@ -39,6 +39,7 @@ public class LogItem {
         RANDOM_EVENT,
         DAY_STARTED,
         LOCATION_FOUND,
+        DUNGEON_LOADED,
         IGNORE;
 
         private final String prefix = "\\[Info   : Unity Log\\] (?<" + DATE + ">\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}:\\d{2}): ";
@@ -88,6 +89,8 @@ public class LogItem {
                     return prefix + "Time \\d+.?\\d+, day:(?<" + DAY + ">\\d+)    nextm:\\d+.?\\d+  skipspeed:\\d+.?\\d+";
                 case LOCATION_FOUND:
                     return prefix + "Found location of type (?<" + LOCATION + ">.+)";
+                case DUNGEON_LOADED:
+                    return prefix + "Dungeon loaded \\d+";
                 default:
                     return prefix;
             }

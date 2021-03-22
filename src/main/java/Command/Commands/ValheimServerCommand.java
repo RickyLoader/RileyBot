@@ -152,6 +152,9 @@ public class ValheimServerCommand extends DiscordCommand {
                     case LOCATION_FOUND:
                         message = "Location found: " + log.getLocationFound();
                         break;
+                    case DUNGEON_LOADED:
+                        message = "Character entered dungeon";
+                        break;
                     // Death
                     default:
                         message = log.getCharacterName() + " died!";
@@ -170,7 +173,7 @@ public class ValheimServerCommand extends DiscordCommand {
              */
             private String getOfflinePlayerMessage(long steamId) {
                 SteamProfile profile = valheimServer.getPlayerList().getSteamProfileById(steamId);
-                String characterNames = "(" + profile.getCharacterNames() + ")";
+                String characterNames = "(" + profile.getCharacterNames().trim() + ")";
                 return EmbedHelper.embedURL(profile.getName(), profile.getUrl()) + " " + characterNames;
             }
 
