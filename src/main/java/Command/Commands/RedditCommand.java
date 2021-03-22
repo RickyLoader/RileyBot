@@ -198,7 +198,7 @@ public class RedditCommand extends DiscordCommand {
         if(url.matches("https?://i.imgur.com/.+.gifv/?")) {
             url = url.substring(0, url.length() - 1);
         }
-        else if(url.matches("https?://www.redgifs.com/watch/.+")) {
+        else if(url.matches("https?://(www.)?redgifs.com/watch/.+")) {
             String[] urlArgs = url.split("/");
             GIF gif = GIFCommand.getGifById(urlArgs[urlArgs.length - 1]);
             if(gif != null) {
