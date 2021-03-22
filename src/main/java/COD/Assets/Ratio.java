@@ -89,4 +89,14 @@ public class Ratio {
     public int getDenominator() {
         return denominator;
     }
+
+    /**
+     * Add the numerator and denominator and return the percentage of numerator
+     *
+     * @return Percentage of numerator
+     */
+    public String getNumeratorPercentage() {
+        double percent = ((double) numerator + (double) denominator) / 100;
+        return (int) ((double) numerator / percent) + "%";
+    }
 }

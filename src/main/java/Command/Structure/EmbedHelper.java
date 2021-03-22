@@ -6,6 +6,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -139,5 +143,39 @@ public class EmbedHelper {
      */
     public static String embedURL(String text, String url) {
         return "[" + text + "](" + url + ")";
+    }
+
+
+    /**
+     * Download a video from the given URL.
+     * Returns null if the video size exceeds 8MB
+     *
+     * @param url Video url
+     * @return Byte array of video or null (if 8MB limit reached)
+     */
+    public static byte[] downloadVideo(String url) {
+        try {
+            URLConnection connection = new URL(url).openConnection();
+            connection.connect();
+            InputStream is = connection.getInputStream();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8000];
+            int bytesIn;
+            while((bytesIn = is.read(buffer)) != -1) {
+                if((os.size() / 1000) > 8192) {
+                    is.close();
+                    os.close();
+                    return null;
+                }
+                os.write(buffer, 0, bytesIn);
+            }
+            is.close();
+            os.close();
+            return os.toByteArray();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

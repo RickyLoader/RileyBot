@@ -199,6 +199,7 @@ public class DiscordCommandManager {
         addCommand(new ValheimWikiCommand());
         addCommand(new GrandExchangeCommand());
         addCommand(new ValheimServerCommand());
+        addCommand(new RedditCommand());
         // addCommand(new FacebookCommand());
     }
 

@@ -677,4 +677,18 @@ public class EmoteHelper {
     public Emote getBuyLimit() {
         return get("820980358550913076");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/823492124174712892.png"/>
+     */
+    public Emote getRedditUpvote() {
+        return get("823492124174712892");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/823492123872460821.png"/>
+     */
+    public Emote getRedditDownvote() {
+        return get("823492123872460821");
+    }
 }

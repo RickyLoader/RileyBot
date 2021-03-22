@@ -136,8 +136,7 @@ public class HubVideo {
      * @return Ratio of likes to dislikes
      */
     public String getLikeRatio() {
-        double percent = ((double) rating.getNumerator() + (double) rating.getDenominator()) / 100;
-        return (int) ((double) rating.getNumerator() / percent) + "%";
+        return rating.getNumeratorPercentage();
     }
 
     /**

@@ -21,6 +21,7 @@ public class GIFCommand extends DiscordCommand {
     private final HashMap<String, ArrayList<GIF>> gifs = new HashMap<>();
     private final HashSet<String> currentQueries = new HashSet<>();
     private final Random random = new Random();
+    private final static String BASE_URL = "https://api.redgifs.com/v1/gfycats/";
 
     public GIFCommand() {
         super("gif", "Search for a random GIF!", "gif [search term]");
@@ -106,7 +107,7 @@ public class GIFCommand extends DiscordCommand {
         currentQueries.add(query);
         ArrayList<GIF> gifs = new ArrayList<>();
         try {
-            String url = "https://api.redgifs.com/v1/gfycats/search?search_text="
+            String url = BASE_URL + "search?search_text="
                     + URLEncoder.encode(query, "UTF-8")
                     + "&count=50";
 
@@ -119,14 +120,7 @@ public class GIFCommand extends DiscordCommand {
                 if(o.isNull("title")) {
                     continue;
                 }
-                gifs.add(
-                        new GIF(
-                                o.getString("gifUrl"),
-                                o.getString("title"),
-                                parseTags(o.getJSONArray("tags")),
-                                new Date(o.getLong("createDate") * 1000)
-                        )
-                );
+                gifs.add(parseGif(o));
             }
         }
         catch(Exception e) {
@@ -137,13 +131,46 @@ public class GIFCommand extends DiscordCommand {
     }
 
     /**
+     * Get a GIF by its unique id
+     *
+     * @param id ID of gif
+     * @return GIF
+     */
+    public static GIF getGifById(String id) {
+        try {
+            JSONObject gif = new JSONObject(
+                    new NetworkRequest(BASE_URL + id, false).get().body
+            ).getJSONObject("gfyItem");
+            return parseGif(gif);
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Parse a GIF from the given JSON
+     *
+     * @param gif Gif JSON
+     * @return GIF
+     */
+    private static GIF parseGif(JSONObject gif) {
+        return new GIF(
+                gif.getString("gifUrl"),
+                gif.isNull("title") ? "Unknown Title" : gif.getString("title"),
+                parseTags(gif.getJSONArray("tags")),
+                new Date(gif.getLong("createDate") * 1000)
+        );
+    }
+
+    /**
      * Parse the list of GIF category tags from the given JSONArray
      * and return an array containing the first 5 tags.
      *
      * @param tagJSON JSONArray of tags, may be empty
      * @return Array of first 5 tags
      */
-    private String[] parseTags(JSONArray tagJSON) {
+    private static String[] parseTags(JSONArray tagJSON) {
         int size = Math.min(5, tagJSON.length());
         String[] tags = new String[size];
         for(int i = 0; i < size; i++) {
@@ -160,7 +187,7 @@ public class GIFCommand extends DiscordCommand {
     /**
      * Hold a GIF search result
      */
-    private static class GIF {
+    public static class GIF {
         private final String url, title;
         private final String[] tags;
         private final Date uploadDate;

@@ -10,16 +10,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
+import static Command.Structure.EmbedHelper.downloadVideo;
 import static Facebook.Attachments.*;
 
 /**
@@ -70,38 +67,6 @@ public class FacebookScraper {
                     return null;
             }
         }
-    }
-
-    /**
-     * Download a Facebook video from the given URL
-     *
-     * @param url Facebook video url
-     * @return Byte array of video
-     */
-    private byte[] downloadVideo(String url) {
-        try {
-            URLConnection connection = new URL(url).openConnection();
-            connection.connect();
-            InputStream is = connection.getInputStream();
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            byte[] buffer = new byte[8000];
-            int bytesIn;
-            while((bytesIn = is.read(buffer)) != -1) {
-                if((os.size() / 1000) > 8192) {
-                    is.close();
-                    os.close();
-                    return null;
-                }
-                os.write(buffer, 0, bytesIn);
-            }
-            is.close();
-            os.close();
-            return os.toByteArray();
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
