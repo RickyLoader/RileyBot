@@ -5,6 +5,7 @@ import Valheim.LogItem;
 import Valheim.PlayerConnection;
 import Valheim.SteamProfile;
 import Valheim.ValheimServer;
+import Valheim.Wiki.ValheimEvent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
+import static Bot.DiscordCommandManager.valheimWiki;
 
 /**
  * View online players & recent events
@@ -56,7 +59,7 @@ public class ValheimServerCommand extends DiscordCommand {
         new ValheimServerMessage(
                 context,
                 connections,
-                valheimServer.getWorldName(),
+                valheimServer,
                 ValheimServerMessage.TYPE.PLAYERS,
                 "Try: " + getHelpName(),
                 new String[]{
@@ -87,11 +90,10 @@ public class ValheimServerCommand extends DiscordCommand {
                 items.sort((Comparator<Object>) (o1, o2) -> {
                     Date d1 = ((PlayerConnection) o1).getDate();
                     Date d2 = ((PlayerConnection) o2).getDate();
-                    return defaultSort ? d1.compareTo(d2) : d2.compareTo(d1);
+                    return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
                 });
             }
         }.showMessage();
-
     }
 
     /**
@@ -104,7 +106,7 @@ public class ValheimServerCommand extends DiscordCommand {
         new ValheimServerMessage(
                 context,
                 logs,
-                valheimServer.getWorldName(),
+                valheimServer,
                 ValheimServerMessage.TYPE.LOGS,
                 "Try: " + getHelpName(),
                 new String[]{
@@ -131,6 +133,24 @@ public class ValheimServerCommand extends DiscordCommand {
                         break;
                     case WORLD_INFO:
                         message = "Created world " + log.getWorldName();
+                        break;
+                    case SERVER_START:
+                        message = "Server started";
+                        break;
+                    case SERVER_STOP:
+                        message = "Server stopped";
+                        break;
+                    case RANDOM_EVENT:
+                        ValheimEvent randomEvent = valheimWiki.getEventByCodename(log.getEventCodename());
+                        message = "Random event: "
+                                + randomEvent.getStartMessage()
+                                + " (" + randomEvent.getCodename() + ")";
+                        break;
+                    case DAY_STARTED:
+                        message = "Day: " + log.getDay() + " has begun!";
+                        break;
+                    case LOCATION_FOUND:
+                        message = "Location found: " + log.getLocationFound();
                         break;
                     // Death
                     default:

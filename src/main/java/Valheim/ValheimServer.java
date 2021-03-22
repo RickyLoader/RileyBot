@@ -16,8 +16,9 @@ import java.util.stream.Collectors;
 public class ValheimServer {
     private final PlayerList playerList;
     private final ArrayList<LogItem> logs;
+    private boolean online = false;
     private String worldName;
-    private int logIndex;
+    private int logIndex, day;
 
     /**
      * Parse the server logs and populate the current online players/server events
@@ -57,7 +58,6 @@ public class ValheimServer {
         if(logs.isEmpty() || logIndex == logs.size() - 1) {
             return;
         }
-
         for(int i = logIndex; i < logs.size(); i++) {
             LogItem log = logs.get(i);
             switch(log.getType()) {
@@ -84,6 +84,16 @@ public class ValheimServer {
                     break;
                 case WORLD_INFO:
                     this.worldName = log.getWorldName();
+                    break;
+                case SERVER_START:
+                    online = true;
+                    break;
+                case SERVER_STOP:
+                    online = false;
+                    break;
+                case DAY_STARTED:
+                    day = log.getDay();
+                    break;
             }
             this.logs.add(log);
         }
@@ -98,7 +108,7 @@ public class ValheimServer {
     private ArrayList<LogItem> fetchLogs() {
         ArrayList<LogItem> logs = new ArrayList<>();
         try {
-            InputStream logInputStream = new URL(getFTPUrl() + "/server.log")
+            InputStream logInputStream = new URL(getFTPUrl() + "/BepInEx/LogOutput.log")
                     .openConnection()
                     .getInputStream();
             String[] logMessages = IOUtils.toString(logInputStream, StandardCharsets.UTF_8).split("\n");
@@ -129,11 +139,29 @@ public class ValheimServer {
     }
 
     /**
+     * Check if the server is online
+     *
+     * @return Server is online
+     */
+    public boolean isOnline() {
+        return online;
+    }
+
+    /**
      * Get the name of the server world
      *
      * @return World name
      */
     public String getWorldName() {
         return worldName;
+    }
+
+    /**
+     * Get the current game day
+     *
+     * @return Game day
+     */
+    public int getDay() {
+        return day;
     }
 }

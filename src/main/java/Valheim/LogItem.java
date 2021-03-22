@@ -7,7 +7,6 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * Valheim server log item
  */
@@ -15,14 +14,18 @@ public class LogItem {
     private final Date date;
     private final TYPE type;
     private final long steamId, zdoid;
-    private final String message, characterName, worldName;
+    private final int day;
+    private final String message, characterName, worldName, eventName, locationFound;
 
     public final static String
             DATE = "date",
             STEAM_ID = "steam",
             CHARACTER_NAME = "charactername",
             WORLD_NAME = "worldname",
-            ZDOID = "zdoid";
+            EVENT_NAME = "eventname",
+            ZDOID = "zdoid",
+            DAY = "day",
+            LOCATION = "location";
 
     public enum TYPE {
         CONNECTION_STARTED,
@@ -31,9 +34,14 @@ public class LogItem {
         RESPAWN,
         WORLD_INFO,
         DISCONNECTION,
+        SERVER_STOP,
+        SERVER_START,
+        RANDOM_EVENT,
+        DAY_STARTED,
+        LOCATION_FOUND,
         IGNORE;
 
-        private final String date = "(?<" + DATE + ">\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}:\\d{2})";
+        private final String prefix = "\\[Info   : Unity Log\\] (?<" + DATE + ">\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}:\\d{2}): ";
 
         /**
          * Get the log type from the given log message
@@ -59,9 +67,9 @@ public class LogItem {
             String defaultZdoid = "-?\\d+";
             switch(this) {
                 case DISCONNECTION:
-                    return date + ": Closing socket (?<" + STEAM_ID + ">\\d+)";
+                    return prefix + "Closing socket (?<" + STEAM_ID + ">\\d+)";
                 case CONNECTION_STARTED:
-                    return date + ": Got connection SteamID (?<" + STEAM_ID + ">\\d+)";
+                    return prefix + "Got connection SteamID (?<" + STEAM_ID + ">\\d+)";
                 case CONNECTION_COMPLETE:
                     return getPlayerEventRegex(defaultZdoid, "1");
                 case DEATH:
@@ -69,9 +77,19 @@ public class LogItem {
                 case RESPAWN:
                     return getPlayerEventRegex(defaultZdoid, "\\d+");
                 case WORLD_INFO:
-                    return date + ": Get create world (?<" + WORLD_NAME + ">.+)";
+                    return prefix + "Get create world (?<" + WORLD_NAME + ">.+)";
+                case SERVER_START:
+                    return prefix + "Game server connected";
+                case SERVER_STOP:
+                    return prefix + "Net scene destroyed";
+                case RANDOM_EVENT:
+                    return prefix + "Random event set:(?<" + EVENT_NAME + ">.+)";
+                case DAY_STARTED:
+                    return prefix + "Time \\d+.?\\d+, day:(?<" + DAY + ">\\d+)    nextm:\\d+.?\\d+  skipspeed:\\d+.?\\d+";
+                case LOCATION_FOUND:
+                    return prefix + "Found location of type (?<" + LOCATION + ">.+)";
                 default:
-                    return date;
+                    return prefix;
             }
         }
 
@@ -84,7 +102,7 @@ public class LogItem {
          * @return Player event regex
          */
         private String getPlayerEventRegex(String zdoid, String value) {
-            return date + ": Got character ZDOID from (?<" + CHARACTER_NAME + ">.+) : (?<" + ZDOID + ">"
+            return prefix + "Got character ZDOID from (?<" + CHARACTER_NAME + ">.+) : (?<" + ZDOID + ">"
                     + zdoid + "):" + value;
         }
     }
@@ -102,6 +120,9 @@ public class LogItem {
         this.zdoid = builder.zdoid;
         this.characterName = builder.characterName;
         this.worldName = builder.worldName;
+        this.eventName = builder.eventName;
+        this.day = builder.day;
+        this.locationFound = builder.locationFound;
     }
 
     /**
@@ -139,6 +160,15 @@ public class LogItem {
             case WORLD_INFO:
                 builder.setWorldName(matcher.group(WORLD_NAME));
                 break;
+            case DAY_STARTED:
+                builder.setDay(Integer.parseInt(matcher.group(DAY)));
+                break;
+            case RANDOM_EVENT:
+                builder.setEventCodename(matcher.group(EVENT_NAME));
+                break;
+            case LOCATION_FOUND:
+                builder.setLocationFound(matcher.group(LOCATION));
+                break;
         }
         return builder.build();
     }
@@ -147,7 +177,8 @@ public class LogItem {
         private final Date date;
         private final TYPE type;
         private final String message;
-        private String characterName, worldName;
+        private String characterName, worldName, eventName, locationFound;
+        private int day;
         private long steamId, zdoid;
 
         /**
@@ -171,6 +202,28 @@ public class LogItem {
          */
         public LogItemBuilder setSteamId(long steamId) {
             this.steamId = steamId;
+            return this;
+        }
+
+        /**
+         * Set the location found from the log message
+         *
+         * @param locationFound Location which has been discovered
+         * @return Builder
+         */
+        public LogItemBuilder setLocationFound(String locationFound) {
+            this.locationFound = locationFound;
+            return this;
+        }
+
+        /**
+         * Set the game day
+         *
+         * @param day Game day
+         * @return Builder
+         */
+        public LogItemBuilder setDay(int day) {
+            this.day = day;
             return this;
         }
 
@@ -204,6 +257,17 @@ public class LogItem {
          */
         public LogItemBuilder setWorldName(String worldName) {
             this.worldName = worldName;
+            return this;
+        }
+
+        /**
+         * Set the codename of a random event from the log message - e.g "skeletons"
+         *
+         * @param eventName Random event codename
+         * @return Builder
+         */
+        public LogItemBuilder setEventCodename(String eventName) {
+            this.eventName = eventName;
             return this;
         }
 
@@ -287,6 +351,33 @@ public class LogItem {
      */
     public String getWorldName() {
         return worldName;
+    }
+
+    /**
+     * Get the location which was found
+     *
+     * @return Location found
+     */
+    public String getLocationFound() {
+        return locationFound;
+    }
+
+    /**
+     * Get the random event codename - e.g "skeletons"
+     *
+     * @return Random event codename
+     */
+    public String getEventCodename() {
+        return eventName;
+    }
+
+    /**
+     * Get the game day
+     *
+     * @return Game day
+     */
+    public int getDay() {
+        return day;
     }
 
     /**

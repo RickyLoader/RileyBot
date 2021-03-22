@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import Network.Secret;
+import Valheim.ValheimServer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -20,18 +21,18 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
      *
      * @param context     Command context
      * @param items       List of items to be displayed
-     * @param serverName  Server name
+     * @param server      Valheim server
      * @param displayType Display type
      * @param footer      Footer to use in the embed
      * @param columns     Column headers to display at the top of message
      */
-    public ValheimServerMessage(CommandContext context, List<?> items, String serverName, TYPE displayType, String footer, String[] columns) {
+    public ValheimServerMessage(CommandContext context, List<?> items, ValheimServer server, TYPE displayType, String footer, String[] columns) {
         super(
                 context,
                 items,
                 PageableValheimWikiSearchEmbed.THUMBNAIL,
-                getTitle(serverName, displayType, items.size()),
-                getServerDescription(),
+                getTitle(server.getWorldName(), displayType, items.size()),
+                getServerDescription(server),
                 footer,
                 columns,
                 5,
@@ -58,10 +59,13 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
     /**
      * Get the description to use in the server embed
      *
+     * @param server Valheim server
      * @return Embed description
      */
-    private static String getServerDescription() {
+    private static String getServerDescription(ValheimServer server) {
         return "**IP**: " + Secret.VALHEIM_IP + ":" + Secret.VALHEIM_SERVER_PORT
-                + "\n**Password**: " + Secret.VALHEIM_SERVER_PASS;
+                + "\n**Password**: " + Secret.VALHEIM_SERVER_PASS
+                + "\n**Online**: " + (server.isOnline() ? "Yes" : "No")
+                + "\n**Day**: " + server.getDay();
     }
 }

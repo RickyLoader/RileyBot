@@ -20,6 +20,7 @@ import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmoteHelper;
+import Valheim.Wiki.ValheimWiki;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -33,10 +34,11 @@ import java.util.Random;
  * Hold a list of commands and handle incoming text input to check for command triggers
  */
 public class DiscordCommandManager {
-    private final ArrayList<DiscordCommand> commands, viewableCommands;
-    private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
     public static final MWManager mwAssetManager = new MWManager();
     public static final CWManager cwManager = new CWManager();
+    public static final ValheimWiki valheimWiki = new ValheimWiki();
+    private final ArrayList<DiscordCommand> commands, viewableCommands;
+    private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
     private EmoteHelper emoteHelper;
 
     /**
