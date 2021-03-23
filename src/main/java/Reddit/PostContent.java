@@ -10,6 +10,7 @@ public class PostContent {
     public enum TYPE {
         TEXT,
         IMAGE,
+        LINK,
         VIDEO
     }
 

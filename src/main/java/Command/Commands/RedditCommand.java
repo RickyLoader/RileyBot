@@ -101,6 +101,10 @@ public class RedditCommand extends DiscordCommand {
                 }
                 description = text + "\n\n" + description;
                 break;
+            case LINK:
+                description = "**Post link: **" + EmbedHelper.embedURL("View", content.getContent())
+                        + "\n\n" + description;
+                break;
             case IMAGE:
                 builder.setImage(content.getContent());
                 break;
@@ -177,8 +181,15 @@ public class RedditCommand extends DiscordCommand {
             );
         }
         else if(text.isEmpty()) {
+            String url = post.getString("url");
+            if(post.getString("post_hint").equals("link")) {
+                return new PostContent(
+                        url,
+                        PostContent.TYPE.LINK
+                );
+            }
             return new PostContent(
-                    processUrl(post.getString("url")),
+                    processImageUrl(url),
                     PostContent.TYPE.IMAGE
             );
         }
@@ -194,7 +205,7 @@ public class RedditCommand extends DiscordCommand {
      * @param url Image/gif URL
      * @return Refactored URL
      */
-    private String processUrl(String url) {
+    private String processImageUrl(String url) {
         if(url.matches("https?://i.imgur.com/.+.gifv/?")) {
             url = url.substring(0, url.length() - 1);
         }
@@ -250,6 +261,6 @@ public class RedditCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.matches("https://www.reddit.com/r/.+/comments/.+/.+/?");
+        return query.matches("https://(www.)?reddit.com/r/.+/comments/.+/.+/?");
     }
 }
