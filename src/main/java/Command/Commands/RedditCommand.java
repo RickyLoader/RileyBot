@@ -102,7 +102,7 @@ public class RedditCommand extends DiscordCommand {
                 description = text + "\n\n" + description;
                 break;
             case LINK:
-                description = "**Post link: **" + EmbedHelper.embedURL("View", content.getContent())
+                description = "**Post link**: " + EmbedHelper.embedURL("View", content.getContent())
                         + "\n\n" + description;
                 break;
             case IMAGE:
