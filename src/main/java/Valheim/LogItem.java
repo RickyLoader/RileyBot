@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class LogItem {
     private final Date date;
     private final TYPE type;
-    private final long steamId, zdoid;
+    private final long steamId, zdoid, zdoidIdentifier;
     private final int day;
     private final String message, characterName, worldName, eventName, locationFound;
 
@@ -25,6 +25,7 @@ public class LogItem {
             EVENT_NAME = "eventname",
             ZDOID = "zdoid",
             DAY = "day",
+            ZDOID_IDENTIFIER = "zdoididentifier",
             LOCATION = "location";
 
     public enum TYPE {
@@ -97,16 +98,16 @@ public class LogItem {
         }
 
         /**
-         * Events involving a player follow the format - "Got character ZDOID from CHARACTER_NAME : ZDOID:VALUE"
-         * where the ZDOID is the character's session id and the value dictates the event which has occurred
+         * Events involving a player follow the format - "Got character ZDOID from CHARACTER_NAME : zdoid:zdoid identifier"
+         * where the zdoid is the character's session id and the identifier dictates the event which has occurred
          *
-         * @param zdoid ZDOID regex
-         * @param value Value regex
+         * @param zdoid           Zdoid regex
+         * @param zdoidIdentifier Zdoid identifier regex
          * @return Player event regex
          */
-        private String getPlayerEventRegex(String zdoid, String value) {
+        private String getPlayerEventRegex(String zdoid, String zdoidIdentifier) {
             return prefix + "Got character ZDOID from (?<" + CHARACTER_NAME + ">.+) : (?<" + ZDOID + ">"
-                    + zdoid + "):" + value;
+                    + zdoid + "):" + "(?<" + ZDOID_IDENTIFIER + ">" + zdoidIdentifier + ")";
         }
     }
 
@@ -121,6 +122,7 @@ public class LogItem {
         this.type = builder.type;
         this.steamId = builder.steamId;
         this.zdoid = builder.zdoid;
+        this.zdoidIdentifier = builder.zdoidIdentifier;
         this.characterName = builder.characterName;
         this.worldName = builder.worldName;
         this.eventName = builder.eventName;
@@ -154,11 +156,10 @@ public class LogItem {
                 break;
             case CONNECTION_COMPLETE:
             case RESPAWN:
-                builder.setZdoid(Long.parseLong(matcher.group(ZDOID)))
-                        .setCharacterName(matcher.group(CHARACTER_NAME));
-                break;
             case DEATH:
-                builder.setCharacterName(matcher.group(CHARACTER_NAME));
+                builder.setZdoid(Long.parseLong(matcher.group(ZDOID)))
+                        .setZdoidIdentifier(Long.parseLong(matcher.group(ZDOID_IDENTIFIER)))
+                        .setCharacterName(matcher.group(CHARACTER_NAME));
                 break;
             case WORLD_INFO:
                 builder.setWorldName(matcher.group(WORLD_NAME));
@@ -182,7 +183,7 @@ public class LogItem {
         private final String message;
         private String characterName, worldName, eventName, locationFound;
         private int day;
-        private long steamId, zdoid;
+        private long steamId, zdoid, zdoidIdentifier;
 
         /**
          * Initialise the builder with the required values
@@ -238,6 +239,19 @@ public class LogItem {
          */
         public LogItemBuilder setZdoid(long zdoid) {
             this.zdoid = zdoid;
+            return this;
+        }
+
+        /**
+         * Set the zdoid identifier from the log message
+         * Is paired with the zdoid in the format zdoid:zdoid identifier and is used to identify the event which
+         * has occurred to the player of the given zdoid
+         *
+         * @param zdoidIdentifier Identifier for the zdoid
+         * @return Builder
+         */
+        public LogItemBuilder setZdoidIdentifier(long zdoidIdentifier) {
+            this.zdoidIdentifier = zdoidIdentifier;
             return this;
         }
 
@@ -345,6 +359,17 @@ public class LogItem {
      */
     public long getZdoid() {
         return zdoid;
+    }
+
+    /**
+     * Get the zdoid identifier from the log message
+     * Is paired with the zdoid in the format zdoid:zdoid identifier and is used to identify the event which
+     * has occurred to the player of the given zdoid;
+     *
+     * @return Zdoid identifier
+     */
+    public long getZdoidIdentifier() {
+        return zdoidIdentifier;
     }
 
     /**
