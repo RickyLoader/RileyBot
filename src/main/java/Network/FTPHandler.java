@@ -40,9 +40,7 @@ public class FTPHandler {
      */
     public InputStream getFileAsStream(String path) {
         try {
-            if(!client.isConnected()) {
-                connect(client);
-            }
+            connect(client);
             InputStream response = client.retrieveFileStream(path);
             client.completePendingCommand();
             return response;
