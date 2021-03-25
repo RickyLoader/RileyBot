@@ -1,13 +1,12 @@
 package Valheim;
 
+import Network.FTPHandler;
 import Network.Secret;
 import Valheim.LogItem.LogItemBuilder;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.ftp.FTPFile;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
@@ -17,7 +16,8 @@ public class ValheimServer {
     private final PlayerList playerList;
     private final ArrayList<LogItem> logs;
     private boolean online = false;
-    private String worldName;
+    private final FTPHandler ftpHandler;
+    private final String worldName;
     private int logIndex, day;
 
     /**
@@ -27,6 +27,13 @@ public class ValheimServer {
         this.logIndex = 0;
         this.playerList = new PlayerList();
         this.logs = new ArrayList<>();
+        this.ftpHandler = new FTPHandler(
+                Secret.VALHEIM_IP,
+                Secret.VALHEIM_FTP_PORT,
+                Secret.VALHEIM_USER,
+                Secret.VALHEIM_FTP_PASS
+        );
+        this.worldName = fetchWorldName();
         updateServer();
     }
 
@@ -82,9 +89,6 @@ public class ValheimServer {
                 case CONNECTION_STARTED:
                     playerList.connectionStarted(log.getSteamId(), log.getDate());
                     break;
-                case WORLD_INFO:
-                    this.worldName = log.getWorldName();
-                    break;
                 case SERVER_START:
                     online = true;
                     break;
@@ -108,12 +112,7 @@ public class ValheimServer {
     private ArrayList<LogItem> fetchLogs() {
         ArrayList<LogItem> logs = new ArrayList<>();
         try {
-            InputStream logInputStream = new URL(getFTPUrl() + "/BepInEx/LogOutput.log")
-                    .openConnection()
-                    .getInputStream();
-            String[] logMessages = IOUtils.toString(logInputStream, StandardCharsets.UTF_8).split("\n");
-            logInputStream.close();
-
+            String[] logMessages = ftpHandler.getFileAsString("/BepInEx/LogOutput.log").split("\n");
             for(String logMessage : logMessages) {
                 LogItem log = LogItem.fromLogMessage(logMessage);
                 if(log == null) {
@@ -129,13 +128,23 @@ public class ValheimServer {
     }
 
     /**
-     * Get the URL required to connect to the Valheim server via FTP
+     * Fetch the world name
      *
-     * @return FTP URL
+     * @return World name
      */
-    private String getFTPUrl() {
-        return "ftp://" + Secret.VALHEIM_USER + ":" + Secret.VALHEIM_FTP_PASS
-                + "@" + Secret.VALHEIM_IP + ":" + Secret.VALHEIM_FTP_PORT;
+    private String fetchWorldName() {
+        String dir = "/.config/unity3d/IronGate/Valheim/worlds/";
+        FTPFile[] dirContents = ftpHandler.getDirectoryContents(dir);
+        String[] infoFiles = Arrays.stream(dirContents)
+                .map(FTPFile::getName)
+                .filter(name -> name.matches(".+.fwl"))
+                .toArray(String[]::new);
+
+        if(infoFiles.length == 0) {
+            return "-";
+        }
+        String contents = ftpHandler.getFileAsString(dir + infoFiles[0]).replaceAll("-", "");
+        return contents.split("\n")[0].replaceAll("\\P{Print}", "");
     }
 
     /**
