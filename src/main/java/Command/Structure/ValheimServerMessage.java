@@ -66,6 +66,6 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
         return "**IP**: " + Secret.VALHEIM_IP + ":" + Secret.VALHEIM_SERVER_PORT
                 + "\n**Password**: " + Secret.VALHEIM_SERVER_PASS
                 + "\n**Online**: " + (server.isOnline() ? "Yes" : "No")
-                + "\n**Day**: " + server.getDay();
+                + "\n**Day**: ~" + server.getDay() + " (Last slept to)";
     }
 }
