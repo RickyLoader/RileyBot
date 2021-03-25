@@ -41,9 +41,7 @@ public class FTPHandler {
     public InputStream getFileAsStream(String path) {
         try {
             connect(client);
-            InputStream response = client.retrieveFileStream(path);
-            client.completePendingCommand();
-            return response;
+            return client.retrieveFileStream(path);
         }
         catch(IOException e) {
             e.printStackTrace();
