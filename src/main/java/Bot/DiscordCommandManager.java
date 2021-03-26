@@ -200,6 +200,7 @@ public class DiscordCommandManager {
         addCommand(new GrandExchangeCommand());
         addCommand(new ValheimServerCommand());
         addCommand(new RedditCommand());
+        addCommand(new SteamCommand());
         // addCommand(new FacebookCommand());
     }
 
