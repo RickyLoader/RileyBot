@@ -5,7 +5,7 @@ package Steam;
  */
 public class AppInfo {
     private final int id;
-    private final String name;
+    private final String name, storeUrl;
 
     /**
      * Create the steam store application info
@@ -16,6 +16,16 @@ public class AppInfo {
     public AppInfo(int id, String name) {
         this.id = id;
         this.name = name;
+        this.storeUrl = SteamStore.STEAM_STORE_WEB_BASE_URL + id;
+    }
+
+    /**
+     * Get the URL to the application on the Steam store
+     *
+     * @return Application store URL
+     */
+    public String getStoreUrl() {
+        return storeUrl;
     }
 
     /**

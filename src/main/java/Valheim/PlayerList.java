@@ -2,6 +2,7 @@ package Valheim;
 
 import Network.NetworkRequest;
 import Network.Secret;
+import Steam.SteamStore;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class PlayerList {
      * @return Steam profile or null
      */
     private SteamProfile fetchSteamProfile(long steamId) {
-        String url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="
+        String url = SteamStore.STEAM_API_BASE_URL +"ISteamUser/GetPlayerSummaries/v2/?key="
                 + Secret.STEAM_KEY + "&steamids=" + steamId;
 
         JSONObject response = new JSONObject(

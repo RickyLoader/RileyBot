@@ -15,8 +15,10 @@ import java.util.stream.Collectors;
 public class SteamStore {
     public final static String
             STEAM_LOGO = "https://i.imgur.com/6gE0Aog.png",
-            STEAM_STORE_WEB_URL = "https://steamcommunity.com/app/\\d+/?",
-            STEAM_STORE_DESKTOP_URL = "https://store.steampowered.com/app/\\d+/.+/?";
+            STEAM_STORE_WEB_BASE_URL = "https://steamcommunity.com/app/",
+            STEAM_STORE_WEB_URL = STEAM_STORE_WEB_BASE_URL + "\\d+/?",
+            STEAM_STORE_DESKTOP_URL = "https://store.steampowered.com/app/\\d+/.+/?",
+            STEAM_API_BASE_URL = "https://api.steampowered.com/";
 
     private final HashMap<Integer, AppInfo> appIdentifiers;
     private final String steamSpyBaseUrl = "https://steamspy.com/api.php?request=";
@@ -78,7 +80,7 @@ public class SteamStore {
      */
     private void fetchAppIdentifiers() {
         String json = new NetworkRequest(
-                "http://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json", false
+                STEAM_API_BASE_URL + "ISteamApps/GetAppList/v0002/?format=json", false
         ).get().body;
 
         JSONArray appList = new JSONObject(json).getJSONObject("applist").getJSONArray("apps");

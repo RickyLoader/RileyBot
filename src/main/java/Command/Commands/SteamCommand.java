@@ -11,12 +11,12 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.*;
 
+import static Bot.DiscordCommandManager.steamStore;
+
 /**
  * View specific/top steam games
  */
 public class SteamCommand extends DiscordCommand {
-    private final SteamStore steamStore = new SteamStore();
-
     public SteamCommand() {
         super("steam", "View steam games!", "steam [top/name/id/store url]");
     }
@@ -100,9 +100,10 @@ public class SteamCommand extends DiscordCommand {
      * @param application Steam application
      * @return Message embed detailing Steam application
      */
-    private EmbedBuilder getApplicationEmbedBuilder(Application application) {
+    EmbedBuilder getApplicationEmbedBuilder(Application application) {
+        AppInfo appInfo = application.getAppInfo();
         return new EmbedBuilder()
-                .setTitle("Steam | " + application.getAppInfo().getSummary())
+                .setTitle("Steam | " + appInfo.getSummary(), appInfo.getStoreUrl())
                 .setThumbnail(SteamStore.STEAM_LOGO)
                 .setImage(application.getThumbnail())
                 .setDescription(application.getDescription())
