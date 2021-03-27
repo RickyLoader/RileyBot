@@ -56,7 +56,7 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @return Default help text
      */
     public static String getHelpText(String trigger) {
-        return "[platform] " + getDefaultLookupArgs(trigger);
+        return "[platform] " + trigger + " " + DEFAULT_LOOKUP_ARGS;
     }
 
     /**

@@ -8,12 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Look up a player in a game and build an image showing their stats
+ * Look up a user and do something with their saved name
  */
-public abstract class LookupCommand extends DiscordCommand {
+public abstract class LookupCommand extends SavedNameCommand {
+    public static final String DEFAULT_LOOKUP_ARGS = "[name/me/@someone]", SAVE_TYPE_NAME = "name";
     private final ArrayList<String> currentLookups = new ArrayList<>();
-    private final int maxLength;
-    public final static String RESOLVE_NAME_ARGS = " [name/me/@someone]";
 
     /**
      * Initialise the command
@@ -26,9 +25,10 @@ public abstract class LookupCommand extends DiscordCommand {
         super(
                 trigger,
                 desc,
-                getDefaultHelpText(trigger)
+                DEFAULT_LOOKUP_ARGS,
+                maxLength,
+                SAVE_TYPE_NAME
         );
-        this.maxLength = maxLength;
     }
 
     /**
@@ -43,72 +43,37 @@ public abstract class LookupCommand extends DiscordCommand {
         super(
                 trigger,
                 desc,
-                getDefaultHelpText(trigger) + "\n\n" + helpText
+                DEFAULT_LOOKUP_ARGS,
+                helpText,
+                maxLength,
+                SAVE_TYPE_NAME
         );
-        this.maxLength = maxLength;
     }
 
-    /**
-     * Get a String detailing the default lookup arguments
-     *
-     * @param trigger Trigger to prepend to String
-     * @return trigger [name/me/@someone]
-     */
-    public static String getDefaultLookupArgs(String trigger) {
-        return trigger + RESOLVE_NAME_ARGS;
-    }
-
-    /**
-     * Get a String detailing the default lookup help text
-     *
-     * @param trigger Trigger to use in help text
-     * @return trigger [name/me/@someone] trigger save [your name]
-     */
-    public static String getDefaultHelpText(String trigger) {
-        return getDefaultLookupArgs(trigger) + "\n" + trigger + " save [your name]";
-    }
-
-    /**
-     * Lookup a user in a game or save their name for later look up queries
-     *
-     * @param context Context of command
-     */
     @Override
-    public void execute(CommandContext context) {
+    public void performLookup(String name, CommandContext context) {
         Message message = context.getMessage();
-        String query = stripArguments(message.getContentRaw().toLowerCase().trim().replaceAll("\\s+", " "));
-        MessageChannel channel = context.getMessageChannel();
-        User author = context.getUser();
         List<User> mentioned = message.getMentionedUsers();
+        User author = message.getAuthor();
+        MessageChannel channel = context.getMessageChannel();
 
-        if(!query.startsWith(getTrigger() + " ")) {
-            channel.sendMessage(getHelpNameCoded()).queue();
-            return;
-        }
-
-        String save = getTrigger() + " save ";
-        if(query.startsWith(save) && !query.replace(save, "").isEmpty()) {
-            saveName(query.replaceFirst(save, ""), channel, author);
-            return;
-        }
-        String name = query.replace(getTrigger(), "").trim();
         if(!mentioned.isEmpty()) {
             User target = mentioned.get(0);
             name = getSavedName(target.getIdLong());
             if(name == null) {
-                channel.sendMessage(author.getAsMention() + " I don't have a name saved for " + target.getAsMention() + " they will need to:" + getSaveHelp(false)).queue();
+                channel.sendMessage(getSaveHelp(target == author, target)).queue();
                 return;
             }
         }
         else if(name.equals("me")) {
             name = getSavedName(context.getUser().getIdLong());
             if(name == null) {
-                channel.sendMessage(author.getAsMention() + " I don't have a name saved for you, try: " + getSaveHelp(true)).queue();
+                channel.sendMessage(getSaveHelp(true, author)).queue();
                 return;
             }
         }
-        if(name.length() > maxLength) {
-            channel.sendMessage("Maximum username length is " + maxLength + " characters cunt").queue();
+        if(name.length() > getMaxLength()) {
+            channel.sendMessage("Maximum username length is " + getMaxLength() + " characters cunt").queue();
             return;
         }
         if(name.isEmpty()) {
@@ -116,16 +81,6 @@ public abstract class LookupCommand extends DiscordCommand {
             return;
         }
         lookupUser(name, context);
-    }
-
-    /**
-     * Strip and save extra arguments such that the query equals [trigger] [name] or [trigger] save [name]
-     *
-     * @param query String which triggered command
-     * @return Query to correct format
-     */
-    public String stripArguments(String query) {
-        return query;
     }
 
     /**
@@ -154,36 +109,4 @@ public abstract class LookupCommand extends DiscordCommand {
      * @param context Command context
      */
     public abstract void processName(String name, CommandContext context);
-
-    /**
-     * Get a hint on how to save the name
-     *
-     * @return How to save user name
-     */
-    public String getSaveHelp(boolean self) {
-        String who = self ? "your " : "their ";
-        return "```" + getTrigger() + " save [" + who + "name]```";
-    }
-
-    /**
-     * Get the user's saved name for the given lookup
-     *
-     * @param id ID of user
-     * @return User's saved name
-     */
-    public abstract String getSavedName(long id);
-
-    /**
-     * Save the user's name for the given lookup
-     *
-     * @param name    Name to save
-     * @param channel Channel to send save status to
-     * @param user    User to save name for
-     */
-    public abstract void saveName(String name, MessageChannel channel, User user);
-
-    @Override
-    public boolean matches(String query, Message message) {
-        return query.startsWith(getTrigger());
-    }
 }

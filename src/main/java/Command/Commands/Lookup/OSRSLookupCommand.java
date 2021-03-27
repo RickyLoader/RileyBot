@@ -18,7 +18,7 @@ public class OSRSLookupCommand extends LookupCommand {
         super(
                 "osrslookup",
                 "Check out someone's stats on OSRS!",
-                "[league] [virtual] [xp] " + getDefaultLookupArgs("osrslookup"),
+                "[league] [virtual] [xp] osrslookup " + DEFAULT_LOOKUP_ARGS,
                 12
         );
     }

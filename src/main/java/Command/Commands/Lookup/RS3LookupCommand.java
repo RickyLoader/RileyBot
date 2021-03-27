@@ -18,7 +18,7 @@ public class RS3LookupCommand extends LookupCommand {
         super(
                 "rs3lookup",
                 "Check out someone's stats on RS3!",
-                "virtual " + getDefaultLookupArgs("rs3lookup"),
+                "virtual rs3lookup " + DEFAULT_LOOKUP_ARGS,
                 12
         );
     }

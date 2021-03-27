@@ -30,7 +30,7 @@ public abstract class SummonerLookupCommand extends LookupCommand {
         super(
                 trigger,
                 desc,
-                "[region] " + getDefaultLookupArgs(trigger),
+                "[region] " + trigger + " " + DEFAULT_LOOKUP_ARGS,
                 16
         );
         this.regions = getRegions();

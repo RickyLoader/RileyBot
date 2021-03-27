@@ -30,8 +30,8 @@ public class TrailblazerCommand extends DiscordCommand {
 
     public TrailblazerCommand() {
         super(
-                "trailblazer view " + LookupCommand.RESOLVE_NAME_ARGS
-                        + "\ntrailblazer store " + LookupCommand.RESOLVE_NAME_ARGS + "*"
+                "trailblazer view " + LookupCommand.DEFAULT_LOOKUP_ARGS
+                        + "\ntrailblazer store " + LookupCommand.DEFAULT_LOOKUP_ARGS + "*"
                         + "\n\n*(Attach exported data from osleague.tools)",
                 "Update/Display a player's OSRS League regions and relics"
         );
