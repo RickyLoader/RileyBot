@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import com.sun.org.apache.regexp.internal.RE;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -199,6 +200,16 @@ public class EmbedLoadingMessage {
     }
 
     /**
+     * Complete the loading and replace the loading message with a message embed
+     *
+     * @param replacement Message embed to replace loading message with
+     */
+    public void completeLoading(MessageEmbed replacement) {
+        completeLoading((String) null);
+        updateLoadingMessage(replacement);
+    }
+
+    /**
      * Add a field showing that the loading has failed. Fail the current and remaining steps
      *
      * @param reason Reason for failure - "That player doesn't exist"
@@ -229,9 +240,18 @@ public class EmbedLoadingMessage {
 
     /**
      * Edit the loading message
+     *
+     * @param replacement Message embed to replace loading message with
+     */
+    void updateLoadingMessage(MessageEmbed replacement) {
+        channel.editMessageById(id, replacement).queue();
+    }
+
+    /**
+     * Update the loading message
      */
     void updateLoadingMessage() {
-        channel.editMessageById(id, createLoadingMessage()).queue();
+        updateLoadingMessage(createLoadingMessage());
     }
 
     /**
@@ -364,7 +384,7 @@ public class EmbedLoadingMessage {
          * @return Loading stage status
          */
         public String getValue() {
-            return duration > 0 ? currentStatus + " " + value + formatTime() : currentStatus + " " + value;
+            return duration > 100 ? currentStatus + " " + value + formatTime() : currentStatus + " " + value;
         }
 
         /**

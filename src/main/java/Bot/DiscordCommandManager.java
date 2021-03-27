@@ -20,6 +20,7 @@ import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmoteHelper;
+import Steam.SteamStore;
 import Valheim.Wiki.ValheimWiki;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-
 /**
  * Hold a list of commands and handle incoming text input to check for command triggers
  */
@@ -37,6 +37,7 @@ public class DiscordCommandManager {
     public static final MWManager mwAssetManager = new MWManager();
     public static final CWManager cwManager = new CWManager();
     public static final ValheimWiki valheimWiki = new ValheimWiki();
+    public static final SteamStore steamStore = new SteamStore();
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
     private EmoteHelper emoteHelper;
@@ -200,6 +201,7 @@ public class DiscordCommandManager {
         addCommand(new GrandExchangeCommand());
         addCommand(new ValheimServerCommand());
         addCommand(new RedditCommand());
+        addCommand(new SteamGameCommand());
         addCommand(new SteamCommand());
         // addCommand(new FacebookCommand());
     }

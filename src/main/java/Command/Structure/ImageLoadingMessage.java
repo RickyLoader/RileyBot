@@ -47,7 +47,7 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
     @Override
     public void completeLoading(String url) {
         this.url = url;
-        super.completeLoading(null);
+        super.completeLoading((String) null);
     }
 
     /**

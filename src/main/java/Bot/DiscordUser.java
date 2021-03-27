@@ -21,6 +21,7 @@ public class DiscordUser {
             LOL = "lollookup",
             YT = "ytlookup",
             TTV = "ttvlookup",
+            STEAM_ID = "steamid",
             RS3 = "rs3lookup";
 
     /**
@@ -34,7 +35,12 @@ public class DiscordUser {
     public static void saveName(String name, String nameType, MessageChannel channel, User user) {
         JSONObject body = new JSONObject().put("discord_id", user.getIdLong()).put("name_type", nameType).put("name", name);
         new NetworkRequest("users/submit", true).post(body.toString());
-        channel.sendMessage(user.getAsMention() + " Your **" + nameType + "** name is now **" + name + "**").queue();
+        String message = user.getAsMention() + " Your **" + nameType + "** ";
+        if(!nameType.equals(STEAM_ID)) {
+            message += "name ";
+        }
+        message += "is now **" + name + "**";
+        channel.sendMessage(message).queue();
     }
 
     /**
