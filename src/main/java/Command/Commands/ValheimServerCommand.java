@@ -190,6 +190,6 @@ public class ValheimServerCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith(getTrigger());
+        return query.startsWith(getTrigger()) && !query.equals(getTrigger() + "!");
     }
 }
