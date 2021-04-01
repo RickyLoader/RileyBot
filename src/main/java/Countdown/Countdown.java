@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
  * Hold a period of time
  */
 public class Countdown {
-    private final long days, hours, minutes, seconds, totalDays, totalHours, totalMinutes, totalSeconds;
+    private final long days, hours, minutes, seconds, totalDays, totalHours, totalMinutes, totalSeconds, timeMs;
     private final DecimalFormat timeFormat = new DecimalFormat("00");
 
     /**
@@ -15,6 +15,7 @@ public class Countdown {
      * @param period Millisecond period to create countdown for
      */
     private Countdown(long period) {
+        this.timeMs = period;
         this.totalSeconds = period / 1000;
         this.totalMinutes = totalSeconds / 60;
         this.totalHours = totalMinutes / 60;
@@ -55,6 +56,33 @@ public class Countdown {
      */
     public String formatHoursMinutesSeconds() {
         return timeFormat.format(totalHours) + ":" + timeFormat.format(minutes) + ":" + timeFormat.format(seconds);
+    }
+
+    /**
+     * Get the total seconds between the two dates
+     *
+     * @return Total seconds
+     */
+    public long getTotalSeconds() {
+        return totalSeconds;
+    }
+
+    /**
+     * Get the total time (in ms)
+     *
+     * @return Total time (in ms)
+     */
+    public long getTimeMs() {
+        return timeMs;
+    }
+
+    /**
+     * Format the countdown in to a String showing dd:HH:mm:ss
+     *
+     * @return Countdown formatted in String
+     */
+    public String formatDaysHoursMinutes() {
+        return timeFormat.format(totalDays) + ":" + timeFormat.format(hours) + ":" + timeFormat.format(minutes);
     }
 
     /**
