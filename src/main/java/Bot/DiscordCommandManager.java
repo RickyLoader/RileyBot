@@ -190,7 +190,6 @@ public class DiscordCommandManager {
         addCommand(new PollCommand());
         addCommand(new StatusCommand());
         addCommand(new GIFCommand());
-        addCommand(new TeamTreesGuessingCommand());
         addCommand(new StocksCommand());
         addCommand(new MWDataCommand());
         addCommand(new TFTLookupCommand());
@@ -204,6 +203,7 @@ public class DiscordCommandManager {
         addCommand(new SteamGameCommand());
         addCommand(new SteamCommand());
         // addCommand(new FacebookCommand());
+        // addCommand(new TeamTreesGuessingCommand());
     }
 
     /**
