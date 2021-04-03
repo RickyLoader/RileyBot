@@ -15,6 +15,11 @@
       "loading_image_url": "https://i.imgur.com/NTYG7Hz.jpg",
       "compass_image_url": "https://i.imgur.com/YRhSLG1.jpg"
     },
+    "mp_killhouse": {
+      "real_name": "Killhouse",
+      "loading_image_url": "https://i.imgur.com/8ckTvhs.png",
+      "compass_image_url": "https://i.imgur.com/rSHCu69.png"
+    },
     "mp_m_showers": {
       "real_name": "Gulag Showers",
       "loading_image_url": "https://i.imgur.com/sCYf2rp.jpg",
@@ -68,7 +73,7 @@
     "mp_m_cornfield": {
       "real_name": "Livestock",
       "loading_image_url": "https://i.imgur.com/KZfTmeP.jpg",
-      "compass_image_url": "https://i.imgur.com/D5tmnfQ.png"
+      "compass_image_url": "https://i.imgur.com/WLjafyk.png"
     },
     "mp_m_pine": {
       "real_name": "Pine",
