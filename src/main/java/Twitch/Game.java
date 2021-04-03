@@ -1,10 +1,12 @@
 package Twitch;
 
+import Command.Commands.Lookup.TTVLookupCommand;
+
 /**
  * Twitch.tv game
  */
 public class Game {
-    private final String name, id, thumbnail;
+    private final String name, id, thumbnail, url;
 
     /**
      * Create a game
@@ -17,6 +19,16 @@ public class Game {
         this.name = name;
         this.id = id;
         this.thumbnail = thumbnail;
+        this.url = TTVLookupCommand.TWITCH_URL + "directory/game/" + name.replace(" ", "%20");
+    }
+
+    /**
+     * Get the URL to the game category on Twitch
+     *
+     * @return URL to game category
+     */
+    public String getUrl() {
+        return url;
     }
 
     /**

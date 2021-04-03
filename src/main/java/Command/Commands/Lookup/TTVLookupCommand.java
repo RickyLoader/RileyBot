@@ -27,9 +27,10 @@ import java.util.stream.Collectors;
  * Look up a Twitch.tv streamer!
  */
 public class TTVLookupCommand extends LookupCommand {
+    public static final String TWITCH_URL = "https://www.twitch.tv/";
     private final String
             baseURL = "https://api.twitch.tv/helix/",
-            twitchUrl = "https://www.twitch.tv/";
+            twitchLogo = "https://i.imgur.com/w1zOkVd.png";
     private final HashMap<String, Game> games = new HashMap<>();
     private final OAuth oAuth;
     private final String footer;
@@ -49,7 +50,7 @@ public class TTVLookupCommand extends LookupCommand {
         if(user.isBot() && member != context.getGuild().getSelfMember()) {
             return;
         }
-        if(name.startsWith(twitchUrl)) {
+        if(name.startsWith(TWITCH_URL)) {
             showTwitchDetailsEmbed(name, context.getMessage(), channel);
             return;
         }
@@ -62,7 +63,7 @@ public class TTVLookupCommand extends LookupCommand {
             return;
         }
         if(streamers.size() == 1) {
-            channel.sendMessage(buildStreamerEmbed(streamers.get(0), false)).queue();
+            channel.sendMessage(buildStreamerEmbed(streamers.get(0), null)).queue();
             return;
         }
         showSearchResults(name, streamers, context);
@@ -79,7 +80,7 @@ public class TTVLookupCommand extends LookupCommand {
      */
     private void showTwitchDetailsEmbed(String streamerUrl, Message message, MessageChannel channel) {
         String name = streamerUrl
-                .replace(twitchUrl, "")
+                .replace(TWITCH_URL, "")
                 .replace("/", "")
                 .trim();
         ArrayList<Streamer> streamers = searchStreamers(name);
@@ -87,7 +88,7 @@ public class TTVLookupCommand extends LookupCommand {
             return;
         }
         message.delete().queue(
-                deleted -> channel.sendMessage(buildStreamerEmbed(streamers.get(0), true)).queue()
+                deleted -> channel.sendMessage(buildStreamerEmbed(streamers.get(0), message.getMember())).queue()
         );
     }
 
@@ -102,7 +103,7 @@ public class TTVLookupCommand extends LookupCommand {
         new PageableTableEmbed(
                 context,
                 streamers,
-                "https://i.imgur.com/w1zOkVd.png",
+                twitchLogo,
                 "TTVLookup: " + streamers.size() + " results found",
                 "**Query**: " + query,
                 footer,
@@ -139,13 +140,18 @@ public class TTVLookupCommand extends LookupCommand {
      * Build a message embed detailing the given Twitch streamer
      *
      * @param streamer Twitch streamer to create message embed for
-     * @param replace  Replacing discord Twitch embed (show author)
+     * @param viewer   Member who posted Twitch.tv link (display in title)
      * @return Message embed detailing the given Twitch streamer
      */
-    private MessageEmbed buildStreamerEmbed(Streamer streamer, boolean replace) {
+    private MessageEmbed buildStreamerEmbed(Streamer streamer, Member viewer) {
         boolean live = streamer.isStreaming();
         String footer = this.footer;
         String description = "**Followers**: " + streamer.formatFollowers();
+
+        if(viewer != null) {
+            description += "\n**Biggest fan**: " + viewer.getAsMention();
+        }
+
         String title = streamer.getDisplayName() + " | " + (live ? "LIVE" : "OFFLINE");
 
         if(streamer.hasLanguage() && !streamer.getLanguage().equalsIgnoreCase("english")) {
@@ -159,13 +165,13 @@ public class TTVLookupCommand extends LookupCommand {
                 )
                 .setColor(live ? EmbedHelper.GREEN : EmbedHelper.RED);
 
+        String twitchName = "Twitch.tv";
         if(live) {
             Stream stream = streamer.getStream();
             Game game = stream.getGame();
             String started = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(stream.getStarted());
             footer += " | Online since: " + started;
             Countdown streamDuration = Countdown.from(stream.getStarted().getTime(), System.currentTimeMillis());
-            builder.setImage(game.getThumbnail());
             description = "__**Current Stream Details**__\n\n"
                     + "**Title**: " + stream.getTitle()
                     + "\n\n**Streaming**: " + game.getName()
@@ -173,10 +179,21 @@ public class TTVLookupCommand extends LookupCommand {
                     + streamDuration.formatHoursMinutesSeconds()
                     + "\n**Viewers**: " + stream.formatViewers()
                     + "\n\n" + description;
+
+            builder.setImage(stream.getThumbnail())
+                    .setAuthor(
+                            twitchName + " - " + game.getName(),
+                            game.getUrl(),
+                            game.getThumbnail());
         }
-        if(replace) {
-            builder.setAuthor("Twitch");
+        else {
+            builder.setAuthor(
+                    twitchName,
+                    TWITCH_URL,
+                    twitchLogo
+            );
         }
+
         return builder
                 .setFooter(footer)
                 .setDescription(description)
@@ -217,8 +234,9 @@ public class TTVLookupCommand extends LookupCommand {
      */
     private Streamer parseStreamer(JSONObject streamer, boolean showFollowers) {
         String id = streamer.getString("id");
+        String loginName = streamer.getString("broadcaster_login");
         StreamerBuilder builder = new StreamerBuilder()
-                .setLoginName(streamer.getString("broadcaster_login"))
+                .setLoginName(loginName)
                 .setDisplayName(streamer.getString("display_name"))
                 .setId(id)
                 .setThumbnail(streamer.getString("thumbnail_url"));
@@ -233,7 +251,8 @@ public class TTVLookupCommand extends LookupCommand {
                             streamer.getString("title"),
                             fetchGame(streamer.getString("game_id")),
                             parseDate(streamer.getString("started_at")),
-                            fetchViewers(id)
+                            fetchViewers(id),
+                            "https://static-cdn.jtvnw.net/previews-ttv/live_user_" + loginName + "-440x248.jpg"
                     )
             );
         }
@@ -245,7 +264,7 @@ public class TTVLookupCommand extends LookupCommand {
 
     @Override
     public String stripArguments(String query) {
-        if(query.startsWith(twitchUrl)) {
+        if(query.startsWith(TWITCH_URL)) {
             query = getTrigger() + " " + query;
         }
         return query;
@@ -358,7 +377,7 @@ public class TTVLookupCommand extends LookupCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        String regex = twitchUrl + "(\\w)+/?";
+        String regex = TWITCH_URL + "(\\w)+/?";
         return super.matches(query, message) || query.matches(regex);
     }
 }

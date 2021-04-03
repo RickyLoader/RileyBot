@@ -7,7 +7,7 @@ import java.util.Date;
  * Twitch.tv stream
  */
 public class Stream {
-    private final String title;
+    private final String title, thumbnail;
     private final Game game;
     private final Date started;
     private final int viewers;
@@ -15,16 +15,18 @@ public class Stream {
     /**
      * Create a stream
      *
-     * @param title   Stream title
-     * @param game    Game being played in stream
-     * @param started Date of stream start
-     * @param viewers Number of viewers watching the stream
+     * @param title     Stream title
+     * @param game      Game being played in stream
+     * @param started   Date of stream start
+     * @param viewers   Number of viewers watching the stream
+     * @param thumbnail URL to the stream thumbnail
      */
-    public Stream(String title, Game game, Date started, int viewers) {
+    public Stream(String title, Game game, Date started, int viewers, String thumbnail) {
         this.title = title;
         this.game = game;
         this.started = started;
         this.viewers = viewers;
+        this.thumbnail = thumbnail;
     }
 
     /**
@@ -36,6 +38,15 @@ public class Stream {
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(true);
         return format.format(viewers);
+    }
+
+    /**
+     * Get the URL to the stream thumbnail
+     *
+     * @return Stream thumbnail URL
+     */
+    public String getThumbnail() {
+        return thumbnail;
     }
 
     /**
