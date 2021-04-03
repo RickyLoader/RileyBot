@@ -287,6 +287,7 @@ public abstract class CODManager {
         Map map = maps.get(codename);
         if(map == null) {
             map = new Map(codename, game);
+            maps.put(codename, map);
         }
         return map;
     }
@@ -306,6 +307,7 @@ public abstract class CODManager {
                     missingModeImage,
                     getMissingModeImageURL()
             );
+            modes.put(codename, mode);
         }
         return mode;
     }
