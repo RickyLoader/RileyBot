@@ -26,6 +26,7 @@ import static Stock.MarketQuote.*;
 public class StocksCommand extends DiscordCommand {
     private final String finnhubBaseUrl = "https://finnhub.io/api/v1/", thumbnail = "https://i.imgur.com/HaSlhp2.png";
     private final ArrayList<Symbol> marketSymbols;
+    private boolean stockSymbols = false;
     private String cryptoEmote;
 
     public StocksCommand() {
@@ -39,10 +40,22 @@ public class StocksCommand extends DiscordCommand {
      * @return List of crypto/stock symbols
      */
     private ArrayList<Symbol> getMarketSymbols() {
-        ArrayList<Symbol> marketSymbols = new ArrayList<>();
-        marketSymbols.addAll(getCryptoSymbols());
-        marketSymbols.addAll(getStockSymbols());
+        ArrayList<Symbol> marketSymbols = new ArrayList<>(getCryptoSymbols());
+        this.stockSymbols = addStockSymbols(marketSymbols);
         return marketSymbols;
+    }
+
+    /**
+     * Add the stock symbols to the given list of market symbols.
+     * Return the success of fetching the symbols
+     *
+     * @param marketSymbols List of market symbols to add stock symbols to
+     * @return Success of adding stock symbols
+     */
+    private boolean addStockSymbols(ArrayList<Symbol> marketSymbols) {
+        ArrayList<Symbol> stockSymbols = getStockSymbols();
+        marketSymbols.addAll(stockSymbols);
+        return !stockSymbols.isEmpty();
     }
 
     /**
@@ -96,11 +109,16 @@ public class StocksCommand extends DiscordCommand {
      */
     private ArrayList<Symbol> getStockSymbols() {
         ArrayList<Symbol> stockSymbols = new ArrayList<>();
-        String json = new NetworkRequest(
+        NetworkResponse response = new NetworkRequest(
                 finnhubBaseUrl + "stock/symbol/?exchange=US&token=" + Secret.FINNHUB_KEY,
                 false
-        ).get().body;
-        JSONArray data = new JSONArray(json);
+        ).get();
+
+        if(response.code != 200) {
+            return stockSymbols;
+        }
+
+        JSONArray data = new JSONArray(response.body);
         for(int i = 0; i < data.length(); i++) {
             JSONObject symbolData = data.getJSONObject(i);
             stockSymbols.add(
@@ -117,11 +135,19 @@ public class StocksCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
+        MessageChannel channel = context.getMessageChannel();
+
         if(cryptoEmote == null) {
             cryptoEmote = EmoteHelper.formatEmote(context.getEmoteHelper().getCrypto());
         }
+        if(!stockSymbols) {
+            stockSymbols = addStockSymbols(marketSymbols);
+            if(!stockSymbols) {
+                channel.sendMessage("Something went wrong fetching the stock symbols!").queue();
+                return;
+            }
+        }
         String query = context.getMessageContent().replace("$", "").trim();
-        MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
 
         if(query.isEmpty()) {
