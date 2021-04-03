@@ -59,7 +59,7 @@ public class RS3Hiscores extends Hiscores {
 
     @Override
     public String getURL(String type, String name) {
-        return "https://secure.runescape.com/m=hiscore" + type + "/index_lite.ws?player=" + encodeName(name);
+        return "https://secure.runescape.com/m=hiscore" + type + "/index_lite.ws?player=" + EmbedHelper.urlEncode(name);
     }
 
     @Override
@@ -243,7 +243,7 @@ public class RS3Hiscores extends Hiscores {
             titleSection = handler.getImageResource(getResourcePath() + "Templates/title_section.png");
             BufferedImage avatar = ImageIO.read(
                     new URL(
-                            "http://services.runescape.com/m=avatar-rs/" + encodeName(name) + "/chat.gif"
+                            "http://services.runescape.com/m=avatar-rs/" + EmbedHelper.urlEncode(name) + "/chat.gif"
                     )
             );
             BufferedImage scaledAvatar = new BufferedImage(287, 287, BufferedImage.TYPE_INT_ARGB);
@@ -434,7 +434,7 @@ public class RS3Hiscores extends Hiscores {
      * @return Player RuneMetrics stats
      */
     private RuneMetrics getRuneMetrics(String name) {
-        String url = "https://apps.runescape.com/runemetrics/profile/profile?user=" + encodeName(name);
+        String url = "https://apps.runescape.com/runemetrics/profile/profile?user=" + EmbedHelper.urlEncode(name);
         JSONObject profile = new JSONObject(
                 new NetworkRequest(url, false).get().body
         );

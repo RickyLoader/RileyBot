@@ -8,8 +8,10 @@ import org.json.JSONObject;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -177,5 +179,20 @@ public class EmbedHelper {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Encode the given URL
+     *
+     * @param url URL to encode
+     * @return Encoded URL
+     */
+    public static String urlEncode(String url) {
+        try {
+            return URLEncoder.encode(url, "UTF-8");
+        }
+        catch(UnsupportedEncodingException e) {
+            return url;
+        }
     }
 }

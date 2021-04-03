@@ -1,5 +1,6 @@
 package Facebook;
 
+import Command.Structure.EmbedHelper;
 import Network.Secret;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,7 +13,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -287,13 +287,7 @@ public class FacebookScraper {
      * @return Login url
      */
     private String getLoginURL(String url) {
-        String loginUrl = MBASIC_URL + "login.php?next=";
-        try {
-            return loginUrl + URLEncoder.encode(url, "UTF-8");
-        }
-        catch(UnsupportedEncodingException e) {
-            return loginUrl + url;
-        }
+        return MBASIC_URL + "login.php?next=" + EmbedHelper.urlEncode(url);
     }
 
     /**

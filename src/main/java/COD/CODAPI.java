@@ -1,10 +1,10 @@
 package COD;
 
+import Command.Structure.EmbedHelper;
 import Network.NetworkInfo;
 import Network.NetworkRequest;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import static Command.Structure.CODLookupCommand.*;
 
@@ -115,6 +115,6 @@ public class CODAPI {
      * @return URL encoded name
      */
     private static String encodeName(String name) throws UnsupportedEncodingException {
-        return URLEncoder.encode(name, "UTF-8").replaceAll("\\+", "%20");
+        return EmbedHelper.urlEncode(name).replaceAll("\\+", "%20");
     }
 }

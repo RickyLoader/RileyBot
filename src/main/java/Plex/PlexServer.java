@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -394,7 +393,7 @@ public class PlexServer {
         try {
             return Secret.RADARR_IP + "/api/movie/lookup"
                     + (idSearch ? ((query.startsWith("tt") ? "/imdb?imdbId=" : "/tmdb?tmdbId=") + query) : "?term="
-                    + URLEncoder.encode(query, "UTF-8")) + "&apikey=" + Secret.RADARR_KEY;
+                    + EmbedHelper.urlEncode(query)) + "&apikey=" + Secret.RADARR_KEY;
         }
         catch(Exception e) {
             return null;

@@ -2,13 +2,13 @@ package LOL;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
+import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
 import org.json.JSONObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.net.URLEncoder;
 
 /**
  * Hold basic LOL summoner overview - name, id, region, etc
@@ -44,7 +44,7 @@ public class SummonerOverview {
      */
     private boolean findSummoner(String nameQuery, boolean TFT) {
         try {
-            String nameEncode = URLEncoder.encode(nameQuery, "UTF-8");
+            String nameEncode = EmbedHelper.urlEncode(nameQuery);
             String endpoint = TFT ? "summoner/v1" : "summoner/v4";
             String url = apiURL + endpoint + "/summoners/by-name/" + nameEncode + "?api_key="
                     + (TFT ? Secret.TFT_KEY : Secret.LEAGUE_KEY);

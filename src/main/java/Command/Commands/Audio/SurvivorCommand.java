@@ -2,10 +2,9 @@ package Command.Commands.Audio;
 
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import Network.NetworkInfo;
 import net.dv8tion.jda.api.entities.Message;
-
-import java.net.URLEncoder;
 
 /**
  * Play a hyper realistic custom Survivor voice clip in the voice channel of the user.
@@ -21,7 +20,7 @@ public class SurvivorCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         try {
             String location = NetworkInfo.getAddress() + "/DiscordBotApi/api/survivor/";
-            String name = URLEncoder.encode(context.getLowerCaseMessage().replaceFirst("survivor ", ""), "UTF-8");
+            String name = EmbedHelper.urlEncode(context.getLowerCaseMessage().replaceFirst("survivor ", ""));
             context.playAudio(
                     location + name
             );

@@ -105,7 +105,7 @@ public class OSRSHiscores extends Hiscores {
 
     @Override
     public String getURL(String type, String name) {
-        return "https://secure.runescape.com/m=hiscore_oldschool" + type + "/index_lite.ws?player=" + encodeName(name);
+        return "https://secure.runescape.com/m=hiscore_oldschool" + type + "/index_lite.ws?player=" + EmbedHelper.urlEncode(name);
     }
 
     @Override

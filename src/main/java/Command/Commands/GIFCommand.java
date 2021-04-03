@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -108,7 +107,7 @@ public class GIFCommand extends DiscordCommand {
         ArrayList<GIF> gifs = new ArrayList<>();
         try {
             String url = BASE_URL + "search?search_text="
-                    + URLEncoder.encode(query, "UTF-8")
+                    + EmbedHelper.urlEncode(query)
                     + "&count=50";
 
             JSONArray results = new JSONObject(

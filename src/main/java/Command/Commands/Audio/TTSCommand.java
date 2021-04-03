@@ -7,7 +7,6 @@ import Network.NetworkInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
-import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
@@ -56,7 +55,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getGoogleTTS(String content) {
         try {
-            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/google/" + URLEncoder.encode(content, "UTF-8");
+            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/google/" + EmbedHelper.urlEncode(content);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -72,7 +71,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getDectalkTTS(String content) {
         try {
-            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/dectalk/" + URLEncoder.encode(content, "UTF-8");
+            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/dectalk/" + EmbedHelper.urlEncode(content);
         }
         catch(Exception e) {
             return null;

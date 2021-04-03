@@ -10,8 +10,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public abstract class Hiscores extends ImageBuilder {
@@ -30,22 +28,6 @@ public abstract class Hiscores extends ImageBuilder {
     public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
         super(emoteHelper, resourcePath, font);
         this.channel = channel;
-    }
-
-    /**
-     * URL encode the player name
-     *
-     * @param name Player name
-     * @return URL encoded player name
-     */
-    public String encodeName(String name) {
-        try {
-            return URLEncoder.encode(name, "UTF-8");
-        }
-        catch(UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return name;
-        }
     }
 
     /**
