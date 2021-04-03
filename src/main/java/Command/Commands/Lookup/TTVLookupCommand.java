@@ -140,7 +140,7 @@ public class TTVLookupCommand extends LookupCommand {
      * Build a message embed detailing the given Twitch streamer
      *
      * @param streamer Twitch streamer to create message embed for
-     * @param viewer   Member who posted Twitch.tv link (display in title)
+     * @param viewer   Member who posted Twitch.tv link (display in description)
      * @return Message embed detailing the given Twitch streamer
      */
     private MessageEmbed buildStreamerEmbed(Streamer streamer, Member viewer) {
