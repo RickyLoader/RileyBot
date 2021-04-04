@@ -1,6 +1,6 @@
 package COD.Assets;
 
-import Bot.DiscordCommandManager;
+import Bot.GlobalReference;
 import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -71,7 +71,7 @@ public class MissingWeaponAttachments {
             if(missingWeaponAttachments == null) {
                 String weaponCodename = info.getString("weapon_name");
                 missingWeaponAttachments = new MissingWeaponAttachments(
-                        DiscordCommandManager.mwAssetManager.getWeaponByCodename(
+                        GlobalReference.MW_ASSET_MANAGER.getWeaponByCodename(
                                 weaponCodename,
                                 Weapon.getCategoryFromWeaponCodename(weaponCodename)
                         )

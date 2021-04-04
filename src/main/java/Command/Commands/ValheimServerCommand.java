@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.GlobalReference;
 import Command.Structure.*;
 import Valheim.LogItem;
 import Valheim.PlayerConnection;
@@ -14,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
-import static Bot.DiscordCommandManager.valheimWiki;
 
 /**
  * View online players & recent events
@@ -141,7 +140,7 @@ public class ValheimServerCommand extends DiscordCommand {
                         message = "Server stopped";
                         break;
                     case RANDOM_EVENT:
-                        ValheimEvent randomEvent = valheimWiki.getEventByCodename(log.getEventCodename());
+                        ValheimEvent randomEvent = GlobalReference.VALHEIM_WIKI.getEventByCodename(log.getEventCodename());
                         message = "Random event: "
                                 + randomEvent.getStartMessage()
                                 + " (" + randomEvent.getCodename() + ")";

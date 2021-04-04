@@ -1,6 +1,6 @@
 package Command.Commands.Lookup;
 
-import Bot.DiscordCommandManager;
+import Bot.GlobalReference;
 import Command.Structure.MatchHistoryCommand;
 
 /**
@@ -8,6 +8,6 @@ import Command.Structure.MatchHistoryCommand;
  */
 public class MWHistoryCommand extends MatchHistoryCommand {
     public MWHistoryCommand() {
-        super("mwhistory", DiscordCommandManager.mwAssetManager);
+        super("mwhistory", GlobalReference.MW_ASSET_MANAGER);
     }
 }

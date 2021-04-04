@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import static Bot.DiscordCommandManager.mwAssetManager;
+import static Bot.GlobalReference.MW_ASSET_MANAGER;
 
 /**
  * View Modern Warfare weapons
@@ -37,7 +37,7 @@ public class MWDataCommand extends DiscordCommand {
 
         Weapon.CATEGORY weaponCategory = categories.getOrDefault(message, Weapon.CATEGORY.UNKNOWN);
         if(weaponCategory != Weapon.CATEGORY.UNKNOWN) {
-            Weapon[] categoryWeapons = mwAssetManager.getWeaponsByCategory(weaponCategory);
+            Weapon[] categoryWeapons = MW_ASSET_MANAGER.getWeaponsByCategory(weaponCategory);
             showPageableWeapons(
                     context,
                     categoryWeapons,
@@ -46,7 +46,7 @@ public class MWDataCommand extends DiscordCommand {
             return;
         }
 
-        Weapon[] searchResults = mwAssetManager.getWeaponsByName(message);
+        Weapon[] searchResults = MW_ASSET_MANAGER.getWeaponsByName(message);
         if(searchResults.length == 0) {
             channel.sendMessage(
                     member.getAsMention() + " I didn't find any weapons matching **" + message + "**!"

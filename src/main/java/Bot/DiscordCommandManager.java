@@ -1,8 +1,6 @@
 package Bot;
 
 import Audio.DiscordAudioPlayer;
-import COD.CWManager;
-import COD.MWManager;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
 import Command.Commands.COD.CWCountdownCommand;
@@ -21,8 +19,6 @@ import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmoteHelper;
 import Command.Structure.OnReadyDiscordCommand;
-import Steam.SteamStore;
-import Valheim.Wiki.ValheimWiki;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -36,10 +32,6 @@ import java.util.Random;
  * Hold a list of commands and handle incoming text input to check for command triggers
  */
 public class DiscordCommandManager {
-    public static final MWManager mwAssetManager = new MWManager();
-    public static final CWManager cwManager = new CWManager();
-    public static final ValheimWiki valheimWiki = new ValheimWiki();
-    public static final SteamStore steamStore = new SteamStore();
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final ArrayList<OnReadyDiscordCommand> onReadyCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();

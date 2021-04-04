@@ -13,7 +13,7 @@ import org.json.JSONArray;
 
 import java.util.*;
 
-import static Bot.DiscordCommandManager.mwAssetManager;
+import static Bot.GlobalReference.MW_ASSET_MANAGER;
 
 /**
  * Get a random MW loadout
@@ -179,7 +179,7 @@ public class MWRandomCommand extends DiscordCommand {
      * @return Random field upgrade
      */
     private FieldUpgrade getRandomFieldUpgrade(FieldUpgrade exclude) {
-        FieldUpgrade[] fieldUpgrades = Arrays.stream(mwAssetManager.getSupers())
+        FieldUpgrade[] fieldUpgrades = Arrays.stream(MW_ASSET_MANAGER.getSupers())
                 .filter(fieldUpgrade -> !fieldUpgrade.equals(exclude))
                 .toArray(FieldUpgrade[]::new);
         return fieldUpgrades[rand.nextInt(fieldUpgrades.length)];
@@ -192,7 +192,7 @@ public class MWRandomCommand extends DiscordCommand {
      * @return Random perk of given colour
      */
     private Perk getRandomPerk(Perk.CATEGORY colour) {
-        Perk[] perks = mwAssetManager.getPerksByColour(colour);
+        Perk[] perks = MW_ASSET_MANAGER.getPerksByColour(colour);
         if(colour == Perk.CATEGORY.BLUE) {
             perks = Arrays.stream(perks)
                     .filter(perk -> !perk.getName().equalsIgnoreCase("gunfight e.o.d"))
@@ -247,7 +247,7 @@ public class MWRandomCommand extends DiscordCommand {
     private Weapon getRandomWeapon(Weapon.TYPE type, Weapon exclude) {
         Weapon.CATEGORY[] typeCategories = type.getCategories();
         Weapon.CATEGORY category = typeCategories[rand.nextInt(typeCategories.length)];
-        Weapon[] categoryWeapons = Arrays.stream(mwAssetManager.getWeaponsByCategory(category))
+        Weapon[] categoryWeapons = Arrays.stream(MW_ASSET_MANAGER.getWeaponsByCategory(category))
                 .filter(weapon -> !weapon.equals(exclude) && !excludedWeaponIds.contains(weapon.getCodename()))
                 .toArray(Weapon[]::new);
         return categoryWeapons[rand.nextInt(categoryWeapons.length)];

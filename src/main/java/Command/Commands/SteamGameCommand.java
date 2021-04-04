@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static Bot.DiscordCommandManager.steamStore;
+import static Bot.GlobalReference.STEAM_STORE;
 
 /**
  * Pick a random Steam game that all users own
@@ -192,11 +192,11 @@ public class SteamGameCommand extends MultiLookupCommand {
         while(application == null) {
             int appId = commonGameIds.get(rand.nextInt(commonGameIds.size()));
             loadingMessage.updateStage("Attempting to get game info for: " + appId);
-            AppInfo appInfo = steamStore.getApplicationInfo(appId);
+            AppInfo appInfo = STEAM_STORE.getApplicationInfo(appId);
             if(appInfo == null) {
                 continue;
             }
-            application = steamStore.fetchApplicationDetails(appInfo);
+            application = STEAM_STORE.fetchApplicationDetails(appInfo);
         }
         return application;
     }
