@@ -21,6 +21,7 @@ public class Listener extends ListenerAdapter {
 
     @Override
     public void onReady(@Nonnull ReadyEvent event) {
+        commandManager.onReady(event.getJDA());
         System.out.println("\n\nBot is now running!");
     }
 

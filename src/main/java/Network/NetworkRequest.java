@@ -50,6 +50,23 @@ public class NetworkRequest {
     }
 
     /**
+     * Make a DELETE request
+     *
+     * @return Response from request
+     */
+    public NetworkResponse delete() {
+        try {
+            Response response = client.newCall(
+                    builder.delete().addHeader("accept", "application/json").build()
+            ).execute();
+            return handleResponse(response);
+        }
+        catch(Exception e) {
+            return timeout;
+        }
+    }
+
+    /**
      * Add headers to the builder
      */
     private void parseHeaders(HashMap<String, String> headers) {

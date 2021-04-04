@@ -20,8 +20,10 @@ import Command.Commands.Variable.*;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmoteHelper;
+import Command.Structure.OnReadyDiscordCommand;
 import Steam.SteamStore;
 import Valheim.Wiki.ValheimWiki;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -39,8 +41,9 @@ public class DiscordCommandManager {
     public static final ValheimWiki valheimWiki = new ValheimWiki();
     public static final SteamStore steamStore = new SteamStore();
     private final ArrayList<DiscordCommand> commands, viewableCommands;
+    private final ArrayList<OnReadyDiscordCommand> onReadyCommands;
     private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
-    private EmoteHelper emoteHelper;
+    public EmoteHelper emoteHelper;
 
     /**
      * Add the commands to the list
@@ -49,7 +52,20 @@ public class DiscordCommandManager {
         FontManager.initialiseFonts();
         this.commands = new ArrayList<>();
         this.viewableCommands = new ArrayList<>();
+        this.onReadyCommands = new ArrayList<>();
         addCommands();
+    }
+
+    /**
+     * Create the emote helper and pass the JDA to all OnReadyDiscordCommands
+     *
+     * @param jda Discord API
+     */
+    public void onReady(JDA jda) {
+        this.emoteHelper = new EmoteHelper(jda);
+        for(OnReadyDiscordCommand command : onReadyCommands) {
+            command.onReady(jda, emoteHelper);
+        }
     }
 
     /**
@@ -112,6 +128,9 @@ public class DiscordCommandManager {
         if(!c.isSecret()) {
             viewableCommands.add(c);
         }
+        if(c instanceof OnReadyDiscordCommand) {
+            onReadyCommands.add((OnReadyDiscordCommand) c);
+        }
     }
 
     /**
@@ -128,9 +147,6 @@ public class DiscordCommandManager {
         if(player == null) {
             player = new DiscordAudioPlayer();
             audioPlayers.put(event.getGuild(), player);
-        }
-        if(emoteHelper == null) {
-            emoteHelper = new EmoteHelper(event.getJDA());
         }
         command.execute(new CommandContext(event, viewableCommands, player, emoteHelper));
     }

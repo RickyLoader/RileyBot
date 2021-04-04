@@ -72,17 +72,23 @@ public class ImgurManager {
      * @return Link to image or null
      */
     public static String uploadImage(String image) {
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("image", image)
-                .addFormDataPart("type", "URL")
-                .build();
+        try {
+            RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("image", image)
+                    .addFormDataPart("type", "URL")
+                    .build();
 
-        String url = "https://api.imgur.com/3/image";
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
-
-        String response = new NetworkRequest(url, false).post(body, headers, false).body;
-        return new JSONObject(response).getJSONObject("data").getString("link");
+            String url = "https://api.imgur.com/3/image";
+            HashMap<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
+            JSONObject response = new JSONObject(
+                    new NetworkRequest(url, false).post(body, headers, false).body
+            );
+            return response.getJSONObject("data").getString("link");
+        }
+        catch(Exception e){
+            return null;
+        }
     }
 
     /**

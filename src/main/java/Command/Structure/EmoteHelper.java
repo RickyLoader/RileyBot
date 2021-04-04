@@ -691,4 +691,18 @@ public class EmoteHelper {
     public Emote getRedditDownvote() {
         return get("823492123872460821");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/828136712898084864.png"/>
+     */
+    public Emote getSavePhoto() {
+        return get("828136712898084864");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/828136713096003597.png"/>
+     */
+    public Emote getDeletePhoto() {
+        return get("828136713096003597");
+    }
 }
