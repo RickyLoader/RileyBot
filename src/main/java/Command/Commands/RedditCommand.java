@@ -31,7 +31,7 @@ public class RedditCommand extends DiscordCommand {
     private String upvote, downvote, comment, blankGap;
 
     public RedditCommand() {
-        super("[reddit url]", "Embed reddit posts/videos!");
+        super("[reddit url]", "Embed Reddit posts/videos!");
         setSecret(true);
     }
 
