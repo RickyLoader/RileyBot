@@ -21,7 +21,7 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
         super(
                 "photography",
                 "Cool photography!",
-                "photography \nphotography [attached image]"
+                "photography \nphotography [attached image/video]"
         );
         this.photos = fetchPhotos();
         this.rand = new Random();
@@ -85,42 +85,60 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
     }
 
     /**
-     * Attempt to save the given attachment to the database and reply to the given message with the result.
+     * Attempt to save the given attachment to the database and respond with the result.
      * If the upload is successful, add the photo to the map for later retrieval.
      * Non photo attachments will be ignored.
      *
      * @param message    Message containing photo to upload
      * @param attachment Attachment to save
-     * @param channel    Channel to send typing to
+     * @param channel    Channel to send response to
      */
     private void savePhoto(Message message, Attachment attachment, MessageChannel channel) {
+        boolean video = attachment.isVideo();
         new Thread(() -> {
-            if(!attachment.isImage()) {
-                message.reply("I'm not saving that.").queue();
+            if(!attachment.isImage() && !video) {
+                channel.sendMessage("I'm not saving that.\n" + getHelpNameCoded()).queue();
                 return;
             }
             channel.sendTyping().queue();
-            Photo photo = uploadPhoto(attachment.getUrl());
+            Photo photo = uploadPhotography(attachment.getUrl(), attachment.isVideo());
             if(photo == null) {
-                message.reply("I'm so sorry, I couldn't save this photo, please forgive me").queue();
+                channel.sendMessage("I'm so sorry, I couldn't save this, please forgive me").queue();
                 return;
             }
-            photos.put(photo.getId(), photo);
-            message.delete().queue(deleted -> channel.sendMessage(
-                    "Photo added to the photography command:\n" + photo.getUrl()
-            ).queue());
+            message.delete().queue(deleted -> {
+                if(video) {
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            photos.put(photo.getId(), photo);
+                        }
+                    }, 5000);
+                    channel.sendMessage(
+                            "Added video to the photography command!\n\n"
+                                    + "**NOTE**: To prevent Discord caching the link as broken, i'm gonna wait 5 seconds before adding it as a possibility."
+                    ).queue();
+                }
+                else {
+                    photos.put(photo.getId(), photo);
+                    channel.sendMessage(
+                            "Added image to the photography command:\n" + photo.getUrl()
+                    ).queue();
+                }
+            });
         }).start();
     }
 
     /**
-     * Save a photo to the database (upload to Imgur first for permanent image hosting)
+     * Save a photo/video to the database (upload to Imgur first for permanent hosting)
      *
-     * @param url Discord url of photo
+     * @param url   Discord url of photo/video
+     * @param video URL is a video URL
      * @return Photo
      */
-    private Photo uploadPhoto(String url) {
+    private Photo uploadPhotography(String url, boolean video) {
         try {
-            String imgurUrl = ImgurManager.uploadImage(url);
+            String imgurUrl = video ? ImgurManager.uploadVideo(url) : ImgurManager.uploadImage(url);
             JSONObject body = new JSONObject().put("url", imgurUrl);
             JSONObject response = new JSONObject(
                     new NetworkRequest("photography/add", true).post(body.toString()).body
@@ -163,7 +181,7 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
                     if(emote == saveEmote) {
                         List<Attachment> attachments = message.getAttachments();
                         if(message.getAuthor() == guild.getSelfMember().getUser() || attachments.isEmpty()) {
-                            message.reply("No can do!").queue();
+                            channel.sendMessage("No can do!").queue();
                             return;
                         }
                         savePhoto(message, attachments.get(0), channel);
@@ -177,10 +195,10 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
                         if(deletePhoto(toDelete)) {
                             sentPhotos.remove(messageId);
                             photos.remove(toDelete.getId());
-                            message.reply("Photo removed from the photography command!").queue();
+                            channel.sendMessage("Photo removed from the photography command!").queue();
                         }
                         else {
-                            message.reply("I couldn't delete that photo!").queue();
+                            channel.sendMessage("I couldn't remove that!").queue();
                         }
                     }
                 });

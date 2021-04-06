@@ -1,5 +1,6 @@
 package Network;
 
+import Command.Structure.EmbedHelper;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.apache.commons.codec.binary.Base64;
@@ -12,6 +13,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 
 public class ImgurManager {
+    public static final String BASE_URL = "https://i.imgur.com/";
+
     /**
      * Strip the alpha channel from the image before saving as JPG
      *
@@ -86,7 +89,7 @@ public class ImgurManager {
             );
             return response.getJSONObject("data").getString("link");
         }
-        catch(Exception e){
+        catch(Exception e) {
             return null;
         }
     }
@@ -116,6 +119,32 @@ public class ImgurManager {
 
             String response = new NetworkRequest(url, false).post(body, headers, false).body;
             return new JSONObject(response).getJSONObject("data").getString("link");
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Upload a video from the given URL to Imgur and return the link
+     *
+     * @param video Video URL
+     * @return Link to video or null
+     */
+    public static String uploadVideo(String video) {
+        try {
+            RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("video", Base64.encodeBase64String(EmbedHelper.downloadVideo(video)))
+                    .addFormDataPart("type", "base64")
+                    .build();
+
+            String url = "https://api.imgur.com/3/upload";
+
+            HashMap<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
+
+            String response = new NetworkRequest(url, false).post(body, headers, false).body;
+            return BASE_URL + new JSONObject(response).getJSONObject("data").getString("id");
         }
         catch(Exception e) {
             return null;
