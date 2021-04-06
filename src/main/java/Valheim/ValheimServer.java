@@ -19,6 +19,7 @@ public class ValheimServer {
     private final FTPHandler ftpHandler;
     private final String worldName;
     private int logIndex, day;
+    private String modVersion;
 
     /**
      * Parse the server logs and populate the current online players/server events
@@ -98,6 +99,9 @@ public class ValheimServer {
                 case DAY_STARTED:
                     day = log.getDay();
                     break;
+                case MOD_VERSION:
+                    modVersion = log.getModVersion();
+                    continue;
             }
             this.logs.add(log);
         }
@@ -172,5 +176,14 @@ public class ValheimServer {
      */
     public int getDay() {
         return day;
+    }
+
+    /**
+     * Get the version of Valheim Plus running on the server
+     *
+     * @return Valheim Plus version
+     */
+    public String getModVersion() {
+        return modVersion;
     }
 }

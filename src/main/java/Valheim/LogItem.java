@@ -15,7 +15,7 @@ public class LogItem {
     private final TYPE type;
     private final long steamId, zdoid, zdoidIdentifier;
     private final int day;
-    private final String message, characterName, worldName, eventName, locationFound;
+    private final String message, characterName, worldName, eventName, locationFound, clientVersion, serverVersion, modVersion;
 
     public final static String
             DATE = "date",
@@ -26,7 +26,10 @@ public class LogItem {
             ZDOID = "zdoid",
             DAY = "day",
             ZDOID_IDENTIFIER = "zdoididentifier",
-            LOCATION = "location";
+            LOCATION = "location",
+            CLIENT_VERSION = "clientversion",
+            SERVER_VERSION = "serverversion",
+            VALHEIM_PLUS_VERSION = "modversion";
 
     public enum TYPE {
         CONNECTION_STARTED,
@@ -41,6 +44,8 @@ public class LogItem {
         DAY_STARTED,
         LOCATION_FOUND,
         DUNGEON_LOADED,
+        CLIENT_SERVER_MISMATCH,
+        MOD_VERSION,
         IGNORE;
 
         private final String prefix = "\\[Info   : Unity Log\\] (?<" + DATE + ">\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}:\\d{2}): ";
@@ -61,12 +66,22 @@ public class LogItem {
         }
 
         /**
+         * Check if the log type has a date value
+         *
+         * @return Log type has date
+         */
+        public boolean hasDate() {
+            return this != MOD_VERSION;
+        }
+
+        /**
          * Get the regular expression used to match a log message of the given type
          *
          * @return Regular expression
          */
         public String getRegex() {
             String defaultZdoid = "-?\\d+";
+            String version = "(\\d\\.? ?@?)+";
             switch(this) {
                 case DISCONNECTION:
                     return prefix + "Closing socket (?<" + STEAM_ID + ">\\d+)";
@@ -92,6 +107,15 @@ public class LogItem {
                     return prefix + "Found location of type (?<" + LOCATION + ">.+)";
                 case DUNGEON_LOADED:
                     return prefix + "Dungeon loaded \\d+";
+                case CLIENT_SERVER_MISMATCH:
+                    String clientVersion = "(?<" + CLIENT_VERSION + ">" + version + ")";
+                    String serverVersion = "(?<" + SERVER_VERSION + ">" + version + ")";
+                    return prefix + "Peer (?<" + STEAM_ID + ">\\d+) has incompatible version, mine:"
+                            + serverVersion
+                            + " remote " + clientVersion;
+                case MOD_VERSION:
+                    return "\\[Info   :   BepInEx\\] Loading \\[Valheim Plus "
+                            + "(?<" + VALHEIM_PLUS_VERSION + ">" + version + ")\\]";
                 default:
                     return prefix;
             }
@@ -128,6 +152,9 @@ public class LogItem {
         this.eventName = builder.eventName;
         this.day = builder.day;
         this.locationFound = builder.locationFound;
+        this.clientVersion = builder.clientVersion;
+        this.modVersion = builder.modVersion;
+        this.serverVersion = builder.serverVersion;
     }
 
     /**
@@ -142,9 +169,8 @@ public class LogItem {
         if(!matcher.find()) {
             return null;
         }
-
         LogItemBuilder builder = new LogItemBuilder(
-                parseDate(matcher.group(DATE)),
+                type.hasDate() ? parseDate(matcher.group(DATE)) : new Date(),
                 logMessage,
                 type
         );
@@ -173,6 +199,14 @@ public class LogItem {
             case LOCATION_FOUND:
                 builder.setLocationFound(matcher.group(LOCATION));
                 break;
+            case CLIENT_SERVER_MISMATCH:
+                builder.setClientVersion(matcher.group(CLIENT_VERSION))
+                        .setServerVersion(matcher.group(SERVER_VERSION))
+                        .setSteamId(Long.parseLong(matcher.group(STEAM_ID)));
+                break;
+            case MOD_VERSION:
+                builder.setModVersion(matcher.group(VALHEIM_PLUS_VERSION));
+                break;
         }
         return builder.build();
     }
@@ -181,7 +215,7 @@ public class LogItem {
         private final Date date;
         private final TYPE type;
         private final String message;
-        private String characterName, worldName, eventName, locationFound;
+        private String characterName, worldName, eventName, locationFound, clientVersion, serverVersion, modVersion;
         private int day;
         private long steamId, zdoid, zdoidIdentifier;
 
@@ -206,6 +240,39 @@ public class LogItem {
          */
         public LogItemBuilder setSteamId(long steamId) {
             this.steamId = steamId;
+            return this;
+        }
+
+        /**
+         * Set the client version from a client server mismatch log message
+         *
+         * @param clientVersion Client version e.g "0.148.7@0.9.7"
+         * @return Builder
+         */
+        public LogItemBuilder setClientVersion(String clientVersion) {
+            this.clientVersion = clientVersion;
+            return this;
+        }
+
+        /**
+         * Set the mod version from the log message
+         *
+         * @param modVersion Mod version e.g "0.9.7"
+         * @return Builder
+         */
+        public LogItemBuilder setModVersion(String modVersion) {
+            this.modVersion = modVersion;
+            return this;
+        }
+
+        /**
+         * Set the server version from a client server mismatch log message
+         *
+         * @param serverVersion Server version e.g "0.148.7"
+         * @return Builder
+         */
+        public LogItemBuilder setServerVersion(String serverVersion) {
+            this.serverVersion = serverVersion;
             return this;
         }
 
@@ -388,6 +455,33 @@ public class LogItem {
      */
     public String getLocationFound() {
         return locationFound;
+    }
+
+    /**
+     * Get the client version from a client server mismatch log
+     *
+     * @return Client version - e.g "0.148.7@0.9.7"
+     */
+    public String getClientVersion() {
+        return clientVersion;
+    }
+
+    /**
+     * Get the mod version
+     *
+     * @return Mod version - e.g "0.9.7"
+     */
+    public String getModVersion() {
+        return modVersion;
+    }
+
+    /**
+     * Get the server version from a client server mismatch log
+     *
+     * @return Server version - e.g "0.148.7"
+     */
+    public String getServerVersion() {
+        return serverVersion;
     }
 
     /**

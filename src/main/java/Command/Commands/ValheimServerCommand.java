@@ -127,6 +127,12 @@ public class ValheimServerCommand extends DiscordCommand {
                     case CONNECTION_STARTED:
                         message = getOfflinePlayerMessage(log.getSteamId()) + " connecting";
                         break;
+                    case CLIENT_SERVER_MISMATCH:
+                        message = getOfflinePlayerMessage(log.getSteamId())
+                                + " incompatible version:\n" +
+                                "Server: **" + log.getServerVersion() + "@" + valheimServer.getModVersion() + "**\n"
+                                + "Player: **" + log.getClientVersion() + "**";
+                        break;
                     case CONNECTION_COMPLETE:
                         message = log.getCharacterName() + " has arrived!";
                         break;
