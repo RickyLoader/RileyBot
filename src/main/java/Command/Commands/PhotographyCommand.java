@@ -205,4 +205,9 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
             }
         });
     }
+
+    @Override
+    public boolean matches(String query, Message message) {
+        return super.matches(query, message) || query.equals("photo");
+    }
 }
