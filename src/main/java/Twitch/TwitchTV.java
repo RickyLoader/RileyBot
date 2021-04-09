@@ -22,10 +22,7 @@ public class TwitchTV {
     public static final String
             TWITCH_URL = "https://www.twitch.tv/",
             TWITCH_LOGO = "https://i.imgur.com/w1zOkVd.png";
-    private final String
-            baseURL = "https://api.twitch.tv/",
-            helix = baseURL + "helix/",
-            kraken = baseURL + "kraken/";
+    private final String baseURL = "https://api.twitch.tv/";
     private final HashMap<String, Game> gamesById, gamesByName;
     private final OAuth oAuth;
 
@@ -45,11 +42,7 @@ public class TwitchTV {
      * @return Total followers
      */
     public int fetchFollowers(String id) {
-        JSONObject response = new JSONObject(
-                new NetworkRequest(helix + "users/follows?to_id=" + id, false)
-                        .get(getAuthHeaders())
-                        .body
-        );
+        JSONObject response = new JSONObject(helixRequest("users/follows?to_id=" + id).body);
         return response.getInt("total");
     }
 
@@ -191,10 +184,8 @@ public class TwitchTV {
      * @return Number of viewers watching streamer's current stream
      */
     private int fetchViewers(String id) {
-        JSONObject response = new JSONObject(
-                new NetworkRequest(helix + "streams?user_id=" + id, false).get(getAuthHeaders()).body
-        ).getJSONArray("data").getJSONObject(0);
-        return response.getInt("viewer_count");
+        JSONObject response = new JSONObject(helixRequest("streams?user_id=" + id).body);
+        return response.getJSONArray("data").getJSONObject(0).getInt("viewer_count");
     }
 
     /**
@@ -208,8 +199,11 @@ public class TwitchTV {
         if(gamesByName.containsKey(name)) {
             return gamesByName.get(name);
         }
-        String url = kraken + "search/games?query=" + EmbedHelper.urlEncode(name);
-        JSONObject response = new JSONObject(krakenRequest(url).body).getJSONArray("games").getJSONObject(0);
+        String endpoint = "search/games?query=" + EmbedHelper.urlEncode(name);
+        JSONObject response = new JSONObject(
+                krakenRequest(endpoint).body
+        ).getJSONArray("games").getJSONObject(0);
+
         Game game = new Game(
                 response.getString("name"),
                 String.valueOf(response.getLong("_id")),
@@ -239,10 +233,8 @@ public class TwitchTV {
         if(gamesById.containsKey(gameId)) {
             return gamesById.get(gameId);
         }
-        String url = helix + "games?id=" + gameId;
-        JSONObject gameData = new JSONObject(
-                new NetworkRequest(url, false).get(getAuthHeaders()).body
-        ).getJSONArray("data").getJSONObject(0);
+        String endpoint = "games?id=" + gameId;
+        JSONObject gameData = new JSONObject(helixRequest(endpoint).body).getJSONArray("data").getJSONObject(0);
         Game game = new Game(
                 gameData.getString("name"),
                 gameData.getString("id"),
@@ -260,8 +252,8 @@ public class TwitchTV {
      * @return JSONArray search results
      */
     private JSONArray getStreamerSearchResultsByName(String nameQuery) {
-        String url = helix + "search/channels?first=20&query=" + nameQuery;
-        JSONObject response = new JSONObject(new NetworkRequest(url, false).get(getAuthHeaders()).body);
+        String endpoint = "search/channels?first=20&query=" + nameQuery;
+        JSONObject response = new JSONObject(helixRequest(endpoint).body);
         return response.getJSONArray("data");
     }
 
@@ -273,21 +265,33 @@ public class TwitchTV {
      * @return JSONArray search results
      */
     private JSONArray getStreamerSearchResultsByStreamTitle(String titleQuery) {
-        String url = kraken + "search/streams/?query=" + EmbedHelper.urlEncode(titleQuery) + "&hls=true";
-        JSONObject response = new JSONObject(krakenRequest(url).body);
+        String endpoint = "search/streams/?query=" + EmbedHelper.urlEncode(titleQuery) + "&hls=true";
+        JSONObject response = new JSONObject(krakenRequest(endpoint).body);
         return response.getJSONArray("streams");
     }
 
     /**
      * Perform a Twitch kraken API request
      *
-     * @param url URL to request
-     * @return URL response
+     * @param endpoint Kraken endpoint - e.g "search/games?query=game%20name"
+     * @return API response
      */
-    private NetworkResponse krakenRequest(String url) {
+    private NetworkResponse krakenRequest(String endpoint) {
+        String url = baseURL + "kraken/" + endpoint;
         HashMap<String, String> headers = getAuthHeaders();
         headers.put("Accept", "application/vnd.twitchtv.v5+json");
         return new NetworkRequest(url, false).get(headers);
+    }
+
+    /**
+     * Perform a Twitch helix API request
+     *
+     * @param endpoint Helix endpoint - e.g "search/channels?first=20&query=channel%20name"
+     * @return API response
+     */
+    private NetworkResponse helixRequest(String endpoint) {
+        String url = baseURL + "helix/" + endpoint;
+        return new NetworkRequest(url, false).get(getAuthHeaders());
     }
 
     /**
