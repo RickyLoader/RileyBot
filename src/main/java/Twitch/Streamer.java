@@ -8,7 +8,7 @@ import java.text.NumberFormat;
 public class Streamer {
     private final String loginName, displayName, id, language, thumbnail, url;
     private final Stream stream;
-    private final int followers;
+    private int followers;
 
     /**
      * Create a Streamer from the builder values
@@ -220,5 +220,14 @@ public class Streamer {
      */
     public boolean hasLanguage() {
         return language != null;
+    }
+
+    /**
+     * Update the number of followers
+     *
+     * @param followers Number of followers to set
+     */
+    public void updateFollowers(int followers) {
+        this.followers = followers;
     }
 }

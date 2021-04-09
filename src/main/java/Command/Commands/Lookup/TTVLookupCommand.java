@@ -6,38 +6,23 @@ import Command.Structure.EmbedHelper;
 import Command.Structure.LookupCommand;
 import Command.Structure.PageableTableEmbed;
 import Countdown.Countdown;
-import Network.NetworkRequest;
-import Network.Secret;
-import Twitch.Game;
-import Twitch.OAuth;
-import Twitch.Stream;
-import Twitch.Streamer;
-import Twitch.Streamer.StreamerBuilder;
+import Twitch.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static Bot.GlobalReference.TWITCH_TV;
 
 /**
  * Look up a Twitch.tv streamer!
  */
 public class TTVLookupCommand extends LookupCommand {
-    public static final String TWITCH_URL = "https://www.twitch.tv/";
-    private final String
-            baseURL = "https://api.twitch.tv/helix/",
-            twitchLogo = "https://i.imgur.com/w1zOkVd.png";
-    private final HashMap<String, Game> games = new HashMap<>();
-    private final OAuth oAuth;
     private final String footer;
 
     public TTVLookupCommand() {
         super("ttvlookup", "Look up a Twitch.tv streamer!", 50);
-        this.oAuth = new OAuth(Secret.TWITCH_CLIENT_ID, Secret.TWITCH_CLIENT_SECRET);
         this.footer = "Type: " + getTrigger() + " for help";
         setBotInput(true);
     }
@@ -50,12 +35,12 @@ public class TTVLookupCommand extends LookupCommand {
         if(user.isBot() && member != context.getGuild().getSelfMember()) {
             return;
         }
-        if(name.startsWith(TWITCH_URL)) {
+        if(name.startsWith(TwitchTV.TWITCH_URL)) {
             showTwitchDetailsEmbed(name, context.getMessage(), channel);
             return;
         }
         channel.sendTyping().queue();
-        ArrayList<Streamer> streamers = searchStreamers(name);
+        ArrayList<Streamer> streamers = TWITCH_TV.searchStreamersByName(name);
         if(streamers.isEmpty()) {
             channel.sendMessage(
                     member.getAsMention() + " I didn't find any streamers matching: **" + name + "**"
@@ -63,7 +48,7 @@ public class TTVLookupCommand extends LookupCommand {
             return;
         }
         if(streamers.size() == 1) {
-            channel.sendMessage(buildStreamerEmbed(streamers.get(0), null)).queue();
+            channel.sendMessage(buildStreamerEmbed(streamers.get(0), null, footer)).queue();
             return;
         }
         showSearchResults(name, streamers, context);
@@ -80,15 +65,17 @@ public class TTVLookupCommand extends LookupCommand {
      */
     private void showTwitchDetailsEmbed(String streamerUrl, Message message, MessageChannel channel) {
         String name = streamerUrl
-                .replace(TWITCH_URL, "")
+                .replace(TwitchTV.TWITCH_URL, "")
                 .replace("/", "")
                 .trim();
-        ArrayList<Streamer> streamers = searchStreamers(name);
+        ArrayList<Streamer> streamers = TWITCH_TV.searchStreamersByName(name);
         if(streamers.size() != 1) {
             return;
         }
         message.delete().queue(
-                deleted -> channel.sendMessage(buildStreamerEmbed(streamers.get(0), message.getMember())).queue()
+                deleted -> channel.sendMessage(
+                        buildStreamerEmbed(streamers.get(0), message.getMember(), footer)
+                ).queue()
         );
     }
 
@@ -103,7 +90,7 @@ public class TTVLookupCommand extends LookupCommand {
         new PageableTableEmbed(
                 context,
                 streamers,
-                twitchLogo,
+                TwitchTV.TWITCH_LOGO,
                 "TTVLookup: " + streamers.size() + " results found",
                 "**Query**: " + query,
                 footer,
@@ -141,11 +128,11 @@ public class TTVLookupCommand extends LookupCommand {
      *
      * @param streamer Twitch streamer to create message embed for
      * @param viewer   Member who posted Twitch.tv link (display in description)
+     * @param footer   Footer to use in the embed
      * @return Message embed detailing the given Twitch streamer
      */
-    private MessageEmbed buildStreamerEmbed(Streamer streamer, Member viewer) {
+    public static MessageEmbed buildStreamerEmbed(Streamer streamer, Member viewer, String footer) {
         boolean live = streamer.isStreaming();
-        String footer = this.footer;
         String description = "**Followers**: " + streamer.formatFollowers();
 
         if(viewer != null) {
@@ -189,8 +176,8 @@ public class TTVLookupCommand extends LookupCommand {
         else {
             builder.setAuthor(
                     twitchName,
-                    TWITCH_URL,
-                    twitchLogo
+                    TwitchTV.TWITCH_URL,
+                    TwitchTV.TWITCH_LOGO
             );
         }
 
@@ -200,169 +187,13 @@ public class TTVLookupCommand extends LookupCommand {
                 .build();
     }
 
-    /**
-     * Search Twitch for the given query. Return all channels found.
-     *
-     * @param query Query to search for
-     * @return List of Twitch streamer results
-     */
-    private ArrayList<Streamer> searchStreamers(String query) {
-        JSONArray results = getStreamerSearchResults(query);
-        ArrayList<Streamer> streamers = new ArrayList<>();
-        for(int i = 0; i < results.length(); i++) {
-            JSONObject streamerData = results.getJSONObject(i);
-            streamers.add(
-                    parseStreamer(
-                            streamerData,
-                            streamerData.getString("broadcaster_login").equalsIgnoreCase(query)
-                    )
-            );
-        }
-        ArrayList<Streamer> matching = streamers
-                .stream()
-                .filter(s -> s.getLoginName().equalsIgnoreCase(query))
-                .collect(Collectors.toCollection(ArrayList::new));
-        return matching.isEmpty() ? streamers : matching;
-    }
-
-    /**
-     * Parse a streamer JSONObject to a Streamer
-     *
-     * @param streamer      Streamer JSON
-     * @param showFollowers Make an extra request to retrieve streamer followers
-     * @return Streamer
-     */
-    private Streamer parseStreamer(JSONObject streamer, boolean showFollowers) {
-        String id = streamer.getString("id");
-        String loginName = streamer.getString("broadcaster_login");
-        StreamerBuilder builder = new StreamerBuilder()
-                .setLoginName(loginName)
-                .setDisplayName(streamer.getString("display_name"))
-                .setId(id)
-                .setThumbnail(streamer.getString("thumbnail_url"));
-
-        String langISO = streamer.getString("broadcaster_language");
-        if(!langISO.isEmpty()) {
-            builder.setLanguage(EmbedHelper.getLanguageFromISO(langISO));
-        }
-        if(streamer.getBoolean("is_live")) {
-            builder.setStream(
-                    new Stream(
-                            streamer.getString("title"),
-                            fetchGame(streamer.getString("game_id")),
-                            parseDate(streamer.getString("started_at")),
-                            fetchViewers(id),
-                            "https://static-cdn.jtvnw.net/previews-ttv/live_user_" + loginName + "-440x248.jpg"
-                    )
-            );
-        }
-        if(showFollowers) {
-            builder.setFollowers(fetchFollowers(id));
-        }
-        return builder.build();
-    }
 
     @Override
     public String stripArguments(String query) {
-        if(query.startsWith(TWITCH_URL)) {
+        if(query.startsWith(TwitchTV.TWITCH_URL)) {
             query = getTrigger() + " " + query;
         }
         return query;
-    }
-
-    /**
-     * Fetch the total followers for the given Twitch channel id
-     *
-     * @param id Twitch channel id
-     * @return Total followers
-     */
-    private int fetchFollowers(String id) {
-        JSONObject response = new JSONObject(
-                new NetworkRequest("https://api.twitch.tv/helix/users/follows?to_id=" + id, false)
-                        .get(getAuthHeaders())
-                        .body
-        );
-        return response.getInt("total");
-    }
-
-    /**
-     * Parse a Twitch.tv stream date from a String
-     *
-     * @param dateString Date String
-     * @return Date of String
-     */
-    private Date parseDate(String dateString) {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return dateFormat.parse(dateString);
-        }
-        catch(ParseException e) {
-            return new Date();
-        }
-    }
-
-    /**
-     * Fetch the number of stream viewers via the streamer's unique id
-     *
-     * @param id Streamer id
-     * @return Number of viewers watching streamer's current stream
-     */
-    private int fetchViewers(String id) {
-        JSONObject response = new JSONObject(
-                new NetworkRequest(baseURL + "streams?user_id=" + id, false).get(getAuthHeaders()).body
-        ).getJSONArray("data").getJSONObject(0);
-        return response.getInt("viewer_count");
-    }
-
-    /**
-     * Fetch a game via the unique id and parse in to a Game object
-     *
-     * @param gameId Unique id of game
-     * @return Game object
-     */
-    private Game fetchGame(String gameId) {
-        if(games.containsKey(gameId)) {
-            return games.get(gameId);
-        }
-        String url = baseURL + "games?id=" + gameId;
-        JSONObject gameData = new JSONObject(
-                new NetworkRequest(url, false).get(getAuthHeaders()).body
-        ).getJSONArray("data").getJSONObject(0);
-        Game game = new Game(
-                gameData.getString("name"),
-                gameData.getString("id"),
-                gameData.getString("box_art_url")
-                        .replace("-{width}x{height}", "")
-                        .replace("/./", "/")
-        );
-        games.put(game.getId(), game);
-        return game;
-    }
-
-    /**
-     * Get streamer search results for the given query
-     *
-     * @param query Query to search for in streamers
-     * @return JSONArray search results
-     */
-    private JSONArray getStreamerSearchResults(String query) {
-        String url = baseURL + "search/channels?first=20&query=" + query;
-        return new JSONObject(
-                new NetworkRequest(url, false).get(getAuthHeaders()).body
-        ).getJSONArray("data");
-    }
-
-    /**
-     * Get the auth headers required to make requests to Twitch.tv
-     *
-     * @return Map of header name -> header value
-     */
-    private HashMap<String, String> getAuthHeaders() {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("Client-Id", oAuth.getClientId());
-        headers.put("Authorization", "Bearer " + oAuth.getAccessToken());
-        return headers;
     }
 
     @Override
@@ -377,7 +208,7 @@ public class TTVLookupCommand extends LookupCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        String regex = TWITCH_URL + "(\\w)+/?";
+        String regex = TwitchTV.TWITCH_URL + "(\\w)+/?";
         return super.matches(query, message) || query.matches(regex);
     }
 }

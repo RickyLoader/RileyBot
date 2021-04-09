@@ -1,7 +1,5 @@
 package Twitch;
 
-import Command.Commands.Lookup.TTVLookupCommand;
-
 /**
  * Twitch.tv game
  */
@@ -18,8 +16,9 @@ public class Game {
     public Game(String name, String id, String thumbnail) {
         this.name = name;
         this.id = id;
-        this.thumbnail = thumbnail;
-        this.url = TTVLookupCommand.TWITCH_URL + "directory/game/" + name.replace(" ", "%20");
+        this.thumbnail = thumbnail.replace("-{width}x{height}", "")
+                .replace("/./", "/");
+        this.url = TwitchTV.TWITCH_URL + "directory/game/" + name.replace(" ", "%20");
     }
 
     /**

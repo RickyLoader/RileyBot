@@ -30,6 +30,16 @@ public class Stream {
     }
 
     /**
+     * Get a stream thumbnail from the streamer login name
+     *
+     * @param loginName Streamer login name
+     * @return URL to stream thumbnail
+     */
+    public static String getThumbnail(String loginName) {
+        return "https://static-cdn.jtvnw.net/previews-ttv/live_user_" + loginName + "-440x248.jpg";
+    }
+
+    /**
      * Get the total number of viewers for the stream formatted as a String
      *
      * @return Formatted viewer String
