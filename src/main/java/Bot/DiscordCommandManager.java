@@ -210,6 +210,7 @@ public class DiscordCommandManager {
         addCommand(new RedditCommand());
         addCommand(new SteamGameCommand());
         addCommand(new SteamCommand());
+        addCommand(new HotTubCommand());
         // addCommand(new FacebookCommand());
         // addCommand(new TeamTreesGuessingCommand());
     }
