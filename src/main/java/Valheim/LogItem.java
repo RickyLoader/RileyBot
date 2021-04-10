@@ -15,7 +15,7 @@ public class LogItem {
     private final TYPE type;
     private final long steamId, zdoid, zdoidIdentifier;
     private final int day;
-    private final String message, characterName, worldName, eventName, locationFound, clientVersion, serverVersion, modVersion;
+    private final String message, characterName, worldName, eventName, locationFound, clientVersion, serverVersion;
 
     public final static String
             DATE = "date",
@@ -28,8 +28,7 @@ public class LogItem {
             ZDOID_IDENTIFIER = "zdoididentifier",
             LOCATION = "location",
             CLIENT_VERSION = "clientversion",
-            SERVER_VERSION = "serverversion",
-            VALHEIM_PLUS_VERSION = "modversion";
+            SERVER_VERSION = "serverversion";
 
     public enum TYPE {
         CONNECTION_STARTED,
@@ -45,7 +44,6 @@ public class LogItem {
         LOCATION_FOUND,
         DUNGEON_LOADED,
         CLIENT_SERVER_MISMATCH,
-        MOD_VERSION,
         IGNORE;
 
         private final String prefix = "\\[Info   : Unity Log\\] (?<" + DATE + ">\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}:\\d{2}): ";
@@ -63,15 +61,6 @@ public class LogItem {
                 }
             }
             return IGNORE;
-        }
-
-        /**
-         * Check if the log type has a date value
-         *
-         * @return Log type has date
-         */
-        public boolean hasDate() {
-            return this != MOD_VERSION;
         }
 
         /**
@@ -113,9 +102,6 @@ public class LogItem {
                     return prefix + "Peer (?<" + STEAM_ID + ">\\d+) has incompatible version, mine:"
                             + serverVersion
                             + " remote " + clientVersion;
-                case MOD_VERSION:
-                    return "\\[Info   :   BepInEx\\] Loading \\[Valheim Plus "
-                            + "(?<" + VALHEIM_PLUS_VERSION + ">" + version + ")\\]";
                 default:
                     return prefix;
             }
@@ -153,7 +139,6 @@ public class LogItem {
         this.day = builder.day;
         this.locationFound = builder.locationFound;
         this.clientVersion = builder.clientVersion;
-        this.modVersion = builder.modVersion;
         this.serverVersion = builder.serverVersion;
     }
 
@@ -170,7 +155,7 @@ public class LogItem {
             return null;
         }
         LogItemBuilder builder = new LogItemBuilder(
-                type.hasDate() ? parseDate(matcher.group(DATE)) : new Date(),
+                parseDate(matcher.group(DATE)),
                 logMessage,
                 type
         );
@@ -203,9 +188,6 @@ public class LogItem {
                 builder.setClientVersion(matcher.group(CLIENT_VERSION))
                         .setServerVersion(matcher.group(SERVER_VERSION))
                         .setSteamId(Long.parseLong(matcher.group(STEAM_ID)));
-                break;
-            case MOD_VERSION:
-                builder.setModVersion(matcher.group(VALHEIM_PLUS_VERSION));
                 break;
         }
         return builder.build();
@@ -251,17 +233,6 @@ public class LogItem {
          */
         public LogItemBuilder setClientVersion(String clientVersion) {
             this.clientVersion = clientVersion;
-            return this;
-        }
-
-        /**
-         * Set the mod version from the log message
-         *
-         * @param modVersion Mod version e.g "0.9.7"
-         * @return Builder
-         */
-        public LogItemBuilder setModVersion(String modVersion) {
-            this.modVersion = modVersion;
             return this;
         }
 
@@ -467,18 +438,9 @@ public class LogItem {
     }
 
     /**
-     * Get the mod version
-     *
-     * @return Mod version - e.g "0.9.7"
-     */
-    public String getModVersion() {
-        return modVersion;
-    }
-
-    /**
      * Get the server version from a client server mismatch log
      *
-     * @return Server version - e.g "0.148.7"
+     * @return Server version - e.g "0.148.7@0.97"
      */
     public String getServerVersion() {
         return serverVersion;

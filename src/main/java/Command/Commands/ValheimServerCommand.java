@@ -133,7 +133,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                     case CLIENT_SERVER_MISMATCH:
                         message = getOfflinePlayerMessage(log.getSteamId())
                                 + " incompatible version:\n" +
-                                "Server: **" + log.getServerVersion() + "@" + valheimServer.getModVersion() + "**\n"
+                                "Server: **" + log.getServerVersion() + "**\n"
                                 + "Player: **" + log.getClientVersion() + "**";
                         break;
                     case CONNECTION_COMPLETE:
