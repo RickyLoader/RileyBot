@@ -705,4 +705,130 @@ public class EmoteHelper {
     public Emote getDeletePhoto() {
         return get("828136713096003597");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364132074979340.png"/>
+     */
+    public Emote getBlobEvent() {
+        return get("830364132074979340");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130878947328.png"/>
+     */
+    public Emote getSkeletonEvent() {
+        return get("830364130878947328");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130867019796.png"/>
+     */
+    public Emote getForestTrollsEvent() {
+        return get("830364130867019796");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130846310401.png"/>
+     */
+    public Emote getSurtlingEvent() {
+        return get("830364130846310401");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130837004298.png"/>
+     */
+    public Emote getTheElder() {
+        return get("830364130837004298");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130824421397.png"/>
+     */
+    public Emote getWolfEvent() {
+        return get("830364130824421397");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130815770624.png"/>
+     */
+    public Emote getModer() {
+        return get("830364130815770624");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130635546644.png"/>
+     */
+    public Emote getBonemass() {
+        return get("830364130635546644");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130606448671.png"/>
+     */
+    public Emote getYagluth() {
+        return get("830364130606448671");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830364130333818881.png"/>
+     */
+    public Emote getEikthyr() {
+        return get("830364130333818881");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830366268221161492.png"/>
+     */
+    public Emote getFuling() {
+        return get("830366268221161492");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830367756477530176.png"/>
+     */
+    public Emote getDeath() {
+        return get("830367756477530176");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830368477507354634.png"/>
+     */
+    public Emote getRespawn() {
+        return get("830368477507354634");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830370910510645278.png"/>
+     */
+    public Emote getServerStarted() {
+        return get("830370910510645278");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830370707531235378.png"/>
+     */
+    public Emote getDungeonLoaded() {
+        return get("830370707531235378");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830370707455737867.png"/>
+     */
+    public Emote getConnecting() {
+        return get("830370707455737867");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830370707065405442.png"/>
+     */
+    public Emote getConnected() {
+        return get("830370707065405442");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/830370707393085471.png"/>
+     */
+    public Emote getDisconnected() {
+        return get("830370707393085471");
+    }
 }

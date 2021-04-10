@@ -1,27 +1,30 @@
 package Command.Commands;
 
-import Bot.GlobalReference;
 import Command.Structure.*;
 import Valheim.LogItem;
 import Valheim.PlayerConnection;
 import Valheim.SteamProfile;
 import Valheim.ValheimServer;
 import Valheim.Wiki.ValheimEvent;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static Bot.GlobalReference.VALHEIM_WIKI;
 
 /**
  * View online players & recent events
  */
-public class ValheimServerCommand extends DiscordCommand {
+public class ValheimServerCommand extends OnReadyDiscordCommand {
     private final ValheimServer valheimServer = new ValheimServer();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private final HashMap<String, Emote> logEmotes = new HashMap<>();
+    private String
+            death, respawn, connected, connecting, disconnect, dayStarted, serverStarted, serverStopped, dungeonLoaded;
 
     public ValheimServerCommand() {
         super("valheim", "View details about the Valheim server!", "valheim [players/logs]");
@@ -119,13 +122,13 @@ public class ValheimServerCommand extends DiscordCommand {
                 String message;
                 switch(log.getType()) {
                     case RESPAWN:
-                        message = log.getCharacterName() + " respawned";
+                        message = respawn + " " + log.getCharacterName() + " respawned";
                         break;
                     case DISCONNECTION:
-                        message = getOfflinePlayerMessage(log.getSteamId()) + " disconnected";
+                        message = disconnect + " " + getOfflinePlayerMessage(log.getSteamId()) + " disconnected";
                         break;
                     case CONNECTION_STARTED:
-                        message = getOfflinePlayerMessage(log.getSteamId()) + " connecting";
+                        message = connecting + " " + getOfflinePlayerMessage(log.getSteamId()) + " connecting";
                         break;
                     case CLIENT_SERVER_MISMATCH:
                         message = getOfflinePlayerMessage(log.getSteamId())
@@ -134,35 +137,37 @@ public class ValheimServerCommand extends DiscordCommand {
                                 + "Player: **" + log.getClientVersion() + "**";
                         break;
                     case CONNECTION_COMPLETE:
-                        message = log.getCharacterName() + " has arrived!";
+                        message = connected + " " + log.getCharacterName() + " has arrived!";
                         break;
                     case WORLD_INFO:
                         message = "Created world " + log.getWorldName();
                         break;
                     case SERVER_START:
-                        message = "Server started";
+                        message = serverStarted + " " + "Server started";
                         break;
                     case SERVER_STOP:
-                        message = "Server stopped";
+                        message = serverStopped + " " + "Server stopped";
                         break;
                     case RANDOM_EVENT:
-                        ValheimEvent randomEvent = GlobalReference.VALHEIM_WIKI.getEventByCodename(log.getEventCodename());
-                        message = "Random event: "
+                        ValheimEvent randomEvent = VALHEIM_WIKI.getEventByCodename(log.getEventCodename());
+                        String codename = randomEvent.getCodename();
+                        message = getLogEmote(codename) + " " + "Random event: "
                                 + randomEvent.getStartMessage()
-                                + " (" + randomEvent.getCodename() + ")";
+                                + " (" + codename + ")";
                         break;
                     case DAY_STARTED:
-                        message = "Day: " + log.getDay() + " has begun!";
+                        message = dayStarted + " " + "Day: " + log.getDay() + " has begun!";
                         break;
                     case LOCATION_FOUND:
-                        message = "Location found: " + log.getLocationFound();
+                        String bossLocation = log.getLocationFound();
+                        message = getLogEmote(bossLocation) + " " + "Location found: " + bossLocation;
                         break;
                     case DUNGEON_LOADED:
-                        message = "Character entered dungeon";
+                        message = dungeonLoaded + " " + "Dungeon loaded";
                         break;
                     // Death
                     default:
-                        message = log.getCharacterName() + " died!";
+                        message = death + " " + log.getCharacterName() + " died!";
                 }
                 return new String[]{
                         dateFormat.format(log.getDate()),
@@ -196,5 +201,48 @@ public class ValheimServerCommand extends DiscordCommand {
     @Override
     public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger()) && !query.equals(getTrigger() + "!");
+    }
+
+    /**
+     * Get the log emote from the given key in the String format required to display in a message
+     *
+     * @param key Emote key - e.g "army_eikthyr"
+     * @return String formatted emote
+     */
+    private String getLogEmote(String key) {
+        return EmoteHelper.formatEmote(logEmotes.get(key.toLowerCase()));
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        // Random events
+        logEmotes.put("army_eikthyr", emoteHelper.getEikthyr());
+        logEmotes.put("army_theelder", emoteHelper.getTheElder());
+        logEmotes.put("army_bonemass", emoteHelper.getBonemass());
+        logEmotes.put("army_moder", emoteHelper.getModer());
+        logEmotes.put("army_goblin", emoteHelper.getFuling());
+        logEmotes.put("skeletons", emoteHelper.getSkeletonEvent());
+        logEmotes.put("blobs", emoteHelper.getBlobEvent());
+        logEmotes.put("foresttrolls", emoteHelper.getForestTrollsEvent());
+        logEmotes.put("wolves", emoteHelper.getWolfEvent());
+        logEmotes.put("surtlings", emoteHelper.getSurtlingEvent());
+
+        // Location discoveries
+        logEmotes.put("bonemass", emoteHelper.getBonemass());
+        logEmotes.put("goblinking", emoteHelper.getYagluth());
+        logEmotes.put("dragon", emoteHelper.getModer());
+        logEmotes.put("gd_king", emoteHelper.getTheElder());
+        logEmotes.put("eikthyr", emoteHelper.getEikthyr());
+
+        // Basic events
+        this.death = EmoteHelper.formatEmote(emoteHelper.getDeath());
+        this.respawn = EmoteHelper.formatEmote(emoteHelper.getRespawn());
+        this.connected = EmoteHelper.formatEmote(emoteHelper.getConnected());
+        this.connecting = EmoteHelper.formatEmote(emoteHelper.getConnecting());
+        this.disconnect = EmoteHelper.formatEmote(emoteHelper.getDisconnected());
+        this.dungeonLoaded = EmoteHelper.formatEmote(emoteHelper.getDungeonLoaded());
+        this.serverStarted = EmoteHelper.formatEmote(emoteHelper.getServerStarted());
+        this.serverStopped = EmoteHelper.formatEmote(emoteHelper.getStop());
+        this.dayStarted = EmoteHelper.formatEmote(emoteHelper.getDayFine());
     }
 }
