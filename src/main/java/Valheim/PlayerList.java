@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class PlayerList {
     private final PendingConnections pendingConnections = new PendingConnections();
     private final HashMap<Long, SteamProfile> steamProfiles = new HashMap<>();
+    private final HashMap<String, Character> characters = new HashMap<>();
     private final HashMap<Long, PlayerConnection>
             connectionsByZdoid = new HashMap<>(),
             connectionsBySteamId = new HashMap<>();
@@ -37,7 +38,7 @@ public class PlayerList {
      * @return Steam profile or null
      */
     private SteamProfile fetchSteamProfile(long steamId) {
-        String url = SteamStore.STEAM_API_BASE_URL +"ISteamUser/GetPlayerSummaries/v2/?key="
+        String url = SteamStore.STEAM_API_BASE_URL + "ISteamUser/GetPlayerSummaries/v2/?key="
                 + Secret.STEAM_KEY + "&steamids=" + steamId;
 
         JSONObject response = new JSONObject(
@@ -61,12 +62,34 @@ public class PlayerList {
      * @param date          Connection date
      */
     public void playerConnected(long zdoid, String characterName, Date date) {
+        Character character = new Character(zdoid, characterName);
         PlayerConnection connected = pendingConnections.completeEarliestConnection(
-                new Character(zdoid, characterName),
+                character,
                 date
         );
+        characters.put(characterName.toLowerCase(), character);
         connectionsByZdoid.put(zdoid, connected);
         connectionsBySteamId.put(connected.getSteamProfile().getId(), connected);
+    }
+
+    /**
+     * Get a list of known characters (characters who have connected to the server)
+     *
+     * @return List of characters
+     */
+    public ArrayList<Character> getKnownCharacters() {
+        return new ArrayList<>(characters.values());
+    }
+
+    /**
+     * Get a character by their name
+     * Character must have connected to the server before
+     *
+     * @param name Character name
+     * @return Character
+     */
+    public Character getCharacterByName(String name) {
+        return characters.get(name.toLowerCase());
     }
 
     /**

@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import Network.Secret;
+import Valheim.Character;
 import Valheim.ValheimServer;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,7 +14,39 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
 
     public enum TYPE {
         PLAYERS,
-        LOGS
+        LOGS,
+        DEATHS;
+
+        /**
+         * Get the embed title to use based on the type
+         *
+         * @param serverName Server name
+         * @param items      Display items
+         * @return Embed title
+         */
+        public String getTitle(String serverName, List<?> items) {
+            String title = serverName
+                    + " | "
+                    + StringUtils.capitalize(this.name().toLowerCase())
+                    + " | ";
+            switch(this) {
+                case LOGS:
+                    title += items.size() + " Events";
+                    break;
+                case DEATHS:
+                    int deaths = 0;
+                    for(Object o : items) {
+                        Character c = (Character) o;
+                        deaths += c.getDeaths();
+                    }
+                    title += deaths + " Total";
+                    break;
+                case PLAYERS:
+                    title += items.size() + " Online";
+                    break;
+            }
+            return title;
+        }
     }
 
     /**
@@ -31,29 +64,13 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
                 context,
                 items,
                 PageableValheimWikiSearchEmbed.THUMBNAIL,
-                getTitle(server.getWorldName(), displayType, items.size()),
+                displayType.getTitle(server.getWorldName(), items),
                 getServerDescription(server),
                 footer,
                 columns,
                 5,
                 items.isEmpty() ? EmbedHelper.ORANGE : EmbedHelper.GREEN
         );
-    }
-
-    /**
-     * Get the title to use in the server embed
-     *
-     * @param serverName  Server name
-     * @param displayType Display type
-     * @param size        Quantity of display items
-     * @return Embed title
-     */
-    private static String getTitle(String serverName, TYPE displayType, int size) {
-        return serverName
-                + " | "
-                + StringUtils.capitalize(displayType.name().toLowerCase())
-                + " | "
-                + size + " " + (displayType == TYPE.PLAYERS ? "Online" : "Recent Events");
     }
 
     /**

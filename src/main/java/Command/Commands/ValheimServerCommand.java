@@ -1,6 +1,7 @@
 package Command.Commands;
 
 import Command.Structure.*;
+import Valheim.Character;
 import Valheim.LogItem;
 import Valheim.PlayerConnection;
 import Valheim.SteamProfile;
@@ -17,7 +18,7 @@ import java.util.*;
 import static Bot.GlobalReference.VALHEIM_WIKI;
 
 /**
- * View online players & recent events
+ * View online players & log events
  */
 public class ValheimServerCommand extends OnReadyDiscordCommand {
     private final ValheimServer valheimServer = new ValheimServer();
@@ -27,7 +28,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
             death, respawn, connected, connecting, disconnect, dayStarted, serverStarted, serverStopped, dungeonLoaded;
 
     public ValheimServerCommand() {
-        super("valheim", "View details about the Valheim server!", "valheim [players/logs]");
+        super("valheim", "View details about the Valheim server!", "valheim [players/logs/deaths]");
     }
 
     @Override
@@ -35,7 +36,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
         String message = context.getLowerCaseMessage().replace(getTrigger(), "").trim();
         MessageChannel channel = context.getMessageChannel();
 
-        if(message.isEmpty() || !message.equals("players") && !message.equals("logs")) {
+        if(message.isEmpty() || !message.equals("players") && !message.equals("logs") && !message.equals("deaths")) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
@@ -46,9 +47,51 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
         if(message.equals("players")) {
             showPlayersEmbed(context);
         }
-        else {
+        else if(message.equals("logs")) {
             showEventsEmbed(context);
         }
+        else {
+            showDeathsEmbed(context);
+        }
+    }
+
+    /**
+     * Send a pageable message embed displaying a list of characters and their deaths
+     *
+     * @param context Command context
+     */
+    private void showDeathsEmbed(CommandContext context) {
+        ArrayList<Character> characters = valheimServer.getPlayerList().getKnownCharacters();
+        new ValheimServerMessage(
+                context,
+                characters,
+                valheimServer,
+                ValheimServerMessage.TYPE.DEATHS,
+                "Try: " + getHelpName(),
+                new String[]{
+                        "Character",
+                        "Deaths"
+                }
+
+        ) {
+            @Override
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
+                Character character = (Character) items.get(index);
+                return new String[]{
+                        character.getName(),
+                        String.valueOf(character.getDeaths())
+                };
+            }
+
+            @Override
+            public void sortItems(List<?> items, boolean defaultSort) {
+                items.sort((Comparator<Object>) (o1, o2) -> {
+                    int d1 = ((Character) o1).getDeaths();
+                    int d2 = ((Character) o2).getDeaths();
+                    return defaultSort ? d2 - d1 : d1 - d2;
+                });
+            }
+        }.showMessage();
     }
 
     /**
@@ -99,7 +142,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
     }
 
     /**
-     * Send a pageable message embed displaying the list of recent log events on the Valheim server
+     * Send a pageable message embed displaying the list of log events on the Valheim server
      *
      * @param context Command context
      */

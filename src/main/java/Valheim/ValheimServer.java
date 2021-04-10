@@ -98,6 +98,9 @@ public class ValheimServer {
                 case DAY_STARTED:
                     day = log.getDay();
                     break;
+                case DEATH:
+                    playerList.getCharacterByName(log.getCharacterName()).addDeath();
+                    break;
             }
             this.logs.add(log);
         }
