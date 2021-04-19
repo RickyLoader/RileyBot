@@ -58,14 +58,16 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
      * @param displayType Display type
      * @param footer      Footer to use in the embed
      * @param columns     Column headers to display at the top of message
+     * @param online      String formatted emote to display when the server is online
+     * @param offline     String formatted emote to display when the server is offline
      */
-    public ValheimServerMessage(CommandContext context, List<?> items, ValheimServer server, TYPE displayType, String footer, String[] columns) {
+    public ValheimServerMessage(CommandContext context, List<?> items, ValheimServer server, TYPE displayType, String footer, String[] columns, String online, String offline) {
         super(
                 context,
                 items,
                 PageableValheimWikiSearchEmbed.THUMBNAIL,
                 displayType.getTitle(server.getWorldName(), items),
-                getServerDescription(server),
+                getServerDescription(server, online, offline),
                 footer,
                 columns,
                 5,
@@ -76,13 +78,15 @@ public abstract class ValheimServerMessage extends PageableTableEmbed {
     /**
      * Get the description to use in the server embed
      *
-     * @param server Valheim server
+     * @param server  Valheim server
+     * @param online  String formatted emote to display when the server is online
+     * @param offline String formatted emote to display when the server is offline
      * @return Embed description
      */
-    private static String getServerDescription(ValheimServer server) {
+    private static String getServerDescription(ValheimServer server, String online, String offline) {
         return "**IP**: " + Secret.VALHEIM_IP + ":" + Secret.VALHEIM_SERVER_PORT
                 + "\n**Password**: " + Secret.VALHEIM_SERVER_PASS
-                + "\n**Online**: " + (server.isOnline() ? "Yes" : "No")
+                + "\n**Online**: " + (server.isOnline() ? online : offline)
                 + "\n**Day**: ~" + server.getDay() + " (Last slept to)";
     }
 }

@@ -92,6 +92,9 @@ public class ValheimServer {
                     playerList.connectionStarted(log.getSteamId(), log.getDate());
                     break;
                 case SERVER_START:
+                    if(online) {
+                        continue;
+                    }
                     online = true;
                     break;
                 case SERVER_STOP:

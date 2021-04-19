@@ -73,8 +73,9 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                         "Character",
                         "Deaths/Sessions",
                         "Per Session"
-                }
-
+                },
+                serverStarted,
+                serverStopped
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
@@ -115,7 +116,9 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                         "Character",
                         "Steam",
                         "Status"
-                }
+                },
+                serverStarted,
+                serverStopped
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
@@ -161,7 +164,9 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 new String[]{
                         "Time",
                         "Message"
-                }
+                },
+                serverStarted,
+                serverStopped
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
@@ -185,9 +190,6 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                         break;
                     case CONNECTION_COMPLETE:
                         message = connected + " " + log.getCharacterName() + " has arrived!";
-                        break;
-                    case WORLD_INFO:
-                        message = "Created world " + log.getWorldName();
                         break;
                     case SERVER_START:
                         message = serverStarted + " " + "Server started";

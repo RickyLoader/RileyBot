@@ -21,7 +21,6 @@ public class LogItem {
             DATE = "date",
             STEAM_ID = "steam",
             CHARACTER_NAME = "charactername",
-            WORLD_NAME = "worldname",
             EVENT_NAME = "eventname",
             ZDOID = "zdoid",
             DAY = "day",
@@ -35,7 +34,6 @@ public class LogItem {
         CONNECTION_COMPLETE,
         DEATH,
         RESPAWN,
-        WORLD_INFO,
         DISCONNECTION,
         SERVER_STOP,
         SERVER_START,
@@ -82,8 +80,6 @@ public class LogItem {
                     return getPlayerEventRegex("0", "0");
                 case RESPAWN:
                     return getPlayerEventRegex(defaultZdoid, "\\d+");
-                case WORLD_INFO:
-                    return prefix + "Get create world (?<" + WORLD_NAME + ">.+)";
                 case SERVER_START:
                     return prefix + "Game server connected";
                 case SERVER_STOP:
@@ -171,9 +167,6 @@ public class LogItem {
                 builder.setZdoid(Long.parseLong(matcher.group(ZDOID)))
                         .setZdoidIdentifier(Long.parseLong(matcher.group(ZDOID_IDENTIFIER)))
                         .setCharacterName(matcher.group(CHARACTER_NAME));
-                break;
-            case WORLD_INFO:
-                builder.setWorldName(matcher.group(WORLD_NAME));
                 break;
             case DAY_STARTED:
                 builder.setDay(Integer.parseInt(matcher.group(DAY)));
