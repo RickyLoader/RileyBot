@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import COD.Assets.Ratio;
 import Command.Structure.*;
 import Valheim.Character;
 import Valheim.LogItem;
@@ -70,16 +71,19 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 "Try: " + getHelpName(),
                 new String[]{
                         "Character",
-                        "Deaths"
+                        "Deaths/Sessions",
+                        "Per Session"
                 }
 
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 Character character = (Character) items.get(index);
+                Ratio deathsPerSession = new Ratio(character.getDeaths(), character.getSessions());
                 return new String[]{
                         character.getName(),
-                        String.valueOf(character.getDeaths())
+                        character.getDeaths() + "/" + character.getSessions(),
+                        String.valueOf(deathsPerSession.formatRatio(deathsPerSession.getRatio()))
                 };
             }
 

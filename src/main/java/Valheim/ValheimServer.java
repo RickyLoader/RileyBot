@@ -74,7 +74,9 @@ public class ValheimServer {
                     playerList.playerDisconnected(log.getSteamId());
                     break;
                 case CONNECTION_COMPLETE:
-                    playerList.playerConnected(log.getZdoid(), log.getCharacterName(), log.getDate());
+                    String characterName = log.getCharacterName();
+                    playerList.playerConnected(log.getZdoid(), characterName, log.getDate());
+                    playerList.getCharacterByName(characterName).addSession();
                     break;
                 case RESPAWN:
                     // Player is joining not respawning

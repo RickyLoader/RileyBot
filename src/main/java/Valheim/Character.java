@@ -6,7 +6,7 @@ package Valheim;
 public class Character {
     private final long zdoid;
     private final String name;
-    private int deaths;
+    private int deaths, sessions;
 
     /**
      * Create the Valheim server character
@@ -18,6 +18,7 @@ public class Character {
         this.zdoid = zdoid;
         this.name = name;
         this.deaths = 0;
+        this.sessions = 0;
     }
 
     /**
@@ -30,10 +31,26 @@ public class Character {
     }
 
     /**
+     * Get the number of times the character has connected to the server
+     *
+     * @return Character sessions
+     */
+    public int getSessions() {
+        return sessions;
+    }
+
+    /**
      * Add a death to the character
      */
     public void addDeath() {
         this.deaths += 1;
+    }
+
+    /**
+     * Add a session to the character (number of times the character has connected to the server)
+     */
+    public void addSession() {
+        this.sessions += 1;
     }
 
     /**

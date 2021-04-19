@@ -35,7 +35,7 @@ public class PlayerList {
      * Fetch a steam profile by the unique steam id
      *
      * @param steamId Unique steam id
-     * @return Steam profile or null
+     * @return Steam profile
      */
     private SteamProfile fetchSteamProfile(long steamId) {
         String url = SteamStore.STEAM_API_BASE_URL + "ISteamUser/GetPlayerSummaries/v2/?key="
@@ -56,18 +56,22 @@ public class PlayerList {
 
     /**
      * Add a newly connected player to the connected players.
+     * Map the connected character if it has not been seen before
      *
      * @param zdoid         Session id of connected player
      * @param characterName Character name
      * @param date          Connection date
      */
     public void playerConnected(long zdoid, String characterName, Date date) {
-        Character character = new Character(zdoid, characterName);
+        Character character = getCharacterByName(characterName);
+        if(character == null) {
+            character = new Character(zdoid, characterName);
+            characters.put(characterName.toLowerCase(), character);
+        }
         PlayerConnection connected = pendingConnections.completeEarliestConnection(
                 character,
                 date
         );
-        characters.put(characterName.toLowerCase(), character);
         connectionsByZdoid.put(zdoid, connected);
         connectionsBySteamId.put(connected.getSteamProfile().getId(), connected);
     }
@@ -86,7 +90,7 @@ public class PlayerList {
      * Character must have connected to the server before
      *
      * @param name Character name
-     * @return Character
+     * @return Character or null
      */
     public Character getCharacterByName(String name) {
         return characters.get(name.toLowerCase());
@@ -97,15 +101,16 @@ public class PlayerList {
      * Player may currently be online or pending connection to the server
      *
      * @param steamId Steam id of disconnected player
+     * @return Disconnected player connection
      */
-    public void playerDisconnected(long steamId) {
+    public PlayerConnection playerDisconnected(long steamId) {
         PlayerConnection connected = connectionsBySteamId.get(steamId);
         if(connected == null) {
-            pendingConnections.failConnection(steamId);
-            return;
+            return pendingConnections.failConnection(steamId);
         }
         connectionsBySteamId.remove(steamId);
         connectionsByZdoid.remove(connected.getCharacter().getZdoid());
+        return connected;
     }
 
     /**
@@ -133,20 +138,10 @@ public class PlayerList {
      * Profile must have connected/attempted to connect to the server before
      *
      * @param steamId Steam id of profile to get
-     * @return Steam profile with given steam id
+     * @return Steam profile with given steam id or null
      */
     public SteamProfile getSteamProfileById(long steamId) {
         return steamProfiles.get(steamId);
-    }
-
-    /**
-     * Get a connected player by their steam id
-     *
-     * @param steamId Player steam id
-     * @return Player with steam id or null
-     */
-    public PlayerConnection getConnectedPlayerBySteamId(long steamId) {
-        return connectionsBySteamId.get(steamId);
     }
 
     /**
