@@ -23,7 +23,6 @@ import static Bot.GlobalReference.VALHEIM_WIKI;
  */
 public class ValheimServerCommand extends OnReadyDiscordCommand {
     private final ValheimServer valheimServer = new ValheimServer();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
     private final HashMap<String, Emote> logEmotes = new HashMap<>();
     private String
             death, respawn, connected, connecting, disconnect, dayStarted, serverStarted, serverStopped, dungeonLoaded;
@@ -133,7 +132,8 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 return new String[]{
                         name,
                         EmbedHelper.embedURL(profile.getName(), profile.getUrl()),
-                        connection.getStatus().name() + " since " + dateFormat.format(connection.getDate())
+                        connection.getStatus().name()
+                                + " since " + new SimpleDateFormat("HH:mm:ss").format(connection.getDate())
                 };
             }
 
@@ -219,7 +219,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                         message = death + " " + log.getCharacterName() + " died!";
                 }
                 return new String[]{
-                        dateFormat.format(log.getDate()),
+                        new SimpleDateFormat("dd/MM HH:mm:ss").format(log.getDate()),
                         message
                 };
             }
