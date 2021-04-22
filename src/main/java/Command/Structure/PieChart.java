@@ -234,7 +234,7 @@ public class PieChart {
         public String getQuantitySummary(int total) {
             DecimalFormat format = new DecimalFormat("0.00'%'");
             String percent = format.format((double) quantity / (total / (double) 100));
-            return quantity + " (" + percent + ")";
+            return new DecimalFormat("#,###").format(quantity) + " (" + percent + ")";
         }
 
         /**
