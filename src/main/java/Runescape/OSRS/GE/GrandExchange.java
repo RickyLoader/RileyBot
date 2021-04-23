@@ -41,7 +41,7 @@ public class GrandExchange {
                 ? null
                 : new Price(priceData.getLong("high"), new Date(priceData.getLong("highTime") * 1000));
 
-        return new ItemPrice(item, high, low, itemTradeVolumes.get(id));
+        return new ItemPrice(item, high, low, itemTradeVolumes.getOrDefault(id, 0L));
     }
 
     /**

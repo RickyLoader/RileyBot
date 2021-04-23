@@ -62,6 +62,15 @@ public class ItemPrice {
     }
 
     /**
+     * Check if the item has a daily trade volume
+     *
+     * @return Item has daily trade volume
+     */
+    public boolean hasDailyVolume() {
+        return dailyVolume != 0;
+    }
+
+    /**
      * Transaction price & date pair
      */
     public static class Price {

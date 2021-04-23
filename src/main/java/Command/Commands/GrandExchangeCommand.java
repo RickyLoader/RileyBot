@@ -140,7 +140,7 @@ public class GrandExchangeCommand extends DiscordCommand {
                 .addField(getPriceField("Sell Price", sellPrice, itemPrice.getLow()))
                 .addField(
                         "Daily Volume",
-                        commaFormat.format(itemPrice.getDailyVolume()),
+                        itemPrice.hasDailyVolume() ? commaFormat.format(itemPrice.getDailyVolume()) : "-",
                         false
                 )
                 .addField(
