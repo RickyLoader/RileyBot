@@ -6974,6 +6974,530 @@
     },
     "weapon_pistol": {
       "iw8_pi_mike": {
+        "attachments": {
+          "barsil": {
+            "stats": {
+              "damage": 0,
+              "mobility": -6,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 7,
+              "control": 5
+            },
+            "description": "The Sykov Skrytyy Lisa slide with a build-in monolithic suppressor keeps the weapon silent and increases range for longer distance stealth assaults.",
+            "real_name": "SSL 308mm",
+            "category": "frontpiece",
+            "blocksCategory": "muzzle"
+          },
+          "xmags": {
+            "stats": {
+              "damage": 0,
+              "mobility": -4,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": -4
+            },
+            "description": "Extended magazines hold 20 rounds of 9mm Makarov ammunition with a moderate weight increase.",
+            "real_name": "20 Round Mags",
+            "category": "magazine"
+          },
+          "barcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Durable stainless steel slide and modified trigger group allow this pistol to fire fully automatic.",
+            "real_name": "Sorokin 140mm Auto",
+            "category": "frontpiece"
+          },
+          "barshort": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Sykov's Svet Bochka slide improves handling at the cost of muzzle velocity.",
+            "real_name": "SSB 105mm",
+            "category": "frontpiece"
+          },
+          "drums": {
+            "stats": {
+              "damage": 0,
+              "mobility": -8,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": -5
+            },
+            "description": "Drum magazines hold 80 rounds of 9mm Makarov, maximizing ammo capacity at the expense of mobility.",
+            "real_name": "80 Round Drums",
+            "category": "magazine"
+          },
+          "pistolgrip01": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": 2
+            },
+            "description": "Mil-spec grip balanced for relaxed and controlled handling. Keeps you steady and on target.",
+            "real_name": "VLK Spetznaz",
+            "category": "reargrip"
+          },
+          "pistolgrip02": {
+            "stats": {
+              "damage": 0,
+              "mobility": 3,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": -2
+            },
+            "description": "Designed for control when performing high-speed maneuvers. Less stable but very agile.",
+            "real_name": "VLK Prizrak",
+            "category": "reargrip"
+          },
+          "pistolgrip03": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 0,
+              "control": -2
+            },
+            "description": "Ergonomic pistol grip keeps gun tight in hand. Exceptional recoil control at the cost of aiming stability.",
+            "real_name": "VLK Elita",
+            "category": "reargrip"
+          },
+          "stockl": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": -1
+            },
+            "description": "Ultralight Pistolet-Pulemet stock provides a stable aiming platform and improved recoil control without sacrificing too much mobility.",
+            "real_name": "PP-Skelet",
+            "category": "backpiece"
+          },
+          "stockh": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 3,
+              "control": -2
+            },
+            "description": "Heavy weight Pistolet-Pulemet stock provides the highest available aiming stability and recoil control.",
+            "real_name": "PP-Karabin",
+            "category": "backpiece"
+          },
+          "trigcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 8,
+              "accuracy": 0,
+              "range": 0,
+              "control": -4
+            },
+            "description": "Lightweight trigger set to single-action mode for extremely responsive firing. Requires slightly slower weapon handling.",
+            "real_name": "Lightweight Single-Action",
+            "category": "trigger"
+          },
+          "trigcust02": {
+            "stats": {
+              "damage": 0,
+              "mobility": 2,
+              "firerate": -4,
+              "accuracy": 0,
+              "range": 0,
+              "control": 4
+            },
+            "description": "Double action pistol mode and a heavy trigger pull allow for faster weapon handling.",
+            "real_name": "Heavyweight Double-Action",
+            "category": "trigger"
+          },
+          "trigcust03": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 5,
+              "accuracy": -2,
+              "range": 0,
+              "control": 2
+            },
+            "description": "High precision lightweight trigger offers a higher rate of fire and steady shots in double-action mode. Not as accurate from the hip.",
+            "real_name": "Lightweight Double-Action",
+            "category": "trigger"
+          },
+          "flashhider": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": -1,
+              "control": 0
+            },
+            "description": "Suppress the flash of your weapon to help keep your target visible and your position concealed.  Slightly lowers muzzle velocity.",
+            "real_name": "Flash Guard",
+            "category": "muzzle"
+          },
+          "silencer4": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": -2,
+              "control": 1
+            },
+            "description": "Suppressor crafted from an oil filter.  Silences weapon, but ^1blocks visibility^7 when used with ironsights.",
+            "real_name": "Oil Can Suppressor",
+            "category": "muzzle"
+          },
+          "brake": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 0,
+              "control": 1
+            },
+            "description": "Redirects gases outward to stabilize the weapon for better control of sustained fire.",
+            "real_name": "Muzzle Brake",
+            "category": "muzzle"
+          },
+          "silencer2": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 1,
+              "range": -4,
+              "control": 0
+            },
+            "description": "Lightweight aluminum suppressor sacrifices range for stealth and agility.",
+            "real_name": "Lightweight Suppressor",
+            "category": "muzzle"
+          },
+          "comp": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": 3
+            },
+            "description": "Expels gases upward to aggressively fight muzzle climb.",
+            "real_name": "Compensator",
+            "category": "muzzle"
+          },
+          "silencer3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 3,
+              "control": -1
+            },
+            "description": "Monolithic core provides superior sound suppression and increased range.  Moderate weight increase affects agility.",
+            "real_name": "Monolithic Suppressor",
+            "category": "muzzle"
+          },
+          "silencer": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Titanium can with stainless steel baffles.  Silences weapon with very little additional weight.",
+            "real_name": "Tactical Suppressor",
+            "category": "muzzle"
+          },
+          "laser": {
+            "stats": {
+              "damage": 0,
+              "mobility": 1,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Low power 1mW red laser improves hip fire accuracy while remaining undetected.",
+            "real_name": "1mW Laser",
+            "category": "extra"
+          },
+          "laserrange": {
+            "stats": {
+              "damage": 0,
+              "mobility": 2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Ultra bright 5mW green laser greatly improves hip fire accuracy and speeds up target acquisition after sprinting.  Exposes position when active.  Only for the aggressive.",
+            "real_name": "5mW Laser",
+            "category": "extra"
+          },
+          "laserbalanced": {
+            "stats": {
+              "damage": 0,
+              "mobility": 2,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": 3
+            },
+            "description": "High power 5mW tactical green laser.  Improves accuracy while aiming down sights.  Exposes position when active.",
+            "real_name": "Tac Laser",
+            "category": "extra"
+          },
+          "reflexmini3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Circular reflex frame from Cronen keeps the focus on the target.",
+            "real_name": "Cronen LP945 Mini Reflex",
+            "category": "optic"
+          },
+          "reflex2": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Reflex sight of western origin.  Provides higher precision.",
+            "real_name": "Aim-Op Reflex Sight",
+            "category": "optic"
+          },
+          "reflexmini2": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Well-rounded precision sight from Solozero Optics provides a balanced sight picture.",
+            "real_name": "Solozero Optics Mini Reflex",
+            "category": "optic"
+          },
+          "reflex3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Precision reflex sight of Russian origin.",
+            "real_name": "Viper Reflex Sight",
+            "category": "optic"
+          },
+          "reflex4": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Russian reflex sight with a low-intrusion frame for improved target tracking.",
+            "real_name": "Monocle Reflex Sight",
+            "category": "optic"
+          },
+          "reflexmini": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "G.I. Miniature reflex optic features a wide, thin frame for an unobstructed sight picture.",
+            "real_name": "G.I. Mini Reflex",
+            "category": "optic"
+          },
+          "reflex": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Reflex sight of American origin. Provides higher precision.",
+            "real_name": "Operator Reflex Sight",
+            "category": "optic"
+          },
+          "gunperk_fastmelee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Training in executing melee maneuvers with great speed.",
+            "real_name": "Fast Melee",
+            "category": "gunperk"
+          },
+          "ammomod_slow": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Bullets slow enemy movement and briefly disable tactical sprint when shooting legs.",
+            "real_name": "Frangible - Disabling",
+            "category": "gunperk"
+          },
+          "gunperk_marksman": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "See enemy nameplates at greater distances.",
+            "real_name": "Recon",
+            "category": "gunperk"
+          },
+          "maxammo": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Start with Maximum Reserve Ammo.",
+            "real_name": "Fully Loaded",
+            "category": "gunperk"
+          },
+          "fmj": {
+            "stats": {
+              "damage": 5,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Increases bullet penetration and damage against equipment and killstreaks.",
+            "real_name": "FMJ",
+            "category": "gunperk"
+          },
+          "ammomod_wound": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Bullets cause target healing to be briefly delayed.",
+            "real_name": "Frangible - Wounding",
+            "category": "gunperk"
+          },
+          "gunperk_xp": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Earn additional XP for kills.",
+            "real_name": "Mo' Money",
+            "category": "gunperk"
+          },
+          "fastreload": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 2,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Training in reloading faster when under pressure.",
+            "real_name": "Sleight of Hand",
+            "category": "gunperk"
+          },
+          "gunperk_hardmelee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Melee produces greater stun on targets.",
+            "real_name": "Heavy Hitter",
+            "category": "gunperk"
+          },
+          "akimbo": {
+            "stats": {
+              "damage": 7,
+              "mobility": -5,
+              "firerate": 15,
+              "accuracy": -10,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Ability to hold a weapon in each hand",
+            "real_name": "Akimbo",
+            "category": "gunperk",
+            "blocksCategory": "backpiece"
+          }
+        },
         "image_url": "https://i.imgur.com/EIpoPjq.png",
         "real_name": "Sykov"
       },
