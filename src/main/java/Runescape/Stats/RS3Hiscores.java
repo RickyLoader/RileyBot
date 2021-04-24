@@ -12,17 +12,17 @@ import Runescape.Skill;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static Command.Structure.PieChart.*;
 import static Runescape.Skill.SKILL_NAME.*;
+import static Runescape.Stats.Clan.*;
 
 /**
  * Build an image displaying a player's RS3 stats
@@ -30,8 +30,8 @@ import static Runescape.Skill.SKILL_NAME.*;
 public class RS3Hiscores extends Hiscores {
     private final Color orange, yellow, red, blue;
     private final ResourceHandler handler;
-    private final String[] bgImages;
     private final boolean virtual;
+    private final String BASE_URL = "https://secure.runescape.com/";
 
     /**
      * Create the RS3 Hiscores instance
@@ -47,19 +47,12 @@ public class RS3Hiscores extends Hiscores {
         this.blue = new Color(EmbedHelper.RUNESCAPE_BLUE);
         this.red = new Color(EmbedHelper.RUNESCAPE_RED);
         this.handler = new ResourceHandler();
-        this.bgImages = new String[]{
-                "1.png",
-                "2.png",
-                "3.png",
-                "4.png",
-                "5.png"
-        };
         this.virtual = virtual;
     }
 
     @Override
     public String getURL(String type, String name) {
-        return "https://secure.runescape.com/m=hiscore" + type + "/index_lite.ws?player=" + EmbedHelper.urlEncode(name);
+        return BASE_URL + "m=hiscore" + type + "/index_lite.ws?player=" + EmbedHelper.urlEncode(name);
     }
 
     @Override
@@ -82,6 +75,7 @@ public class RS3Hiscores extends Hiscores {
         ArrayList<String> loadingCriteria = new ArrayList<>();
         loadingCriteria.add("Player exists...");
         loadingCriteria.add("Checking RuneMetrics...");
+        loadingCriteria.add("Checking clan...");
         loadingCriteria.add("Checking account type...");
         return loadingCriteria;
     }
@@ -116,22 +110,60 @@ public class RS3Hiscores extends Hiscores {
             );
         }
 
-        BufferedImage background = handler.getImageResource(
-                getResourcePath() + "Templates/Background/" + bgImages[new Random().nextInt(bgImages.length)]
-        );
-
-        if(background == null) {
-            return playerImage;
+        if(stats.isClanMember()) {
+            BufferedImage clanSection = buildClanSection(stats.getClan(), stats.getName());
+            BufferedImage expandedImage = new BufferedImage(
+                    playerImage.getWidth(),
+                    playerImage.getHeight() + clanSection.getHeight(),
+                    playerImage.getType()
+            );
+            g = expandedImage.getGraphics();
+            g.drawImage(playerImage, 0, 0, null);
+            g.drawImage(
+                    clanSection,
+                    overhang,
+                    titleSection.getHeight() + skillSection.getHeight(),
+                    null
+            );
+            playerImage = expandedImage;
         }
-        g = background.getGraphics();
-        g.drawImage(
-                playerImage,
-                (background.getWidth() / 2) - (playerImage.getWidth() / 2),
-                (background.getHeight() / 2) - (playerImage.getHeight() / 2),
-                null
-        );
         g.dispose();
-        return background;
+        return playerImage;
+    }
+
+    /**
+     * Build the clan section of the image
+     *
+     * @param clan Player clan
+     * @param name Player name
+     * @return Clan image section
+     */
+    private BufferedImage buildClanSection(Clan clan, String name) {
+        BufferedImage clanSection = null;
+        try {
+            clanSection = handler.getImageResource(getResourcePath() + "Templates/clan_section.png");
+            Graphics g = clanSection.getGraphics();
+            g.setFont(getGameFont().deriveFont(40f));
+            g.setColor(Color.WHITE);
+            g.drawImage(clan.getBanner(), clanSection.getWidth() - clan.getBanner().getWidth(), 0, null);
+            g.drawString(clan.getName(), 100, 50);
+
+            g.setColor(orange);
+            ArrayList<String> owners = clan.getPlayersByRole(ROLE.OWNER);
+            String owner = owners.isEmpty() ? "Unknown" : owners.get(0);
+
+            int x = 300;
+            g.setFont(getGameFont().deriveFont(25f));
+
+            g.drawString(owner, x, 150);
+            g.drawString(clan.getRoleByPlayerName(name).getName(), x, 200);
+            g.drawString(String.valueOf(clan.getMemberCount()), x, 250);
+            g.dispose();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return clanSection;
     }
 
     /**
@@ -241,10 +273,8 @@ public class RS3Hiscores extends Hiscores {
         try {
             String name = playerStats.getName();
             titleSection = handler.getImageResource(getResourcePath() + "Templates/title_section.png");
-            BufferedImage avatar = ImageIO.read(
-                    new URL(
-                            "http://services.runescape.com/m=avatar-rs/" + EmbedHelper.urlEncode(name) + "/chat.gif"
-                    )
+            BufferedImage avatar = EmbedHelper.downloadImage(
+                    "http://services.runescape.com/m=avatar-rs/" + EmbedHelper.urlEncode(name) + "/chat.gif"
             );
             BufferedImage scaledAvatar = new BufferedImage(287, 287, BufferedImage.TYPE_INT_ARGB);
             Graphics g = scaledAvatar.createGraphics();
@@ -430,8 +460,8 @@ public class RS3Hiscores extends Hiscores {
     /**
      * Get the player's RuneMetrics stats if available
      *
-     * @param name URL encoded player name
-     * @return Player RuneMetrics stats
+     * @param name Player name
+     * @return Player RuneMetrics stats or null
      */
     private RuneMetrics getRuneMetrics(String name) {
         String url = "https://apps.runescape.com/runemetrics/profile/profile?user=" + EmbedHelper.urlEncode(name);
@@ -451,6 +481,71 @@ public class RS3Hiscores extends Hiscores {
         );
     }
 
+    /**
+     * Get the clan that the given player is a member of (if they are in a clan)
+     *
+     * @param name Player name
+     * @return Player clan or null
+     */
+    private Clan getClan(String name) {
+        String url = BASE_URL
+                + "m=website-data/playerDetails.ws?names=%5B%22"
+                + EmbedHelper.urlEncode(name)
+                + "%22%5D&callback=jQuery000000000000000_0000000000&_=0";
+        String embedUrl = EmbedHelper.embedURL("clan", url);
+
+        try {
+            String response = new NetworkRequest(url, false).get().body;
+            Matcher matcher = Pattern.compile("\\{.+}").matcher(response);
+            if(!matcher.find()) {
+                throw new Exception();
+            }
+            JSONObject playerClanDetails = new JSONObject(response.substring(matcher.start(), matcher.end()));
+            if(!playerClanDetails.has("clan")) {
+                loading.failStage("Player is not part of a " + embedUrl);
+                return null;
+            }
+            String clanName = playerClanDetails.getString("clan");
+            String clanNameEncode = EmbedHelper.urlEncode(clanName);
+            loading.updateStage("Player is in the **" + clanName + "** clan, fetching details...");
+            Clan clan = new Clan(
+                    clanName,
+                    EmbedHelper.downloadImage(
+                            BASE_URL + "m=avatar-rs/" + clanNameEncode + "/clanmotif.png"
+                    )
+            );
+
+            String[] clanMembers = new NetworkRequest(
+                    "http://services.runescape.com/m=clan-hiscores/members_lite.ws?clanName=" + clanNameEncode,
+                    false
+            )
+                    .get()
+                    .body
+                    .replace("�", " ")
+                    .split("\n");
+
+            // First row is redundant column info
+            for(int i = 1; i < clanMembers.length; i++) {
+                String[] memberDetails = clanMembers[i].split(",");
+                clan.addPlayer(memberDetails[0], ROLE.byName(memberDetails[1]));
+            }
+            ROLE playerRole = clan.getRoleByPlayerName(name);
+            loading.completeStage(
+                    "Player is **"
+                            + playerRole.getPrefix()
+                            + " "
+                            + playerRole.getName()
+                            + "** of the **" + clanName + "** " + embedUrl + "!"
+            );
+            return clan;
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            loading.failStage("Unable to determine if player is part of a " + embedUrl);
+            return null;
+        }
+    }
+
 
     @Override
     public PlayerStats fetchPlayerData(String name) {
@@ -464,6 +559,7 @@ public class RS3Hiscores extends Hiscores {
         loading.completeStage();
 
         RuneMetrics runeMetrics = getRuneMetrics(name);
+        Clan clan = getClan(name);
         String[] clues = parseClueScrolls(normal);
 
         RS3PlayerStats normalAccount = new RS3PlayerStats(
@@ -472,7 +568,8 @@ public class RS3Hiscores extends Hiscores {
                 parseSkills(normal),
                 clues,
                 runeMetrics,
-                PlayerStats.ACCOUNT.NORMAL
+                PlayerStats.ACCOUNT.NORMAL,
+                clan
         );
 
         loading.updateStage("Player exists, checking ironman hiscores");
@@ -489,7 +586,8 @@ public class RS3Hiscores extends Hiscores {
                 parseSkills(iron),
                 clues,
                 runeMetrics,
-                PlayerStats.ACCOUNT.IRON
+                PlayerStats.ACCOUNT.IRON,
+                clan
         );
 
         if(normalAccount.getTotalXP() > ironAccount.getTotalXP()) {
@@ -507,7 +605,8 @@ public class RS3Hiscores extends Hiscores {
                     parseSkills(hardcore),
                     clues,
                     runeMetrics,
-                    PlayerStats.ACCOUNT.HARDCORE
+                    PlayerStats.ACCOUNT.HARDCORE,
+                    clan
             );
 
             HCIMStatus hcimStatus = new HCIMStatus(name);

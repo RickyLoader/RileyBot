@@ -6,6 +6,7 @@ import Runescape.Skill;
 public class RS3PlayerStats extends PlayerStats {
     private final int combatLevel;
     private final RuneMetrics runeMetrics;
+    private final Clan clan;
     private HCIMStatus hcimStatus;
 
     /**
@@ -18,7 +19,7 @@ public class RS3PlayerStats extends PlayerStats {
      * @param runeMetrics RuneMetrics data
      * @param type        Account type
      */
-    public RS3PlayerStats(String name, String url, Skill[] skills, String[] clues, RuneMetrics runeMetrics, ACCOUNT type) {
+    public RS3PlayerStats(String name, String url, Skill[] skills, String[] clues, RuneMetrics runeMetrics, ACCOUNT type, Clan clan) {
         super(name, url, skills, clues, type);
         this.combatLevel = calculateCombatLevel(
                 getSkill(Skill.SKILL_NAME.ATTACK),
@@ -31,6 +32,7 @@ public class RS3PlayerStats extends PlayerStats {
                 getSkill(Skill.SKILL_NAME.SUMMONING)
         );
         this.runeMetrics = runeMetrics;
+        this.clan = clan;
     }
 
     /**
@@ -67,6 +69,24 @@ public class RS3PlayerStats extends PlayerStats {
      */
     public boolean hasRuneMetrics() {
         return runeMetrics != null;
+    }
+
+    /**
+     * Get the clan that the player belongs to
+     *
+     * @return Player clan
+     */
+    public Clan getClan() {
+        return clan;
+    }
+
+    /**
+     * Return whether the player belongs to a clan
+     *
+     * @return Player belongs to a clan
+     */
+    public boolean isClanMember() {
+        return clan != null;
     }
 
     /**
