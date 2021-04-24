@@ -119,15 +119,7 @@ public class SteakCommand extends DiscordCommand {
      * @return User avatar
      */
     private BufferedImage getUserAvatar(User fan) {
-        try {
-            URLConnection connection = new URL(fan.getEffectiveAvatarUrl()).openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.connect();
-            return resizeAvatar(ImageIO.read(connection.getInputStream()));
-        }
-        catch(Exception e) {
-            return null;
-        }
+        return resizeAvatar(EmbedHelper.downloadImage(fan.getEffectiveAvatarUrl()));
     }
 
     /**

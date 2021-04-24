@@ -5,7 +5,9 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -180,6 +182,24 @@ public class EmbedHelper {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Download an image from the given URL
+     *
+     * @param url URL to image
+     * @return Downloaded image or null
+     */
+    public static BufferedImage downloadImage(String url) {
+        try {
+            URLConnection connection = new URL(url).openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            connection.connect();
+            return ImageIO.read(connection.getInputStream());
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**
