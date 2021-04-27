@@ -212,6 +212,7 @@ public class DiscordCommandManager {
         addCommand(new SteamCommand());
         addCommand(new HotTubCommand());
         addCommand(new RSPlayerCountCommand());
+        addCommand(new TrademeCommand());
         // addCommand(new FacebookCommand());
         // addCommand(new TeamTreesGuessingCommand());
     }

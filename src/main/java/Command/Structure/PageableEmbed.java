@@ -72,6 +72,15 @@ public abstract class PageableEmbed {
     }
 
     /**
+     * Get the total number of pages
+     *
+     * @return Total number of pages
+     */
+    public int getPages() {
+        return pages;
+    }
+
+    /**
      * Get the current index
      *
      * @return Current index
@@ -156,12 +165,21 @@ public abstract class PageableEmbed {
      * @return Message embed
      */
     public MessageEmbed buildMessage() {
-        EmbedBuilder embedBuilder = getEmbedBuilder("Page: " + page + "/" + pages);
+        EmbedBuilder embedBuilder = getEmbedBuilder(getPageDetails());
         int max = Math.min(bound, (items.size() - this.index));
         for(int index = this.index; index < (this.index + max); index++) {
             displayItem(embedBuilder, index);
         }
         return embedBuilder.build();
+    }
+
+    /**
+     * Get a String detailing the current page - e.g "Page: 1/5"
+     *
+     * @return String detailing the current page
+     */
+    public String getPageDetails() {
+        return "Page: " + page + "/" + pages;
     }
 
     /**

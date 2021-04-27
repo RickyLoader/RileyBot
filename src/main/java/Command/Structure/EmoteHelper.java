@@ -831,4 +831,18 @@ public class EmoteHelper {
     public Emote getDisconnected() {
         return get("830370707393085471");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/836472093737615400.png"/>
+     */
+    public Emote getBiddersWatchers() {
+        return get("836472093737615400");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/836529142391635979.png"/>
+     */
+    public Emote getPrice() {
+        return get("836529142391635979");
+    }
 }
