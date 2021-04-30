@@ -18,7 +18,8 @@ import java.util.regex.Pattern;
  * Fetch Trademe listing details
  */
 public class Trademe {
-    private final HashMap<String, String> headers = new HashMap<>();
+    private final HashMap<String, String> headers;
+    private final HashMap<String, Category> categories;
     public final static String
             BASE_URL = "https://www.trademe.co.nz/",
             TRADEME_LOGO = "https://i.imgur.com/tTVElnt.png",
@@ -27,14 +28,92 @@ public class Trademe {
             API_URL = "https://api.trademe.co.nz/v1/",
             NO_SEARCH_RESULTS_IMAGE = "https://i.imgur.com/VJVbVZu.png";
 
+    /**
+     * Initialise authentication headers & listing categories
+     */
     public Trademe() {
+        this.headers = getHeaders();
+        this.categories = fetchCategories();
+    }
+
+    /**
+     * Get a map of headers required to authenticate with the Trademe API
+     *
+     * @return Authentication header map
+     */
+    private HashMap<String, String> getHeaders() {
+        HashMap<String, String> headers = new HashMap<>();
         headers.put(
                 "Authorization",
                 "OAuth oauth_consumer_key=\"" + Secret.TRADEME_CONSUMER_KEY + "\""
                         + ", oauth_signature_method=\"PLAINTEXT\""
                         + ", oauth_signature=\"" + Secret.TRADEME_CONSUMER_SECRET + "&\""
         );
+        return headers;
+    }
 
+    /**
+     * Get a listing category by name
+     *
+     * @param name Name of category to retrieve
+     * @return Category matching name or null
+     */
+    public Category getCategoryByName(String name) {
+        return categories.get(name.toLowerCase());
+    }
+
+    /**
+     * Get a list of listing categories matching/containing the given name
+     *
+     * @return List of matching categories
+     */
+    public ArrayList<Category> getCategoriesByName(String name) {
+        ArrayList<Category> results = new ArrayList<>();
+        for(String categoryName : categories.keySet()) {
+            if(!categoryName.contains(name.toLowerCase()) && !categoryName.equalsIgnoreCase(name)) {
+                continue;
+            }
+            results.add(categories.get(categoryName));
+        }
+        return results;
+    }
+
+    /**
+     * Get a list of all listing categories
+     *
+     * @return List of listing categories
+     */
+    public ArrayList<Category> getCategories() {
+        return new ArrayList<>(categories.values());
+    }
+
+    /**
+     * Get a map of listing categories.
+     * Map from category name -> category
+     *
+     * @return Map of listing categories
+     */
+    private HashMap<String, Category> fetchCategories() {
+        String key = "Subcategories";
+        HashMap<String, Category> categories = new HashMap<>();
+        JSONArray generalCategoryList = apiRequest("Categories.json").getJSONArray(key);
+        for(int i = 0; i < generalCategoryList.length(); i++) {
+            JSONObject generalCategory = generalCategoryList.getJSONObject(i);
+            if(!generalCategory.has(key)) {
+                continue;
+            }
+            JSONArray subCategories = generalCategory
+                    .getJSONArray(key);
+            for(int j = 0; j < subCategories.length(); j++) {
+                JSONObject categoryData = subCategories.getJSONObject(j);
+                Category category = new Category(
+                        categoryData.getString("Name"),
+                        categoryData.getString("Number")
+                );
+                categories.put(category.getName().toLowerCase(), category);
+            }
+        }
+        return categories;
     }
 
     /**
@@ -87,12 +166,16 @@ public class Trademe {
      * If a match is not found, return an array of listing overviews containing the given query in the title.
      *
      * @param titleQuery Query to search for in listing titles
+     * @param category   Category to search in (null = all categories)
      * @return Listing overviews containing/matching query
      */
-    public ListingOverview[] getListingOverviewsByTitle(String titleQuery) {
-        JSONObject response = apiRequest(
-                "Search/General.json?search_string=" + EmbedHelper.urlEncode(titleQuery)
-        );
+    public ListingOverview[] getListingOverviewsByTitle(String titleQuery, Category category) {
+        String endpoint = "Search/General.json?search_string="
+                + EmbedHelper.urlEncode(titleQuery);
+        if(category != null) {
+            endpoint += "&category=" + category.getNumber();
+        }
+        JSONObject response = apiRequest(endpoint);
         JSONArray results = response.getJSONArray("List");
         ListingOverview[] listings = new ListingOverview[results.length()];
 
@@ -157,7 +240,7 @@ public class Trademe {
                 images.add(photo.getJSONObject("Value").getString("FullSize"));
             }
         }
-        String BIDDERS = "BiddersAndWatchers";
+        String BIDDERS = "BidderAndWatchers";
         return new Listing(
                 new ListingOverview(
                         listingDetails.getString("Title"),
