@@ -1,6 +1,5 @@
 package Command.Structure;
 
-import Command.Commands.TrademeCommand;
 import Trademe.Listing;
 import Trademe.Member;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -10,6 +9,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+
+import static Trademe.Trademe.*;
 
 /**
  * Page through images in a Trademe listing
@@ -35,6 +36,7 @@ public class PageableTrademeListing extends PageableEmbed {
         boolean closed = listing.isClosed();
         MessageEmbed.AuthorInfo author = getAuthor(listing.getMember());
         String emoteGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
+        Listing.ListingOverview overview = listing.getOverview();
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(closed ? EmbedHelper.RED : EmbedHelper.ORANGE)
@@ -44,7 +46,7 @@ public class PageableTrademeListing extends PageableEmbed {
                                 + "\n\n" + EmoteHelper.formatEmote(emoteHelper.getBiddersWatchers()) + emoteGap
                                 + df.format(listing.getBidderWatchers())
                                 + "\n" + EmoteHelper.formatEmote(emoteHelper.getPrice()) + emoteGap
-                                + listing.getPriceDisplay()
+                                + overview.getPriceDisplay()
                 )
                 .setThumbnail(listing.getThumbnail())
                 .setFooter(
@@ -52,9 +54,9 @@ public class PageableTrademeListing extends PageableEmbed {
                                 + ": "
                                 + new SimpleDateFormat("dd/MM/yyy HH:mm:ss").format(listing.getClosingDate())
                                 + " | " + pageDetails,
-                        TrademeCommand.TRADEME_LOGO
+                        TRADEME_LOGO
                 )
-                .setTitle(listing.getTitle(), listing.getUrl());
+                .setTitle(overview.getTitle(), overview.getUrl());
 
         if(!listing.hasImages()) {
             builder.setImage(Listing.NO_PHOTOS_IMAGE);
@@ -74,8 +76,8 @@ public class PageableTrademeListing extends PageableEmbed {
         if(member == null) {
             return new MessageEmbed.AuthorInfo(
                     name,
-                    TrademeCommand.BASE_URL,
-                    TrademeCommand.TRADEME_LOGO,
+                    BASE_URL,
+                    TRADEME_LOGO,
                     null
             );
         }

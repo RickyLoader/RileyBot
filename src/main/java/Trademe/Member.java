@@ -1,7 +1,5 @@
 package Trademe;
 
-import Command.Commands.TrademeCommand;
-
 /**
  * Trademe member
  */
@@ -17,7 +15,7 @@ public class Member {
      */
     public Member(String name, long id, String photo) {
         this.name = name;
-        this.url = TrademeCommand.BASE_URL + "Members/Profile.aspx?member=" + id;
+        this.url = Trademe.BASE_URL + "Members/Profile.aspx?member=" + id;
         this.photo = photo;
     }
 
