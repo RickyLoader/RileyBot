@@ -1,7 +1,7 @@
 package Command.Structure;
 
-import Trademe.Listing;
-import Trademe.Member;
+import TrademeAPI.Listing;
+import TrademeAPI.Member;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -10,23 +10,26 @@ import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
-import static Trademe.Trademe.*;
+import static TrademeAPI.Trademe.*;
 
 /**
  * Page through images in a Trademe listing
  */
 public class PageableTrademeListing extends PageableEmbed {
     private final Listing listing;
+    private final String footer;
 
     /**
      * Initialise the values
      *
      * @param context Command context
      * @param listing Trademe listing to display
+     * @param footer  Footer to display in message
      */
-    public PageableTrademeListing(CommandContext context, Listing listing) {
+    public PageableTrademeListing(CommandContext context, Listing listing, String footer) {
         super(context, listing.getImages(), 1);
         this.listing = listing;
+        this.footer = footer;
     }
 
     @Override
@@ -52,8 +55,9 @@ public class PageableTrademeListing extends PageableEmbed {
                 .setFooter(
                         (closed ? "Closed" : "Closing")
                                 + ": "
-                                + new SimpleDateFormat("dd/MM/yyy HH:mm:ss").format(listing.getClosingDate())
-                                + " | " + pageDetails,
+                                + new SimpleDateFormat("dd/MM/yyy").format(listing.getClosingDate())
+                                + " | " + pageDetails
+                                + " | " + footer,
                         TRADEME_LOGO
                 )
                 .setTitle(overview.getTitle(), overview.getUrl());

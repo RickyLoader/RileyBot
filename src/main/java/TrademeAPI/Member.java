@@ -1,4 +1,4 @@
-package Trademe;
+package TrademeAPI;
 
 /**
  * Trademe member

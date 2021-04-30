@@ -1,4 +1,4 @@
-package Trademe;
+package TrademeAPI;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,7 +123,8 @@ public class Listing {
      * Basic listing overview - title, id, price, and URL
      */
     public static class ListingOverview {
-        private final String title, id, url, price;
+        private final String title, url, price;
+        private final long id;
 
         /**
          * Create a Trademe listing overview
@@ -132,7 +133,7 @@ public class Listing {
          * @param id    Unique id of listing
          * @param price Price display - e.g "$260.00"
          */
-        public ListingOverview(String title, String id, String price) {
+        public ListingOverview(String title, long id, String price) {
             this.title = title;
             this.id = id;
             this.url = Trademe.BASE_URL + "Listing/" + id;
@@ -153,7 +154,7 @@ public class Listing {
          *
          * @return Listing id
          */
-        public String getId() {
+        public long getId() {
             return id;
         }
 

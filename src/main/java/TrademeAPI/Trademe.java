@@ -1,11 +1,14 @@
-package Trademe;
+package TrademeAPI;
 
+import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
+import TrademeAPI.Listing.ListingOverview;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -21,7 +24,8 @@ public class Trademe {
             TRADEME_LOGO = "https://i.imgur.com/tTVElnt.png",
             LISTING_ID = "listingid",
             TRADEME_URL = BASE_URL + "(.+)/(Listing\\.aspx\\?id=)?(listing-)?(?<" + LISTING_ID + ">\\d+)(.+)?",
-            API_URL = "https://api.trademe.co.nz/v1/";
+            API_URL = "https://api.trademe.co.nz/v1/",
+            NO_SEARCH_RESULTS_IMAGE = "https://i.imgur.com/VJVbVZu.png";
 
     public Trademe() {
         headers.put(
@@ -50,6 +54,16 @@ public class Trademe {
     }
 
     /**
+     * Check if the given URL is a Trademe listing URL
+     *
+     * @param url URL to check
+     * @return URL is a Trademe listing URL
+     */
+    public static boolean isTrademeUrl(String url) {
+        return url.matches(TRADEME_URL);
+    }
+
+    /**
      * Parse the member details from the JSON of a listing
      *
      * @param listingDetails Listing JSON
@@ -69,6 +83,36 @@ public class Trademe {
     }
 
     /**
+     * Search for listing overviews with the given query in the title.
+     * If a match is not found, return an array of listing overviews containing the given query in the title.
+     *
+     * @param titleQuery Query to search for in listing titles
+     * @return Listing overviews containing/matching query
+     */
+    public ListingOverview[] getListingOverviewsByTitle(String titleQuery) {
+        JSONObject response = apiRequest(
+                "Search/General.json?search_string=" + EmbedHelper.urlEncode(titleQuery)
+        );
+        JSONArray results = response.getJSONArray("List");
+        ListingOverview[] listings = new ListingOverview[results.length()];
+
+        for(int i = 0; i < listings.length; i++) {
+            JSONObject listing = results.getJSONObject(i);
+            ListingOverview overview = new ListingOverview(
+                    listing.getString("Title"),
+                    listing.getLong("ListingId"),
+                    listing.getString("PriceDisplay")
+            );
+            listings[i] = overview;
+        }
+
+        ListingOverview[] matching = Arrays.stream(listings)
+                .filter(overview -> overview.getTitle().equalsIgnoreCase(titleQuery))
+                .toArray(ListingOverview[]::new);
+        return matching.length == 1 ? matching : listings;
+    }
+
+    /**
      * Get the details of a listing from the given URL
      *
      * @param url Trademe URL
@@ -79,7 +123,7 @@ public class Trademe {
         if(!matcher.find()) {
             return null;
         }
-        return getListingById(matcher.group(LISTING_ID));
+        return getListingById(Long.parseLong(matcher.group(LISTING_ID)));
     }
 
     /**
@@ -98,9 +142,11 @@ public class Trademe {
      * @param id Listing id
      * @return Listing details or null
      */
-    public Listing getListingById(String id) {
+    public Listing getListingById(long id) {
         JSONObject listingDetails = apiRequest("Listings/" + id + ".json?return_member_profile=true");
-
+        if(listingDetails.has("ErrorDescription")) {
+            return null;
+        }
         ArrayList<String> images = new ArrayList<>();
         String PHOTOS = "Photos";
 
@@ -113,7 +159,7 @@ public class Trademe {
         }
         String BIDDERS = "BiddersAndWatchers";
         return new Listing(
-                new Listing.ListingOverview(
+                new ListingOverview(
                         listingDetails.getString("Title"),
                         id,
                         listingDetails.getString("PriceDisplay")
