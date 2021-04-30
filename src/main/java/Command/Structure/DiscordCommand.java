@@ -73,13 +73,29 @@ public abstract class DiscordCommand {
     }
 
     /**
-     * Attempts to pull an integer from the given message
+     * Attempts to convert the given String to an integer
      *
-     * @return The integer or 0 if not found
+     * @param arg String to convert
+     * @return 0 (if not int) or int value of String
      */
-    public static int getQuantity(String arg) {
+    public static int toInteger(String arg) {
         try {
             return Integer.parseInt(arg);
+        }
+        catch(Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Attempts to convert the given String to a long
+     *
+     * @param arg String to convert
+     * @return 0 (if not long) or long value of String
+     */
+    public static long toLong(String arg) {
+        try {
+            return Long.parseLong(arg);
         }
         catch(Exception e) {
             return 0;

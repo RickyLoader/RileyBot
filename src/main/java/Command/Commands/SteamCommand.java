@@ -64,7 +64,7 @@ public class SteamCommand extends DiscordCommand {
             return;
         }
 
-        int appId = getQuantity(query);
+        int appId = toInteger(query);
         AppInfo appInfo;
         if(appId == 0 && !query.equals("0")) {
             ArrayList<AppInfo> searchResults = STEAM_STORE.getApplicationsByName(query);

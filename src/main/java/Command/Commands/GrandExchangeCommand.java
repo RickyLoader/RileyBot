@@ -54,7 +54,7 @@ public class GrandExchangeCommand extends DiscordCommand {
         }
 
         new Thread(() -> {
-            int id = getQuantity(query);
+            int id = toInteger(query);
             if(id == 0 && !query.equals("0")) {
                 Item[] items = grandExchange.getItemManager().getItemsByName(query);
                 if(items.length == 1) {

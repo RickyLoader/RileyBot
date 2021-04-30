@@ -29,7 +29,7 @@ public class LeaderboardCommand extends DiscordCommand {
             return;
         }
         MessageChannel channel = context.getMessageChannel();
-        int position = getQuantity(query.replace(getTrigger() + " ", ""));
+        int position = toInteger(query.replace(getTrigger() + " ", ""));
         if(position > 0) {
             ArrayList<Session> sessions = Session.getHistory();
             if(sessions == null) {

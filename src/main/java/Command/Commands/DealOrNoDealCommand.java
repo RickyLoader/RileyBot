@@ -96,7 +96,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
             channel.sendMessage(contestant.getAsMention() + " You aren't playing Deal or No Deal!").queue();
             return;
         }
-        int caseNumber = DiscordCommand.getQuantity(message);
+        int caseNumber = DiscordCommand.toInteger(message);
         if(open) {
             game.openCase(caseNumber);
         }

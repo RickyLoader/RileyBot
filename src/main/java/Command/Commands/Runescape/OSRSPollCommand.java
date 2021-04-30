@@ -30,7 +30,7 @@ public class OSRSPollCommand extends DiscordCommand {
 
         int number = 0;
         if(!message.isEmpty()) {
-            number = getQuantity(message);
+            number = toInteger(message);
             if(number == 0) {
                 ArrayList<Poll> results = pollManager.getPollsByTitle(message);
                 if(results.isEmpty()) {

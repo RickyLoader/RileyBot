@@ -161,7 +161,7 @@ public class XKCDCommand extends DiscordCommand {
                 comic = getComic(getRandomIssueNumber());
                 break;
             default:
-                int issueNumber = getQuantity(message);
+                int issueNumber = toInteger(message);
                 if(issueNumber > 0) {
                     comic = getComic(issueNumber);
                 }

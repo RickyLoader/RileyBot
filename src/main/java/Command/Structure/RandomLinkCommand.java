@@ -23,7 +23,7 @@ public class RandomLinkCommand extends JSONListCommand {
             return;
         }
 
-        int quantity = args.length == 2 ? getQuantity(args[1]) : 1;
+        int quantity = args.length == 2 ? toInteger(args[1]) : 1;
         if(quantity == 0) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;

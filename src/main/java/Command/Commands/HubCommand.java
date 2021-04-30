@@ -79,7 +79,7 @@ public class HubCommand extends DiscordCommand {
                 channel.sendMessage(buildEmbed(performer)).queue();
                 return;
             }
-            int rank = getQuantity(arg);
+            int rank = toInteger(arg);
             if(rank < 0) {
                 channel.sendMessage(
                         member.getAsMention()
