@@ -12,7 +12,7 @@ import java.text.DecimalFormat;
 /**
  * Page through images in a facebook post
  */
-public class PageableFacebookPost extends PageableEmbed {
+public class PageableFacebookPost extends CyclicalPageableEmbed {
     private final FacebookPost facebookPost;
 
     /**
@@ -73,24 +73,6 @@ public class PageableFacebookPost extends PageableEmbed {
     public void displayItem(EmbedBuilder builder, int currentIndex) {
         String image = (String) getItems().get(currentIndex);
         builder.setImage(image);
-    }
-
-    @Override
-    public void pageForward() {
-        int index = getIndex() + 1;
-        if(index == getItems().size()) {
-            index = 0;
-        }
-        setIndex(index);
-    }
-
-    @Override
-    public void pageBackward() {
-        int index = getIndex() - 1;
-        if(index == -1) {
-            index = getItems().size() - 1;
-        }
-        setIndex(index);
     }
 
     @Override
