@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -105,13 +104,11 @@ public class GrandExchangeCommand extends DiscordCommand {
 
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String n1 = ((Item) o1).getName();
-                    String n2 = ((Item) o2).getName();
-                    if(defaultSort) {
-                        return levenshteinDistance(n1, query) - levenshteinDistance(n2, query);
+                items.sort(new LevenshteinDistance(query, defaultSort) {
+                    @Override
+                    public String getString(Object o) {
+                        return ((Item) o).getName();
                     }
-                    return levenshteinDistance(n2, query) - levenshteinDistance(n1, query);
                 });
             }
         }.showMessage();

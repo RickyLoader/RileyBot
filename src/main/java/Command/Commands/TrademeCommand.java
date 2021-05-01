@@ -144,18 +144,19 @@ public class TrademeCommand extends DiscordCommand {
         ) {
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
+                if(searching) {
+                    items.sort(new LevenshteinDistance(query, defaultSort) {
+                        @Override
+                        public String getString(Object o) {
+                            return ((Category) o).getName();
+                        }
+                    });
+                    return;
+                }
                 items.sort((Comparator<Object>) (o1, o2) -> {
                     String n1 = ((Category) o1).getName();
                     String n2 = ((Category) o2).getName();
-                    if(searching) {
-                        if(defaultSort) {
-                            return levenshteinDistance(n1, query) - levenshteinDistance(n2, query);
-                        }
-                        return levenshteinDistance(n2, query) - levenshteinDistance(n1, query);
-                    }
-                    else {
-                        return defaultSort ? n1.compareTo(n2) : n2.compareTo(n1);
-                    }
+                    return defaultSort ? n1.compareTo(n2) : n2.compareTo(n1);
                 });
             }
 
@@ -215,13 +216,11 @@ public class TrademeCommand extends DiscordCommand {
 
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String t1 = ((Listing.ListingOverview) o1).getTitle();
-                    String t2 = ((Listing.ListingOverview) o2).getTitle();
-                    if(defaultSort) {
-                        return levenshteinDistance(t1, query) - levenshteinDistance(t2, query);
+                items.sort(new LevenshteinDistance(query, defaultSort) {
+                    @Override
+                    public String getString(Object o) {
+                        return ((Listing.ListingOverview) o).getTitle();
                     }
-                    return levenshteinDistance(t2, query) - levenshteinDistance(t1, query);
                 });
             }
 

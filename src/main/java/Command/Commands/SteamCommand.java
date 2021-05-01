@@ -144,13 +144,11 @@ public class SteamCommand extends DiscordCommand {
         ) {
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String n1 = ((AppInfo) o1).getName();
-                    String n2 = ((AppInfo) o2).getName();
-                    if(defaultSort) {
-                        return levenshteinDistance(n1, query) - levenshteinDistance(n2, query);
+                items.sort(new LevenshteinDistance(query, defaultSort) {
+                    @Override
+                    public String getString(Object o) {
+                        return ((AppInfo) o).getName();
                     }
-                    return levenshteinDistance(n2, query) - levenshteinDistance(n1, query);
                 });
             }
 

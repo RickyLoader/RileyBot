@@ -52,9 +52,9 @@ public class HubCommand extends DiscordCommand {
                 return;
             }
 
-            if(TheHub.isProfileUrl(content)){
+            if(TheHub.isProfileUrl(content)) {
                 Performer performer = theHub.getPerformerByUrl(content);
-                if(performer!=null){
+                if(performer != null) {
                     message.delete().queue(deleted -> channel.sendMessage(buildEmbed(performer)).queue());
                 }
                 return;
@@ -183,13 +183,11 @@ public class HubCommand extends DiscordCommand {
 
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String name1 = ((Performer) o1).getName();
-                    String name2 = ((Performer) o2).getName();
-                    if(defaultSort) {
-                        return levenshteinDistance(name1, searchQuery) - levenshteinDistance(name2, searchQuery);
+                items.sort(new LevenshteinDistance(searchQuery, defaultSort) {
+                    @Override
+                    public String getString(Object o) {
+                        return ((Performer) o).getName();
                     }
-                    return levenshteinDistance(name2, searchQuery) - levenshteinDistance(name1, searchQuery);
                 });
             }
         }.showMessage();

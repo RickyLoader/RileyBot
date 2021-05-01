@@ -1,10 +1,7 @@
 package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
-import Command.Structure.CommandContext;
-import Command.Structure.EmbedHelper;
-import Command.Structure.LookupCommand;
-import Command.Structure.PageableTableEmbed;
+import Command.Structure.*;
 import Countdown.Countdown;
 import Twitch.*;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -111,13 +108,11 @@ public class TTVLookupCommand extends LookupCommand {
 
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String t1 = ((Streamer) o1).getLoginName();
-                    String t2 = ((Streamer) o2).getLoginName();
-                    if(defaultSort) {
-                        return levenshteinDistance(t1, query) - levenshteinDistance(t2, query);
+                items.sort(new LevenshteinDistance(query, defaultSort) {
+                    @Override
+                    public String getString(Object o) {
+                        return ((Streamer) o).getLoginName();
                     }
-                    return levenshteinDistance(t2, query) - levenshteinDistance(t1, query);
                 });
             }
         }.showMessage();
