@@ -194,7 +194,7 @@ public class DiscordCommandManager {
         addCommand(new XKCDCommand());
         addCommand(new RiddleCommand());
         addCommand(new YuGiOhCommand());
-        addCommand(new NASACommand());
+       // addCommand(new NASACommand());
         addCommand(new PollCommand());
         addCommand(new StatusCommand());
         addCommand(new GIFCommand());
@@ -213,6 +213,7 @@ public class DiscordCommandManager {
         addCommand(new HotTubCommand());
         addCommand(new RSPlayerCountCommand());
         addCommand(new TrademeCommand());
+        addCommand(new DictionaryCommand());
         // addCommand(new FacebookCommand());
         // addCommand(new TeamTreesGuessingCommand());
     }

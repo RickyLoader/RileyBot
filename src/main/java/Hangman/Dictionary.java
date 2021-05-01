@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Hold dictionary words
@@ -68,5 +69,18 @@ public class Dictionary {
      */
     public ArrayList<DictWord> getWords() {
         return wordList;
+    }
+
+    /**
+     * Search the dictionary for a list of words containing the given query.
+     *
+     * @param query Query to search for
+     * @return List of words containing query
+     */
+    public ArrayList<DictWord> searchWords(String query) {
+        return wordList
+                .stream()
+                .filter(dictWord -> dictWord.getWord().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }
