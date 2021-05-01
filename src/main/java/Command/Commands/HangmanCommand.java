@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.GlobalReference;
 import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -25,36 +26,29 @@ public class HangmanCommand extends DiscordCommand {
     private final Dictionary dictionary;
     private final int MIN_LENGTH = 5, MAX_LENGTH = 25;
     private final ArrayList<Gallows> gallows;
-    private final String PATH = "/Hangman/";
 
     public HangmanCommand() {
         super("hm start [word]\nhm guess [word/letter]\nhm hint\nhm stop\nhm ai", "Play hangman!");
         this.hangmanGames = new HashMap<>();
-        this.dictionary = createDictionary();
+        this.dictionary = filterDictionary();
         this.gallows = createGallows();
     }
 
     /**
-     * Parse Webster's English dictionary in to a Dictionary object
+     * Create a filtered copy of the Webster's English dictionary containing only words that
+     * meet the criteria to be used in hangman
      *
      * @return English Dictionary
      */
-    private Dictionary createDictionary() {
-        System.out.println("Parsing Webster's English dictionary...");
-        JSONObject data = new JSONObject(
-                new ResourceHandler().getResourceFileAsString(PATH + "dictionary.json")
-        );
+    private Dictionary filterDictionary() {
         Dictionary dictionary = new Dictionary();
-        for(String word : data.keySet()) {
+        ArrayList<DictWord> allWords = GlobalReference.DICTIONARY.getWords();
+        for(DictWord dictWord : allWords) {
+            String word = dictWord.getWord();
             if(invalidInput(word) || word.length() < MIN_LENGTH || word.length() > MAX_LENGTH) {
                 continue;
             }
-            dictionary.addWord(
-                    new DictWord(
-                            word,
-                            data.getString(word)
-                    )
-            );
+            dictionary.addWord(dictWord);
         }
         return dictionary;
     }
@@ -230,11 +224,12 @@ public class HangmanCommand extends DiscordCommand {
     private ArrayList<Gallows> createGallows() {
         ResourceHandler handler = new ResourceHandler();
         ArrayList<Gallows> gallows = new ArrayList<>();
-        JSONObject gallowsData = readJSONFile(PATH + "gallows.json");
+        String path = "/Hangman/";
+        JSONObject gallowsData = readJSONFile(path + "gallows.json");
 
         for(String gallowsName : gallowsData.keySet()) {
             JSONObject info = gallowsData.getJSONObject(gallowsName);
-            String imagePath = PATH + info.getString("folder") + "/";
+            String imagePath = path + info.getString("folder") + "/";
             JSONArray imageNames = info.getJSONArray("images");
             BufferedImage[] images = new BufferedImage[imageNames.length()];
 
@@ -249,7 +244,7 @@ public class HangmanCommand extends DiscordCommand {
                         )
                 );
             }
-            catch(IncorrectQuantityException e){
+            catch(IncorrectQuantityException e) {
                 e.printStackTrace();
             }
         }

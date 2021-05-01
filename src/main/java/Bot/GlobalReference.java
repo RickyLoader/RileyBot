@@ -2,6 +2,7 @@ package Bot;
 
 import COD.CWManager;
 import COD.MWManager;
+import Hangman.Dictionary;
 import Steam.SteamStore;
 import Twitch.TwitchTV;
 import Valheim.Wiki.ValheimWiki;
@@ -15,4 +16,5 @@ public class GlobalReference {
     public static final ValheimWiki VALHEIM_WIKI = new ValheimWiki();
     public static final SteamStore STEAM_STORE = new SteamStore();
     public static final TwitchTV TWITCH_TV = new TwitchTV();
+    public static final Dictionary DICTIONARY = Dictionary.createDictionary();
 }
