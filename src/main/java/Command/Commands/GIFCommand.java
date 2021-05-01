@@ -1,14 +1,12 @@
 package Command.Commands;
 
 import Command.Structure.CommandContext;
+import Command.Structure.CyclicalPageableEmbed;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,11 +14,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * View cool GIFs
+ */
 public class GIFCommand extends DiscordCommand {
     private final HashMap<String, ArrayList<GIF>> gifs = new HashMap<>();
     private final HashSet<String> currentQueries = new HashSet<>();
-    private final Random random = new Random();
     private final static String BASE_URL = "https://api.redgifs.com/v1/gfycats/";
+    private final String thumbnail = "https://i.imgur.com/bTDNO9G.jpg";
 
     public GIFCommand() {
         super("gif", "Search for a random GIF!", "gif [search term]");
@@ -49,51 +50,68 @@ public class GIFCommand extends DiscordCommand {
         new Thread(() -> {
             ArrayList<GIF> queryGifs = gifs.get(query);
             if(queryGifs == null) {
-                channel.sendMessage("I don't have any " + query + " gifs at the moment, let me get some!").queue();
+                channel.sendTyping().queue();
                 queryGifs = searchGIFs(query);
                 gifs.put(query, queryGifs);
             }
             if(queryGifs.isEmpty()) {
-                channel.sendMessage(member.getAsMention() + " I didn't find anything for: " + query).queue();
+                channel.sendMessage(
+                        member.getAsMention() + " I didn't find anything for: **" + query + "**"
+                ).queue();
                 return;
             }
-            channel.sendMessage(
-                    buildGifEmbed(
-                            queryGifs.get(random.nextInt(queryGifs.size())),
-                            query,
-                            queryGifs.size()
-                    )
-            ).queue();
+            showGifs(context, query, queryGifs);
         }).start();
     }
 
     /**
-     * Create a message embed displaying the given GIF
+     * Display the given list of GIFs in a pageable message embed
      *
-     * @param gif     GIF to build embed for
-     * @param query   Search query used to find GIF
-     * @param results Total number of results for the query
-     * @return Message embed displaying GIF
+     * @param context Command context
+     * @param query   Query used to find GIFs
+     * @param gifs    List of GIFS found for query
      */
-    private MessageEmbed buildGifEmbed(GIF gif, String query, int results) {
-        String thumbnail = "https://i.imgur.com/bTDNO9G.jpg";
-        String description = "Search term: **" + query + "**" + "\nResults: **" + results + "**";
-        if(gif.hasTags()) {
-            description += "\nTags: "
-                    + Arrays.stream(gif.getTags()).collect(Collectors.joining(", ", "**", "**"));
-        }
-        description += "\n\nSometimes they don't load, click the title if you *really* want to see it.";
-        return new EmbedBuilder()
-                .setTitle(gif.getTitle(), gif.getUrl())
-                .setImage(gif.getUrl())
-                .setDescription(description)
-                .setColor(EmbedHelper.PURPLE)
-                .setThumbnail(thumbnail)
-                .setFooter(
-                        "Uploaded: " + new SimpleDateFormat("dd/MM/yyyy").format(gif.getUploadDate())
-                                + " | Try: " + getHelpName(), thumbnail
-                )
-                .build();
+    private void showGifs(CommandContext context, String query, ArrayList<GIF> gifs) {
+        new CyclicalPageableEmbed(
+                context,
+                gifs,
+                1
+        ) {
+
+            @Override
+            public EmbedBuilder getEmbedBuilder(String pageDetails) {
+                return new EmbedBuilder()
+                        .setColor(EmbedHelper.PURPLE)
+                        .setThumbnail(thumbnail);
+            }
+
+            @Override
+            public void displayItem(EmbedBuilder builder, int currentIndex) {
+                GIF gif = (GIF) getItems().get(currentIndex);
+                if(gif.hasTags()) {
+                    builder.setDescription(
+                            "Tags: "
+                                    + Arrays
+                                    .stream(gif.getTags())
+                                    .collect(Collectors.joining(", ", "**", "**"))
+                    );
+                }
+                builder
+                        .setTitle("GIF Search | " + query + " | " + (currentIndex + 1) + "/" + getItems().size())
+                        .setImage(gif.getUrl())
+                        .setFooter(
+                                "Uploaded: "
+                                        + new SimpleDateFormat("dd/MM/yyyy").format(gif.getUploadDate())
+                                        + " | Try: " + getHelpName(),
+                                thumbnail
+                        );
+            }
+
+            @Override
+            public boolean nonPagingEmoteAdded(Emote e) {
+                return false;
+            }
+        }.showMessage();
     }
 
     /**
@@ -109,17 +127,12 @@ public class GIFCommand extends DiscordCommand {
             String url = BASE_URL + "search?search_text="
                     + EmbedHelper.urlEncode(query)
                     + "&count=50";
-
             JSONArray results = new JSONObject(
                     new NetworkRequest(url, false).get().body
             ).getJSONArray("gfycats");
 
             for(int i = 0; i < results.length(); i++) {
-                JSONObject o = results.getJSONObject(i);
-                if(o.isNull("title")) {
-                    continue;
-                }
-                gifs.add(parseGif(o));
+                gifs.add(parseGif(results.getJSONObject(i)));
             }
         }
         catch(Exception e) {
@@ -156,7 +169,6 @@ public class GIFCommand extends DiscordCommand {
     private static GIF parseGif(JSONObject gif) {
         return new GIF(
                 gif.getString("gifUrl"),
-                gif.isNull("title") ? "Unknown Title" : gif.getString("title"),
                 parseTags(gif.getJSONArray("tags")),
                 new Date(gif.getLong("createDate") * 1000)
         );
@@ -187,7 +199,7 @@ public class GIFCommand extends DiscordCommand {
      * Hold a GIF search result
      */
     public static class GIF {
-        private final String url, title;
+        private final String url;
         private final String[] tags;
         private final Date uploadDate;
 
@@ -195,13 +207,11 @@ public class GIFCommand extends DiscordCommand {
          * Create a GIF
          *
          * @param url        URL to GIF
-         * @param title      Title of GIF
          * @param tags       Category tags of GIF
          * @param uploadDate Date of upload
          */
-        public GIF(String url, String title, String[] tags, Date uploadDate) {
+        public GIF(String url, String[] tags, Date uploadDate) {
             this.url = url;
-            this.title = title;
             this.tags = tags;
             this.uploadDate = uploadDate;
         }
@@ -222,15 +232,6 @@ public class GIFCommand extends DiscordCommand {
          */
         public String[] getTags() {
             return tags;
-        }
-
-        /**
-         * Get the title of the GIF
-         *
-         * @return GIF title
-         */
-        public String getTitle() {
-            return title;
         }
 
         /**
