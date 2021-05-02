@@ -7,6 +7,7 @@ import Network.Secret;
 import Stock.Symbol;
 import Stock.MarketQuote;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -23,14 +24,47 @@ import static Stock.MarketQuote.*;
 /**
  * View info on some stocks/crypto
  */
-public class StocksCommand extends DiscordCommand {
-    private final String finnhubBaseUrl = "https://finnhub.io/api/v1/", thumbnail = "https://i.imgur.com/HaSlhp2.png";
+public class StocksCommand extends OnReadyDiscordCommand {
+    private final String
+            finnhubBaseUrl = "https://finnhub.io/api/v1/",
+            thumbnail = "https://i.imgur.com/HaSlhp2.png";
+
+    private final static String
+            stock = "stock",
+            crypto = "crypto";
+
     private final ArrayList<Symbol> marketSymbols;
     private boolean stockSymbols = false;
     private String cryptoEmote;
 
+    private enum SEARCH_TYPE {
+        ALL,
+        STOCK_ONLY,
+        CRYPTO_ONLY;
+
+        /**
+         * Check if the given symbol matches the search type
+         *
+         * @param symbol Symbol to check
+         * @return Symbol matches search type
+         */
+        public boolean matches(Symbol symbol) {
+            switch(this) {
+                case CRYPTO_ONLY:
+                    return symbol.isCrypto();
+                case STOCK_ONLY:
+                    return !symbol.isCrypto();
+                default:
+                    return true;
+            }
+        }
+    }
+
     public StocksCommand() {
-        super("$[stock/crypto symbol or search term]", "Check out some stocks & crypto!");
+        super(
+                "$[" + stock + "/" + crypto + "] [stock/crypto symbol or search term]",
+                "Check out some stocks & crypto!"
+        );
         this.marketSymbols = getMarketSymbols();
     }
 
@@ -137,9 +171,6 @@ public class StocksCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
 
-        if(cryptoEmote == null) {
-            cryptoEmote = EmoteHelper.formatEmote(context.getEmoteHelper().getCrypto());
-        }
         if(!stockSymbols) {
             stockSymbols = addStockSymbols(marketSymbols);
             if(!stockSymbols) {
@@ -154,8 +185,20 @@ public class StocksCommand extends DiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
+
+        SEARCH_TYPE searchType = SEARCH_TYPE.ALL;
+
+        if(query.startsWith(crypto)) {
+            query = query.replaceFirst(crypto, "").trim();
+            searchType = SEARCH_TYPE.CRYPTO_ONLY;
+        }
+        else if(query.startsWith(stock)) {
+            query = query.replaceFirst(stock, "").trim();
+            searchType = SEARCH_TYPE.STOCK_ONLY;
+        }
+
         channel.sendTyping().queue();
-        Symbol[] searchResults = getSymbolsByQuery(query.toLowerCase());
+        Symbol[] searchResults = getSymbolsByQuery(query.toLowerCase(), searchType);
 
         if(searchResults.length == 0) {
             channel.sendMessage(member.getAsMention() + " I couldn't find anything for **" + query + "**!").queue();
@@ -343,17 +386,18 @@ public class StocksCommand extends DiscordCommand {
      * Check for symbols with an exact match to the query, otherwise perform a fuzzy search.
      * Get the symbol logo if it has not been seen before and there is a singular result
      *
-     * @param query Query - either symbol or search query
+     * @param query      Query - either symbol or search query
+     * @param searchType Search type
      * @return Array of search results
      */
-    private Symbol[] getSymbolsByQuery(String query) {
-        Symbol[] symbols = getMatchingSymbolsById(query);
+    private Symbol[] getSymbolsByQuery(String query, SEARCH_TYPE searchType) {
+        Symbol[] symbols = getMatchingSymbolsById(query, searchType);
         if(symbols.length == 1) {
             return new Symbol[]{completeSymbol(symbols[0])};
         }
-        symbols = getMatchingSymbolsBySymbol(query);
+        symbols = getMatchingSymbolsBySymbol(query, searchType);
         if(symbols.length == 0) {
-            return getFuzzyMatchingSymbols(query);
+            return getFuzzyMatchingSymbols(query, searchType);
         }
         if(symbols.length == 1) {
             return new Symbol[]{completeSymbol(symbols[0])};
@@ -380,40 +424,46 @@ public class StocksCommand extends DiscordCommand {
     /**
      * Get an array of symbols where the symbol matches the given query
      *
-     * @param query Query to match to symbol
+     * @param query      Query to match to symbol
+     * @param searchType Search type
      * @return Symbols matching query
      */
-    private Symbol[] getMatchingSymbolsBySymbol(String query) {
+    private Symbol[] getMatchingSymbolsBySymbol(String query, SEARCH_TYPE searchType) {
         return marketSymbols
                 .stream()
-                .filter(symbol -> symbol.getSymbol().equalsIgnoreCase(query))
+                .filter(symbol -> symbol.getSymbol().equalsIgnoreCase(query) && searchType.matches(symbol))
                 .toArray(Symbol[]::new);
     }
 
     /**
      * Get an array of symbols where the name matches the given query
      *
-     * @param query Query to match to name
+     * @param query      Query to match to name
+     * @param searchType Search type
      * @return Symbols with name matching query
      */
-    private Symbol[] getMatchingSymbolsById(String query) {
+    private Symbol[] getMatchingSymbolsById(String query, SEARCH_TYPE searchType) {
         return marketSymbols
                 .stream()
-                .filter(symbol -> symbol.getId().equalsIgnoreCase(query))
+                .filter(symbol -> symbol.getId().equalsIgnoreCase(query) && searchType.matches(symbol))
                 .toArray(Symbol[]::new);
     }
 
     /**
      * Get an array of symbols where the name or symbol contain the given query
      *
-     * @param query Query to fuzzy search
+     * @param query      Query to fuzzy search
+     * @param searchType Search type
      * @return Symbols where the name or symbol contain the given query
      */
-    private Symbol[] getFuzzyMatchingSymbols(String query) {
+    private Symbol[] getFuzzyMatchingSymbols(String query, SEARCH_TYPE searchType) {
         return marketSymbols
                 .stream()
-                .filter(symbol -> symbol.getSymbol().toLowerCase().contains(query)
-                        || symbol.getName().toLowerCase().contains(query))
+                .filter(symbol -> {
+                    boolean fuzzyMatch = symbol.getSymbol().toLowerCase().contains(query)
+                            || symbol.getName().toLowerCase().contains(query);
+                    return fuzzyMatch && searchType.matches(symbol);
+                })
                 .toArray(Symbol[]::new);
     }
 
@@ -458,5 +508,10 @@ public class StocksCommand extends DiscordCommand {
     @Override
     public boolean matches(String query, Message message) {
         return query.startsWith("$");
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        cryptoEmote = EmoteHelper.formatEmote(emoteHelper.getCrypto());
     }
 }

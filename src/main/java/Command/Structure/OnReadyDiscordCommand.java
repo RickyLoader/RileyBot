@@ -10,6 +10,10 @@ public abstract class OnReadyDiscordCommand extends DiscordCommand {
         super(trigger, desc, helpName);
     }
 
+    public OnReadyDiscordCommand(String trigger, String desc) {
+        super(trigger, desc);
+    }
+
     /**
      * Fired when the Bot comes online
      *
