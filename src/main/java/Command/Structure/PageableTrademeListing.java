@@ -50,6 +50,8 @@ public class PageableTrademeListing extends CyclicalPageableEmbed {
                                 + df.format(listing.getBidderWatchers())
                                 + "\n" + EmoteHelper.formatEmote(emoteHelper.getPrice()) + emoteGap
                                 + overview.getPriceDisplay()
+                                + "\n" + EmoteHelper.formatEmote(emoteHelper.getCategory()) + emoteGap
+                                + overview.getCategory().getPath()
                 )
                 .setThumbnail(listing.getThumbnail())
                 .setFooter(

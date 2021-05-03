@@ -845,4 +845,11 @@ public class EmoteHelper {
     public Emote getPrice() {
         return get("836529142391635979");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/838924724583006248.png"/>
+     */
+    public Emote getCategory() {
+        return get("838924724583006248");
+    }
 }
