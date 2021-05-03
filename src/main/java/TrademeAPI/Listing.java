@@ -125,19 +125,31 @@ public class Listing {
     public static class ListingOverview {
         private final String title, url, price;
         private final long id;
+        private final Category category;
 
         /**
          * Create a Trademe listing overview
          *
-         * @param title Title of listing
-         * @param id    Unique id of listing
-         * @param price Price display - e.g "$260.00"
+         * @param title    Title of listing
+         * @param id       Unique id of listing
+         * @param price    Price display - e.g "$260.00"
+         * @param category Listing category
          */
-        public ListingOverview(String title, long id, String price) {
+        public ListingOverview(String title, long id, String price, Category category) {
             this.title = title;
             this.id = id;
-            this.url = Trademe.BASE_URL + "Listing/" + id;
+            this.url = Trademe.BASE_URL + category.getPath() + "/listing-" + id + ".htm";
             this.price = price;
+            this.category = category;
+        }
+
+        /**
+         * Get the listing category
+         *
+         * @return Listing category
+         */
+        public Category getCategory() {
+            return category;
         }
 
         /**

@@ -25,7 +25,7 @@ public class TrademeCommand extends DiscordCommand {
         super(
                 "trademe",
                 "Embed Trademe listings!",
-                "trademe [id/query] : [optional category name]\ntrademe categories\n[trademe url]"
+                "trademe [id/query] : [optional category name/id]\ntrademe categories\n[trademe url]"
         );
         this.trademe = new Trademe();
         this.footer = "Type: " + getTrigger() + " for help";
@@ -57,10 +57,10 @@ public class TrademeCommand extends DiscordCommand {
         }
 
         long id = toLong(query);
+        Category category = trademe.getRootCategory();
 
         // Search by listing name
         if(id == 0) {
-            Category category = null;
             if(query.contains(":")) {
                 String[] args = query.split(":");
                 if(args.length == 0 || args[0].isEmpty()) {
@@ -76,24 +76,34 @@ public class TrademeCommand extends DiscordCommand {
                     return;
                 }
                 query = args[0].trim();
-                String categoryName = args[1].trim();
-                category = trademe.getCategoryByName(categoryName);
-                if(category == null && !categoryName.equalsIgnoreCase("all")) {
-                    ArrayList<Category> similarCategories = trademe.getCategoriesByName(categoryName);
-                    if(similarCategories.isEmpty()) {
+                String categoryString = args[1].trim();
+                if(Trademe.isCategoryId(categoryString)) {
+                    category = trademe.getCategoryByNumber(categoryString);
+                    if(category == null) {
                         channel.sendMessage(
-                                member.getAsMention()
-                                        + " I didn't find any categories named **" + categoryName + "**"
+                                member.getAsMention() + " You sure that's a category ID bro?"
                         ).queue();
                         return;
                     }
-                    if(similarCategories.size() > 1) {
-                        showCategories(context, trademe.getCategoriesByName(categoryName), categoryName);
+                }
+                else {
+                    ArrayList<Category> categories = trademe.getCategoriesByName(categoryString);
+                    if(categories.isEmpty()) {
+                        channel.sendMessage(
+                                member.getAsMention()
+                                        + " I didn't find any categories named **" + categoryString + "**"
+                        ).queue();
                         return;
                     }
-                    category = similarCategories.get(0);
+
+                    if(categories.size() > 1) {
+                        showCategories(context, categories, categoryString);
+                        return;
+                    }
+                    category = categories.get(0);
                 }
             }
+
             channel.sendTyping().queue();
             Listing.ListingOverview[] results = trademe.getListingOverviewsByTitle(query, category);
             if(results.length == 1) {
@@ -118,6 +128,7 @@ public class TrademeCommand extends DiscordCommand {
             }
             showListing(context, listing);
         }
+
     }
 
     /**
@@ -129,19 +140,27 @@ public class TrademeCommand extends DiscordCommand {
      */
     private void showCategories(CommandContext context, ArrayList<Category> categories, String query) {
         boolean searching = query != null;
-        new PageableListEmbed(
+        new PageableTableEmbed(
                 context,
                 categories,
                 Trademe.TRADEME_LOGO,
                 searching ? "Trademe Category Search" : "Trademe Categories",
                 query == null
                         ? "There are **" + categories.size() + "** categories:"
-                        : "No categories named: **" + query + "**\n\n"
-                        + "Here are " + categories.size() + " similar results:",
+                        : categories.size()
+                        + " categories found for: **" + query + "**"
+                        + "\n\n Use the **ID** to search in a specific category",
                 footer,
+                new String[]{"ID", "Path", "Name"},
                 5,
                 searching ? EmbedHelper.RED : EmbedHelper.YELLOW
         ) {
+            @Override
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
+                Category category = (Category) items.get(index);
+                return new String[]{category.getNumber(), category.getPath(), category.getName()};
+            }
+
             @Override
             public void sortItems(List<?> items, boolean defaultSort) {
                 if(searching) {
@@ -154,20 +173,10 @@ public class TrademeCommand extends DiscordCommand {
                     return;
                 }
                 items.sort((Comparator<Object>) (o1, o2) -> {
-                    String n1 = ((Category) o1).getName();
-                    String n2 = ((Category) o2).getName();
+                    String n1 = ((Category) o1).getPath();
+                    String n2 = ((Category) o2).getPath();
                     return defaultSort ? n1.compareTo(n2) : n2.compareTo(n1);
                 });
-            }
-
-            @Override
-            public String getName(int currentIndex) {
-                return EmbedHelper.BLANK_CHAR;
-            }
-
-            @Override
-            public String getValue(int currentIndex) {
-                return ((Category) getItems().get(currentIndex)).getName();
             }
         }.showMessage();
     }
@@ -198,8 +207,9 @@ public class TrademeCommand extends DiscordCommand {
                 Trademe.TRADEME_LOGO,
                 "Trademe Search",
                 (noResults ? "No" : results.length)
-                        + " results found for: **" + query
-                        + "** in category: **" + (category == null ? "All" : category.getName()) + "**",
+                        + " results found for: **" + query + "**"
+                        + " in category: **"
+                        + (category == trademe.getRootCategory() ? category.getName() : category.getPath()) + "**",
                 "Type: " + getTrigger() + " for help",
                 new String[]{"ID", "Title", "Price"},
                 5

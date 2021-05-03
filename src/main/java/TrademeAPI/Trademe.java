@@ -11,29 +11,43 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Fetch Trademe listing details
  */
 public class Trademe {
     private final HashMap<String, String> headers;
-    private final HashMap<String, Category> categories;
+    private final HashMap<String, Category> categoriesByNumber;
+    private final Category rootCategory;
     public final static String
             BASE_URL = "https://www.trademe.co.nz/",
             TRADEME_LOGO = "https://i.imgur.com/tTVElnt.png",
             LISTING_ID = "listingid",
             TRADEME_URL = BASE_URL + "(.+)/(Listing\\.aspx\\?id=)?(listing-)?(?<" + LISTING_ID + ">\\d+)(.+)?",
             API_URL = "https://api.trademe.co.nz/v1/",
-            NO_SEARCH_RESULTS_IMAGE = "https://i.imgur.com/VJVbVZu.png";
+            NO_SEARCH_RESULTS_IMAGE = "https://i.imgur.com/VJVbVZu.png",
+            ROOT_CATEGORY_NUMBER = "0000";
 
     /**
      * Initialise authentication headers & listing categories
      */
     public Trademe() {
         this.headers = getHeaders();
-        this.categories = fetchCategories();
+        this.categoriesByNumber = fetchCategories();
+        this.rootCategory = categoriesByNumber.get(ROOT_CATEGORY_NUMBER);
+    }
+
+    /**
+     * Get the root category (for searching all categories)
+     *
+     * @return Root category
+     */
+    public Category getRootCategory() {
+        return rootCategory;
     }
 
     /**
@@ -53,29 +67,77 @@ public class Trademe {
     }
 
     /**
-     * Get a listing category by name
+     * Create a map of category number -> category
      *
-     * @param name Name of category to retrieve
-     * @return Category matching name or null
+     * @return Map of category number -> category
      */
-    public Category getCategoryByName(String name) {
-        return categories.get(name.toLowerCase());
+    private HashMap<String, Category> fetchCategories() {
+        HashMap<String, Category> categoriesByNumber = new HashMap<>();
+        JSONObject rootCategory = apiRequest("Categories.json");
+
+        // Change name from Root to All
+        rootCategory
+                .put("Name", "All")
+                .put("Number", ROOT_CATEGORY_NUMBER);
+        parseCategory(rootCategory, categoriesByNumber);
+        return categoriesByNumber;
     }
 
     /**
-     * Get a list of listing categories matching/containing the given name
+     * Parse a category from its JSON and add to the given map by its unique category number.
+     * Categories may hold subcategories, but as the category number is always unique,
+     * flatten the tree by recursively visiting all categories.
      *
+     * @param categoryData       JSON category
+     * @param categoriesByNumber Map to add category to
+     */
+    private void parseCategory(JSONObject categoryData, HashMap<String, Category> categoriesByNumber) {
+        Category category = new Category(
+                categoryData.getString("Name"),
+                categoryData.getString("Number"),
+                categoryData.getString("Path")
+        );
+        categoriesByNumber.put(category.getNumber(), category);
+
+        String key = "Subcategories";
+        if(!categoryData.has(key)) {
+            return;
+        }
+
+        JSONArray subcategories = categoryData.getJSONArray(key);
+        for(int i = 0; i < subcategories.length(); i++) {
+            parseCategory(subcategories.getJSONObject(i), categoriesByNumber);
+        }
+    }
+
+    /**
+     * Get a list of categories matching/containing the given name.
+     * If any matching categories are found they will be returned,
+     * if no matching categories are found, categories containing the given name will be returned.
+     *
+     * @param name Name to search for
      * @return List of matching categories
      */
     public ArrayList<Category> getCategoriesByName(String name) {
-        ArrayList<Category> results = new ArrayList<>();
-        for(String categoryName : categories.keySet()) {
-            if(!categoryName.contains(name.toLowerCase()) && !categoryName.equalsIgnoreCase(name)) {
-                continue;
-            }
-            results.add(categories.get(categoryName));
+        ArrayList<Category> matching = filterCategories(category -> category.getName().equalsIgnoreCase(name));
+        if(!matching.isEmpty()) {
+            return matching;
         }
-        return results;
+        return filterCategories(category -> category.getName().contains(name.toLowerCase()));
+    }
+
+    /**
+     * Filter the categories by the given predicate
+     *
+     * @param filter Predicate to use to filter categories
+     * @return List of categories passing the given filter
+     */
+    private ArrayList<Category> filterCategories(Predicate<Category> filter) {
+        return categoriesByNumber
+                .values()
+                .stream()
+                .filter(filter)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -84,36 +146,7 @@ public class Trademe {
      * @return List of listing categories
      */
     public ArrayList<Category> getCategories() {
-        return new ArrayList<>(categories.values());
-    }
-
-    /**
-     * Get a map of listing categories.
-     * Map from category name -> category
-     *
-     * @return Map of listing categories
-     */
-    private HashMap<String, Category> fetchCategories() {
-        String key = "Subcategories";
-        HashMap<String, Category> categories = new HashMap<>();
-        JSONArray generalCategoryList = apiRequest("Categories.json").getJSONArray(key);
-        for(int i = 0; i < generalCategoryList.length(); i++) {
-            JSONObject generalCategory = generalCategoryList.getJSONObject(i);
-            if(!generalCategory.has(key)) {
-                continue;
-            }
-            JSONArray subCategories = generalCategory
-                    .getJSONArray(key);
-            for(int j = 0; j < subCategories.length(); j++) {
-                JSONObject categoryData = subCategories.getJSONObject(j);
-                Category category = new Category(
-                        categoryData.getString("Name"),
-                        categoryData.getString("Number")
-                );
-                categories.put(category.getName().toLowerCase(), category);
-            }
-        }
-        return categories;
+        return new ArrayList<>(categoriesByNumber.values());
     }
 
     /**
@@ -143,6 +176,16 @@ public class Trademe {
     }
 
     /**
+     * Check whether the given String is a category ID
+     *
+     * @param categoryString String to check
+     * @return String is a category ID
+     */
+    public static boolean isCategoryId(String categoryString) {
+        return categoryString.matches("(\\d+-?)+");
+    }
+
+    /**
      * Parse the member details from the JSON of a listing
      *
      * @param listingDetails Listing JSON
@@ -166,33 +209,40 @@ public class Trademe {
      * If a match is not found, return an array of listing overviews containing the given query in the title.
      *
      * @param titleQuery Query to search for in listing titles
-     * @param category   Category to search in (null = all categories)
+     * @param category   Category to search in
      * @return Listing overviews containing/matching query
      */
     public ListingOverview[] getListingOverviewsByTitle(String titleQuery, Category category) {
         String endpoint = "Search/General.json?search_string="
                 + EmbedHelper.urlEncode(titleQuery);
-        if(category != null) {
+
+        if(category != rootCategory) {
             endpoint += "&category=" + category.getNumber();
         }
+
         JSONObject response = apiRequest(endpoint);
         JSONArray results = response.getJSONArray("List");
         ListingOverview[] listings = new ListingOverview[results.length()];
 
         for(int i = 0; i < listings.length; i++) {
             JSONObject listing = results.getJSONObject(i);
-            ListingOverview overview = new ListingOverview(
-                    listing.getString("Title"),
-                    listing.getLong("ListingId"),
-                    listing.getString("PriceDisplay")
-            );
-            listings[i] = overview;
+            listings[i] = parseListingOverview(listing);
         }
 
         ListingOverview[] matching = Arrays.stream(listings)
                 .filter(overview -> overview.getTitle().equalsIgnoreCase(titleQuery))
                 .toArray(ListingOverview[]::new);
         return matching.length == 1 ? matching : listings;
+    }
+
+    /**
+     * Get a category by its unique number
+     *
+     * @param categoryNumber Category number
+     * @return Category with number or null
+     */
+    public Category getCategoryByNumber(String categoryNumber) {
+        return categoriesByNumber.get(categoryNumber);
     }
 
     /**
@@ -242,16 +292,28 @@ public class Trademe {
         }
         String BIDDERS = "BidderAndWatchers";
         return new Listing(
-                new ListingOverview(
-                        listingDetails.getString("Title"),
-                        id,
-                        listingDetails.getString("PriceDisplay")
-                ),
+                parseListingOverview(listingDetails),
                 listingDetails.getString("Body"),
                 parseDate(listingDetails.getString("EndDate")),
                 listingDetails.has(BIDDERS) ? listingDetails.getInt(BIDDERS) : 0,
                 images,
                 parseMemberDetails(listingDetails)
+        );
+    }
+
+    /**
+     * Parse a listing overview from the given listing JSON.
+     * Listing JSON may be from search results or specific listing.
+     *
+     * @param listingDetails Listing JSON
+     * @return Listing overview
+     */
+    private ListingOverview parseListingOverview(JSONObject listingDetails) {
+        return new ListingOverview(
+                listingDetails.getString("Title"),
+                listingDetails.getLong("ListingId"),
+                listingDetails.getString("PriceDisplay"),
+                getCategoryByNumber(listingDetails.getString("Category"))
         );
     }
 }
