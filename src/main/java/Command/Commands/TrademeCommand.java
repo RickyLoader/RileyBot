@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class TrademeCommand extends DiscordCommand {
     private final Trademe trademe;
-    private final String footer;
+    private final String footer, listingIdPrefix = "tm";
 
     public TrademeCommand() {
         super(
@@ -56,11 +56,26 @@ public class TrademeCommand extends DiscordCommand {
             return;
         }
 
-        long id = toLong(query);
         Category category = trademe.getRootCategory();
 
-        // Search by listing name
-        if(id == 0) {
+        if(query.matches(listingIdPrefix + "\\d+")) {
+            channel.sendTyping().queue();
+            Listing listing = trademe.getListingById(
+                    toLong(
+                            query.replaceFirst(listingIdPrefix, "")
+                    )
+            );
+            if(listing == null) {
+                channel.sendMessage(
+                        member.getAsMention()
+                                + " Are you sure that's a valid listing id?\n"
+                                + getHelpNameCoded()
+                ).queue();
+                return;
+            }
+            showListing(context, listing);
+        }
+        else {
             if(query.contains(":")) {
                 String[] args = query.split(":");
                 if(args.length == 0 || args[0].isEmpty()) {
@@ -113,22 +128,6 @@ public class TrademeCommand extends DiscordCommand {
             }
             showListingResults(context, results, query, category);
         }
-
-        // Search by listing ID
-        else {
-            channel.sendTyping().queue();
-            Listing listing = trademe.getListingById(id);
-            if(listing == null) {
-                channel.sendMessage(
-                        member.getAsMention()
-                                + " Are you sure that's a valid listing id?\n"
-                                + getHelpNameCoded()
-                ).queue();
-                return;
-            }
-            showListing(context, listing);
-        }
-
     }
 
     /**
@@ -218,7 +217,7 @@ public class TrademeCommand extends DiscordCommand {
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 Listing.ListingOverview overview = (Listing.ListingOverview) items.get(index);
                 return new String[]{
-                        String.valueOf(overview.getId()),
+                        listingIdPrefix + overview.getId(),
                         EmbedHelper.embedURL(overview.getTitle(), overview.getUrl()),
                         overview.getPriceDisplay()
                 };
