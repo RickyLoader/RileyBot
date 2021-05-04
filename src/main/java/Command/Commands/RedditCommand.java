@@ -2,15 +2,13 @@ package Command.Commands;
 
 import COD.Assets.Ratio;
 import Command.Commands.GIFCommand.GIF;
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.EmbedHelper;
-import Command.Structure.EmoteHelper;
+import Command.Structure.*;
 import Network.NetworkRequest;
 import Reddit.PostContent;
 import Reddit.RedditPost;
 import Reddit.Subreddit;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -26,7 +24,7 @@ import java.util.Date;
 /**
  * Take Reddit post URLs and replace with an embed detailing the post
  */
-public class RedditCommand extends DiscordCommand {
+public class RedditCommand extends OnReadyDiscordCommand {
     private final String thumbnail = "https://i.imgur.com/zSNgbNA.png";
     private String upvote, downvote, comment, blankGap;
 
@@ -37,14 +35,6 @@ public class RedditCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        if(upvote == null) {
-            EmoteHelper emoteHelper = context.getEmoteHelper();
-            upvote = EmoteHelper.formatEmote(emoteHelper.getRedditUpvote());
-            downvote = EmoteHelper.formatEmote(emoteHelper.getRedditDownvote());
-            blankGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
-            comment = EmoteHelper.formatEmote(emoteHelper.getFacebookComments());
-        }
-
         MessageChannel channel = context.getMessageChannel();
 
         new Thread(() -> {
@@ -262,5 +252,13 @@ public class RedditCommand extends DiscordCommand {
     @Override
     public boolean matches(String query, Message message) {
         return query.matches("https://(www.)?reddit.com/r/.+/comments/.+/.+/?");
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        upvote = EmoteHelper.formatEmote(emoteHelper.getRedditUpvote());
+        downvote = EmoteHelper.formatEmote(emoteHelper.getRedditDownvote());
+        blankGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
+        comment = EmoteHelper.formatEmote(emoteHelper.getFacebookComments());
     }
 }
