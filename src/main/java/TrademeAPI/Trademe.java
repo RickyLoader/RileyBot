@@ -123,7 +123,7 @@ public class Trademe {
         if(!matching.isEmpty()) {
             return matching;
         }
-        return filterCategories(category -> category.getName().contains(name.toLowerCase()));
+        return filterCategories(category -> category.getName().toLowerCase().contains(name.toLowerCase()));
     }
 
     /**
