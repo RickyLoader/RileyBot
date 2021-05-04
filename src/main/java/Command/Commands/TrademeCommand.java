@@ -10,9 +10,10 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
+import static TrademeAPI.Listing.*;
 
 /**
  * Take Trademe listing URLs and replace with an embed detailing the listing
@@ -120,9 +121,9 @@ public class TrademeCommand extends DiscordCommand {
             }
 
             channel.sendTyping().queue();
-            Listing.ListingOverview[] results = trademe.getListingOverviewsByTitle(query, category);
-            if(results.length == 1) {
-                Listing listing = trademe.getListingById(results[0].getId());
+            ArrayList<ListingOverview> results = trademe.searchListingsByTitle(query, category);
+            if(results.size() == 1) {
+                Listing listing = trademe.getListingById(results.get(0).getId());
                 showListing(context, listing);
                 return;
             }
@@ -198,14 +199,14 @@ public class TrademeCommand extends DiscordCommand {
      * @param query    Query used to find listings
      * @param category Category which was searched for listings
      */
-    private void showListingResults(CommandContext context, Listing.ListingOverview[] results, String query, Category category) {
-        boolean noResults = results.length == 0;
+    private void showListingResults(CommandContext context, ArrayList<ListingOverview> results, String query, Category category) {
+        boolean noResults = results.isEmpty();
         new PageableTableEmbed(
                 context,
-                Arrays.asList(results),
+                results,
                 Trademe.TRADEME_LOGO,
                 "Trademe Search",
-                (noResults ? "No" : results.length)
+                (noResults ? "No" : results.size())
                         + " results found for: **" + query + "**"
                         + " in category: **"
                         + (category == trademe.getRootCategory() ? category.getName() : category.getPath()) + "**",
@@ -215,7 +216,7 @@ public class TrademeCommand extends DiscordCommand {
         ) {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Listing.ListingOverview overview = (Listing.ListingOverview) items.get(index);
+                ListingOverview overview = (ListingOverview) items.get(index);
                 return new String[]{
                         listingIdPrefix + overview.getId(),
                         EmbedHelper.embedURL(overview.getTitle(), overview.getUrl()),
@@ -228,7 +229,7 @@ public class TrademeCommand extends DiscordCommand {
                 items.sort(new LevenshteinDistance(query, defaultSort) {
                     @Override
                     public String getString(Object o) {
-                        return ((Listing.ListingOverview) o).getTitle();
+                        return ((ListingOverview) o).getTitle();
                     }
                 });
             }

@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.function.Predicate;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class Trademe {
     private final HashMap<String, String> headers;
     private final HashMap<String, Category> categoriesByNumber;
-    private final Category rootCategory;
+    private final Category rootCategory, adultCategory;
     public final static String
             BASE_URL = "https://www.trademe.co.nz/",
             TRADEME_LOGO = "https://i.imgur.com/tTVElnt.png",
@@ -30,7 +29,8 @@ public class Trademe {
             TRADEME_URL = BASE_URL + "(.+)/(Listing\\.aspx\\?id=)?(listing-)?(?<" + LISTING_ID + ">\\d+)(.+)?",
             API_URL = "https://api.trademe.co.nz/v1/",
             NO_SEARCH_RESULTS_IMAGE = "https://i.imgur.com/VJVbVZu.png",
-            ROOT_CATEGORY_NUMBER = "0000";
+            ROOT_CATEGORY_NUMBER = "0000",
+            ADULT_CATEGORY_NUMBER = "0004-3267-8324-";
 
     /**
      * Initialise authentication headers & listing categories
@@ -39,6 +39,7 @@ public class Trademe {
         this.headers = getHeaders();
         this.categoriesByNumber = fetchCategories();
         this.rootCategory = categoriesByNumber.get(ROOT_CATEGORY_NUMBER);
+        this.adultCategory = categoriesByNumber.get(ADULT_CATEGORY_NUMBER);
     }
 
     /**
@@ -206,13 +207,34 @@ public class Trademe {
 
     /**
      * Search for listing overviews with the given query in the title.
-     * If a match is not found, return an array of listing overviews containing the given query in the title.
+     * Make a secondary search for adult results if the given category is the root category.
+     * (Adult results aren't returned unless searching the adult category specifically)
+     * If a singular matching title is found, the returned list will contain only the match,
+     * otherwise the list will contain all listing overviews with the given query in the title.
      *
      * @param titleQuery Query to search for in listing titles
      * @param category   Category to search in
-     * @return Listing overviews containing/matching query
+     * @return List of listing overviews containing/matching query
      */
-    public ListingOverview[] getListingOverviewsByTitle(String titleQuery, Category category) {
+    public ArrayList<ListingOverview> searchListingsByTitle(String titleQuery, Category category) {
+        ArrayList<ListingOverview> results = getListingOverviewsByTitle(titleQuery, category);
+        if(category == rootCategory) {
+            results.addAll(getListingOverviewsByTitle(titleQuery, adultCategory));
+        }
+        ArrayList<ListingOverview> matching = results.stream()
+                .filter(overview -> overview.getTitle().equalsIgnoreCase(titleQuery))
+                .collect(Collectors.toCollection(ArrayList::new));
+        return matching.size() == 1 ? matching : results;
+    }
+
+    /**
+     * Search for listing overviews with the given query in the title.
+     *
+     * @param titleQuery Query to search for in listing titles
+     * @param category   Category to search in
+     * @return List of listing overviews containing/matching query
+     */
+    private ArrayList<ListingOverview> getListingOverviewsByTitle(String titleQuery, Category category) {
         String endpoint = "Search/General.json?search_string="
                 + EmbedHelper.urlEncode(titleQuery);
 
@@ -222,17 +244,13 @@ public class Trademe {
 
         JSONObject response = apiRequest(endpoint);
         JSONArray results = response.getJSONArray("List");
-        ListingOverview[] listings = new ListingOverview[results.length()];
+        ArrayList<ListingOverview> listings = new ArrayList<>();
 
-        for(int i = 0; i < listings.length; i++) {
+        for(int i = 0; i < results.length(); i++) {
             JSONObject listing = results.getJSONObject(i);
-            listings[i] = parseListingOverview(listing);
+            listings.add(parseListingOverview(listing));
         }
-
-        ListingOverview[] matching = Arrays.stream(listings)
-                .filter(overview -> overview.getTitle().equalsIgnoreCase(titleQuery))
-                .toArray(ListingOverview[]::new);
-        return matching.length == 1 ? matching : listings;
+        return listings;
     }
 
     /**
