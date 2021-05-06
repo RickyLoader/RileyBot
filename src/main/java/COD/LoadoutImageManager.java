@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import static Command.Structure.ImageBuilder.copyImage;
+
 /**
  * Build COD loadout images
  */
@@ -448,23 +450,5 @@ public class LoadoutImageManager {
         g.drawImage(attachmentImage, 0, weaponImage.getHeight() + 10, null);
         g.dispose();
         return container;
-    }
-
-    /**
-     * Create a copy of the given image
-     *
-     * @param source Source to copy
-     * @return Copy of source image
-     */
-    private BufferedImage copyImage(BufferedImage source) {
-        BufferedImage copy = new BufferedImage(
-                source.getWidth(),
-                source.getHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
-        Graphics g = copy.getGraphics();
-        g.drawImage(source, 0, 0, null);
-        g.dispose();
-        return copy;
     }
 }

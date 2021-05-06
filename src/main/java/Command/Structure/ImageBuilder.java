@@ -3,6 +3,7 @@ package Command.Structure;
 import Bot.ResourceHandler;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public abstract class ImageBuilder {
     private final EmoteHelper emoteHelper;
@@ -67,5 +68,23 @@ public abstract class ImageBuilder {
      */
     public EmoteHelper getEmoteHelper() {
         return emoteHelper;
+    }
+
+    /**
+     * Create a copy of the given image
+     *
+     * @param source Source to copy
+     * @return Copy of source image
+     */
+    public static BufferedImage copyImage(BufferedImage source) {
+        BufferedImage copy = new BufferedImage(
+                source.getWidth(),
+                source.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics g = copy.getGraphics();
+        g.drawImage(source, 0, 0, null);
+        g.dispose();
+        return copy;
     }
 }
