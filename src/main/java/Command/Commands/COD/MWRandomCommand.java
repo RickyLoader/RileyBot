@@ -2,6 +2,7 @@ package Command.Commands.COD;
 
 import COD.Assets.*;
 import COD.LoadoutAnalysis;
+import COD.MWManager;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
 import Command.Structure.*;
@@ -12,8 +13,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 
 import java.util.*;
-
-import static Bot.GlobalReference.MW_ASSET_MANAGER;
 
 /**
  * Get a random MW loadout
@@ -178,7 +177,7 @@ public class MWRandomCommand extends DiscordCommand {
      * @return Random field upgrade
      */
     private FieldUpgrade getRandomFieldUpgrade(FieldUpgrade exclude) {
-        FieldUpgrade[] fieldUpgrades = Arrays.stream(MW_ASSET_MANAGER.getSupers())
+        FieldUpgrade[] fieldUpgrades = Arrays.stream(MWManager.getInstance().getSupers())
                 .filter(fieldUpgrade -> !fieldUpgrade.equals(exclude))
                 .toArray(FieldUpgrade[]::new);
         return fieldUpgrades[rand.nextInt(fieldUpgrades.length)];
@@ -191,7 +190,7 @@ public class MWRandomCommand extends DiscordCommand {
      * @return Random perk of given colour
      */
     private Perk getRandomPerk(Perk.CATEGORY colour) {
-        Perk[] perks = MW_ASSET_MANAGER.getPerksByColour(colour);
+        Perk[] perks = MWManager.getInstance().getPerksByColour(colour);
         if(colour == Perk.CATEGORY.BLUE) {
             perks = Arrays.stream(perks)
                     .filter(perk -> !perk.getName().equalsIgnoreCase("gunfight e.o.d"))
@@ -246,7 +245,7 @@ public class MWRandomCommand extends DiscordCommand {
     private Weapon getRandomWeapon(Weapon.TYPE type, Weapon exclude) {
         Weapon.CATEGORY[] typeCategories = type.getCategories();
         Weapon.CATEGORY category = typeCategories[rand.nextInt(typeCategories.length)];
-        Weapon[] categoryWeapons = Arrays.stream(MW_ASSET_MANAGER.getWeaponsByCategory(category))
+        Weapon[] categoryWeapons = Arrays.stream(MWManager.getInstance().getWeaponsByCategory(category))
                 .filter(weapon -> !weapon.equals(exclude) && !excludedWeaponIds.contains(weapon.getCodename()))
                 .toArray(Weapon[]::new);
         return categoryWeapons[rand.nextInt(categoryWeapons.length)];

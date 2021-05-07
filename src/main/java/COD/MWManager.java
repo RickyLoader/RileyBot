@@ -14,15 +14,28 @@ public class MWManager extends CODManager {
     private final HashMap<String, FieldUpgrade> supers;
     private final HashMap<String, Commendation> commendations;
     private final HashMap<String, Killstreak> killstreaks;
+    private static MWManager instance = null;
 
     /**
      * Create the MW manager
      */
-    public MWManager() {
+    private MWManager() {
         super(GAME.MW);
         this.supers = readSupers();
         this.commendations = readCommendations();
         this.killstreaks = readKillstreaks();
+    }
+
+    /**
+     * Get an instance of the MWManager class
+     *
+     * @return Instance
+     */
+    public static MWManager getInstance() {
+        if(instance == null) {
+            instance = new MWManager();
+        }
+        return instance;
     }
 
     /**

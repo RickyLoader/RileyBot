@@ -21,7 +21,6 @@ import java.util.List;
  * View OSRS G.E prices
  */
 public class GrandExchangeCommand extends DiscordCommand {
-    private final GrandExchange grandExchange = new GrandExchange();
     private final String thumbnail = "https://i.imgur.com/4z4Aipa.png";
     private final DecimalFormat commaFormat = new DecimalFormat("#,###");
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -54,8 +53,8 @@ public class GrandExchangeCommand extends DiscordCommand {
 
         new Thread(() -> {
             int id = toInteger(query);
-            if(id == 0 && !query.equals("0")) {
-                Item[] items = grandExchange.getItemManager().getItemsByName(query);
+            if(id == 0) {
+                Item[] items = GrandExchange.getInstance().getItemManager().getItemsByName(query);
                 if(items.length == 1) {
                     showItemPriceEmbed(items[0], channel);
                     return;
@@ -63,7 +62,7 @@ public class GrandExchangeCommand extends DiscordCommand {
                 showItemSearchResults(context, items, query);
             }
             else {
-                Item item = grandExchange.getItemManager().getItemByID(id);
+                Item item = GrandExchange.getInstance().getItemManager().getItemByID(id);
                 if(item == null) {
                     channel.sendMessage(
                             context.getMember().getAsMention()
@@ -83,7 +82,7 @@ public class GrandExchangeCommand extends DiscordCommand {
      * @param items   Items found with the given search query
      * @param query   Search query used to find items
      */
-    private void showItemSearchResults(CommandContext context, Item[] items, String query) {
+    public void showItemSearchResults(CommandContext context, Item[] items, String query) {
         boolean noResults = items.length == 0;
         new PageableTableEmbed(
                 context,
@@ -122,7 +121,7 @@ public class GrandExchangeCommand extends DiscordCommand {
      */
     private void showItemPriceEmbed(Item item, MessageChannel channel) {
         channel.sendTyping().queue();
-        ItemPrice itemPrice = grandExchange.getItemPrice(item);
+        ItemPrice itemPrice = GrandExchange.getInstance().getItemPrice(item);
         ItemImage itemImage = item.getItemImage();
 
         MessageEmbed itemEmbed = new EmbedBuilder()
@@ -162,7 +161,7 @@ public class GrandExchangeCommand extends DiscordCommand {
                 )
                 .setFooter(
                         "Type: " + getTrigger() + " for help | Trade volume as of: "
-                                + dateFormat.format(grandExchange.getVolumeTimestamp()),
+                                + dateFormat.format(GrandExchange.getInstance().getVolumeTimestamp()),
                         thumbnail
                 )
                 .setColor(EmbedHelper.GREEN)

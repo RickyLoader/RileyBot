@@ -1,6 +1,6 @@
 package Command.Commands.Lookup;
 
-import Bot.GlobalReference;
+import COD.CWManager;
 import Command.Structure.MatchHistoryCommand;
 
 /**
@@ -8,6 +8,6 @@ import Command.Structure.MatchHistoryCommand;
  */
 public class CWHistoryCommand extends MatchHistoryCommand {
     public CWHistoryCommand() {
-        super("cwhistory", GlobalReference.CW_ASSET_MANAGER);
+        super("cwhistory", CWManager.getInstance());
     }
 }

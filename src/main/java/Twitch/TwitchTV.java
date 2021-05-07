@@ -25,14 +25,27 @@ public class TwitchTV {
     private final String baseURL = "https://api.twitch.tv/";
     private final HashMap<String, Game> gamesById, gamesByName;
     private final OAuth oAuth;
+    private static TwitchTV instance;
 
     /**
      * Initialise a map of games & OAuth credentials
      */
-    public TwitchTV() {
+    private TwitchTV() {
         this.oAuth = new OAuth(Secret.TWITCH_CLIENT_ID, Secret.TWITCH_CLIENT_SECRET);
         this.gamesById = new HashMap<>();
         this.gamesByName = new HashMap<>();
+    }
+
+    /**
+     * Get an instance of the TwitchTV class
+     *
+     * @return Instance
+     */
+    public static TwitchTV getInstance() {
+        if(instance == null) {
+            instance = new TwitchTV();
+        }
+        return instance;
     }
 
     /**

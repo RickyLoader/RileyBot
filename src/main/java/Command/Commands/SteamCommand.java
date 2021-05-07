@@ -11,8 +11,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.*;
 
-import static Bot.GlobalReference.STEAM_STORE;
-
 /**
  * View specific/top steam games
  */
@@ -30,11 +28,11 @@ public class SteamCommand extends DiscordCommand {
         if(SteamStore.isSteamUrl(message)) {
             String[] urlArgs = message.split("/");
             int idIndex = message.matches(SteamStore.STEAM_STORE_DESKTOP_URL) ? urlArgs.length - 2 : urlArgs.length - 1;
-            AppInfo targetInfo = STEAM_STORE.getApplicationInfo(Integer.parseInt(urlArgs[idIndex]));
+            AppInfo targetInfo = SteamStore.getInstance().getApplicationInfo(Integer.parseInt(urlArgs[idIndex]));
             if(targetInfo == null) {
                 return;
             }
-            Application targetApp = STEAM_STORE.fetchApplicationDetails(targetInfo);
+            Application targetApp = SteamStore.getInstance().fetchApplicationDetails(targetInfo);
             if(targetApp == null) {
                 return;
             }
@@ -51,7 +49,7 @@ public class SteamCommand extends DiscordCommand {
         }
 
         String query = message.replace(getTrigger(), "").trim();
-        STEAM_STORE.updateStoreData();
+        SteamStore.getInstance().updateStoreData();
 
         if(query.isEmpty()) {
             channel.sendMessage(getHelpNameCoded()).queue();
@@ -67,7 +65,7 @@ public class SteamCommand extends DiscordCommand {
         int appId = toInteger(query);
         AppInfo appInfo;
         if(appId == 0 && !query.equals("0")) {
-            ArrayList<AppInfo> searchResults = STEAM_STORE.getApplicationsByName(query);
+            ArrayList<AppInfo> searchResults = SteamStore.getInstance().getApplicationsByName(query);
             if(searchResults.size() != 1) {
                 showSearchResults(context, searchResults, query);
                 return;
@@ -75,7 +73,7 @@ public class SteamCommand extends DiscordCommand {
             appInfo = searchResults.get(0);
         }
         else {
-            appInfo = STEAM_STORE.getApplicationInfo(appId);
+            appInfo = SteamStore.getInstance().getApplicationInfo(appId);
             if(appInfo == null) {
                 channel.sendMessage(
                         member.getAsMention() + " I didn't find anything with the id: **" + appId + "**"
@@ -84,7 +82,7 @@ public class SteamCommand extends DiscordCommand {
             }
         }
         channel.sendTyping().queue();
-        Application application = STEAM_STORE.fetchApplicationDetails(appInfo);
+        Application application = SteamStore.getInstance().fetchApplicationDetails(appInfo);
         if(application == null) {
             channel.sendMessage(
                     member.getAsMention() + " I wasn't able to parse any info about " + appInfo.getSummary()
@@ -169,7 +167,7 @@ public class SteamCommand extends DiscordCommand {
      * @param context Command context
      */
     private void showTopSteamGames(CommandContext context) {
-        ArrayList<Application> topApplications = STEAM_STORE.fetchTopSteamApplications();
+        ArrayList<Application> topApplications = SteamStore.getInstance().fetchTopSteamApplications();
         new PageableTableEmbed(
                 context,
                 topApplications,
@@ -206,7 +204,6 @@ public class SteamCommand extends DiscordCommand {
             }
         }.showMessage();
     }
-
 
     @Override
     public boolean matches(String query, Message message) {

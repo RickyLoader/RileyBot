@@ -1,6 +1,6 @@
 package COD.Assets;
 
-import Bot.GlobalReference;
+import COD.MWManager;
 import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -71,7 +71,7 @@ public class MissingWeaponAttachments {
             if(missingWeaponAttachments == null) {
                 String weaponCodename = info.getString("weapon_name");
                 missingWeaponAttachments = new MissingWeaponAttachments(
-                        GlobalReference.MW_ASSET_MANAGER.getWeaponByCodename(
+                        MWManager.getInstance().getWeaponByCodename(
                                 weaponCodename,
                                 Weapon.getCategoryFromWeaponCodename(weaponCodename)
                         )

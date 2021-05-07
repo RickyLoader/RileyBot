@@ -19,13 +19,26 @@ public class ValheimWiki {
     private final ArrayList<ValheimPageSummary> pageSummaries;
     private final HashMap<String, ValheimEvent> eventMap;
     public static final String BASE_URL = "https://valheim.fandom.com/wiki/";
+    private static ValheimWiki instance = null;
 
     /**
      * Create a list of summaries for all searchable Valheim wiki pages
      */
-    public ValheimWiki() {
+    private ValheimWiki() {
         this.eventMap = new HashMap<>();
         this.pageSummaries = fetchPageTitles();
+    }
+
+    /**
+     * Get an instance of the ValheimWiki class
+     *
+     * @return Instance
+     */
+    public static ValheimWiki getInstance() {
+        if(instance == null){
+            instance = new ValheimWiki();
+        }
+        return instance;
     }
 
     /**

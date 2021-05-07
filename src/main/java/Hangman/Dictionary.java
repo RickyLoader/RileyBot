@@ -15,6 +15,7 @@ public class Dictionary {
     private final ArrayList<DictWord> wordList = new ArrayList<>();
     private final HashMap<String, DictWord> wordMap = new HashMap<>();
     private final Random random = new Random();
+    private static Dictionary instance = null;
 
     /**
      * Add a word to the dictionary
@@ -24,6 +25,18 @@ public class Dictionary {
     public void addWord(DictWord word) {
         wordList.add(word);
         wordMap.put(word.getWord().toLowerCase(), word);
+    }
+
+    /**
+     * Get an instance of the Dictionary class
+     *
+     * @return Instance
+     */
+    public static Dictionary getInstance() {
+        if(instance == null) {
+            instance = createDictionary();
+        }
+        return instance;
     }
 
     /**

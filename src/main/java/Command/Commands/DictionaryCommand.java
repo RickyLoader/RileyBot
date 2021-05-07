@@ -2,6 +2,7 @@ package Command.Commands;
 
 import Command.Structure.*;
 import Hangman.DictWord;
+import Hangman.Dictionary;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import Network.Secret;
@@ -14,8 +15,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
-
-import static Bot.GlobalReference.DICTIONARY;
 
 /**
  * Get the definitions of words!
@@ -40,9 +39,9 @@ public class DictionaryCommand extends DiscordCommand {
             return;
         }
 
-        DictWord dictWord = DICTIONARY.getWord(word);
+        DictWord dictWord = Dictionary.getInstance().getWord(word);
         if(dictWord == null) {
-            ArrayList<DictWord> similar = DICTIONARY.searchWords(word);
+            ArrayList<DictWord> similar = Dictionary.getInstance().searchWords(word);
             showSimilarWords(context, similar, word);
             return;
         }

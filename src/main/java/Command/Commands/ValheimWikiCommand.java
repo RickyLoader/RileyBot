@@ -12,7 +12,6 @@ import org.apache.http.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static Bot.GlobalReference.VALHEIM_WIKI;
 import static Valheim.Wiki.ValheimPageSummary.*;
 
 
@@ -37,13 +36,13 @@ public class ValheimWikiCommand extends DiscordCommand {
         CATEGORY category = CATEGORY.byName(query);
 
         if(category != CATEGORY.NONE) {
-            searchResults = VALHEIM_WIKI.getPageSummaries(category);
+            searchResults = ValheimWiki.getInstance().getPageSummaries(category);
         }
         else if(query.equals("all")) {
-            searchResults = VALHEIM_WIKI.getPageSummaries();
+            searchResults = ValheimWiki.getInstance().getPageSummaries();
         }
         else {
-            searchResults = VALHEIM_WIKI.searchWiki(query);
+            searchResults = ValheimWiki.getInstance().searchWiki(query);
         }
 
         if(searchResults.size() == 1) {
@@ -68,14 +67,14 @@ public class ValheimWikiCommand extends DiscordCommand {
         try {
             CATEGORY category = valheimPageSummary.getCategory();
             if(category == CATEGORY.BIOME) {
-                ValheimBiome biome = VALHEIM_WIKI.getBiome(valheimPageSummary);
+                ValheimBiome biome = ValheimWiki.getInstance().getBiome(valheimPageSummary);
                 if(biome == null) {
                     throw new ParseException();
                 }
                 new BiomeMessage(biome, context, "Try: " + getHelpName()).showMessage();
             }
             else if(category == CATEGORY.ITEM) {
-                ValheimItem item = VALHEIM_WIKI.getItem(valheimPageSummary);
+                ValheimItem item = ValheimWiki.getInstance().getItem(valheimPageSummary);
                 if(item == null) {
                     throw new ParseException();
                 }
@@ -110,11 +109,11 @@ public class ValheimWikiCommand extends DiscordCommand {
                 channel.sendMessage(itemEmbed).queue();
             }
             else if(category == CATEGORY.EVENT) {
-                ValheimEvent event = VALHEIM_WIKI.getEventByCodename(valheimPageSummary.getTitle());
+                ValheimEvent event = ValheimWiki.getInstance().getEventByCodename(valheimPageSummary.getTitle());
                 channel.sendMessage(buildEventEmbed(event)).queue();
             }
             else {
-                ValheimCreature creature = VALHEIM_WIKI.getCreature(valheimPageSummary);
+                ValheimCreature creature = ValheimWiki.getInstance().getCreature(valheimPageSummary);
                 if(creature == null) {
                     throw new ParseException();
                 }

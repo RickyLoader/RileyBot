@@ -10,8 +10,6 @@ import net.dv8tion.jda.api.entities.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static Bot.GlobalReference.TWITCH_TV;
-
 /**
  * Look up a Twitch.tv streamer!
  */
@@ -37,7 +35,7 @@ public class TTVLookupCommand extends LookupCommand {
             return;
         }
         channel.sendTyping().queue();
-        ArrayList<Streamer> streamers = TWITCH_TV.searchStreamersByName(name);
+        ArrayList<Streamer> streamers = TwitchTV.getInstance().searchStreamersByName(name);
         if(streamers.isEmpty()) {
             channel.sendMessage(
                     member.getAsMention() + " I didn't find any streamers matching: **" + name + "**"
@@ -65,7 +63,7 @@ public class TTVLookupCommand extends LookupCommand {
                 .replace(TwitchTV.TWITCH_URL, "")
                 .replace("/", "")
                 .trim();
-        ArrayList<Streamer> streamers = TWITCH_TV.searchStreamersByName(name);
+        ArrayList<Streamer> streamers = TwitchTV.getInstance().searchStreamersByName(name);
         if(streamers.size() != 1) {
             return;
         }

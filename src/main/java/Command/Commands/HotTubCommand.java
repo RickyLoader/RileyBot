@@ -4,13 +4,12 @@ import Command.Commands.Lookup.TTVLookupCommand;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Twitch.Streamer;
+import Twitch.TwitchTV;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-import static Bot.GlobalReference.*;
 
 /**
  * Cool hot tub streamers
@@ -26,7 +25,7 @@ public class HotTubCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
         channel.sendTyping().queue();
-        ArrayList<Streamer> hotTubStreamers = TWITCH_TV.searchStreamersByStreamTitle(
+        ArrayList<Streamer> hotTubStreamers = TwitchTV.getInstance().searchStreamersByStreamTitle(
                 "hot tub",
                 "Just Chatting"
         );
@@ -35,7 +34,7 @@ public class HotTubCommand extends DiscordCommand {
             return;
         }
         Streamer streamer = hotTubStreamers.get(random.nextInt(hotTubStreamers.size()));
-        streamer.updateFollowers(TWITCH_TV.fetchFollowers(streamer.getId()));
+        streamer.updateFollowers(TwitchTV.getInstance().fetchFollowers(streamer.getId()));
         MessageEmbed streamerEmbed = TTVLookupCommand.buildStreamerEmbed(
                 streamer,
                 context.getMember(),

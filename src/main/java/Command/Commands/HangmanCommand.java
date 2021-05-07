@@ -1,6 +1,5 @@
 package Command.Commands;
 
-import Bot.GlobalReference;
 import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
@@ -42,7 +41,7 @@ public class HangmanCommand extends DiscordCommand {
      */
     private Dictionary filterDictionary() {
         Dictionary dictionary = new Dictionary();
-        ArrayList<DictWord> allWords = GlobalReference.DICTIONARY.getWords();
+        ArrayList<DictWord> allWords = Dictionary.getInstance().getWords();
         for(DictWord dictWord : allWords) {
             String word = dictWord.getWord();
             if(invalidInput(word) || word.length() < MIN_LENGTH || word.length() > MAX_LENGTH) {

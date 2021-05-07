@@ -23,13 +23,26 @@ public class SteamStore {
     private final HashMap<Integer, AppInfo> appIdentifiers;
     private final String steamSpyBaseUrl = "https://steamspy.com/api.php?request=";
     private long lastFetched;
+    private static SteamStore instance = null;
 
     /**
      * Initialise the steam store data
      */
-    public SteamStore() {
+    private SteamStore() {
         this.appIdentifiers = new HashMap<>();
         updateStoreData();
+    }
+
+    /**
+     * Get an instance of the SteamStore class
+     *
+     * @return Instance
+     */
+    public static SteamStore getInstance() {
+        if(instance == null) {
+            instance = new SteamStore();
+        }
+        return instance;
     }
 
     /**

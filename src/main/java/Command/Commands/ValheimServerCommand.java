@@ -8,6 +8,7 @@ import Valheim.PlayerConnection;
 import Valheim.SteamProfile;
 import Valheim.ValheimServer;
 import Valheim.Wiki.ValheimEvent;
+import Valheim.Wiki.ValheimWiki;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
@@ -15,8 +16,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static Bot.GlobalReference.VALHEIM_WIKI;
 
 /**
  * View online players & log events
@@ -198,7 +197,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                         message = serverStopped + " " + "Server stopped";
                         break;
                     case RANDOM_EVENT:
-                        ValheimEvent randomEvent = VALHEIM_WIKI.getEventByCodename(log.getEventCodename());
+                        ValheimEvent randomEvent = ValheimWiki.getInstance().getEventByCodename(log.getEventCodename());
                         String codename = randomEvent.getCodename();
                         message = getLogEmote(codename) + " " + "Random event: "
                                 + randomEvent.getStartMessage()

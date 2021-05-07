@@ -15,10 +15,23 @@ public class GrandExchange {
     private final ItemManager itemManager;
     private HashMap<Integer, Long> itemTradeVolumes;
     private long lastUpdate, volumeTimestamp;
+    private static GrandExchange instance;
 
-    public GrandExchange() {
+    private GrandExchange() {
         this.itemManager = new ItemManager();
         refreshData();
+    }
+
+    /**
+     * Get an instance of the Grand Exchange class
+     *
+     * @return Instance
+     */
+    public static GrandExchange getInstance() {
+        if(instance == null) {
+            instance = new GrandExchange();
+        }
+        return instance;
     }
 
     /**

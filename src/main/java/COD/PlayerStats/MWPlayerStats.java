@@ -2,13 +2,12 @@ package COD.PlayerStats;
 
 import COD.Assets.*;
 import COD.CODAPI;
+import COD.MWManager;
 import Command.Structure.CODLookupCommand.PLATFORM;
 import org.json.JSONObject;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static Bot.GlobalReference.MW_ASSET_MANAGER;
 
 public class MWPlayerStats {
     private final String name, data;
@@ -280,7 +279,7 @@ public class MWPlayerStats {
         ArrayList<CommendationStats> commendationStats = new ArrayList<>();
         try {
             for(String commendationName : commendations.keySet()) {
-                Commendation commendation = MW_ASSET_MANAGER.getCommendationByCodename(commendationName);
+                Commendation commendation = MWManager.getInstance().getCommendationByCodename(commendationName);
                 commendationStats.add(
                         new CommendationStats(
                                 commendation,
@@ -313,7 +312,7 @@ public class MWPlayerStats {
 
         for(String name : supportStreaks.keySet()) {
             JSONObject killstreakData = supportStreaks.getJSONObject(name).getJSONObject("properties");
-            Killstreak killstreak = MW_ASSET_MANAGER.getKillstreakByCodename(name);
+            Killstreak killstreak = MWManager.getInstance().getKillstreakByCodename(name);
             stats.add(
                     new KillstreakStats(
                             killstreak,
@@ -343,7 +342,7 @@ public class MWPlayerStats {
                 continue;
             }
             JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
-            FieldUpgrade fieldUpgrade = MW_ASSET_MANAGER.getSuperByCodename(superName);
+            FieldUpgrade fieldUpgrade = MWManager.getInstance().getSuperByCodename(superName);
             fieldUpgradeStats.add(
                     new FieldUpgradeStats(
                             fieldUpgrade,
@@ -370,7 +369,7 @@ public class MWPlayerStats {
             Weapon.CATEGORY category = Weapon.CATEGORY.discernCategory(categoryName);
             for(String weaponName : categoryData.keySet()) {
                 JSONObject weaponData = categoryData.getJSONObject(weaponName).getJSONObject("properties");
-                Weapon weapon = MW_ASSET_MANAGER.getWeaponByCodename(weaponName, category);
+                Weapon weapon = MWManager.getInstance().getWeaponByCodename(weaponName, category);
                 WeaponStats stats;
 
                 switch(weapon.getType()) {
