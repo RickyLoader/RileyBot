@@ -1,7 +1,9 @@
 package Runescape.OSRS.GE;
 
+import Command.Structure.EmbedHelper;
 import org.apache.commons.codec.binary.Hex;
 
+import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -141,17 +143,43 @@ public class Item {
      * Inventory image/High detail user-submitted image
      */
     public static class ItemImage {
-        private final String inventoryImageUrl, highDetailImageUrl;
+        private final String inventoryImageUrl, highDetailImageUrl, filename;
+        private BufferedImage inventoryImage;
 
         /**
          * Create the item image
          *
-         * @param filename Item filename
-         * @param id       Item id
+         * @param filename       Item filename
+         * @param id             Item id
+         * @param inventoryImage Inventory image
          */
-        public ItemImage(String filename, int id) {
+        public ItemImage(String filename, int id, BufferedImage inventoryImage) {
+            this.inventoryImage = inventoryImage;
+            this.filename = filename;
             this.inventoryImageUrl = generateImageUrl(filename, id);
             this.highDetailImageUrl = generateImageUrl(filename.replace(".png", "_detail.png"), id);
+        }
+
+        /**
+         * Get the inventory image if it exists.
+         * If not, download and return the image using the URL
+         *
+         * @return Inventory image
+         */
+        public BufferedImage getInventoryImage() {
+            if(inventoryImage == null) {
+                this.inventoryImage = EmbedHelper.downloadImage(inventoryImageUrl);
+            }
+            return inventoryImage;
+        }
+
+        /**
+         * Get the filename of the item image (typically "name of item" becomes "name_of_item.png")
+         *
+         * @return Item image filename
+         */
+        public String getFilename() {
+            return filename;
         }
 
         /**
@@ -164,7 +192,6 @@ public class Item {
          */
         private String generateImageUrl(String filename, int id) {
             try {
-                filename = filename.replace(" ", "_");
                 MessageDigest md5 = MessageDigest.getInstance("MD5");
                 md5.update(filename.getBytes(StandardCharsets.UTF_8));
                 String hash = Hex.encodeHexString(md5.digest()).toLowerCase();

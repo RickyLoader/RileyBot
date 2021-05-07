@@ -1,5 +1,6 @@
 package Runescape.OSRS.GE;
 
+import Bot.ResourceHandler;
 import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,6 +11,7 @@ import java.util.HashMap;
  * Tradeable OSRS item manager
  */
 public class ItemManager {
+    private final ResourceHandler resourceHandler;
     private HashMap<Integer, Item> items;
     private long lastUpdate;
 
@@ -17,6 +19,7 @@ public class ItemManager {
      * Get all tradeable OSRS items
      */
     public ItemManager() {
+        this.resourceHandler = new ResourceHandler();
         refreshData();
     }
 
@@ -82,17 +85,24 @@ public class ItemManager {
         for(int i = 0; i < items.length(); i++) {
             JSONObject item = items.getJSONObject(i);
             int id = item.getInt("id");
+            String name = item.getString("name");
+            String filename = item.getString("icon").replace(" ", "_");
+
             itemMap.put(
                     id,
                     new Item(
                             id,
-                            item.getString("name"),
+                            name,
                             item.getString("examine"),
                             item.has("members") && item.getBoolean("members"),
                             item.has("highalch") ? item.getInt("highalch") : -1,
                             item.has("lowalch") ? item.getInt("lowalch") : -1,
                             item.has("limit") ? item.getInt("limit") : -1,
-                            new Item.ItemImage(item.getString("icon"), id)
+                            new Item.ItemImage(
+                                    filename,
+                                    id,
+                                    resourceHandler.getImageResource("/Runescape/OSRS/Sprites/" + filename)
+                            )
                     )
             );
         }
