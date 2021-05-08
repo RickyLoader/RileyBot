@@ -52,12 +52,15 @@ public abstract class PageableTemplateEmbed extends PageableSortEmbed {
 
     @Override
     public EmbedBuilder getEmbedBuilder(String pageDetails) {
-        return new EmbedBuilder()
+        EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(title)
                 .setThumbnail(thumb)
-                .setDescription(desc)
                 .setColor(colour)
                 .setImage(EmbedHelper.SPACER_IMAGE)
                 .setFooter(pageDetails + " | " + footer);
+        if(desc != null) {
+            builder.setDescription(desc);
+        }
+        return builder;
     }
 }
