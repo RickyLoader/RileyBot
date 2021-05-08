@@ -28,7 +28,7 @@ public class ItemManager {
      */
     private void refreshData() {
         long now = System.currentTimeMillis();
-        if(items != null && now - lastUpdate < 60000) {
+        if(items != null && now - lastUpdate < 3600000) {
             return;
         }
         this.items = fetchItems();
