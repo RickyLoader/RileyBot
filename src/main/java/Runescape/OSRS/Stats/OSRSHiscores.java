@@ -38,6 +38,7 @@ public class OSRSHiscores extends Hiscores {
     private final boolean league, virtual, xp;
     public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 
     /**
      * Create the OSRS Hiscores instance
@@ -68,6 +69,7 @@ public class OSRSHiscores extends Hiscores {
         else {
             criteria.add("Player exists...");
             criteria.add("Checking account type...");
+            criteria.add("Fetching achievements...");
         }
         if(xp) {
             criteria.add("Checking XP tracker...");
@@ -265,10 +267,55 @@ public class OSRSHiscores extends Hiscores {
             loading.completeStage("Player is " + leagueTier.getTierName() + "!");
         }
 
+        addPlayerAchievements(stats);
+
         if(xp) {
             getTrackerData(stats);
         }
         return playerStats;
+    }
+
+    /**
+     * Fetch and add recent achievements for the player
+     *
+     * @param stats Player stats
+     */
+    private void addPlayerAchievements(OSRSPlayerStats stats) {
+        try {
+            String json = fetchRecentPlayerAchievementData(stats.getName(), league);
+            if(json == null) {
+                loading.failStage("Achievement tracker didn't respond, unlucky cunt");
+                return;
+            }
+
+            JSONArray achievements = new JSONArray(json);
+            String dateKey = "createdAt";
+
+            for(int i = 0; i < achievements.length(); i++) {
+                JSONObject achievement = achievements.getJSONObject(i);
+                int progress = achievement.getInt("currentValue");
+
+                // Ignore achievements with no current progress
+                if(progress == -1) {
+                    continue;
+                }
+                String dateString = achievement.isNull(dateKey) ? null : achievement.getString(dateKey);
+                stats.addAchievement(
+                        new Achievement(
+                                achievement.getString("name"),
+                                achievement.getString("measure"),
+                                achievement.getString("metric"),
+                                progress,
+                                achievement.getInt("threshold"),
+                                dateString == null ? null : dateFormat.parse(dateString)
+                        )
+                );
+            }
+            loading.completeStage(stats.getAchievementSummary());
+        }
+        catch(Exception e) {
+            loading.failStage("Failed to parse achievement data!");
+        }
     }
 
     /**
@@ -314,6 +361,20 @@ public class OSRSHiscores extends Hiscores {
     }
 
     /**
+     * Fetch recent achievement data for the player
+     *
+     * @param name   Player name
+     * @param league Player is a league account
+     * @return Achievement data
+     */
+    private String fetchRecentPlayerAchievementData(String name, boolean league) {
+        return new NetworkRequest(
+                "https://" + getTrackerDomain(league) + "/api/players/username/" + name + "/achievements/progress",
+                false
+        ).get().body;
+    }
+
+    /**
      * Get the weekly tracker data for the given player.
      * If the player is not currently tracked begin tracking
      *
@@ -354,7 +415,6 @@ public class OSRSHiscores extends Hiscores {
                 playerStats.addGainedXP(skillName, experienceData.getLong("gained"));
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
             playerStats.setTrackerPeriod(
                     dateFormat.parse(week.getString("startsAt")),
                     dateFormat.parse(week.getString("endsAt"))

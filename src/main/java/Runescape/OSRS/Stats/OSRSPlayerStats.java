@@ -13,6 +13,7 @@ import java.util.List;
 
 public class OSRSPlayerStats extends PlayerStats {
     private final List<Boss> bossKills;
+    private final ArrayList<Achievement> completedAchievements, inProgressAchievements;
     private LeagueTier leagueTier;
     private ArrayList<Region> regions;
     private ArrayList<RelicTier> relicTiers;
@@ -31,6 +32,45 @@ public class OSRSPlayerStats extends PlayerStats {
     public OSRSPlayerStats(String name, String url, Skill[] skills, String[] clues, List<Boss> bossKills, ACCOUNT type) {
         super(name, url, skills, clues, type);
         this.bossKills = bossKills;
+        this.completedAchievements = new ArrayList<>();
+        this.inProgressAchievements = new ArrayList<>();
+    }
+
+    /**
+     * Add the given achievement to either the list of completed or in progress achievements.
+     *
+     * @param achievement Achievement to add
+     */
+    public void addAchievement(Achievement achievement) {
+        if(achievement.isCompleted()) {
+            completedAchievements.add(achievement);
+        }
+        else {
+            inProgressAchievements.add(achievement);
+        }
+    }
+
+    /**
+     * Get a String detailing the achievement completions of the player.
+     *
+     * @return Achievement summary
+     */
+    public String getAchievementSummary() {
+        if(!hasAchievements()) {
+            return "No achievements found!";
+        }
+        return completedAchievements.size()
+                + " completed, "
+                + inProgressAchievements.size() + " in progress";
+    }
+
+    /**
+     * Check if the player has any achievements
+     *
+     * @return Player has achievements
+     */
+    public boolean hasAchievements() {
+        return !inProgressAchievements.isEmpty() || !completedAchievements.isEmpty();
     }
 
     /**
