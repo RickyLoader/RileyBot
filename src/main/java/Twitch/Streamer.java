@@ -151,6 +151,15 @@ public class Streamer {
     }
 
     /**
+     * Check if the streamer has any followers
+     *
+     * @return Streamer has followers
+     */
+    public boolean hasFollowers() {
+        return followers > 0;
+    }
+
+    /**
      * Get the total number of followers for the streamer
      *
      * @return Total number of followers

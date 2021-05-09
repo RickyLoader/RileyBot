@@ -2,20 +2,20 @@ package Command.Commands;
 
 import Command.Commands.Lookup.TTVLookupCommand;
 import Command.Structure.CommandContext;
+import Command.Structure.CyclicalPageableEmbed;
 import Command.Structure.DiscordCommand;
 import Twitch.Streamer;
 import Twitch.TwitchTV;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Cool hot tub streamers
  */
 public class HotTubCommand extends DiscordCommand {
-    private final Random random = new Random();
 
     public HotTubCommand() {
         super("hot tub", "Take a look at some hot tub streamers!");
@@ -33,15 +33,50 @@ public class HotTubCommand extends DiscordCommand {
             channel.sendMessage("I didn't see anyone in a hot tub right now!").queue();
             return;
         }
-        Streamer streamer = hotTubStreamers.get(random.nextInt(hotTubStreamers.size()));
-        streamer.updateFollowers(TwitchTV.getInstance().fetchFollowers(streamer.getId()));
-        MessageEmbed streamerEmbed = TTVLookupCommand.buildStreamerEmbed(
-                streamer,
-                context.getMember(),
-                "Try: " + getTrigger()
-        );
-        channel.sendMessage(hotTubStreamers.size() + " *possible* hot tubbers found, here's one:").
-                embed(streamerEmbed)
-                .queue();
+        displayHotTubbers(context, hotTubStreamers);
+    }
+
+    /**
+     * Display the hot tub streams in a pageable message embed
+     *
+     * @param context   Command context
+     * @param streamers List of streamers to display
+     */
+    private void displayHotTubbers(CommandContext context, ArrayList<Streamer> streamers) {
+        new CyclicalPageableEmbed(
+                context,
+                streamers,
+                1
+        ) {
+            @Override
+            public EmbedBuilder getEmbedBuilder(String pageDetails) {
+                return new EmbedBuilder();
+            }
+
+            @Override
+            public void displayItem(EmbedBuilder builder, int currentIndex) {
+                Streamer streamer = (Streamer) getItems().get(currentIndex);
+                if(!streamer.hasFollowers()) {
+                    streamer.updateFollowers(TwitchTV.getInstance().fetchFollowers(streamer.getId()));
+                }
+
+                TTVLookupCommand.addStreamerToEmbed(
+                        builder,
+                        streamer,
+                        context.getMember(),
+                        "Try: " + getTrigger() + " | " + getPageDetails()
+                );
+            }
+
+            @Override
+            public String getPageDetails() {
+                return "Tubber: " + getPage() + "/" + getPages();
+            }
+
+            @Override
+            public boolean nonPagingEmoteAdded(Emote e) {
+                return false;
+            }
+        }.showMessage();
     }
 }

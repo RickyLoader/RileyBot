@@ -125,6 +125,19 @@ public class TTVLookupCommand extends LookupCommand {
      * @return Message embed detailing the given Twitch streamer
      */
     public static MessageEmbed buildStreamerEmbed(Streamer streamer, Member viewer, String footer) {
+        return addStreamerToEmbed(new EmbedBuilder(), streamer, viewer, footer).build();
+    }
+
+    /**
+     * Add the details of a Twitch streamer to the given embed builder
+     *
+     * @param builder  Embed builder to use
+     * @param streamer Twitch streamer to create message embed for
+     * @param viewer   Member who posted Twitch.tv link (display in description)
+     * @param footer   Footer to use in the embed
+     * @return Message embed detailing the given Twitch streamer
+     */
+    public static EmbedBuilder addStreamerToEmbed(EmbedBuilder builder, Streamer streamer, Member viewer, String footer) {
         boolean live = streamer.isStreaming();
         String description = "**Followers**: " + streamer.formatFollowers();
 
@@ -137,7 +150,7 @@ public class TTVLookupCommand extends LookupCommand {
         if(streamer.hasLanguage() && !streamer.getLanguage().equalsIgnoreCase("english")) {
             title += " (" + streamer.getLanguage() + ")";
         }
-        EmbedBuilder builder = new EmbedBuilder()
+        builder
                 .setThumbnail(streamer.getThumbnail())
                 .setTitle(
                         title,
@@ -176,8 +189,7 @@ public class TTVLookupCommand extends LookupCommand {
 
         return builder
                 .setFooter(footer)
-                .setDescription(description)
-                .build();
+                .setDescription(description);
     }
 
 
