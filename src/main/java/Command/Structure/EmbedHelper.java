@@ -32,6 +32,7 @@ public class EmbedHelper {
             URBAN_DICT_BLUE = 741095,
             RUNESCAPE_YELLOW = 16747520,
             RUNESCAPE_ORANGE = 13937190,
+            OSRS_BANK_TITLE = 16750623,
             RUNESCAPE_RED = 11672635,
             RUNESCAPE_BLUE = 6206918,
             FIRE_ORANGE = 16544773;

@@ -214,6 +214,7 @@ public class DiscordCommandManager {
         addCommand(new RSPlayerCountCommand());
         addCommand(new TrademeCommand());
         addCommand(new DictionaryCommand());
+        addCommand(new OSRSLendingCommand());
         // addCommand(new FacebookCommand());
         // addCommand(new TeamTreesGuessingCommand());
     }

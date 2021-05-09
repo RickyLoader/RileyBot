@@ -11,6 +11,7 @@ public class FontManager {
             BLITZ_FONT,
             COLD_WAR_FONT,
             OSRS_FONT,
+            OSRS_BANK_FONT,
             WISE_OLD_MAN_FONT,
             RS3_FONT,
             DEAL_OR_NO_DEAL_FONT,
@@ -24,6 +25,7 @@ public class FontManager {
         BLITZ_FONT = registerFont("/LOL/blitz_font.ttf");
         COLD_WAR_FONT = registerFont("/COD/CW/ColdWar.ttf");
         OSRS_FONT = registerFont("/Runescape/OSRS/osrs.ttf");
+        OSRS_BANK_FONT = registerFont("/Runescape/OSRS/osrs_bank.ttf");
         WISE_OLD_MAN_FONT = registerFont("/Runescape/OSRS/wise_old_man.ttf");
         RS3_FONT = registerFont("/Runescape/RS3/rs3.ttf");
         DEAL_OR_NO_DEAL_FONT = registerFont("/DOND/dond.ttf");
