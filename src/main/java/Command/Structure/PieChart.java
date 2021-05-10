@@ -12,8 +12,23 @@ import java.util.Comparator;
  */
 public class PieChart {
     private final BufferedImage chart, key;
-    private final int total;
+    private final long total;
     private final Font font;
+
+    /**
+     * Create a donut chart
+     *
+     * @param sections Sections to use in chart
+     * @param font     Font to use in key
+     * @param donut    Display as a donut chart
+     * @param radius   Radius to use for chart
+     */
+    public PieChart(Section[] sections, Font font, boolean donut, int radius) {
+        this.font = font;
+        this.total = Arrays.stream(sections).mapToLong(Section::getQuantity).sum();
+        this.chart = buildChart(sections, donut, radius);
+        this.key = buildKey(sections);
+    }
 
     /**
      * Create a donut chart
@@ -23,10 +38,7 @@ public class PieChart {
      * @param donut    Display as a donut chart
      */
     public PieChart(Section[] sections, Font font, boolean donut) {
-        this.font = font;
-        this.total = Arrays.stream(sections).mapToInt(Section::getQuantity).sum();
-        this.chart = buildChart(sections, donut);
-        this.key = buildKey(sections);
+        this(sections, font, donut, 150);
     }
 
     /**
@@ -52,7 +64,7 @@ public class PieChart {
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        Arrays.sort(sections, (o1, o2) -> o2.getQuantity() - o1.getQuantity());
+        Arrays.sort(sections, (o1, o2) -> Long.compare(o2.getQuantity(), o1.getQuantity()));
         Graphics g = key.getGraphics();
 
         for(Section section : sections) {
@@ -140,10 +152,10 @@ public class PieChart {
      *
      * @param sections Sections to display
      * @param donut    Display as a donut chart
+     * @param radius   Radius to use for chart
      * @return Image displaying donut chart
      */
-    private BufferedImage buildChart(Section[] sections, boolean donut) {
-        int radius = 150;
+    private BufferedImage buildChart(Section[] sections, boolean donut, int radius) {
         int diameter = radius * 2;
         int sectionWidth = 80;
         BufferedImage chart = new BufferedImage(
@@ -191,7 +203,7 @@ public class PieChart {
      */
     public static class Section {
         private final String title;
-        private final int quantity;
+        private final long quantity;
         private final Color colour;
 
         /**
@@ -201,7 +213,7 @@ public class PieChart {
          * @param quantity Quantity of item to build section for
          * @param colour   Section colour
          */
-        public Section(String title, int quantity, Color colour) {
+        public Section(String title, long quantity, Color colour) {
             this.title = title;
             this.quantity = quantity;
             this.colour = colour;
@@ -212,7 +224,7 @@ public class PieChart {
          *
          * @return Quantity
          */
-        public int getQuantity() {
+        public long getQuantity() {
             return quantity;
         }
 
@@ -231,7 +243,7 @@ public class PieChart {
          * @param total Total to find percentage of for quantity
          * @return String summary - "15 (25%)"
          */
-        public String getQuantitySummary(int total) {
+        public String getQuantitySummary(long total) {
             DecimalFormat format = new DecimalFormat("0.00'%'");
             String percent = format.format((double) quantity / (total / (double) 100));
             return new DecimalFormat("#,###").format(quantity) + " (" + percent + ")";
