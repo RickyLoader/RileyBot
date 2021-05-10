@@ -293,6 +293,7 @@ public class OSRSHiscores extends Hiscores {
 
             JSONArray achievements = new JSONArray(json);
             String dateKey = "createdAt";
+            String baseLevelRegex = "Base \\d+ Stats";
 
             for(int i = 0; i < achievements.length(); i++) {
                 JSONObject achievement = achievements.getJSONObject(i);
@@ -303,10 +304,13 @@ public class OSRSHiscores extends Hiscores {
                     continue;
                 }
                 String dateString = achievement.isNull(dateKey) ? null : achievement.getString(dateKey);
+                String name = achievement.getString("name");
                 stats.addAchievement(
                         new Achievement(
-                                achievement.getString("name"),
-                                achievement.getString("measure"),
+                                name,
+                                name.matches(baseLevelRegex)
+                                        ? "lowest xp"
+                                        : achievement.getString("measure"),
                                 achievement.getString("metric"),
                                 progress,
                                 achievement.getLong("threshold"),
