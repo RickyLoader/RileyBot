@@ -8,7 +8,7 @@ import java.util.Date;
  */
 public class Achievement {
     private final String name, measure, metric;
-    private final int progress, threshold;
+    private final long progress, threshold;
     private final boolean completed;
     private final Date date;
 
@@ -22,7 +22,7 @@ public class Achievement {
      * @param threshold Threshold - when achievement is completed
      * @param date      Date of completion (may be null)
      */
-    public Achievement(String name, String measure, String metric, int progress, int threshold, @Nullable Date date) {
+    public Achievement(String name, String measure, String metric, long progress, long threshold, @Nullable Date date) {
         this.name = name;
         this.measure = measure;
         this.metric = metric;
@@ -42,12 +42,34 @@ public class Achievement {
     }
 
     /**
+     * Get the progress percentage for the achievement
+     *
+     * @return Progress percent
+     */
+    public double getProgressPercent() {
+        return ((double) progress) / ((double) threshold) / 100;
+    }
+
+    /**
      * Get the date of the achievement completion
      *
      * @return Date of completion
      */
     public Date getCompletionDate() {
         return date;
+    }
+
+    /**
+     * Check if the achievement has a completion date.
+     * This is false if the achievement has not yet been completed,
+     * but also if the tracker provided the Unix epoch as a completion date.
+     * This occurs if the player was tracked after completing an achievement, the tracker does not know
+     * when the achievement occurred.
+     *
+     * @return Achievement has a completion date
+     */
+    public boolean hasCompletionDate() {
+        return date != null && date.getTime() > 0;
     }
 
     /**
@@ -64,7 +86,7 @@ public class Achievement {
      *
      * @return Current progress
      */
-    public int getProgress() {
+    public long getProgress() {
         return progress;
     }
 
@@ -73,7 +95,7 @@ public class Achievement {
      *
      * @return Achievement threshold
      */
-    public int getThreshold() {
+    public long getThreshold() {
         return threshold;
     }
 
@@ -93,5 +115,17 @@ public class Achievement {
      */
     public String getMetric() {
         return metric;
+    }
+
+    /**
+     * Get the remaining number of the metric until the threshold is reached
+     *
+     * @return Remaining number of the metric
+     */
+    public long getRemaining() {
+        if(completed) {
+            return 0;
+        }
+        return threshold - progress;
     }
 }

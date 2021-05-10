@@ -51,6 +51,24 @@ public class OSRSPlayerStats extends PlayerStats {
     }
 
     /**
+     * Get the list of completed achievements
+     *
+     * @return List of completed achievements
+     */
+    public ArrayList<Achievement> getCompletedAchievements() {
+        return completedAchievements;
+    }
+
+    /**
+     * Get the list of in progress achievements
+     *
+     * @return List of in progress achievements
+     */
+    public ArrayList<Achievement> getInProgressAchievements() {
+        return inProgressAchievements;
+    }
+
+    /**
      * Get a String detailing the achievement completions of the player.
      *
      * @return Achievement summary

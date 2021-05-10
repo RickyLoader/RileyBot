@@ -35,6 +35,8 @@ public class EmbedHelper {
             OSRS_BANK_TITLE = 16750623,
             RUNESCAPE_RED = 11672635,
             RUNESCAPE_BLUE = 6206918,
+            ROW_DARK = 1973790,
+            ROW_LIGHT = 3160122,
             FIRE_ORANGE = 16544773;
 
     public static final String

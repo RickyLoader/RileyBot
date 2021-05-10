@@ -5,6 +5,7 @@ import Bot.FontManager;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 
+import Command.Structure.PieChart;
 import Network.NetworkRequest;
 import Runescape.Boss;
 import Runescape.Hiscores;
@@ -22,7 +23,6 @@ import org.json.JSONObject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -38,7 +38,10 @@ public class OSRSHiscores extends Hiscores {
     private final boolean league, virtual, xp;
     public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+    private final SimpleDateFormat
+            parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'"),
+            displayFormat = new SimpleDateFormat("dd/MM/yyyy");
+
 
     /**
      * Create the OSRS Hiscores instance
@@ -293,10 +296,10 @@ public class OSRSHiscores extends Hiscores {
 
             for(int i = 0; i < achievements.length(); i++) {
                 JSONObject achievement = achievements.getJSONObject(i);
-                int progress = achievement.getInt("currentValue");
+                long progress = achievement.getLong("currentValue");
 
                 // Ignore achievements with no current progress
-                if(progress == -1) {
+                if(progress <= 0) {
                     continue;
                 }
                 String dateString = achievement.isNull(dateKey) ? null : achievement.getString(dateKey);
@@ -306,8 +309,8 @@ public class OSRSHiscores extends Hiscores {
                                 achievement.getString("measure"),
                                 achievement.getString("metric"),
                                 progress,
-                                achievement.getInt("threshold"),
-                                dateString == null ? null : dateFormat.parse(dateString)
+                                achievement.getLong("threshold"),
+                                dateString == null ? null : parseFormat.parse(dateString)
                         )
                 );
             }
@@ -414,14 +417,13 @@ public class OSRSHiscores extends Hiscores {
                 JSONObject experienceData = entry.getJSONObject("experience");
                 playerStats.addGainedXP(skillName, experienceData.getLong("gained"));
             }
-
             playerStats.setTrackerPeriod(
-                    dateFormat.parse(week.getString("startsAt")),
-                    dateFormat.parse(week.getString("endsAt"))
+                    parseFormat.parse(week.getString("startsAt")),
+                    parseFormat.parse(week.getString("endsAt"))
             );
             loading.completeStage(playerStats.hasWeeklyGains() ? "Weekly XP obtained" : "No XP gained this week");
         }
-        catch(ParseException e) {
+        catch(Exception e) {
             loading.failStage("Failed to parse Weekly XP");
         }
     }
@@ -433,20 +435,25 @@ public class OSRSHiscores extends Hiscores {
      * @return League tier
      */
     private LEAGUE_TIER calculateTier(long rank) {
-        String json = new NetworkRequest("https://trailblazer.wiseoldman.net/api/league/tiers", false).get().body;
         LEAGUE_TIER tier = LEAGUE_TIER.UNQUALIFIED;
-        if(json == null) {
+        try {
+            String json = new NetworkRequest("https://trailblazer.wiseoldman.net/api/league/tiers", false).get().body;
+            if(json == null) {
+                throw new Exception();
+            }
+            JSONArray tiers = new JSONArray(json);
+            for(int i = 0; i < tiers.length(); i++) {
+                JSONObject tierInfo = tiers.getJSONObject(i);
+                if(rank > tierInfo.getLong("threshold")) {
+                    break;
+                }
+                tier = LEAGUE_TIER.valueOf(tierInfo.getString("name").toUpperCase());
+            }
             return tier;
         }
-        JSONArray tiers = new JSONArray(json);
-        for(int i = 0; i < tiers.length(); i++) {
-            JSONObject tierInfo = tiers.getJSONObject(i);
-            if(rank > tierInfo.getLong("threshold")) {
-                break;
-            }
-            tier = LEAGUE_TIER.valueOf(tierInfo.getString("name").toUpperCase());
+        catch(Exception e) {
+            return tier;
         }
-        return tier;
     }
 
     /**
@@ -575,7 +582,213 @@ public class OSRSHiscores extends Hiscores {
         if(xp && stats.hasWeeklyGains()) {
             baseImage = addXPTracker(baseImage, stats);
         }
+
+        if(!league && stats.hasAchievements()) {
+            baseImage = addAchievementInfo(baseImage, stats);
+        }
         return baseImage;
+    }
+
+    /**
+     * Add player achievement info. Display most recently completed & closest to be completed achievements.
+     *
+     * @param baseImage Base player image
+     * @param stats     Player stats
+     * @return Base image with achievements appended
+     */
+    private BufferedImage addAchievementInfo(BufferedImage baseImage, OSRSPlayerStats stats) {
+
+        // Sort by most recent completion first
+        BufferedImage completedAchievements = buildAchievementsSection(
+                stats.getCompletedAchievements(),
+                (o1, o2) -> o2.getCompletionDate().compareTo(o1.getCompletionDate()),
+                "Recent Achievements"
+        );
+
+        // Sort by closest to completion first
+        BufferedImage inProgressAchievements = buildAchievementsSection(
+                stats.getInProgressAchievements(),
+                (o1, o2) -> Double.compare(o2.getProgressPercent(), o1.getProgressPercent()),
+                "Upcoming Achievements"
+        );
+
+        BufferedImage achievementsImage = new BufferedImage(
+                baseImage.getWidth(),
+                baseImage.getHeight() + completedAchievements.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        Graphics g = achievementsImage.getGraphics();
+        g.drawImage(baseImage, 0, 0, null);
+
+        int x = 0;
+        if(!stats.getCompletedAchievements().isEmpty()) {
+            g.drawImage(completedAchievements, x, baseImage.getHeight(), null);
+            x += completedAchievements.getWidth();
+        }
+        if(!stats.getInProgressAchievements().isEmpty()) {
+            g.drawImage(inProgressAchievements, x, baseImage.getHeight(), null);
+        }
+        g.dispose();
+        return achievementsImage;
+    }
+
+    /**
+     * Build an image displaying the top 5 from the given list of achievements
+     *
+     * @param achievements Achievements to display
+     * @param comparator   Comparator for sorting achievements (the first 5 will be displayed after sorting)
+     * @param title        Title to display
+     * @return Image displaying achievements
+     */
+    private BufferedImage buildAchievementsSection(ArrayList<Achievement> achievements, Comparator<Achievement> comparator, String title) {
+        BufferedImage achievementsContainer = getResourceHandler()
+                .getImageResource(getResourcePath() + "Templates/achievement_container.png");
+        achievements.sort(comparator);
+        Graphics g = achievementsContainer.getGraphics();
+
+        int y = 225;
+        int border = 25;
+        int max = 5;
+        int titleSectionHeight = (y - 2 * border);
+
+        g.setFont(getGameFont().deriveFont(80f));
+        g.setColor(Color.YELLOW);
+
+        FontMetrics fm = g.getFontMetrics();
+        g.drawString(
+                title,
+                (achievementsContainer.getWidth() / 2) - (fm.stringWidth(title) / 2),
+                ((titleSectionHeight / 2) + (fm.getMaxAscent() / 2)) + border
+        );
+
+        int rowCount = Math.min(achievements.size(), max);
+
+        // Always calculate for max rows
+        int rowHeight = (achievementsContainer.getHeight() - y - border) / max;
+        int rowWidth = achievementsContainer.getWidth() - (2 * border);
+
+        Color dark = new Color(EmbedHelper.ROW_DARK);
+        Color light = new Color(EmbedHelper.ROW_LIGHT);
+
+        for(int i = 0; i < rowCount; i++) {
+            Achievement achievement = achievements.get(i);
+            boolean even = i % 2 == 0;
+            g.drawImage(
+                    buildAchievementRow(
+                            achievement,
+                            even ? dark : light,
+                            even ? light : dark,
+                            rowWidth,
+                            rowHeight
+                    ),
+                    border,
+                    y,
+                    null
+            );
+            y += rowHeight;
+        }
+
+        g.dispose();
+        return achievementsContainer;
+    }
+
+    /**
+     * Build an achievement row displaying the given achievement details.
+     *
+     * @param achievement Achievement to display
+     * @param rowColour   Background colour to use behind row
+     * @param chartColour Background colour to use behind chart
+     * @param width       Width of row
+     * @param height      Height of row
+     * @return Achievement row image
+     */
+    private BufferedImage buildAchievementRow(Achievement achievement, Color rowColour, Color chartColour, int width, int height) {
+        BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics g = row.getGraphics();
+        g.setFont(trackerFont.deriveFont(35f));
+
+        int chartSectionWidth = width / 3;
+        int midY = height / 2;
+        int padding = 10;
+
+        g.setColor(rowColour);
+        g.fillRect(0, 0, width - chartSectionWidth, height);
+        g.setColor(chartColour);
+        g.fillRect(width - chartSectionWidth, 0, width, height);
+
+        BufferedImage progressImage = getAchievementChart(achievement, (height / 2) - padding);
+
+        g.drawImage(
+                progressImage,
+                (width - chartSectionWidth / 2) - (progressImage.getWidth() / 2),
+                midY - (progressImage.getHeight() / 2),
+                null
+        );
+
+
+        g.setColor(achievement.isCompleted() ? Color.GREEN : Color.WHITE);
+        FontMetrics fm = g.getFontMetrics();
+
+        int midLeftX = (width - chartSectionWidth) / 2;
+
+        DecimalFormat df = new DecimalFormat("#,###");
+        ArrayList<String> summary = new ArrayList<>();
+        summary.add(achievement.getName());
+        summary.add(
+                df.format(achievement.getProgress())
+                        + "/"
+                        + df.format(achievement.getThreshold())
+                        + " " + achievement.getMeasure()
+        );
+
+        if(achievement.isCompleted()) {
+            String date = achievement.hasCompletionDate()
+                    ? displayFormat.format(achievement.getCompletionDate())
+                    : "Unknown";
+            summary.add("Date: " + date);
+        }
+
+        int lineHeight = fm.getMaxAscent();
+        int gap = 20;
+        int textHeight = (lineHeight * summary.size()) + (gap * (summary.size() - 1)); // total size occupied by text
+
+        // text draws from bottom up, add line height so first line is drawn with the top at textHeight
+        int textY = midY - (textHeight / 2) + lineHeight;
+
+        for(String line : summary) {
+            g.drawString(line, midLeftX - (fm.stringWidth(line) / 2), textY);
+            textY += lineHeight + gap;
+        }
+        g.dispose();
+        return row;
+    }
+
+    /**
+     * Get a pie chart image for the given achievement
+     *
+     * @param achievement Achievement to build chart image for
+     * @param radius      Radius to use
+     * @return Achievement pie chart
+     */
+    private BufferedImage getAchievementChart(Achievement achievement, int radius) {
+        return new PieChart(
+                new PieChart.Section[]{
+                        new PieChart.Section(
+                                "Complete",
+                                achievement.getProgress(),
+                                Color.GREEN
+                        ),
+                        new PieChart.Section(
+                                "Incomplete",
+                                achievement.getRemaining(),
+                                Color.RED
+                        )
+                },
+                getGameFont(),
+                false,
+                radius
+        ).getChart();
     }
 
     /**
@@ -742,10 +955,9 @@ public class OSRSHiscores extends Hiscores {
         g.setColor(Color.YELLOW);
         FontMetrics fm = g.getFontMetrics();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String trackerPeriod = dateFormat.format(stats.getTrackerStartDate())
+        String trackerPeriod = displayFormat.format(stats.getTrackerStartDate())
                 + " - "
-                + dateFormat.format(stats.getTrackerEndDate());
+                + displayFormat.format(stats.getTrackerEndDate());
 
         g.drawString(
                 trackerPeriod,
