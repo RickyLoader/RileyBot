@@ -270,8 +270,9 @@ public class OSRSHiscores extends Hiscores {
             leagueTier.setTier(calculateTier(leagueTier.getRank()));
             loading.completeStage("Player is " + leagueTier.getTierName() + "!");
         }
-
-        addPlayerAchievements(stats);
+        else {
+            addPlayerAchievements(stats);
+        }
 
         if(xp) {
             getTrackerData(stats);
