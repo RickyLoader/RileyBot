@@ -286,13 +286,21 @@ public class OSRSHiscores extends Hiscores {
      */
     private void addPlayerAchievements(OSRSPlayerStats stats) {
         try {
-            String json = fetchRecentPlayerAchievementData(stats.getName(), league);
-            if(json == null) {
+            loading.updateStage("Checking player is tracked...");
+            NetworkResponse response = fetchRecentPlayerAchievementData(stats.getName(), league);
+
+            if(response.code == -1) {
                 loading.failStage("Achievement tracker didn't respond, unlucky cunt");
                 return;
             }
 
-            JSONArray achievements = new JSONArray(json);
+            if(response.code == 404) {
+                updatePlayerTracking(stats.getName(), league, false); // Tracking a new player can take 20+ seconds, don't wait
+                loading.completeStage("Player not tracked - They will be *soon*™");
+                return;
+            }
+
+            JSONArray achievements = new JSONArray(response.body);
             String dateKey = "createdAt";
             String baseLevelRegex = "Base \\d+ Stats";
 
@@ -376,11 +384,11 @@ public class OSRSHiscores extends Hiscores {
      * @param league Player is a league account
      * @return Achievement data
      */
-    private String fetchRecentPlayerAchievementData(String name, boolean league) {
+    private NetworkResponse fetchRecentPlayerAchievementData(String name, boolean league) {
         return new NetworkRequest(
                 "https://" + getTrackerDomain(league) + "/api/players/username/" + name + "/achievements/progress",
                 false
-        ).get().body;
+        ).get();
     }
 
     /**
@@ -402,7 +410,6 @@ public class OSRSHiscores extends Hiscores {
             }
 
             if(response.code == 404) {
-                updatePlayerTracking(name, league, false); // Tracking a new player can take 20+ seconds, don't wait
                 loading.completeStage("Player not tracked - They will be *soon*™");
                 return;
             }
