@@ -8,6 +8,7 @@ import Runescape.OSRS.GE.Item.ItemImage;
 import Runescape.OSRS.GE.ItemPrice;
 import Runescape.OSRS.GE.ItemPrice.Price;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -20,29 +21,20 @@ import java.util.List;
 /**
  * View OSRS G.E prices
  */
-public class GrandExchangeCommand extends DiscordCommand {
+public class GrandExchangeCommand extends OnReadyDiscordCommand {
     private final String thumbnail = "https://i.imgur.com/4z4Aipa.png";
     private final DecimalFormat commaFormat = new DecimalFormat("#,###");
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private final GrandExchange grandExchange;
     private String lowAlch, highAlch, sellPrice, buyPrice, freeToPlay, members, buyLimit;
 
     public GrandExchangeCommand() {
         super("g.e", "View the latest Grand Exchange prices for an item!", "g.e [item name/id]");
+        this.grandExchange = GrandExchange.getInstance();
     }
 
     @Override
     public void execute(CommandContext context) {
-        if(lowAlch == null) {
-            EmoteHelper emoteHelper = context.getEmoteHelper();
-            lowAlch = EmoteHelper.formatEmote(emoteHelper.getLowAlch());
-            highAlch = EmoteHelper.formatEmote(emoteHelper.getHighAlch());
-            sellPrice = EmoteHelper.formatEmote(emoteHelper.getSellPrice());
-            buyPrice = EmoteHelper.formatEmote(emoteHelper.getBuyPrice());
-            freeToPlay = EmoteHelper.formatEmote(emoteHelper.getFreeToPlay());
-            members = EmoteHelper.formatEmote(emoteHelper.getMembers());
-            buyLimit = EmoteHelper.formatEmote(emoteHelper.getBuyLimit());
-        }
-
         MessageChannel channel = context.getMessageChannel();
         String query = context.getLowerCaseMessage().replaceFirst(getTrigger(), "").trim();
 
@@ -54,7 +46,7 @@ public class GrandExchangeCommand extends DiscordCommand {
         new Thread(() -> {
             int id = toInteger(query);
             if(id == 0) {
-                Item[] items = GrandExchange.getInstance().getItemManager().getItemsByName(query);
+                Item[] items = grandExchange.getItemManager().getItemsByName(query);
                 if(items.length == 1) {
                     showItemPriceEmbed(items[0], channel);
                     return;
@@ -62,7 +54,7 @@ public class GrandExchangeCommand extends DiscordCommand {
                 showItemSearchResults(context, items, query);
             }
             else {
-                Item item = GrandExchange.getInstance().getItemManager().getItemByID(id);
+                Item item = grandExchange.getItemManager().getItemByID(id);
                 if(item == null) {
                     channel.sendMessage(
                             context.getMember().getAsMention()
@@ -121,7 +113,7 @@ public class GrandExchangeCommand extends DiscordCommand {
      */
     private void showItemPriceEmbed(Item item, MessageChannel channel) {
         channel.sendTyping().queue();
-        ItemPrice itemPrice = GrandExchange.getInstance().getItemPrice(item);
+        ItemPrice itemPrice = grandExchange.getItemPrice(item);
         ItemImage itemImage = item.getItemImage();
 
         MessageEmbed itemEmbed = new EmbedBuilder()
@@ -161,7 +153,7 @@ public class GrandExchangeCommand extends DiscordCommand {
                 )
                 .setFooter(
                         "Type: " + getTrigger() + " for help | Trade volume as of: "
-                                + dateFormat.format(GrandExchange.getInstance().getVolumeTimestamp()),
+                                + dateFormat.format(grandExchange.getVolumeTimestamp()),
                         thumbnail
                 )
                 .setColor(EmbedHelper.GREEN)
@@ -218,5 +210,16 @@ public class GrandExchangeCommand extends DiscordCommand {
     @Override
     public boolean matches(String query, Message message) {
         return query.startsWith(getTrigger());
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        lowAlch = EmoteHelper.formatEmote(emoteHelper.getLowAlch());
+        highAlch = EmoteHelper.formatEmote(emoteHelper.getHighAlch());
+        sellPrice = EmoteHelper.formatEmote(emoteHelper.getSellPrice());
+        buyPrice = EmoteHelper.formatEmote(emoteHelper.getBuyPrice());
+        freeToPlay = EmoteHelper.formatEmote(emoteHelper.getFreeToPlay());
+        members = EmoteHelper.formatEmote(emoteHelper.getMembers());
+        buyLimit = EmoteHelper.formatEmote(emoteHelper.getBuyLimit());
     }
 }
