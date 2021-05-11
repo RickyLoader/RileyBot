@@ -7,6 +7,7 @@ import Command.Structure.EmoteHelper;
 
 import Command.Structure.PieChart;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import Runescape.Boss;
 import Runescape.Hiscores;
 import Runescape.OSRS.League.LeagueTier;
@@ -361,11 +362,11 @@ public class OSRSHiscores extends Hiscores {
      * @param league Player is a league account
      * @return XP tracking data
      */
-    private String fetchPlayerTrackingData(String name, boolean league) {
+    private NetworkResponse fetchPlayerTrackingData(String name, boolean league) {
         return new NetworkRequest(
                 "https://" + getTrackerDomain(league) + "/api/players/username/" + name + "/gained",
                 false
-        ).get().body;
+        ).get();
     }
 
     /**
@@ -393,12 +394,14 @@ public class OSRSHiscores extends Hiscores {
             loading.updateStage("Checking player is tracked...");
             boolean league = playerStats.isLeague();
             String name = playerStats.getName();
-            String json = fetchPlayerTrackingData(name, league); // Check if player exists
-            if(json == null) {
+            NetworkResponse response = fetchPlayerTrackingData(name, league); // Check if player exists
+
+            if(response.code == -1) {
                 loading.failStage("XP tracker didn't respond, unlucky cunt");
                 return;
             }
-            if(json.equals("err")) {
+
+            if(response.code == 404) {
                 updatePlayerTracking(name, league, false); // Tracking a new player can take 20+ seconds, don't wait
                 loading.completeStage("Player not tracked - They will be *soon*™");
                 return;
@@ -407,9 +410,9 @@ public class OSRSHiscores extends Hiscores {
             loading.updateStage("Player is tracked, refreshing tracker...");
             updatePlayerTracking(name, league, true);
             loading.updateStage("Player is tracked, getting stats...");
-            json = fetchPlayerTrackingData(name, league);
+            response = fetchPlayerTrackingData(name, league);
 
-            JSONObject week = new JSONObject(json).getJSONObject("week");
+            JSONObject week = new JSONObject(response.body).getJSONObject("week");
             JSONObject stats = week.getJSONObject("data");
 
             for(String key : stats.keySet()) {
