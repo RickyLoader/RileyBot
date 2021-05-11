@@ -305,6 +305,7 @@ public class OSRSHiscores extends Hiscores {
                 }
                 String dateString = achievement.isNull(dateKey) ? null : achievement.getString(dateKey);
                 String name = achievement.getString("name");
+
                 stats.addAchievement(
                         new Achievement(
                                 name,
@@ -314,7 +315,7 @@ public class OSRSHiscores extends Hiscores {
                                 achievement.getString("metric"),
                                 progress,
                                 achievement.getLong("threshold"),
-                                dateString == null ? null : parseFormat.parse(dateString)
+                                dateString == null ? new Date(0) : parseFormat.parse(dateString)
                         )
                 );
             }
