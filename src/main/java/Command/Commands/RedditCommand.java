@@ -4,6 +4,7 @@ import COD.Assets.Ratio;
 import Command.Commands.GIFCommand.GIF;
 import Command.Structure.*;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import Reddit.PostContent;
 import Reddit.RedditPost;
 import Reddit.Subreddit;
@@ -39,6 +40,9 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
         new Thread(() -> {
             RedditPost redditPost = getPostInfo(context.getMessageContent());
+            if(redditPost == null) {
+                return;
+            }
             MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost);
             PostContent postContent = redditPost.getContent();
             AuditableRestAction<Void> deleteUrl = context.getMessage().delete();
@@ -129,9 +133,12 @@ public class RedditCommand extends OnReadyDiscordCommand {
      */
     private RedditPost getPostInfo(String url) {
         url = url.split("\\?")[0];
-        String json = new NetworkRequest(url + ".json", false).get().body;
+        NetworkResponse response = new NetworkRequest(url + ".json", false).get();
+        if(response.code != 200) {
+            return null;
+        }
 
-        JSONObject info = new JSONArray(json)
+        JSONObject info = new JSONArray(response.body)
                 .getJSONObject(0)
                 .getJSONObject("data")
                 .getJSONArray("children")
