@@ -145,13 +145,16 @@ public class GIFCommand extends DiscordCommand {
     /**
      * Get a GIF by its unique id
      *
-     * @param id ID of gif
+     * @param id    ID of gif
+     * @param adult Search on RedGIF vs Gfycat
      * @return GIF
      */
-    public static GIF getGifById(String id) {
+    public static GIF getGifById(String id, boolean adult) {
         try {
             JSONObject gif = new JSONObject(
-                    new NetworkRequest(BASE_URL + id, false).get().body
+                    new NetworkRequest(
+                            (adult ? BASE_URL : "https://api.gfycat.com/v1/gfycats/") + id, false
+                    ).get().body
             ).getJSONObject("gfyItem");
             return parseGif(gif);
         }

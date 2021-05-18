@@ -128,6 +128,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
      * @return Reddit post info
      */
     private RedditPost getPostInfo(String url) {
+        url = url.split("\\?")[0];
         String json = new NetworkRequest(url + ".json", false).get().body;
 
         JSONObject info = new JSONArray(json)
@@ -198,10 +199,13 @@ public class RedditCommand extends OnReadyDiscordCommand {
     private String processImageUrl(String url) {
         if(url.matches("https?://i.imgur.com/.+.gifv/?")) {
             url = url.substring(0, url.length() - 1);
+            return url;
         }
-        else if(url.matches("https?://(www.)?redgifs.com/watch/.+")) {
+        String redGifs = "https?://(www\\.)?redgifs.com/watch/.+";
+        String gfyCat = "https://(www\\.)?gfycat.com/.+";
+        if(url.matches(redGifs) || url.matches(gfyCat)) {
             String[] urlArgs = url.split("/");
-            GIF gif = GIFCommand.getGifById(urlArgs[urlArgs.length - 1]);
+            GIF gif = GIFCommand.getGifById(urlArgs[urlArgs.length - 1], url.matches(redGifs));
             if(gif != null) {
                 url = gif.getUrl();
             }
