@@ -20,7 +20,7 @@ public class NetworkRequest {
      */
     public NetworkRequest(String url, boolean local) {
         client = new OkHttpClient();
-        timeout = new NetworkResponse(null, -1);
+        timeout = new NetworkResponse(null, -1, null);
 
         try {
             builder = new Request.Builder().url(
@@ -183,7 +183,8 @@ public class NetworkRequest {
             }
             NetworkResponse networkResponse = new NetworkResponse(
                     response.body().string(),
-                    response.code()
+                    response.code(),
+                    response.headers()
             );
             response.close();
             return networkResponse;
