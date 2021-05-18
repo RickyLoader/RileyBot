@@ -10,6 +10,7 @@ import Reddit.RedditPost;
 import Reddit.Subreddit;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -43,9 +44,13 @@ public class RedditCommand extends OnReadyDiscordCommand {
             if(redditPost == null) {
                 return;
             }
-            MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost);
             PostContent postContent = redditPost.getContent();
+            if(postContent.hasGallery()) {
+                showGalleryPost(context, redditPost);
+                return;
+            }
             AuditableRestAction<Void> deleteUrl = context.getMessage().delete();
+            MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost);
             MessageAction sendRedditEmbed = channel.sendMessage(redditEmbed);
 
             if(postContent.getType() == PostContent.TYPE.VIDEO) {
@@ -65,33 +70,58 @@ public class RedditCommand extends OnReadyDiscordCommand {
     }
 
     /**
+     * Display a gallery Reddit post in a pageable message embed
+     *
+     * @param context     Command context
+     * @param galleryPost Gallery post to display
+     */
+    private void showGalleryPost(CommandContext context, RedditPost galleryPost) {
+        new CyclicalPageableEmbed(
+                context,
+                galleryPost.getContent().getGallery(),
+                1
+        ) {
+            @Override
+            public EmbedBuilder getEmbedBuilder(String pageDetails) {
+                return getDefaultEmbedBuilder(galleryPost)
+                        .setFooter(buildFooter(galleryPost) + " | " + pageDetails)
+                        .setDescription(buildDescription(galleryPost));
+            }
+
+            @Override
+            public String getPageDetails() {
+                return "Image: " + getPage() + "/" + getPages();
+            }
+
+            @Override
+            public void displayItem(EmbedBuilder builder, int currentIndex) {
+                builder.setImage((String) getItems().get(currentIndex));
+            }
+
+            @Override
+            public boolean nonPagingEmoteAdded(Emote e) {
+                return false;
+            }
+        }.showMessage();
+    }
+
+    /**
      * Get a message embed detailing the given Reddit post
      *
      * @param post Reddit post
      * @return Message embed detailing Reddit post
      */
     private MessageEmbed buildRedditPostEmbed(RedditPost post) {
-        Subreddit subreddit = post.getSubreddit();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy 'at' HH:mm:ss");
+        EmbedBuilder builder = getDefaultEmbedBuilder(post);
         String description = buildDescription(post);
-        EmbedBuilder builder = new EmbedBuilder()
-                .setColor(EmbedHelper.RED)
-                .setAuthor(
-                        subreddit.getName(),
-                        subreddit.getUrl(),
-                        subreddit.getImageUrl()
-                )
-                .setTitle(post.getTitle(), post.getUrl())
-                .setFooter("Posted by: " + post.getAuthor() + " on " + dateFormat.format(post.getDatePosted()))
-                .setThumbnail(thumbnail);
-
         PostContent content = post.getContent();
+
         switch(content.getType()) {
             case TEXT:
                 String text = content.getContent();
                 int limit = 300;
                 if(text.length() > limit) {
-                    text = text.substring(0, 300) + "...";
+                    text = text.substring(0, limit) + "...";
                 }
                 description = text + "\n\n" + description;
                 break;
@@ -105,7 +135,39 @@ public class RedditCommand extends OnReadyDiscordCommand {
             case VIDEO:
                 description = "**Note**: Videos will not have any sound!\n\n" + description;
         }
-        return builder.setDescription(description).build();
+        return builder
+                .setFooter(buildFooter(post))
+                .setDescription(description).build();
+    }
+
+    /**
+     * Get the default embed builder to use when displaying a Reddit post
+     *
+     * @param post Post to initialise embed builder values with
+     * @return Embed builder initialised with post values
+     */
+    private EmbedBuilder getDefaultEmbedBuilder(RedditPost post) {
+        Subreddit subreddit = post.getSubreddit();
+        return new EmbedBuilder()
+                .setColor(EmbedHelper.RED)
+                .setAuthor(
+                        subreddit.getName(),
+                        subreddit.getUrl(),
+                        subreddit.getImageUrl()
+                )
+                .setTitle(post.getTitle(), post.getUrl())
+                .setThumbnail(thumbnail);
+    }
+
+    /**
+     * Build the description to use in the message embed
+     *
+     * @param post Reddit post
+     * @return Embed footer
+     */
+    private String buildFooter(RedditPost post) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy 'at' HH:mm:ss");
+        return "Posted by: " + post.getAuthor() + " on " + dateFormat.format(post.getDatePosted());
     }
 
     /**
@@ -133,7 +195,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
      */
     private RedditPost getPostInfo(String url) {
         url = url.split("\\?")[0];
-        NetworkResponse response = new NetworkRequest(url + ".json", false).get();
+        NetworkResponse response = new NetworkRequest(url + ".json?raw_json=1", false).get();
         if(response.code != 200) {
             return null;
         }
@@ -180,11 +242,24 @@ public class RedditCommand extends OnReadyDiscordCommand {
         }
         else if(text.isEmpty()) {
             String url = post.getString("url");
-            if(post.getString("post_hint").equals("link")) {
+            if(post.has("post_hint") && post.getString("post_hint").equals("link")) {
                 return new PostContent(
                         url,
                         PostContent.TYPE.LINK
                 );
+            }
+            if(url.matches("https://www.reddit.com/gallery/.+")) {
+                PostContent gallery = new PostContent(url, PostContent.TYPE.IMAGE);
+                JSONObject mediaList = post.getJSONObject("media_metadata");
+                for(String key : mediaList.keySet()) {
+                    JSONArray mediaUrls = mediaList
+                            .getJSONObject(key)
+                            .getJSONArray("p");
+
+                    JSONObject targetMedia = mediaUrls.getJSONObject(mediaUrls.length() - 1);
+                    gallery.addImageToGallery(targetMedia.getString("u"));
+                }
+                return gallery;
             }
             return new PostContent(
                     processImageUrl(url),
