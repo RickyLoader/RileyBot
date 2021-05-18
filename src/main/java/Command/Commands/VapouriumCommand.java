@@ -60,7 +60,6 @@ public class VapouriumCommand extends DiscordCommand {
 
         if(query.equalsIgnoreCase(LATEST)) {
             ArrayList<Product> latest = vapourium.getLatestProducts(10);
-            System.out.println(latest.size());
             showProducts(context, latest);
             return;
         }
