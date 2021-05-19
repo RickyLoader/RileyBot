@@ -53,6 +53,7 @@ public class Vapourium {
      * @return List of product search results
      */
     public ArrayList<Product> getProductsByName(String name) {
+        refreshProductMap();
         ArrayList<Product> results = getProductList()
                 .stream()
                 .filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
