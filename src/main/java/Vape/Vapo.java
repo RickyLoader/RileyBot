@@ -13,7 +13,7 @@ public class Vapo extends VapeStore {
         super(
                 "Vapo",
                 "https://www.vapo.co.nz",
-                "https://i.imgur.com/Ex4yqV8.png"
+                "https://i.imgur.com/vrSStBe.png"
         );
     }
 
