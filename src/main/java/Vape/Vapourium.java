@@ -289,7 +289,7 @@ public class Vapourium {
 
         for(int i = 0; i < imageList.length(); i++) {
             JSONObject imageData = imageList.getJSONObject(i);
-            images.add(imageData.getString("src"));
+            images.add(imageData.getString("src").split("\\?")[0]);
         }
         return images;
     }
