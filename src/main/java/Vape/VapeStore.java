@@ -22,8 +22,27 @@ import java.util.stream.Collectors;
  */
 public class VapeStore {
     public final String name, baseUrl, urlRegex, logo;
+    private final static int ALL_PAGES = 0;
     private HashMap<Long, Product> products;
     private long lastUpdate;
+    private final int maxProductPages;
+
+    /**
+     * Initialise the vape store
+     *
+     * @param name            Store name
+     * @param baseUrl         Base URL to the store - e.g https://vapourium.nz
+     * @param logo            URL to the store logo - e.g https://i.imgur.com/cAZkQRq.png
+     * @param maxProductPages Max number of pages of products to parse (0 is all pages)
+     */
+    public VapeStore(String name, String baseUrl, String logo, int maxProductPages) {
+        this.name = name;
+        this.baseUrl = baseUrl + "/products";
+        this.urlRegex = baseUrl + "/(.+)";
+        this.logo = logo;
+        this.maxProductPages = maxProductPages < 0 ? ALL_PAGES : maxProductPages;
+        refreshProductMap();
+    }
 
     /**
      * Initialise the vape store
@@ -33,11 +52,7 @@ public class VapeStore {
      * @param logo    URL to the store logo - e.g https://i.imgur.com/cAZkQRq.png
      */
     public VapeStore(String name, String baseUrl, String logo) {
-        this.name = name;
-        this.baseUrl = baseUrl + "/products";
-        this.urlRegex = baseUrl + "/(.+)";
-        this.logo = logo;
-        refreshProductMap();
+        this(name, baseUrl, logo, ALL_PAGES);
     }
 
     /**
@@ -88,16 +103,19 @@ public class VapeStore {
         );
 
         JSONArray productArray = response.getJSONArray("products");
+
         if(productArray.isEmpty()) {
             return products;
         }
-
         for(int i = 0; i < productArray.length(); i++) {
             Product product = parseProduct(productArray.getJSONObject(i));
             if(product == null) {
                 continue;
             }
             products.put(product.getId(), product);
+        }
+        if(maxProductPages != ALL_PAGES && page == maxProductPages) {
+            return products;
         }
         return addProducts(products, page + 1);
     }
