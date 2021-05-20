@@ -34,7 +34,6 @@ public class VapouriumCommand extends DiscordCommand {
         this.vapourium = Vapourium.getInstance();
         this.footer = "Type: " + getTrigger() + " for help";
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
     }
 
     @Override
@@ -103,14 +102,15 @@ public class VapouriumCommand extends DiscordCommand {
         ) {
             @Override
             public EmbedBuilder getEmbedBuilder(String pageDetails) {
+
                 EmbedBuilder builder = new EmbedBuilder()
                         .setTitle(product.getName(), product.getUrl())
                         .setFooter(pageDetails)
                         .setThumbnail(Vapourium.LOGO)
                         .setDescription(product.getTruncatedDescription(100))
                         .addField("ID", String.valueOf(product.getId()), true)
-                        .addBlankField(true)
                         .addField("Type", product.getType(), true)
+                        .addField("Price", product.formatPriceRange(), true)
                         .setColor(EmbedHelper.GREEN);
 
                 if(product.hasOptions()) {
@@ -118,7 +118,7 @@ public class VapouriumCommand extends DiscordCommand {
 
                     for(Option option : options) {
                         ArrayList<Option.Value> values = option.getValues();
-                        String separator = values.size() > 3 ? ", " : "\n";
+                        String separator = values.size() > 3 ? ", " : ",\n";
                         String valueString;
                         if(option.hasValues()) {
                             StringBuilder valueBuilder = new StringBuilder();

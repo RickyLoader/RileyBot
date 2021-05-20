@@ -1,5 +1,8 @@
 package Vape;
 
+import javafx.util.Pair;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -12,12 +15,14 @@ public class Product {
     private final Date lastUpdated, created;
     private final ArrayList<String> images;
     private final ArrayList<Option> options;
+    private final Pair<Double, Double> priceRange;
 
     /**
      * Create the product
      *
      * @param id          Unique product id
      * @param name        Product name
+     * @param priceRange  Low/High price range
      * @param url         URL to the product
      * @param description Description of product
      * @param type        Product type
@@ -26,9 +31,10 @@ public class Product {
      * @param images      List of image URLs
      * @param options     List of product options
      */
-    public Product(long id, String name, String url, String description, String type, Date created, Date lastUpdated, ArrayList<String> images, ArrayList<Option> options) {
+    public Product(long id, String name, Pair<Double, Double> priceRange, String url, String description, String type, Date created, Date lastUpdated, ArrayList<String> images, ArrayList<Option> options) {
         this.id = id;
         this.name = name;
+        this.priceRange = priceRange;
         this.url = url;
         this.description = description;
         this.type = type.isEmpty() ? "-" : type.toUpperCase();
@@ -36,6 +42,15 @@ public class Product {
         this.lastUpdated = lastUpdated;
         this.images = images;
         this.options = options;
+    }
+
+    /**
+     * Get the price range of the product
+     *
+     * @return Price range
+     */
+    public Pair<Double, Double> getPriceRange() {
+        return priceRange;
     }
 
     /**
@@ -142,5 +157,19 @@ public class Product {
      */
     public boolean hasOptions() {
         return !options.isEmpty();
+    }
+
+    /**
+     * Get the price range of the product formatted as a String.
+     * If the price range is equal, a singular price will be returned.
+     * E.g <10.0, 15.0> -> "$10 - $15" or <10.0, 10.0> -> "$10"
+     *
+     * @return Formatted price range
+     */
+    public String formatPriceRange() {
+        DecimalFormat df = new DecimalFormat("$");
+        double low = priceRange.getKey();
+        double high = priceRange.getValue();
+        return low == high ? df.format(low) : df.format(low) + " - " + df.format(high);
     }
 }
