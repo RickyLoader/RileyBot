@@ -15,10 +15,7 @@ import Command.Commands.JSON.*;
 import Command.Commands.Runescape.OSRSPollCommand;
 import Command.Commands.Runescape.TrailblazerCommand;
 import Command.Commands.Variable.*;
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
-import Command.Structure.EmoteHelper;
-import Command.Structure.OnReadyDiscordCommand;
+import Command.Structure.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -149,6 +146,7 @@ public class DiscordCommandManager {
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
+        addCommand(new TrademeCommand());
         addCommand(new GunfightCommand());
         addCommand(new GunfightHelpCommand());
         addCommand(new LeaderboardCommand());
@@ -194,7 +192,6 @@ public class DiscordCommandManager {
         addCommand(new XKCDCommand());
         addCommand(new RiddleCommand());
         addCommand(new YuGiOhCommand());
-       // addCommand(new NASACommand());
         addCommand(new PollCommand());
         addCommand(new StatusCommand());
         addCommand(new GIFCommand());
@@ -212,12 +209,16 @@ public class DiscordCommandManager {
         addCommand(new SteamCommand());
         addCommand(new HotTubCommand());
         addCommand(new RSPlayerCountCommand());
-        addCommand(new TrademeCommand());
         addCommand(new DictionaryCommand());
         addCommand(new OSRSLendingCommand());
         addCommand(new VapouriumCommand());
-        // addCommand(new FacebookCommand());
-        // addCommand(new TeamTreesGuessingCommand());
+        addCommand(new VapoCommand());
+        addCommand(new AlphaVapeCommand());
+        /* TODO
+            addCommand(new FacebookCommand());
+            addCommand(new TeamTreesGuessingCommand());
+            addCommand(new NASACommand());
+         */
     }
 
     /**
@@ -250,7 +251,7 @@ public class DiscordCommandManager {
         addCommand(new SpidermanCommand());
         addCommand(new TrulyCommand());
         addCommand(new UnderbellyCommand());
-        addCommand(new VapeCommand());
+        // addCommand(new VapeCommand());
 
         addCommand(new FishingCommand());
         addCommand(new NormanCommand());
