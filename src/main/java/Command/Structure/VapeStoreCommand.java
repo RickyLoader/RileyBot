@@ -144,7 +144,7 @@ public class VapeStoreCommand extends DiscordCommand {
                             valueString = "-";
                         }
                         builder.addField(
-                                option.getName(),
+                                "__" + option.getName() + "__",
                                 valueString,
                                 true
                         );
