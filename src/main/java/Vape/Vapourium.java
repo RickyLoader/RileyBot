@@ -2,6 +2,7 @@ package Vape;
 
 import Network.NetworkRequest;
 import Network.NetworkResponse;
+import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -11,6 +12,7 @@ import org.jsoup.nodes.Element;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -121,7 +123,7 @@ public class Vapourium {
             return null;
         }
         JSONArray optionsList = product.getJSONArray("options");
-        HashMap<String, Boolean> variants = parseOptionAvailability(
+        ArrayList<Variant> variants = parseProductVariants(
                 product.getJSONArray("variants"),
                 optionsList.length()
         );
@@ -129,6 +131,7 @@ public class Vapourium {
         return new Product(
                 id,
                 product.getString("title"),
+                parsePriceRange(variants),
                 BASE_URL + "/" + product.getString("handle"),
                 description.isEmpty() ? "-" : description,
                 product.getString("product_type"),
@@ -137,6 +140,18 @@ public class Vapourium {
                 parseImages(product.getJSONArray("images")),
                 parseOptions(optionsList, variants)
         );
+    }
+
+    /**
+     * Parse the price range of the product variants
+     *
+     * @param variants List of product variants, each with a price
+     * @return Price range of product variants - lowest & highest price
+     */
+    private Pair<Double, Double> parsePriceRange(ArrayList<Variant> variants) {
+        // Sort by price low -> high
+        variants.sort(Comparator.comparingDouble(Variant::getPrice));
+        return new Pair<>(variants.get(0).getPrice(), variants.get(variants.size() - 1).getPrice());
     }
 
     /**
@@ -160,40 +175,64 @@ public class Vapourium {
     }
 
     /**
-     * Parse the variants from the given JSON, variants are all possible unique combinations of product option values.
+     * Parse the list of product variants from the given JSON array.
+     * Product variants are unique combinations of product option values.
      * E.g if the product has a "volume" option with values 60ml & 120ml, and a "nicotine" option with values 1mg & 6mg,
      * the resulting variants will be "60ml / 1mg", "60ml / 6mg", "120ml / 1mg", and "120ml / 6mg".
-     * Create a map of all unique option values (e.g ["1mg", "6mg", "60ml", "120ml"])
-     * to a boolean representing whether any variant containing that value is in stock.
-     * E.g the 6mg option value will be mapped to true if either "60ml / 6mg" or "120ml / 6mg" are in stock,
-     * the 1mg value will be false if neither "60ml / 1mg" or "120ml / 1mg" are in stock.
      *
      * @param variantList Product variants JSON
      * @param numOptions  Number of product options
-     * @return Map of available options
+     * @return List of product variants
      */
-    private HashMap<String, Boolean> parseOptionAvailability(JSONArray variantList, int numOptions) {
-        HashMap<String, Boolean> variants = new HashMap<>();
+    private ArrayList<Variant> parseProductVariants(JSONArray variantList, int numOptions) {
+        ArrayList<Variant> variants = new ArrayList<>();
         String availableKey = "available";
         for(int i = 0; i < variantList.length(); i++) {
-            JSONObject variant = variantList.getJSONObject(i);
+            JSONObject variantData = variantList.getJSONObject(i);
+            Variant variant = new Variant(
+                    variantData.getDouble("price"),
+                    variantData.has(availableKey)
+                            ? variantData.getBoolean(availableKey)
+                            : variantData.getInt("inventory_quantity") > 0
+            );
 
+            /*
+             * If a product has 2 options, every variant will have a value for both options,
+             * stored as "option1" and "option2"
+             */
             for(int j = 1; j <= numOptions; j++) {
-                String option = variant.getString("option" + j).toLowerCase();
-                boolean available = variant.has(availableKey)
-                        ? variant.getBoolean(availableKey)
-                        : variant.getInt("inventory_quantity") > 0;
+                variant.addOptionValue(variantData.getString("option" + j));
+            }
+            variants.add(variant);
+        }
+        return variants;
+    }
 
-                if(variants.containsKey(option)) {
+    /**
+     * Create a map where the keys are every unique product option value, and the values
+     * are whether that option value is in stock in any variants.
+     *
+     * @param variants List of product variants
+     * @return Map of option value -> in stock
+     */
+    private HashMap<String, Boolean> getOptionAvailability(ArrayList<Variant> variants) {
+        HashMap<String, Boolean> optionAvailability = new HashMap<>();
+
+        for(Variant variant : variants) {
+            ArrayList<String> optionValues = variant.getOptionValues();
+
+            for(String optionValue : optionValues) {
+                if(optionAvailability.containsKey(optionValue)) {
+
                     // Only overwrite false -> true
-                    if(variants.get(option) || !available) {
+                    if(optionAvailability.get(optionValue) || !variant.inStock()) {
                         continue;
                     }
                 }
-                variants.put(option, available);
+                optionAvailability.put(optionValue, variant.inStock());
             }
         }
-        return variants;
+        return optionAvailability;
     }
 
     /**
@@ -246,26 +285,29 @@ public class Vapourium {
     }
 
     /**
-     * Parse a list of options/variants from the given options JSON
+     * Parse a list of options from the given options JSON
      *
-     * @param optionList         Product options JSON
-     * @param optionAvailability Map of option -> available in stock
+     * @param optionList Product options JSON
+     * @param variants   List of product variants
      * @return List of options from the given JSON
      */
-    private ArrayList<Option> parseOptions(JSONArray optionList, HashMap<String, Boolean> optionAvailability) {
+    private ArrayList<Option> parseOptions(JSONArray optionList, ArrayList<Variant> variants) {
         ArrayList<Option> options = new ArrayList<>();
+
+        // Map of option value -> in stock (in at least one product variant)
+        HashMap<String, Boolean> optionAvailability = getOptionAvailability(variants);
 
         for(int i = 0; i < optionList.length(); i++) {
             JSONObject optionData = optionList.getJSONObject(i);
+            String name = optionData.getString("name");
+            if(name.equalsIgnoreCase("title")) {
+                continue;
+            }
             JSONArray values = optionData.getJSONArray("values");
-            Option option = new Option(optionData.getString("name"));
+            Option option = new Option(name);
 
             for(int j = 0; j < values.length(); j++) {
                 String value = values.getString(j);
-
-                /*
-                 * Option value is considered available if ANY variant containing the value is in stock.
-                 */
                 option.addValue(
                         new Option.Value(
                                 value,
