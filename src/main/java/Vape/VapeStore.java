@@ -21,21 +21,21 @@ import java.util.stream.Collectors;
  * Vape store products
  */
 public class VapeStore {
-    public final String name, productsUrl, urlRegex, logo;
+    public final String name, baseUrl, urlRegex, logo;
     private HashMap<Long, Product> products;
     private long lastUpdate;
 
     /**
      * Initialise the vape store
      *
-     * @param name        Store name
-     * @param productsUrl Base URL to the store products - e.g https://vapourium.nz/products
-     * @param logo        URL to the store logo - e.g https://i.imgur.com/cAZkQRq.png
+     * @param name    Store name
+     * @param baseUrl Base URL to the store - e.g https://vapourium.nz
+     * @param logo    URL to the store logo - e.g https://i.imgur.com/cAZkQRq.png
      */
-    public VapeStore(String name, String productsUrl, String logo) {
+    public VapeStore(String name, String baseUrl, String logo) {
         this.name = name;
-        this.productsUrl = productsUrl;
-        this.urlRegex = productsUrl + "/(.+)";
+        this.baseUrl = baseUrl + "/products";
+        this.urlRegex = baseUrl + "/(.+)";
         this.logo = logo;
         refreshProductMap();
     }
@@ -81,7 +81,7 @@ public class VapeStore {
      * @return Map of vape store products
      */
     private HashMap<Long, Product> addProducts(HashMap<Long, Product> products, int page) {
-        String url = productsUrl + ".json?limit=250&page=" + page;
+        String url = baseUrl + ".json?limit=250&page=" + page;
         System.out.println("Fetching " + name + " products: Page " + page);
         JSONObject response = new JSONObject(
                 new NetworkRequest(url, false).get().body
@@ -124,7 +124,7 @@ public class VapeStore {
                 id,
                 product.getString("title"),
                 parsePriceRange(variants),
-                productsUrl + "/" + product.getString("handle"),
+                baseUrl + "/" + product.getString("handle"),
                 description.isEmpty() ? "-" : description,
                 product.getString("product_type"),
                 parseDate(product.getString("created_at")),

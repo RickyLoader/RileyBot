@@ -12,7 +12,7 @@ public class Vapourium extends VapeStore {
     private Vapourium() {
         super(
                 "Vapourium",
-                "https://vapourium.nz/products",
+                "https://vapourium.nz",
                 "https://i.imgur.com/cAZkQRq.png"
         );
     }
