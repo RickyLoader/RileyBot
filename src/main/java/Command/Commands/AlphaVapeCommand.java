@@ -22,7 +22,7 @@ public class AlphaVapeCommand extends DiscordCommand {
         Product alphaVape = vapo.getProductById(ALPHA_ID);
         if(alphaVape == null) {
             context.getMessageChannel().sendMessage(
-                    context.getMember() + " I am so sorry, the **ALPHA VAPE** is nowhere to be found!"
+                    context.getMember().getAsMention() + " I am so sorry, the **ALPHA VAPE** is nowhere to be found!"
             ).queue();
             return;
         }
