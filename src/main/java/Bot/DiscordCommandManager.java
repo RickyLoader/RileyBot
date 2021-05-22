@@ -23,7 +23,6 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 /**
  * Hold a list of commands and handle incoming text input to check for command triggers
@@ -71,27 +70,6 @@ public class DiscordCommandManager {
             }
         }
         return null;
-    }
-
-    /**
-     * Randomly select the given number of commands
-     *
-     * @param bound How many commands to return
-     * @return An array of random commands
-     */
-    public DiscordCommand[] pickRandomCommands(int bound) {
-        DiscordCommand[] commands = new DiscordCommand[bound];
-        ArrayList<DiscordCommand> seen = new ArrayList<>();
-        Random rand = new Random();
-        for(int i = 0; i < bound; i++) {
-            DiscordCommand j = this.viewableCommands.get(rand.nextInt(this.viewableCommands.size()));
-            while(seen.contains(j)) {
-                j = this.viewableCommands.get(rand.nextInt(this.viewableCommands.size()));
-            }
-            commands[i] = j;
-            seen.add(j);
-        }
-        return commands;
     }
 
     /**
