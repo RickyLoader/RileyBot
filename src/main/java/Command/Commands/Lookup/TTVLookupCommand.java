@@ -139,7 +139,11 @@ public class TTVLookupCommand extends LookupCommand {
      */
     public static EmbedBuilder addStreamerToEmbed(EmbedBuilder builder, Streamer streamer, Member viewer, String footer) {
         boolean live = streamer.isStreaming();
-        String description = "**Followers**: " + streamer.formatFollowers();
+        String description = "";
+
+        if(streamer.hasFollowers()) {
+            description += "**Followers**: " + streamer.formatFollowers();
+        }
 
         if(viewer != null) {
             description += "\n**Biggest fan**: " + viewer.getAsMention();

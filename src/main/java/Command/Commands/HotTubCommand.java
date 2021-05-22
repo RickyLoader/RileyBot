@@ -16,6 +16,7 @@ import java.util.ArrayList;
  * Cool hot tub streamers
  */
 public class HotTubCommand extends DiscordCommand {
+    private static final long HOT_TUB_CATEGORY = 116747788;
 
     public HotTubCommand() {
         super("hot tub", "Take a look at some hot tub streamers!");
@@ -25,10 +26,7 @@ public class HotTubCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
         channel.sendTyping().queue();
-        ArrayList<Streamer> hotTubStreamers = TwitchTV.getInstance().searchStreamersByStreamTitle(
-                "hot tub",
-                "Just Chatting"
-        );
+        ArrayList<Streamer> hotTubStreamers = TwitchTV.getInstance().getStreamersByCategoryId(HOT_TUB_CATEGORY);
         if(hotTubStreamers.size() == 0) {
             channel.sendMessage("I didn't see anyone in a hot tub right now!").queue();
             return;
@@ -56,10 +54,9 @@ public class HotTubCommand extends DiscordCommand {
             @Override
             public void displayItem(EmbedBuilder builder, int currentIndex) {
                 Streamer streamer = (Streamer) getItems().get(currentIndex);
-                if(!streamer.hasFollowers()) {
-                    streamer.updateFollowers(TwitchTV.getInstance().fetchFollowers(streamer.getId()));
+                if(!streamer.hasThumbnail()) {
+                    streamer.updateThumbnail(TwitchTV.getInstance().getStreamerProfilePicture(streamer.getId()));
                 }
-
                 TTVLookupCommand.addStreamerToEmbed(
                         builder,
                         streamer,

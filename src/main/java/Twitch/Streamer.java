@@ -6,9 +6,10 @@ import java.text.NumberFormat;
  * Twitch.tv streamer
  */
 public class Streamer {
-    private final String loginName, displayName, id, language, thumbnail, url;
+    private final String loginName, displayName, id, language, url;
     private final Stream stream;
-    private int followers;
+    private String thumbnail;
+    private final int followers;
 
     /**
      * Create a Streamer from the builder values
@@ -232,11 +233,20 @@ public class Streamer {
     }
 
     /**
-     * Update the number of followers
+     * Update the streamer thumbnail
      *
-     * @param followers Number of followers to set
+     * @param thumbnail Thumbnail to set
      */
-    public void updateFollowers(int followers) {
-        this.followers = followers;
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    /**
+     * Check if the streamer has a thumbnail
+     *
+     * @return Streamer has thumbnail
+     */
+    public boolean hasThumbnail() {
+        return thumbnail != null;
     }
 }
