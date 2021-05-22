@@ -58,23 +58,39 @@ public class VapeStore {
     /**
      * Get a product by the unique id.
      *
+     * @param id         Product id
+     * @param updateData Update data if due
+     * @return Product with the given id or null
+     */
+    public Product getProductById(long id, boolean updateData) {
+        if(updateData) {
+            refreshProductMap();
+        }
+        return products.get(id);
+    }
+
+    /**
+     * Get a product by the unique id.
+     *
      * @param id Product id
      * @return Product with the given id or null
      */
     public Product getProductById(long id) {
-        refreshProductMap();
-        return products.get(id);
+        return getProductById(id, true);
     }
 
     /**
      * Get a list of products matching/containing the given name.
      * If a singular match is found, the returned list will contain only the match.
      *
-     * @param name Product name/query
+     * @param name       Product name/query
+     * @param updateData Update data if due
      * @return List of product search results
      */
-    public ArrayList<Product> getProductsByName(String name) {
-        refreshProductMap();
+    public ArrayList<Product> getProductsByName(String name, boolean updateData) {
+        if(updateData) {
+            refreshProductMap();
+        }
         ArrayList<Product> results = getProductList()
                 .stream()
                 .filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
@@ -85,6 +101,17 @@ public class VapeStore {
                 .filter(product -> product.getName().equalsIgnoreCase(name))
                 .collect(Collectors.toCollection(ArrayList::new));
         return matching.size() == 1 ? matching : results;
+    }
+
+    /**
+     * Get a list of products matching/containing the given name.
+     * If a singular match is found, the returned list will contain only the match.
+     *
+     * @param name Product name/query
+     * @return List of product search results
+     */
+    public ArrayList<Product> getProductsByName(String name) {
+        return getProductsByName(name, true);
     }
 
     /**

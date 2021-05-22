@@ -19,7 +19,7 @@ public class AlphaVapeCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         Vapo vapo = Vapo.getInstance();
-        Product alphaVape = vapo.getProductById(ALPHA_ID);
+        Product alphaVape = vapo.getProductById(ALPHA_ID, false);
         if(alphaVape == null) {
             context.getMessageChannel().sendMessage(
                     context.getMember().getAsMention() + " I am so sorry, the **ALPHA VAPE** is nowhere to be found!"
