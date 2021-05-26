@@ -81,7 +81,7 @@ public class BankImageBuilder {
         );
 
         if(quantity > 1) {
-            g.setFont(FontManager.OSRS_FONT.deriveFont(12f));
+            g.setFont(FontManager.OSRS_BANK_FONT.deriveFont(12f));
             QUANTITY_ABBREVIATION abbreviation = QUANTITY_ABBREVIATION.forQuantity(quantity);
 
             String quantityText = OSRSLendingCommand.formatQuantity(quantity, abbreviation, coins);
@@ -154,7 +154,7 @@ public class BankImageBuilder {
      */
     private void drawTitle(BufferedImage bankImage, String title) {
         Graphics g = bankImage.getGraphics();
-        g.setFont(FontManager.OSRS_BANK_FONT.deriveFont(18f));
+        g.setFont(FontManager.OSRS_BANK_FONT.deriveFont(16f));
         FontMetrics fm = g.getFontMetrics();
         int titleHeight = itemStartY - border * 2;
 
