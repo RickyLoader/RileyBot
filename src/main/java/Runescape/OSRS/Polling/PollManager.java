@@ -195,15 +195,18 @@ public class PollManager {
 
         updateHistory();
 
-        if(number > history.size()) {
+        if(number < 0 || number > history.size()) {
             return null;
         }
 
-        int pollIndex = ((number == 0) ? history.size() : number);
-        Poll poll = completePoll(history.get(pollIndex - 1));
+        if(number == 0){
+            number = history.size();
+        }
+
+        Poll poll = completePoll(history.get(number - 1));
 
         // Don't cache latest poll
-        if(poll != null && pollIndex != history.size() && !polls.containsKey(poll.getNumber())) {
+        if(poll != null && number != history.size() && !polls.containsKey(poll.getNumber())) {
             polls.put(poll.getNumber(), poll);
         }
         return poll;
