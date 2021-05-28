@@ -9,8 +9,12 @@ import Runescape.OSRS.Loan.ItemQuantity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -38,8 +42,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
     private final GrandExchange grandExchange;
     private final HashMap<Long, Loan> loanMessages;
     private final SimpleDateFormat dateFormat;
-
-    private Emote accept, decline;
+    private final Button accept, decline;
 
     public OSRSLendingCommand() {
         super(
@@ -56,6 +59,8 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
         this.loanMessages = new HashMap<>();
         this.footer = "Type: " + getTrigger() + " for help";
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy 'at' HH:mm:ss ");
+        this.accept = Button.success("accept", "Accept");
+        this.decline = Button.danger("decline", "Decline");
     }
 
     public enum QUANTITY_ABBREVIATION {
@@ -342,10 +347,8 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
      * @param channel Channel to send loan to
      */
     private void proposeLoan(Loan loan, MessageChannel channel) {
-        getLoanMessageAction(loan, channel, true).queue(message -> {
+        getLoanMessageAction(loan, channel, true).setActionRows(ActionRow.of(accept, decline)).queue(message -> {
             long id = message.getIdLong();
-            message.addReaction(accept).queue();
-            message.addReaction(decline).queue();
             loanMessages.put(id, loan);
 
             new Timer().schedule(new TimerTask() {
@@ -567,25 +570,33 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
 
     @Override
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
-        this.accept = emoteHelper.getComplete();
-        this.decline = emoteHelper.getFail();
-        jda.addEventListener(new EmoteListener() {
+        jda.addEventListener(new ButtonListener() {
             @Override
-            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                Emote emote = reaction.getReactionEmote().getEmote();
-                long messageId = reaction.getMessageIdLong();
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                long messageId = event.getMessageIdLong();
+                String buttonId = event.getComponentId();
                 Loan loan = loanMessages.get(messageId);
-                MessageChannel channel = reaction.getChannel();
+                MessageChannel channel = event.getChannel();
+                User user = event.getUser();
 
-                if(loan == null || user != loan.getLoanee() && user != loan.getLoaner() || emote != accept && emote != decline || user == loan.getLoaner() && emote == accept) {
+                if(loan == null) {
                     return;
                 }
 
+                if(user != loan.getLoanee() && user != loan.getLoaner()) {
+                    return;
+                }
+
+                if(user == loan.getLoaner() && buttonId.equals(accept.getId())) {
+                    return;
+                }
+
+                event.deferEdit().queue();
                 loanMessages.remove(messageId);
                 channel.deleteMessageById(messageId).queue();
 
                 // Both users may decline
-                if(emote == decline) {
+                if(buttonId.equals(decline.getId())) {
                     if(user == loan.getLoaner()) {
                         channel.sendMessage(
                                 loan.getLoanee().getAsMention()
