@@ -1,5 +1,8 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.interactions.button.Button;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,5 +37,15 @@ public abstract class CyclicalPageableEmbed extends PageableEmbed {
             index = getItems().size() - 1;
         }
         setIndex(index);
+    }
+
+    @Override
+    public ArrayList<Button> getButtonList() {
+        ArrayList<Button> buttons = new ArrayList<>();
+        if(getPages() > 1) {
+            buttons.add(getBackwardButton());
+            buttons.add(getForwardButton());
+        }
+        return buttons;
     }
 }

@@ -131,6 +131,24 @@ public abstract class PageableEmbed {
     }
 
     /**
+     * Get the button used to page backward
+     *
+     * @return Page backward button
+     */
+    public Button getBackwardButton() {
+        return backward;
+    }
+
+    /**
+     * Get the button used to page forward
+     *
+     * @return Page forward button
+     */
+    public Button getForwardButton() {
+        return forward;
+    }
+
+    /**
      * Get the embed builder to use
      *
      * @param pageDetails Current page details - e.g "Page: 1/5"
