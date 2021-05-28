@@ -4,69 +4,27 @@ import Command.Structure.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.button.ButtonStyle;
+import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
  * Track alcohol consumption with cool emotes
  */
-public class BrewTrackerCommand extends DiscordCommand {
-    private BrewsMessage brewsMessage;
-    private EmoteListener listener;
+public class BrewTrackerCommand extends OnReadyDiscordCommand {
+    private final HashMap<Long, BrewsMessage> brewMessages; // Channel ID -> Brews message
 
     public BrewTrackerCommand() {
         super("brew tracker!", "A tracker for alcoholism!");
-    }
-
-    /**
-     * Get an emote listener for calling the BrewsMessage instance when emotes are clicked
-     *
-     * @return Emote listener
-     */
-    private EmoteListener getEmoteListener() {
-        return new EmoteListener() {
-            @Override
-            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                long reactID = reaction.getMessageIdLong();
-                if(brewsMessage != null && reactID == brewsMessage.getId()) {
-                    brewsMessage.reactionAdded(reaction, user);
-                }
-            }
-        };
-    }
-
-    /**
-     * Add an emote listener to listen for brew emotes if there isn't one already
-     *
-     * @param jda BOT
-     */
-    private void addEmoteListener(JDA jda) {
-        if(this.listener == null) {
-            this.listener = getEmoteListener();
-            jda.addEventListener(this.listener);
-        }
-    }
-
-    /**
-     * Send the brew tracker message to the channel or relocate it if it has moved
-     *
-     * @param context Context of command
-     */
-    private void showBrewTracker(CommandContext context) {
-        if(brewsMessage == null || brewsMessage.timedOut()) {
-            addEmoteListener(context.getJDA());
-            brewsMessage = new BrewsMessage(context.getMessageChannel(), context.getEmoteHelper(), context.getGuild());
-            return;
-        }
-        brewsMessage.relocate();
-    }
-
-    @Override
-    public boolean matches(String query, Message message) {
-        return query.contains("brew") && query.contains("!");
+        this.brewMessages = new HashMap<>();
     }
 
     /**
@@ -76,12 +34,31 @@ public class BrewTrackerCommand extends DiscordCommand {
      */
     @Override
     public void execute(CommandContext context) {
-        String trigger = context.getLowerCaseMessage();
-        if(trigger.equals("brew tracker!")) {
-            showBrewTracker(context);
+        MessageChannel channel = context.getMessageChannel();
+        BrewsMessage brewsMessage = brewMessages.get(channel.getIdLong());
+
+        if(brewsMessage == null) {
+            brewMessages.put(
+                    channel.getIdLong(),
+                    new BrewsMessage(channel, context.getEmoteHelper(), context.getGuild())
+            );
             return;
         }
-        context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
+        brewsMessage.relocate();
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        jda.addEventListener(new ButtonListener() {
+            @Override
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                BrewsMessage brewsMessage = brewMessages.get(event.getMessageChannel().getIdLong());
+                if(brewsMessage == null || event.getMessageIdLong() != brewsMessage.getId()) {
+                    return;
+                }
+                brewsMessage.buttonPressed(event);
+            }
+        });
     }
 
     /**
@@ -89,10 +66,11 @@ public class BrewTrackerCommand extends DiscordCommand {
      */
     private static class BrewsMessage {
         private final MessageChannel channel;
-        private long id, lastUpdate;
-        private final LinkedHashMap<Member, Alcoholic> alcoholics = new LinkedHashMap<>();
-        private final Emote increment, decrement, emptyBeer;
+        private long id;
+        private final LinkedHashMap<Long, Alcoholic> alcoholics = new LinkedHashMap<>(); // User ID -> alcoholic
+        private final Emote emptyBeer;
         private final Guild guild;
+        private final Button increment, decrement;
 
         /**
          * Initialise the brew tracker
@@ -104,10 +82,21 @@ public class BrewTrackerCommand extends DiscordCommand {
         public BrewsMessage(MessageChannel channel, EmoteHelper emoteHelper, Guild guild) {
             this.channel = channel;
             this.guild = guild;
-            this.increment = emoteHelper.getAddBeer();
-            this.decrement = emoteHelper.getSubtractBeer();
+            this.increment = new ButtonImpl(
+                    "increment",
+                    "Add Beer",
+                    ButtonStyle.SUCCESS,
+                    false,
+                    Emoji.ofEmote(emoteHelper.getAddBeer())
+            );
+            this.decrement = new ButtonImpl(
+                    "decrement",
+                    "Remove Beer",
+                    ButtonStyle.DANGER,
+                    false,
+                    Emoji.ofEmote(emoteHelper.getSubtractBeer())
+            );
             this.emptyBeer = emoteHelper.getEmptyBeer();
-            this.lastUpdate = System.currentTimeMillis();
             sendMessage(getEmbed());
         }
 
@@ -118,15 +107,6 @@ public class BrewTrackerCommand extends DiscordCommand {
          */
         public long getId() {
             return id;
-        }
-
-        /**
-         * Time out the tracker after 2 hours
-         *
-         * @return Whether it has been 2 hours since the last update
-         */
-        public boolean timedOut() {
-            return System.currentTimeMillis() - lastUpdate > 7200000;
         }
 
         /**
@@ -146,19 +126,26 @@ public class BrewTrackerCommand extends DiscordCommand {
          * @return brew tracker message
          */
         private MessageEmbed getEmbed() {
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("Brew Tracker!");
-            builder.setDescription("Use the emotes to keep track of your alcoholism!");
-            builder.setThumbnail("https://i.imgur.com/0lQ4Cxh.png");
-            builder.setImage(EmbedHelper.SPACER_IMAGE);
-            builder.setColor(EmbedHelper.PURPLE);
-            builder.setFooter("Take the quiz: https://www.alcohol.org.nz/quiz", "https://i.imgur.com/uogtXCW.png");
+            EmbedBuilder builder = new EmbedBuilder()
+                    .setTitle("Brew Tracker!")
+                    .setDescription("Use the emotes to keep track of your alcoholism!")
+                    .setThumbnail("https://i.imgur.com/0lQ4Cxh.png")
+                    .setImage(EmbedHelper.SPACER_IMAGE)
+                    .setColor(EmbedHelper.PURPLE)
+                    .setFooter(
+                            "Take the quiz: https://www.alcohol.org.nz/quiz",
+                            "https://i.imgur.com/uogtXCW.png"
+                    );
             int total = 0;
             int index = 0;
             if(!alcoholics.isEmpty()) {
                 Alcoholic winner = getWinner();
                 for(Alcoholic alcoholic : alcoholics.values()) {
-                    builder.addField(alcoholic.getName(), getBrews(alcoholic.getBrews(), winner.getBrews()), true);
+                    builder.addField(
+                            alcoholic.getName(guild),
+                            getBrews(alcoholic.getBrews(), winner.getBrews()),
+                            true
+                    );
                     total += alcoholic.getBrews();
 
                     // Embed wraps after 3 inline fields, add a blank field after the first on each line to have only 2 on each
@@ -167,10 +154,13 @@ public class BrewTrackerCommand extends DiscordCommand {
                     }
                     index++;
                 }
-                builder.addBlankField(false);
-                builder.addField("Total", getBrewSummary(total), true);
-                builder.addField("Winner? - " + winner.getName(), getBrewSummary(winner.getBrews()), true);
-
+                builder.addBlankField(false)
+                        .addField("Total", getBrewSummary(total), true)
+                        .addField(
+                                "Winner? - " + winner.getName(guild),
+                                getBrewSummary(winner.getBrews()),
+                                true
+                        );
             }
             return builder.build();
         }
@@ -209,95 +199,87 @@ public class BrewTrackerCommand extends DiscordCommand {
         }
 
         /**
-         * Send the brew tracker message with a callback
-         * to apply the reaction emotes and remember the id of the message
+         * Send the brew tracker message with a callback to remember the id of the message
          *
          * @param message Brew tracker message
          */
         private void sendMessage(MessageEmbed message) {
-            channel.sendMessage(message).queue(response -> {
-                id = response.getIdLong();
-                response.addReaction(decrement).queue();
-                response.addReaction(increment).queue();
-            });
+            channel.sendMessage(message).setActionRows(ActionRow.of(increment, decrement)).queue(response -> id = response.getIdLong());
         }
 
         /**
-         * Called when a reaction is received, either delete and resend the brew tracker message if it is not
+         * Called when a button is clicked, either delete and resend the brew tracker message if it is not
          * the most recent message in the channel, or edit the existing message
+         *
+         * @param event Button click event to acknowledge
          */
-        private void updateMessage() {
-            channel.retrieveMessageById(id).queue(message -> {
-                MessageEmbed updateMessage = getEmbed();
-                if(channel.getLatestMessageIdLong() == id) {
-                    message.editMessage(updateMessage).queue();
-                }
-                else {
-                    message.delete().queue(aVoid -> {
-                        System.out.println("Moving message");
-                        sendMessage(updateMessage);
-                    });
-                }
-            });
+        private void updateMessage(ButtonClickEvent event) {
+            if(channel.getLatestMessageIdLong() == id) {
+                event.deferEdit().setEmbeds(getEmbed()).queue();
+            }
+            else {
+                relocate(event);
+            }
         }
 
         /**
          * Delete the current brew tracker message and resend as to make it the most recent message in the channel
+         *
+         * @param event Optional button click event to acknowledge
          */
-        public void relocate() {
-            channel.retrieveMessageById(id).queue(message -> {
-                message.delete().queue(aVoid -> System.out.println("relocating"));
-                sendMessage(getEmbed());
-            });
+        public void relocate(ButtonClickEvent... event) {
+            if(event.length > 0) {
+                event[0].deferEdit().queue();
+            }
+            channel.deleteMessageById(id).queue();
+            sendMessage(getEmbed());
         }
 
         /**
-         * Called when a reaction is added to the brew tracker message, change the quantity of brews for a member
+         * Called when a button on the message is clicked, change the quantity of brews for
+         * the member who clicked.
          *
-         * @param reaction Reaction that was added
-         * @param user     User who added the reaction
+         * @param event Button click event
          */
-        public void reactionAdded(MessageReaction reaction, User user) {
-            Emote emote = reaction.getReactionEmote().getEmote();
-            Member member = guild.getMember(user);
-            if(emote != increment && emote != decrement) {
-                return;
-            }
-            Alcoholic alcoholic = alcoholics.get(member);
+        public void buttonPressed(ButtonClickEvent event) {
+            long userId = event.getUser().getIdLong();
+            Alcoholic alcoholic = alcoholics.get(userId);
+
             if(alcoholic == null) {
-                alcoholic = new Alcoholic(member);
-                alcoholics.put(member, alcoholic);
+                alcoholic = new Alcoholic(userId);
+                alcoholics.put(userId, alcoholic);
             }
-            if(emote == increment) {
+
+            String buttonId = event.getComponentId();
+            if(buttonId.equals(increment.getId())) {
                 alcoholic.incrementBrews();
             }
             else {
                 if(alcoholic.decrementBrews()) {
-                    alcoholics.remove(member);
+                    alcoholics.remove(userId);
                 }
             }
-            this.lastUpdate = System.currentTimeMillis();
-            updateMessage();
+            updateMessage(event);
         }
 
         /**
          * Wrap user in class to track their brews
          */
         private static class Alcoholic implements Comparable<Alcoholic> {
-            private final Member member;
+            private final long userId;
             private int brews = 0;
 
             /**
-             * Create a new member to track
+             * Create a new alcoholic to track
              *
-             * @param member Member to track
+             * @param userId ID of the user to track
              */
-            public Alcoholic(Member member) {
-                this.member = member;
+            public Alcoholic(long userId) {
+                this.userId = userId;
             }
 
             /**
-             * Increment the member's brews if they are < 24
+             * Increment the user's brews if they are < 24
              */
             public void incrementBrews() {
                 if(this.brews == 24) {
@@ -307,9 +289,20 @@ public class BrewTrackerCommand extends DiscordCommand {
             }
 
             /**
-             * Decrement the member's brews and return if they have 0 or fewer
+             * Get the name of the alcoholic by attempting to locate the member via the user ID
              *
-             * @return Whether member now has 0 or fewer brews
+             * @param guild Guild to attempt to locate member
+             * @return Name of user or "Unknown"
+             */
+            public String getName(Guild guild) {
+                Member member = guild.getMemberById(userId);
+                return member == null ? "Unknown" : member.getEffectiveName();
+            }
+
+            /**
+             * Decrement the user's brews and return if they have 0 or fewer
+             *
+             * @return Whether user now has 0 or fewer brews
              */
             public boolean decrementBrews() {
                 this.brews--;
@@ -326,18 +319,9 @@ public class BrewTrackerCommand extends DiscordCommand {
             }
 
             /**
-             * Get the member's name
+             * Sort users in descending order brew quantity
              *
-             * @return Member name
-             */
-            public String getName() {
-                return member.getEffectiveName();
-            }
-
-            /**
-             * Sort members in descending order brew quantity
-             *
-             * @param o member to compare to current
+             * @param o user to compare to current
              * @return Sort value
              */
             @Override
