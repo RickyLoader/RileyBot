@@ -29,12 +29,7 @@ public class GunfightScore {
      * @param score Score to use values from
      */
     public GunfightScore(GunfightScore score) {
-        this.wins = score.getWins();
-        this.losses = score.getLosses();
-        this.currentStreak = score.getCurrentStreak();
-        this.rank = score.getRank();
-        this.longestStreak = score.getLongestStreak();
-        this.lastUpdate = score.getLastUpdate();
+        replaceValues(score);
     }
 
     /**
