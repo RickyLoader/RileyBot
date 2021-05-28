@@ -42,14 +42,12 @@ public class GunfightScore {
                 "https://bit.ly/2YTzfTQ", // Default price
                 "https://bnetcmsus-a.akamaihd.net/cms/blog_header/pv/PV106AQCOXG41591752563326.jpg", // Price in smoke
                 "https://i.imgur.com/W3nY6AF.jpg", // Happy price
-                "https://vignette.wikia.nocookie.net/callofduty/images/7/71/Pillar3.jpg/revision/latest?cb=20191004172714", // Happy price
                 "https://static1.gamerantimages.com/wordpress/wp-content/uploads/2020/05/call-of-duty-modern-warfare-nuke-victory-screen.jpg", // VICTORY
         };
 
         String[] badThumb = new String[]{
                 "https://i.imgur.com/AHtBYyn.jpg", // Sad price
                 "https://i.ytimg.com/vi/ONzIHOxtQws/maxresdefault.jpg", // Ghost dying
-                "https://vignette.wikia.nocookie.net/callofduty/images/c/c5/Ghost%27s_death_Shepherd_Loose_Ends_MW2.png/revision/latest?cb=20120121101525", // Ghost dying
                 "https://i.imgur.com/ZgHmHY2.png" // DEFEAT
         };
 
