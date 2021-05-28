@@ -35,6 +35,10 @@ public class BrewTrackerCommand extends OnReadyDiscordCommand {
     @Override
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
+        if(!context.getLowerCaseMessage().equalsIgnoreCase(getTrigger())) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
         BrewsMessage brewsMessage = brewMessages.get(channel.getIdLong());
 
         if(brewsMessage == null) {
@@ -59,6 +63,11 @@ public class BrewTrackerCommand extends OnReadyDiscordCommand {
                 brewsMessage.buttonPressed(event);
             }
         });
+    }
+
+    @Override
+    public boolean matches(String query, Message message) {
+        return super.matches(query, message) || query.startsWith(getTrigger().split(" ")[0]);
     }
 
     /**
