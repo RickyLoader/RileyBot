@@ -4,7 +4,6 @@ import Vape.Option;
 import Vape.Product;
 import Vape.VapeStore;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -170,7 +169,7 @@ public class VapeStoreCommand extends DiscordCommand {
             }
 
             @Override
-            public boolean nonPagingEmoteAdded(Emote e) {
+            public boolean nonPagingButtonPressed(String buttonId) {
                 return false;
             }
         }.showMessage();

@@ -290,7 +290,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             }
 
             @Override
-            public boolean nonPagingEmoteAdded(Emote e) {
+            public boolean nonPagingButtonPressed(String buttonId) {
                 return false;
             }
 

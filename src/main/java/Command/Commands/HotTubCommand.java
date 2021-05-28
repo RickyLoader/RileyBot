@@ -7,7 +7,6 @@ import Command.Structure.DiscordCommand;
 import Twitch.Streamer;
 import Twitch.TwitchTV;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class HotTubCommand extends DiscordCommand {
             }
 
             @Override
-            public boolean nonPagingEmoteAdded(Emote e) {
+            public boolean nonPagingButtonPressed(String buttonId) {
                 return false;
             }
         }.showMessage();

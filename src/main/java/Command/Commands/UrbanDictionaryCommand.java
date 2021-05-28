@@ -4,7 +4,6 @@ import Command.Structure.*;
 import UrbanDictionary.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -90,7 +89,7 @@ public class UrbanDictionaryCommand extends OnReadyDiscordCommand {
             }
 
             @Override
-            public boolean nonPagingEmoteAdded(Emote e) {
+            public boolean nonPagingButtonPressed(String buttonId) {
                 return false;
             }
         }.showMessage();

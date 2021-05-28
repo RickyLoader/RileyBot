@@ -108,7 +108,7 @@ public class GIFCommand extends DiscordCommand {
             }
 
             @Override
-            public boolean nonPagingEmoteAdded(Emote e) {
+            public boolean nonPagingButtonPressed(String buttonId) {
                 return false;
             }
         }.showMessage();
