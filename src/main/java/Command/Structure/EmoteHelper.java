@@ -38,17 +38,24 @@ public class EmoteHelper {
     }
 
     /**
-     * <img src="https://cdn.discordapp.com/emojis/742984226621620234.png"/>
+     * <img src="https://cdn.discordapp.com/emojis/847803447885430784.png"/>
      */
     public Emote getUndo() {
-        return get("742984226621620234");
+        return get("847803447885430784");
     }
 
     /**
-     * <img src="https://cdn.discordapp.com/emojis/742984225808187494.png"/>
+     * <img src="https://cdn.discordapp.com/emojis/847805264656203837.png"/>
      */
     public Emote getStop() {
-        return get("742984225808187494");
+        return get("847805264656203837");
+    }
+
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/847805658623508481.png"/>
+     */
+    public Emote getStopWhite() {
+        return get("847805658623508481");
     }
 
     /**
@@ -84,20 +91,6 @@ public class EmoteHelper {
      */
     public Emote getIMDB() {
         return get("755356580613980190");
-    }
-
-    /**
-     * <img src="https://cdn.discordapp.com/emojis/742984225959051331.png"/>
-     */
-    public Emote getVictory() {
-        return get("742984225959051331");
-    }
-
-    /**
-     * <img src="https://cdn.discordapp.com/emojis/742984225606860813.png"/>
-     */
-    public Emote getDefeat() {
-        return get("742984225606860813");
     }
 
     /**
