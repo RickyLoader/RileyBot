@@ -5,7 +5,6 @@ import Facebook.PostDetails;
 import Facebook.SocialResponse;
 import Facebook.UserDetails;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
 
 import java.text.DecimalFormat;
 
@@ -76,7 +75,7 @@ public class PageableFacebookPost extends CyclicalPageableEmbed {
     }
 
     @Override
-    public boolean nonPagingEmoteAdded(Emote e) {
+    public boolean nonPagingButtonPressed(String buttonId) {
         return false;
     }
 }

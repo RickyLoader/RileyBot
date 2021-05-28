@@ -1,15 +1,16 @@
 package Command.Structure;
 
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Emoji;
+import net.dv8tion.jda.api.interactions.button.Button;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Sortable pageable embed
  */
 public abstract class PageableSortEmbed extends PageableEmbed {
-    private final Emote reverse;
+    private final Button reverse;
     private boolean defaultSort = true;
 
     /**
@@ -21,21 +22,22 @@ public abstract class PageableSortEmbed extends PageableEmbed {
      */
     public PageableSortEmbed(CommandContext context, List<?> items, int bound) {
         super(context, items, bound);
-        this.reverse = context.getEmoteHelper().getReverse();
+        this.reverse = Button.primary("reverse", Emoji.ofEmote(getEmoteHelper().getReverse()));
         sortItems(items, defaultSort);
     }
 
     @Override
-    public void addReactions(Message message) {
-        super.addReactions(message);
+    public ArrayList<Button> getButtonList() {
+        ArrayList<Button> buttons = super.getButtonList();
         if(getItems().size() > 1) {
-            message.addReaction(reverse).queue();
+            buttons.add(reverse);
         }
+        return buttons;
     }
 
     @Override
-    public boolean nonPagingEmoteAdded(Emote e) {
-        if(e != reverse || getItems().size() == 1) {
+    public boolean nonPagingButtonPressed(String buttonId) {
+        if(!buttonId.equals(reverse.getId())) {
             return false;
         }
         flipSortDirection();
@@ -61,11 +63,11 @@ public abstract class PageableSortEmbed extends PageableEmbed {
     }
 
     /**
-     * Get the reverse sort emote
+     * Get the reverse sort button
      *
-     * @return Reverse sort emote
+     * @return Reverse sort button
      */
-    public Emote getReverse() {
+    public Button getReverseButton() {
         return reverse;
     }
 

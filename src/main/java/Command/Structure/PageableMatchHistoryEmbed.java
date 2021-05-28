@@ -4,13 +4,13 @@ import COD.Assets.Breakdown;
 import COD.Match.MatchHistory;
 import COD.Match.MatchStats;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.button.ButtonStyle;
+import net.dv8tion.jda.internal.interactions.ButtonImpl;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static COD.CODManager.*;
 
@@ -18,7 +18,7 @@ import static COD.CODManager.*;
  * Pageable COD match history embed with map/mode breakdown charts
  */
 public class PageableMatchHistoryEmbed extends PageableTableEmbed {
-    private final Emote maps, modes;
+    private final Button maps, modes, goBack;
     private final MatchHistory matchHistory;
     private final GAME game;
 
@@ -45,8 +45,27 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
                 matchHistory.getWins() > matchHistory.getLosses() ? EmbedHelper.GREEN : EmbedHelper.RED
         );
         EmoteHelper emoteHelper = context.getEmoteHelper();
-        this.maps = emoteHelper.getMapBreakdown();
-        this.modes = emoteHelper.getModeBreakdown();
+        this.maps = new ButtonImpl(
+                "maps",
+                "Maps",
+                ButtonStyle.PRIMARY,
+                false,
+                Emoji.ofEmote(emoteHelper.getMapBreakdown())
+        );
+        this.modes = new ButtonImpl(
+                "modes",
+                "Modes",
+                ButtonStyle.PRIMARY,
+                false,
+                Emoji.ofEmote(emoteHelper.getModeBreakdown())
+        );
+        this.goBack = new ButtonImpl(
+                "back",
+                "Return",
+                ButtonStyle.DANGER,
+                false,
+                Emoji.ofEmote(emoteHelper.getBackward())
+        );
         this.matchHistory = matchHistory;
         this.game = game;
     }
@@ -63,34 +82,31 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
      * Build a message embed displaying a breakdown of the match history.
      * A breakdown is a pie chart + key detailing the frequency of an item in the match history.
      *
-     * @param breakdown     Breakdown to display
-     * @param breakdownItem Name of item being broken down - e.g "Map"
+     * @param breakdown Breakdown to display
      */
-    private MessageEmbed buildBreakdownEmbed(Breakdown breakdown, String breakdownItem) {
+    private MessageEmbed buildBreakdownEmbed(Breakdown breakdown) {
         return new EmbedBuilder()
                 .setTitle(
                         game.name().toUpperCase()
                                 + " Match History "
                                 + matchHistory.getName().toUpperCase()
-                                + "\n" + breakdownItem + " Breakdown"
+                                + "\n" + breakdown.getTitle() + " Breakdown"
                 )
                 .setImage(breakdown.getImageUrl())
                 .setDescription("Breakdown for the last " + matchHistory.getMatches().size() + " matches:")
                 .setColor(EmbedHelper.GREEN)
                 .setThumbnail(getThumb())
-                .setFooter(getFooter() + " | Use the paging emotes to return")
+                .setFooter(getFooter())
                 .build();
     }
 
-
     @Override
     public MessageEmbed buildMessage() {
-        Emote lastAction = getLastAction();
-        if(lastAction == maps) {
-            return buildBreakdownEmbed(matchHistory.getMapBreakdown(), "Map");
+        if(showingMaps()) {
+            return buildBreakdownEmbed(matchHistory.getMapBreakdown());
         }
-        else if(lastAction == modes) {
-            return buildBreakdownEmbed(matchHistory.getModeBreakdown(), "Mode");
+        else if(showingModes()) {
+            return buildBreakdownEmbed(matchHistory.getModeBreakdown());
         }
         return super.buildMessage();
     }
@@ -116,55 +132,62 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
     }
 
     /**
-     * Check if a map or mode breakdown is currently being shown in the message.
+     * Check if the message is currently displaying a breakdown
      *
-     * @return Map/mode breakdown is being shown
+     * @return Message is displaying a breakdown
      */
     private boolean showingBreakdown() {
-        return getLastAction() == maps || getLastAction() == modes;
+        return showingMaps() || showingModes();
     }
 
     /**
-     * Page forward if a map/mode breakdown is not being displayed.
+     * Check if the message is currently displaying the map breakdown
+     *
+     * @return Message is displaying map breakdown
      */
-    @Override
-    public void pageForward() {
-        if(showingBreakdown()) {
-            return;
-        }
-        super.pageForward();
+    private boolean showingMaps() {
+        return hasLastAction() && getLastAction().equals(maps.getId());
     }
 
     /**
-     * Page backward if a map/mode breakdown is not being displayed
+     * Check if the message is currently displaying the mode breakdown
+     *
+     * @return Message is displaying mode breakdown
      */
-    @Override
-    public void pageBackward() {
-        if(showingBreakdown()) {
-            return;
-        }
-        super.pageBackward();
+    private boolean showingModes() {
+        return hasLastAction() && getLastAction().equals(modes.getId());
     }
 
     @Override
-    public void addReactions(Message message) {
-        super.addReactions(message);
-        message.addReaction(maps).queue();
-        message.addReaction(modes).queue();
+    public ArrayList<Button> getButtonList() {
+        if(showingBreakdown()) {
+            Button[] buttons = new Button[]{
+                    goBack,
+                    showingMaps() ? maps.asDisabled() : maps,
+                    showingModes() ? modes.asDisabled() : modes,
+            };
+            return new ArrayList<>(Arrays.asList(buttons));
+        }
+        ArrayList<Button> buttons = super.getButtonList();
+        buttons.add(maps);
+        buttons.add(modes);
+        return buttons;
     }
 
     /**
-     * If the added emote is for a map/mode breakdown, return true to update the message.
+     * If the added button is for a map/mode breakdown, return true to update the message.
      * Also return true if the emote was for sorting but a map/mode breakdown is currently being displayed.
-     * This allows the paging emotes to act as a back button for returning to the match history from a
+     * This allows the paging  to act as a back button for returning to the match history from a
      * map/mode breakdown, without actually paging forward/backward or sorting the matches.
+     *
+     * @param buttonId ID of the button which was pressed
      */
     @Override
-    public boolean nonPagingEmoteAdded(Emote e) {
-        if(e == maps || e == modes || e == getReverse() && showingBreakdown()) {
+    public boolean nonPagingButtonPressed(String buttonId) {
+        if(buttonId.equals(maps.getId()) || buttonId.equals(modes.getId()) || buttonId.equals(goBack.getId())) {
             return true;
         }
-        return super.nonPagingEmoteAdded(e);
+        return super.nonPagingButtonPressed(buttonId);
     }
 
     /**

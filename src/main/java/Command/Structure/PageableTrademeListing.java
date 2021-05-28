@@ -3,7 +3,6 @@ package Command.Structure;
 import TrademeAPI.Listing;
 import TrademeAPI.Member;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.annotation.Nullable;
@@ -106,7 +105,7 @@ public class PageableTrademeListing extends CyclicalPageableEmbed {
     }
 
     @Override
-    public boolean nonPagingEmoteAdded(Emote e) {
+    public boolean nonPagingButtonPressed(String buttonId) {
         return false;
     }
 }
