@@ -22,15 +22,18 @@ public class Session {
 
     /**
      * Constructor for building a Session instance from a completed Gunfight
+     *
+     * @param startTime Start time of session
+     * @param score     Session score
      */
-    Session(long startTime, long date, int wins, int losses, int longestStreak) {
-        this.date = date;
-        this.wins = wins;
-        this.losses = losses;
+    Session(long startTime, GunfightScore score) {
+        this.date = score.getLastUpdate();
+        this.wins = score.getWins();
+        this.losses = score.getLosses();
 
         // calculate win/loss ratio
         this.ratio = getRatio();
-        this.longestStreak = longestStreak;
+        this.longestStreak = score.getLongestStreak();
 
         // duration of session
         this.duration = date - startTime;
@@ -118,8 +121,6 @@ public class Session {
      * @return Win/loss ratio
      */
     double getRatio() {
-
-        // Can't divide by zero
         if(wins == 0) {
             return 0.0;
         }
