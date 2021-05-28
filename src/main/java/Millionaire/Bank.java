@@ -126,7 +126,7 @@ public class Bank {
      * @return Message embed displaying bank summary
      */
     public MessageEmbed getBankMessage(String help) {
-        String thumb = MillionaireGameshow.thumb;
+        String thumb = MillionaireGameshow.THUMB;
         return new EmbedBuilder()
                 .setTitle("Millionaire Bank: " + contestant)
                 .setThumbnail(thumb)

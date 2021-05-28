@@ -339,38 +339,31 @@ public class EmoteHelper {
     }
 
     /**
-     * <img src="https://cdn.discordapp.com/emojis/768689497327271958.png"/>
+     * <img src="https://cdn.discordapp.com/emojis/847759352668094495.png"/>
      */
     public Emote getMillionaireOptionA() {
-        return get("768689497327271958");
+        return get("847759352668094495");
     }
 
     /**
-     * <img src="https://cdn.discordapp.com/emojis/768689497625460776.png"/>
+     * <img src="https://cdn.discordapp.com/emojis/847759617123024906.png"/>
      */
     public Emote getMillionaireOptionB() {
-        return get("768689497625460776");
+        return get("847759617123024906");
     }
 
     /**
-     * <img src="https://cdn.discordapp.com/emojis/768689497294110721.png"/>
+     * <img src="https://cdn.discordapp.com/emojis/847759353045319691.png"/>
      */
     public Emote getMillionaireOptionC() {
-        return get("768689497294110721");
+        return get("847759353045319691");
     }
 
     /**
-     * <img src="https://cdn.discordapp.com/emojis/768689497616547840.png"/>
+     * <img src="https://cdn.discordapp.com/emojis/847759352957632533.png"/>
      */
     public Emote getMillionaireOptionD() {
-        return get("768689497616547840");
-    }
-
-    /**
-     * <img src="https://cdn.discordapp.com/emojis/768695195783921694.png"/>
-     */
-    public Emote getLifeline() {
-        return get("768695195783921694");
+        return get("847759352957632533");
     }
 
     /**

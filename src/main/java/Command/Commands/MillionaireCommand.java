@@ -5,6 +5,8 @@ import Millionaire.Bank;
 import Millionaire.MillionaireGameshow;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +15,8 @@ import java.util.List;
 /**
  * Play who wants to be a millionaire with emotes
  */
-public class MillionaireCommand extends DiscordCommand {
-    private final HashMap<Member, MillionaireGameshow> games;
-    private EmoteListener listener;
+public class MillionaireCommand extends OnReadyDiscordCommand {
+    private final HashMap<Long, MillionaireGameshow> games;
 
     public MillionaireCommand() {
         super(
@@ -52,7 +53,7 @@ public class MillionaireCommand extends DiscordCommand {
 
         switch(message) {
             case "start":
-                startGame(owner, channel, context.getEmoteHelper(), context.getJDA());
+                startGame(owner, channel, context.getEmoteHelper());
                 break;
             case "forfeit":
                 forfeitGame(owner, channel);
@@ -84,7 +85,7 @@ public class MillionaireCommand extends DiscordCommand {
         new PageableTableEmbed(
                 context,
                 Bank.getLeaderboard(),
-                MillionaireGameshow.thumb,
+                MillionaireGameshow.THUMB,
                 "Millionaire Leaderboard",
                 "Check out **millionaire bank** to view your personal stats!",
                 "Type: " + getTrigger() + " for help",
@@ -150,13 +151,13 @@ public class MillionaireCommand extends DiscordCommand {
      * @param channel Channel to inform of incorrect usage
      */
     private void forfeitGame(Member owner, MessageChannel channel) {
-        MillionaireGameshow gameShow = games.get(owner);
+        MillionaireGameshow gameShow = games.get(owner.getIdLong());
         if(gameShow == null || !gameShow.isActive()) {
             channel.sendMessage(owner.getAsMention() + " You don't have a game to forfeit!").queue();
             return;
         }
         gameShow.forfeit();
-        games.remove(owner);
+        games.remove(owner.getIdLong());
     }
 
     /**
@@ -165,10 +166,9 @@ public class MillionaireCommand extends DiscordCommand {
      * @param owner   Game owner
      * @param channel Channel to play in
      * @param helper  Emote helper
-     * @param jda     JDA for listener
      */
-    private void startGame(Member owner, MessageChannel channel, EmoteHelper helper, JDA jda) {
-        MillionaireGameshow gameShow = games.get(owner);
+    private void startGame(Member owner, MessageChannel channel, EmoteHelper helper) {
+        MillionaireGameshow gameShow = games.get(owner.getIdLong());
         if(gameShow != null && gameShow.isActive()) {
             channel.sendMessage(
                     owner.getAsMention() + " You need to forfeit or finish your current game first!"
@@ -183,40 +183,30 @@ public class MillionaireCommand extends DiscordCommand {
                 "millionaire start | millionaire forfeit | millionaire leaderboard"
         );
 
-        games.put(owner, gameShow);
-        if(this.listener == null) {
-            this.listener = getEmoteListener();
-            jda.addEventListener(this.listener);
-        }
+        games.put(owner.getIdLong(), gameShow);
         gameShow.start();
-    }
-
-    /**
-     * Get an emote listener for calling the Gameshow instance when emotes are clicked
-     *
-     * @return Emote listener
-     */
-    private EmoteListener getEmoteListener() {
-        return new EmoteListener() {
-            @Override
-            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                long reactID = reaction.getMessageIdLong();
-                Member member = guild.getMember(user);
-                MillionaireGameshow gameshow = games.get(member);
-
-                if(gameshow == null) {
-                    return;
-                }
-
-                if(reactID == gameshow.getGameId() && gameshow.isActive()) {
-                    gameshow.reactionAdded(reaction);
-                }
-            }
-        };
     }
 
     @Override
     public boolean matches(String query, Message message) {
         return query.startsWith("millionaire");
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        jda.addEventListener(new ButtonListener() {
+            @Override
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                Member member = event.getMember();
+                if(member == null || !games.containsKey(member.getIdLong())) {
+                    return;
+                }
+                MillionaireGameshow gameshow = games.get(member.getIdLong());
+                if(event.getMessageIdLong() != gameshow.getGameId() || !gameshow.isActive()) {
+                    return;
+                }
+                gameshow.buttonClicked(event);
+            }
+        });
     }
 }

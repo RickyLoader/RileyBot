@@ -5,10 +5,15 @@ import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,13 +22,14 @@ public class MillionaireGameshow {
     private final Member owner;
     private final String helpMessage;
     private final MessageChannel channel;
-    private final Emote a, b, c, d, lifeline;
+    private final Button lifeline;
     private long gameID;
     private final Quiz quiz;
     private boolean running, victory, forfeit, paused, timeout;
     private final String correctEmote, incorrectEmote, blankEmote;
-    public final static String thumb = "https://i.imgur.com/6kjTqXa.png";
+    public final static String THUMB = "https://i.imgur.com/6kjTqXa.png";
     private final HashMap<Question, Timer> questionTimers;
+    private final HashMap<String, Button> answerButtons;
 
     /**
      * Create a game of who wants to be a millionaire
@@ -36,11 +42,8 @@ public class MillionaireGameshow {
     public MillionaireGameshow(Member owner, MessageChannel channel, EmoteHelper emoteHelper, String helpMessage) {
         this.owner = owner;
         this.channel = channel;
-        this.a = emoteHelper.getMillionaireOptionA();
-        this.b = emoteHelper.getMillionaireOptionB();
-        this.c = emoteHelper.getMillionaireOptionC();
-        this.d = emoteHelper.getMillionaireOptionD();
-        this.lifeline = emoteHelper.getLifeline();
+        this.answerButtons = getAnswerButtons(emoteHelper);
+        this.lifeline = Button.primary("lifeline", "50:50");
         this.correctEmote = EmoteHelper.formatEmote(emoteHelper.getComplete());
         this.incorrectEmote = EmoteHelper.formatEmote(emoteHelper.getFail());
         this.blankEmote = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
@@ -50,12 +53,31 @@ public class MillionaireGameshow {
     }
 
     /**
+     * Get a map of answer button ID -> answer button
+     *
+     * @param emoteHelper Emote helper for getting the emotes to use in the buttons
+     * @return Map of answer button ID -> answer button
+     */
+    private HashMap<String, Button> getAnswerButtons(EmoteHelper emoteHelper) {
+        HashMap<String, Button> answerButtons = new HashMap<>();
+        Button a = Button.success("A:", Emoji.ofEmote(emoteHelper.getMillionaireOptionA()));
+        Button b = Button.success("B:", Emoji.ofEmote(emoteHelper.getMillionaireOptionB()));
+        Button c = Button.success("C:", Emoji.ofEmote(emoteHelper.getMillionaireOptionC()));
+        Button d = Button.success("D:", Emoji.ofEmote(emoteHelper.getMillionaireOptionD()));
+        answerButtons.put(a.getId(), a);
+        answerButtons.put(b.getId(), b);
+        answerButtons.put(c.getId(), c);
+        answerButtons.put(d.getId(), d);
+        return answerButtons;
+    }
+
+    /**
      * Get the questions to be used
      *
      * @return List of questions
      */
     private ArrayList<Question> getQuestions() {
-        channel.sendMessage("Let me grab some questions for you").queue();
+        channel.sendTyping().queue();
         ArrayList<Question> questions = new ArrayList<>();
 
         JSONArray questionData = new JSONObject(
@@ -65,28 +87,27 @@ public class MillionaireGameshow {
         Random rand = new Random();
 
         for(int i = 0; i < questionData.length(); i++) {
-            HashMap<Emote, Answer> answers = new HashMap<>();
-            ArrayList<Emote> emotes = new ArrayList<>(Arrays.asList(a, b, c, d));
+            HashMap<String, Answer> answers = new HashMap<>();
+            ArrayList<Button> buttons = new ArrayList<>(answerButtons.values());
             JSONObject question = questionData.getJSONObject(i);
             JSONArray answerData = question.getJSONArray("incorrect_answers");
 
             for(int j = 0; j < answerData.length(); j++) {
-                Emote key = emotes.get(rand.nextInt(emotes.size()));
-                emotes.remove(key);
+                Button button = buttons.get(rand.nextInt(buttons.size()));
+                String key = button.getId();
+                buttons.remove(button);
                 answers.put(
                         key,
                         new Answer(
                                 StringEscapeUtils.unescapeHtml4(answerData.getString(j)),
-                                getEmoteName(key),
                                 key,
                                 false
                         )
                 );
             }
-            Emote finalKey = emotes.get(0);
+            String finalKey = buttons.get(0).getId();
             Answer correctAnswer = new Answer(
                     StringEscapeUtils.unescapeHtml4(question.getString("correct_answer")),
-                    getEmoteName(finalKey),
                     finalKey,
                     true
             );
@@ -104,27 +125,6 @@ public class MillionaireGameshow {
     }
 
     /**
-     * Get the option name to use for the given emote
-     *
-     * @param emote Emote to get option name for
-     * @return Option name
-     */
-    private String getEmoteName(Emote emote) {
-        if(emote == a) {
-            return "A:";
-        }
-        else if(emote == b) {
-            return "B:";
-        }
-        else if(emote == c) {
-            return "C:";
-        }
-        else {
-            return "D:";
-        }
-    }
-
-    /**
      * Start the game
      */
     public void start() {
@@ -135,55 +135,104 @@ public class MillionaireGameshow {
     /**
      * Send or edit the game message.
      * Add reward to bank if game has completed
+     *
+     * @param event Optional Button click event to acknowledge
      */
-    private void updateGame() {
+    private void updateGame(ButtonClickEvent... event) {
         if(!running) {
             addToBank(forfeit ? quiz.getForfeitReward() : quiz.getReward());
         }
+
         MessageEmbed gameMessage = buildGameMessage();
-        int lifeline = quiz.hasLifeline() ? 1 : 0;
         paused = true;
-        channel.retrieveMessageById(gameID).queue(message -> {
-            int options = lifeline + quiz.getCurrentQuestion().getAnswers().size();
-            if(running && channel.getLatestMessageIdLong() == gameID && options == message.getReactions().size()) {
-                channel.editMessageById(gameID, gameMessage).queue(m -> {
-                    paused = false;
-                    startTimer();
-                });
-            }
-            else {
-                sendGameMessage(gameMessage);
-            }
-        });
+        ActionRow buttons = getButtons();
+
+        if(channel.getLatestMessageIdLong() != gameID || buttons == null) {
+            sendGameMessage(gameMessage, event);
+            return;
+        }
+
+        if(event.length == 0) {
+            channel.editMessageById(gameID, gameMessage).setActionRows(buttons).queue(message -> messageSent(event));
+        }
+        else {
+            event[0].deferEdit().setEmbeds(gameMessage).setActionRows(buttons).queue(interactionHook -> messageSent(event));
+        }
     }
 
     /**
-     * Send the game message
+     * Actions to perform after editing/sending the game message.
+     * Unpause the game and start a question timer if the game is running.
+     *
+     * @param event Optional Button click event
+     */
+    private void messageSent(ButtonClickEvent... event) {
+        paused = false;
+        if(running) {
+            startTimer(event);
+        }
+    }
+
+    /**
+     * Get the action row of buttons to use for the current question
+     *
+     * @return Buttons for current question, will be null if no buttons
+     */
+    @Nullable
+    private ActionRow getButtons() {
+        ArrayList<Button> buttons = getButtonList();
+        return buttons.isEmpty() ? null : ActionRow.of(buttons);
+    }
+
+    /**
+     * Get the list of buttons to use for the current question
+     *
+     * @return List of buttons to use for the current question
+     */
+    private ArrayList<Button> getButtonList() {
+        ArrayList<Button> buttons = new ArrayList<>();
+        if(running) {
+            for(Answer a : quiz.getCurrentQuestion().getAnswers()) {
+                buttons.add(answerButtons.get(a.getButtonId()));
+            }
+            if(quiz.hasLifeline()) {
+                buttons.add(lifeline);
+            }
+        }
+        return buttons;
+    }
+
+    /**
+     * Send the game message and apply the appropriate buttons
      *
      * @param gameMessage Game message
+     * @param event       Optional Button click event to acknowledge
      */
-    private void sendGameMessage(MessageEmbed gameMessage) {
+    private void sendGameMessage(MessageEmbed gameMessage, ButtonClickEvent... event) {
+        if(event.length > 0) {
+            event[0].deferEdit().queue();
+        }
         channel.deleteMessageById(gameID).queue();
-        channel.sendMessage(gameMessage).queue(m -> {
+
+        ActionRow buttons = getButtons();
+        MessageAction sendMessage = channel.sendMessage(gameMessage);
+        if(buttons != null) {
+            sendMessage = sendMessage.setActionRows(buttons);
+        }
+
+        sendMessage.queue(m -> {
             gameID = m.getIdLong();
-            if(running) {
-                for(Answer a : quiz.getCurrentQuestion().getAnswers()) {
-                    m.addReaction(a.getEmote()).queue();
-                }
-                if(quiz.hasLifeline()) {
-                    m.addReaction(lifeline).queue();
-                }
-                startTimer();
-            }
-            paused = false;
+            messageSent();
         });
     }
 
     /**
      * Start a timer to end the game if an answer is not submitted within 90 seconds.
      * Ignore questions that are already being timed.
+     *
+     * @param event Optional Button click event
      */
-    private void startTimer() {
+    private void startTimer(ButtonClickEvent... event) {
         Question currentQuestion = quiz.getCurrentQuestion();
         if(questionTimers.containsKey(currentQuestion)) {
             return;
@@ -200,7 +249,7 @@ public class MillionaireGameshow {
                         }
                         running = false;
                         timeout = true;
-                        updateGame();
+                        updateGame(event);
                     }
                 },
                 90000);
@@ -235,7 +284,7 @@ public class MillionaireGameshow {
                     value = "**" + value + "** " + correctEmote;
                 }
             }
-            builder.addField("**" + a.getOption() + "** ", value, true);
+            builder.addField("**" + a.getButtonId() + "** ", value, true);
             if((i + 2) % 2 == 0) {
                 builder.addBlankField(true);
             }
@@ -244,7 +293,7 @@ public class MillionaireGameshow {
         return builder
                 .setTitle(owner.getEffectiveName() + " " + getTitle() + " a millionaire!")
                 .setDescription(buildDescription())
-                .setThumbnail(thumb)
+                .setThumbnail(THUMB)
                 .setFooter("Try: " + helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .setColor(getColour())
                 .setImage(EmbedHelper.SPACER_IMAGE)
@@ -277,7 +326,7 @@ public class MillionaireGameshow {
         if(!quiz.isFirstQuestion()) {
             Answer previous = quiz.getPreviousQuestion().getSelectedAnswer();
             progression += "\n\n"
-                    + "__**Previous Answer**__: " + "**" + previous.getOption() + "** " + previous.getTitle();
+                    + "__**Previous Answer**__: " + "**" + previous.getButtonId() + "** " + previous.getTitle();
         }
         return progression + "\n\n" + description;
     }
@@ -363,31 +412,31 @@ public class MillionaireGameshow {
     }
 
     /**
-     * Reaction has been added to the game message
+     * A button has been clicked on the game message
      *
-     * @param reaction Reaction added
+     * @param event Button click event
      */
-    public void reactionAdded(MessageReaction reaction) {
-        Emote emote = reaction.getReactionEmote().getEmote();
-        if(paused || emote != a && emote != b && emote != c && emote != d && emote != lifeline) {
+    public void buttonClicked(ButtonClickEvent event) {
+        if(paused) {
             return;
         }
-        if(emote == lifeline && quiz.hasLifeline()) {
+        String buttonId = event.getComponentId();
+        if(buttonId.equals(lifeline.getId()) && quiz.hasLifeline()) {
             quiz.useLifeline();
-            updateGame();
+            updateGame(event);
             return;
         }
-        answerQuestion(emote);
+        answerQuestion(buttonId, event);
     }
 
     /**
-     * Answer the question
+     * Answer the question with the given button ID.
      *
-     * @param emote Emote clicked
+     * @param event Button click event
      */
-    private void answerQuestion(Emote emote) {
+    private void answerQuestion(String buttonId, ButtonClickEvent event) {
         Question question = quiz.getCurrentQuestion();
-        Answer selected = question.selectAnswer(emote);
+        Answer selected = question.selectAnswer(buttonId);
 
         if(selected.isCorrect()) {
             if(quiz.isFinalQuestion()) {
@@ -401,7 +450,7 @@ public class MillionaireGameshow {
         else {
             running = false;
         }
-        updateGame();
+        updateGame(event);
     }
 
     /**
@@ -625,9 +674,8 @@ public class MillionaireGameshow {
      * Millionaire question
      */
     private static class Question {
-
         private final String title;
-        private final HashMap<Emote, Answer> answerMap;
+        private final HashMap<String, Answer> answerMap;
         private final ArrayList<Answer> answers;
         private final Answer correctAnswer;
         private Answer selectedAnswer;
@@ -636,17 +684,17 @@ public class MillionaireGameshow {
          * Create a question
          *
          * @param title         Title of question
-         * @param answerMap     Map of emote to answer
+         * @param answerMap     Map of button ID to answer
          * @param correctAnswer Correct answer
          */
-        public Question(String title, HashMap<Emote, Answer> answerMap, Answer correctAnswer) {
+        public Question(String title, HashMap<String, Answer> answerMap, Answer correctAnswer) {
             this.title = title;
             this.answerMap = answerMap;
             this.answers = answerMap
                     .entrySet()
                     .stream()
                     .sorted(
-                            Comparator.comparing(e -> e.getValue().getOption())
+                            Comparator.comparing(e -> e.getValue().getButtonId())
                     )
                     .map(Map.Entry::getValue)
                     .collect(Collectors.toCollection(ArrayList::new));
@@ -701,11 +749,11 @@ public class MillionaireGameshow {
         /**
          * Select an answer
          *
-         * @param e Emote mapped to answer
+         * @param buttonId ID of the button mapped to the answer
          * @return Selected answer
          */
-        public Answer selectAnswer(Emote e) {
-            Answer selectedAnswer = answerMap.get(e);
+        public Answer selectAnswer(String buttonId) {
+            Answer selectedAnswer = answerMap.get(buttonId);
             selectedAnswer.selectAnswer();
             this.selectedAnswer = selectedAnswer;
             return selectedAnswer;
@@ -715,15 +763,15 @@ public class MillionaireGameshow {
          * Apply the 50/50 lifeline
          */
         public void applyLifeline() {
-            Emote[] options = answerMap.keySet().toArray(new Emote[0]);
+            String[] options = answerMap.keySet().toArray(new String[0]);
             Random rand = new Random();
             Arrays.sort(options, Comparator.comparingInt(o -> rand.nextInt()));
 
-            for(Emote option : options) {
-                Answer answer = answerMap.get(option);
+            for(String optionId : options) {
+                Answer answer = answerMap.get(optionId);
                 if(answers.size() > 2 && !answer.isCorrect()) {
                     answers.remove(answer);
-                    answerMap.remove(option);
+                    answerMap.remove(optionId);
                 }
             }
         }
@@ -735,41 +783,31 @@ public class MillionaireGameshow {
     private static class Answer {
         private boolean selected;
         private final boolean correct;
-        private final String title, option;
-        private final Emote emote;
+        private final String title;
+        private final String buttonId;
 
         /**
          * Create an answer
          *
-         * @param title   Answer title
-         * @param option  Option name A/B/C/D
-         * @param correct Answer is correct
-         * @param emote   Answer emote
+         * @param title    Answer title
+         * @param correct  Answer is correct
+         * @param buttonId ID of the button for the answer - e.g "A:" or "B:" etc
          */
-        public Answer(String title, String option, Emote emote, boolean correct) {
+        public Answer(String title, String buttonId, boolean correct) {
             this.title = title;
-            this.option = option;
-            this.emote = emote;
+            this.buttonId = buttonId;
             this.correct = correct;
             this.selected = false;
         }
 
         /**
-         * Get the answer emote
+         * Get the ID of the button used to select the answer
+         * This is also the answer option e.g - "A:", "B:" etc
          *
-         * @return Answer emote
+         * @return Answer button ID
          */
-        public Emote getEmote() {
-            return emote;
-        }
-
-        /**
-         * Get the option name
-         *
-         * @return Option name
-         */
-        public String getOption() {
-            return option;
+        public String getButtonId() {
+            return buttonId;
         }
 
         /**
