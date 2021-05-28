@@ -38,12 +38,12 @@ public class MatchHistory {
         this.name = name;
         this.killDeath = killDeath;
         this.font = font;
+        this.mapBreakdown = createMapBreakdown();
+        this.modeBreakdown = createModeBreakdown();
         this.matchMap = new HashMap<>();
         for(MatchStats m : matchStats) {
             matchMap.put(m.getId(), m);
         }
-        this.mapBreakdown = createMapBreakdown();
-        this.modeBreakdown = createModeBreakdown();
         calculateSummary();
     }
 
@@ -68,7 +68,7 @@ public class MatchHistory {
                 .stream()
                 .map(m -> new PieChart.Section(m.getName(), mapFrequency.get(m), EmbedHelper.getRandomColour()))
                 .toArray(PieChart.Section[]::new);
-        return new Breakdown(new PieChart(sections, font, false));
+        return new Breakdown("Map", new PieChart(sections, font, false));
     }
 
     /**
@@ -91,7 +91,7 @@ public class MatchHistory {
                 .stream()
                 .map(m -> new PieChart.Section(m.getName(), modeFrequency.get(m), EmbedHelper.getRandomColour()))
                 .toArray(PieChart.Section[]::new);
-        return new Breakdown(new PieChart(sections, font, false));
+        return new Breakdown("Mode", new PieChart(sections, font, false));
     }
 
     /**
