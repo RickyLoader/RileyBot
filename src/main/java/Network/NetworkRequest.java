@@ -171,6 +171,16 @@ public class NetworkRequest {
     }
 
     /**
+     * Make a form POST request
+     *
+     * @param body Form to send
+     * @return Response
+     */
+    public NetworkResponse post(RequestBody body) {
+        return post(body, null, false);
+    }
+
+    /**
      * Return the message of a response
      *
      * @param response Response from network call

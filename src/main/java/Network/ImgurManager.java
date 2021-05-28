@@ -95,6 +95,27 @@ public class ImgurManager {
     }
 
     /**
+     * Upload the given image to imgbb
+     *
+     * @param image Image to upload
+     * @return URL to uploaded image or null
+     */
+    public static String alternativeUpload(BufferedImage image) {
+        String base64 = toBase64PNG(image);
+        if(base64 == null) {
+            return null;
+        }
+
+        String url = "https://api.imgbb.com/1/upload?key=" + Secret.IMGBB_KEY;
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("image", base64)
+                .build();
+
+        NetworkResponse response = new NetworkRequest(url, false).post(body);
+        return new JSONObject(response.body).getJSONObject("data").getString("url");
+    }
+
+    /**
      * Upload a given BufferedImage to Imgur and return the link to the image
      *
      * @param image Buffered image to be uploaded
