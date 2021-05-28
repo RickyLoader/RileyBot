@@ -5,8 +5,11 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.interactions.ActionRow;
 import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.UpdateAction;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,7 +111,12 @@ public abstract class PageableEmbed {
      * Send the embed with the paging buttons
      */
     public void showMessage() {
-        channel.sendMessage(buildMessage()).setActionRows(getButtonRow()).queue(message -> id = message.getIdLong());
+        MessageAction sendMessage = channel.sendMessage(buildMessage());
+        ActionRow buttonRow = getButtonRow();
+        if(buttonRow != null) {
+            sendMessage = sendMessage.setActionRows(buttonRow);
+        }
+        sendMessage.queue(message -> id = message.getIdLong());
     }
 
     /**
@@ -180,7 +188,12 @@ public abstract class PageableEmbed {
      * @param event Event to acknowledge
      */
     private void updateMessage(ButtonClickEvent event) {
-        event.deferEdit().setEmbeds(buildMessage()).setActionRows(getButtonRow()).queue();
+        UpdateAction updateMessage = event.deferEdit().setEmbeds(buildMessage());
+        ActionRow buttonRow = getButtonRow();
+        if(buttonRow != null) {
+            updateMessage = updateMessage.setActionRows(buttonRow);
+        }
+        updateMessage.queue();
     }
 
     /**
@@ -188,8 +201,10 @@ public abstract class PageableEmbed {
      *
      * @return Row of buttons
      */
+    @Nullable
     private ActionRow getButtonRow() {
-        return ActionRow.of(getButtonList());
+        ArrayList<Button> buttons = getButtonList();
+        return buttons.isEmpty() ? null : ActionRow.of(buttons);
     }
 
     /**
