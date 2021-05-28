@@ -57,7 +57,7 @@ public class LeaderboardCommand extends DiscordCommand {
     private MessageEmbed buildSessionMessage(Session session, int rank) {
         return new EmbedBuilder()
                 .setColor(EmbedHelper.GREEN)
-                .setThumbnail(Gunfight.thumbnail)
+                .setThumbnail(Gunfight.THUMBNAIL)
                 .setTitle("GUNFIGHT RANK #" + rank)
                 .setDescription("Here's the break down!")
                 .addField("DATE", session.getFormattedDate(), true)
@@ -81,7 +81,7 @@ public class LeaderboardCommand extends DiscordCommand {
         return new PageableTableEmbed(
                 context,
                 Session.getHistory(),
-                Gunfight.thumbnail,
+                Gunfight.THUMBNAIL,
                 "GUNFIGHT LEADERBOARD!",
                 "Here are the top gunfight performances!",
                 "Try: " + getTrigger(),

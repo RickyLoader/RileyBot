@@ -456,7 +456,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
                 getEmoteHelper(),
                 title,
                 "One moment please.",
-                Gunfight.thumbnail,
+                Gunfight.THUMBNAIL,
                 helpMessage,
                 new String[]{
                         "Fetching player data...",

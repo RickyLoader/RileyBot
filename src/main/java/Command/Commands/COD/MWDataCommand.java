@@ -73,7 +73,7 @@ public class MWDataCommand extends DiscordCommand {
     private MessageEmbed buildWeaponEmbed(Weapon weapon) {
         Weapon.CATEGORY category = weapon.getCategory();
         return new EmbedBuilder()
-                .setThumbnail(Gunfight.thumbnail)
+                .setThumbnail(Gunfight.THUMBNAIL)
                 .setImage(weapon.getImageURL())
                 .setColor(EmbedHelper.GREEN)
                 .setTitle(weapon.getName())
@@ -103,7 +103,7 @@ public class MWDataCommand extends DiscordCommand {
                 return new EmbedBuilder()
                         .setColor(EmbedHelper.PURPLE)
                         .setTitle(title)
-                        .setThumbnail(Gunfight.thumbnail)
+                        .setThumbnail(Gunfight.THUMBNAIL)
                         .setFooter(pageDetails + " | " + "Type: " + getTrigger() + " for help");
             }
 
