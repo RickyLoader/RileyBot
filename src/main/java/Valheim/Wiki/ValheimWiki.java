@@ -159,7 +159,7 @@ public class ValheimWiki {
                                 columns.get(1).text(),
                                 columns.get(2).text(),
                                 columns.get(3).text(),
-                                Integer.parseInt(columns.get(5).text())
+                                Integer.parseInt(columns.get(6).text())
                         )
                 );
             }

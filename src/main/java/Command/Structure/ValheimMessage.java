@@ -4,6 +4,15 @@ import Valheim.Wiki.ValheimPageSummary;
 import Valheim.Wiki.ValheimWikiAsset;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.UpdateAction;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Interactive Valheim message
@@ -13,9 +22,9 @@ public abstract class ValheimMessage {
     private final EmoteHelper emoteHelper;
     private final MessageChannel channel;
     private final String footer;
-    private final Emote home;
+    private final Button home;
     private long id;
-    private Emote last;
+    private String lastButtonId;
 
     /**
      * Create the interactive valheim message
@@ -29,42 +38,45 @@ public abstract class ValheimMessage {
         this.emoteHelper = context.getEmoteHelper();
         this.channel = context.getMessageChannel();
         this.footer = footer;
-        this.home = context.getEmoteHelper().getHome();
-        context.getJDA().addEventListener(new EmoteListener() {
+        this.home = Button.success("home", Emoji.ofEmote(emoteHelper.getHome()));
+        this.lastButtonId = home.getId();
+
+        context.getJDA().addEventListener(new ButtonListener() {
             @Override
-            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                long reactID = reaction.getMessageIdLong();
-                Emote emote = reaction.getReactionEmote().getEmote();
-                if(reactID != id && (emote != home || !shouldPerformAction(emote))) {
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                long messageId = event.getMessageIdLong();
+                String buttonId = event.getComponentId();
+
+                if(messageId != id || !buttonId.equals(home.getId()) && !shouldPerformAction(buttonId)) {
                     return;
                 }
-                last = emote;
-                if(emote == home && hasEmotes()) {
-                    updateMessage(getDefaultMessageEmbed());
+                lastButtonId = buttonId;
+                if(buttonId.equals(home.getId())) {
+                    updateMessage(getDefaultMessageEmbed(), event);
                 }
                 else {
-                    updateMessage(buildMessage(getDefaultEmbedBuilder()));
+                    updateMessage(buildMessage(getDefaultEmbedBuilder()), event);
                 }
             }
         });
     }
 
     /**
-     * Get the most recent actionable emote which was added to the valheim message
+     * Get the most recent actionable button ID which was pressed on the valheim message
      *
-     * @return Most recent actionable emote
+     * @return Most recent actionable button ID
      */
-    public Emote getLast() {
-        return last;
+    public String getLastButtonId() {
+        return lastButtonId;
     }
 
     /**
-     * Return whether to perform an action based on an emote which was added to the message
+     * Return whether to perform an action based on a button which was pressed on the message
      *
-     * @param emote Emote added to message
-     * @return Perform action based on emote
+     * @param buttonId ID of the pressed button
+     * @return Should perform action based on button ID
      */
-    public abstract boolean shouldPerformAction(Emote emote);
+    public abstract boolean shouldPerformAction(String buttonId);
 
     /**
      * Get the emote helper
@@ -85,32 +97,46 @@ public abstract class ValheimMessage {
     }
 
     /**
-     * Send the embed and add the paging emotes
+     * Send the embed and add the buttons
      */
     public void showMessage() {
-        channel.sendMessage(getDefaultMessageEmbed()).queue(message -> {
-            id = message.getIdLong();
-            if(hasEmotes()) {
-                message.addReaction(home).queue();
-            }
-            addReactions(message);
-        });
+        MessageAction sendMessage = channel.sendMessage(getDefaultMessageEmbed());
+        if(hasButtons()) {
+            sendMessage = sendMessage.setActionRows(getButtonRow());
+        }
+        sendMessage.queue(message -> id = message.getIdLong());
     }
 
     /**
-     * Return whether there are any other emotes to listen for.
-     * If not, no emotes will be added as there will be only a singular message embed to display.
+     * Return whether there are any other buttons to listen for.
+     * If not, no buttons will be added as there will be only a singular message embed to display.
      *
-     * @return Listening for other emotes
+     * @return Listening for other buttons
      */
-    public abstract boolean hasEmotes();
+    public abstract boolean hasButtons();
 
     /**
-     * Add reactions to the message
+     * Get the list of buttons to display
      *
-     * @param message Message to add reactions to
+     * @return List of buttons to display
      */
-    public abstract void addReactions(Message message);
+    public abstract ArrayList<Button> getButtonList();
+
+    /**
+     * Get the action row of buttons to display
+     *
+     * @return Action row of buttons
+     */
+    private ActionRow getButtonRow() {
+        ArrayList<Button> availableButtons = new ArrayList<>(Collections.singletonList(home));
+        availableButtons.addAll(getButtonList());
+
+        ArrayList<Button> toDisplay = new ArrayList<>();
+        for(Button button : availableButtons) {
+            toDisplay.add(lastButtonId.equals(button.getId()) ? button.asDisabled() : button);
+        }
+        return ActionRow.of(toDisplay);
+    }
 
     /**
      * Build the message embed
@@ -124,9 +150,14 @@ public abstract class ValheimMessage {
      * Edit the embedded message in place
      *
      * @param updatedContent Content to replace message with
+     * @param event          Button click event to acknowledge
      */
-    private void updateMessage(MessageEmbed updatedContent) {
-        channel.editMessageById(id, updatedContent).queue();
+    private void updateMessage(MessageEmbed updatedContent, ButtonClickEvent event) {
+        UpdateAction updateAction = event.deferEdit().setEmbeds(updatedContent);
+        if(hasButtons()) {
+            updateAction = updateAction.setActionRows(getButtonRow());
+        }
+        updateAction.queue();
     }
 
     /**

@@ -2,19 +2,20 @@ package Command.Structure;
 
 import Valheim.Wiki.ValheimBiome;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.button.Button;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Valheim biome message which can be interacted with via emotes
+ * Valheim biome message which can be interacted with via buttons
  */
 public class BiomeMessage extends ValheimMessage {
     private final ValheimBiome biome;
-    private final Emote creatures, pointOfInterest, resources;
+    private final Button creatures, pointOfInterest, resources;
 
     /**
      * Create the interactive valheim biome message
@@ -27,42 +28,46 @@ public class BiomeMessage extends ValheimMessage {
         super(biome, context, footer);
         this.biome = biome;
         EmoteHelper emoteHelper = context.getEmoteHelper();
-        this.creatures = emoteHelper.getCreatures();
-        this.pointOfInterest = emoteHelper.getPointOfInterest();
-        this.resources = emoteHelper.getResources();
+        this.creatures = Button.success("creatures", Emoji.ofEmote(emoteHelper.getCreatures()));
+        this.pointOfInterest = Button.success("interest", Emoji.ofEmote(emoteHelper.getPointOfInterest()));
+        this.resources = Button.success("resources", Emoji.ofEmote(emoteHelper.getResources()));
     }
 
     @Override
-    public boolean shouldPerformAction(Emote emote) {
-        return emote == creatures && biome.hasCreatures()
-                || emote == pointOfInterest && biome.hasInterestPoints()
-                || emote == resources && biome.hasResources();
+    public boolean shouldPerformAction(String buttonId) {
+        return buttonId.equals(creatures.getId()) && biome.hasCreatures()
+                || buttonId.equals(pointOfInterest.getId()) && biome.hasInterestPoints()
+                || buttonId.equals(resources.getId()) && biome.hasResources();
     }
 
     @Override
-    public boolean hasEmotes() {
+    public boolean hasButtons() {
         return biome.hasResources() || biome.hasCreatures() || biome.hasInterestPoints();
     }
 
     @Override
-    public void addReactions(Message message) {
+    public ArrayList<Button> getButtonList() {
+        ArrayList<Button> buttons = new ArrayList<>();
         if(biome.hasCreatures()) {
-            message.addReaction(creatures).queue();
+            buttons.add(creatures);
         }
         if(biome.hasInterestPoints()) {
-            message.addReaction(pointOfInterest).queue();
+            buttons.add(pointOfInterest);
         }
         if(biome.hasResources()) {
-            message.addReaction(resources).queue();
+            buttons.add(resources);
         }
+        return buttons;
     }
 
     @Override
     public MessageEmbed buildMessage(EmbedBuilder builder) {
-        if(getLast() == creatures) {
+        if(getLastButtonId().equals(creatures.getId())) {
             return buildCreaturesEmbed(builder);
         }
-        return getLast() == pointOfInterest ? buildInterestPointEmbed(builder) : buildResourcesEmbed(builder);
+        return getLastButtonId().equals(pointOfInterest.getId())
+                ? buildInterestPointEmbed(builder)
+                : buildResourcesEmbed(builder);
     }
 
     /**
