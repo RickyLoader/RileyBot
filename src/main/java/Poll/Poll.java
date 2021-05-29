@@ -331,6 +331,9 @@ public class Poll {
                 double percent = votes / (totalVotes / 100.0);
                 pollImage += " (" + new DecimalFormat("#.##").format(percent) + "%)";
             }
+            if(isWinningAnswer(option)) {
+                pollImage += " " + winning.getAsMention();
+            }
             builder.addField(option.getTitle(), pollImage, false);
         }
         return builder.build();
