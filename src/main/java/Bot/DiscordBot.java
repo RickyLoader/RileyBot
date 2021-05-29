@@ -16,7 +16,7 @@ public class DiscordBot {
      */
     public static void main(String[] args) {
         if(args.length == 1) {
-            login(args[0]);
+            login(args[0], new Listener());
         }
         else {
             System.out.println("No discord token specified, please try again using the token as an argument.");
@@ -26,9 +26,10 @@ public class DiscordBot {
     /**
      * Login procedure for the bot.
      *
-     * @param token Discord token to link bot to application
+     * @param token    Discord token to link bot to application
+     * @param listener Event listener
      */
-    private static void login(String token) {
+    private static void login(String token, Listener listener) {
         try {
             JDABuilder
                     .create(token,
@@ -40,7 +41,7 @@ public class DiscordBot {
                             GatewayIntent.GUILD_PRESENCES
                     )
                     .setActivity(Activity.watching("the Hangman championship"))
-                    .addEventListeners(new Listener())
+                    .addEventListeners(listener)
                     .build();
         }
         catch(Exception e) {

@@ -56,6 +56,7 @@ public class DiscordCommandManager {
         }
     }
 
+
     /**
      * Check a given query against the matches method of each command
      *
@@ -126,7 +127,6 @@ public class DiscordCommandManager {
         addLinkCommands();
         addCommand(new TrademeCommand());
         addCommand(new GunfightCommand());
-        addCommand(new GunfightHelpCommand());
         addCommand(new LeaderboardCommand());
         addCommand(new MeCommand());
         addCommand(new OSRSLookupCommand());
@@ -188,7 +188,6 @@ public class DiscordCommandManager {
         addCommand(new HotTubCommand());
         addCommand(new RSPlayerCountCommand());
         addCommand(new DictionaryCommand());
-        addCommand(new OSRSLendingCommand());
         addCommand(new VapouriumCommand());
         addCommand(new VapoCommand());
         addCommand(new AlphaVapeCommand());
@@ -196,6 +195,7 @@ public class DiscordCommandManager {
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());
             addCommand(new NASACommand());
+            addCommand(new OSRSLendingCommand());
          */
     }
 
