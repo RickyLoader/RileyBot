@@ -7,20 +7,25 @@ import YuGiOh.CardStats;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.UpdateAction;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
-
 /**
  * Search and view Yu-Gi-Oh cards
  */
-public class YuGiOhCommand extends DiscordCommand {
+public class YuGiOhCommand extends OnReadyDiscordCommand {
     private final CardManager cardManager = new CardManager();
     private final HashMap<Long, Card> cardMessages = new HashMap<>();
-    private boolean listener = false;
-    private Emote switchImage;
-    private EmoteHelper emoteHelper;
+    private final String switchImageId = "switch";
+    private Button switchImage;
+    private String upvote, downvote;
 
     public YuGiOhCommand() {
         super("yugi\nyugi [card name]", "Take a look at some Yu-Gi-Oh cards!");
@@ -28,21 +33,12 @@ public class YuGiOhCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        if(!listener) {
-            registerListener(context.getJDA());
-            listener = true;
-        }
-
-        if(emoteHelper == null) {
-            emoteHelper = context.getEmoteHelper();
-            switchImage = emoteHelper.getNextImage();
-        }
-
         String cardName = context.getLowerCaseMessage().replace("yugi", "").trim();
+        MessageChannel channel = context.getMessageChannel();
+        channel.sendTyping().queue();
         new Thread(() -> {
             boolean random = cardName.isEmpty();
             Card card = random ? cardManager.getRandomCard() : cardManager.getCard(cardName);
-            MessageChannel channel = context.getMessageChannel();
 
             if(card == null) {
                 Member member = context.getMember();
@@ -55,14 +51,17 @@ public class YuGiOhCommand extends DiscordCommand {
                 channel.sendMessage(buildErrorMessage(cardName, member)).queue();
                 return;
             }
+            MessageAction sendMessage = channel.sendMessage(buildCardMessage(card));
 
-            channel.sendMessage(buildCardMessage(card)).queue(message -> {
-                if(card.getTotalImages() == 1) {
-                    return;
-                }
-                cardMessages.put(message.getIdLong(), card);
-                message.addReaction(switchImage).queue();
-            });
+            // Don't need to keep track of cards with a single image
+            if(card.hasMultipleImages()) {
+                sendMessage
+                        .setActionRows(ActionRow.of(switchImage))
+                        .queue(message -> cardMessages.put(message.getIdLong(), card));
+            }
+            else {
+                sendMessage.queue();
+            }
         }).start();
     }
 
@@ -95,8 +94,6 @@ public class YuGiOhCommand extends DiscordCommand {
     private MessageEmbed buildCardMessage(Card card) {
         CardStats stats = card.getStats();
         DecimalFormat commaFormat = new DecimalFormat("#,###");
-        String upvote = EmoteHelper.formatEmote(emoteHelper.getUpvote());
-        String downvote = EmoteHelper.formatEmote(emoteHelper.getDownvote());
 
         EmbedBuilder builder = getDefaultEmbedBuilder()
                 .setTitle(card.getName())
@@ -111,7 +108,7 @@ public class YuGiOhCommand extends DiscordCommand {
                 .setImage(card.getCurrentImage())
                 .setColor(card.getType().getColour());
 
-        if(card.getTotalImages() > 1) {
+        if(card.hasMultipleImages()) {
             builder.setDescription("**Image**: " + (card.getImageIndex() + 1) + "/" + card.getTotalImages());
         }
 
@@ -140,40 +137,41 @@ public class YuGiOhCommand extends DiscordCommand {
     }
 
     /**
-     * Register the emote listener for switching card artwork in card messages
-     *
-     * @param jda JDA for registering listener
-     */
-    private void registerListener(JDA jda) {
-        jda.addEventListener(
-                new EmoteListener() {
-                    @Override
-                    public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                        long id = reaction.getMessageIdLong();
-                        if(reaction.getReactionEmote().getEmote() != switchImage || !cardMessages.containsKey(id)) {
-                            return;
-                        }
-                        updateCardImage(id, reaction.getChannel());
-                    }
-                }
-        );
-    }
-
-    /**
      * Update the image currently displayed in a card's message embed
      * Progress from the first image through to the last & then loop back
      *
-     * @param id      ID of message embed
-     * @param channel Channel of message embed
+     * @param event Button click event to acknowledge
      */
-    private void updateCardImage(long id, MessageChannel channel) {
-        Card card = cardMessages.get(id);
+    private void updateCardImage(ButtonClickEvent event) {
+        Card card = cardMessages.get(event.getMessageIdLong());
         card.updateImage();
-        channel.editMessageById(id, buildCardMessage(card)).queue();
+        UpdateAction updateAction = event.deferEdit().setEmbeds(buildCardMessage(card));
+        if(card.hasMultipleImages()) {
+            updateAction = updateAction.setActionRows(ActionRow.of(switchImage));
+        }
+        updateAction.queue();
     }
 
     @Override
     public boolean matches(String query, Message message) {
         return query.startsWith("yugi");
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.upvote = emoteHelper.getUpvote().getAsMention();
+        this.downvote = emoteHelper.getDownvote().getAsMention();
+        this.switchImage = Button.primary(switchImageId, Emoji.ofEmote(emoteHelper.getNextImage()));
+        jda.addEventListener(new ButtonListener() {
+            @Override
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                long messageId = event.getMessageIdLong();
+                String buttonId = event.getComponentId();
+                if(!cardMessages.containsKey(messageId) || !buttonId.equals(switchImageId)) {
+                    return;
+                }
+                updateCardImage(event);
+            }
+        });
     }
 }

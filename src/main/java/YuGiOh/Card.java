@@ -95,6 +95,15 @@ public class Card {
     }
 
     /**
+     * Check if the card has more than one image
+     *
+     * @return Card has more than one image
+     */
+    public boolean hasMultipleImages() {
+        return images.length > 1;
+    }
+
+    /**
      * Update the current image index and return the new image
      *
      * @return Image after index update
