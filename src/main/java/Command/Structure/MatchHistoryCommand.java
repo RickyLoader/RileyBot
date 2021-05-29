@@ -381,7 +381,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      *
      * @param currentButtonId Button ID of the currently displayed embed
      * @param matchStats      Match stats to determine if certain buttons should be displayed
-     * @return Buttons for current question, will be null if no buttons
+     * @return Buttons for given match stats
      */
     private ActionRow getButtons(String currentButtonId, MatchStats matchStats) {
         ArrayList<Button> buttons = new ArrayList<>();
