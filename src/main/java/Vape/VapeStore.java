@@ -2,7 +2,6 @@ package Vape;
 
 import Network.NetworkRequest;
 import Network.NetworkResponse;
-import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -164,11 +163,16 @@ public class VapeStore {
                 product.getJSONArray("variants"),
                 optionsList.length()
         );
+
+        // Sort by ascending price
+        variants.sort(Comparator.comparingDouble(Variant::getPrice));
+
         String description = parseDescription(product.getString("body_html"));
         return new Product(
                 id,
                 product.getString("title"),
-                parsePriceRange(variants),
+                variants.get(0).getPrice(),
+                variants.get(variants.size() - 1).getPrice(),
                 baseUrl + "/" + product.getString("handle"),
                 description.isEmpty() ? "-" : description,
                 product.getString("product_type"),
@@ -177,18 +181,6 @@ public class VapeStore {
                 parseImages(product.getJSONArray("images")),
                 parseOptions(optionsList, variants)
         );
-    }
-
-    /**
-     * Parse the price range of the product variants
-     *
-     * @param variants List of product variants, each with a price
-     * @return Price range of product variants - lowest & highest price
-     */
-    private Pair<Double, Double> parsePriceRange(ArrayList<Variant> variants) {
-        // Sort by price low -> high
-        variants.sort(Comparator.comparingDouble(Variant::getPrice));
-        return new Pair<>(variants.get(0).getPrice(), variants.get(variants.size() - 1).getPrice());
     }
 
     /**
