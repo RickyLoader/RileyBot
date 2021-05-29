@@ -9,7 +9,11 @@ import COD.LoadoutImageManager;
 import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,9 +34,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private final ArrayList<WobblyScore> leaderboard;
     private final CODManager codManager;
     private final Font font;
-    private final String footer;
+    private final String footer, statsId, switchImageId, defaultButtonId;
+    private Button stats, loadouts, switchImage;
     private String matchID;
-    private Emote stats, players, loadouts, switchImage;
     private EmoteHelper emoteHelper;
 
     /**
@@ -61,6 +65,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
         this.font = codManager.getGame() == CODManager.GAME.MW
                 ? FontManager.MODERN_WARFARE_FONT
                 : FontManager.COLD_WAR_FONT;
+        this.statsId = "stats";
+        this.switchImageId = "switch";
+        this.defaultButtonId = statsId; // Stats page is displayed first
     }
 
     @Override
@@ -102,13 +109,14 @@ public class MatchHistoryCommand extends CODLookupCommand {
     @Override
     public void onArgumentsSet(String name, CommandContext context) {
         if(emoteHelper == null) {
-            emoteHelper = context.getEmoteHelper();
-            stats = emoteHelper.getStats();
-            players = emoteHelper.getPlayers();
-            loadouts = emoteHelper.getLoadouts();
-            switchImage = emoteHelper.getNextImage();
-            context.getJDA().addEventListener(getMatchEmoteListener());
+            this.emoteHelper = context.getEmoteHelper();
+            this.stats = Button.primary(statsId, Emoji.ofEmote(emoteHelper.getStats()));
+            this.loadouts = Button.primary("loadouts", Emoji.ofEmote(emoteHelper.getLoadouts()));
+            this.switchImage = Button.primary(switchImageId, EmbedHelper.BLANK_CHAR);
         }
+
+        context.getJDA().addEventListener(getMatchButtonListener());
+
         MessageChannel channel = context.getMessageChannel();
         channel.sendTyping().queue();
         if(name.equals("missing")) {
@@ -187,7 +195,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private void showWobblyLeaderboard(CommandContext context) {
         if(leaderboard.isEmpty()) {
             context.getMessageChannel().sendMessage(
-                    "There are no wobblies on the leaderboard for " + codManager.getGame().name().toUpperCase() + "!"
+                    "There are no wobblies on the leaderboard for "
+                            + codManager.getGame().name().toUpperCase() + "!"
             ).queue();
             return;
         }
@@ -309,49 +318,109 @@ public class MatchHistoryCommand extends CODLookupCommand {
     }
 
     /**
-     * Create an emote listener to handle toggling a match embed between match stats
-     * and a list of players
+     * Check if the given button ID is a valid button to control the gunfight
+     *
+     * @param buttonId ID of button
+     * @return Button is valid
+     */
+    private boolean isValidButton(String buttonId) {
+        return buttonId.equals(stats.getId()) || buttonId.equals(loadouts.getId()) || buttonId.equals(switchImage.getId());
+    }
+
+    /**
+     * Create a button listener to handle toggling a match embed between match stats,
+     * loadouts, and players
      *
      * @return Emote listener
      */
-    private EmoteListener getMatchEmoteListener() {
-        return new EmoteListener() {
-            private Emote last = stats;
+    private ButtonListener getMatchButtonListener() {
+        return new ButtonListener() {
+            private String last = defaultButtonId;
 
             @Override
-            public void handleReaction(MessageReaction reaction, User user, Guild guild) {
-                long id = reaction.getMessageIdLong();
-                Emote emote = reaction.getReactionEmote().getEmote();
-                if(!matchMessages.containsKey(id) || (emote != stats && emote != players && emote != loadouts && emote != switchImage)) {
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                String buttonId = event.getComponentId();
+                long messageId = event.getMessageIdLong();
+                if(!matchMessages.containsKey(messageId) || !isValidButton(buttonId)) {
                     return;
                 }
-                reaction.getChannel().retrieveMessageById(id).queue(message -> {
-                    MatchStats matchStats = matchMessages.get(id);
-                    MessageEmbed content = null;
-                    if(emote == stats) {
-                        content = buildMatchEmbed(matchStats);
-                    }
-                    else if(emote == players) {
-                        content = buildMatchPlayersEmbed(matchStats);
-                    }
-                    else if(emote == loadouts && matchStats.getMainPlayer().hasLoadouts()) {
-                        content = buildMatchLoadoutEmbed(matchStats);
-                    }
-                    else if(emote == switchImage && last != loadouts) {
-                        matchStats.switchDisplayImageURL();
-                        content = last == stats ? buildMatchEmbed(matchStats) : buildMatchPlayersEmbed(matchStats);
-                    }
-                    if(content == null) {
-                        return;
-                    }
-                    message.editMessage(content).queue(messageEdit -> {
-                        if(emote != switchImage) {
-                            last = emote;
-                        }
-                    });
-                });
+
+                MatchStats matchStats = matchMessages.get(messageId);
+                MessageEmbed content = null;
+
+                if(buttonId.equals(stats.getId())) {
+                    content = buildMatchEmbed(matchStats);
+                }
+                else if(buttonId.equals(loadouts.getId()) && shouldDisplayLoadoutsButton(matchStats)) {
+                    content = buildMatchLoadoutEmbed(matchStats);
+                }
+                else if(buttonId.equals(switchImage.getId()) && shouldDisplaySwitchButton(last)) {
+                    matchStats.switchDisplayImageURL();
+                    content = buildMatchEmbed(matchStats);
+                }
+
+                // Shouldn't happen but would if buttons weren't removed when unavailable
+                if(content == null) {
+                    return;
+                }
+
+                // Switch image doesn't change the current displayed embed so don't remember as last button press
+                if(!buttonId.equals(switchImage.getId())) {
+                    last = buttonId;
+                }
+
+                event.deferEdit().setEmbeds(content).setActionRows(getButtons(last, matchStats)).queue();
             }
         };
+    }
+
+    /**
+     * Get the action row of buttons to use in the message embed for the given match stats.
+     * This includes disabling the button associated with the currently displayed embed, and removing
+     * buttons when they should not be accessible (e.g switch map image button when viewing loadouts)
+     *
+     * @param currentButtonId Button ID of the currently displayed embed
+     * @param matchStats      Match stats to determine if certain buttons should be displayed
+     * @return Buttons for current question, will be null if no buttons
+     */
+    private ActionRow getButtons(String currentButtonId, MatchStats matchStats) {
+        ArrayList<Button> buttons = new ArrayList<>();
+        buttons.add(currentButtonId.equals(stats.getId()) ? stats.asDisabled() : stats);
+
+        if(shouldDisplaySwitchButton(currentButtonId)) {
+
+            // Label is the opposite of what is currently displayed as it indicates what it will switch to
+            String label = "View " + (matchStats.displayingLoadingImage() ? "Compass" : "Loading");
+            buttons.add(Button.of(switchImage.getStyle(), switchImageId, label));
+        }
+
+        if(shouldDisplayLoadoutsButton(matchStats)) {
+            buttons.add(currentButtonId.equals(loadouts.getId()) ? loadouts.asDisabled() : loadouts);
+        }
+
+        return ActionRow.of(buttons);
+    }
+
+    /**
+     * Check if the switch map image button should be displayed on the message embed.
+     * This is if the currently displayed message embed is the stats embed.
+     *
+     * @param currentButtonId Button ID of the currently displayed embed
+     * @return Switch image button should be displayed
+     */
+    private boolean shouldDisplaySwitchButton(String currentButtonId) {
+        return currentButtonId.equals(stats.getId());
+    }
+
+    /**
+     * Check if the loadouts button should be displayed on the message embed for the given match stats
+     * This is if the match player has any loadouts
+     *
+     * @param matchStats Match stats
+     * @return Loadouts button should be displayed
+     */
+    private boolean shouldDisplayLoadoutsButton(MatchStats matchStats) {
+        return matchStats.getMainPlayer().hasLoadouts();
     }
 
     /**
@@ -378,18 +447,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
         }
 
         MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
-        MessageAction sendMessage = channel.sendMessage(matchEmbed);
+        MessageAction sendMessage = channel.sendMessage(matchEmbed).setActionRows(getButtons(defaultButtonId, matchStats));
         MatchPlayer player = matchStats.getMainPlayer();
-        Consumer<Message> callback = message -> {
-            matchMessages.put(message.getIdLong(), matchStats);
-            message.addReaction(stats).queue();
-            message.addReaction(players).queue();
-            if(player.hasLoadouts()) {
-                message.addReaction(loadouts).queue();
-            }
-            message.addReaction(switchImage).queue();
-        };
-        addTeams(matchStats);
+        Consumer<Message> callback = message -> matchMessages.put(message.getIdLong(), matchStats);
         if(player.hasLoadouts()) {
             player.setLoadoutImage(buildLoadoutImage(player.getLoadouts()));
             /*
@@ -435,41 +495,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
         }
         g.dispose();
         return ImageLoadingMessage.imageToByteArray(background);
-    }
-
-    /**
-     * Attempt to get and add the team information for the provided match
-     *
-     * @param matchStats Match to add teams to
-     */
-    private void addTeams(MatchStats matchStats) {
-        Team allies = new Team("Allies");
-        Team axis = new Team("Axis");
-        JSONObject matchDetails = new JSONObject(getMatchPlayersJSON(matchStats.getId(), getPlatform()));
-        if(matchDetails.has("status")) {
-            matchStats.setTeams(allies, axis);
-            return;
-        }
-        JSONArray playerList = matchDetails.getJSONArray("allPlayers");
-
-        for(int i = 0; i < playerList.length(); i++) {
-            JSONObject stats = playerList.getJSONObject(i);
-            JSONObject playerInfo = stats.getJSONObject("player");
-            MatchPlayer player = parseMatchPlayer(
-                    stats,
-                    new MatchPlayer.MatchPlayerBuilder(
-                            playerInfo.getString("username"),
-                            PLATFORM.byName(playerInfo.getString("platform"))
-                    )
-            );
-            if(player.getTeam().equals("allies")) {
-                allies.addPlayer(player);
-            }
-            else {
-                axis.addPlayer(player);
-            }
-        }
-        matchStats.setTeams(allies, axis);
     }
 
     /**
@@ -546,20 +571,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
     }
 
     /**
-     * Create a message embed showing the list of players in the given match
-     *
-     * @param matchStats Match stats to display players from
-     * @return Message embed showing list of match players
-     */
-    private MessageEmbed buildMatchPlayersEmbed(MatchStats matchStats) {
-        EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats)
-                .setTitle(codManager.getGame().name().toUpperCase() + " Match Players: " + matchStats.getId());
-        addTeamToEmbed(matchStats.getAllies(), builder);
-        addTeamToEmbed(matchStats.getAxis(), builder);
-        return builder.build();
-    }
-
-    /**
      * Create a message embed showing the loadouts used by the player in the given match
      *
      * @param matchStats Match stats to display loadouts from
@@ -581,31 +592,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .setDescription(summary)
                 .setImage("attachment://image.png")
                 .build();
-    }
-
-    /**
-     * Add the given team to the embed builder
-     *
-     * @param team    Team to add to embed builder
-     * @param builder Embed builder with team name and players
-     */
-    private void addTeamToEmbed(Team team, EmbedBuilder builder) {
-        ArrayList<MatchPlayer> players = team.getPlayers();
-        String teamName = "__" + team.getName().toUpperCase() + "__";
-        if(players.isEmpty()) {
-            builder.addField(teamName, "No players found!", true);
-            return;
-        }
-        for(int i = 0; i < players.size(); i++) {
-            MatchPlayer player = players.get(i);
-            String value = "**" + player.getName() + "**"
-                    + "\n" + player.getPlatform().name()
-                    + "\n#" + player.getUno();
-            builder.addField(i == 0
-                    ? EmbedHelper.getTitleField(teamName, value)
-                    : EmbedHelper.getValueField(value)
-            );
-        }
     }
 
     /**
@@ -922,19 +908,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
         return codManager.getGame() == CODManager.GAME.MW
                 ? CODAPI.getMWMatchHistory(name, platform)
                 : CODAPI.getCWMatchHistory(name, platform);
-    }
-
-    /**
-     * Get the match players JSON
-     *
-     * @param matchID  Match id
-     * @param platform Match platform
-     * @return Match players JSON
-     */
-    private String getMatchPlayersJSON(String matchID, PLATFORM platform) {
-        return codManager.getGame() == CODManager.GAME.MW
-                ? CODAPI.getMWMatchPlayers(matchID, platform)
-                : CODAPI.getCWMatchPlayers(matchID, platform);
     }
 
     /**

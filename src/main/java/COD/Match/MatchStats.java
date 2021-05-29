@@ -19,7 +19,6 @@ public class MatchStats {
     private final long duration;
     private final Score score;
     private final MatchPlayer mainPlayer;
-    private Team allies, axis;
     private String displayImageURL;
 
     public enum RESULT {
@@ -67,9 +66,16 @@ public class MatchStats {
      * Switch the display image URL between the map compass and map loading screen image
      */
     public void switchDisplayImageURL() {
-        this.displayImageURL = displayImageURL.equals(map.getLoadingImageURL())
-                ? map.getCompassImageURL()
-                : map.getLoadingImageURL();
+        this.displayImageURL = displayingLoadingImage() ? map.getCompassImageURL() : map.getLoadingImageURL();
+    }
+
+    /**
+     * Check if the currently displayed image URL is the map's loading image
+     *
+     * @return Currently displaying map loading image
+     */
+    public boolean displayingLoadingImage() {
+        return this.displayImageURL.equals(map.getLoadingImageURL());
     }
 
     /**
@@ -193,43 +199,5 @@ public class MatchStats {
      */
     public boolean playerCompleted() {
         return result != RESULT.FORFEIT;
-    }
-
-    /**
-     * Get the allied team
-     *
-     * @return Allied team
-     */
-    public Team getAllies() {
-        return allies;
-    }
-
-    /**
-     * Get the axis team
-     *
-     * @return Axis team
-     */
-    public Team getAxis() {
-        return axis;
-    }
-
-    /**
-     * Set the match teams
-     *
-     * @param allies Allied team
-     * @param axis   Axis team
-     */
-    public void setTeams(Team allies, Team axis) {
-        this.allies = allies;
-        this.axis = axis;
-    }
-
-    /**
-     * Check if the match has team information
-     *
-     * @return Match has team information
-     */
-    public boolean hasTeams() {
-        return allies != null && axis != null;
     }
 }
