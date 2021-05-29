@@ -490,34 +490,6 @@ public class EmoteHelper {
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/801427904197689354.png"/>
-     */
-    public Emote getPollOptionA() {
-        return get("801427904197689354");
-    }
-
-    /**
-     * <img src = "https://cdn.discordapp.com/emojis/801429096784592906.png"/>
-     */
-    public Emote getPollOptionB() {
-        return get("801429096784592906");
-    }
-
-    /**
-     * <img src = "https://cdn.discordapp.com/emojis/801429893644156978.png"/>
-     */
-    public Emote getPollOptionC() {
-        return get("801429893644156978");
-    }
-
-    /**
-     * <img src = "https://cdn.discordapp.com/emojis/801430434860367922.png"/>
-     */
-    public Emote getPollOptionD() {
-        return get("801430434860367922");
-    }
-
-    /**
      * <img src = "https://cdn.discordapp.com/emojis/802472508438609940.png"/>
      */
     public Emote getPlayers() {
@@ -574,24 +546,24 @@ public class EmoteHelper {
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/818744837632950292.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/848064859458371637.png"/>
      */
     public Emote getPointOfInterest() {
-        return get("818744837632950292");
+        return get("848064859458371637");
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/818745191900905472.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/848064859907162152.png"/>
      */
     public Emote getResources() {
-        return get("818745191900905472");
+        return get("848064859907162152");
     }
 
     /**
-     * <img src = "https://cdn.discordapp.com/emojis/818745730466054147.png"/>
+     * <img src = "https://cdn.discordapp.com/emojis/848064859727200286.png"/>
      */
     public Emote getCreatures() {
-        return get("818745730466054147");
+        return get("848064859727200286");
     }
 
     /**
