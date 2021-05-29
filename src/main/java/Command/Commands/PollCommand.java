@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.HashMap;
 
+import static Command.Structure.PageableTableEmbed.*;
+
 /**
  * Create a poll of up to 4 items and use emotes to vote
  */
@@ -39,7 +41,7 @@ public class PollCommand extends DiscordCommand {
             if(pollMissing(current, channel, pollMaster)) {
                 return;
             }
-            current.refreshPollMessage();
+            current.relocateMessage();
             return;
         }
 
@@ -47,7 +49,7 @@ public class PollCommand extends DiscordCommand {
             if(pollMissing(current, channel, pollMaster)) {
                 return;
             }
-            current.stop(jda);
+            current.stop();
             return;
         }
 
@@ -64,16 +66,6 @@ public class PollCommand extends DiscordCommand {
                 .trim()
                 .split(delim);
 
-        if(questions.length == 1) {
-            channel.sendMessage(pollMaster.getAsMention() + " What kind of poll has 1 item?").queue();
-            return;
-        }
-
-        if(questions.length > 4) {
-            channel.sendMessage(pollMaster.getAsMention() + " Let's keep it to 4 items bro").queue();
-            return;
-        }
-
         if(current != null && current.isRunning()) {
             channel.sendMessage(
                     pollMaster.getAsMention() + " There's already a poll running in this channel, it will end in "
@@ -81,12 +73,15 @@ public class PollCommand extends DiscordCommand {
             ).queue();
             return;
         }
-
-        Poll poll = new Poll(channel, questions, title, jda, context.getEmoteHelper());
-        polls.put(channelId, poll);
-        poll.start();
+        try {
+            Poll poll = new Poll(channel, questions, title, jda, context.getEmoteHelper());
+            polls.put(channelId, poll);
+            poll.start();
+        }
+        catch(IncorrectQuantityException e) {
+            channel.sendMessage(pollMaster.getAsMention() + " " + e.getMessage()).queue();
+        }
     }
-
 
     /**
      * Check if the given poll is ended or doesn't exist

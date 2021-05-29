@@ -838,4 +838,11 @@ public class EmoteHelper {
     public Emote getCategory() {
         return get("838924724583006248");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/848021441752203305.png"/>
+     */
+    public Emote getTrophy() {
+        return get("848021441752203305");
+    }
 }
