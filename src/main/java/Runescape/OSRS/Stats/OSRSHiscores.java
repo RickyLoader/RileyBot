@@ -39,9 +39,10 @@ public class OSRSHiscores extends Hiscores {
     private final boolean league, virtual, xp;
     public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
+    private final String displayFormatDate = "dd/MM/yyyy";
     private final SimpleDateFormat
-            parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'"),
-            displayFormat = new SimpleDateFormat("dd/MM/yyyy");
+            parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+            displayFormat = new SimpleDateFormat(displayFormatDate);
 
     /**
      * Create the OSRS Hiscores instance
@@ -59,6 +60,7 @@ public class OSRSHiscores extends Hiscores {
         this.virtual = virtual;
         this.xp = xp;
         this.trackerFont = FontManager.WISE_OLD_MAN_FONT;
+        parseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -449,7 +451,8 @@ public class OSRSHiscores extends Hiscores {
                     parseFormat.parse(week.getString("endsAt"))
             );
 
-            String beginningAt = displayFormat.format(playerStats.getTrackerStartDate());
+            String beginningAt = new SimpleDateFormat(displayFormatDate + "  HH:mm:ss")
+                    .format(playerStats.getTrackerStartDate());
             String trackerUrl = getTrackerBrowserUrl(name, league);
 
             String details = playerStats.hasWeeklyGains()
