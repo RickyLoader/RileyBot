@@ -43,7 +43,6 @@ public class OSRSHiscores extends Hiscores {
             parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'"),
             displayFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-
     /**
      * Create the OSRS Hiscores instance
      *
@@ -365,6 +364,18 @@ public class OSRSHiscores extends Hiscores {
     }
 
     /**
+     * Get the weekly XP tracker browser URL (the URL to view the tracker directly in a browser)
+     *
+     * @param name   Player name
+     * @param league League XP tracker
+     * @return XP tracker browser URL
+     */
+    private String getTrackerBrowserUrl(String name, boolean league) {
+        return "https://" + getTrackerDomain(league)
+                + "/players/" + name.replaceAll(" ", "%20") + "/gained/skilling?period=week";
+    }
+
+    /**
      * Fetch XP tracking data for the given player
      *
      * @param name   Player name
@@ -437,7 +448,15 @@ public class OSRSHiscores extends Hiscores {
                     parseFormat.parse(week.getString("startsAt")),
                     parseFormat.parse(week.getString("endsAt"))
             );
-            loading.completeStage(playerStats.hasWeeklyGains() ? "Weekly XP obtained" : "No XP gained this week");
+
+            String beginningAt = displayFormat.format(playerStats.getTrackerStartDate());
+            String trackerUrl = getTrackerBrowserUrl(name, league);
+
+            String details = playerStats.hasWeeklyGains()
+                    ? "Weekly XP " + EmbedHelper.embedURL("obtained", trackerUrl)
+                    : "No XP " + EmbedHelper.embedURL("gained", trackerUrl);
+
+            loading.completeStage(details + " for week beginning at: " + beginningAt);
         }
         catch(Exception e) {
             loading.failStage("Failed to parse Weekly XP");
