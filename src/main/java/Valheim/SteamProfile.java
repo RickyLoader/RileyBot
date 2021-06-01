@@ -10,9 +10,27 @@ import java.util.HashSet;
  */
 public class SteamProfile {
     private final long id;
+    private static final String UNKNOWN = "Unknown";
     private final String name, url;
     private final ArrayList<String> characterNames;
     private final HashSet<String> characterNameSet;
+
+    /**
+     * Create the steam profile
+     *
+     * @param id               Steam id
+     * @param name             Profile name
+     * @param url              URL to profile
+     * @param characterNames   List of Valheim character names
+     * @param characterNameSet Set of unique Valheim character names
+     */
+    public SteamProfile(long id, String name, String url, ArrayList<String> characterNames, HashSet<String> characterNameSet) {
+        this.id = id;
+        this.name = name;
+        this.url = url;
+        this.characterNames = characterNames;
+        this.characterNameSet = characterNameSet;
+    }
 
     /**
      * Create the steam profile
@@ -22,11 +40,43 @@ public class SteamProfile {
      * @param url  URL to profile
      */
     public SteamProfile(long id, String name, String url) {
-        this.id = id;
-        this.name = name;
-        this.url = url;
-        this.characterNames = new ArrayList<>();
-        this.characterNameSet = new HashSet<>();
+        this(id, name, url, new ArrayList<>(), new HashSet<>());
+    }
+
+    /**
+     * Create an unknown steam profile (where the Steam name and URL are unknown)
+     *
+     * @param id Steam ID
+     */
+    public SteamProfile(long id) {
+        this(id, UNKNOWN, null);
+    }
+
+    /**
+     * Check if the Steam profile is unknown
+     *
+     * @return Profile is unknown
+     */
+    public boolean isUnknown() {
+        return name.equals(UNKNOWN) && url == null;
+    }
+
+    /**
+     * Get the unique Valheim character names associated with the Steam profile
+     *
+     * @return Valheim character name set
+     */
+    public HashSet<String> getCharacterNameSet() {
+        return characterNameSet;
+    }
+
+    /**
+     * Get the list of Valheim character names associated with the Steam profile
+     *
+     * @return List of Valheim character names
+     */
+    public ArrayList<String> getCharacterNameList() {
+        return characterNames;
     }
 
     /**

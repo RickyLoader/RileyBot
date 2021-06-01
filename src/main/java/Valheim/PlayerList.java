@@ -28,7 +28,39 @@ public class PlayerList {
      */
     public void connectionStarted(long steamId, Date date) {
         SteamProfile profile = steamProfiles.computeIfAbsent(steamId, this::fetchSteamProfile);
+
+        // Steam API down, try again
+        if(profile.isUnknown()) {
+            SteamProfile fixed = fixSteamProfile(profile);
+            if(fixed != null) {
+                profile = fixed;
+                steamProfiles.put(steamId, profile);
+            }
+        }
         pendingConnections.addConnection(profile, date);
+    }
+
+    /**
+     * Take an unknown Steam profile (when Steam API is down) and copy the known values in to a fixed profile.
+     * Return null if the profile remains unknown.
+     *
+     * @param profile Unknown Steam profile from when Steam API was down
+     * @return Fixed steam profile or null
+     */
+    private SteamProfile fixSteamProfile(SteamProfile profile) {
+        SteamProfile updated = fetchSteamProfile(profile.getId());
+        // API still down
+        if(updated.isUnknown()) {
+            return null;
+        }
+        // New profile with the old character names still intact
+        return new SteamProfile(
+                profile.getId(),
+                updated.getName(),
+                updated.getUrl(),
+                profile.getCharacterNameList(),
+                profile.getCharacterNameSet()
+        );
     }
 
     /**
@@ -38,20 +70,25 @@ public class PlayerList {
      * @return Steam profile
      */
     private SteamProfile fetchSteamProfile(long steamId) {
-        String url = SteamStore.STEAM_API_BASE_URL + "ISteamUser/GetPlayerSummaries/v2/?key="
-                + Secret.STEAM_KEY + "&steamids=" + steamId;
+        try {
+            String url = SteamStore.STEAM_API_BASE_URL + "ISteamUser/GetPlayerSummaries/v2/?key="
+                    + Secret.STEAM_KEY + "&steamids=" + steamId;
 
-        JSONObject response = new JSONObject(
-                new NetworkRequest(url, false).get().body
-        ).getJSONObject("response");
+            JSONObject response = new JSONObject(
+                    new NetworkRequest(url, false).get().body
+            ).getJSONObject("response");
 
-        JSONObject player = response.getJSONArray("players").getJSONObject(0);
+            JSONObject player = response.getJSONArray("players").getJSONObject(0);
 
-        return new SteamProfile(
-                steamId,
-                player.getString("personaname"),
-                player.getString("profileurl")
-        );
+            return new SteamProfile(
+                    steamId,
+                    player.getString("personaname"),
+                    player.getString("profileurl")
+            );
+        }
+        catch(Exception e) {
+            return new SteamProfile(steamId);
+        }
     }
 
     /**
