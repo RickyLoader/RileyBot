@@ -64,12 +64,25 @@ public class ItemManager {
     /**
      * Get an item by its id
      *
+     * @param id         Item id
+     * @param updateData Update data if due
+     * @return Item with id or null
+     */
+    public Item getItemByID(int id, boolean updateData) {
+        if(updateData) {
+            refreshData();
+        }
+        return items.get(id);
+    }
+
+    /**
+     * Get an item by its id
+     *
      * @param id Item id
      * @return Item with id or null
      */
     public Item getItemByID(int id) {
-        refreshData();
-        return items.get(id);
+        return getItemByID(id, true);
     }
 
     /**
