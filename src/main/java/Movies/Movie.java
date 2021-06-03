@@ -298,12 +298,13 @@ public class Movie {
     }
 
     /**
-     * Get the summary/synopsis of the movie
+     * Get the summary/synopsis of the movie truncated to 100 characters
      *
      * @return Movie summary
      */
     public String getSummary() {
-        return summary;
+        int max = 100;
+        return summary.length() < max ? summary : summary.substring(0, max) + "...";
     }
 
     /**
