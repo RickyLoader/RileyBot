@@ -233,6 +233,16 @@ public class PlexServer {
     }
 
     /**
+     * Check if the given query is a TMDB (td12345) or IMDB ID (tt12345)
+     *
+     * @param query Query to check
+     * @return Query is an ID
+     */
+    private boolean isId(String query) {
+        return query.matches("([t][" + TMDB_ID_PREFIX + "])\\d+");
+    }
+
+    /**
      * Search for a movie currently in the Radarr library
      * Display either a message embed detailing the singular movie found, or a pageable message embed
      * displaying the search results.
@@ -243,8 +253,7 @@ public class PlexServer {
     public void searchLibrary(String query, CommandContext context) {
         PlexMovie[] results;
 
-        // tt12345 or td12345
-        if(query.matches("([t][td])\\d+")) {
+        if(isId(query)) {
             query = query.replaceFirst(TMDB_ID_PREFIX, "");
             results = searchByID(query);
         }
@@ -287,7 +296,7 @@ public class PlexServer {
      * @param context Command context for initialising pageable embed
      */
     public void searchRadarr(String query, CommandContext context) {
-        boolean idSearch = query.matches("([t][td])\\d+");
+        boolean idSearch = isId(query);
         if(idSearch) {
             query = query.replaceFirst(TMDB_ID_PREFIX, "");
         }
