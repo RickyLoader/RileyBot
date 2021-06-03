@@ -191,6 +191,9 @@ public class DiscordCommandManager {
         addCommand(new VapouriumCommand());
         addCommand(new VapoCommand());
         addCommand(new AlphaVapeCommand());
+        addCommand(new IMDBMovieCommand());
+        addCommand(new TMDBMovieCommand());
+        addCommand(new RottenTomatoesMovieCommand());
         /* TODO
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());
