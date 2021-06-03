@@ -23,6 +23,7 @@ public class TheMovieDatabase {
             VIDEOS_KEY = "videos",
             CREDITS_KEY = "credits",
             RELEASE_DATES_KEY = "release_dates";
+    public static final String LOGO = "https://i.imgur.com/J1JGC4J.png";
 
     /**
      * Get a movie from TMDB using a supported movie ID.
@@ -71,7 +72,6 @@ public class TheMovieDatabase {
         builder.setBudget(movieDetails.getLong("budget"))
                 .setRevenue(movieDetails.getLong("revenue"))
                 .setRating(movieDetails.getDouble("vote_average"))
-                .setDuration(movieDetails.getInt("duration"))
                 .setContentRating(
                         parseContentRating(movieDetails.getJSONObject(RELEASE_DATES_KEY).getJSONArray("results"))
                 )
@@ -81,6 +81,11 @@ public class TheMovieDatabase {
         String tagline = movieDetails.getString("tagline");
         if(!tagline.isEmpty()) {
             builder.setTagline(tagline);
+        }
+
+        String durationKey = "duration";
+        if(movieDetails.has(durationKey)) {
+            builder.setDuration(movieDetails.getInt(durationKey));
         }
 
         String posterKey = "poster_path";
@@ -267,14 +272,14 @@ public class TheMovieDatabase {
      * Parse the release date of a movie from the date String
      *
      * @param dateString Date String representing release date
-     * @return Release date of movie (or now if the date is unable to be parsed)
+     * @return Release date of movie (or null if the date is unable to be parsed)
      */
     private static Date parseReleaseDate(String dateString) {
         try {
             return new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
         }
         catch(ParseException e) {
-            return new Date();
+            return null;
         }
     }
 

@@ -1,28 +1,26 @@
 package Plex;
 
-import Command.Structure.CommandContext;
-import Command.Structure.EmbedHelper;
-import Command.Structure.EmoteHelper;
+import Command.Structure.*;
+import Movies.*;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class PlexServer {
     private final String helpMessage;
     public static final String
             RADARR_ICON = "https://i.imgur.com/d5p0ftd.png",
-            PLEX_ICON = "https://i.imgur.com/FdabwCm.png";
-    private long timeFetched;
-    private ArrayList<Movie> library;
+            PLEX_ICON = "https://i.imgur.com/FdabwCm.png",
+            TMDB_ID_PREFIX = "td";
+    private long lastRefreshed;
+    private ArrayList<PlexMovie> library;
     private EmoteHelper emoteHelper;
     private HashMap<String, String> plexUrls;
 
@@ -56,17 +54,17 @@ public class PlexServer {
      * Refresh the Radarr library and Plex URLs
      */
     public void refreshData() {
-        this.plexUrls = parsePlex();
+        this.plexUrls = parsePlexDetails();
         this.library = getLibraryOverview();
-        this.timeFetched = System.currentTimeMillis();
+        this.lastRefreshed = System.currentTimeMillis();
     }
 
     /**
-     * Retrieve the Plex URL for each movie from the Plex API. Map the folder name to the URL.
+     * Retrieve the Plex URL for each movie from the Plex API. Map the movie's folder name to the URL.
      *
-     * @return Folder name mapped to Plex URL
+     * @return Map of movie folder name -> Plex URL
      */
-    private HashMap<String, String> parsePlex() {
+    private HashMap<String, String> parsePlexDetails() {
         HashMap<String, String> plexURLs = new HashMap<>();
         NetworkResponse response = new NetworkRequest(getPlexLibraryURL(), false).get();
         String json = response.body;
@@ -108,8 +106,8 @@ public class PlexServer {
      *
      * @return List of movies
      */
-    private ArrayList<Movie> getLibraryOverview() {
-        ArrayList<Movie> library = new ArrayList<>();
+    private ArrayList<PlexMovie> getLibraryOverview() {
+        ArrayList<PlexMovie> library = new ArrayList<>();
         NetworkResponse response = new NetworkRequest(getRadarrLibraryURL(), false).get();
         String json = response.body;
         if(json == null || response.code == 504) {
@@ -124,11 +122,11 @@ public class PlexServer {
      * Parse Radarr JSON to a list of movies
      *
      * @param movies        Radarr movie list json
-     * @param ignoreLibrary Ignore results which are on Radarr (For searching outside library)
+     * @param ignoreLibrary Ignore results which are on Radarr (For when searching outside library)
      * @return List of movies
      */
-    private ArrayList<Movie> parseMovies(JSONArray movies, boolean ignoreLibrary) {
-        ArrayList<Movie> library = new ArrayList<>();
+    private ArrayList<PlexMovie> parseMovies(JSONArray movies, boolean ignoreLibrary) {
+        ArrayList<PlexMovie> library = new ArrayList<>();
         for(int i = 0; i < movies.length(); i++) {
             JSONObject movieData = movies.getJSONObject(i);
             if(ignoreLibrary && searchByID(String.valueOf(movieData.getInt("tmdbId"))).length > 0) {
@@ -145,55 +143,93 @@ public class PlexServer {
      * @param movie Radarr movie json
      * @return Movie
      */
-    private Movie parseMovie(JSONObject movie) {
+    private PlexMovie parseMovie(JSONObject movie) {
         boolean downloaded = movie.getBoolean("downloaded");
         String plexUrl = null;
         if(downloaded) {
             String folder = movie.getString("path");
-            plexUrl = folder.endsWith("/") ? plexUrls.get(folder.substring(0, folder.length() - 1)) : plexUrls.get(folder);
+            if(folder.endsWith("/")) {
+
+                // Remove the trailing slash as it is not present in Plex folder paths but can be in Radarr folder paths
+                folder = folder.substring(0, folder.length() - 1);
+            }
+            plexUrl = plexUrls.get(folder);
         }
-        Movie.MovieBuilder builder = new Movie.MovieBuilder()
-                .setTmdbId(String.valueOf(movie.getInt("tmdbId")))
-                .setTitle(movie.getString("title"))
-                .setSummary(movie.has("overview") ? movie.getString("overview") : null)
-                .setReleaseDate(movie.has("inCinemas") ? movie.getString("inCinemas") : null)
-                .setPlexURL(plexUrl)
-                .setOnPlex(downloaded);
-        if(movie.has("imdbId")) {
-            builder.setImdbId(movie.getString("imdbId"));
+
+        RatingIds.RatingIdsBuilder builder = new RatingIds.RatingIdsBuilder()
+                .setTmdbId(String.valueOf(movie.getInt("tmdbId")));
+
+        String imdbKey = "imdbId";
+        if(movie.has(imdbKey)) {
+            builder.setImdbId(movie.getString(imdbKey));
         }
-        return builder.build();
+
+        return new PlexMovie(
+                new PlexDetails(
+                        builder.build(),
+                        movie.getString("title"),
+                        plexUrl,
+                        downloaded
+                )
+        );
     }
 
     /**
      * Build a message embed detailing a Movie from Radarr
      *
-     * @param movie  Movie to build embed for
-     * @param adding Movie is being added to Radarr
+     * @param plexMovie Plex movie to build embed for
+     * @param adding    Movie is being added to Radarr
      * @return Movie embed
      */
-    public MessageEmbed getMovieEmbed(Movie movie, boolean adding) {
-        if(!movie.isComplete()) {
-            movie.completeMovieDetails();
+    public MessageEmbed getMovieEmbed(PlexMovie plexMovie, boolean adding) {
+        if(!plexMovie.hasMovie()) {
+            completeMovie(plexMovie);
         }
-        EmbedBuilder builder = new EmbedBuilder()
-                .setThumbnail(movie.isOnPlex() ? PLEX_ICON : RADARR_ICON)
-                .setColor(movie.isOnPlex() ? EmbedHelper.ORANGE : EmbedHelper.BLUE)
-                .setTitle(adding ? movie.getTitle() + " - Added to Radarr queue" : movie.getTitle());
-        if(movie.getPoster() != null) {
-            builder.setImage(movie.getPoster());
-        }
-        builder.setDescription(
-                movie.buildEmbedDescription(
-                        EmoteHelper.formatEmote(emoteHelper.getIMDB()),
-                        EmoteHelper.formatEmote(emoteHelper.getFacebook()),
-                        EmoteHelper.formatEmote(emoteHelper.getYoutube()),
-                        EmoteHelper.formatEmote(emoteHelper.getPlex())
-                )
-        );
-        double rating = movie.getRating();
-        builder.setFooter("TMDB: " + ((rating == 0) ? "N/A" : rating) + " | Content Rating: " + movie.getContentRating() + " | Release Date: " + movie.getFormattedReleaseDate(), "https://i.imgur.com/J1JGC4J.png");
+
+        PlexDetails plexDetails = plexMovie.getPlexDetails();
+        Movies.Movie movie = plexMovie.getMovie();
+        MovieEmbedBuilder builder = new MovieEmbedBuilder(
+                movie,
+                emoteHelper,
+                plexDetails.isOnPlex() ? PLEX_ICON : RADARR_ICON,
+                plexDetails.isOnPlex() ? EmbedHelper.ORANGE : EmbedHelper.BLUE
+        ) {
+
+            @Override
+            public String getDescription() {
+                return (plexMovie.getPlexDetails().isOnPlex()
+                        ? "Movie **is** on Plex"
+                        : "Movie **is not** on Plex but is being monitored.")
+                        + "\n\n" + super.getDescription();
+            }
+
+            @Override
+            public ArrayList<String> getSocialElements() {
+                ArrayList<String> socialElements = super.getSocialElements();
+                if(plexDetails.isOnPlex()) {
+                    String plexEmote = EmoteHelper.formatEmote(emoteHelper.getPlex());
+                    socialElements.add(EmbedHelper.embedURL(plexEmote + " Plex", plexDetails.getPlexUrl()));
+                }
+                return socialElements;
+            }
+
+            @Override
+            public String getTitle() {
+                return adding ? super.getTitle() + " - Added to Radarr queue" : super.getTitle();
+            }
+        };
         return builder.build();
+    }
+
+    /**
+     * Set the movie details of the Plex movie
+     *
+     * @param plexMovie Plex movie to set movie details for
+     */
+    private void completeMovie(PlexMovie plexMovie) {
+        plexMovie.setMovie(
+                TheMovieDatabase.getMovieById(plexMovie.getPlexDetails().getRatingIds().getTmdbId().getId())
+        );
     }
 
     /**
@@ -205,11 +241,11 @@ public class PlexServer {
      * @param context Command context for initialising pageable embed
      */
     public void searchLibrary(String query, CommandContext context) {
-        Movie[] results;
+        PlexMovie[] results;
 
         // tt12345 or td12345
         if(query.matches("([t][td])\\d+")) {
-            query = query.replaceFirst("td", "");
+            query = query.replaceFirst(TMDB_ID_PREFIX, "");
             results = searchByID(query);
         }
         else {
@@ -223,7 +259,7 @@ public class PlexServer {
             context.getMessageChannel().sendMessage(getMovieEmbed(results[0], false)).queue();
             return;
         }
-        new PageableMovieSearchEmbed(context, query, results, helpMessage, true).showMessage();
+        showSearchResults(context, query, results, true);
     }
 
     /**
@@ -248,44 +284,45 @@ public class PlexServer {
      * displaying the search results.
      *
      * @param query   Search query - id or title
-     * @param webhook Webhook URL to respond to
      * @param context Command context for initialising pageable embed
      */
-    public void searchRadarr(String query, String webhook, CommandContext context) {
+    public void searchRadarr(String query, CommandContext context) {
         boolean idSearch = query.matches("([t][td])\\d+");
         if(idSearch) {
-            query = query.replaceFirst("td", "");
+            query = query.replaceFirst(TMDB_ID_PREFIX, "");
         }
+
         String response = new NetworkRequest(getRadarrSearchURL(query, idSearch), false).get().body;
         if(response == null) {
             context.getMessageChannel().sendMessage(buildFailedEmbed()).queue();
             return;
         }
+
         JSONArray searchResults = idSearch ? new JSONArray().put(new JSONObject(response)) : new JSONArray(response);
-        Movie[] movies = parseMovies(searchResults, true).toArray(new Movie[0]);
+        PlexMovie[] movies = parseMovies(searchResults, true).toArray(new PlexMovie[0]);
+
         if(movies.length == 1) {
             for(int i = 0; i < searchResults.length(); i++) {
                 JSONObject result = searchResults.getJSONObject(i);
-                if(result.getInt("tmdbId") == Integer.parseInt(movies[0].getTmdbId())) {
+                String tmdbId = String.valueOf(result.getInt("tmdbId"));
+                if(tmdbId.equals(movies[0].getPlexDetails().getRatingIds().getTmdbId().getId())) {
                     context.getMessageChannel().sendMessage(
-                            getMovieEmbed(addToRadarr(result, context.getMember(), webhook), true)
+                            getMovieEmbed(addToRadarr(result), true)
                     ).queue();
                     return;
                 }
             }
         }
-        new PageableMovieSearchEmbed(context, query, movies, helpMessage, false).showMessage();
+        showSearchResults(context, query, movies, false);
     }
 
     /**
      * Add a movie to Radarr
      *
-     * @param movie   Movie JSON
-     * @param member  Member who requested add
-     * @param webhook Webhook URL to respond to
+     * @param movie Movie JSON
      * @return Movie added to Radarr
      */
-    private Movie addToRadarr(JSONObject movie, Member member, String webhook) {
+    private PlexMovie addToRadarr(JSONObject movie) {
         String body = new JSONObject()
                 .put("title", movie.getString("title"))
                 .put("qualityProfileId", 4)
@@ -298,12 +335,8 @@ public class PlexServer {
                 .put("addOptions", new JSONObject().put("searchForMovie", true))
                 .toString();
 
-        Movie result = parseMovie(movie);
-        result.completeMovieDetails();
-
-        // Store the movie in the database for later callback informing of download
-        new NetworkRequest("plex/monitor", true)
-                .post(result.toJSON(member, System.currentTimeMillis() / 1000, webhook));
+        PlexMovie result = parseMovie(movie);
+        completeMovie(result);
 
         // Add the movie to Radarr
         new NetworkRequest(getRadarrLibraryURL(), false).post(body);
@@ -318,8 +351,8 @@ public class PlexServer {
      * @param query Query to check title for
      * @return Filtered array of movies that contain the query in the title
      */
-    private Movie[] searchByQuery(String query) {
-        return getMatchingMovies(movie -> movie.getTitle().toLowerCase().contains(query));
+    private PlexMovie[] searchByQuery(String query) {
+        return getMatchingMovies(plexMovie -> plexMovie.getPlexDetails().getTitle().toLowerCase().contains(query));
     }
 
     /**
@@ -328,8 +361,8 @@ public class PlexServer {
      * @param title Movie title
      * @return Filtered array of movies that match the title
      */
-    private Movie[] searchByTitle(String title) {
-        return getMatchingMovies(movie -> movie.getTitle().equalsIgnoreCase(title));
+    private PlexMovie[] searchByTitle(String title) {
+        return getMatchingMovies(plexMovie -> plexMovie.getPlexDetails().getTitle().equalsIgnoreCase(title));
     }
 
     /**
@@ -338,10 +371,11 @@ public class PlexServer {
      * @param id Movie id
      * @return Filtered array of movies that match the id
      */
-    private Movie[] searchByID(String id) {
-        return getMatchingMovies(
-                movie -> (movie.getImdbId() != null && movie.getImdbId().equals(id)) || movie.getTmdbId().equals(id)
-        );
+    private PlexMovie[] searchByID(String id) {
+        return getMatchingMovies(plexMovie -> {
+            RatingIds ratingIds = plexMovie.getPlexDetails().getRatingIds();
+            return ratingIds.hasImdbId() && ratingIds.getImdbId().getId().equals(id) || ratingIds.getTmdbId().getId().equals(id);
+        });
     }
 
     /**
@@ -350,8 +384,8 @@ public class PlexServer {
      * @param p Predicate to filter by
      * @return Filtered array of movies
      */
-    private Movie[] getMatchingMovies(Predicate<Movie> p) {
-        return library.stream().filter(p).toArray(Movie[]::new);
+    private PlexMovie[] getMatchingMovies(Predicate<PlexMovie> p) {
+        return library.stream().filter(p).toArray(PlexMovie[]::new);
     }
 
     /**
@@ -359,9 +393,9 @@ public class PlexServer {
      *
      * @return Random movie
      */
-    public Movie getRandomMovie() {
-        List<Movie> plexLibrary = library.stream().filter(Movie::isOnPlex).collect(Collectors.toList());
-        return plexLibrary.get(new Random().nextInt(plexLibrary.size()));
+    public PlexMovie getRandomMovie() {
+        PlexMovie[] library = getMatchingMovies(plexMovie -> plexMovie.getPlexDetails().isOnPlex());
+        return library[new Random().nextInt(library.length)];
     }
 
     /**
@@ -405,7 +439,105 @@ public class PlexServer {
      *
      * @return Time fetched of Radarr data
      */
-    public long getTimeFetched() {
-        return timeFetched;
+    public long getLastRefreshed() {
+        return lastRefreshed;
+    }
+
+    /**
+     * Display the given array of Plex movies in a pageable message embed.
+     *
+     * @param context       Command context
+     * @param query         Query used to find the movies
+     * @param searchResults Array of movies found with the given query
+     * @param inLibrary     Search was performed on the library (not externally on Radarr)
+     */
+    private void showSearchResults(CommandContext context, String query, PlexMovie[] searchResults, boolean inLibrary) {
+        new PageableTableEmbed(
+                context,
+                Arrays.asList(searchResults),
+                inLibrary ? PLEX_ICON : RADARR_ICON,
+                inLibrary ? "Plex Movie Search" : "Radarr Movie Search",
+                buildDescription(query, searchResults, emoteHelper, inLibrary),
+                helpMessage,
+                new String[]{"Platform", "Title", "ID"},
+                5,
+                inLibrary ? EmbedHelper.ORANGE : EmbedHelper.BLUE
+        ) {
+
+            @Override
+            public void sortItems(List<?> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance(query, defaultSort) {
+                    @Override
+                    public String getString(Object o) {
+                        return ((PlexMovie) o).getPlexDetails().getTitle();
+                    }
+                });
+            }
+
+            @Override
+            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
+                PlexDetails plexDetails = ((PlexMovie) items.get(index)).getPlexDetails();
+                return new String[]{
+                        plexDetails.isOnPlex()
+                                ? EmoteHelper.formatEmote(emoteHelper.getPlex())
+                                : EmoteHelper.formatEmote(emoteHelper.getRadarr()),
+                        plexDetails.getTitle(),
+                        plexDetails.getRatingIds().getFormattedId()
+                };
+            }
+        }.showMessage();
+    }
+
+    /**
+     * Build the description to display in the pageable embed. Show a key for the platform
+     * icons that will be displayed in the message (Based on the platform the movies were found on).
+     *
+     * @param query       Search query used to find results
+     * @param movies      Array of movies found for search query
+     * @param emoteHelper Emote helper
+     * @param inLibrary   Search was performed on the library (not externally on Radarr)
+     * @return Description showing emote key
+     */
+    private static String buildDescription(String query, PlexMovie[] movies, EmoteHelper emoteHelper, boolean inLibrary) {
+        if(movies.length == 0) {
+            String description = "No movie results found for: **" + query + "**, try again cunt.";
+            if(!inLibrary) {
+                description += "\n\nI won't find movies that are already on Radarr.";
+            }
+            return description;
+        }
+        return buildEmoteKey(movies, emoteHelper, inLibrary)
+                + "I found "
+                + movies.length
+                + " results for: **"
+                + query
+                + "**"
+                + "\n\nNarrow it down next time cunt, here they are:";
+    }
+
+    /**
+     * Build an emote key to explain the platform icons that are required
+     * based on the platform that the movies were found on
+     *
+     * @param movies      Array of movies found for search query
+     * @param emoteHelper Emote helper
+     * @param inLibrary   Search was performed on the library (not externally on Radarr)
+     * @return Emote key
+     */
+    private static String buildEmoteKey(PlexMovie[] movies, EmoteHelper emoteHelper, boolean inLibrary) {
+        StringBuilder key = new StringBuilder();
+        if(Arrays.stream(movies).anyMatch(plexMovie -> plexMovie.getPlexDetails().isOnPlex())) {
+            key.append(EmoteHelper.formatEmote(emoteHelper.getPlex())).append(" = On Plex\n\n");
+        }
+        if(Arrays.stream(movies).anyMatch(plexMovie -> !plexMovie.getPlexDetails().isOnPlex())) {
+            key
+                    .append(EmoteHelper.formatEmote(emoteHelper.getRadarr()))
+                    .append(
+                            inLibrary
+                                    ? " = On Radarr - Movie **is not** on Plex but is being monitored.\n\n"
+                                    : " = Available on Radarr - Search by the id to add to Plex.\n\n"
+                    );
+        }
+        return key.toString();
     }
 }

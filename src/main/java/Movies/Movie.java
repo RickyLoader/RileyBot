@@ -1,5 +1,7 @@
 package Movies;
 
+import javax.annotation.Nullable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -61,7 +63,7 @@ public class Movie {
          * @param language    Language name - English, German, etc
          * @param ratingIds   Rating IDs (IMDB, TMDB, etc)
          */
-        public MovieBuilder(String title, String summary, Date releaseDate, String[] genres, String language, RatingIds ratingIds) {
+        public MovieBuilder(String title, String summary, @Nullable Date releaseDate, String[] genres, String language, RatingIds ratingIds) {
             this.title = title;
             this.summary = summary;
             this.releaseDate = releaseDate;
@@ -329,5 +331,14 @@ public class Movie {
      */
     public boolean hasTagline() {
         return tagline != null;
+    }
+
+    /**
+     * Get the release date formatted to NZ standard
+     *
+     * @return Formatted release date
+     */
+    public String getFormattedReleaseDate() {
+        return releaseDate == null ? "N/A" : new SimpleDateFormat("dd/MM/yyyy").format(releaseDate);
     }
 }

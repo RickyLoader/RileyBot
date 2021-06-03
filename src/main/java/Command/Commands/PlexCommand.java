@@ -19,7 +19,7 @@ public class PlexCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        long timePassed = System.currentTimeMillis() - plex.getTimeFetched();
+        long timePassed = System.currentTimeMillis() - plex.getLastRefreshed();
         MessageChannel channel = context.getMessageChannel();
         String message = context.getLowerCaseMessage();
         Member member = context.getMember();
@@ -76,7 +76,7 @@ public class PlexCommand extends DiscordCommand {
                         channel.sendMessage("I need a webhook named: ```plex``` to do that!").queue();
                         return;
                     }
-                    plex.searchRadarr(finalQuery, webhook, context);
+                    plex.searchRadarr(finalQuery, context);
                 });
                 return;
             }

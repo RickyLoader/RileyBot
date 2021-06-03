@@ -1,5 +1,8 @@
 package Movies;
 
+import Command.Structure.EmbedHelper;
+import Plex.PlexServer;
+
 /**
  * Hold various movie rating Ids
  */
@@ -50,6 +53,17 @@ public class RatingIds {
      */
     public boolean hasImdbId() {
         return imdbId != null;
+    }
+
+    /**
+     * Get the first available rating ID for the movie formatted with the URL to the rating page
+     *
+     * @return Rating ID with URL
+     */
+    public String getFormattedId() {
+        return hasImdbId()
+                ? EmbedHelper.embedURL(imdbId.getId(), imdbId.getUrl())
+                : EmbedHelper.embedURL(PlexServer.TMDB_ID_PREFIX + tmdbId.getId(), tmdbId.getUrl());
     }
 
     public static class RatingIdsBuilder {
