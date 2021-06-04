@@ -10,29 +10,19 @@ import java.util.ArrayList;
  * Look up multiple users and do something with their saved names
  */
 public abstract class MultiLookupCommand extends SavedNameCommand {
-    private final static String DEFAULT_LOOKUP_ARGS = "[me] [@user1, @user2...]", SAVE_TYPE_NAME = "Steam64 ID";
+    private final static String DEFAULT_LOOKUP_ARGS = "[me] [@user1, @user2...]";
 
     /**
      * Initialise the command
      *
-     * @param trigger   Trigger of command
-     * @param desc      Description of command
-     * @param maxLength Max length of name
+     * @param trigger      Trigger of command
+     * @param desc         Description of command
+     * @param helpText     Help text to be appended to default lookup actions
+     * @param maxLength    Max length of name
+     * @param saveTypeName Name of save type - e.g "name"
      */
-    public MultiLookupCommand(String trigger, String desc, int maxLength) {
-        super(trigger, desc, DEFAULT_LOOKUP_ARGS, maxLength, SAVE_TYPE_NAME);
-    }
-
-    /**
-     * Initialise the command
-     *
-     * @param trigger   Trigger of command
-     * @param desc      Description of command
-     * @param helpText  Help text to be appended to default lookup actions
-     * @param maxLength Max length of name
-     */
-    public MultiLookupCommand(String trigger, String desc, String helpText, int maxLength) {
-        super(trigger, desc, DEFAULT_LOOKUP_ARGS, helpText, maxLength, SAVE_TYPE_NAME);
+    public MultiLookupCommand(String trigger, String desc, String helpText, int maxLength, String saveTypeName) {
+        super(trigger, desc, DEFAULT_LOOKUP_ARGS, helpText, maxLength, saveTypeName);
     }
 
     /**

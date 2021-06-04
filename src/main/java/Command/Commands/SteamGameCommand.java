@@ -27,14 +27,18 @@ import java.util.stream.Collectors;
  * Pick a random Steam game that all users own
  */
 public class SteamGameCommand extends MultiLookupCommand {
+    private static final String SAVE_TYPE_NAME = "Steam64 ID";
+    private final String footer;
 
     public SteamGameCommand() {
         super(
                 "steamgame",
                 "Pick a random Steam game that all mentioned users own!",
-                "Get your Steam64 Id from: https://steamidfinder.com/",
-                17
+                "Get your " + SAVE_TYPE_NAME + " from: https://steamidfinder.com/",
+                17,
+                SAVE_TYPE_NAME
         );
+        this.footer = "Type: " + getTrigger() + " for help";
     }
 
     @Override
@@ -49,9 +53,9 @@ public class SteamGameCommand extends MultiLookupCommand {
 
     @Override
     public void processNames(ArrayList<UserSavedData> savedSteamIds, CommandContext context) {
-        String footer = "Type: " + getTrigger() + " for help";
         EmbedLoadingMessage loadingMessage = getEmbedLoadingMessage(context, savedSteamIds, footer);
         loadingMessage.showLoading();
+
         HashMap<Integer, Integer> gameFrequencyMap = new HashMap<>();
         ArrayList<User> noGames = new ArrayList<>();
 
@@ -73,7 +77,6 @@ public class SteamGameCommand extends MultiLookupCommand {
                 .filter(gameId -> gameFrequencyMap.get(gameId) == savedSteamIds.size() - noGames.size())
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        MessageChannel channel = context.getMessageChannel();
         if(commonGameIds.isEmpty()) {
             loadingMessage.failLoading("I didn't find any common games between those users!");
             return;
@@ -198,7 +201,6 @@ public class SteamGameCommand extends MultiLookupCommand {
         }
         return application;
     }
-
 
     /**
      * Fetch a list of the Steam game ids owned by the given Steam user id
