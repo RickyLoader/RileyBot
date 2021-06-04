@@ -35,7 +35,7 @@ import static Runescape.Skill.SKILL_NAME.*;
  * Build an image displaying a player's OSRS stats
  */
 public class OSRSHiscores extends Hiscores {
-    private final String[] bossNames;
+    private final Boss.BOSS_NAME[] bossNames;
     private final boolean league, virtual, xp;
     public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
@@ -55,7 +55,7 @@ public class OSRSHiscores extends Hiscores {
      */
     public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual, boolean xp) {
         super(channel, emoteHelper, "/Runescape/OSRS/", FontManager.OSRS_FONT);
-        this.bossNames = Boss.getBossNames();
+        this.bossNames = Boss.BOSS_NAME.getNamesInHiscoresOrder();
         this.league = league;
         this.virtual = virtual;
         this.xp = xp;
@@ -1187,13 +1187,14 @@ public class OSRSHiscores extends Hiscores {
         List<Boss> bosses = new ArrayList<>();
 
         int i = 1;
-        for(String boss : bossNames) {
+        for(Boss.BOSS_NAME bossName : bossNames) {
             int kills = Integer.parseInt(stats.get(i));
             if(kills > -1) {
-                bosses.add(new Boss(boss, kills));
+                bosses.add(new Boss(bossName, kills));
             }
             i += 2;
         }
+        // Sort in descending order of kills
         Collections.sort(bosses);
         return bosses;
     }
