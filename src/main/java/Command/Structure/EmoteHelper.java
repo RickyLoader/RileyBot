@@ -192,6 +192,13 @@ public class EmoteHelper {
     }
 
     /**
+     * <img src="https://cdn.discordapp.com/emojis/850257322168418337.png"/>
+     */
+    public Emote getNightFrost() {
+        return get("850257322168418337");
+    }
+
+    /**
      * <img src="https://cdn.discordapp.com/emojis/758611377362305034.png"/>
      */
     public Emote getNightPartlyCloudy() {
