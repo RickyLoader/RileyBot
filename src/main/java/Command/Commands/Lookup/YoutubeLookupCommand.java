@@ -53,7 +53,7 @@ public class YoutubeLookupCommand extends LookupCommand {
                 channel.getThumbnail(),
                 channel.getName(),
                 "Type: " + getTrigger() + " for help",
-                EmbedHelper.embedURL(channel.getDesc(), channel.getUrl()),
+                channel.getDesc(),
                 new String[]{"Title", "URL", "Views"},
                 5
         ) {
