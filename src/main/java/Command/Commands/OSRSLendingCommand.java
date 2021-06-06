@@ -37,7 +37,8 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
     private static final String
             FORGIVE = "forgive",
             LOANS = "loans",
-            GP = "GP";
+            GP = "GP",
+            UNKNOWN_USER = "Unknown";
     private final BankImageBuilder bankImageBuilder;
     private final GrandExchange grandExchange;
     private final HashMap<Long, Loan> loanMessages;
@@ -402,11 +403,13 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
     /**
      * Get the mention String for the given user ID
      *
+     * @param jda    JDA for resolving user
      * @param userId User ID to get mention String for
-     * @return Mention String for user ID
+     * @return Mention String for user ID or "Unknown" if unable to locate in cache
      */
-    private String getLoanUserMention(long userId) {
-        return "<@!" + userId + ">";
+    private String getLoanUserMention(JDA jda, long userId) {
+        User user = jda.getUserById(userId);
+        return user == null ? UNKNOWN_USER : user.getAsMention();
     }
 
     /**
@@ -425,14 +428,14 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
 
         if(request) {
             title += " Request";
-            description += "\n\n**Respond**: " + getLoanUserMention(loan.getLoanee()) + " You have 2 minutes to respond!";
+            description += "\n\n**Respond**: " + getLoanUserMention(jda, loan.getLoanee()) + " You have 2 minutes to respond!";
         }
 
         String attachmentName = "loan.png";
         byte[] loanImage = getLoanImage(loan, jda);
 
         MessageEmbed loanMessage = new EmbedBuilder()
-                .setTitle(title + " | " + getLoanUserMention(loan.getLoaner()) + " -> " + getLoanUserMention(loan.getLoanee()))
+                .setTitle(title + " | " + getLoanUserName(jda, loan.getLoaner()) + " -> " + getLoanUserName(jda, loan.getLoanee()))
                 .setDescription(description)
                 .setThumbnail(EmbedHelper.OSRS_LOGO)
                 .setImage("attachment://" + attachmentName)
@@ -622,18 +625,21 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
                 loanMessages.remove(messageId);
                 channel.deleteMessageById(messageId).queue();
 
+                String loaner = getLoanUserMention(jda, loan.getLoaner());
+                String loanee = getLoanUserMention(jda, loan.getLoanee());
+
                 // Both users may decline
                 if(buttonId.equals(decline.getId())) {
                     if(userId == loan.getLoaner()) {
                         channel.sendMessage(
-                                getLoanUserMention(loan.getLoanee())
-                                        + " " + getLoanUserMention(loan.getLoaner()) + " has revoked the loan offer!"
+                                loanee
+                                        + " " + loaner + " has revoked the loan offer!"
                         ).queue();
                     }
                     else {
                         channel.sendMessage(
-                                getLoanUserMention(loan.getLoaner())
-                                        + " " + getLoanUserMention(loan.getLoanee()) + " has declined!"
+                                loaner
+                                        + " " + loanee + " has declined!"
                         ).queue();
                     }
                 }
@@ -642,7 +648,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
                     Loan submittedLoan = Loan.submitLoan(loan);
                     if(submittedLoan == null) {
                         channel.sendMessage(
-                                getLoanUserMention(loan.getLoaner())
+                                loaner
                                         + " something went wrong submitting that loan!"
                         ).queue();
                     }
