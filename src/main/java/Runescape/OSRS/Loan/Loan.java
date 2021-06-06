@@ -2,8 +2,6 @@ package Runescape.OSRS.Loan;
 
 import Network.NetworkRequest;
 import Runescape.OSRS.GE.GrandExchange;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.User;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,7 +14,7 @@ import java.util.HashMap;
  * OSRS Item/coin loan
  */
 public class Loan {
-    private final User loaner, loanee;
+    private final long loaner, loanee;
     private final int id;
     private final HashMap<Integer, ItemQuantity> items;
     private final Date date;
@@ -38,12 +36,12 @@ public class Loan {
     /**
      * Initialise the loan
      *
-     * @param loaner User loaning items
-     * @param loanee User receiving items
+     * @param loaner ID of user loaning items
+     * @param loanee ID of user receiving items
      * @param date   Date of loan
      * @param id     ID of loan
      */
-    public Loan(User loaner, User loanee, Date date, int id) {
+    public Loan(long loaner, long loanee, Date date, int id) {
         this.loaner = loaner;
         this.loanee = loanee;
         this.date = date;
@@ -105,20 +103,20 @@ public class Loan {
     }
 
     /**
-     * Get the user who is borrowing items
+     * Get the ID of the user who is borrowing items
      *
-     * @return Loanee user
+     * @return Loanee user ID
      */
-    public User getLoanee() {
+    public long getLoanee() {
         return loanee;
     }
 
     /**
-     * Get the user who is loaning items
+     * Get the ID of the user who is loaning items
      *
-     * @return Loaner user
+     * @return Loaner user ID
      */
-    public User getLoaner() {
+    public long getLoaner() {
         return loaner;
     }
 
@@ -180,8 +178,8 @@ public class Loan {
      */
     public String toJSON() {
         JSONObject loan = new JSONObject()
-                .put(LOANER_ID, loaner.getIdLong())
-                .put(LOANEE_ID, loanee.getIdLong())
+                .put(LOANER_ID, loaner)
+                .put(LOANEE_ID, loanee)
                 .put(DATE_KEY, date.getTime());
 
         JSONArray items = new JSONArray();
@@ -208,13 +206,12 @@ public class Loan {
      * Parse the loan details (loaner, loanee, date) from the given JSON
      *
      * @param loanDetails Loan details JSON
-     * @param jda         JDA for resolving users
      * @return Loan from JSON
      */
-    private static Loan parseLoanDetails(JSONObject loanDetails, JDA jda) {
+    private static Loan parseLoanDetails(JSONObject loanDetails) {
         return new Loan(
-                jda.getUserById(loanDetails.getLong(LOANER_ID)),
-                jda.getUserById(loanDetails.getLong(LOANEE_ID)),
+                loanDetails.getLong(LOANER_ID),
+                loanDetails.getLong(LOANEE_ID),
                 new Date(loanDetails.getLong(DATE_KEY)),
                 loanDetails.getInt(ID_KEY)
         );
@@ -224,11 +221,10 @@ public class Loan {
      * Parse a loan from the given loan JSON
      *
      * @param loanJson Loan JSON (loan details & item list)
-     * @param jda      JDA for resolving users
      * @return Loan from JSON
      */
-    public static Loan fromJSON(JSONObject loanJson, JDA jda) {
-        Loan loan = parseLoanDetails(loanJson.getJSONObject(Loan.DETAILS_KEY), jda);
+    public static Loan fromJSON(JSONObject loanJson) {
+        Loan loan = parseLoanDetails(loanJson.getJSONObject(Loan.DETAILS_KEY));
         JSONArray items = loanJson.getJSONArray(ITEMS_KEY);
 
         for(int i = 0; i < items.length(); i++) {
@@ -254,20 +250,19 @@ public class Loan {
     /**
      * Fetch the details of loans involving the given user
      *
-     * @param user User to fetch loans for
-     * @param jda  JDA for resolving users
+     * @param userId ID of user to fetch loans for
      * @return List of loans involving the given user
      */
-    public static ArrayList<Loan> fetchLoans(User user, JDA jda) {
+    public static ArrayList<Loan> fetchLoans(long userId) {
         ArrayList<Loan> loans = new ArrayList<>();
         JSONArray loanDetails = new JSONArray(
                 new NetworkRequest(
-                        ENDPOINT + "user/" + user.getIdLong(),
+                        ENDPOINT + "user/" + userId,
                         true
                 ).get().body
         );
         for(int i = 0; i < loanDetails.length(); i++) {
-            loans.add(parseLoanDetails(loanDetails.getJSONObject(i), jda));
+            loans.add(parseLoanDetails(loanDetails.getJSONObject(i)));
         }
         return loans;
     }
@@ -277,17 +272,16 @@ public class Loan {
      * Return value will be null if no loan exists between the two users
      *
      * @param id  Loan id
-     * @param jda JDA for resolving users
      * @return Loan or null
      */
-    public static Loan fetchLoanDetails(int id, JDA jda) {
+    public static Loan fetchLoanDetails(int id) {
         JSONObject loanDetails = new JSONObject(
                 new NetworkRequest(
                         ENDPOINT + id,
                         true
                 ).get().body
         );
-        return loanDetails.getBoolean(STATUS_KEY) ? fromJSON(loanDetails, jda) : null;
+        return loanDetails.getBoolean(STATUS_KEY) ? fromJSON(loanDetails) : null;
     }
 
 
@@ -311,10 +305,9 @@ public class Loan {
      * Submit or update a loan in the database
      *
      * @param loan Loan to submit
-     * @param jda  JDA for resolving users
      * @return Updated loan or null
      */
-    public static Loan submitLoan(Loan loan, JDA jda) {
+    public static Loan submitLoan(Loan loan) {
         JSONObject response = new JSONObject(
                 new NetworkRequest(
                         ENDPOINT + "create",
@@ -324,6 +317,6 @@ public class Loan {
         if(!response.getBoolean("status")) {
             return null;
         }
-        return fromJSON(response, jda);
+        return fromJSON(response);
     }
 }

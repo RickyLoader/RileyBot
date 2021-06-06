@@ -213,12 +213,12 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        Loan loan = Loan.fetchLoanDetails(id, context.getJDA());
+        Loan loan = Loan.fetchLoanDetails(id);
         if(loan == null) {
             channel.sendMessage(user.getAsMention() + " That loan doesn't exist!").queue();
             return;
         }
-        if(user != loan.getLoaner()) {
+        if(user.getIdLong() != loan.getLoaner()) {
             channel.sendMessage(user.getAsMention() + " That's not your loan to forgive!").queue();
             return;
         }
@@ -238,12 +238,12 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
      */
     private void showLoanContents(int id, CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
-        Loan loan = Loan.fetchLoanDetails(id, context.getJDA());
+        Loan loan = Loan.fetchLoanDetails(id);
         if(loan == null) {
             channel.sendMessage(context.getUser().getAsMention() + " No loan exists with that ID!").queue();
             return;
         }
-        getLoanMessageAction(loan, channel, false).queue();
+        getLoanMessageAction(loan, context.getJDA(), channel, false).queue();
     }
 
     /**
@@ -253,7 +253,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
      * @param user    User who loans belong to
      */
     private void showLoans(CommandContext context, User user) {
-        ArrayList<Loan> loans = Loan.fetchLoans(context.getUser(), context.getJDA());
+        ArrayList<Loan> loans = Loan.fetchLoans(context.getUser().getIdLong());
         if(loans.isEmpty()) {
             context.getMessageChannel().sendMessage(user.getAsMention() + " You don't have any loans!").queue();
             return;
@@ -271,10 +271,11 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 Loan loan = (Loan) items.get(index);
-                boolean lending = loan.getLoaner() == user;
+                boolean lending = loan.getLoaner() == user.getIdLong();
+                String targetName = getLoanUserName(context.getJDA(), lending ? loan.getLoanee() : loan.getLoaner());
                 return new String[]{
                         String.valueOf(loan.getId()),
-                        lending ? " to " + loan.getLoanee().getName() : "from " + loan.getLoaner().getName(),
+                        lending ? " to " + targetName : "from " + targetName,
                         dateFormat.format(loan.getDate())
                 };
             }
@@ -333,9 +334,9 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             return;
         }
 
-        Loan loan = new Loan(loaner, loanee, new Date(), Loan.PENDING_LOAN_ID);
+        Loan loan = new Loan(loaner.getIdLong(), loanee.getIdLong(), new Date(), Loan.PENDING_LOAN_ID);
         if(addItems(loan, args.split(","), channel, loaner)) {
-            proposeLoan(loan, channel);
+            proposeLoan(loan, context.getJDA(), channel);
         }
     }
 
@@ -344,10 +345,11 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
      * to accept or decline the loan. Automatically decline after 2 minutes.
      *
      * @param loan    Loan to propose
+     * @param jda     JDA for resolving users
      * @param channel Channel to send loan to
      */
-    private void proposeLoan(Loan loan, MessageChannel channel) {
-        getLoanMessageAction(loan, channel, true).setActionRows(ActionRow.of(accept, decline)).queue(message -> {
+    private void proposeLoan(Loan loan, JDA jda, MessageChannel channel) {
+        getLoanMessageAction(loan, jda, channel, true).setActionRows(ActionRow.of(accept, decline)).queue(message -> {
             long id = message.getIdLong();
             loanMessages.put(id, loan);
 
@@ -359,7 +361,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
                     }
                     message.delete().queue();
                     channel.sendMessage(
-                            loan.getLoaner().getAsMention() + " " + loan.getLoanee().getAsMention() + " Too slow!"
+                            "Loan request timed out, too slow!"
                     ).queue();
                 }
             }, 120000);
@@ -370,13 +372,14 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
      * Get an image of the contents of the loan in a bank
      *
      * @param loan Loan to build image for
+     * @param jda  JDA for resolving users
      * @return Loan image
      */
-    private byte[] getLoanImage(Loan loan) {
+    private byte[] getLoanImage(Loan loan, JDA jda) {
         return ImageLoadingMessage.imageToByteArray(
                 bankImageBuilder.buildImage(
-                        loan.getLoaner().getName()
-                                + " -> " + loan.getLoanee().getName()
+                        getLoanUserName(jda, loan.getLoaner())
+                                + " -> " + getLoanUserName(jda, loan.getLoanee())
                                 + " (" + loan.getFormattedTotalValue() + ")",
                         loan.getItems(),
                         loan.getCoins()
@@ -385,28 +388,51 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
     }
 
     /**
+     * Get the name of a loan user
+     *
+     * @param jda    JDA for resolving user
+     * @param userId ID of user to get name for
+     * @return Name of user or "Unknown" if unable to locate in cache
+     */
+    private String getLoanUserName(JDA jda, long userId) {
+        User user = jda.getUserById(userId);
+        return user == null ? "Unknown" : user.getName();
+    }
+
+    /**
+     * Get the mention String for the given user ID
+     *
+     * @param userId User ID to get mention String for
+     * @return Mention String for user ID
+     */
+    private String getLoanUserMention(long userId) {
+        return "<@!" + userId + ">";
+    }
+
+    /**
      * Get a message action for sending a message embed detailing the given loan and adding an image of the contents.
      *
      * @param loan    Loan to display
+     * @param jda     JDA for resolving users
      * @param request Loan request
      * @param channel Channel to send to
      * @return Loan message action
      */
-    private MessageAction getLoanMessageAction(Loan loan, MessageChannel channel, boolean request) {
+    private MessageAction getLoanMessageAction(Loan loan, JDA jda, MessageChannel channel, boolean request) {
         String description = "**ID**: " + (loan.getId() == Loan.PENDING_LOAN_ID ? "Pending" : loan.getId())
                 + "\n**Date**: " + dateFormat.format(loan.getDate());
         String title = "Loan";
 
         if(request) {
             title += " Request";
-            description += "\n\n**Respond**: " + loan.getLoanee().getAsMention() + " You have 2 minutes to respond!";
+            description += "\n\n**Respond**: " + getLoanUserMention(loan.getLoanee()) + " You have 2 minutes to respond!";
         }
 
         String attachmentName = "loan.png";
-        byte[] loanImage = getLoanImage(loan);
+        byte[] loanImage = getLoanImage(loan, jda);
 
         MessageEmbed loanMessage = new EmbedBuilder()
-                .setTitle(title + " | " + loan.getLoaner().getName() + " -> " + loan.getLoanee().getName())
+                .setTitle(title + " | " + getLoanUserMention(loan.getLoaner()) + " -> " + getLoanUserMention(loan.getLoanee()))
                 .setDescription(description)
                 .setThumbnail(EmbedHelper.OSRS_LOGO)
                 .setImage("attachment://" + attachmentName)
@@ -574,20 +600,21 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             @Override
             public void handleButtonClick(@NotNull ButtonClickEvent event) {
                 long messageId = event.getMessageIdLong();
+                long userId = event.getUser().getIdLong();
+
                 String buttonId = event.getComponentId();
                 Loan loan = loanMessages.get(messageId);
                 MessageChannel channel = event.getChannel();
-                User user = event.getUser();
 
                 if(loan == null) {
                     return;
                 }
 
-                if(user != loan.getLoanee() && user != loan.getLoaner()) {
+                if(userId != loan.getLoanee() && userId != loan.getLoaner()) {
                     return;
                 }
 
-                if(user == loan.getLoaner() && buttonId.equals(accept.getId())) {
+                if(userId == loan.getLoaner() && buttonId.equals(accept.getId())) {
                     return;
                 }
 
@@ -597,30 +624,30 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
 
                 // Both users may decline
                 if(buttonId.equals(decline.getId())) {
-                    if(user == loan.getLoaner()) {
+                    if(userId == loan.getLoaner()) {
                         channel.sendMessage(
-                                loan.getLoanee().getAsMention()
-                                        + " " + loan.getLoaner().getName() + " has revoked the loan offer!"
+                                getLoanUserMention(loan.getLoanee())
+                                        + " " + getLoanUserMention(loan.getLoaner()) + " has revoked the loan offer!"
                         ).queue();
                     }
                     else {
                         channel.sendMessage(
-                                loan.getLoaner().getAsMention()
-                                        + " " + loan.getLoanee().getName() + " has declined!"
+                                getLoanUserMention(loan.getLoaner())
+                                        + " " + getLoanUserMention(loan.getLoanee()) + " has declined!"
                         ).queue();
                     }
                 }
                 else {
                     channel.sendTyping().queue();
-                    Loan submittedLoan = Loan.submitLoan(loan, jda);
+                    Loan submittedLoan = Loan.submitLoan(loan);
                     if(submittedLoan == null) {
                         channel.sendMessage(
-                                loan.getLoaner().getAsMention()
+                                getLoanUserMention(loan.getLoaner())
                                         + " something went wrong submitting that loan!"
                         ).queue();
                     }
                     else {
-                        getLoanMessageAction(submittedLoan, channel, false).queue();
+                        getLoanMessageAction(submittedLoan, jda, channel, false).queue();
                     }
                 }
             }
