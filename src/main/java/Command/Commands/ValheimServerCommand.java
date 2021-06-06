@@ -43,6 +43,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
         channel.sendTyping().queue();
         valheimServer.updateServer();
 
+        if(valheimServer.getServerEvents().isEmpty()){
+            channel.sendMessage("I am very sorry, I was unable to contact the server!").queue();
+            return;
+        }
+
         if(message.equals("players")) {
             showPlayersEmbed(context);
         }

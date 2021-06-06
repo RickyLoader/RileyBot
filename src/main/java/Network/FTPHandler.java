@@ -44,7 +44,6 @@ public class FTPHandler {
             return client.retrieveFileStream(path);
         }
         catch(IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -94,7 +93,7 @@ public class FTPHandler {
             client.login(username, password);
         }
         catch(IOException e) {
-            e.printStackTrace();
+            System.out.println("Unable to connect to the server!");
         }
     }
 }

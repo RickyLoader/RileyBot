@@ -130,7 +130,7 @@ public class ValheimServer {
             }
         }
         catch(Exception e) {
-            e.printStackTrace();
+            System.out.println("Error fetching logs!");
         }
         return logs;
     }
@@ -141,18 +141,23 @@ public class ValheimServer {
      * @return World name
      */
     private String fetchWorldName() {
-        String dir = "/.config/unity3d/IronGate/Valheim/worlds/";
-        FTPFile[] dirContents = ftpHandler.getDirectoryContents(dir);
-        String[] infoFiles = Arrays.stream(dirContents)
-                .map(FTPFile::getName)
-                .filter(name -> name.matches(".+.fwl"))
-                .toArray(String[]::new);
+        try {
+            String dir = "/.config/unity3d/IronGate/Valheim/worlds/";
+            FTPFile[] dirContents = ftpHandler.getDirectoryContents(dir);
+            String[] infoFiles = Arrays.stream(dirContents)
+                    .map(FTPFile::getName)
+                    .filter(name -> name.matches(".+.fwl"))
+                    .toArray(String[]::new);
 
-        if(infoFiles.length == 0) {
-            return "-";
+            if(infoFiles.length == 0) {
+                throw new Exception();
+            }
+            String contents = ftpHandler.getFileAsString(dir + infoFiles[0]).replaceAll("-", "");
+            return contents.split("\n")[0].replaceAll("\\P{Print}", "");
         }
-        String contents = ftpHandler.getFileAsString(dir + infoFiles[0]).replaceAll("-", "");
-        return contents.split("\n")[0].replaceAll("\\P{Print}", "");
+        catch(Exception e) {
+            return "Unknown Server";
+        }
     }
 
     /**
