@@ -56,7 +56,6 @@ public class DiscordCommandManager {
         }
     }
 
-
     /**
      * Check a given query against the matches method of each command
      *
@@ -125,6 +124,9 @@ public class DiscordCommandManager {
     private void addCommands() {
         addRandomCommands();
         addLinkCommands();
+        addCommand(new StocksCommand());
+        addCommand(new VapouriumCommand());
+        addCommand(new VapoCommand());
         addCommand(new TrademeCommand());
         addCommand(new GunfightCommand());
         addCommand(new LeaderboardCommand());
@@ -173,7 +175,6 @@ public class DiscordCommandManager {
         addCommand(new PollCommand());
         addCommand(new StatusCommand());
         addCommand(new GIFCommand());
-        addCommand(new StocksCommand());
         addCommand(new MWDataCommand());
         addCommand(new TFTLookupCommand());
         addCommand(new TTVLookupCommand());
@@ -188,17 +189,16 @@ public class DiscordCommandManager {
         addCommand(new HotTubCommand());
         addCommand(new RSPlayerCountCommand());
         addCommand(new DictionaryCommand());
-        addCommand(new VapouriumCommand());
-        addCommand(new VapoCommand());
         addCommand(new AlphaVapeCommand());
         addCommand(new IMDBMovieCommand());
         addCommand(new TMDBMovieCommand());
         addCommand(new RottenTomatoesMovieCommand());
+        addCommand(new OSRSLendingCommand());
+        addCommand(new WhipPriceCommand());
         /* TODO
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());
             addCommand(new NASACommand());
-            addCommand(new OSRSLendingCommand());
          */
     }
 
