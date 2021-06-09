@@ -10,19 +10,23 @@ import net.dv8tion.jda.api.entities.Message;
 public class PlayYoutubeCommand extends DiscordCommand {
 
     public PlayYoutubeCommand() {
-        super("!play [LINK]", "Play a youtube clip in the voice chat!");
+        super("!play", "Play a youtube clip in the voice chat!", "!play [LINK]");
     }
 
     @Override
     public void execute(CommandContext context) {
-        String audio = context.getMessageContent().replace("!play ", "");
-        context.playAudio(
-                audio
-        );
+        String audio = context.getMessageContent().substring(getTrigger().length()).trim();
+
+        if(audio.isEmpty()) {
+            context.getMessageChannel().sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
+        context.playAudio(audio);
     }
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.split(" ")[0].equalsIgnoreCase("!play");
+        return query.startsWith(getTrigger());
     }
 }
