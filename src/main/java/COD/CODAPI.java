@@ -58,21 +58,65 @@ public class CODAPI {
     }
 
     /**
+     * Get the details of a Modern Warfare match
+     *
+     * @param matchId  Match Id
+     * @param platform Player platform
+     * @return Player match
+     */
+    public static String getMWMatch(String matchId, PLATFORM platform) {
+        return getMatch(matchId, platform, MODERN_WARFARE_URL);
+    }
+
+    /**
+     * Get the details of a Cold War match
+     *
+     * @param matchId  Match Id
+     * @param platform Player platform
+     * @return Player match
+     */
+    public static String getCWMatch(String matchId, PLATFORM platform) {
+        return getMatch(matchId, platform, COLD_WAR_URL);
+    }
+
+    /**
      * Get a player's match history
      *
      * @param name     Player name
      * @param platform Player platform
-     * @param gameURL  Base URL for game
+     * @param gameUrl  Base URL for game
      * @return Player match history
      */
-    private static String getMatchHistory(String name, PLATFORM platform, String gameURL) {
+    private static String getMatchHistory(String name, PLATFORM platform, String gameUrl) {
         String json = null;
         try {
             String nameEncode = encodeName(name);
             json = new NetworkRequest(
-                    gameURL + "history/" + nameEncode + "/" + platform.name().toLowerCase(),
+                    gameUrl + "history/" + nameEncode + "/" + platform.name().toLowerCase(),
                     false)
                     .get().body;
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
+    /**
+     * Get the JSON of a match
+     *
+     * @param matchId  Match Id
+     * @param platform Player platform
+     * @param gameUrl  Base URL for game
+     * @return Match JSON
+     */
+    public static String getMatch(String matchId, PLATFORM platform, String gameUrl) {
+        String json = null;
+        try {
+            json = new NetworkRequest(
+                    gameUrl + "match/" + matchId + "/" + platform.name().toLowerCase(),
+                    false
+            ).get().body;
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -114,7 +158,7 @@ public class CODAPI {
      * @param name Name to encode
      * @return URL encoded name
      */
-    private static String encodeName(String name) throws UnsupportedEncodingException {
+    private static String encodeName(String name) {
         return EmbedHelper.urlEncode(name).replaceAll("\\+", "%20");
     }
 }
