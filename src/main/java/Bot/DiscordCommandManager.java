@@ -232,8 +232,6 @@ public class DiscordCommandManager {
         addCommand(new SpidermanCommand());
         addCommand(new TrulyCommand());
         addCommand(new UnderbellyCommand());
-        // addCommand(new VapeCommand());
-
         addCommand(new FishingCommand());
         addCommand(new NormanCommand());
         addCommand(new PhotoshopCommand());
