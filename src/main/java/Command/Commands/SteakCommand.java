@@ -1,138 +1,149 @@
 package Command.Commands;
 
-import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
+import Command.Structure.SelfieCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Random;
 
 /**
  * Put the user's image in a selfie with Steak!
  */
-public class SteakCommand extends DiscordCommand {
-    private final BufferedImage steak;
+public class SteakCommand extends SelfieCommand {
+    private final Quote[] quotes;
 
     public SteakCommand() {
-        super("steak", "Get a photo with steak!");
-        this.steak = new ResourceHandler().getImageResource("/LOL/steak.png");
-    }
-
-    @Override
-    public void execute(CommandContext context) {
-        MessageChannel channel = context.getMessageChannel();
-        new Thread(() -> {
-            try {
-                Member biggestFan = context.getMember();
-                BufferedImage fanImage = getUserAvatar(biggestFan.getUser());
-                if(fanImage == null) {
-                    throw new Exception();
-                }
-
-                BufferedImage steak = new BufferedImage(
-                        this.steak.getWidth(),
-                        this.steak.getHeight(),
-                        this.steak.getType()
-                );
-
-                Graphics g = steak.getGraphics();
-                g.drawImage(this.steak, 0, 0, null);
-
-                g.drawImage(fanImage, 180, 50, null);
-                g.dispose();
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                ImageIO.write(steak, "png", out);
-                out.close();
-                sendMessage(channel, out.toByteArray(), biggestFan.getEffectiveName());
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-                channel.sendMessage("Steak was too busy to take a selfie with you, sorry!").queue();
-            }
-        }).start();
+        super(
+                "steak",
+                "Get a photo with steak!",
+                "/LOL/steak.png",
+                "https://i.imgur.com/KXnIE3C.png",
+                new ProfileDimensions(
+                        180,
+                        50,
+                        240,
+                        240
+                )
+        );
+        this.quotes = getQuotes();
     }
 
     /**
-     * Build the selfie message
+     * Get an array of quotes from/about Steak
      *
-     * @param channel     Channel to send selfie to
-     * @param steakSelfie Selfie with the greatest League of Legends player in history
-     * @param name        Name of the lucky fan
+     * @return Array of Steak quotes
      */
-    private void sendMessage(MessageChannel channel, byte[] steakSelfie, String name) {
-        String steak = "https://i.imgur.com/KXnIE3C.png";
-        MessageEmbed message = new EmbedBuilder()
-                .setColor(EmbedHelper.PURPLE)
-                .setThumbnail(steak)
-                .setTitle(name + " - Photo with Steak")
-                .setDescription("The **GREATEST** League of Legends player in LCS history!")
-                .setFooter(getQuote(), steak)
-                .setImage("attachment://steak.jpg")
-                .build();
-        channel.sendMessage(message).addFile(steakSelfie, "steak.jpg").queue();
+    private Quote[] getQuotes() {
+        final String steak = "Steak";
+        return new Quote[]{
+                new Quote("I wanted a short name and steak is my favourite food", steak),
+                new Quote("Yeah so like Maple's gonna carry me no matter what", steak),
+                new Quote("It's pretty easy yeah", steak),
+                new Quote("I think we're gonna make it through like, I don't know, I think", steak),
+                new Quote("We have pretty much confident in this tournament", steak),
+                new Quote(
+                        "Yeah but, hmm actually I think.. It's possible.. well the.. second to six team",
+                        steak
+                ),
+                new Quote(
+                        "Everybody has like the same skill set yeah, except for SKT1, yeah they're the best",
+                        steak
+                ),
+                new Quote(
+                        "If you count the whole region I think we might not even be better than wildcard",
+                        steak
+                ),
+                new Quote(
+                        "Uh we prepared a lot, I would say enough, yeah but um our gameplay was pretty bad",
+                        steak
+                ),
+                new Quote(
+                        "Like our communication and our team play was really really bad, so that's why we lost",
+                        steak
+                ),
+                new Quote(
+                        "I'd say we're really really good, and I hope we can show you that in a few days, yeah",
+                        steak
+                ),
+                new Quote(
+                        "Um thank you for your support and I hope we do good in the next few games, yeah",
+                        steak
+                ),
+                new Quote(
+                        "Aphromoo is kinda famous for his hair, yeah but I think my hair crushes his",
+                        steak
+                ),
+                new Quote(
+                        "They just kinda leave Steak to do whatever, most of the time he's just dead",
+                        "Doublelift"
+                ),
+                new Quote(
+                        "Best hair award, there we go, for NA, that was me. I don't know what Steak's won.. but",
+                        "Aphromoo"
+                ),
+                new Quote(
+                        "I think strategicca..strateg..whatever. Strategy yeah, yeah strategy isn't that much from the coach",
+                        steak
+                ),
+                new Quote(
+                        "Uh it's pretty easy to go in the game knowing that i'm gonna be the only one to troll our team",
+                        steak
+                )
+        };
     }
 
     /**
-     * Get a famous Steak quote
+     * Get a random quote from/about Steak
+     * The quote text is formatted in italics with quotation marks and the author is bold
      *
      * @return Steak quote
      */
-    private String getQuote() {
-        String[] quotes = new String[]{
-                "I wanted a short name and steak is my favourite food - Steak",
-                "Uh it's pretty easy to go in the game knowing that i'm gonna be the only one to troll our team - Steak",
-                "Yeah so like Maple's gonna carry me no matter what - Steak",
-                "It's pretty easy yeah - Steak",
-                "I think we're gonna make it through like, I don't know, I think - Steak",
-                "They just kinda leave Steak to do whatever, most of the time he's just dead - Doublelift",
-                "We have pretty much confident in this tournament - Steak",
-                "Yeah but, hmm actually I think.. It's possible.. well the.. second to six team - Steak",
-                "Everybody has like the same skill set yeah, except for SKT1, yeah they're the best - Steak",
-                "If you count the whole region I think we might not even be better than wildcard - Steak",
-                "Uh we prepared a lot, I would say enough, yeah but um our gameplay was pretty bad - Steak",
-                "Like our communication and our team play was really really bad, so that's why we lost - Steak",
-                "I'd say we're really really good, and I hope we can show you that in a few days, yeah - Steak",
-                "I think strategicca..strateg..whatever. Strategy yeah, yeah strategy isn't that much from the coach - Steak",
-                "Um thank you for your support and I hope we do good in the next few games, yeah - Steak",
-                "Aphromoo is kinda famous for his hair, yeah but I think my hair crushes his - Steak",
-                "Best hair award, there we go, for NA, that was me. I don't know what Steak's won.. but - Aphromoo"
-        };
-        return quotes[new Random().nextInt(quotes.length)];
+    private String getRandomQuote() {
+        Quote quote = quotes[new Random().nextInt(quotes.length)];
+        return "*\"" + quote.getText() + "\"* - **" + quote.getAuthor() + "**";
     }
 
-    /**
-     * Get and resize the user's avatar to the correct size for replacing
-     * the person's head beside him.
-     *
-     * @param fan User who is a big fan of steak
-     * @return User avatar
-     */
-    private BufferedImage getUserAvatar(User fan) {
-        return resizeAvatar(EmbedHelper.downloadImage(fan.getEffectiveAvatarUrl()));
+    @Override
+    public EmbedBuilder getEmbedBuilder(CommandContext context) {
+        return new EmbedBuilder()
+                .setColor(EmbedHelper.PURPLE)
+                .setThumbnail(getThumbnailUrl())
+                .setTitle(context.getMember().getEffectiveName() + " - Photo with Steak")
+                .setDescription("The **GREATEST** League of Legends player in LCS history!\n\n" + getRandomQuote())
+                .setFooter(getFooterHelpText(), getThumbnailUrl());
     }
 
-    /**
-     * Resize the user avatar image
-     *
-     * @param avatar User Discord avatar
-     * @return Resized image
-     */
-    private BufferedImage resizeAvatar(BufferedImage avatar) {
-        BufferedImage resized = new BufferedImage(240, 240, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = resized.getGraphics();
-        g.drawImage(avatar, 0, 0, 240, 240, null);
-        g.dispose();
-        return resized;
+    private static class Quote {
+        private final String text, author;
+
+        /**
+         * Create a quote
+         *
+         * @param text   Quote text
+         * @param author Quote author
+         */
+        public Quote(String text, String author) {
+            this.text = text;
+            this.author = author;
+        }
+
+        /**
+         * Get the name of the author of the quote
+         *
+         * @return Quote author
+         */
+        public String getAuthor() {
+            return author;
+        }
+
+        /**
+         * Get the quote text
+         *
+         * @return Quote text
+         */
+        public String getText() {
+            return text;
+        }
     }
 }
