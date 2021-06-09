@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class TheHub {
     public static final int FIRST_PAGE = 54, OTHER_PAGE = 57;
+    public static final String LOGO = "https://i.imgur.com/ngRnecW.png";
     private static final String BASE_URL = "https://www.pornhub.com/";
     private final String listUrl = BASE_URL + "pornstars";
     private final HashMap<String, Performer> performersByName = new HashMap<>(), performersByUrl = new HashMap<>();

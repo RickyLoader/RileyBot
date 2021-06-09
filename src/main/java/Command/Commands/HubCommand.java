@@ -19,7 +19,6 @@ import static TheHub.HubVideo.*;
  * Check out some rankings on the hub
  */
 public class HubCommand extends DiscordCommand {
-    private final String thumbnail = "https://i.imgur.com/ngRnecW.png";
     private final TheHub theHub;
     private final Random random;
     private String thumbsUp, thumbsDown, blankGap;
@@ -130,7 +129,7 @@ public class HubCommand extends DiscordCommand {
                 .setColor(EmbedHelper.FIRE_ORANGE)
                 .setTitle(videoInfo.getTitle(), videoInfo.getUrl())
                 .setImage(videoInfo.getThumbnailUrl())
-                .setThumbnail(thumbnail);
+                .setThumbnail(TheHub.LOGO);
 
         DecimalFormat commaFormat = new DecimalFormat("#,###");
 
@@ -164,7 +163,7 @@ public class HubCommand extends DiscordCommand {
         new PageableTableEmbed(
                 context,
                 searchResults,
-                thumbnail,
+                TheHub.LOGO,
                 "Hub Search",
                 searchResults.size() + " Results found for **" + searchQuery + "**:",
                 "Try: " + getHelpName().replace("\n", " | "),
@@ -207,8 +206,8 @@ public class HubCommand extends DiscordCommand {
                                 performer.getType().name().toLowerCase()
                         ) + " " + rank + " - " + performer.getName()
                 )
-                .setThumbnail(thumbnail)
-                .setFooter("Try: " + getHelpName().replace("\n", " | "), thumbnail)
+                .setThumbnail(TheHub.LOGO)
+                .setFooter("Try: " + getHelpName().replace("\n", " | "), TheHub.LOGO)
                 .setImage(performer.getImage())
                 .setDescription(performer.getDesc())
                 .addField("Views", performer.getViews(), true)
