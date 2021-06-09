@@ -147,6 +147,10 @@ public class RedditCommand extends OnReadyDiscordCommand {
      */
     private EmbedBuilder getDefaultEmbedBuilder(RedditPost post) {
         Subreddit subreddit = post.getSubreddit();
+        String title = post.getTitle();
+        if(title.length() > MessageEmbed.TITLE_MAX_LENGTH) {
+            title = title.substring(0, MessageEmbed.TITLE_MAX_LENGTH);
+        }
         return new EmbedBuilder()
                 .setColor(EmbedHelper.RED)
                 .setAuthor(
@@ -154,7 +158,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
                         subreddit.getUrl(),
                         subreddit.getImageUrl()
                 )
-                .setTitle(post.getTitle(), post.getUrl())
+                .setTitle(title, post.getUrl())
                 .setThumbnail(thumbnail);
     }
 
