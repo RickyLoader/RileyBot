@@ -28,7 +28,8 @@ import java.util.stream.Collectors;
  * View a COD player's match history
  */
 public class MatchHistoryCommand extends CODLookupCommand {
-    public final static LoadoutImageManager loadoutImageManager = new LoadoutImageManager();
+    public static final LoadoutImageManager loadoutImageManager = new LoadoutImageManager();
+    private static final String LATEST = "latest";
     private final HashMap<Long, MatchStats> matchMessages;
     private final HashSet<String> leaderboardSeen;
     private final ArrayList<WobblyScore> leaderboard;
@@ -49,7 +50,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getHelpText(trigger) + " [match id/latest/maps/modes]\n\n"
+                getHelpText(trigger) + " [match id/" + LATEST + "/maps/modes]\n\n"
                         + trigger + " missing\n"
                         + trigger + " wobblies\n"
                         + trigger + " wobblies [rank]"
@@ -80,7 +81,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         }
 
         String lastArg = args[args.length - 1];
-        if(lastArg.matches("\\d+") || lastArg.equals("latest")) {
+        if(lastArg.matches("\\d+") || lastArg.equals(LATEST)) {
             matchID = lastArg;
             return query.replace(lastArg, "").trim();
         }
@@ -432,7 +433,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @param channel      Channel to send to
      */
     private void sendMatchEmbed(MatchHistory matchHistory, MessageChannel channel) {
-        MatchStats matchStats = matchID.equals("latest")
+        MatchStats matchStats = matchID.equals(LATEST)
                 ? matchHistory.getMatches().get(0)
                 : matchHistory.getMatch(matchID);
         if(matchStats == null) {
