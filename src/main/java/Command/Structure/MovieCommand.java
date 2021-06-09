@@ -29,6 +29,7 @@ public abstract class MovieCommand extends DiscordCommand {
         this.urlRegex = urlRegex;
         this.logoUrl = logoUrl;
         this.colour = colour;
+        setSecret(true);
     }
 
     @Override
