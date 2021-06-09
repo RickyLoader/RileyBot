@@ -24,7 +24,7 @@ public class BlitzCommand extends DiscordCommand {
     private final List<String> roles = Arrays.asList("TOP", "MID", "ADC", "SUPP", "SUP", "SUPPORT", "JG", "JUNGLE");
 
     public BlitzCommand() {
-        super("blitz [champion] [role]", "Get the blitz.gg build info for a champion!");
+        super("blitz", "Get the blitz.gg build info for a champion!", "blitz [champion] [role]");
         this.blitz = new Blitz();
         this.blitzImageBuilder = new BlitzImageBuilder();
     }
@@ -34,12 +34,12 @@ public class BlitzCommand extends DiscordCommand {
         MessageChannel channel = context.getMessageChannel();
         String message = context.getLowerCaseMessage();
 
-        if(message.equals("blitz")) {
+        if(message.equals(getTrigger())) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
 
-        message = message.replaceFirst("blitz ", "");
+        message = message.replaceFirst(getTrigger(), "").trim();
         String[] args = message.split(" ");
         String givenRole = args[args.length - 1].toUpperCase();
 
@@ -128,6 +128,6 @@ public class BlitzCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("blitz");
+        return query.startsWith(getTrigger());
     }
 }
