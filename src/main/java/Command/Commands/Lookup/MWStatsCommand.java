@@ -30,14 +30,14 @@ public class MWStatsCommand extends MWLookupCommand {
         );
         if(weaponName == null) {
             combatRecordImageBuilder.buildCombatRecordImage(
-                    getLookupName(),
+                    name,
                     getPlatform(),
                     channel
             );
         }
         else {
             combatRecordImageBuilder.buildWeaponRecordImage(
-                    getLookupName(),
+                    name,
                     getPlatform(),
                     weaponName,
                     channel

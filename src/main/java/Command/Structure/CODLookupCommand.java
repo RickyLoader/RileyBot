@@ -4,13 +4,11 @@ import net.dv8tion.jda.api.entities.Message;
 
 public abstract class CODLookupCommand extends LookupCommand {
     private PLATFORM platform;
-    private String lookupName;
 
     public enum PLATFORM {
         BATTLE,
         XBOX,
         PSN,
-        UNO,
         NONE;
 
         /**
@@ -43,8 +41,8 @@ public abstract class CODLookupCommand extends LookupCommand {
                 desc,
                 getHelpText(trigger)
                         + "\n" + helpText
-                        + "\n\nPlatform is assumed to be Battle.net (name#123) or UNO (#123) unless a platform is specified."
-                        + "\n\nAccepted platforms: XBOX, XBL, PSN, UNO, BATTLE",
+                        + "\n\nPlatform is assumed to be Battle.net (name#123) unless a platform is specified."
+                        + "\n\nAccepted platforms: XBOX, XBL, PSN, BATTLE",
                 30
         );
     }
@@ -81,15 +79,6 @@ public abstract class CODLookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
-        if(platform == PLATFORM.UNO && name.startsWith("#")) {
-            lookupName = name.replace("#", "");
-        }
-        else if(name.endsWith("#0")) {
-            lookupName = name.replace("#0", "");
-        }
-        else {
-            lookupName = name;
-        }
         onArgumentsSet(name, context);
     }
 
@@ -100,18 +89,6 @@ public abstract class CODLookupCommand extends LookupCommand {
      * @param context Context of command
      */
     public abstract void onArgumentsSet(String name, CommandContext context);
-
-    /**
-     * Get the lookup name
-     * Lookup name is the name stripped of any characters used only for display purposes
-     * e.g '#' in an UNO id is used only to discern between a match id & UNO id when
-     * calling the MWHistoryCommand
-     *
-     * @return Lookup name
-     */
-    public String getLookupName() {
-        return lookupName;
-    }
 
     /**
      * Strip the platform from the given query
@@ -126,7 +103,7 @@ public abstract class CODLookupCommand extends LookupCommand {
         String platformName = args[0];
         PLATFORM platform = PLATFORM.byName(platformName);
         if(platform == PLATFORM.NONE) {
-            this.platform = args.length > 1 && args[1].startsWith("#") ? PLATFORM.UNO : PLATFORM.BATTLE;
+            this.platform = PLATFORM.BATTLE;
         }
         else {
             this.platform = platform;

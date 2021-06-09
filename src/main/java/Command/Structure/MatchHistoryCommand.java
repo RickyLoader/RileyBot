@@ -50,7 +50,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
-                getHelpText(trigger) + " [match id/" + LATEST + "/maps/modes]\n\n"
+                getHelpText(trigger) + " [match id/" + LATEST + "]\n\n"
                         + trigger + " missing\n"
                         + trigger + " wobblies\n"
                         + trigger + " wobblies [rank]"
@@ -683,11 +683,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private MatchHistory getMatchHistory(String name, PLATFORM platform, MessageChannel channel) {
         ArrayList<MatchStats> matchStats = new ArrayList<>();
-        JSONObject overview = new JSONObject(getMatchHistoryJSON(getLookupName(), platform));
+        JSONObject overview = new JSONObject(getMatchHistoryJSON(name, platform));
         if(overview.has("status")) {
             channel.sendMessage(
                     buildErrorEmbed(
-                            "Error Fetching Player: " + getLookupName(),
+                            "Error Fetching Player: " + name,
                             overview.getString("status")
                     )
             ).queue();
