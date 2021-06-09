@@ -67,7 +67,11 @@ public class MovieEmbedBuilder {
      * @return Embed title URL (Default null)
      */
     public String getTitleUrl() {
-        return null;
+        RatingIds ratingIds = movie.getRatingIds();
+        if(!ratingIds.hasImdbId()) {
+            return null;
+        }
+        return ratingIds.getImdbId().getUrl();
     }
 
     /**
@@ -164,13 +168,8 @@ public class MovieEmbedBuilder {
      */
     public ArrayList<String> getSocialElements() {
         ArrayList<String> elements = new ArrayList<>();
-
-        if(movie.getRatingIds().hasImdbId()) {
-            String imdbEmote = EmoteHelper.formatEmote(emoteHelper.getIMDB());
-            elements.add(EmbedHelper.embedURL(imdbEmote + " IMDB", movie.getRatingIds().getImdbId().getUrl()));
-        }
-
         SocialConnections socialConnections = movie.getSocialConnections();
+
         if(socialConnections.hasTrailerUrl()) {
             String youtubeEmote = EmoteHelper.formatEmote(emoteHelper.getYoutube());
             elements.add(EmbedHelper.embedURL(youtubeEmote + " Trailer", socialConnections.getTrailerUrl()));

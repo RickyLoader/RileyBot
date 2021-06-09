@@ -197,10 +197,11 @@ public class PlexServer {
 
             @Override
             public String getDescription() {
-                return (plexMovie.getPlexDetails().isOnPlex()
-                        ? "Movie **is** on Plex"
-                        : "Movie **is not** on Plex but is being monitored.")
-                        + "\n\n" + super.getDescription();
+                String description = super.getDescription();
+                if(plexMovie.getPlexDetails().isOnPlex()) {
+                    return description;
+                }
+                return "Movie **is not** on Plex but is being monitored." + "\n\n" + super.getDescription();
             }
 
             @Override
