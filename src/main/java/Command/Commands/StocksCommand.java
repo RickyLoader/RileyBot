@@ -62,8 +62,9 @@ public class StocksCommand extends OnReadyDiscordCommand {
 
     public StocksCommand() {
         super(
-                "$[" + stock + "/" + crypto + "] [stock/crypto symbol or search term]",
-                "Check out some stocks & crypto!"
+                "$",
+                "Check out some stocks & crypto!",
+                "$[" + stock + "/" + crypto + "] [stock/crypto symbol or search term]"
         );
         this.marketSymbols = getMarketSymbols();
     }
@@ -178,7 +179,7 @@ public class StocksCommand extends OnReadyDiscordCommand {
                 return;
             }
         }
-        String query = context.getMessageContent().replace("$", "").trim();
+        String query = context.getMessageContent().replace(getTrigger(), "").trim();
         Member member = context.getMember();
 
         if(query.isEmpty()) {
@@ -247,11 +248,11 @@ public class StocksCommand extends OnReadyDiscordCommand {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 Symbol symbol = (Symbol) items.get(index);
-                String identifier = "$" + symbol.getSymbol();
+                String identifier = getTrigger() + symbol.getSymbol();
                 if(symbol.isCrypto()) {
                     identifier = cryptoEmote + " " + identifier;
                 }
-                return new String[]{identifier, symbol.getName(), "$" + symbol.getId()};
+                return new String[]{identifier, symbol.getName(), getTrigger() + symbol.getId()};
             }
 
             @Override
@@ -507,7 +508,7 @@ public class StocksCommand extends OnReadyDiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("$");
+        return query.startsWith(getTrigger());
     }
 
     @Override
