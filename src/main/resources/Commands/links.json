@@ -1,155 +1,68 @@
 {
-    "smirny": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThtjK.jpg"
-    },
-    "dobro": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThgPc.jpg"
-    },
-    "turbogreg": {
-        "link": "https:\/\/image.ibb.co\/ewVbrV\/jGGKgmr.jpg"
-    },
-    "turbobob": {
-        "link": "https:\/\/image.ibb.co\/c0zrQq\/Jt2kERs.png"
-    },
-    "turbo": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThThm.jpg"
-    },
-    "vodka": {
-        "link": "https:\/\/i.lensdump.com\/i\/ATh6zo.jpg"
-    },
-    "vodka2": {
-        "link": "https://cdn.discordapp.com/attachments/602077196571377675/738970352213819453/Screenshot_20200801_160327_com.huawei.himovie.overseas.jpg"
-    },
-    "friendly": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThCw9.png"
-    },
-    "resting": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThVKv.jpg"
-    },
-    "shrek": {
-        "link": "https:\/\/pbs.twimg.com\/media\/BlZ4ze5CUAAH5i-?format=jpg"
-    },
-    "norman": {
-        "link": "https:\/\/preview.ibb.co\/j8JwrV\/IFXdToe.png"
-    },
-    "norman2": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2dTk.png"
-    },
-    "norman3": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE27QP.png"
-    },
-    "mega": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2pAZ.jpg"
-    },
-    "riggs": {
-        "link": "https:\/\/steamcommunity.com\/profiles\/76561198073367937"
-    },
-    "hagrid": {
-        "link": "https:\/\/preview.ibb.co\/kCLWQq\/uOYYwEY.jpg"
-    },
-    "exodia": {
-        "link": "https:\/\/image.ibb.co\/io37yA\/YlhSfxa.jpg"
-    },
-    "hats": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThKSr.jpg"
-    },
-    "mandrill": {
-        "link": "https:\/\/www.mightyape.co.nz\/product\/mandrill\/27603303"
-    },
-    "cath": {
-        "link": "https:\/\/www.twitch.tv\/catherine"
-    },
-    "lcs": {
-        "link": "https:\/\/www.twitch.tv\/riotgames"
-    },
-    "chipmunk": {
-        "link": "https:\/\/www.twitch.tv\/lilchiipmunk"
-    },
-    "fishing": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThnYM.jpg"
-    },
-    "brogle": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThL2Q.jpg"
-    },
-    "banana": {
-        "link": "https:\/\/preview.ibb.co\/kUPfJA\/Jpb6z1e.jpg"
-    },
-    "cube": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThF0c.jpg"
-    },
-    "selfie": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThwJm.jpg"
-    },
-    "codka": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE23mc.jpg"
-    },
-    "friends": {
-        "link": "https:\/\/i.lensdump.com\/i\/AThxei.png"
-    },
-    "brews": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2sZ1.jpg"
-    },
-    "sleeping": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2Ie7.png"
-    },
-    "cooked": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2q7x.jpg"
-    },
-    "pure": {
-        "link": "https:\/\/preview.ibb.co\/mqcd5q\/CGqblIc.jpg"
-    },
-    "resting2": {
-        "link": "https:\/\/preview.ibb.co\/gyxd5q\/lolMWQy.jpg"
-    },
-    "underbelly": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2Emq.png"
-    },
-    "truly": {
-        "link": "https:\/\/image.ibb.co\/jzabrV\/CknCgwv.png"
-    },
-    "clyde": {
-        "link": "https:\/\/www.twitch.tv\/gsxrclyde"
-    },
-    "remember": {
-        "link": "https:\/\/preview.ibb.co\/n4X0JA\/m3ajo1F.png"
-    },
-    "sleeping2": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2Qea.png"
-    },
-    "spider-man": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2Vye.jpg"
-    },
-    "rapgod": {
-        "link": "https:\/\/i.lensdump.com\/i\/AE2BUH.png"
-    },
-    "dizzy": {
-        "link": "https:\/\/www.twitch.tv\/dizzykitten"
-    },
-    "goth": {
-        "link": "https:\/\/i.lensdump.com\/i\/ATaEX0.jpg"
-    },
-    "pokies": {
-        "link": "https:\/\/i.lensdump.com\/i\/ABBy57.jpg"
-    },
-    "rather": {
-        "link": "https:\/\/i.lensdump.com\/i\/ATfhfe.png"
-    },
-    "downyricky": {
-        "link": "https:\/\/cdn.discordapp.com\/attachments\/359890045244538881\/530677572170809344\/RickyDowny.mp4"
-    },
-    "chopping": {
-        "link": "https:\/\/cdn.discordapp.com\/attachments\/359859612918480897\/586748077461733377\/elite_raid.png"
-    },
-    "joe": {
-        "link": "https:\/\/twitter.com\/JoeCecot\/with_replies?lang=en"
-    },
-    "raids": {
-        "link": "https:\/\/imgur.com\/a\/67zKiQL"
-    },
-    "resting3": {
-        "link": "https:\/\/i.lensdump.com\/i\/j7X9H3.png"
-    },
-    "resting4": {
-        "link": "https:\/\/i1.lensdump.com\/i\/j7XdX0.png"
-    }
+  "smirny": {
+    "link": "https:\/\/i.lensdump.com\/i\/AThtjK.jpg"
+  },
+  "dobro": {
+    "link": "https:\/\/i.lensdump.com\/i\/AThgPc.jpg"
+  },
+  "friendly": {
+    "link": "https:\/\/i.lensdump.com\/i\/AThCw9.png"
+  },
+  "shrek": {
+    "link": "https:\/\/pbs.twimg.com\/media\/BlZ4ze5CUAAH5i-?format=jpg"
+  },
+  "mega": {
+    "link": "https:\/\/i.lensdump.com\/i\/AE2pAZ.jpg"
+  },
+  "hagrid": {
+    "link": "https:\/\/preview.ibb.co\/kCLWQq\/uOYYwEY.jpg"
+  },
+  "exodia": {
+    "link": "https:\/\/image.ibb.co\/io37yA\/YlhSfxa.jpg"
+  },
+  "hats": {
+    "link": "https:\/\/i.lensdump.com\/i\/AThKSr.jpg"
+  },
+  "mandrill": {
+    "link": "https:\/\/www.mightyape.co.nz\/product\/mandrill\/27603303"
+  },
+
+  "selfie": {
+    "link": "https:\/\/i.lensdump.com\/i\/AThwJm.jpg"
+  },
+  "brews": {
+    "link": "https:\/\/i.lensdump.com\/i\/AE2sZ1.jpg"
+  },
+  "cooked": {
+    "link": "https:\/\/i.lensdump.com\/i\/AE2q7x.jpg"
+  },
+  "pure": {
+    "link": "https:\/\/preview.ibb.co\/mqcd5q\/CGqblIc.jpg"
+  },
+  "underbelly": {
+    "link": "https:\/\/i.lensdump.com\/i\/AE2Emq.png"
+  },
+  "truly": {
+    "link": "https:\/\/image.ibb.co\/jzabrV\/CknCgwv.png"
+  },
+
+  "remember": {
+    "link": "https:\/\/preview.ibb.co\/n4X0JA\/m3ajo1F.png"
+  },
+  "spider-man": {
+    "link": "https:\/\/i.lensdump.com\/i\/AE2Vye.jpg"
+  },
+  "rapgod": {
+    "link": "https:\/\/i.lensdump.com\/i\/AE2BUH.png"
+  },
+
+  "goth": {
+    "link": "https:\/\/i.lensdump.com\/i\/ATaEX0.jpg"
+  },
+  "downyricky": {
+    "link": "https:\/\/cdn.discordapp.com\/attachments\/359890045244538881\/530677572170809344\/RickyDowny.mp4"
+  },
+  "joe": {
+    "link": "https:\/\/twitter.com\/JoeCecot\/with_replies?lang=en"
+  }
 }

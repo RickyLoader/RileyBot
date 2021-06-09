@@ -1,39 +1,53 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class VariableLinkCommand extends DiscordCommand {
+public abstract class VariableLinkCommand extends DiscordCommand {
     private final HashMap<String, String> versions;
 
-    public VariableLinkCommand(String[] variations, String desc) {
-        super(StringUtils.join(variations, "\n"), desc);
-        this.versions = parseJSON(variations);
+    /**
+     * Create a variable link command
+     *
+     * @param helpTrigger Trigger to use to see the triggers
+     * @param desc        Description of the command
+     */
+    public VariableLinkCommand(String helpTrigger, String desc) {
+        super(helpTrigger, desc);
+        this.versions = new HashMap<>();
+        insertVersions(versions);
     }
 
-    private HashMap<String, String> parseJSON(String[] variations) {
-        HashMap<String, String> versions = new HashMap<>();
-        JSONObject o = readJSONFile("/Commands/links.json");
-        if(o == null) {
-            return versions;
-        }
-        for(String trigger : variations) {
-            JSONObject command = o.getJSONObject(trigger);
-            versions.put(trigger, command.getString("link"));
-        }
-        return versions;
+    /**
+     * Add to the given map of trigger -> link
+     *
+     * @param versions Map of trigger -> link to add to
+     */
+    public abstract void insertVersions(HashMap<String, String> versions);
+
+    @Override
+    public String getHelpName() {
+        return StringUtils.join(versions.keySet(), " | ");
     }
 
     @Override
     public void execute(CommandContext context) {
-        context.getMessageChannel().sendMessage(versions.get(context.getLowerCaseMessage())).queue();
+        String message = context.getLowerCaseMessage();
+        MessageChannel channel = context.getMessageChannel();
+
+        if(message.equals(getTrigger())) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
+        channel.sendMessage(versions.get(message)).queue();
     }
 
     @Override
     public boolean matches(String query, Message message) {
-        return versions.containsKey(query);
+        return query.equals(getTrigger()) || versions.containsKey(query);
     }
 }

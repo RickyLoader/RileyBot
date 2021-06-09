@@ -55,7 +55,7 @@ public abstract class DiscordCommand {
     }
 
     public String getHelpNameCoded() {
-        return "```" + helpName + "```";
+        return "```" + getHelpName() + "```";
     }
 
     /**
