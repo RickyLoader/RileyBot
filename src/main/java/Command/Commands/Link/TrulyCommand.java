@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class TrulyCommand extends LinkCommand {
     public TrulyCommand() {
-        super("truly", "I truly enjoy the hunt!");
+        super("truly", "I truly enjoy the hunt!", "https://image.ibb.co/jzabrV/CknCgwv.png");
     }
 }

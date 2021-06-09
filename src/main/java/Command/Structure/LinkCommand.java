@@ -1,32 +1,22 @@
 package Command.Structure;
 
-import org.json.JSONObject;
-
-
 public class LinkCommand extends DiscordCommand {
-
     private final String link;
 
-    public LinkCommand(String trigger, String desc, String helpName) {
-        super(trigger, desc, helpName);
-        this.link = parseJSON();
-    }
-
-    public LinkCommand(String trigger, String desc) {
+    /**
+     * Create a link command
+     *
+     * @param trigger Trigger to call link command
+     * @param desc    Description of command
+     * @param link    Link to be sent when command is called
+     */
+    public LinkCommand(String trigger, String desc, String link) {
         super(trigger, desc);
-        this.link = parseJSON();
+        this.link = link;
     }
 
     @Override
     public void execute(CommandContext context) {
         context.getMessageChannel().sendMessage(link).queue();
-    }
-
-    private String parseJSON() {
-        JSONObject o = readJSONFile("/Commands/links.json");
-        if(o == null) {
-            return null;
-        }
-        return o.getJSONObject(getTrigger()).getString("link");
     }
 }

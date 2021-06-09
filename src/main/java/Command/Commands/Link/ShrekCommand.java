@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class ShrekCommand extends LinkCommand {
     public ShrekCommand() {
-        super("shrek", "Shrek having a good time!");
+        super("shrek", "Shrek having a good time!", "https://pbs.twimg.com/media/BlZ4ze5CUAAH5i-?format=jpg");
     }
 }

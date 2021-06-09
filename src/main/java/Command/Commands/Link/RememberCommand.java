@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class RememberCommand extends LinkCommand {
     public RememberCommand() {
-        super("remember", "Remember, no russian!");
+        super("remember", "Remember, no russian!", "https://preview.ibb.co/n4X0JA/m3ajo1F.png");
     }
 }

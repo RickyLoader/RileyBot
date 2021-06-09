@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class ExodiaCommand extends LinkCommand {
     public ExodiaCommand() {
-        super("exodia", "Exodia the forbidden one!");
+        super("exodia", "Exodia the forbidden one!", "https://image.ibb.co/io37yA/YlhSfxa.jpg");
     }
 }

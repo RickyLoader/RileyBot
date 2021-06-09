@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class PureCommand extends LinkCommand {
     public PureCommand() {
-        super("pure", "A great deception!");
+        super("pure", "A great deception!", "https://preview.ibb.co/mqcd5q/CGqblIc.jpg");
     }
 }

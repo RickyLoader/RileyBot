@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class MegaCommand extends LinkCommand {
     public MegaCommand() {
-        super("mega", "The greatest burger ever invented!");
+        super("mega", "The greatest burger ever invented!", "https://i.lensdump.com/i/AE2pAZ.jpg");
     }
 }

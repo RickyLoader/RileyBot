@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class FriendlyCommand extends LinkCommand {
     public FriendlyCommand() {
-        super("friendly", "A nice friendly exchange!");
+        super("friendly", "A nice friendly exchange!", "https://i.lensdump.com/i/AThCw9.png");
     }
 }

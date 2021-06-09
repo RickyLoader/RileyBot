@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class HagridCommand extends LinkCommand {
     public HagridCommand() {
-        super("hagrid", "Everyone has a day like this!");
+        super("hagrid", "Everyone has a day like this!", "https://preview.ibb.co/kCLWQq/uOYYwEY.jpg");
     }
 }

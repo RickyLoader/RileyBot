@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class GothCommand extends LinkCommand {
     public GothCommand() {
-        super("goth", "We can all relate!");
+        super("goth", "We can all relate!", "https://i.lensdump.com/i/ATaEX0.jpg");
     }
 }

@@ -7,6 +7,6 @@ import Command.Structure.LinkCommand;
  */
 public class SmirnyCommand extends LinkCommand {
     public SmirnyCommand() {
-        super("smirny", "A nice hat!");
+        super("smirny", "A nice hat!", "https://i.lensdump.com/i/AThtjK.jpg");
     }
 }
