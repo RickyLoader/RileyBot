@@ -64,7 +64,6 @@ public class MatchPlayer {
         public MatchPlayerBuilder(String name, PLATFORM platform) {
             this.name = name;
             this.platform = platform;
-
         }
 
         /**
