@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
  * Reading resources
  */
 public class ResourceHandler {
+    public static String
+            RUNESCAPE_BASE_PATH = "/Runescape/",
+            OSRS_BASE_PATH = RUNESCAPE_BASE_PATH + "OSRS/",
+            RS3_BASE_PATH = RUNESCAPE_BASE_PATH + "RS3/";
 
     /**
      * Get an input stream from a given file path
