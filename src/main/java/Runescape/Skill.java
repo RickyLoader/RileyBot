@@ -1,5 +1,10 @@
 package Runescape;
 
+import Bot.ResourceHandler;
+
+import javax.annotation.Nullable;
+import java.awt.image.BufferedImage;
+
 /**
  * Hold data on a skill
  */
@@ -8,7 +13,8 @@ public class Skill {
     private final int level, virtualLevel;
     private final SKILL_NAME name;
     private long gained;
-    public final static String RANK_IMAGE_PATH = "/Runescape/rank.png";
+    public final static String RANK_IMAGE_PATH = ResourceHandler.RUNESCAPE_BASE_PATH + "rank.png";
+    private static final String BASE_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "Skills/";
 
     public enum SKILL_NAME {
         ATTACK,
@@ -40,7 +46,33 @@ public class Skill {
         INVENTION,
         ARCHAEOLOGY,
         OVERALL,
-        VIRTUAL_TOTAL_LEVEL
+        COMBAT,
+        VIRTUAL_TOTAL_LEVEL,
+        UNKNOWN;
+
+        /**
+         * Get the path to the image for the skill
+         *
+         * @return Path to skill image
+         */
+        public String getImagePath() {
+            return BASE_IMAGE_PATH + this.name() + ".png";
+        }
+
+        /**
+         * Get a skill name from the given skill name String
+         *
+         * @param skillName Skill name String e.g "attack"
+         * @return Skill name e.g ATTACK (or UNKNOWN if unable to find a match)
+         */
+        public static SKILL_NAME fromName(String skillName) {
+            try {
+                return SKILL_NAME.valueOf(skillName.toUpperCase());
+            }
+            catch(IllegalArgumentException e) {
+                return UNKNOWN;
+            }
+        }
     }
 
     /**
@@ -94,12 +126,13 @@ public class Skill {
     }
 
     /**
-     * Get the path to the skill icon image
+     * Get the skill image
      *
-     * @return Skill image path
+     * @return Skill image (May be null if the skill has no image)
      */
-    public String getImagePath() {
-        return "/Runescape/OSRS/Skills/" + name.name() + ".png";
+    @Nullable
+    public BufferedImage getImage() {
+        return new ResourceHandler().getImageResource(name.getImagePath());
     }
 
     /**
