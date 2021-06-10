@@ -13,6 +13,7 @@ public class PlayerStats {
     private final Clue[] clues;
     private final Skill[] skills;
     private final HashMap<Skill.SKILL_NAME, Skill> skillMap;
+    private final HashMap<Clue.TYPE, Clue> clueMap;
     private final ACCOUNT type;
     private final Skill total, virtualTotal;
     public final DecimalFormat commaFormat = new DecimalFormat("#,###");
@@ -39,6 +40,10 @@ public class PlayerStats {
         this.skillMap = new HashMap<>();
         for(Skill skill : skills) {
             skillMap.put(skill.getName(), skill);
+        }
+        this.clueMap = new HashMap<>();
+        for(Clue clue : clues) {
+            clueMap.put(clue.getType(), clue);
         }
         this.total = getSkill(Skill.SKILL_NAME.OVERALL);
         this.virtualTotal = calculateVirtualTotal(total, skills);
@@ -154,6 +159,15 @@ public class PlayerStats {
      */
     public boolean hasAccountTypeImage() {
         return getAccountTypeImagePath(type) != null;
+    }
+
+    /**
+     * Check if the player has any clue completions
+     *
+     * @return Player has clue completions
+     */
+    public boolean hasClueCompletions() {
+        return clueMap.get(Clue.TYPE.ALL).hasCompletions();
     }
 
     /**

@@ -1,6 +1,7 @@
 package Runescape;
 
 import Bot.ResourceHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
@@ -15,6 +16,7 @@ public class Clue {
     private final TYPE type;
 
     public enum TYPE {
+        ALL,
         BEGINNER,
         EASY,
         MEDIUM,
@@ -57,6 +59,15 @@ public class Clue {
                 return UNKNOWN;
             }
         }
+
+        /**
+         * Get the name of the clue type
+         *
+         * @return Clue type name
+         */
+        public String getName() {
+            return StringUtils.capitalize(this.name().toLowerCase());
+        }
     }
 
     /**
@@ -88,6 +99,15 @@ public class Clue {
      */
     public int getCompletions() {
         return completions;
+    }
+
+    /**
+     * Check if the clue has any completions
+     *
+     * @return Clue has completions
+     */
+    public boolean hasCompletions() {
+        return completions > 0;
     }
 
     /**

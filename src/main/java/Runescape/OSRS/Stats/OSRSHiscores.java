@@ -39,6 +39,8 @@ public class OSRSHiscores extends Hiscores {
     public static final String LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
     private final String displayFormatDate = "dd/MM/yyyy";
+    private final int border = 25; // Horizontal & vertical borders on template images
+    private final Color opaqueRed;
     private final SimpleDateFormat
             parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             displayFormat = new SimpleDateFormat(displayFormatDate);
@@ -53,12 +55,13 @@ public class OSRSHiscores extends Hiscores {
      * @param xp          Get the XP tracker info for the player
      */
     public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual, boolean xp) {
-        super(channel, emoteHelper, ResourceHandler.OSRS_BASE_PATH, FontManager.OSRS_FONT);
+        super(channel, emoteHelper, ResourceHandler.OSRS_BASE_PATH + "Templates/", FontManager.OSRS_FONT);
         this.bossNames = Boss.BOSS_NAME.getNamesInHiscoresOrder();
         this.league = league;
         this.virtual = virtual;
         this.xp = xp;
         this.trackerFont = FontManager.WISE_OLD_MAN_FONT;
+        this.opaqueRed = new Color(255, 0, 0, 127); // 50% opacity
         parseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
@@ -98,8 +101,9 @@ public class OSRSHiscores extends Hiscores {
      * @return Clue scroll data
      */
     private Clue[] parseClueScrolls(String[] data) {
-        data = Arrays.copyOfRange(data, 80, 92);
+        data = Arrays.copyOfRange(data, 78, 92);
         Clue.TYPE[] clueTypes = new Clue.TYPE[]{
+                Clue.TYPE.ALL,
                 Clue.TYPE.BEGINNER,
                 Clue.TYPE.EASY,
                 Clue.TYPE.MEDIUM,
@@ -510,51 +514,96 @@ public class OSRSHiscores extends Hiscores {
      */
     private void addBossKills(BufferedImage baseImage, List<Boss> bosses) {
         Graphics g = baseImage.getGraphics();
-        g.setColor(Color.YELLOW);
+        final int maxBosses = 5;
+
+        final int bossSectionWidth = 960;
+        final int bossSectionX = 1044;
+        final int bossSectionY = 223;
+
+        // TODO modular
+        final int bossSectionHeight = (baseImage.getHeight() - bossSectionY - border);
+
+        // Always calculate for max bosses
+        final int bossRowHeight = bossSectionHeight / maxBosses;
 
         if(bosses.size() > 0) {
-            int max = Math.min(5, bosses.size());
+            final int bossDisplayCount = Math.min(maxBosses, bosses.size());
+            int y = bossSectionY;
 
-            // All images have 220px height, and the top name banner + bottom border has 260px total height, clue section has height of 425
-            int padding = ((baseImage.getHeight() - 260 - 425) - (5 * 220)) / 6;
-
-            // Height of top name banner
-            int y = 230 + padding;
-
-            int bossCentre = (int) (baseImage.getWidth() * 0.625); // mid point of boss image section
-            g.setFont(getGameFont().deriveFont(70f));
-            FontMetrics fm = g.getFontMetrics();
-
-            for(int i = 0; i < max; i++) {
-                Boss boss = bosses.get(i);
-                BufferedImage bossImage = boss.getFullImage();
-                if(bossImage == null) {
-                    continue;
-                }
-                g.drawImage(bossImage, bossCentre - (bossImage.getWidth() / 2), y, null);
-
-                String kills = boss.formatKills();
-                int killWidth = fm.stringWidth(kills);
-                g.drawString(
-                        kills,
-                        (int) ((baseImage.getWidth() * 0.875) - killWidth / 2),
-                        (y + (bossImage.getHeight() / 2) + (fm.getHeight() / 2))
-                );
-                y += 220 + padding;
+            for(int i = 0; i < bossDisplayCount; i++) {
+                final BufferedImage bossImage = buildBossRowImage(bosses.get(i), bossSectionWidth, bossRowHeight);
+                g.drawImage(bossImage, bossSectionX, y, null);
+                y += bossRowHeight;
             }
         }
         else {
-            BufferedImage noBoss = getResourceHandler().getImageResource(
-                    getResourcePath() + "Templates/no_boss.png"
-            );
-            g.drawImage(
-                    noBoss,
-                    (int) ((baseImage.getWidth() * 0.75)) - (noBoss.getWidth() / 2),
-                    200 + (((baseImage.getHeight() - 200 - 425) / 2) - (noBoss.getHeight() / 2)),
-                    null
-            );
+            // Draw an opaque red layer over boss area
+            g.setColor(opaqueRed);
+            g.fillRect(bossSectionX, bossSectionY, bossSectionWidth, bossSectionHeight);
         }
         g.dispose();
+    }
+
+    /**
+     * Build an image displaying the given boss and the player's total kills.
+     * This image has a transparent background to be drawn on top of the boss section.
+     *
+     * @param boss   Boss to display
+     * @param width  Width of boss image to build
+     * @param height Height of clue image to build
+     * @return Boss image
+     */
+    private BufferedImage buildBossRowImage(Boss boss, int width, int height) {
+        final int boxWidth = (width - border) / 2;
+        final int centreVertical = height / 2;
+        final int centreHorizontal = boxWidth / 2;
+
+        BufferedImage bossBox = new BufferedImage(
+                boxWidth,
+                height,
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        BufferedImage bossImage = boss.getFullImage();
+        if(bossImage == null) {
+            return bossBox;
+        }
+
+        Graphics g = bossBox.getGraphics();
+        // Draw boss image centered in boss box
+        g.drawImage(
+                bossImage,
+                centreHorizontal - (bossImage.getWidth() / 2),
+                centreVertical - (bossImage.getHeight() / 2),
+                null
+        );
+
+        BufferedImage textBox = new BufferedImage(
+                boxWidth,
+                height,
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        g = textBox.getGraphics();
+        g.setFont(getGameFont().deriveFont(70f));
+        g.setColor(Color.YELLOW);
+        FontMetrics fm = g.getFontMetrics();
+        String kills = boss.formatKills();
+
+        // Draw kills centered in text box
+        g.drawString(
+                kills,
+                centreHorizontal - (fm.stringWidth(kills) / 2),
+                centreVertical + (fm.getMaxAscent() / 2)
+        );
+
+        // Combine in to row with border-sized gap in centre for mid border
+        BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        g = row.getGraphics();
+        g.drawImage(bossBox, 0, 0, null);
+        g.drawImage(textBox, boxWidth + border, 0, null);
+        g.dispose();
+        return row;
     }
 
     /**
@@ -565,7 +614,7 @@ public class OSRSHiscores extends Hiscores {
      */
     private BufferedImage buildSkillsImage(PlayerStats stats) {
         BufferedImage image = getResourceHandler().getImageResource(
-                getResourcePath() + "Templates/stats_template.png"
+                getResourcePath() + "stats_template.png"
         );
 
         Graphics g = image.getGraphics();
@@ -620,8 +669,11 @@ public class OSRSHiscores extends Hiscores {
 
         BufferedImage baseImage = buildSkillsImage(playerStats);
         addBossKills(baseImage, stats.getBossKills());
-        addClues(baseImage, playerStats.getClues());
         addNameSection(baseImage, stats);
+
+        if(playerStats.hasClueCompletions()) {
+            baseImage = addClues(baseImage, playerStats.getClues());
+        }
 
         if(stats.isLeague()) {
             baseImage = addLeagueInfo(baseImage, stats);
@@ -691,14 +743,13 @@ public class OSRSHiscores extends Hiscores {
      */
     private BufferedImage buildAchievementsSection(ArrayList<Achievement> achievements, Comparator<Achievement> comparator, String title) {
         BufferedImage achievementsContainer = getResourceHandler()
-                .getImageResource(getResourcePath() + "Templates/achievement_container.png");
+                .getImageResource(getResourcePath() + "achievement_container.png");
         achievements.sort(comparator);
         Graphics g = achievementsContainer.getGraphics();
 
         int y = 225;
-        int border = 25;
-        int max = 5;
-        int titleSectionHeight = (y - 2 * border);
+        final int max = 5;
+        final int titleSectionHeight = (y - 2 * border);
 
         g.setFont(getGameFont().deriveFont(80f));
         g.setColor(Color.YELLOW);
@@ -710,18 +761,18 @@ public class OSRSHiscores extends Hiscores {
                 ((titleSectionHeight / 2) + (fm.getMaxAscent() / 2)) + border
         );
 
-        int rowCount = Math.min(achievements.size(), max);
+        final int rowCount = Math.min(achievements.size(), max);
 
-        // Always calculate for max rows
-        int rowHeight = (achievementsContainer.getHeight() - y - border) / max;
-        int rowWidth = achievementsContainer.getWidth() - (2 * border);
+        // Always calculate for max achievements
+        final int rowHeight = (achievementsContainer.getHeight() - y - border) / max;
+        final int rowWidth = achievementsContainer.getWidth() - (2 * border);
 
-        Color dark = new Color(EmbedHelper.ROW_DARK);
-        Color light = new Color(EmbedHelper.ROW_LIGHT);
+        final Color dark = new Color(EmbedHelper.ROW_DARK);
+        final Color light = new Color(EmbedHelper.ROW_LIGHT);
 
         for(int i = 0; i < rowCount; i++) {
             Achievement achievement = achievements.get(i);
-            boolean even = i % 2 == 0;
+            final boolean even = i % 2 == 0;
             g.drawImage(
                     buildAchievementRow(
                             achievement,
@@ -968,21 +1019,107 @@ public class OSRSHiscores extends Hiscores {
      * @param baseImage Base player image
      * @param clues     List of clue completions
      */
-    private void addClues(BufferedImage baseImage, Clue[] clues) {
-        Graphics g = baseImage.getGraphics();
+    private BufferedImage addClues(BufferedImage baseImage, Clue[] clues) {
+        final BufferedImage clueSection = getResourceHandler().getImageResource(
+                getResourcePath() + "clues_container.png"
+        );
+
+        Graphics g = clueSection.getGraphics();
+
+        final int maxClues = clues.length - 1; // Not drawing "ALL" type clue
+        final int border = 28; // TODO fix
+
+        // Always calculate for max clues
+        final int clueWidth = (clueSection.getWidth() - (2 * border)) / maxClues;
+        final int clueHeight = clueSection.getHeight() - (2 * border);
+
+        int x = border;
+
+        // Build clue stat images with transparent backgrounds to slot in to the clue section
+        for(Clue clue : clues) {
+            if(clue.getType() == Clue.TYPE.ALL) {
+                continue;
+            }
+            final BufferedImage clueImage = buildClueImage(clue, clueWidth, clueHeight);
+            g.drawImage(clueImage, x, border, null);
+            x += clueWidth;
+        }
+
+        final BufferedImage combined = new BufferedImage(
+                baseImage.getWidth(),
+                baseImage.getHeight() + clueSection.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        g = combined.getGraphics();
+        g.drawImage(baseImage, 0, 0, null);
+        g.drawImage(clueSection, 0, baseImage.getHeight(), null);
+        g.dispose();
+        return combined;
+    }
+
+    /**
+     * Build an image displaying the given clue and the player's total completions of it.
+     * This image has a transparent background to be drawn on top of the clue section.
+     *
+     * @param clue   Clue to display
+     * @param width  Width of clue image to build
+     * @param height Height of clue image to build
+     * @return Clue image
+     */
+    private BufferedImage buildClueImage(Clue clue, int width, int height) {
+        final BufferedImage background = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = background.getGraphics();
+
         g.setFont(getGameFont().deriveFont(65f));
         g.setColor(Color.YELLOW);
         FontMetrics fm = g.getFontMetrics();
 
-        int x = 170;
-        int y = 1960;
-        for(Clue clue : clues) {
-            String quantity = clue.formatCompletions();
-            int quantityWidth = fm.stringWidth(quantity) / 2;
-            g.drawString(quantity, x - quantityWidth, y);
-            x += 340;
+        final int centreVertical = height / 2;
+        final int centreHorizontal = width / 2;
+
+        final BufferedImage clueImage = clue.getFullImage(ResourceHandler.OSRS_BASE_PATH);
+
+        if(clueImage == null) {
+            return background;
         }
+
+        // Draw clue centered in background
+        g.drawImage(
+                clueImage,
+                centreHorizontal - (clueImage.getWidth() / 2),
+                centreVertical - (clueImage.getHeight() / 2),
+                null
+        );
+
+        // Height of area above & below clue
+        final int textBoxHeight = (height - clueImage.getHeight()) / 2;
+
+        // Add this to top of a text box to centre text
+        final int textY = (textBoxHeight / 2) + (fm.getMaxAscent() / 2);
+
+        final String name = clue.getType().getName();
+        g.drawString(
+                name,
+                centreHorizontal - (fm.stringWidth(name) / 2),
+                textY // Top text box begins at 0, drawing at textY centres text in it
+        );
+
+        final String completions = clue.formatCompletions();
+        g.drawString(
+                completions,
+                centreHorizontal - (fm.stringWidth(completions) / 2),
+                (height - textBoxHeight) + textY // Bottom text box begins at (height - textBoxHeight)
+        );
+
+        // Draw an opaque red layer over incomplete clues
+        if(!clue.hasCompletions()) {
+            g.setColor(opaqueRed);
+            g.fillRect(0, 0, width, height);
+        }
+
         g.dispose();
+        return background;
     }
 
     /**
@@ -1015,7 +1152,7 @@ public class OSRSHiscores extends Hiscores {
     private BufferedImage buildTrackerSection(OSRSPlayerStats stats) {
         BufferedImage image = getResourceHandler()
                 .getImageResource(
-                        getResourcePath() + "Templates/xp_tracker_container.png"
+                        getResourcePath() + "xp_tracker_container.png"
                 );
 
         Graphics g = image.getGraphics();
@@ -1096,7 +1233,7 @@ public class OSRSHiscores extends Hiscores {
      */
     private BufferedImage buildRelicSection(ArrayList<RelicTier> relicTiers) {
         BufferedImage relicContainer = getResourceHandler().getImageResource(
-                getResourcePath() + "Templates/relic_container.png"
+                getResourcePath() + "relic_container.png"
         );
         BufferedImage lockedRelic = getResourceHandler().getImageResource(Relic.res + Relic.lockedRelic);
         Graphics g = relicContainer.getGraphics();
@@ -1151,7 +1288,7 @@ public class OSRSHiscores extends Hiscores {
     private BufferedImage buildRegionSection(ArrayList<Region> regions) {
         BufferedImage map = getResourceHandler().getImageResource(Region.res + Region.baseMap);
         BufferedImage mapContainer = getResourceHandler().getImageResource(
-                getResourcePath() + "Templates/map_container.png"
+                getResourcePath() + "map_container.png"
         );
         Graphics g = map.getGraphics();
         for(Region region : regions) {
