@@ -3,6 +3,7 @@ package Runescape;
 import Bot.ResourceHandler;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 
@@ -10,8 +11,8 @@ import java.text.NumberFormat;
  * Hold information about a boss, sortable by kill count
  */
 public class Boss implements Comparable<Boss> {
+    private static final String BASE_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "Bosses/";
     private final BOSS_NAME name;
-    private final String filename;
     private final int kills;
 
     public enum BOSS_NAME {
@@ -60,7 +61,8 @@ public class Boss implements Comparable<Boss> {
         VORKATH,
         WINTERTODT,
         ZALCANO,
-        ZULRAH;
+        ZULRAH,
+        UNKNOWN;
 
         /**
          * Get the boss names in the order they appear on the hiscores
@@ -116,6 +118,21 @@ public class Boss implements Comparable<Boss> {
                     ZALCANO,
                     ZULRAH
             };
+        }
+
+        /**
+         * Get a boss name from the given boss name String
+         *
+         * @param bossName Boss name String e.g "kalphite queen"
+         * @return Boss name e.g KALPHITE_QUEEN (or UNKNOWN if unable to find a match)
+         */
+        public static BOSS_NAME fromName(String bossName) {
+            try {
+                return BOSS_NAME.valueOf(bossName.toUpperCase());
+            }
+            catch(IllegalArgumentException e) {
+                return UNKNOWN;
+            }
         }
 
         /**
@@ -183,6 +200,24 @@ public class Boss implements Comparable<Boss> {
             // Comma for large numbers
             return NumberFormat.getNumberInstance().format(kills) + " " + type;
         }
+
+        /**
+         * Get the path to the full image of the boss
+         *
+         * @return Path to full boss image
+         */
+        public String getFullImagePath() {
+            return BASE_IMAGE_PATH + "Full/" + this.name() + ".png";
+        }
+
+        /**
+         * Get the path to the icon image of the boss
+         *
+         * @return Path to boss icon image
+         */
+        public String getIconImagePath() {
+            return BASE_IMAGE_PATH + "Icons/" + this.name() + ".png";
+        }
     }
 
     /**
@@ -194,7 +229,6 @@ public class Boss implements Comparable<Boss> {
     public Boss(BOSS_NAME name, int kills) {
         this.name = name;
         this.kills = kills;
-        this.filename = name.name() + ".png";
     }
 
     /**
@@ -216,12 +250,23 @@ public class Boss implements Comparable<Boss> {
     }
 
     /**
-     * Get the boss image
+     * Get the full boss image
      *
-     * @return Boss image
+     * @return Full boss image (May be null if the boss has no image)
      */
-    public BufferedImage getImage() {
-        return new ResourceHandler().getImageResource("/Runescape/OSRS/Bosses/" + filename);
+    @Nullable
+    public BufferedImage getFullImage() {
+        return new ResourceHandler().getImageResource(name.getFullImagePath());
+    }
+
+    /**
+     * Get the boss icon image
+     *
+     * @return Boss icon image (May be null if the boss has no icon)
+     */
+    @Nullable
+    public BufferedImage getIconImage() {
+        return new ResourceHandler().getImageResource(name.getIconImagePath());
     }
 
     /**
