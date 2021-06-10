@@ -14,6 +14,7 @@ public class ResourceHandler {
     public static String
             RUNESCAPE_BASE_PATH = "/Runescape/",
             OSRS_BASE_PATH = RUNESCAPE_BASE_PATH + "OSRS/",
+            OSRS_LEAGUE_PATH = OSRS_BASE_PATH + "League/",
             RS3_BASE_PATH = RUNESCAPE_BASE_PATH + "RS3/";
 
     /**

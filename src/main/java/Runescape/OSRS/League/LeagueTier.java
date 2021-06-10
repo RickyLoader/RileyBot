@@ -1,5 +1,6 @@
 package Runescape.OSRS.League;
 
+import Bot.ResourceHandler;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -96,6 +97,6 @@ public class LeagueTier {
      * @return Tier image path
      */
     public String getTierImagePath() {
-        return "/Runescape/OSRS/League/Tiers/" + tier.name() + ".png";
+        return ResourceHandler.OSRS_LEAGUE_PATH + "Tiers/" + tier.name() + ".png";
     }
 }

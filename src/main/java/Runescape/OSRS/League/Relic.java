@@ -1,12 +1,16 @@
 package Runescape.OSRS.League;
 
+import Bot.ResourceHandler;
+
 /**
  * Hold data on a relic from OSRS Trailblazer League
  */
 public class Relic {
     private final int id, index;
     private final String name, imagePath;
-    public static final String lockedRelic = "locked.png", res = "/Runescape/OSRS/League/Relics/";
+    public static final String
+            LOCKED_RELIC_FILENAME = "locked.png",
+            RES = ResourceHandler.OSRS_LEAGUE_PATH + "Relics/";
 
     /**
      * Create a relic
@@ -17,7 +21,7 @@ public class Relic {
      */
     public Relic(int id, int index, String name) {
         this.id = id;
-        this.imagePath = res + id + ".png";
+        this.imagePath = RES + id + ".png";
         this.index = index;
         this.name = name;
     }

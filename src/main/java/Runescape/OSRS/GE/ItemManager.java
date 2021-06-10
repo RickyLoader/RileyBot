@@ -114,7 +114,9 @@ public class ItemManager {
                             new Item.ItemImage(
                                     filename,
                                     id,
-                                    resourceHandler.getImageResource("/Runescape/OSRS/Sprites/" + filename)
+                                    resourceHandler.getImageResource(
+                                            ResourceHandler.OSRS_BASE_PATH + "Sprites/" + filename
+                                    )
                             )
                     )
             );

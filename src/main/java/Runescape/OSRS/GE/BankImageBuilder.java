@@ -25,8 +25,8 @@ public class BankImageBuilder {
      * Initialise the empty bank image & coin image
      */
     public BankImageBuilder() {
-        String path = "/Runescape/OSRS/";
         ResourceHandler handler = new ResourceHandler();
+        String path = ResourceHandler.OSRS_BASE_PATH;
         this.bankImage = handler.getImageResource(path + "Templates/empty_bank.png");
         this.coinsImage = handler.getImageResource(path + "Sprites/coins.png");
     }

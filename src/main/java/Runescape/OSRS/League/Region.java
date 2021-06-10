@@ -1,5 +1,6 @@
 package Runescape.OSRS.League;
 
+import Bot.ResourceHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,7 +12,9 @@ import java.util.Comparator;
  */
 public class Region {
     private final String name, imagePath;
-    public static final String baseMap = "base_map.png", res = "/Runescape/OSRS/League/Regions/";
+    public static final String
+            BASE_MAP_FILENAME = "base_map.png",
+            RES = ResourceHandler.OSRS_LEAGUE_PATH + "Regions/";
     private final int unlockIndex;
     public static final int MAX_REGIONS = 5;
 
@@ -23,7 +26,7 @@ public class Region {
      */
     public Region(String name, int unlockIndex) {
         this.name = name;
-        this.imagePath = res + name.toLowerCase() + ".png";
+        this.imagePath = RES + name.toLowerCase() + ".png";
         this.unlockIndex = unlockIndex;
     }
 

@@ -1235,7 +1235,7 @@ public class OSRSHiscores extends Hiscores {
         BufferedImage relicContainer = getResourceHandler().getImageResource(
                 getResourcePath() + "relic_container.png"
         );
-        BufferedImage lockedRelic = getResourceHandler().getImageResource(Relic.res + Relic.lockedRelic);
+        BufferedImage lockedRelic = getResourceHandler().getImageResource(Relic.RES + Relic.LOCKED_RELIC_FILENAME);
         Graphics g = relicContainer.getGraphics();
         g.setFont(getGameFont().deriveFont(40f));
         FontMetrics fm = g.getFontMetrics();
@@ -1286,7 +1286,7 @@ public class OSRSHiscores extends Hiscores {
      * @return Image displaying player regions
      */
     private BufferedImage buildRegionSection(ArrayList<Region> regions) {
-        BufferedImage map = getResourceHandler().getImageResource(Region.res + Region.baseMap);
+        BufferedImage map = getResourceHandler().getImageResource(Region.RES + Region.BASE_MAP_FILENAME);
         BufferedImage mapContainer = getResourceHandler().getImageResource(
                 getResourcePath() + "map_container.png"
         );
