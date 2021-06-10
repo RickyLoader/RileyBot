@@ -588,7 +588,7 @@ public class OSRSHiscores extends Hiscores {
         g.setFont(getGameFont().deriveFont(70f));
         g.setColor(Color.YELLOW);
         FontMetrics fm = g.getFontMetrics();
-        String kills = boss.formatKills();
+        String kills = boss.getFormattedKills();
 
         // Draw kills centered in text box
         g.drawString(
@@ -1105,7 +1105,7 @@ public class OSRSHiscores extends Hiscores {
                 textY // Top text box begins at 0, drawing at textY centres text in it
         );
 
-        final String completions = clue.formatCompletions();
+        final String completions = clue.getFormattedCompletions();
         g.drawString(
                 completions,
                 centreHorizontal - (fm.stringWidth(completions) / 2),
@@ -1355,11 +1355,17 @@ public class OSRSHiscores extends Hiscores {
         List<String> stats = Arrays.asList(csv).subList(96, csv.length);
         List<Boss> bosses = new ArrayList<>();
 
-        int i = 1;
+        int i = 0;
         for(Boss.BOSS_NAME bossName : bossNames) {
-            int kills = Integer.parseInt(stats.get(i));
+            int kills = Integer.parseInt(stats.get(i + 1));
             if(kills > -1) {
-                bosses.add(new Boss(bossName, kills));
+                bosses.add(
+                        new Boss(
+                                bossName,
+                                Integer.parseInt(stats.get(i)),
+                                kills
+                        )
+                );
             }
             i += 2;
         }

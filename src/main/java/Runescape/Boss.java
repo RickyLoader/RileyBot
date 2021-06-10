@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
@@ -13,7 +14,7 @@ import java.text.NumberFormat;
 public class Boss implements Comparable<Boss> {
     private static final String BASE_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "Bosses/";
     private final BOSS_NAME name;
-    private final int kills;
+    private final int rank, kills;
 
     public enum BOSS_NAME {
         ABYSSAL_SIRE,
@@ -224,10 +225,12 @@ public class Boss implements Comparable<Boss> {
      * Create a boss
      *
      * @param name  Boss name
+     * @param rank  Boss kills rank
      * @param kills Boss kills
      */
-    public Boss(BOSS_NAME name, int kills) {
+    public Boss(BOSS_NAME name, int rank, int kills) {
         this.name = name;
+        this.rank = rank;
         this.kills = kills;
     }
 
@@ -236,8 +239,17 @@ public class Boss implements Comparable<Boss> {
      *
      * @return Formatted boss kills - 1000 GIANT_MOLE -> 1,000 Kills
      */
-    public String formatKills() {
+    public String getFormattedKills() {
         return name.formatKills(kills);
+    }
+
+    /**
+     * Get the boss kills rank formatted with a comma
+     *
+     * @return Comma formatted boss kills rank
+     */
+    public String getFormattedRank() {
+        return new DecimalFormat("#,###").format(rank);
     }
 
     /**
@@ -247,6 +259,24 @@ public class Boss implements Comparable<Boss> {
      */
     public int getKills() {
         return kills;
+    }
+
+    /**
+     * Get the boss kills rank
+     *
+     * @return Boss kills rank
+     */
+    public int getRank() {
+        return rank;
+    }
+
+    /**
+     * Get the name of the boss
+     *
+     * @return Boss name
+     */
+    public String getName() {
+        return name.getName();
     }
 
     /**
