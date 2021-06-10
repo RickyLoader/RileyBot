@@ -1,6 +1,7 @@
 package Runescape.OSRS.Stats;
 
 import Runescape.Boss;
+import Runescape.Clue;
 import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.RelicTier;
@@ -29,7 +30,7 @@ public class OSRSPlayerStats extends PlayerStats {
      * @param bossKills List of boss kill data
      * @param type      Account type
      */
-    public OSRSPlayerStats(String name, String url, Skill[] skills, String[] clues, List<Boss> bossKills, ACCOUNT type) {
+    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<Boss> bossKills, ACCOUNT type) {
         super(name, url, skills, clues, type);
         this.bossKills = bossKills;
         this.completedAchievements = new ArrayList<>();

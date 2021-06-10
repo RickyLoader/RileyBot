@@ -6,6 +6,7 @@ import Command.Structure.PieChart;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import Network.NetworkRequest;
+import Runescape.Clue;
 import Runescape.Hiscores;
 import Runescape.PlayerStats;
 import Runescape.Skill;
@@ -14,7 +15,6 @@ import org.json.JSONObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -41,7 +41,7 @@ public class RS3Hiscores extends Hiscores {
      * @param virtual     Calculate virtual levels or display hiscores provided levels
      */
     public RS3Hiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean virtual) {
-        super(channel, emoteHelper, "/Runescape/RS3/", FontManager.RS3_FONT);
+        super(channel, emoteHelper, ResourceHandler.RS3_BASE_PATH, FontManager.RS3_FONT);
         this.orange = new Color(EmbedHelper.RUNESCAPE_ORANGE);
         this.yellow = new Color(EmbedHelper.RUNESCAPE_YELLOW);
         this.blue = new Color(EmbedHelper.RUNESCAPE_BLUE);
@@ -172,7 +172,7 @@ public class RS3Hiscores extends Hiscores {
      * @param clues Clue data
      * @return Clue scroll image section
      */
-    private BufferedImage buildClueSection(String[] clues) {
+    private BufferedImage buildClueSection(Clue[] clues) {
         BufferedImage clueSection = null;
         try {
             clueSection = handler.getImageResource(getResourcePath() + "Templates/clue_section.png");
@@ -182,8 +182,8 @@ public class RS3Hiscores extends Hiscores {
             int x = 330;
             int y = 174;
             FontMetrics fm = g.getFontMetrics();
-            for(String quantity : clues) {
-                g.drawString(quantity, x, y - (fm.getHeight() / 2) + fm.getAscent());
+            for(Clue clue : clues) {
+                g.drawString(clue.formatCompletions(), x, y - (fm.getHeight() / 2) + fm.getAscent());
                 y += 140;
             }
             g.dispose();
@@ -443,15 +443,23 @@ public class RS3Hiscores extends Hiscores {
      * @param data CSV data from API
      * @return Clue scroll data
      */
-    private String[] parseClueScrolls(String[] data) {
-        data = Arrays.copyOfRange(data, 137, data.length - 1);
-        String[] clues = new String[5];
+    private Clue[] parseClueScrolls(String[] data) {
+        data = Arrays.copyOfRange(data, 137, data.length - 2);
+        Clue.TYPE[] clueTypes = new Clue.TYPE[]{
+                Clue.TYPE.EASY,
+                Clue.TYPE.MEDIUM,
+                Clue.TYPE.HARD,
+                Clue.TYPE.ELITE,
+                Clue.TYPE.MASTER
+        };
+        Clue[] clues = new Clue[clueTypes.length];
         int j = 0;
-        DecimalFormat format = new DecimalFormat("x#,###");
-        for(int i = 1; i < data.length; i += 2) {
-            int quantity = Integer.parseInt(data[i]);
-            quantity = quantity == -1 ? 0 : quantity;
-            clues[j] = format.format(quantity);
+        for(int i = 0; i < data.length; i += 2) {
+            clues[j] = new Clue(
+                    clueTypes[j],
+                    Integer.parseInt(data[i]),
+                    Integer.parseInt(data[i + 1])
+            );
             j++;
         }
         return clues;
@@ -560,7 +568,7 @@ public class RS3Hiscores extends Hiscores {
 
         RuneMetrics runeMetrics = getRuneMetrics(name);
         Clan clan = getClan(name);
-        String[] clues = parseClueScrolls(normal);
+        Clue[] clues = parseClueScrolls(normal);
 
         RS3PlayerStats normalAccount = new RS3PlayerStats(
                 name,

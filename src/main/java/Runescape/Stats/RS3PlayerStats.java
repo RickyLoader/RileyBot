@@ -1,5 +1,6 @@
 package Runescape.Stats;
 
+import Runescape.Clue;
 import Runescape.PlayerStats;
 import Runescape.Skill;
 
@@ -19,7 +20,7 @@ public class RS3PlayerStats extends PlayerStats {
      * @param runeMetrics RuneMetrics data
      * @param type        Account type
      */
-    public RS3PlayerStats(String name, String url, Skill[] skills, String[] clues, RuneMetrics runeMetrics, ACCOUNT type, Clan clan) {
+    public RS3PlayerStats(String name, String url, Skill[] skills, Clue[] clues, RuneMetrics runeMetrics, ACCOUNT type, Clan clan) {
         super(name, url, skills, clues, type);
         this.combatLevel = calculateCombatLevel(
                 getSkill(Skill.SKILL_NAME.ATTACK),

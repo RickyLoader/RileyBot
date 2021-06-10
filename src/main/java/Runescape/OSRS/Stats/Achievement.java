@@ -1,35 +1,143 @@
 package Runescape.OSRS.Stats;
 
+import Bot.ResourceHandler;
+import Runescape.Boss;
+import Runescape.Clue;
+import Runescape.Skill;
+
 import javax.annotation.Nullable;
+import java.awt.image.BufferedImage;
 import java.util.Date;
 
 /**
  * Player achievement
  */
 public class Achievement {
+    private static final String
+            CLUE_METRIC_REGEX = "clue_scrolls_",
+            BASE_LEVEL_REGEX = "Base \\d+ Stats";
     private final String name, measure, metric;
     private final long progress, threshold;
     private final boolean completed;
     private final Date date;
+    private final TYPE type;
+
+    public enum TYPE {
+        BOSS,
+        SKILL,
+        CLUE,
+        UNKNOWN;
+
+        /**
+         * Get an achievement type from the achievement metric
+         *
+         * @param metric Achievement metric e.g "attack", "commander_zilyana" etc
+         * @return Achievement type
+         */
+        public static TYPE fromAchievementMetric(String metric) {
+            Skill.SKILL_NAME skill = Skill.SKILL_NAME.fromName(metric);
+            if(skill != Skill.SKILL_NAME.UNKNOWN) {
+                return SKILL;
+            }
+            Boss.BOSS_NAME boss = Boss.BOSS_NAME.fromName(metric);
+            if(boss != Boss.BOSS_NAME.UNKNOWN) {
+                return BOSS;
+            }
+            Clue.TYPE clue = Clue.TYPE.fromTypeName(getClueTypeName(metric));
+            if(clue != Clue.TYPE.UNKNOWN) {
+                return CLUE;
+            }
+            return UNKNOWN;
+        }
+    }
 
     /**
      * Create a player achievement
      *
      * @param name      Name - e.g "500 Abyssal Sire kills"
-     * @param measure   Measurement - e.g "kills"
-     * @param metric    Metric - e.g "abyssal_sire"
+     * @param measure   Measurement the achievement is measured in - e.g "kills"
+     * @param metric    Metric the achievement is counting - e.g "abyssal_sire"
      * @param progress  Current progress/threshold
      * @param threshold Threshold - when achievement is completed
      * @param date      Date of completion (may be null)
      */
     public Achievement(String name, String measure, String metric, long progress, long threshold, @Nullable Date date) {
         this.name = name;
-        this.measure = measure;
+        this.measure = fixMeasure(name, measure);
         this.metric = metric;
         this.progress = progress;
         this.threshold = threshold;
         this.completed = progress >= threshold;
         this.date = date;
+        this.type = TYPE.fromAchievementMetric(metric);
+    }
+
+    /**
+     * Get the clue type name from a clue achievement metric. E.g "clue_scrolls_beginner" -> "beginner"
+     *
+     * @param clueMetric Clue achievement metric e.g "clue_scrolls_beginner"
+     * @return Clue type name e.g "beginner"
+     */
+    public static String getClueTypeName(String clueMetric) {
+        return clueMetric.replaceFirst(CLUE_METRIC_REGEX, "").trim();
+    }
+
+    /**
+     * Fix the achievement measure - e.g The achievements for reaching a base total level
+     * e.g "Base 70 Stats" have a measure of "levels" yet a metric which displays the XP of the player's lowest skill.
+     * Replace "levels" with "lowest xp" in this case.
+     *
+     * @param name    Name - e.g "500 Abyssal Sire kills"
+     * @param measure Measurement the achievement is measured in - e.g "kills"
+     * @return Fixed achievement name
+     */
+    private String fixMeasure(String name, String measure) {
+        if(!name.matches(BASE_LEVEL_REGEX)) {
+            return measure;
+        }
+        return "lowest xp";
+    }
+
+    /**
+     * Get the achievement type
+     *
+     * @return Achievement type
+     */
+    public TYPE getType() {
+        return type;
+    }
+
+    /**
+     * Check if the achievement type can have an associated image
+     *
+     * @return Achievement type can have associated image
+     */
+    public boolean canHaveImage() {
+        return type != TYPE.UNKNOWN;
+    }
+
+    /**
+     * Get the achievement image.
+     * This will be null if none is available
+     *
+     * @return Achievement image (will be null if the achievement type is UNKNOWN or the skill/boss/etc doesn't have an image)
+     */
+    @Nullable
+    public BufferedImage getImage() {
+        ResourceHandler resourceHandler = new ResourceHandler();
+        switch(type) {
+            case BOSS:
+                return resourceHandler.getImageResource(Boss.BOSS_NAME.fromName(metric).getIconImagePath());
+            case SKILL:
+                return resourceHandler.getImageResource(Skill.SKILL_NAME.fromName(metric).getImagePath());
+            case CLUE:
+                Clue.TYPE clueType = Clue.TYPE.fromTypeName(getClueTypeName(metric));
+                return resourceHandler.getImageResource(
+                        ResourceHandler.OSRS_BASE_PATH + clueType.getIconImagePath()
+                );
+            default:
+                return null;
+        }
     }
 
     /**

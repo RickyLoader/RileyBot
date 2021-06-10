@@ -1,5 +1,7 @@
 package Runescape;
 
+import Bot.ResourceHandler;
+
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
@@ -8,7 +10,7 @@ import java.util.HashMap;
  */
 public class PlayerStats {
     private final String name, url;
-    private final String[] clues;
+    private final Clue[] clues;
     private final Skill[] skills;
     private final HashMap<Skill.SKILL_NAME, Skill> skillMap;
     private final ACCOUNT type;
@@ -28,7 +30,7 @@ public class PlayerStats {
      * @param clues  Array of clue data
      * @param type   Account type
      */
-    public PlayerStats(String name, String url, Skill[] skills, String[] clues, ACCOUNT type) {
+    public PlayerStats(String name, String url, Skill[] skills, Clue[] clues, ACCOUNT type) {
         this.name = name;
         this.url = url;
         this.skills = skills;
@@ -106,11 +108,11 @@ public class PlayerStats {
     }
 
     /**
-     * Get a list of clue scroll completions in order of Beginner, Easy, Medium, Hard, Elite, Master
+     * Get a list of clue scroll data
      *
-     * @return Clue scroll completions
+     * @return Clue scroll data
      */
-    public String[] getClues() {
+    public Clue[] getClues() {
         return clues;
     }
 
@@ -121,7 +123,7 @@ public class PlayerStats {
      * @return Image path
      */
     public static String getAccountTypeImagePath(ACCOUNT type) {
-        String res = "/Runescape/Accounts/";
+        String res = ResourceHandler.RUNESCAPE_BASE_PATH + "Accounts/";
         switch(type) {
             case IRON:
                 return res + "iron.png";

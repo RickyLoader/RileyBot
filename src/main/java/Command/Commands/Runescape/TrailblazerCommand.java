@@ -127,9 +127,9 @@ public class TrailblazerCommand extends DiscordCommand {
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(name.toUpperCase() + " League data")
                 .setColor(EmbedHelper.RUNESCAPE_ORANGE)
-                .setThumbnail(OSRSHiscores.leagueThumbnail)
+                .setThumbnail(OSRSHiscores.LEAGUE_THUMBNAIL)
                 .setImage(EmbedHelper.SPACER_IMAGE)
-                .setFooter("Type: trailblazer for help.", OSRSHiscores.leagueThumbnail);
+                .setFooter("Type: trailblazer for help.", OSRSHiscores.LEAGUE_THUMBNAIL);
 
         StringBuilder description = new StringBuilder();
 

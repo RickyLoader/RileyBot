@@ -2,20 +2,19 @@ package Runescape.OSRS.Stats;
 
 import Bot.DiscordUser;
 import Bot.FontManager;
+import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 
 import Command.Structure.PieChart;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
-import Runescape.Boss;
-import Runescape.Hiscores;
+import Runescape.*;
 import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.Relic;
 import Runescape.OSRS.League.RelicTier;
-import Runescape.PlayerStats;
-import Runescape.Skill;
+import Runescape.Skill.SKILL_NAME;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -37,7 +36,7 @@ import static Runescape.Skill.SKILL_NAME.*;
 public class OSRSHiscores extends Hiscores {
     private final Boss.BOSS_NAME[] bossNames;
     private final boolean league, virtual, xp;
-    public final static String leagueThumbnail = "https://i.imgur.com/xksIl6S.png";
+    public static final String LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
     private final String displayFormatDate = "dd/MM/yyyy";
     private final SimpleDateFormat
@@ -54,7 +53,7 @@ public class OSRSHiscores extends Hiscores {
      * @param xp          Get the XP tracker info for the player
      */
     public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual, boolean xp) {
-        super(channel, emoteHelper, "/Runescape/OSRS/", FontManager.OSRS_FONT);
+        super(channel, emoteHelper, ResourceHandler.OSRS_BASE_PATH, FontManager.OSRS_FONT);
         this.bossNames = Boss.BOSS_NAME.getNamesInHiscoresOrder();
         this.league = league;
         this.virtual = virtual;
@@ -89,7 +88,7 @@ public class OSRSHiscores extends Hiscores {
 
     @Override
     public String getLoadingThumbnail() {
-        return league ? leagueThumbnail : EmbedHelper.OSRS_LOGO;
+        return league ? LEAGUE_THUMBNAIL : EmbedHelper.OSRS_LOGO;
     }
 
     /**
@@ -98,13 +97,24 @@ public class OSRSHiscores extends Hiscores {
      * @param data CSV data from API
      * @return Clue scroll data
      */
-    private String[] parseClueScrolls(String[] data) {
-        data = Arrays.copyOfRange(data, 80, 93);
-        String[] clues = new String[6];
+    private Clue[] parseClueScrolls(String[] data) {
+        data = Arrays.copyOfRange(data, 80, 92);
+        Clue.TYPE[] clueTypes = new Clue.TYPE[]{
+                Clue.TYPE.BEGINNER,
+                Clue.TYPE.EASY,
+                Clue.TYPE.MEDIUM,
+                Clue.TYPE.HARD,
+                Clue.TYPE.ELITE,
+                Clue.TYPE.MASTER
+        };
+        Clue[] clues = new Clue[clueTypes.length];
         int j = 0;
-        for(int i = 1; i < data.length; i += 2) {
-            int quantity = Integer.parseInt(data[i]);
-            clues[j] = "x" + ((quantity == -1) ? "0" : data[i]);
+        for(int i = 0; i < data.length; i += 2) {
+            clues[j] = new Clue(
+                    clueTypes[j],
+                    Integer.parseInt(data[i]),
+                    Integer.parseInt(data[i + 1])
+            );
             j++;
         }
         return clues;
@@ -153,7 +163,7 @@ public class OSRSHiscores extends Hiscores {
         loading.completeStage();
 
         List<Boss> bossKills = parseBossKills(normal);
-        String[] clues = parseClueScrolls(normal);
+        Clue[] clues = parseClueScrolls(normal);
 
         OSRSPlayerStats normalAccount = new OSRSPlayerStats(
                 name,
@@ -304,7 +314,6 @@ public class OSRSHiscores extends Hiscores {
 
             JSONArray achievements = new JSONArray(response.body);
             String dateKey = "createdAt";
-            String baseLevelRegex = "Base \\d+ Stats";
 
             for(int i = 0; i < achievements.length(); i++) {
                 JSONObject achievement = achievements.getJSONObject(i);
@@ -315,14 +324,10 @@ public class OSRSHiscores extends Hiscores {
                     continue;
                 }
                 String dateString = achievement.isNull(dateKey) ? null : achievement.getString(dateKey);
-                String name = achievement.getString("name");
-
                 stats.addAchievement(
                         new Achievement(
-                                name,
-                                name.matches(baseLevelRegex)
-                                        ? "lowest xp"
-                                        : achievement.getString("measure"),
+                                achievement.getString("name"),
+                                achievement.getString("measure"),
                                 achievement.getString("metric"),
                                 progress,
                                 achievement.getLong("threshold"),
@@ -441,8 +446,10 @@ public class OSRSHiscores extends Hiscores {
                 if(!entry.has("experience")) {
                     continue;
                 }
-                Skill.SKILL_NAME skillName = Skill.SKILL_NAME.valueOf(key.toUpperCase());
-
+                SKILL_NAME skillName = SKILL_NAME.fromName(key);
+                if(skillName == UNKNOWN) {
+                    continue;
+                }
                 JSONObject experienceData = entry.getJSONObject("experience");
                 playerStats.addGainedXP(skillName, experienceData.getLong("gained"));
             }
@@ -520,7 +527,10 @@ public class OSRSHiscores extends Hiscores {
 
             for(int i = 0; i < max; i++) {
                 Boss boss = bosses.get(i);
-                BufferedImage bossImage = boss.getImage();
+                BufferedImage bossImage = boss.getFullImage();
+                if(bossImage == null) {
+                    continue;
+                }
                 g.drawImage(bossImage, bossCentre - (bossImage.getWidth() / 2), y, null);
 
                 String kills = boss.formatKills();
@@ -803,14 +813,15 @@ public class OSRSHiscores extends Hiscores {
     }
 
     /**
-     * Get a pie chart image for the given achievement
+     * Get a pie chart image for the given achievement. If the achievement has an associated image,
+     * centre it in the chart.
      *
      * @param achievement Achievement to build chart image for
      * @param radius      Radius to use
      * @return Achievement pie chart
      */
     private BufferedImage getAchievementChart(Achievement achievement, int radius) {
-        return new PieChart(
+        BufferedImage chart = new PieChart(
                 new PieChart.Section[]{
                         new PieChart.Section(
                                 "Complete",
@@ -827,6 +838,24 @@ public class OSRSHiscores extends Hiscores {
                 false,
                 radius
         ).getChart();
+
+        if(achievement.canHaveImage()) {
+            Graphics g = chart.getGraphics();
+            BufferedImage achievementImage = achievement.getImage();
+
+            // Skill/boss/etc may not have an image
+            if(achievementImage == null) {
+                return chart;
+            }
+            g.drawImage(
+                    achievementImage,
+                    (chart.getWidth() / 2) - (achievementImage.getWidth() / 2),
+                    (chart.getHeight() / 2) - (achievementImage.getHeight() / 2),
+                    null
+            );
+            g.dispose();
+        }
+        return chart;
     }
 
     /**
@@ -939,7 +968,7 @@ public class OSRSHiscores extends Hiscores {
      * @param baseImage Base player image
      * @param clues     List of clue completions
      */
-    private void addClues(BufferedImage baseImage, String[] clues) {
+    private void addClues(BufferedImage baseImage, Clue[] clues) {
         Graphics g = baseImage.getGraphics();
         g.setFont(getGameFont().deriveFont(65f));
         g.setColor(Color.YELLOW);
@@ -947,7 +976,8 @@ public class OSRSHiscores extends Hiscores {
 
         int x = 170;
         int y = 1960;
-        for(String quantity : clues) {
+        for(Clue clue : clues) {
+            String quantity = clue.formatCompletions();
             int quantityWidth = fm.stringWidth(quantity) / 2;
             g.drawString(quantity, x - quantityWidth, y);
             x += 340;
@@ -1007,9 +1037,11 @@ public class OSRSHiscores extends Hiscores {
         int iconX = 64, skillX = 150, expX = 500, gap = 68, y = 362;
 
         for(Skill skill : stats.getSkills()) {
-            BufferedImage icon = getResourceHandler().getImageResource(skill.getImagePath());
+            BufferedImage icon = skill.getImage();
             int sectionMid = y - (gap / 2);
-            g.drawImage(icon, iconX, sectionMid - (icon.getHeight() / 2), null);
+            if(icon != null) {
+                g.drawImage(icon, iconX, sectionMid - (icon.getHeight() / 2), null);
+            }
 
             int textY = sectionMid + (fm.getMaxAscent() / 2);
 
