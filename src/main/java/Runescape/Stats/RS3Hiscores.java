@@ -183,7 +183,7 @@ public class RS3Hiscores extends Hiscores {
             int y = 174;
             FontMetrics fm = g.getFontMetrics();
             for(Clue clue : clues) {
-                g.drawString(clue.formatCompletions(), x, y - (fm.getHeight() / 2) + fm.getAscent());
+                g.drawString(clue.getFormattedCompletions(), x, y - (fm.getHeight() / 2) + fm.getAscent());
                 y += 140;
             }
             g.dispose();

@@ -115,7 +115,7 @@ public class Clue {
      *
      * @return Clue completions String
      */
-    public String formatCompletions() {
+    public String getFormattedCompletions() {
         return new DecimalFormat("x#,###").format(completions == -1 ? 0 : completions);
     }
 
