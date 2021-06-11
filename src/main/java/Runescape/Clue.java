@@ -11,6 +11,9 @@ import java.text.DecimalFormat;
  * Hold data on a clue scroll
  */
 public class Clue {
+    public static final int
+            CLUE_START_INDEX = 78,
+            CLUE_END_INDEX = 92;
     private static final String BASE_IMAGE_PATH = "Clues/";
     private final int rank, completions;
     private final TYPE type;

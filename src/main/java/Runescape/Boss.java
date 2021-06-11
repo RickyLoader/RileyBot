@@ -12,6 +12,9 @@ import java.text.NumberFormat;
  * Hold information about a boss, sortable by kill count
  */
 public class Boss implements Comparable<Boss> {
+    public static final int
+            BOSS_START_INDEX = 96,
+            BOSS_END_INDEX = 190;
     private static final String BASE_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "Bosses/";
     private final BOSS_NAME name;
     private final int rank, kills;

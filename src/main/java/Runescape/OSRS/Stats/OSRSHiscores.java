@@ -101,7 +101,7 @@ public class OSRSHiscores extends Hiscores {
      * @return Clue scroll data
      */
     private Clue[] parseClueScrolls(String[] data) {
-        data = Arrays.copyOfRange(data, 78, 92);
+        data = Arrays.copyOfRange(data, Clue.CLUE_START_INDEX, Clue.CLUE_END_INDEX);
         Clue.TYPE[] clueTypes = new Clue.TYPE[]{
                 Clue.TYPE.ALL,
                 Clue.TYPE.BEGINNER,
@@ -1364,23 +1364,24 @@ public class OSRSHiscores extends Hiscores {
     }
 
     /**
-     * Build a sorted list of boss kill counts
+     * Build a sorted list of player boss kill data
+     * Sort in descending order of kill count
      *
      * @param csv csv from API
-     * @return Sorted list of boss kill counts
+     * @return Sorted list of player boss kill data
      */
     private List<Boss> parseBossKills(String[] csv) {
-        List<String> stats = Arrays.asList(csv).subList(96, csv.length);
+        String[] stats = Arrays.copyOfRange(csv, Boss.BOSS_START_INDEX, Boss.BOSS_END_INDEX);
         List<Boss> bosses = new ArrayList<>();
 
         int i = 0;
         for(Boss.BOSS_NAME bossName : bossNames) {
-            int kills = Integer.parseInt(stats.get(i + 1));
+            int kills = Integer.parseInt(stats[i + 1]);
             if(kills > -1) {
                 bosses.add(
                         new Boss(
                                 bossName,
-                                Integer.parseInt(stats.get(i)),
+                                Integer.parseInt(stats[i]),
                                 kills
                         )
                 );
