@@ -17,13 +17,15 @@ public class SteakCommand extends SelfieCommand {
         super(
                 "steak",
                 "Get a photo with steak!",
-                "/LOL/steak.png",
-                "https://i.imgur.com/KXnIE3C.png",
-                new ProfileDimensions(
-                        180,
-                        50,
-                        240,
-                        240
+                new SelfieManager(
+                        "/LOL/steak.png",
+                        "https://i.imgur.com/KXnIE3C.png",
+                        new SelfieManager.ProfileDimensions(
+                                180,
+                                50,
+                                240,
+                                240
+                        )
                 )
         );
         this.quotes = getQuotes();
@@ -106,12 +108,13 @@ public class SteakCommand extends SelfieCommand {
 
     @Override
     public EmbedBuilder getEmbedBuilder(CommandContext context) {
+        String thumbnailUrl = getSelfieManager().getThumbnailUrl();
         return new EmbedBuilder()
                 .setColor(EmbedHelper.PURPLE)
-                .setThumbnail(getThumbnailUrl())
+                .setThumbnail(thumbnailUrl)
                 .setTitle(context.getMember().getEffectiveName() + " - Photo with Steak")
                 .setDescription("The **GREATEST** League of Legends player in LCS history!\n\n" + getRandomQuote())
-                .setFooter(getFooterHelpText(), getThumbnailUrl());
+                .setFooter(getFooterHelpText(), thumbnailUrl);
     }
 
     private static class Quote {
