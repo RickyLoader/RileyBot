@@ -13,7 +13,9 @@ public class Skill {
     private final int level, virtualLevel;
     private final SKILL_NAME name;
     private long gained;
-    public final static String RANK_IMAGE_PATH = ResourceHandler.RUNESCAPE_BASE_PATH + "rank.png";
+    public final static String
+            LARGE_COMBAT_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "large_combat.png",
+            RANK_IMAGE_PATH = ResourceHandler.RUNESCAPE_BASE_PATH + "rank.png";
     private static final String BASE_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "Skills/";
 
     public enum SKILL_NAME {

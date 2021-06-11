@@ -1004,33 +1004,30 @@ public class OSRSHiscores extends Hiscores {
     }
 
     /**
-     * Add the name and account type to the base image
+     * Add the name, account type, and combat level to the base image
      *
      * @param baseImage Base player image
      * @param stats     Player stats
      */
     private void addNameSection(BufferedImage baseImage, OSRSPlayerStats stats) {
-        Graphics g = baseImage.getGraphics();
+        final Graphics g = baseImage.getGraphics();
         g.setFont(getGameFont().deriveFont(140f));
         g.setColor(Color.YELLOW);
         FontMetrics fm = g.getFontMetrics();
 
-        String name = stats.getName();
-
-        int centerVertical = 115;
-        int nameWidth = fm.stringWidth(name);
-
-        int x = (baseImage.getWidth() / 2) - (nameWidth / 2);
+        final String name = stats.getName();
+        final int centerVertical = 115;
+        final int x = (baseImage.getWidth() / 2) - (fm.stringWidth(name) / 2);
 
         g.drawString(name.toUpperCase(), x, centerVertical + (fm.getMaxAscent() / 2));
 
         g.setFont(getGameFont().deriveFont(75f));
         fm = g.getFontMetrics();
 
-        PlayerStats.ACCOUNT accountType = stats.getAccountType();
+        final PlayerStats.ACCOUNT accountType = stats.getAccountType();
 
         if(accountType != PlayerStats.ACCOUNT.NORMAL && !stats.isLeague()) {
-            BufferedImage accountImage = getResourceHandler().getImageResource(
+            final BufferedImage accountImage = getResourceHandler().getImageResource(
                     PlayerStats.getAccountTypeImagePath(stats.getAccountType())
             );
             g.drawImage(
@@ -1041,14 +1038,30 @@ public class OSRSHiscores extends Hiscores {
             );
         }
 
-        String rank = "Rank: " + stats.getFormattedRank();
-        BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
-        int rankX = baseImage.getWidth() - fm.stringWidth(rank) - 50;
-        g.drawString(rank, rankX, centerVertical + (fm.getMaxAscent() / 2));
+        final int edgePadding = 2 * border; // Padding from outer edges
+        final int imagePadding = 15; // Padding from text to image
+        final int textY = centerVertical + (fm.getMaxAscent() / 2); // Centre text vertically
 
+        // Draw combat level on left side of title section
+        final String combat = String.valueOf(stats.getCombatLevel());
+        final BufferedImage combatImage = getResourceHandler().getImageResource(Skill.LARGE_COMBAT_IMAGE_PATH);
+        g.drawImage(
+                combatImage,
+                edgePadding,
+                centerVertical - (combatImage.getHeight() / 2),
+                null
+        );
+        g.drawString(combat, edgePadding + combatImage.getWidth() + imagePadding, textY);
+
+        // Draw rank info on right side of title section
+        final String rank = "Rank: " + stats.getFormattedRank();
+        final BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
+        final int rankX = baseImage.getWidth() - edgePadding - fm.stringWidth(rank);
+
+        g.drawString(rank, rankX, textY);
         g.drawImage(
                 rankImage,
-                rankX - rankImage.getWidth() - 15,
+                rankX - imagePadding - rankImage.getWidth(),
                 centerVertical - (rankImage.getHeight() / 2),
                 null
         );
