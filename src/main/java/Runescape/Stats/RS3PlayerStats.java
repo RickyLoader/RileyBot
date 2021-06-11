@@ -4,8 +4,9 @@ import Runescape.Clue;
 import Runescape.PlayerStats;
 import Runescape.Skill;
 
+import static Runescape.Skill.SKILL_NAME.*;
+
 public class RS3PlayerStats extends PlayerStats {
-    private final int combatLevel;
     private final RuneMetrics runeMetrics;
     private final Clan clan;
     private HCIMStatus hcimStatus;
@@ -22,16 +23,6 @@ public class RS3PlayerStats extends PlayerStats {
      */
     public RS3PlayerStats(String name, String url, Skill[] skills, Clue[] clues, RuneMetrics runeMetrics, ACCOUNT type, Clan clan) {
         super(name, url, skills, clues, type);
-        this.combatLevel = calculateCombatLevel(
-                getSkill(Skill.SKILL_NAME.ATTACK),
-                getSkill(Skill.SKILL_NAME.STRENGTH),
-                getSkill(Skill.SKILL_NAME.MAGIC),
-                getSkill(Skill.SKILL_NAME.RANGED),
-                getSkill(Skill.SKILL_NAME.DEFENCE),
-                getSkill(Skill.SKILL_NAME.HITPOINTS),
-                getSkill(Skill.SKILL_NAME.PRAYER),
-                getSkill(Skill.SKILL_NAME.SUMMONING)
-        );
         this.runeMetrics = runeMetrics;
         this.clan = clan;
     }
@@ -100,32 +91,15 @@ public class RS3PlayerStats extends PlayerStats {
     }
 
     /**
-     * Get the player combat level
-     *
-     * @return Combat level
+     * @see <a href="https://runescape.wiki/w/Combat_level">Formula on Runescape Wiki</a>
      */
-    public int getCombatLevel() {
-        return combatLevel;
-    }
-
-    /**
-     * Calculate the player's combat level
-     *
-     * @param attack    Attack skill
-     * @param defence   Defence skill
-     * @param hitpoints Hitpoints skill
-     * @param magic     Magic skill
-     * @param prayer    Prayer skill
-     * @param ranged    Ranged skill
-     * @param strength  Strength skill
-     * @param summoning Summoning skill
-     * @return Combat level
-     */
-    private int calculateCombatLevel(Skill attack, Skill strength, Skill magic, Skill ranged, Skill defence, Skill hitpoints, Skill prayer, Skill summoning) {
+    @Override
+    public int calculateCombatLevel() {
         int multiplier = Math.max(
-                (attack.getLevel() + strength.getLevel()),
-                Math.max((2 * magic.getLevel()), (2 * ranged.getLevel()))
+                (getSkill(ATTACK).getLevel() + getSkill(STRENGTH).getLevel()),
+                Math.max((2 * getSkill(MAGIC).getLevel()), (2 * getSkill(RANGED).getLevel()))
         );
-        return (int) (((13d / 10d) * multiplier + defence.getLevel() + hitpoints.getLevel() + (prayer.getLevel() / 2d) + (summoning.getLevel() / 2d)) / 4);
+        return (int) (((13d / 10d) * multiplier + getSkill(DEFENCE).getLevel() + getSkill(HITPOINTS).getLevel()
+                + (getSkill(PRAYER).getLevel() / 2d) + (getSkill(SUMMONING).getLevel() / 2d)) / 4);
     }
 }

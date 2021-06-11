@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static Runescape.Skill.SKILL_NAME.*;
+
 public class OSRSPlayerStats extends PlayerStats {
     private final List<Boss> bossKills;
     private final ArrayList<Achievement> completedAchievements, inProgressAchievements;
@@ -251,5 +253,16 @@ public class OSRSPlayerStats extends PlayerStats {
      */
     public Date getTrackerStartDate() {
         return trackerStart;
+    }
+
+    /**
+     * @see <a href="https://bit.ly/2TQlaWU">Formula on Oldschool Runescape Wiki</a>
+     */
+    @Override
+    public int calculateCombatLevel() {
+        final double adjustedPrayer = Math.floor((double) getSkill(PRAYER).getLevel() / 2);
+        final double baseCombat = (getSkill(HITPOINTS).getLevel() + getSkill(DEFENCE).getLevel() + adjustedPrayer) / 4;
+        final double multiplier = (getSkill(STRENGTH).getLevel() + getSkill(ATTACK).getLevel()) * 0.325;
+        return (int) (baseCombat + multiplier);
     }
 }

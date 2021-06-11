@@ -8,7 +8,7 @@ import java.util.HashMap;
 /**
  * Hold Runescape player hiscores entry
  */
-public class PlayerStats {
+public abstract class PlayerStats {
     private final String name, url;
     private final Clue[] clues;
     private final Skill[] skills;
@@ -16,6 +16,7 @@ public class PlayerStats {
     private final HashMap<Clue.TYPE, Clue> clueMap;
     private final ACCOUNT type;
     private final Skill total, virtualTotal;
+    private final int combatLevel;
     public final DecimalFormat commaFormat = new DecimalFormat("#,###");
 
     public enum ACCOUNT {
@@ -47,6 +48,23 @@ public class PlayerStats {
         }
         this.total = getSkill(Skill.SKILL_NAME.OVERALL);
         this.virtualTotal = calculateVirtualTotal(total, skills);
+        this.combatLevel = calculateCombatLevel();
+    }
+
+    /**
+     * Calculate the player's combat level
+     *
+     * @return Player's combat level
+     */
+    public abstract int calculateCombatLevel();
+
+    /**
+     * Get the player's combat level
+     *
+     * @return Combat level
+     */
+    public int getCombatLevel() {
+        return combatLevel;
     }
 
     /**
