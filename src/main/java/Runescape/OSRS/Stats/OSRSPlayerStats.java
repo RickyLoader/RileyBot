@@ -15,6 +15,7 @@ import java.util.List;
 public class OSRSPlayerStats extends PlayerStats {
     private final List<Boss> bossKills;
     private final ArrayList<Achievement> completedAchievements, inProgressAchievements;
+    private final LastManStanding lmsInfo;
     private LeagueTier leagueTier;
     private ArrayList<Region> regions;
     private ArrayList<RelicTier> relicTiers;
@@ -28,11 +29,13 @@ public class OSRSPlayerStats extends PlayerStats {
      * @param skills    Array of skill data
      * @param clues     Array of clue data
      * @param bossKills List of boss kill data
+     * @param lmsInfo   Last man standing info
      * @param type      Account type
      */
-    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<Boss> bossKills, ACCOUNT type) {
+    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<Boss> bossKills, LastManStanding lmsInfo, ACCOUNT type) {
         super(name, url, skills, clues, type);
         this.bossKills = bossKills;
+        this.lmsInfo = lmsInfo;
         this.completedAchievements = new ArrayList<>();
         this.inProgressAchievements = new ArrayList<>();
     }
@@ -49,6 +52,24 @@ public class OSRSPlayerStats extends PlayerStats {
         else {
             inProgressAchievements.add(achievement);
         }
+    }
+
+    /**
+     * Get the players last man standing info
+     *
+     * @return Last man standing info
+     */
+    public LastManStanding getLmsInfo() {
+        return lmsInfo;
+    }
+
+    /**
+     * Check whether the player has any LMS points
+     *
+     * @return Player has LMS points
+     */
+    public boolean hasLmsPoints() {
+        return lmsInfo.hasPoints();
     }
 
     /**

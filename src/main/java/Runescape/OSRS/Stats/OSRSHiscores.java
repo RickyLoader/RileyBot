@@ -124,6 +124,20 @@ public class OSRSHiscores extends Hiscores {
         return clues;
     }
 
+    /**
+     * Parse and format the player's LMS data from the hiscores CSV
+     *
+     * @param data CSV data from API
+     * @return Last Man Standing info
+     */
+    private LastManStanding parseLmsInfo(String[] data) {
+        return new LastManStanding(
+                Integer.parseInt(data[LastManStanding.RANK_INDEX]),
+                Integer.parseInt(data[LastManStanding.POINTS_INDEX])
+        );
+    }
+
+
     @Override
     public String getURL(String type, String name) {
         return "https://secure.runescape.com/m=hiscore_oldschool" + type + "/index_lite.ws?player=" + EmbedHelper.urlEncode(name);
@@ -168,6 +182,7 @@ public class OSRSHiscores extends Hiscores {
 
         List<Boss> bossKills = parseBossKills(normal);
         Clue[] clues = parseClueScrolls(normal);
+        LastManStanding lmsInfo = parseLmsInfo(normal);
 
         OSRSPlayerStats normalAccount = new OSRSPlayerStats(
                 name,
@@ -175,6 +190,7 @@ public class OSRSHiscores extends Hiscores {
                 parseSkills(normal),
                 clues,
                 bossKills,
+                lmsInfo,
                 league ? PlayerStats.ACCOUNT.LEAGUE : PlayerStats.ACCOUNT.NORMAL
         );
 
@@ -212,6 +228,7 @@ public class OSRSHiscores extends Hiscores {
                 parseSkills(iron),
                 clues,
                 bossKills,
+                lmsInfo,
                 PlayerStats.ACCOUNT.IRON
         );
 
@@ -232,6 +249,7 @@ public class OSRSHiscores extends Hiscores {
                     parseSkills(hardcore),
                     clues,
                     bossKills,
+                    lmsInfo,
                     PlayerStats.ACCOUNT.HARDCORE
             );
 
@@ -256,6 +274,7 @@ public class OSRSHiscores extends Hiscores {
                     parseSkills(ultimate),
                     clues,
                     bossKills,
+                    lmsInfo,
                     PlayerStats.ACCOUNT.ULTIMATE
             );
 
@@ -666,7 +685,6 @@ public class OSRSHiscores extends Hiscores {
     @Override
     public BufferedImage buildHiscoresImage(PlayerStats playerStats) {
         OSRSPlayerStats stats = (OSRSPlayerStats) playerStats;
-
         BufferedImage baseImage = buildSkillsImage(playerStats);
         addBossKills(baseImage, stats.getBossKills());
         addNameSection(baseImage, stats);
