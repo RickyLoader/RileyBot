@@ -845,20 +845,20 @@ public class OSRSHiscores extends Hiscores {
      * @return Achievement row image
      */
     private BufferedImage buildAchievementRow(Achievement achievement, Color rowColour, Color chartColour, int width, int height) {
-        BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics g = row.getGraphics();
+        final BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        final Graphics g = row.getGraphics();
         g.setFont(trackerFont.deriveFont(35f));
 
-        int chartSectionWidth = width / 3;
-        int midY = height / 2;
-        int padding = 10;
+        final int chartSectionWidth = width / 3;
+        final int midY = height / 2;
+        final int padding = 10;
 
         g.setColor(rowColour);
         g.fillRect(0, 0, width - chartSectionWidth, height);
         g.setColor(chartColour);
         g.fillRect(width - chartSectionWidth, 0, width, height);
 
-        BufferedImage progressImage = getAchievementChart(achievement, (height / 2) - padding);
+        final BufferedImage progressImage = getAchievementChart(achievement, (height / 2) - padding);
 
         g.drawImage(
                 progressImage,
@@ -869,12 +869,12 @@ public class OSRSHiscores extends Hiscores {
 
 
         g.setColor(achievement.isCompleted() ? Color.GREEN : Color.WHITE);
-        FontMetrics fm = g.getFontMetrics();
+        final FontMetrics fm = g.getFontMetrics();
 
-        int midLeftX = (width - chartSectionWidth) / 2;
+        final int midLeftX = (width - chartSectionWidth) / 2;
 
-        DecimalFormat df = new DecimalFormat("#,###");
-        ArrayList<String> summary = new ArrayList<>();
+        final DecimalFormat df = new DecimalFormat("#,###");
+        final ArrayList<String> summary = new ArrayList<>();
         summary.add(achievement.getName());
         summary.add(
                 df.format(achievement.getProgress())
@@ -890,11 +890,11 @@ public class OSRSHiscores extends Hiscores {
             summary.add("Date: " + date);
         }
 
-        int lineHeight = fm.getMaxAscent();
-        int gap = 20;
-        int textHeight = (lineHeight * summary.size()) + (gap * (summary.size() - 1)); // total size occupied by text
+        final int lineHeight = fm.getMaxAscent();
+        final int gap = 20;
+        final int textHeight = (lineHeight * summary.size()) + (gap * (summary.size() - 1)); // total size occupied by text
 
-        // text draws from bottom up, add line height so first line is drawn with the top at textHeight
+        // Text draws from bottom up, add line height so first line is drawn with the top at textHeight
         int textY = midY - (textHeight / 2) + lineHeight;
 
         for(String line : summary) {
@@ -919,12 +919,12 @@ public class OSRSHiscores extends Hiscores {
                         new PieChart.Section(
                                 "Complete",
                                 achievement.getProgress(),
-                                Color.GREEN
+                                new Color(2, 215, 59) // Green
                         ),
                         new PieChart.Section(
                                 "Incomplete",
                                 achievement.getRemaining(),
-                                Color.RED
+                                new Color(255, 40, 32) // Red
                         )
                 },
                 getGameFont(),
