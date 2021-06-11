@@ -109,7 +109,7 @@ public abstract class SelfieCommand extends DiscordCommand {
          * @return Byte array of background image with user avatar drawn on
          * @throws Exception When unable to retrieve user avatar image
          */
-        private byte[] getSelfie(User user) throws Exception {
+        public byte[] getSelfie(User user) throws Exception {
             BufferedImage userImage = getUserAvatar(user);
             BufferedImage background = ImageBuilder.copyImage(this.background);
 
