@@ -31,7 +31,7 @@ public class HelpCommand extends DiscordCommand {
             @Override
             public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
                 DiscordCommand command = (DiscordCommand) items.get(index);
-                return new String[]{command.getHelpName(), command.getDesc()};
+                return new String[]{command.getTrigger(), command.getDesc()};
             }
 
             @Override
