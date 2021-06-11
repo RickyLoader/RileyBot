@@ -550,7 +550,11 @@ public class OSRSHiscores extends Hiscores {
             int y = bossSectionY;
 
             for(int i = 0; i < bossDisplayCount; i++) {
-                final BufferedImage bossImage = buildBossRowImage(bosses.get(i), bossSectionWidth, bossRowHeight);
+                final BufferedImage bossImage = buildBossRowImage(
+                        bosses.get(i),
+                        bossSectionWidth,
+                        bossRowHeight
+                );
                 g.drawImage(bossImage, bossSectionX, y, null);
                 y += bossRowHeight;
             }
@@ -583,7 +587,7 @@ public class OSRSHiscores extends Hiscores {
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        BufferedImage bossImage = boss.getFullImage();
+        final BufferedImage bossImage = boss.getFullImage();
         if(bossImage == null) {
             return bossBox;
         }
@@ -597,7 +601,7 @@ public class OSRSHiscores extends Hiscores {
                 null
         );
 
-        BufferedImage textBox = new BufferedImage(
+        final BufferedImage textBox = new BufferedImage(
                 boxWidth,
                 height,
                 BufferedImage.TYPE_INT_ARGB
@@ -606,18 +610,38 @@ public class OSRSHiscores extends Hiscores {
         g = textBox.getGraphics();
         g.setFont(getGameFont().deriveFont(70f));
         g.setColor(Color.YELLOW);
-        FontMetrics fm = g.getFontMetrics();
-        String kills = boss.getFormattedKills();
 
-        // Draw kills centered in text box
+        final FontMetrics fm = g.getFontMetrics();
+
+        // Draw above centre line
+        final String kills = boss.getFormattedKills();
         g.drawString(
                 kills,
                 centreHorizontal - (fm.stringWidth(kills) / 2),
-                centreVertical + (fm.getMaxAscent() / 2)
+                centreVertical
         );
 
+        // Rank title will be different colour so must be drawn as two separate Strings
+        final String rankTitle = "Rank: ";
+        final String rankValue = boss.getFormattedRank(); // 1,234 kills
+        final int rankTitleWidth = fm.stringWidth(rankTitle);
+
+        /*
+         * Calculate where to begin drawing the rank title such that when both Strings are drawn beside
+         * each other, the full String is centered.
+         */
+        final int x = centreHorizontal - ((rankTitleWidth + fm.stringWidth(rankValue)) / 2);
+
+        // Draw rank below centre line
+        final int y = centreVertical + fm.getMaxAscent();
+        g.drawString(rankValue, x + rankTitleWidth, y); // Add rank title width to leave room for rank title to be drawn
+
+        g.setColor(Color.WHITE);
+        g.drawString(rankTitle, x, y);
+
+
         // Combine in to row with border-sized gap in centre for mid border
-        BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         g = row.getGraphics();
         g.drawImage(bossBox, 0, 0, null);
         g.drawImage(textBox, boxWidth + border, 0, null);
