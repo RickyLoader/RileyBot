@@ -191,6 +191,7 @@ public class DiscordCommandManager {
         addCommand(new DictionaryCommand());
         addCommand(new AlphaVapeCommand());
         addCommand(new IMDBMovieCommand());
+        addCommand(new BrewTrackerCommand());
         addCommand(new TMDBMovieCommand());
         addCommand(new RottenTomatoesMovieCommand());
         addCommand(new OSRSLendingCommand());
@@ -226,7 +227,6 @@ public class DiscordCommandManager {
         addCommand(new MegaCommand());
         addCommand(new PureCommand());
         addCommand(new RememberCommand());
-        addCommand(new BrewTrackerCommand());
         addCommand(new ShrekCommand());
         addCommand(new SmirnyCommand());
         addCommand(new SpidermanCommand());
