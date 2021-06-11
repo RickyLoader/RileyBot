@@ -15,7 +15,8 @@ import java.util.Date;
 public class Achievement {
     private static final String
             CLUE_METRIC_REGEX = "clue_scrolls_",
-            BASE_LEVEL_REGEX = "Base \\d+ Stats";
+            BASE_LEVEL_REGEX = "Base \\d+ Stats",
+            LMS_REGEX = "last_man_standing";
     private final String name, measure, metric;
     private final long progress, threshold;
     private final boolean completed;
@@ -26,6 +27,7 @@ public class Achievement {
         BOSS,
         SKILL,
         CLUE,
+        LMS,
         UNKNOWN;
 
         /**
@@ -46,6 +48,9 @@ public class Achievement {
             Clue.TYPE clue = Clue.TYPE.fromTypeName(getClueTypeName(metric));
             if(clue != Clue.TYPE.UNKNOWN) {
                 return CLUE;
+            }
+            if(metric.matches(LMS_REGEX)) {
+                return LMS;
             }
             return UNKNOWN;
         }
@@ -135,6 +140,8 @@ public class Achievement {
                 return resourceHandler.getImageResource(
                         ResourceHandler.OSRS_BASE_PATH + clueType.getIconImagePath()
                 );
+            case LMS:
+                return resourceHandler.getImageResource(LastManStanding.POINTS_ICON);
             default:
                 return null;
         }
