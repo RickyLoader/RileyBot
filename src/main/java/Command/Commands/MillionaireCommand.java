@@ -17,13 +17,23 @@ import java.util.List;
  */
 public class MillionaireCommand extends OnReadyDiscordCommand {
     private final HashMap<Long, MillionaireGameshow> games;
+    private static final String
+            TRIGGER = "millionaire",
+            BANK_TRIGGER = TRIGGER + " bank",
+            BANK_ARGS = BANK_TRIGGER + "\n" + BANK_TRIGGER + " [@someone]";
+    private final String helpMessage;
 
     public MillionaireCommand() {
         super(
-                "millionaire start\nmillionaire forfeit\nmillionaire bank\nmillionaire bank [@someone]\nmillionaire leaderboard",
-                "Play a game of who wants to be a millionaire!"
+                TRIGGER,
+                "Play a game of who wants to be a millionaire!",
+                TRIGGER + " start\n"
+                        + TRIGGER + " forfeit\n"
+                        + BANK_ARGS
+                        + "\n" + TRIGGER + " leaderboard"
         );
         this.games = new HashMap<>();
+        this.helpMessage = "Type: " + getTrigger() + " for help";
     }
 
     /**
@@ -35,7 +45,7 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
     private String stripMessage(String message) {
         return message
                 .toLowerCase()
-                .replace("millionaire", "")
+                .replace(getTrigger(), "")
                 .replaceAll("<@![\\d]+>", "")
                 .trim();
     }
@@ -87,8 +97,8 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
                 Bank.getLeaderboard(),
                 MillionaireGameshow.THUMB,
                 "Millionaire Leaderboard",
-                "Check out **millionaire bank** to view your personal stats!",
-                "Type: " + getTrigger() + " for help",
+                "Check out **" + BANK_TRIGGER + "** to view your personal stats!",
+                helpMessage,
                 new String[]{
                         "Rank",
                         "Details",
@@ -135,13 +145,15 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
         if(bank == null) {
             String who = member == instigator ? "You haven't" : member.getEffectiveName() + " hasn't";
             channel.sendMessage(
-                    "Oi " + instigator.getAsMention() + ", " + who + " played any games of **millionaire** cunt."
+                    "Oi " + instigator.getAsMention() + ", " + who
+                            + " played any games of **" + getTrigger() + "** cunt."
             ).queue();
             return;
         }
 
-        String bankHelp = "millionaire bank | millionaire bank [@someone]";
-        channel.sendMessage(bank.getBankMessage(bankHelp)).queue();
+        channel.sendMessage(
+                bank.getBankMessage("Try: " + BANK_ARGS.replaceAll("\n", " | "))
+        ).queue();
     }
 
     /**
@@ -180,7 +192,7 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
                 owner,
                 channel,
                 helper,
-                "millionaire start | millionaire forfeit | millionaire leaderboard"
+                helpMessage
         );
 
         games.put(owner.getIdLong(), gameShow);
@@ -189,7 +201,7 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("millionaire");
+        return query.startsWith(getTrigger());
     }
 
     @Override
