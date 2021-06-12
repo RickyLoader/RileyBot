@@ -41,6 +41,7 @@ public class GrandExchange {
      * @return Item price info
      */
     public ItemPrice getItemPrice(Item item) {
+        refreshData();
         int id = item.getId();
         JSONObject priceData = new JSONObject(
                 new NetworkRequest(BASE_URL + "latest?id=" + id, false).get().body
