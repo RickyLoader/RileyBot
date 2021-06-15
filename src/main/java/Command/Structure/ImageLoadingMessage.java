@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class ImageLoadingMessage extends EmbedLoadingMessage {
+    private final String filename = "image.png";
     private String url;
     private byte[] image;
 
@@ -57,8 +58,9 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
      * @param message Message to display
      */
     public void completeLoading(BufferedImage image, String message) {
+        getChannel().sendTyping().queue();
         this.image = imageToByteArray(image);
-        this.url = "attachment://image.png";
+        this.url = "attachment://" + filename;
         super.completeLoading(message);
     }
 
@@ -117,7 +119,7 @@ public class ImageLoadingMessage extends EmbedLoadingMessage {
             super.updateLoadingMessage();
             return;
         }
-        getChannel().sendMessage(createLoadingMessage()).addFile(image, "image.png").queue();
+        getChannel().sendMessage(createLoadingMessage()).addFile(image, filename).queue();
         getChannel().deleteMessageById(getId()).queue();
     }
 }
