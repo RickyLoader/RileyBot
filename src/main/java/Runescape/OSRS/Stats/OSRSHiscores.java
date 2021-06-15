@@ -15,7 +15,6 @@ import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.Relic;
 import Runescape.OSRS.League.RelicTier;
 import Runescape.Skill.SKILL_NAME;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,9 +32,8 @@ import static Runescape.Skill.SKILL_NAME.*;
 /**
  * Build an image displaying a player's OSRS stats
  */
-public class OSRSHiscores extends Hiscores {
+public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     private final Boss.BOSS_NAME[] bossNames;
-    private final boolean league, virtual, xp;
     public static final String LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
     private final String displayFormatDate = "dd/MM/yyyy";
@@ -45,30 +43,25 @@ public class OSRSHiscores extends Hiscores {
             parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             displayFormat = new SimpleDateFormat(displayFormatDate);
 
+
     /**
      * Create the OSRS Hiscores instance
      *
-     * @param channel     Channel to send message to
      * @param emoteHelper Emote helper
-     * @param league      Use league hiscores or normal
-     * @param virtual     Calculate virtual levels or display hiscores provided levels
-     * @param xp          Get the XP tracker info for the player
+     * @param helpMessage Help message to display in loading message
      */
-    public OSRSHiscores(MessageChannel channel, EmoteHelper emoteHelper, boolean league, boolean virtual, boolean xp) {
-        super(channel, emoteHelper, ResourceHandler.OSRS_BASE_PATH + "Templates/", FontManager.OSRS_FONT);
+    public OSRSHiscores(EmoteHelper emoteHelper, String helpMessage) {
+        super(emoteHelper, ResourceHandler.OSRS_BASE_PATH + "Templates/", FontManager.OSRS_FONT, helpMessage);
         this.bossNames = Boss.BOSS_NAME.getNamesInHiscoresOrder();
-        this.league = league;
-        this.virtual = virtual;
-        this.xp = xp;
         this.trackerFont = FontManager.WISE_OLD_MAN_FONT;
         this.opaqueRed = new Color(255, 0, 0, 127); // 50% opacity
         parseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
-    public ArrayList<String> getLoadingCriteria() {
+    public ArrayList<String> getLoadingCriteria(OSRSHiscoresArgs args) {
         ArrayList<String> criteria = new ArrayList<>();
-        if(league) {
+        if(args.searchLeagueStats()) {
             criteria.add("Player has League stats...");
             criteria.add("Player has stored Relic/Region data...");
             criteria.add("Calculating League Tier...");
@@ -78,20 +71,20 @@ public class OSRSHiscores extends Hiscores {
             criteria.add("Checking account type...");
             criteria.add("Fetching achievements...");
         }
-        if(xp) {
+        if(args.displayXpTracker()) {
             criteria.add("Checking XP tracker...");
         }
         return criteria;
     }
 
     @Override
-    public String getLoadingTitle(String name) {
-        return "OSRS " + (league ? "League" : "Hiscores") + " lookup: " + name.toUpperCase();
+    public String getLoadingTitle(String name, OSRSHiscoresArgs args) {
+        return "OSRS " + (args.searchLeagueStats() ? "League" : "Hiscores") + " lookup: " + name.toUpperCase();
     }
 
     @Override
-    public String getLoadingThumbnail() {
-        return league ? LEAGUE_THUMBNAIL : EmbedHelper.OSRS_LOGO;
+    public String getLoadingThumbnail(OSRSHiscoresArgs args) {
+        return args.searchLeagueStats() ? LEAGUE_THUMBNAIL : EmbedHelper.OSRS_LOGO;
     }
 
     /**
@@ -137,20 +130,19 @@ public class OSRSHiscores extends Hiscores {
         );
     }
 
-
     @Override
     public String getURL(String type, String name) {
         return "https://secure.runescape.com/m=hiscore_oldschool" + type + "/index_lite.ws?player=" + EmbedHelper.urlEncode(name);
     }
 
     @Override
-    public String getDefaultURL(String name) {
-        return league ? getLeagueAccount(name) : getNormalAccount(name);
+    public String getDefaultURL(String name, OSRSHiscoresArgs args) {
+        return args.searchLeagueStats() ? getLeagueAccount(name) : getNormalAccount(name);
     }
 
     @Override
-    public String getNotFoundMessage(String name) {
-        return league ? "isn't on the league hiscores" : "doesn't exist cunt";
+    public String getNotFoundMessage(String name, OSRSHiscoresArgs args) {
+        return args.searchLeagueStats() ? "isn't on the league hiscores" : "doesn't exist cunt";
     }
 
     /**
@@ -168,10 +160,11 @@ public class OSRSHiscores extends Hiscores {
      * Fetch the player stats
      *
      * @param name Player name
+     * @param args Hiscores arguments
      * @return Player stats object
      */
-    private PlayerStats fetchStats(String name) {
-        String url = league ? getLeagueAccount(name) : getNormalAccount(name);
+    private OSRSPlayerStats fetchStats(String name, OSRSHiscoresArgs args) {
+        String url = args.searchLeagueStats() ? getLeagueAccount(name) : getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
         if(normal == null) {
@@ -191,10 +184,10 @@ public class OSRSHiscores extends Hiscores {
                 clues,
                 bossKills,
                 lmsInfo,
-                league ? PlayerStats.ACCOUNT.LEAGUE : PlayerStats.ACCOUNT.NORMAL
+                args.searchLeagueStats() ? PlayerStats.ACCOUNT.LEAGUE : PlayerStats.ACCOUNT.NORMAL
         );
 
-        if(league) {
+        if(args.searchLeagueStats()) {
             normalAccount.setLeaguePoints(Integer.parseInt(normal[73]), Long.parseLong(normal[72]));
             String leagueJSON = DiscordUser.getOSRSLeagueData(name);
             if(leagueJSON == null) {
@@ -291,38 +284,38 @@ public class OSRSHiscores extends Hiscores {
     }
 
     @Override
-    public PlayerStats fetchPlayerData(String name) {
-        PlayerStats playerStats = fetchStats(name);
-        OSRSPlayerStats stats = (OSRSPlayerStats) playerStats;
+    public OSRSPlayerStats fetchPlayerData(String name, OSRSHiscoresArgs args) {
+        OSRSPlayerStats stats = fetchStats(name, args);
 
-        if(playerStats == null) {
+        if(stats == null) {
             return null;
         }
 
-        if(league) {
+        if(args.searchLeagueStats()) {
             LeagueTier leagueTier = stats.getLeagueTier();
             leagueTier.setTier(calculateTier(leagueTier.getRank()));
             loading.completeStage("Player is " + leagueTier.getTierName() + "!");
         }
         else {
-            addPlayerAchievements(stats);
+            addPlayerAchievements(stats, args);
         }
 
-        if(xp) {
+        if(args.displayXpTracker()) {
             getTrackerData(stats);
         }
-        return playerStats;
+        return stats;
     }
 
     /**
      * Fetch and add recent achievements for the player
      *
      * @param stats Player stats
+     * @param args  Hiscores arguments
      */
-    private void addPlayerAchievements(OSRSPlayerStats stats) {
+    private void addPlayerAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
         try {
             loading.updateStage("Checking player is tracked...");
-            NetworkResponse response = fetchRecentPlayerAchievementData(stats.getName(), league);
+            NetworkResponse response = fetchRecentPlayerAchievementData(stats.getName(), args.searchLeagueStats());
 
             if(response.code == -1) {
                 loading.failStage("Achievement tracker didn't respond, unlucky cunt");
@@ -330,7 +323,7 @@ public class OSRSHiscores extends Hiscores {
             }
 
             if(response.code == 404) {
-                updatePlayerTracking(stats.getName(), league, false); // Tracking a new player can take 20+ seconds, don't wait
+                updatePlayerTracking(stats.getName(), args.searchLeagueStats(), false); // Tracking a new player can take 20+ seconds, don't wait
                 loading.completeStage("Player not tracked - They will be *soon*™");
                 return;
             }
@@ -653,9 +646,10 @@ public class OSRSHiscores extends Hiscores {
      * Build an image displaying player skills
      *
      * @param stats Player stats
+     * @param args  Hiscores arguments
      * @return Image displaying player skills
      */
-    private BufferedImage buildSkillsImage(PlayerStats stats) {
+    private BufferedImage buildSkillsImage(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
         BufferedImage image = getResourceHandler().getImageResource(
                 getResourcePath() + "stats_template.png"
         );
@@ -670,7 +664,7 @@ public class OSRSHiscores extends Hiscores {
 
         for(int i = 0; i < skills.length - 1; i++) {
             Skill skill = skills[i];
-            int displayLevel = virtual ? skill.getVirtualLevel() : skill.getLevel();
+            int displayLevel = args.displayVirtualLevels() ? skill.getVirtualLevel() : skill.getLevel();
             boolean master = displayLevel > 99;
             String level = String.valueOf(displayLevel);
 
@@ -696,7 +690,9 @@ public class OSRSHiscores extends Hiscores {
         }
 
         g.setColor(Color.YELLOW);
-        String level = String.valueOf(virtual ? stats.getVirtualTotalLevel() : stats.getTotalLevel());
+        String level = String.valueOf(
+                args.displayVirtualLevels() ? stats.getVirtualTotalLevel() : stats.getTotalLevel()
+        );
         g.drawString(
                 level,
                 825 - (g.getFontMetrics().stringWidth(level) / 2),
@@ -707,26 +703,25 @@ public class OSRSHiscores extends Hiscores {
     }
 
     @Override
-    public BufferedImage buildHiscoresImage(PlayerStats playerStats) {
-        OSRSPlayerStats stats = (OSRSPlayerStats) playerStats;
-        BufferedImage baseImage = buildSkillsImage(playerStats);
-        addBossKills(baseImage, stats.getBossKills());
-        addNameSection(baseImage, stats);
+    public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, OSRSHiscoresArgs args) {
+        BufferedImage baseImage = buildSkillsImage(playerStats, args);
+        addBossKills(baseImage, playerStats.getBossKills());
+        addNameSection(baseImage, playerStats);
 
         if(playerStats.hasClueCompletions()) {
             baseImage = addClues(baseImage, playerStats.getClues());
         }
 
-        if(stats.isLeague()) {
-            baseImage = addLeagueInfo(baseImage, stats);
+        if(playerStats.isLeague()) {
+            baseImage = addLeagueInfo(baseImage, playerStats);
         }
 
-        if(xp && stats.hasWeeklyGains()) {
-            baseImage = addXPTracker(baseImage, stats);
+        if(args.displayXpTracker() && playerStats.hasWeeklyGains()) {
+            baseImage = addXPTracker(baseImage, playerStats);
         }
 
-        if(!league && stats.hasAchievements()) {
-            baseImage = addAchievementInfo(baseImage, stats);
+        if(!args.searchLeagueStats() && playerStats.hasAchievements()) {
+            baseImage = addAchievementInfo(baseImage, playerStats);
         }
         return baseImage;
     }

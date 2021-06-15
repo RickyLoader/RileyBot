@@ -3,6 +3,7 @@ package Command.Commands.Lookup;
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
+import Runescape.HiscoresArgs;
 import Runescape.Stats.RS3Hiscores;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -26,11 +27,10 @@ public class RS3LookupCommand extends LookupCommand {
     @Override
     public void processName(String name, CommandContext context) {
         RS3Hiscores hiscores = new RS3Hiscores(
-                context.getMessageChannel(),
                 context.getEmoteHelper(),
-                virtual
+                "Type: " + getTrigger() + " for help"
         );
-        hiscores.buildImage(name, "Type: " + getTrigger() + " for help");
+        hiscores.buildImage(name, context.getMessageChannel(), new HiscoresArgs(virtual));
     }
 
     @Override

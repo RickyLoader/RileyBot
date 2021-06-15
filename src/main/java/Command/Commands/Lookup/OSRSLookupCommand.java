@@ -4,6 +4,7 @@ import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.LookupCommand;
 import Runescape.OSRS.Stats.OSRSHiscores;
+import Runescape.OSRSHiscoresArgs;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -26,13 +27,14 @@ public class OSRSLookupCommand extends LookupCommand {
     @Override
     public void processName(String name, CommandContext context) {
         OSRSHiscores hiscores = new OSRSHiscores(
-                context.getMessageChannel(),
                 context.getEmoteHelper(),
-                league,
-                virtual,
-                xp
+                "Type: " + getTrigger() + " for help"
         );
-        hiscores.buildImage(name, "Type: " + getTrigger() + " for help");
+        hiscores.buildImage(
+                name,
+                context.getMessageChannel(),
+                new OSRSHiscoresArgs(virtual, league, xp)
+        );
     }
 
     @Override

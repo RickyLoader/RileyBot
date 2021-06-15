@@ -12,22 +12,22 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public abstract class Hiscores extends ImageBuilder {
+public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> extends ImageBuilder {
+    private final String helpMessage;
     public ImageLoadingMessage loading;
     private boolean timeout = false;
-    private final MessageChannel channel;
 
     /**
      * Create a Runescape Hiscores instance
      *
-     * @param channel      Channel to send message to
      * @param emoteHelper  Emote helper
      * @param resourcePath Path to resources
      * @param font         Font to use in image
+     * @param helpMessage  Help message to display in loading message
      */
-    public Hiscores(MessageChannel channel, EmoteHelper emoteHelper, String resourcePath, Font font) {
+    public Hiscores(EmoteHelper emoteHelper, String resourcePath, Font font, String helpMessage) {
         super(emoteHelper, resourcePath, font);
-        this.channel = channel;
+        this.helpMessage = helpMessage;
     }
 
     /**
@@ -105,61 +105,73 @@ public abstract class Hiscores extends ImageBuilder {
      * Get the default URL to display in the loading message
      *
      * @param name Player name
+     * @param args Hiscores arguments
      * @return default URL to display in loading
      */
-    public abstract String getDefaultURL(String name);
+    public abstract String getDefaultURL(String name, T args);
 
     /**
      * Fetch the player data from the hiscores
      *
      * @param name Player name
+     * @param args Hiscores arguments
      * @return Player data
      */
-    public abstract PlayerStats fetchPlayerData(String name);
+    public abstract S fetchPlayerData(String name, T args);
 
     /**
      * Get the message to display if a player was not found - Appended to "That player "
      *
      * @param name Player name
+     * @param args Hiscores arguments
      * @return Player not found error message
      */
-    public abstract String getNotFoundMessage(String name);
+    public abstract String getNotFoundMessage(String name, T args);
 
     /**
-     * Look a player up on the hiscores and return an image displaying their skills
+     * Look a player up on the hiscores and build an image displaying their skills.
+     * Send this message to the provided channel.
+     * During this process, update a loading message within the channel to indicate the current progress.
      *
-     * @param nameQuery   Player name
-     * @param helpMessage Help message to display in loading message
+     * @param nameQuery Player name
+     * @param channel   Channel to send the image to
+     * @param args      Arguments for building image/looking up stats
      */
-    public void buildImage(String nameQuery, String helpMessage) {
-        String defaultURL = getDefaultURL(nameQuery);
-        ArrayList<String> loadingCriteria = getLoadingCriteria();
+    public void buildImage(String nameQuery, MessageChannel channel, T args) {
+        String defaultURL = getDefaultURL(nameQuery, args);
+        ArrayList<String> loadingCriteria = getLoadingCriteria(args);
         loadingCriteria.add("Building image...");
 
         this.loading = new ImageLoadingMessage(
                 channel,
                 getEmoteHelper(),
-                getLoadingTitle(nameQuery),
+                getLoadingTitle(nameQuery, args),
                 "Give me a second, their website can be slow as fuck.",
-                getLoadingThumbnail(),
+                getLoadingThumbnail(args),
                 helpMessage,
                 loadingCriteria.toArray(new String[0])
         );
 
         loading.showLoading();
 
-        PlayerStats stats = fetchPlayerData(nameQuery);
+        S stats = fetchPlayerData(nameQuery, args);
 
         if(stats == null) {
             if(timeout) {
-                loading.failLoading("I wasn't able to connect to the " + EmbedHelper.embedURL("hiscores", defaultURL));
+                loading.failLoading(
+                        "I wasn't able to connect to the "
+                                + EmbedHelper.embedURL("hiscores", defaultURL)
+                );
                 return;
             }
-            loading.failLoading("That player " + EmbedHelper.embedURL(getNotFoundMessage(nameQuery), defaultURL));
+            loading.failLoading(
+                    "That player "
+                            + EmbedHelper.embedURL(getNotFoundMessage(nameQuery, args), defaultURL)
+            );
             return;
         }
 
-        BufferedImage playerImage = buildHiscoresImage(stats);
+        BufferedImage playerImage = buildHiscoresImage(stats, args);
         loading.completeStage();
         loading.completeLoading(playerImage, EmbedHelper.embedURL("View raw data", stats.getUrl()));
     }
@@ -168,29 +180,33 @@ public abstract class Hiscores extends ImageBuilder {
      * Get the title to be used in the loading message
      *
      * @param name Player name
+     * @param args Hiscores arguments
      * @return Loading message title
      */
-    public abstract String getLoadingTitle(String name);
+    public abstract String getLoadingTitle(String name, T args);
 
     /**
      * Get the thumbnail to be used in the loading message
      *
+     * @param args Hiscores arguments
      * @return Loading message thumbnail
      */
-    public abstract String getLoadingThumbnail();
+    public abstract String getLoadingThumbnail(T args);
 
     /**
      * Get the loading criteria to use
      *
+     * @param args Hiscores arguments
      * @return Loading criteria
      */
-    public abstract ArrayList<String> getLoadingCriteria();
+    public abstract ArrayList<String> getLoadingCriteria(T args);
 
     /**
      * Build the hiscores image
      *
      * @param playerStats PlayerStats instance
+     * @param args        Hiscores arguments
      * @return Hiscores image
      */
-    public abstract BufferedImage buildHiscoresImage(PlayerStats playerStats);
+    public abstract BufferedImage buildHiscoresImage(S playerStats, T args);
 }
