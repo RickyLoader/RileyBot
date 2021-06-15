@@ -1,5 +1,6 @@
 package Command.Structure;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Look up a user and do something with their saved name
  */
-public abstract class SavedNameCommand extends DiscordCommand {
+public abstract class SavedNameCommand extends OnReadyDiscordCommand {
     private final int maxLength;
     private final String saveTypeName;
 
@@ -139,6 +140,9 @@ public abstract class SavedNameCommand extends DiscordCommand {
                 + "```" + getTrigger() + " save [" + (self ? "your " : "their ") + saveTypeName + "]```";
     }
 
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+    }
 
     /**
      * Get the user's saved name for the given lookup
