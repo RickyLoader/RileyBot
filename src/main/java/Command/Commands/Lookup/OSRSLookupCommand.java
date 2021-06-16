@@ -2,9 +2,11 @@ package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
+import Command.Structure.EmoteHelper;
 import Command.Structure.LookupCommand;
 import Runescape.OSRS.Stats.OSRSHiscores;
 import Runescape.OSRSHiscoresArgs;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -13,6 +15,7 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a OSRS player and build an image with their stats
  */
 public class OSRSLookupCommand extends LookupCommand {
+    private OSRSHiscores hiscores;
     private boolean league = false, virtual = false, xp = false;
 
     public OSRSLookupCommand() {
@@ -25,11 +28,15 @@ public class OSRSLookupCommand extends LookupCommand {
     }
 
     @Override
-    public void processName(String name, CommandContext context) {
-        OSRSHiscores hiscores = new OSRSHiscores(
-                context.getEmoteHelper(),
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.hiscores = new OSRSHiscores(
+                emoteHelper,
                 "Type: " + getTrigger() + " for help"
         );
+    }
+
+    @Override
+    public void processName(String name, CommandContext context) {
         hiscores.buildImage(
                 name,
                 context.getMessageChannel(),

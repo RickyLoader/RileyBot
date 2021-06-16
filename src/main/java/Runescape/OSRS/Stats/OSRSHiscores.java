@@ -38,10 +38,23 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     private final Font trackerFont;
     private final String displayFormatDate = "dd/MM/yyyy";
     private final int border = 25; // Horizontal & vertical borders on template images
-    private final Color opaqueRed;
+    private final float titleFontSize = 65;
+    private final Color redOverlay, dark, light;
     private final SimpleDateFormat
             parseFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
             displayFormat = new SimpleDateFormat(displayFormatDate);
+    private final BufferedImage
+            titleContainer,
+            achievementsContainer,
+            achievementsTitleContainer,
+            bossContainer,
+            cluesContainer,
+            skillsContainer,
+            xpContainer,
+            xpHeader,
+            mapContainer,
+            relicContainer,
+            leagueInfoContainer;
 
 
     /**
@@ -54,8 +67,24 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         super(emoteHelper, ResourceHandler.OSRS_BASE_PATH + "Templates/", FontManager.OSRS_FONT, helpMessage);
         this.bossNames = Boss.BOSS_NAME.getNamesInHiscoresOrder();
         this.trackerFont = FontManager.WISE_OLD_MAN_FONT;
-        this.opaqueRed = new Color(255, 0, 0, 127); // 50% opacity
-        parseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        this.redOverlay = new Color(255, 0, 0, 127); // 50% opacity
+        this.dark = new Color(EmbedHelper.ROW_DARK);
+        this.light = new Color(EmbedHelper.ROW_LIGHT);
+        this.parseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        ResourceHandler resourceHandler = getResourceHandler();
+        String templates = getResourcePath();
+        this.titleContainer = resourceHandler.getImageResource(templates + "title_container.png");
+        this.achievementsContainer = resourceHandler.getImageResource(templates + "achievements_container.png");
+        this.achievementsTitleContainer = resourceHandler.getImageResource(templates + "achievements_title_container.png");
+        this.bossContainer = resourceHandler.getImageResource(templates + "boss_container.png");
+        this.cluesContainer = resourceHandler.getImageResource(templates + "clues_container.png");
+        this.skillsContainer = resourceHandler.getImageResource(templates + "skills_container.png");
+        this.xpContainer = resourceHandler.getImageResource(templates + "xp_tracker_container.png");
+        this.xpHeader = resourceHandler.getImageResource(templates + "xp_tracker_header.png");
+        this.mapContainer = resourceHandler.getImageResource(templates + "map_container.png");
+        this.relicContainer = resourceHandler.getImageResource(templates + "relic_container.png");
+        this.leagueInfoContainer = resourceHandler.getImageResource(templates + "league_info_container.png");
     }
 
     @Override
@@ -71,7 +100,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             criteria.add("Checking account type...");
             criteria.add("Fetching achievements...");
         }
-        if(args.displayXpTracker()) {
+        if(shouldDisplayXpTracker(args)) {
             criteria.add("Checking XP tracker...");
         }
         return criteria;
@@ -300,7 +329,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             addPlayerAchievements(stats, args);
         }
 
-        if(args.displayXpTracker()) {
+        if(shouldDisplayXpTracker(args)) {
             getTrackerData(stats);
         }
         return stats;
@@ -518,46 +547,48 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Add boss kills to the base image or a red X if the
-     * player has none
+     * Build an image displaying the given list of bosses.
+     * This image consists of vertical rows, where each row contains an image of the boss, and a summary detailing the
+     * rank and total kills that the player has for that boss.
+     * If the list is empty, the image will have a red overlay indicating no boss kills.
      *
-     * @param baseImage Base player image
-     * @param bosses    List of bosses
+     * @param bosses List of bosses to display
      */
-    private void addBossKills(BufferedImage baseImage, List<Boss> bosses) {
-        Graphics g = baseImage.getGraphics();
+    private BufferedImage buildBossSection(List<Boss> bosses) {
+        BufferedImage container = copyImage(bossContainer);
+        Graphics g = container.getGraphics();
+
+        // Adjusted dimensions after factoring in border that surrounds boss container image
+        final int adjustedHeight = container.getHeight() - (border * 2);
+        final int adjustedWidth = container.getWidth() - (border * 2);
+
+        // Draw a red overlay over the empty boss container
+        if(bosses.isEmpty()) {
+            g.setColor(redOverlay);
+            g.fillRect(border, border, adjustedWidth, adjustedHeight);
+            g.dispose();
+            return container;
+        }
+
         final int maxBosses = 5;
 
-        final int bossSectionWidth = 960;
-        final int bossSectionX = 1044;
-        final int bossSectionY = 223;
+        // Calculate the height to use for each row (always calculate for max bosses)
+        final int bossRowHeight = adjustedHeight / maxBosses;
 
-        // TODO modular
-        final int bossSectionHeight = (baseImage.getHeight() - bossSectionY - border);
+        final int bossDisplayCount = Math.min(maxBosses, bosses.size());
+        int y = border;
 
-        // Always calculate for max bosses
-        final int bossRowHeight = bossSectionHeight / maxBosses;
-
-        if(bosses.size() > 0) {
-            final int bossDisplayCount = Math.min(maxBosses, bosses.size());
-            int y = bossSectionY;
-
-            for(int i = 0; i < bossDisplayCount; i++) {
-                final BufferedImage bossImage = buildBossRowImage(
-                        bosses.get(i),
-                        bossSectionWidth,
-                        bossRowHeight
-                );
-                g.drawImage(bossImage, bossSectionX, y, null);
-                y += bossRowHeight;
-            }
-        }
-        else {
-            // Draw an opaque red layer over boss area
-            g.setColor(opaqueRed);
-            g.fillRect(bossSectionX, bossSectionY, bossSectionWidth, bossSectionHeight);
+        for(int i = 0; i < bossDisplayCount; i++) {
+            final BufferedImage bossImage = buildBossRowImage(
+                    bosses.get(i),
+                    adjustedWidth,
+                    bossRowHeight
+            );
+            g.drawImage(bossImage, border, y, null);
+            y += bossRowHeight;
         }
         g.dispose();
+        return container;
     }
 
     /**
@@ -567,7 +598,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param boss   Boss to display
      * @param width  Width of boss image to build
      * @param height Height of clue image to build
-     * @return Boss image
+     * @return Image displaying player boss kills
      */
     private BufferedImage buildBossRowImage(Boss boss, int width, int height) {
         final int boxWidth = (width - border) / 2;
@@ -586,7 +617,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         }
 
         Graphics g = bossBox.getGraphics();
-        // Draw boss image centered in boss box
+        // Draw boss image centred in boss box
         g.drawImage(
                 bossImage,
                 centreHorizontal - (bossImage.getWidth() / 2),
@@ -621,7 +652,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         /*
          * Calculate where to begin drawing the rank title such that when both Strings are drawn beside
-         * each other, the full String is centered.
+         * each other, the full String is centred.
          */
         final int x = centreHorizontal - ((rankTitleWidth + fm.stringWidth(rankValue)) / 2);
 
@@ -643,23 +674,32 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Build an image displaying player skills
+     * Build an image displaying the given player's skills.
+     * This image is a replica of the in-game skills panel, which is a 3x8 grid where each box contains an image of
+     * the skill and a blank area to draw the level.
+     * Optionally, the virtual skill levels may be drawn instead of the normal skill levels.
      *
      * @param stats Player stats
      * @param args  Hiscores arguments
      * @return Image displaying player skills
      */
-    private BufferedImage buildSkillsImage(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
-        BufferedImage image = getResourceHandler().getImageResource(
-                getResourcePath() + "stats_template.png"
-        );
-
-        Graphics g = image.getGraphics();
+    private BufferedImage buildSkillsSection(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+        BufferedImage container = copyImage(skillsContainer);
+        Graphics g = container.getGraphics();
         g.setFont(getGameFont().deriveFont(65f));
 
-        // First skill location
-        int x = 200, ogX = x;
-        int y = 315;
+        /*
+         * Text co-ordinates of first skill level, all skills can be drawn by transforming from these
+         * co-ordinates, either vertically or horizontally
+         */
+        int x = border + 160, ogX = x;
+        int y = border + 75;
+
+        /*
+         * Skills are in the display order when reading the skill image grid from left to right.
+         * By iterating in this order and incrementing the Y co-ordinate/resetting the X co-ordinate after every
+         * third skill, the skills will align with the grid.
+         */
         Skill[] skills = stats.getSkills();
 
         for(int i = 0; i < skills.length - 1; i++) {
@@ -699,79 +739,283 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                 y + 65
         );
         g.dispose();
-        return image;
+        return container;
     }
 
     @Override
     public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, OSRSHiscoresArgs args) {
-        BufferedImage baseImage = buildSkillsImage(playerStats, args);
-        addBossKills(baseImage, playerStats.getBossKills());
-        addNameSection(baseImage, playerStats);
-
-        if(playerStats.hasClueCompletions()) {
-            baseImage = addClues(baseImage, playerStats.getClues());
-        }
-
-        if(playerStats.isLeague()) {
-            baseImage = addLeagueInfo(baseImage, playerStats);
-        }
-
-        if(args.displayXpTracker() && playerStats.hasWeeklyGains()) {
-            baseImage = addXPTracker(baseImage, playerStats);
-        }
-
-        if(!args.searchLeagueStats() && playerStats.hasAchievements()) {
-            baseImage = addAchievementInfo(baseImage, playerStats);
-        }
-        return baseImage;
-    }
-
-    /**
-     * Add player achievement info. Display most recently completed & closest to be completed achievements.
-     *
-     * @param baseImage Base player image
-     * @param stats     Player stats
-     * @return Base image with achievements appended
-     */
-    private BufferedImage addAchievementInfo(BufferedImage baseImage, OSRSPlayerStats stats) {
-
-        // Sort by most recent completion first
-        BufferedImage completedAchievements = buildAchievementsSection(
-                stats.getCompletedAchievements(),
-                (o1, o2) -> o2.getCompletionDate().compareTo(o1.getCompletionDate()),
-                "Recent Achievements"
-        );
-
-        // Sort by closest to completion first
-        BufferedImage inProgressAchievements = buildAchievementsSection(
-                stats.getInProgressAchievements(),
-                (o1, o2) -> Double.compare(o2.getProgressPercent(), o1.getProgressPercent()),
-                "Upcoming Achievements"
-        );
-
-        BufferedImage achievementsImage = new BufferedImage(
-                baseImage.getWidth(),
-                baseImage.getHeight() + completedAchievements.getHeight(),
+        BufferedImage image = new BufferedImage(
+                calculateImageWidth(args),
+                calculateImageHeight(playerStats, args),
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        Graphics g = achievementsImage.getGraphics();
-        g.drawImage(baseImage, 0, 0, null);
+        Graphics g = image.getGraphics();
+        BufferedImage titleSection = buildTitleSection(playerStats);
+        g.drawImage(titleSection, 0, 0, null);
 
-        int x = 0;
-        if(!stats.getCompletedAchievements().isEmpty()) {
-            g.drawImage(completedAchievements, x, baseImage.getHeight(), null);
-            x += completedAchievements.getWidth();
+        BufferedImage skillsSection = buildSkillsSection(playerStats, args);
+        g.drawImage(skillsSection, 0, titleSection.getHeight(), null);
+
+        BufferedImage bossSection = buildBossSection(playerStats.getBossKills());
+        g.drawImage(bossSection, skillsSection.getWidth(), titleSection.getHeight(), null);
+
+        // When optional sections are displayed vertically, they should be displayed below the base image
+        int y = titleSection.getHeight() + skillsSection.getHeight();
+
+        if(shouldDisplayClues(playerStats)) {
+            BufferedImage clueSection = buildClueSection(playerStats.getClues());
+            g.drawImage(clueSection, 0, y, null);
+            y += clueSection.getHeight();
         }
-        if(!stats.getInProgressAchievements().isEmpty()) {
-            g.drawImage(inProgressAchievements, x, baseImage.getHeight(), null);
+
+        if(shouldDisplayAchievements(playerStats, args)) {
+            BufferedImage achievementsSections = buildAchievementsSections(playerStats);
+            g.drawImage(achievementsSections, 0, y, null);
+            y += achievementsSections.getHeight();
         }
+
+        // Player unlocked regions/relics
+        if(shouldDisplayLeagueUnlocks(playerStats)) {
+            BufferedImage leagueUnlockSection = buildLeagueUnlockSection(playerStats);
+            g.drawImage(leagueUnlockSection, 0, y, null);
+            y += leagueUnlockSection.getHeight();
+        }
+
+        // League points/tier
+        if(shouldDisplayLeagueInfo(playerStats)) {
+            BufferedImage leagueInfoSection = buildLeagueInfoSection(playerStats);
+            g.drawImage(leagueInfoSection, 0, y, null);
+        }
+
+        // Display off to the right of the image
+        if(shouldDisplayXpTracker(args)) {
+            BufferedImage xpTrackerSection = buildXpTrackerSection(playerStats);
+            g.drawImage(xpTrackerSection, titleSection.getWidth(), 0, null);
+        }
+
         g.dispose();
-        return achievementsImage;
+        return image;
     }
 
     /**
-     * Build an image displaying the top 5 from the given list of achievements
+     * Build an image displaying the player's league tier & points.
+     * This image uses a similar image to the title section
+     *
+     * @param stats Player stats
+     * @return Image displaying player's league tier & points
+     */
+    private BufferedImage buildLeagueInfoSection(OSRSPlayerStats stats) {
+        BufferedImage container = copyImage(leagueInfoContainer);
+        Graphics g = container.getGraphics();
+        g.setFont(getGameFont().deriveFont(titleFontSize));
+        g.setColor(Color.YELLOW);
+        FontMetrics fm = g.getFontMetrics();
+
+        final int edgePadding = 2 * border; // Padding from outer edges
+        final int imagePadding = 15; // Padding from text to image
+        final int centreVertical = (container.getHeight() / 2);
+        final int textY = centreVertical + (fm.getMaxAscent() / 2); // Centre text vertically
+
+        LeagueTier leagueTier = stats.getLeagueTier();
+
+        // Draw league tier on the left side of the image
+        if(leagueTier.hasTier()) {
+            BufferedImage tierIcon = getResourceHandler().getImageResource(leagueTier.getTierImagePath());
+
+            g.drawImage(tierIcon, edgePadding, centreVertical - (tierIcon.getHeight() / 2), null);
+            g.drawString(
+                    leagueTier.getTierName(),
+                    edgePadding + tierIcon.getWidth() + imagePadding,
+                    textY
+            );
+        }
+
+        // Draw league points on the right side of the image
+        BufferedImage leaguePointImage = getResourceHandler().getImageResource(
+                PlayerStats.getAccountTypeImagePath(stats.getAccountType())
+        );
+        String points = new DecimalFormat("#,### points").format(leagueTier.getPoints());
+        int pointsX = container.getWidth() - edgePadding - fm.stringWidth(points);
+        g.drawString(points, pointsX, textY);
+        g.drawImage(
+                leaguePointImage,
+                pointsX - imagePadding - leaguePointImage.getWidth(),
+                centreVertical - (leaguePointImage.getHeight() / 2),
+                null
+        );
+
+        g.dispose();
+        return container;
+    }
+
+    /**
+     * Calculate the height of the hiscores image to create.
+     * This is based on the elements which will be displayed which is determined both by the hiscores arguments
+     * and the presence of certain stats for the player.
+     * E.g the clue scroll section is typically displayed below the boss section, however if the player has no clue
+     * scroll completions, there is no need to build this section.
+     *
+     * @param stats Player stats
+     * @param args  Hiscores arguments
+     * @return Height of hiscores image to create
+     */
+    private int calculateImageHeight(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+        /*
+         * Base height - title section, skills section, and boss section are always displayed
+         * (boss section is equal in height to the skills section)
+         */
+        int height = titleContainer.getHeight() + skillsContainer.getHeight();
+
+        // Clue scroll section optional and is displayed below the base image
+        if(shouldDisplayClues(stats)) {
+            height += cluesContainer.getHeight();
+        }
+
+        // Achievements section is optional and is displayed below clue section (or base image)
+        if(shouldDisplayAchievements(stats, args)) {
+            height += achievementsTitleContainer.getHeight() + achievementsContainer.getHeight();
+        }
+
+        // League unlocks are optional and are displayed at the bottom of the image
+        if(shouldDisplayLeagueUnlocks(stats)) {
+            height += mapContainer.getHeight();
+        }
+        // League info attaches a section to the bottom of the image similar to the title section
+        if(shouldDisplayLeagueInfo(stats)) {
+            height += leagueInfoContainer.getHeight();
+        }
+        return height;
+    }
+
+    /**
+     * Calculate the width of the hiscores image to create.
+     * This is based on the elements which will be displayed which is determined both by the hiscores arguments
+     * and the presence of certain stats for the player.
+     * E.g the XP tracker section is typically displayed beside the boss section, however if the hiscores arguments
+     * haven't specified to display the XP tracker (or the player has no gained XP for the week), there is no need to
+     * build this section.
+     *
+     * @param args Hiscores arguments
+     * @return Width of hiscores image to create
+     */
+    private int calculateImageWidth(OSRSHiscoresArgs args) {
+        /*
+         * Base width - title section, skills section, and boss section are always displayed,
+         * the title section is equal in width to the skills section & boss section combined.
+         */
+        int width = titleContainer.getWidth();
+
+        // XP tracker is optional and is displayed beside the base image, add its width to the base width
+        return shouldDisplayXpTracker(args) ? width + xpContainer.getWidth() : width;
+    }
+
+    /**
+     * Check if clue scroll section should be drawn on to the hiscores image
+     *
+     * @param stats Player stats
+     * @return Should display player clue scroll completions in hiscores image
+     */
+    private boolean shouldDisplayClues(OSRSPlayerStats stats) {
+        return stats.hasClueCompletions();
+    }
+
+    /**
+     * Check if the player's league unlocks should be drawn on to the hiscores image.
+     * This is the map & relic container
+     *
+     * @param stats Player stats
+     * @return Should display league map & relic unlocks in hiscores image
+     */
+    private boolean shouldDisplayLeagueUnlocks(OSRSPlayerStats stats) {
+        return stats.isLeague() && stats.hasLeagueUnlockData();
+    }
+
+    /**
+     * Check if the player's league points & tier should be drawn on to the hiscores image
+     *
+     * @param stats Player stats
+     * @return Should display league points/tier in hiscores image
+     */
+    private boolean shouldDisplayLeagueInfo(OSRSPlayerStats stats) {
+        return stats.isLeague();
+    }
+
+    /**
+     * Check if the XP tracker should be drawn on to the hiscores image
+     *
+     * @param args Hiscores arguments
+     * @return Should display XP tracker in hiscores image
+     */
+    private boolean shouldDisplayXpTracker(OSRSHiscoresArgs args) {
+        return args.displayXpTracker() && !args.searchLeagueStats();
+    }
+
+    /**
+     * Check if achievements section should be drawn on to the hiscores image
+     *
+     * @param stats Player stats
+     * @param args  Hiscores arguments
+     * @return Should display player achievements in hiscores image
+     */
+    private boolean shouldDisplayAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+        return !args.searchLeagueStats() && stats.hasAchievements();
+    }
+
+    /**
+     * Build an image displaying the given player's achievements.
+     * This image consists of up to two sections, a section displaying the player's completed achievements,
+     * and a section displaying the player's in progress achievements.
+     * Only one section is guaranteed to be present
+     * e.g a player has completed all achievements therefore has none in progress, or has completed
+     * no achievements therefore every achievement is in progress.
+     *
+     * @param stats Player stats
+     * @return Image displaying the player's achievements
+     */
+    private BufferedImage buildAchievementsSections(OSRSPlayerStats stats) {
+        final boolean displayCompleted = !stats.getCompletedAchievements().isEmpty();
+        final boolean displayInProgress = !stats.getInProgressAchievements().isEmpty();
+
+        BufferedImage container = new BufferedImage(
+                displayInProgress && displayCompleted
+                        ? achievementsContainer.getWidth() * 2
+                        : achievementsContainer.getWidth(),
+                achievementsTitleContainer.getHeight() + achievementsContainer.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        Graphics g = container.getGraphics();
+        int x = 0;
+
+        if(displayCompleted) {
+            // Sort by most recent completion first
+            BufferedImage completedAchievements = buildAchievementsSection(
+                    stats.getCompletedAchievements(),
+                    (o1, o2) -> o2.getCompletionDate().compareTo(o1.getCompletionDate()),
+                    "Recent Achievements"
+            );
+            g.drawImage(completedAchievements, x, 0, null);
+            x += completedAchievements.getWidth();
+        }
+        if(displayInProgress) {
+            // Sort by closest to completion first
+            BufferedImage inProgressAchievements = buildAchievementsSection(
+                    stats.getInProgressAchievements(),
+                    (o1, o2) -> Double.compare(o2.getProgressPercent(), o1.getProgressPercent()),
+                    "Upcoming Achievements"
+            );
+            g.drawImage(inProgressAchievements, x, 0, null);
+        }
+        g.dispose();
+        return container;
+    }
+
+    /**
+     * Build an image displaying the top 5 achievements from the given list of achievements.
+     * The image consists of a title and a box containing rows for the achievements.
+     * Each row consists of a description of the achievement, and a pie chart displaying
+     * the progress & optional image.
      *
      * @param achievements Achievements to display
      * @param comparator   Comparator for sorting achievements (the first 5 will be displayed after sorting)
@@ -779,34 +1023,19 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @return Image displaying achievements
      */
     private BufferedImage buildAchievementsSection(ArrayList<Achievement> achievements, Comparator<Achievement> comparator, String title) {
-        BufferedImage achievementsContainer = getResourceHandler()
-                .getImageResource(getResourcePath() + "achievement_container.png");
         achievements.sort(comparator);
-        Graphics g = achievementsContainer.getGraphics();
+        BufferedImage titleImage = buildAchievementsTitleSection(title);
+        BufferedImage achievementsImage = copyImage(achievementsContainer);
+        Graphics g = achievementsImage.getGraphics();
 
-        int y = 225;
         final int max = 5;
-        final int titleSectionHeight = (y - 2 * border);
-
-        g.setFont(getGameFont().deriveFont(80f));
-        g.setColor(Color.YELLOW);
-
-        FontMetrics fm = g.getFontMetrics();
-        g.drawString(
-                title,
-                (achievementsContainer.getWidth() / 2) - (fm.stringWidth(title) / 2),
-                ((titleSectionHeight / 2) + (fm.getMaxAscent() / 2)) + border
-        );
-
         final int rowCount = Math.min(achievements.size(), max);
 
         // Always calculate for max achievements
-        final int rowHeight = (achievementsContainer.getHeight() - y - border) / max;
-        final int rowWidth = achievementsContainer.getWidth() - (2 * border);
+        final int rowHeight = (achievementsImage.getHeight() - (2 * border)) / max;
+        final int rowWidth = achievementsImage.getWidth() - (2 * border);
 
-        final Color dark = new Color(EmbedHelper.ROW_DARK);
-        final Color light = new Color(EmbedHelper.ROW_LIGHT);
-
+        int y = border;
         for(int i = 0; i < rowCount; i++) {
             Achievement achievement = achievements.get(i);
             final boolean even = i % 2 == 0;
@@ -825,12 +1054,47 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             y += rowHeight;
         }
 
+        BufferedImage container = new BufferedImage(
+                titleImage.getWidth(),
+                titleImage.getHeight() + achievementsImage.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        g = container.getGraphics();
+        g.drawImage(titleImage, 0, 0, null);
+        g.drawImage(achievementsImage, 0, titleImage.getHeight(), null);
         g.dispose();
-        return achievementsContainer;
+        return container;
     }
 
     /**
-     * Build an achievement row displaying the given achievement details.
+     * Build an image displaying the given title for an achievements section.
+     * This image should be displayed above an achievements section.
+     *
+     * @param title Title to display
+     * @return Image displaying the given title
+     */
+    private BufferedImage buildAchievementsTitleSection(String title) {
+        BufferedImage container = copyImage(achievementsTitleContainer);
+        Graphics g = container.getGraphics();
+        g.setFont(getGameFont().deriveFont(80f));
+        g.setColor(Color.YELLOW);
+        FontMetrics fm = g.getFontMetrics();
+
+        g.drawString(
+                title,
+                (container.getWidth() / 2) - (fm.stringWidth(title) / 2),
+                (container.getHeight() / 2) + (fm.getMaxAscent() / 2)
+        );
+        g.dispose();
+        return container;
+    }
+
+    /**
+     * Build an image displaying the given achievement details.
+     * This image is displayed as a row.
+     * The row contains a summary of the achievement (including description, progress, and optional completion date)
+     * and a pie chart image indicating the achievement progress.
+     * The chart may optionally have an image displayed in the centre.
      *
      * @param achievement Achievement to display
      * @param rowColour   Background colour to use behind row
@@ -947,76 +1211,25 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Add the league points, tier, and relic/region data if available
+     * Build an image displaying the given player's name, account type, combat level, and rank.
      *
-     * @param baseImage Base player image
-     * @param stats     Player stats
-     * @return Base image with league data appended
+     * @param stats Player stats
+     * @return Image displaying player overview
      */
-    private BufferedImage addLeagueInfo(BufferedImage baseImage, OSRSPlayerStats stats) {
-        Graphics g = baseImage.getGraphics();
-        g.setFont(getGameFont().deriveFont(65f));
-        g.setColor(Color.YELLOW);
-        FontMetrics fm = g.getFontMetrics();
-
-        BufferedImage leaguePointImage = getResourceHandler().getImageResource(
-                PlayerStats.getAccountTypeImagePath(stats.getAccountType())
-        );
-
-        int x = 50;
-        int y = 35;
-
-        g.drawImage(leaguePointImage, x, y, null);
-
-        LeagueTier leagueTier = stats.getLeagueTier();
-
-        String points = new DecimalFormat("#,### points").format(leagueTier.getPoints());
-        int titleX = x + leaguePointImage.getWidth() + 25;
-
-        g.drawString(
-                points,
-                titleX,
-                y + (leaguePointImage.getHeight() / 2) + (fm.getMaxAscent() / 2)
-        );
-
-        if(leagueTier.hasTier()) {
-            BufferedImage tierIcon = getResourceHandler().getImageResource(leagueTier.getTierImagePath());
-            y += leaguePointImage.getHeight() + 3;
-            g.drawImage(tierIcon, x, y, null);
-
-            g.drawString(
-                    leagueTier.getTierName(),
-                    titleX,
-                    y + (tierIcon.getHeight() / 2) + (fm.getMaxAscent() / 2)
-            );
-        }
-        g.dispose();
-
-        if(stats.hasLeagueUnlockData()) {
-            return buildLeagueImage(baseImage, stats);
-        }
-        return baseImage;
-    }
-
-    /**
-     * Add the name, account type, and combat level to the base image
-     *
-     * @param baseImage Base player image
-     * @param stats     Player stats
-     */
-    private void addNameSection(BufferedImage baseImage, OSRSPlayerStats stats) {
-        final Graphics g = baseImage.getGraphics();
+    private BufferedImage buildTitleSection(OSRSPlayerStats stats) {
+        final BufferedImage container = copyImage(titleContainer);
+        final Graphics g = container.getGraphics();
         g.setFont(getGameFont().deriveFont(140f));
         g.setColor(Color.YELLOW);
         FontMetrics fm = g.getFontMetrics();
 
         final String name = stats.getName();
-        final int centerVertical = 115;
-        final int x = (baseImage.getWidth() / 2) - (fm.stringWidth(name) / 2);
+        final int centreVertical = container.getHeight() / 2;
+        final int x = (container.getWidth() / 2) - (fm.stringWidth(name) / 2);
 
-        g.drawString(name.toUpperCase(), x, centerVertical + (fm.getMaxAscent() / 2));
+        g.drawString(name.toUpperCase(), x, centreVertical + (fm.getMaxAscent() / 2));
 
-        g.setFont(getGameFont().deriveFont(75f));
+        g.setFont(getGameFont().deriveFont(titleFontSize));
         fm = g.getFontMetrics();
 
         final PlayerStats.ACCOUNT accountType = stats.getAccountType();
@@ -1028,14 +1241,14 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             g.drawImage(
                     accountImage,
                     x - (int) (accountImage.getWidth() * 1.5),
-                    centerVertical - (accountImage.getHeight() / 2),
+                    centreVertical - (accountImage.getHeight() / 2),
                     null
             );
         }
 
         final int edgePadding = 2 * border; // Padding from outer edges
         final int imagePadding = 15; // Padding from text to image
-        final int textY = centerVertical + (fm.getMaxAscent() / 2); // Centre text vertically
+        final int textY = centreVertical + (fm.getMaxAscent() / 2); // Centre text vertically
 
         // Draw combat level on left side of title section
         final String combat = String.valueOf(stats.getCombatLevel());
@@ -1043,7 +1256,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         g.drawImage(
                 combatImage,
                 edgePadding,
-                centerVertical - (combatImage.getHeight() / 2),
+                centreVertical - (combatImage.getHeight() / 2),
                 null
         );
         g.drawString(combat, edgePadding + combatImage.getWidth() + imagePadding, textY);
@@ -1051,41 +1264,43 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         // Draw rank info on right side of title section
         final String rank = "Rank: " + stats.getFormattedRank();
         final BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
-        final int rankX = baseImage.getWidth() - edgePadding - fm.stringWidth(rank);
+        final int rankX = container.getWidth() - edgePadding - fm.stringWidth(rank);
 
         g.drawString(rank, rankX, textY);
         g.drawImage(
                 rankImage,
                 rankX - imagePadding - rankImage.getWidth(),
-                centerVertical - (rankImage.getHeight() / 2),
+                centreVertical - (rankImage.getHeight() / 2),
                 null
         );
         g.dispose();
+        return container;
     }
 
     /**
-     * Add clue scroll completions to the base image
+     * Build an image displaying the given clue scroll completions.
+     * This image is a horizontal list of clue scroll images.
+     * Each clue scroll image contains the type of clue, an image of the clue, and the player's completions of the clue.
+     * These are displayed left to right in ascending order of difficulty.
+     * Clue scrolls without any completions are displayed with a red overlay.
      *
-     * @param baseImage Base player image
-     * @param clues     List of clue completions
+     * @param clues List of clue scroll completions
+     * @return Image displaying player clue scroll completions
      */
-    private BufferedImage addClues(BufferedImage baseImage, Clue[] clues) {
-        final BufferedImage clueSection = getResourceHandler().getImageResource(
-                getResourcePath() + "clues_container.png"
-        );
+    private BufferedImage buildClueSection(Clue[] clues) {
+        final BufferedImage container = copyImage(cluesContainer);
 
-        Graphics g = clueSection.getGraphics();
+        Graphics g = container.getGraphics();
 
         final int maxClues = clues.length - 1; // Not drawing "ALL" type clue
-        final int border = 28; // TODO fix
 
         // Always calculate for max clues
-        final int clueWidth = (clueSection.getWidth() - (2 * border)) / maxClues;
-        final int clueHeight = clueSection.getHeight() - (2 * border);
+        final int clueWidth = (container.getWidth() - (2 * border)) / maxClues;
+        final int clueHeight = container.getHeight() - (2 * border);
 
         int x = border;
 
-        // Build clue stat images with transparent backgrounds to slot in to the clue section
+        // Build clue stat images with transparent backgrounds to place in to the clue section
         for(Clue clue : clues) {
             if(clue.getType() == Clue.TYPE.ALL) {
                 continue;
@@ -1094,18 +1309,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             g.drawImage(clueImage, x, border, null);
             x += clueWidth;
         }
-
-        final BufferedImage combined = new BufferedImage(
-                baseImage.getWidth(),
-                baseImage.getHeight() + clueSection.getHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
-
-        g = combined.getGraphics();
-        g.drawImage(baseImage, 0, 0, null);
-        g.drawImage(clueSection, 0, baseImage.getHeight(), null);
         g.dispose();
-        return combined;
+        return container;
     }
 
     /**
@@ -1134,7 +1339,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             return background;
         }
 
-        // Draw clue centered in background
+        // Draw clue centred in background
         g.drawImage(
                 clueImage,
                 centreHorizontal - (clueImage.getWidth() / 2),
@@ -1162,9 +1367,9 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                 (height - textBoxHeight) + textY // Bottom text box begins at (height - textBoxHeight)
         );
 
-        // Draw an opaque red layer over incomplete clues
-        if(!clue.hasCompletions()) {
-            g.setColor(opaqueRed);
+        // Draw a red overlay on incomplete clues
+        if(!clue.hasCompletions()){
+            g.setColor(redOverlay);
             g.fillRect(0, 0, width, height);
         }
 
@@ -1173,42 +1378,53 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Append XP tracker info to the player image
-     *
-     * @param baseImage Base player image
-     * @param stats     Player stats
-     * @return Base image with XP tracker appended
-     */
-    private BufferedImage addXPTracker(BufferedImage baseImage, OSRSPlayerStats stats) {
-        BufferedImage trackerSection = buildTrackerSection(stats);
-        BufferedImage trackerImage = new BufferedImage(
-                baseImage.getWidth() + trackerSection.getWidth(),
-                baseImage.getHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
-        Graphics g = trackerImage.getGraphics();
-        g.drawImage(baseImage, 0, 0, null);
-        g.drawImage(trackerSection, baseImage.getWidth(), 0, null);
-        g.dispose();
-        return trackerImage;
-    }
-
-    /**
      * Build an image displaying the player's weekly gained XP
      *
      * @param stats Player stats
      * @return Image displaying player's weekly gained XP
      */
-    private BufferedImage buildTrackerSection(OSRSPlayerStats stats) {
-        BufferedImage image = getResourceHandler()
-                .getImageResource(
-                        getResourcePath() + "xp_tracker_container.png"
-                );
+    private BufferedImage buildXpTrackerSection(OSRSPlayerStats stats) {
+        BufferedImage container = new BufferedImage(
+                xpHeader.getWidth(),
+                xpHeader.getHeight() + xpContainer.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
 
-        Graphics g = image.getGraphics();
-        g.setFont(trackerFont.deriveFont(40f));
-        g.setColor(Color.YELLOW);
-        FontMetrics fm = g.getFontMetrics();
+        BufferedImage tracker = copyImage(xpContainer);
+        Graphics g = tracker.getGraphics();
+
+        Skill[] skills = stats.getSkills();
+        int rowHeight = (tracker.getHeight() - (2 * border)) / skills.length;
+        int rowWidth = tracker.getWidth() - (2 * border);
+        int y = border;
+
+        for(int i = 0; i < skills.length; i++) {
+            Skill skill = skills[i];
+            Color colour = i % 2 == 0 ? dark : light;
+            BufferedImage row = buildSkillXpRow(rowWidth, rowHeight, colour, skill);
+            g.drawImage(row, border, y, null);
+            y += rowHeight;
+        }
+
+        BufferedImage header = buildXpTrackerHeader(stats);
+        g = container.getGraphics();
+        g.drawImage(header, 0, 0, null);
+        g.drawImage(tracker, 0, header.getHeight(), null);
+        g.dispose();
+        return container;
+    }
+
+    /**
+     * Build the XP tracker header image.
+     * This displays the weekly period for which the XP gains are from.
+     *
+     * @param stats Player stats
+     * @return XP tracker header image
+     */
+    private BufferedImage buildXpTrackerHeader(OSRSPlayerStats stats) {
+        BufferedImage header = copyImage(xpHeader);
+        Graphics g = header.getGraphics();
+        setXpTrackerFont(g);
 
         String trackerPeriod = displayFormat.format(stats.getTrackerStartDate())
                 + " - "
@@ -1216,60 +1432,91 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         g.drawString(
                 trackerPeriod,
-                660 - (fm.stringWidth(trackerPeriod) / 2),
+                660 - (g.getFontMetrics().stringWidth(trackerPeriod) / 2),
                 166
         );
-
-        DecimalFormat df = new DecimalFormat("#,### XP");
-        int iconX = 64, skillX = 150, expX = 500, gap = 68, y = 362;
-
-        for(Skill skill : stats.getSkills()) {
-            BufferedImage icon = skill.getImage();
-            int sectionMid = y - (gap / 2);
-            if(icon != null) {
-                g.drawImage(icon, iconX, sectionMid - (icon.getHeight() / 2), null);
-            }
-
-            int textY = sectionMid + (fm.getMaxAscent() / 2);
-
-            String name = StringUtils.capitalize(skill.getName().name().toLowerCase());
-            String xp = df.format(skill.getGainedXP());
-            if(skill.hasGainedXP()) {
-                g.setColor(Color.GREEN);
-                xp = "+" + xp;
-            }
-            else {
-                g.setColor(Color.WHITE);
-            }
-            g.drawString(name, skillX, textY);
-            g.drawString(xp, expX, textY);
-            y += gap;
-        }
         g.dispose();
-        return image;
+        return header;
     }
 
     /**
-     * Append league relics and region unlocks to the player image
+     * Set the font and font size for drawing in the XP container
      *
-     * @param baseImage Base Player image
-     * @param stats     Player stats
-     * @return Base image with league relics/regions appended
+     * @param g Graphics instance to set font on
      */
-    private BufferedImage buildLeagueImage(BufferedImage baseImage, OSRSPlayerStats stats) {
+    private void setXpTrackerFont(Graphics g) {
+        g.setFont(trackerFont.deriveFont(40f));
+        g.setColor(Color.YELLOW);
+    }
+
+    /**
+     * Build an image displaying the XP gained in the given skill alongside the icon and skill name
+     *
+     * @param width  Width of image
+     * @param height Height of image
+     * @param colour Colour to fill row
+     * @param skill  Skill to display XP from
+     * @return XP displaying gained XP in the given skill
+     */
+    private BufferedImage buildSkillXpRow(int width, int height, Color colour, Skill skill) {
+        BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = row.getGraphics();
+
+        g.setColor(colour);
+        g.fillRect(0, 0, width, height);
+        setXpTrackerFont(g);
+
+        final int iconWidth = 50;
+
+        int iconX = border;
+        int expX = row.getWidth() / 2;
+        int sectionMid = row.getHeight() / 2;
+
+        BufferedImage icon = skill.getImage();
+        if(icon == null) {
+            g.dispose();
+            return row;
+        }
+
+        g.drawImage(icon, iconX, sectionMid - (icon.getHeight() / 2), null);
+        int textY = sectionMid + (g.getFontMetrics().getMaxAscent() / 2);
+
+        String name = StringUtils.capitalize(skill.getName().name().toLowerCase());
+        String xp = new DecimalFormat("#,### XP").format(skill.getGainedXP());
+
+        if(skill.hasGainedXP()) {
+            g.setColor(Color.GREEN);
+            xp = "+" + xp;
+        }
+        else {
+            g.setColor(Color.WHITE);
+        }
+        g.drawString(name, iconX + iconWidth + border, textY);
+        g.drawString(xp, expX, textY);
+        g.dispose();
+        return row;
+    }
+
+    /**
+     * Build an image displaying league relics and region unlocks.
+     * These are displayed side by side
+     *
+     * @param stats Player stats
+     * @return Image displaying league relics/region unlocks
+     */
+    private BufferedImage buildLeagueUnlockSection(OSRSPlayerStats stats) {
         BufferedImage regionImage = buildRegionSection(stats.getRegions());
         BufferedImage relicImage = buildRelicSection(stats.getRelicTiers());
 
         BufferedImage leagueImage = new BufferedImage(
-                baseImage.getWidth(),
-                baseImage.getHeight() + regionImage.getHeight(),
+                regionImage.getWidth() + relicImage.getWidth(),
+                regionImage.getHeight(), // Same height as relic image
                 BufferedImage.TYPE_INT_ARGB
         );
 
         Graphics g = leagueImage.getGraphics();
-        g.drawImage(baseImage, 0, 0, null);
-        g.drawImage(relicImage, 0, baseImage.getHeight(), null);
-        g.drawImage(regionImage, relicImage.getWidth(), baseImage.getHeight(), null);
+        g.drawImage(relicImage, 0, 0, null);
+        g.drawImage(regionImage, relicImage.getWidth(), 0, null);
         g.dispose();
         return leagueImage;
     }
@@ -1282,9 +1529,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @return Image displaying player relics
      */
     private BufferedImage buildRelicSection(ArrayList<RelicTier> relicTiers) {
-        BufferedImage relicContainer = getResourceHandler().getImageResource(
-                getResourcePath() + "relic_container.png"
-        );
+        BufferedImage relicContainer = copyImage(this.relicContainer);
         BufferedImage lockedRelic = getResourceHandler().getImageResource(Relic.RES + Relic.LOCKED_RELIC_FILENAME);
         Graphics g = relicContainer.getGraphics();
         g.setFont(getGameFont().deriveFont(40f));
@@ -1337,9 +1582,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      */
     private BufferedImage buildRegionSection(ArrayList<Region> regions) {
         BufferedImage map = getResourceHandler().getImageResource(Region.RES + Region.BASE_MAP_FILENAME);
-        BufferedImage mapContainer = getResourceHandler().getImageResource(
-                getResourcePath() + "map_container.png"
-        );
+        BufferedImage mapContainer = copyImage(this.mapContainer);
         Graphics g = map.getGraphics();
         for(Region region : regions) {
             g.drawImage(
