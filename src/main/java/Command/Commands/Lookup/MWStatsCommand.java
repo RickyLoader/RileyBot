@@ -15,7 +15,7 @@ public class MWStatsCommand extends MWLookupCommand {
         super(
                 "mwlookup",
                 "Have a gander at a player's Modern Warfare stats!",
-                getHelpText("mwlookup") + " +[weapon/equipment name]"
+                getHelpText("mwlookup") + " +[weapon/equipment/etc name]"
         );
     }
 
@@ -28,6 +28,7 @@ public class MWStatsCommand extends MWLookupCommand {
                 "MW",
                 FontManager.MODERN_WARFARE_FONT
         );
+
         if(weaponName == null) {
             combatRecordImageBuilder.buildCombatRecordImage(
                     name,
@@ -36,7 +37,7 @@ public class MWStatsCommand extends MWLookupCommand {
             );
         }
         else {
-            combatRecordImageBuilder.buildWeaponRecordImage(
+            combatRecordImageBuilder.buildQueryImage(
                     name,
                     getPlatform(),
                     weaponName,

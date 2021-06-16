@@ -2,13 +2,11 @@ package COD.PlayerStats;
 
 import COD.Assets.Killstreak;
 import COD.Assets.Ratio;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Player killstreak stats
  */
-public class KillstreakStats implements Comparable<KillstreakStats> {
-    private final Killstreak killstreak;
+public class KillstreakStats extends AssetStats<Killstreak> {
     private final Ratio statUse;
 
     /**
@@ -19,17 +17,8 @@ public class KillstreakStats implements Comparable<KillstreakStats> {
      * @param uses         Total number of uses of the killstreak by the player
      */
     public KillstreakStats(Killstreak killstreak, int statQuantity, int uses) {
-        this.killstreak = killstreak;
+        super(killstreak);
         this.statUse = new Ratio(statQuantity, uses);
-    }
-
-    /**
-     * Get the killstreak that the player stats pertain to
-     *
-     * @return Killstreak that player stats pertain to
-     */
-    public Killstreak getKillstreak() {
-        return killstreak;
     }
 
     /**
@@ -78,7 +67,7 @@ public class KillstreakStats implements Comparable<KillstreakStats> {
     }
 
     @Override
-    public int compareTo(@NotNull KillstreakStats o) {
-        return o.getUses() - getUses();
+    public int getSortValue() {
+        return getUses();
     }
 }

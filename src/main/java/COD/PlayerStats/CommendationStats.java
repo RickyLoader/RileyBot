@@ -1,15 +1,13 @@
 package COD.PlayerStats;
 
 import COD.Assets.Commendation;
-import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 
 /**
  * Player commendation stats
  */
-public class CommendationStats implements Comparable<CommendationStats> {
-    private final Commendation commendation;
+public class CommendationStats extends AssetStats<Commendation> {
     private final int quantity;
 
     /**
@@ -19,7 +17,7 @@ public class CommendationStats implements Comparable<CommendationStats> {
      * @param quantity     Quantity of commendation that player has achieved
      */
     public CommendationStats(Commendation commendation, int quantity) {
-        this.commendation = commendation;
+        super(commendation);
         this.quantity = quantity;
     }
 
@@ -33,15 +31,6 @@ public class CommendationStats implements Comparable<CommendationStats> {
     }
 
     /**
-     * Get the commendation that the player stats pertain to
-     *
-     * @return Commendation
-     */
-    public Commendation getCommendation() {
-        return commendation;
-    }
-
-    /**
      * Format the quantity from 1 to x1
      *
      * @return Formatted quantity
@@ -51,7 +40,7 @@ public class CommendationStats implements Comparable<CommendationStats> {
     }
 
     @Override
-    public int compareTo(@NotNull CommendationStats o) {
-        return o.getQuantity() - getQuantity();
+    public int getSortValue() {
+        return getQuantity();
     }
 }

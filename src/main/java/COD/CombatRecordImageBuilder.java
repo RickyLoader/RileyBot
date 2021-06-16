@@ -56,7 +56,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
      */
     private BufferedImage drawWeapon(WeaponStats weaponStats) {
         BufferedImage image = null;
-        Weapon weapon = weaponStats.getWeapon();
+        Weapon weapon = weaponStats.getAsset();
         try {
             int x = 277;
             image = getWeaponImage(weapon.getType());
@@ -144,7 +144,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
      */
     private BufferedImage drawSuper(FieldUpgradeStats fieldUpgradeStats) {
         BufferedImage image = null;
-        FieldUpgrade fieldUpgrade = fieldUpgradeStats.getFieldUpgrade();
+        FieldUpgrade fieldUpgrade = fieldUpgradeStats.getAsset();
         try {
             image = getResourceHandler().getImageResource(getResourcePath() + "Templates/field_upgrade_section.png");
             BufferedImage superImage = fieldUpgrade.getImage();
@@ -263,7 +263,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             for(int i = 0; i < Math.min(5, allCommendationStats.size()); i++) {
                 g.setFont(getGameFont().deriveFont(32f));
                 CommendationStats commendationStats = allCommendationStats.get(i);
-                Commendation commendation = commendationStats.getCommendation();
+                Commendation commendation = commendationStats.getAsset();
 
                 BufferedImage icon = commendation.getImage();
 
@@ -338,20 +338,20 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             g.setFont(getGameFont());
             KillstreakStats largest = topKillstreakStats
                     .stream()
-                    .max(Comparator.comparing(stats -> stats.getKillstreak().getImage().getHeight()))
+                    .max(Comparator.comparing(stats -> stats.getAsset().getImage().getHeight()))
                     .orElse(null);
 
             if(largest == null) {
                 throw new Exception("Unable to determine largest height for killstreaks");
             }
 
-            int maxHeight = largest.getKillstreak().getImage().getHeight();
+            int maxHeight = largest.getAsset().getImage().getHeight();
             int padding = (image.getWidth() - (280 * 5)) / 6;
             int x = padding;
             for(KillstreakStats killstreakStats : topKillstreakStats) {
-                Killstreak killstreak = killstreakStats.getKillstreak();
+                Killstreak killstreak = killstreakStats.getAsset();
                 g.setFont(getGameFont().deriveFont(32f));
-                BufferedImage icon = killstreakStats.getKillstreak().getImage();
+                BufferedImage icon = killstreakStats.getAsset().getImage();
                 int y = (200 + (maxHeight / 2) - (icon.getHeight() / 2));
 
                 g.drawImage(icon, x, y, null);
@@ -416,26 +416,26 @@ public class CombatRecordImageBuilder extends ImageBuilder {
     }
 
     /**
-     * Build an image displaying the player's stats for the weapon/equipment of
+     * Build an image displaying the player's stats for the weapon/equipment/etc of
      * the given name.
      *
      * @param nameQuery  Player name to search for
      * @param platform   Player platform
-     * @param weaponName Name of weapon to display stats for
+     * @param name Name of weapon to display stats for
      * @param channel    Channel to send image to
      */
-    public void buildWeaponRecordImage(String nameQuery, PLATFORM platform, String weaponName, MessageChannel channel) {
+    public void buildQueryImage(String nameQuery, PLATFORM platform, String name, MessageChannel channel) {
         ImageLoadingMessage loadingMessage = buildImageLoadingMessage(
-                "MW " + weaponName.toUpperCase() + " Stats: " + nameQuery.toUpperCase(),
+                "MW " + name.toUpperCase() + " Stats: " + nameQuery.toUpperCase(),
                 channel
         );
         MWPlayerStats playerStats = initialisePlayerStats(nameQuery, platform, loadingMessage);
         if(!playerStats.success()) {
             return;
         }
-        WeaponStats weaponStats = playerStats.getWeaponStatsByName(weaponName);
+        WeaponStats weaponStats = playerStats.getWeaponStatsByName(name);
         if(weaponStats == null) {
-            loadingMessage.failLoading("I didn't any weapon/equipment for: **" + weaponName + "**");
+            loadingMessage.failLoading("I didn't any weapon/equipment for: **" + name + "**");
             return;
         }
         BufferedImage weaponImage = drawWeapon(weaponStats);

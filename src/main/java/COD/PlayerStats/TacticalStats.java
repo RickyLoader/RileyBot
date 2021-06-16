@@ -1,7 +1,7 @@
 package COD.PlayerStats;
 
 import COD.Assets.Ratio;
-import COD.Assets.Weapon;
+import COD.Assets.TacticalWeapon;
 
 /**
  * Tactical equipment player stats
@@ -16,7 +16,7 @@ public class TacticalStats extends WeaponStats {
      * @param stat   Number of unique stat for this tactical equipment
      * @param uses   Number of uses of the tactical equipment
      */
-    public TacticalStats(Weapon weapon, int stat, int uses) {
+    public TacticalStats(TacticalWeapon weapon, int stat, int uses) {
         super(weapon);
         this.statUse = new Ratio(stat, uses);
     }

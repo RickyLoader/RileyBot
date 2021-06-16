@@ -229,7 +229,7 @@ public class MWPlayerStats {
     private HashMap<String, WeaponStats> mapWeaponStats(ArrayList<WeaponStats> weaponStats) {
         HashMap<String, WeaponStats> weaponStatsMap = new HashMap<>();
         for(WeaponStats stats : weaponStats) {
-            weaponStatsMap.put(stats.getWeapon().getName().toLowerCase(), stats);
+            weaponStatsMap.put(stats.getAsset().getName().toLowerCase(), stats);
         }
         return weaponStatsMap;
     }
@@ -263,7 +263,7 @@ public class MWPlayerStats {
     private WeaponStats getFavouriteWeapon(ArrayList<WeaponStats> stats, Weapon.TYPE type) {
         ArrayList<WeaponStats> filtered = stats
                 .stream()
-                .filter(weaponStats -> weaponStats.getWeapon().getType() == type)
+                .filter(weaponStats -> weaponStats.getAsset().getType() == type)
                 .sorted()
                 .collect(Collectors.toCollection(ArrayList::new));
         return filtered.get(0);
@@ -382,7 +382,7 @@ public class MWPlayerStats {
                         break;
                     case TACTICAL:
                         stats = new TacticalStats(
-                                weapon,
+                                (TacticalWeapon) weapon,
                                 weaponData.getInt("extraStat1"),
                                 weaponData.getInt("uses")
                         );

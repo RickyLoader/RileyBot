@@ -2,16 +2,13 @@ package COD.PlayerStats;
 
 import COD.Assets.FieldUpgrade;
 import COD.Assets.Ratio;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Player field upgrade stats
  */
-public class FieldUpgradeStats implements Comparable<FieldUpgradeStats> {
-    private final FieldUpgrade fieldUpgrade;
+public class FieldUpgradeStats extends AssetStats<FieldUpgrade> {
     private final Ratio killUse;
     private final int propertyStat;
-
 
     /**
      * Create player stats for the given field upgrade
@@ -22,7 +19,7 @@ public class FieldUpgradeStats implements Comparable<FieldUpgradeStats> {
      * @param propertyStat Quantity of unique field upgrade property that the player has earned e.g Longest streak
      */
     public FieldUpgradeStats(FieldUpgrade fieldUpgrade, int kills, int uses, int propertyStat) {
-        this.fieldUpgrade = fieldUpgrade;
+        super(fieldUpgrade);
         this.killUse = new Ratio(kills, uses);
         this.propertyStat = propertyStat;
     }
@@ -91,17 +88,8 @@ public class FieldUpgradeStats implements Comparable<FieldUpgradeStats> {
         return killUse.formatRatio(killUse.getRatio());
     }
 
-    /**
-     * Get the field upgrade that the player stats pertain to
-     *
-     * @return Field upgrade that player stats pertain to
-     */
-    public FieldUpgrade getFieldUpgrade() {
-        return fieldUpgrade;
-    }
-
     @Override
-    public int compareTo(@NotNull FieldUpgradeStats o) {
-        return o.getUses() - getUses();
+    public int getSortValue() {
+        return getUses();
     }
 }
