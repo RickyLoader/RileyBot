@@ -494,8 +494,8 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             statsSummary.add(stats.formatAverageStatQuantity());
         }
 
-        // Add 2x font size for gap below image
-        final int statsBeginY = imageY + killstreakImage.getHeight() + (fm.getMaxAscent() * 2);
+        // Add font height to add gap below image
+        final int statsBeginY = imageY + killstreakImage.getHeight() + (fm.getMaxAscent());
         final int remainingArea = image.getHeight() - statsBeginY - BORDER;
 
         // Height of area to use per stat, centre text within
@@ -569,7 +569,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
 
         // More than one result - display as pageable embed
         if(statsList.size() > 1) {
-            loadingMessage.failLoading("You'll have to narrow down that query bro!");
+            loadingMessage.failLoading("You'll have to narrow that query down bro!");
             new PageableCODAssetStatsEmbed(
                     context,
                     statsList,
@@ -578,7 +578,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
                     helpMessage,
                     "This player has **"
                             + (statsList.isEmpty() ? "no" : statsList.size())
-                            + "** stats available for: **" + assetName + "**"
+                            + "** stats available for: **" + assetName + "**\n\nTry using the **Codename**!"
             ) {
                 @Override
                 public void sortItems(List<?> items, boolean defaultSort) {

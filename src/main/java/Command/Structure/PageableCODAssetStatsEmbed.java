@@ -29,7 +29,7 @@ public abstract class PageableCODAssetStatsEmbed extends PageableTableEmbed {
                 title,
                 description,
                 footer,
-                new String[]{"Name", "Type"},
+                new String[]{"Codename", "Name", "Type"},
                 5,
                 items.isEmpty() ? EmbedHelper.RED : EmbedHelper.FIRE_ORANGE
         );
@@ -38,7 +38,12 @@ public abstract class PageableCODAssetStatsEmbed extends PageableTableEmbed {
     @Override
     public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
         AssetStats<? extends CODAsset> assetStats = (AssetStats<? extends CODAsset>) items.get(index);
-        return new String[]{assetStats.getAsset().getName(), getStatsType(assetStats)};
+        CODAsset asset = assetStats.getAsset();
+        return new String[]{
+                asset.getCodename(),
+                asset.getName(),
+                getStatsType(assetStats)
+        };
     }
 
     /**

@@ -31,10 +31,10 @@ public class Commendation extends CODAsset {
     }
 
     /**
-     * Check if the query is found in the commendation name or description
+     * Check if the query is found in the commendation name, codename, or description
      *
-     * @param query Query to check for in the commendation name or description
-     * @return Query found in name or description
+     * @param query Query to check for in the commendation name, codename, or description
+     * @return Query found in name, codename, or description
      */
     @Override
     public boolean isPartialMatch(String query) {
