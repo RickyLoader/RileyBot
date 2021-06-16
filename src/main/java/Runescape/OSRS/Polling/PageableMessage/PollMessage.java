@@ -17,7 +17,6 @@ public class PollMessage extends PageableListEmbed {
     private final String pass, fail, answer;
     private final ProgressBar progressBar;
     private final boolean open;
-    private final int maxSwordEmoteLength;
     private final Emote blankEmote;
 
     /**
@@ -51,9 +50,6 @@ public class PollMessage extends PageableListEmbed {
         this.answer = emoteHelper.getPollAnswerShield().getAsMention();
         this.open = poll.isOpen();
         this.blankEmote = emoteHelper.getBlankGap();
-
-        // Emote length of maximum possible sword emote (100% votes and sword tip added)
-        this.maxSwordEmoteLength = progressBar.getEmoteLength(calculateSwordSections(100d), true);
     }
 
     @Override
@@ -94,7 +90,8 @@ public class PollMessage extends PageableListEmbed {
                 builder.append(
                         buildSword(
                                 a.getPercentageVote(),
-                                question.isOpinionQuestion() && a == question.getWinner()
+                                question.getWinner().getPercentageVote(),
+                                question.isOpinionQuestion()
                         )
                 )
                         .append(" ")
@@ -115,13 +112,24 @@ public class PollMessage extends PageableListEmbed {
 
     /**
      * Build the sword emote image based on the percentage of votes an Answer has.
-     * Pad the sword out with blank characters to always be a consistent size (the size of a 100% vote)
+     * Pad the sword out with blank characters to always be a consistent size (the size of the winning answer's sword)
      *
-     * @param percentageVotes Percentage of total votes the answer to a question has
-     * @param highestOpinion  Answer is the highest voted opinion of an opinion question
+     * @param percentageVotes        Percentage of total votes the answer to a question has
+     * @param winningPercentageVotes Winning answer's percentage of total votes
+     * @param opinionQuestion        Answer if from an opinion question
      * @return Image of a sword
      */
-    private String buildSword(double percentageVotes, boolean highestOpinion) {
+    private String buildSword(double percentageVotes, double winningPercentageVotes, boolean opinionQuestion) {
+        // Emote length of winning answer's sword emote
+        int maxSwordEmoteLength = progressBar.getEmoteLength(
+                calculateSwordSections(winningPercentageVotes),
+                true
+        );
+
+        if(opinionQuestion){
+            maxSwordEmoteLength++; // +1 for checkmark emote
+        }
+
         final int sections = calculateSwordSections(percentageVotes);
 
         String sword = progressBar.build(sections, true);
@@ -131,7 +139,7 @@ public class PollMessage extends PageableListEmbed {
          * The question is an opinion question and the answer is the highest voted opinion,
          * prepend a checkmark emote to the sword
          */
-        if(highestOpinion) {
+        if(opinionQuestion && percentageVotes == winningPercentageVotes) {
             sword = pass + sword;
             swordEmoteLength++; // +1 for checkmark emote
         }
