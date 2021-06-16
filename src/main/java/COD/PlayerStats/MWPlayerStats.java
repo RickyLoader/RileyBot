@@ -21,7 +21,7 @@ public class MWPlayerStats {
     private FieldUpgradeStats fieldUpgradeStats;
     private ArrayList<KillstreakStats> killstreakStats;
     private ArrayList<CommendationStats> commendationStats;
-    private HashMap<String, WeaponStats> weaponStats;
+    private ArrayList<AssetStats<? extends CODAsset>> assetStats;
 
     /**
      * Create a Modern Warfare player's stats
@@ -202,12 +202,13 @@ public class MWPlayerStats {
         weapons.remove("supers");
 
         ArrayList<WeaponStats> weaponStats = parseWeaponStats(weapons);
-        this.weaponStats = mapWeaponStats(weaponStats);
         this.primaryStats = (StandardWeaponStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.PRIMARY);
         this.secondaryStats = (StandardWeaponStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.SECONDARY);
         this.lethalStats = (LethalStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.LETHAL);
         this.tacticalStats = (TacticalStats) getFavouriteWeapon(weaponStats, Weapon.TYPE.TACTICAL);
-        this.fieldUpgradeStats = parseFavouriteFieldUpgrade(supers);
+
+        ArrayList<FieldUpgradeStats> fieldUpgradeStats = parseFieldUpgradeStats(supers);
+        this.fieldUpgradeStats = fieldUpgradeStats.get(0);
 
         JSONObject killstreaks = player.getJSONObject("scorestreakData");
         this.killstreakStats = parseKillstreakStats(
@@ -217,40 +218,35 @@ public class MWPlayerStats {
         this.commendationStats = parseCommendationStats(
                 player.getJSONObject("accoladeData").getJSONObject("properties")
         );
+
+        this.assetStats = new ArrayList<>();
+        assetStats.addAll(weaponStats);
+        assetStats.addAll(fieldUpgradeStats);
+        assetStats.addAll(commendationStats);
+        assetStats.addAll(killstreakStats);
         return json;
     }
 
     /**
-     * Create a map of weapon/equipment name -> player weapon stats
+     * Get a list of asset stats containing for the given query.
+     * If a singular matching asset stats is found, the returned list will contain only the match,
+     * otherwise the list will contain all asset stats matching the query.
      *
-     * @param weaponStats List of player weapon stats
-     * @return Map of weapon/equipment name ->player weapon stats
+     * @param query Asset query (Passed to asset to check for a match, assets may compare to different values)
+     * @return List of matching asset stats
      */
-    private HashMap<String, WeaponStats> mapWeaponStats(ArrayList<WeaponStats> weaponStats) {
-        HashMap<String, WeaponStats> weaponStatsMap = new HashMap<>();
-        for(WeaponStats stats : weaponStats) {
-            weaponStatsMap.put(stats.getAsset().getName().toLowerCase(), stats);
-        }
-        return weaponStatsMap;
-    }
+    public ArrayList<AssetStats<? extends CODAsset>> getAssetStatsByName(String query) {
+        ArrayList<AssetStats<? extends CODAsset>> results = assetStats
+                .stream()
+                .filter(assetStats -> assetStats.getAsset().isPartialMatch(query))
+                .collect(Collectors.toCollection(ArrayList::new));
 
-    /**
-     * Get the player's weapon stats for the given weapon name
-     *
-     * @param name Weapon name
-     * @return Player weapon stats or null
-     */
-    public WeaponStats getWeaponStatsByName(String name) {
-        WeaponStats stats = weaponStats.get(name.toLowerCase());
-        if(stats == null) {
-            for(String weaponName : weaponStats.keySet()) {
-                if(weaponName.contains(name)) {
-                    stats = weaponStats.get(weaponName);
-                    break;
-                }
-            }
-        }
-        return stats;
+        ArrayList<AssetStats<? extends CODAsset>> matching = results
+                .stream()
+                .filter(assetStats -> assetStats.getAsset().isExactMatch(query))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return matching.size() == 1 ? matching : results;
     }
 
     /**
@@ -277,20 +273,20 @@ public class MWPlayerStats {
      */
     private ArrayList<CommendationStats> parseCommendationStats(JSONObject commendations) {
         ArrayList<CommendationStats> commendationStats = new ArrayList<>();
-        try {
-            for(String commendationName : commendations.keySet()) {
-                Commendation commendation = MWManager.getInstance().getCommendationByCodename(commendationName);
-                commendationStats.add(
-                        new CommendationStats(
-                                commendation,
-                                commendations.getInt(commendationName)
-                        )
-                );
+
+        for(String commendationName : commendations.keySet()) {
+            Commendation commendation = MWManager.getInstance().getCommendationByCodename(commendationName);
+            if(commendation == null) {
+                continue;
             }
+            commendationStats.add(
+                    new CommendationStats(
+                            commendation,
+                            commendations.getInt(commendationName)
+                    )
+            );
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+
         Collections.sort(commendationStats);
         return commendationStats;
     }
@@ -327,22 +323,23 @@ public class MWPlayerStats {
 
 
     /**
-     * Parse the player's field upgrade JSON to find the highest field upgrade stats based on usage.
+     * Parse the player's field upgrade JSON in to a list of field upgrade stats
      *
      * @param superData Field upgrade JSON
-     * @return Player's top field upgrade stats
+     * @return List of field upgrade stats
      */
-    private FieldUpgradeStats parseFavouriteFieldUpgrade(JSONObject superData) {
+    private ArrayList<FieldUpgradeStats> parseFieldUpgradeStats(JSONObject superData) {
         ArrayList<FieldUpgradeStats> fieldUpgradeStats = new ArrayList<>();
-
         for(String superName : superData.keySet()) {
-
             // Counts Field Upgrade Pro (Running 2 field upgrades) as a field upgrade itself
             if(superName.equals("super_select")) {
                 continue;
             }
             JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
             FieldUpgrade fieldUpgrade = MWManager.getInstance().getSuperByCodename(superName);
+            if(fieldUpgrade == null) {
+                continue;
+            }
             fieldUpgradeStats.add(
                     new FieldUpgradeStats(
                             fieldUpgrade,
@@ -353,7 +350,7 @@ public class MWPlayerStats {
             );
         }
         Collections.sort(fieldUpgradeStats);
-        return fieldUpgradeStats.get(0);
+        return fieldUpgradeStats;
     }
 
     /**

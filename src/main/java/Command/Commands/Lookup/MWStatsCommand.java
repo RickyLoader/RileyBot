@@ -41,7 +41,7 @@ public class MWStatsCommand extends MWLookupCommand {
                     name,
                     getPlatform(),
                     weaponName,
-                    channel
+                    context
             );
         }
     }
