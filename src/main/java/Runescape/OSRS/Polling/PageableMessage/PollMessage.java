@@ -38,7 +38,7 @@ public class PollMessage extends PageableListEmbed {
                         + "\n**Votes**: " + (poll.isOpen() ? "None" : poll.getFormattedTotalVotes()),
                 footer,
                 3,
-                EmbedHelper.GREEN
+                poll.isOpen() ? EmbedHelper.ORANGE : EmbedHelper.GREEN
         );
         EmoteHelper emoteHelper = context.getEmoteHelper();
         this.progressBar = new ProgressBar(
