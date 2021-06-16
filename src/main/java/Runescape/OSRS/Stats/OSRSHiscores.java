@@ -648,7 +648,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         // Rank title will be different colour so must be drawn as two separate Strings
         final String rankTitle = "Rank: ";
-        final String rankValue = boss.getFormattedRank(); // 1,234 kills
+        final String rankValue = boss.getFormattedRank(); // 1,234
         final int rankTitleWidth = fm.stringWidth(rankTitle);
 
         /*
@@ -1315,7 +1315,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Build an image displaying the given clue and the player's total completions of it.
+     * Build an image displaying the given clue and a summary detailing the player's completions and rank.
      * This image has a transparent background to be drawn on top of the clue section.
      *
      * @param clue   Clue to display
@@ -1350,23 +1350,47 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         // Height of area above & below clue
         final int textBoxHeight = (height - clueImage.getHeight()) / 2;
+        final int centreTextVertical = textBoxHeight / 2;
 
-        // Add this to top of a text box to centre text
-        final int textY = (textBoxHeight / 2) + (fm.getMaxAscent() / 2);
-
+        // Draw name centred in the area above the clue image
         final String name = clue.getType().getName();
         g.drawString(
                 name,
                 centreHorizontal - (fm.stringWidth(name) / 2),
-                textY // Top text box begins at 0, drawing at textY centres text in it
+                centreTextVertical + (fm.getMaxAscent() / 2)
         );
 
+        g.setFont(getGameFont().deriveFont(50f));
+        fm = g.getFontMetrics();
+
+        // Centre of the area below the clue image
+        final int centreBottom = (height - textBoxHeight) + centreTextVertical;
+
+        // Draw completions above the centre line of the area below the clue image
         final String completions = clue.getFormattedCompletions();
         g.drawString(
                 completions,
                 centreHorizontal - (fm.stringWidth(completions) / 2),
-                (height - textBoxHeight) + textY // Bottom text box begins at (height - textBoxHeight)
+                centreBottom
         );
+
+        // Rank title will be different colour so must be drawn as two separate Strings
+        final String rankTitle = "Rank: ";
+        final String rankValue = clue.getFormattedRank(); // 1,234
+        final int rankTitleWidth = fm.stringWidth(rankTitle);
+
+        /*
+         * Calculate where to begin drawing the rank title such that when both Strings are drawn beside
+         * each other, the full String is centred.
+         */
+        final int rankX = centreHorizontal - ((rankTitleWidth + fm.stringWidth(rankValue)) / 2);
+
+        // Draw rank below the centre line of the area below the clue image
+        final int y = centreBottom + fm.getMaxAscent();
+        g.drawString(rankValue, rankX + rankTitleWidth, y); // Add rank title width to leave room for rank title to be drawn
+
+        g.setColor(Color.WHITE);
+        g.drawString(rankTitle, rankX, y);
 
         // Draw a red overlay on incomplete clues
         if(!clue.hasCompletions()) {

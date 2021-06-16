@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * Hold data on a clue scroll
@@ -155,6 +156,18 @@ public class Clue {
      */
     public int getRank() {
         return rank;
+    }
+
+    /**
+     * Get the rank formatted with commas
+     * If the rank is -1 (unranked) return a dash ("-")
+     * @return Formatted rank
+     */
+    public String getFormattedRank() {
+        if(rank == -1) {
+            return "-";
+        }
+        return NumberFormat.getNumberInstance().format(rank);
     }
 
     /**
