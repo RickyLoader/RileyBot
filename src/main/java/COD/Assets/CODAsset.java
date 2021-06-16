@@ -48,4 +48,26 @@ public class CODAsset {
     public String getName() {
         return name;
     }
+
+    /**
+     * Compare the given query String to the name of the asset
+     * Return true if the query matches the name.
+     *
+     * @param query Query to match to the asset name
+     * @return Query matches the asset name
+     */
+    public boolean isExactMatch(String query) {
+        return name.equalsIgnoreCase(query);
+    }
+
+    /**
+     * Compare the given query String to the name of the asset
+     * Return true if the query is found in the name.
+     *
+     * @param query Query to check for in the asset name
+     * @return Query is in the asset name
+     */
+    public boolean isPartialMatch(String query) {
+        return name.toLowerCase().contains(query.toLowerCase());
+    }
 }
