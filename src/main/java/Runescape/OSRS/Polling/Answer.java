@@ -42,6 +42,25 @@ public class Answer {
     }
 
     /**
+     * Get the text of the answer truncated to the given index
+     *
+     * @param truncatedTo Index to truncate to
+     * @return Answer text truncated to the given index
+     */
+    public String getText(int truncatedTo) {
+        boolean truncated = true;
+        if(truncatedTo < 0) {
+            truncatedTo = 0;
+        }
+        else if(truncatedTo > text.length()) {
+            truncatedTo = text.length();
+            truncated = false;
+        }
+        String text = this.text.substring(0, truncatedTo);
+        return truncated ? text + "..." : text;
+    }
+
+    /**
      * Get the percentage vote
      *
      * @return Percentage vote

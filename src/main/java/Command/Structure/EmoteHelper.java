@@ -38,6 +38,21 @@ public class EmoteHelper {
     }
 
     /**
+     * Get a String repeating the mention String of the given emote n times
+     *
+     * @param e Emote to repeat
+     * @param n Number of times to repeat
+     * @return Emote mention String repeated n times
+     */
+    public static String getRepeatedEmote(Emote e, int n) {
+        StringBuilder emoteString = new StringBuilder();
+        for(int i = 0; i < n; i++) {
+            emoteString.append(e.getAsMention());
+        }
+        return emoteString.toString();
+    }
+
+    /**
      * <img src="https://cdn.discordapp.com/emojis/847803447885430784.png"/>
      */
     public Emote getUndo() {
@@ -823,5 +838,12 @@ public class EmoteHelper {
      */
     public Emote getTrophy() {
         return get("848021441752203305");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/854617897603301426.png"/>
+     */
+    public Emote getPollAnswerShield() {
+        return get("854617897603301426");
     }
 }

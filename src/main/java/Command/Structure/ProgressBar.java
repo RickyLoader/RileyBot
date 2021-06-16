@@ -33,9 +33,33 @@ public class ProgressBar {
         for(int i = 0; i < sections; i++) {
             progressBar.append(section);
         }
-        if(sections > 0 && complete) {
+        if(shouldEndProgressBar(sections, complete)) {
             progressBar.append(end);
         }
         return progressBar.toString();
+    }
+
+    /**
+     * Get the number of emotes that will be used to build a progress bar with the given arguments.
+     *
+     * @param sections Sections to add
+     * @param complete Whether to cap the progress bar with the end emote
+     * @return Emote length of progress bar
+     */
+    public int getEmoteLength(int sections, boolean complete) {
+        final int base = 1 + sections; // Start emote & sections
+        return shouldEndProgressBar(sections, complete) ? base + 1 : base;
+    }
+
+    /**
+     * Check whether a progress bar with the given arguments should have the end emote added.
+     * This is if there is more than one section and complete is true.
+     *
+     * @param sections Sections to add
+     * @param complete Whether to cap the progress bar with the end emote
+     * @return Progress bar should have end emote added
+     */
+    private boolean shouldEndProgressBar(int sections, boolean complete) {
+        return complete && sections > 0;
     }
 }
