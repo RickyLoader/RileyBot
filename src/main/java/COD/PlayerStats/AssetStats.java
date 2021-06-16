@@ -4,7 +4,7 @@ import COD.Assets.CODAsset;
 import org.jetbrains.annotations.NotNull;
 
 // Stats for a COD item
-public abstract class AssetStats<T extends CODAsset> implements Comparable<AssetStats<T>>{
+public abstract class AssetStats<T extends CODAsset> implements Comparable<AssetStats<T>> {
     private final T asset;
 
     /**
