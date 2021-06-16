@@ -16,27 +16,44 @@ import java.util.ArrayList;
  */
 public class OSRSPollCommand extends DiscordCommand {
     private final PollManager pollManager;
+    private static final String
+            LATEST = "latest",
+            TRIGGER = "osrspoll";
 
     public OSRSPollCommand() {
-        super("osrspoll\nosrspoll [poll number/poll name]", "Look at poll results!");
+        super(
+                TRIGGER,
+                "Look at poll results!",
+                TRIGGER + " " + LATEST + "\n" + TRIGGER + " [poll number/poll name]"
+        );
         this.pollManager = new PollManager();
     }
 
     @Override
     public void execute(CommandContext context) {
-        String message = context.getLowerCaseMessage().replace("osrspoll", "").trim();
+        String message = context.getLowerCaseMessage().replace(getTrigger(), "").trim();
         MessageChannel channel = context.getMessageChannel();
+
+        if(message.isEmpty()) {
+            channel.sendMessage(getHelpNameCoded()).queue();
+            return;
+        }
+
         channel.sendTyping().queue();
 
         int number = 0;
-        if(!message.isEmpty()) {
+
+        // Not asking for latest
+        if(!message.equals(LATEST)) {
             number = toInteger(message);
+
+            // Message was NaN, Searching by title
             if(number == 0) {
                 ArrayList<Poll> results = pollManager.getPollsByTitle(message);
                 if(results.isEmpty()) {
                     context.getMessageChannel().sendMessage(
                             context.getMember().getAsMention()
-                                    + " I didn't find any polls with **" + message + "** in the title"
+                                    + " I didn't find any polls with **" + message + "** in the **title**"
                     ).queue();
                     return;
                 }
@@ -49,6 +66,8 @@ public class OSRSPollCommand extends DiscordCommand {
                     ).showMessage();
                     return;
                 }
+
+                // Assign poll number
                 number = results.get(0).getNumber();
             }
         }
@@ -61,11 +80,11 @@ public class OSRSPollCommand extends DiscordCommand {
             ).queue();
             return;
         }
-        new PollMessage(context, poll, "Try: " + getHelpName()).showMessage();
+        new PollMessage(context, poll, "Type: " + getTrigger() + " for help").showMessage();
     }
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("osrspoll");
+        return query.startsWith(getTrigger());
     }
 }
