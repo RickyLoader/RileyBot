@@ -6,6 +6,7 @@ import Runescape.OSRS.Polling.PageableMessage.PollSearchResultsMessage;
 import Runescape.OSRS.Polling.Poll;
 import Runescape.OSRS.Polling.PollManager;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -33,6 +34,7 @@ public class OSRSPollCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         String message = context.getLowerCaseMessage().replace(getTrigger(), "").trim();
         MessageChannel channel = context.getMessageChannel();
+        Member member = context.getMember();
 
         if(message.isEmpty()) {
             channel.sendMessage(getHelpNameCoded()).queue();
@@ -51,8 +53,8 @@ public class OSRSPollCommand extends DiscordCommand {
             if(number == 0) {
                 ArrayList<Poll> results = pollManager.getPollsByTitle(message);
                 if(results.isEmpty()) {
-                    context.getMessageChannel().sendMessage(
-                            context.getMember().getAsMention()
+                    channel.sendMessage(
+                            member.getAsMention()
                                     + " I didn't find any polls with **" + message + "** in the **title**"
                     ).queue();
                     return;
@@ -75,7 +77,7 @@ public class OSRSPollCommand extends DiscordCommand {
         Poll poll = pollManager.getPollByNumber(number);
         if(poll == null) {
             channel.sendMessage(
-                    context.getMember().getAsMention()
+                    member.getAsMention()
                             + " Poll #" + number + " doesn't exist (or I couldn't parse it)"
             ).queue();
             return;
