@@ -83,7 +83,6 @@ public class PollManager {
     private Poll completePoll(Poll poll) {
         try {
             Document doc = Jsoup.connect(poll.getUrl()).get();
-
             poll = new PollBuilder()
                     .setPollNumber(poll.getNumber())
                     .setTitle(poll.getTitle())
@@ -95,8 +94,7 @@ public class PollManager {
                     .build();
         }
         catch(Exception e) {
-            e.printStackTrace();
-            System.out.println("Error parsing: " + poll.getUrl());
+            return null;
         }
         return poll;
     }
@@ -199,7 +197,7 @@ public class PollManager {
             return null;
         }
 
-        if(number == 0){
+        if(number == 0) {
             number = history.size();
         }
 
@@ -210,7 +208,6 @@ public class PollManager {
             polls.put(poll.getNumber(), poll);
         }
         return poll;
-
     }
 
     /**
