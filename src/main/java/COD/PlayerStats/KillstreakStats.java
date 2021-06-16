@@ -22,12 +22,12 @@ public class KillstreakStats extends AssetStats<Killstreak> {
     }
 
     /**
-     * Get the formatted average stat per use of the killstreak
+     * Get the formatted average stat per use of the killstreak e.g "Avg: 5.30"
      *
      * @return Average stat per use
      */
-    public String getAverage() {
-        return statUse.formatRatio(statUse.getRatio());
+    public String formatAverageStatQuantity() {
+        return "Avg: " + statUse.formatRatio(statUse.getRatio());
     }
 
     /**
@@ -49,21 +49,24 @@ public class KillstreakStats extends AssetStats<Killstreak> {
     }
 
     /**
-     * Get the uses in a formatted String
+     * Get the uses in a formatted String e.g "Quantity: 1,234"
      *
      * @return Formatted uses
      */
     public String formatUses() {
-        return statUse.formatDenominator();
+        return "Uses: " + statUse.formatDenominator();
     }
 
     /**
-     * Get the stat quantity in a formatted String
+     * Get the stat quantity in a formatted String e.g "Assists: 1,234"
      *
      * @return Formatted stat quantity
      */
     public String formatStatQuantity() {
-        return statUse.formatNumerator();
+        if(!getAsset().hasExtraStat()) {
+            return "No extra stat!";
+        }
+        return getAsset().getStatName() + ": " + statUse.formatNumerator();
     }
 
     @Override
