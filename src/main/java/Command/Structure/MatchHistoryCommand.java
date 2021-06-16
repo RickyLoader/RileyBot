@@ -2,10 +2,8 @@ package Command.Structure;
 
 import Bot.DiscordUser;
 import Bot.FontManager;
+import COD.*;
 import COD.Assets.*;
-import COD.CODAPI;
-import COD.CODManager;
-import COD.LoadoutImageManager;
 import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -652,8 +650,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private String getEmbedThumbnail() {
         return codManager.getGame() == CODManager.GAME.MW
-                ? "https://i.imgur.com/xjMwGhr.png"
-                : "https://i.imgur.com/0uCij2q.png";
+                ? MWManager.THUMBNAIL
+                : CWManager.THUMBNAIL;
     }
 
     /**

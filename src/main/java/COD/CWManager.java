@@ -2,6 +2,7 @@ package COD;
 
 public class CWManager extends CODManager {
     private static CWManager instance = null;
+    public static String THUMBNAIL = "https://i.imgur.com/0uCij2q.png";
 
     /**
      * Create the CW manager

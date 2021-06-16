@@ -15,6 +15,7 @@ public class MWManager extends CODManager {
     private final HashMap<String, Commendation> commendations;
     private final HashMap<String, Killstreak> killstreaks;
     private static MWManager instance = null;
+    public static String THUMBNAIL = "https://i.imgur.com/xjMwGhr.png";
 
     /**
      * Create the MW manager
