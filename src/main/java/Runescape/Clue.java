@@ -4,6 +4,7 @@ import Bot.ResourceHandler;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 
@@ -60,6 +61,31 @@ public class Clue {
             }
             catch(IllegalArgumentException e) {
                 return UNKNOWN;
+            }
+        }
+
+        /**
+         * Get the colour of a given clue type
+         *
+         * @return Colour
+         */
+        public Color getColour() {
+            switch(this) {
+                case BEGINNER:
+                    return new Color(169, 158, 157); // Grey
+                case EASY:
+                    return new Color(29, 115, 32); // Green
+                case MEDIUM:
+                    return new Color(86, 150, 153); // Cyan
+                case HARD:
+                    return new Color(131, 55, 152); // Purple
+                case ALL:
+                case ELITE:
+                    return new Color(189, 165, 24); // Orange
+                case MASTER:
+                    return new Color(155, 48, 38); // Red
+                default:
+                    return new Color(255, 0, 0); // Red
             }
         }
 
