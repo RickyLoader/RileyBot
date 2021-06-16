@@ -553,6 +553,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * If the list is empty, the image will have a red overlay indicating no boss kills.
      *
      * @param bosses List of bosses to display
+     * @return Image displaying player boss kills
      */
     private BufferedImage buildBossSection(List<Boss> bosses) {
         BufferedImage container = copyImage(bossContainer);
@@ -598,7 +599,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param boss   Boss to display
      * @param width  Width of boss image to build
      * @param height Height of clue image to build
-     * @return Image displaying player boss kills
+     * @return Image displaying a boss and the player's kills/rank for that boss
      */
     private BufferedImage buildBossRowImage(Boss boss, int width, int height) {
         final int boxWidth = (width - border) / 2;
@@ -1368,7 +1369,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         );
 
         // Draw a red overlay on incomplete clues
-        if(!clue.hasCompletions()){
+        if(!clue.hasCompletions()) {
             g.setColor(redOverlay);
             g.fillRect(0, 0, width, height);
         }
