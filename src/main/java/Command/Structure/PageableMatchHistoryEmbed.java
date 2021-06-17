@@ -211,11 +211,11 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
     public static String getResultEmote(MatchStats.RESULT result, EmoteHelper emoteHelper) {
         switch(result) {
             case WIN:
-                return EmoteHelper.formatEmote(emoteHelper.getComplete());
+                return emoteHelper.getComplete().getAsMention();
             case LOSS:
-                return EmoteHelper.formatEmote(emoteHelper.getFail());
+                return emoteHelper.getFail().getAsMention();
             default:
-                return EmoteHelper.formatEmote(emoteHelper.getDraw());
+                return emoteHelper.getDraw().getAsMention();
         }
     }
 }

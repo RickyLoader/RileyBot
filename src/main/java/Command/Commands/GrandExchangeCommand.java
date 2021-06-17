@@ -214,12 +214,12 @@ public class GrandExchangeCommand extends OnReadyDiscordCommand {
 
     @Override
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
-        lowAlch = EmoteHelper.formatEmote(emoteHelper.getLowAlch());
-        highAlch = EmoteHelper.formatEmote(emoteHelper.getHighAlch());
-        sellPrice = EmoteHelper.formatEmote(emoteHelper.getSellPrice());
-        buyPrice = EmoteHelper.formatEmote(emoteHelper.getBuyPrice());
-        freeToPlay = EmoteHelper.formatEmote(emoteHelper.getFreeToPlay());
-        members = EmoteHelper.formatEmote(emoteHelper.getMembers());
-        buyLimit = EmoteHelper.formatEmote(emoteHelper.getBuyLimit());
+        lowAlch = emoteHelper.getLowAlch().getAsMention();
+        highAlch = emoteHelper.getHighAlch().getAsMention();
+        sellPrice = emoteHelper.getSellPrice().getAsMention();
+        buyPrice = emoteHelper.getBuyPrice().getAsMention();
+        freeToPlay = emoteHelper.getFreeToPlay().getAsMention();
+        members = emoteHelper.getMembers().getAsMention();
+        buyLimit = emoteHelper.getBuyLimit().getAsMention();
     }
 }

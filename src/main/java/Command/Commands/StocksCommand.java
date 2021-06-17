@@ -513,6 +513,6 @@ public class StocksCommand extends OnReadyDiscordCommand {
 
     @Override
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
-        cryptoEmote = EmoteHelper.formatEmote(emoteHelper.getCrypto());
+        cryptoEmote = emoteHelper.getCrypto().getAsMention();
     }
 }

@@ -33,9 +33,9 @@ public class HubCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         if(thumbsUp == null) {
             EmoteHelper emoteHelper = context.getEmoteHelper();
-            this.thumbsUp = EmoteHelper.formatEmote(emoteHelper.getThumbsUp());
-            this.thumbsDown = EmoteHelper.formatEmote(emoteHelper.getThumbsDown());
-            this.blankGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
+            this.thumbsUp = emoteHelper.getThumbsUp().getAsMention();
+            this.thumbsDown = emoteHelper.getThumbsDown().getAsMention();
+            this.blankGap = emoteHelper.getBlankGap().getAsMention();
         }
         new Thread(() -> {
             Member member = context.getMember();

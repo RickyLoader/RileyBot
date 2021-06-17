@@ -37,7 +37,7 @@ public class PageableTrademeListing extends CyclicalPageableEmbed {
         DecimalFormat df = new DecimalFormat("#,###");
         boolean closed = listing.isClosed();
         MessageEmbed.AuthorInfo author = getAuthor(listing.getMember());
-        String emoteGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
+        String emoteGap = emoteHelper.getBlankGap().getAsMention();
         Listing.ListingOverview overview = listing.getOverview();
 
         EmbedBuilder builder = new EmbedBuilder()
@@ -45,11 +45,11 @@ public class PageableTrademeListing extends CyclicalPageableEmbed {
                 .setAuthor(author.getName(), author.getUrl(), author.getIconUrl())
                 .setDescription(
                         listing.getTruncatedDescription()
-                                + "\n\n" + EmoteHelper.formatEmote(emoteHelper.getBiddersWatchers()) + emoteGap
+                                + "\n\n" + emoteHelper.getBiddersWatchers().getAsMention() + emoteGap
                                 + df.format(listing.getBidderWatchers())
-                                + "\n" + EmoteHelper.formatEmote(emoteHelper.getPrice()) + emoteGap
+                                + "\n" + emoteHelper.getPrice().getAsMention() + emoteGap
                                 + overview.getPriceDisplay()
-                                + "\n" + EmoteHelper.formatEmote(emoteHelper.getCategory()) + emoteGap
+                                + "\n" + emoteHelper.getCategory().getAsMention() + emoteGap
                                 + overview.getCategory().getPath()
                 )
                 .setThumbnail(listing.getThumbnail())

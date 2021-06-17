@@ -44,9 +44,9 @@ public class MillionaireGameshow {
         this.channel = channel;
         this.answerButtons = getAnswerButtons(emoteHelper);
         this.lifeline = Button.primary("lifeline", "50:50");
-        this.correctEmote = EmoteHelper.formatEmote(emoteHelper.getComplete());
-        this.incorrectEmote = EmoteHelper.formatEmote(emoteHelper.getFail());
-        this.blankEmote = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
+        this.correctEmote = emoteHelper.getComplete().getAsMention();
+        this.incorrectEmote = emoteHelper.getFail().getAsMention();
+        this.blankEmote = emoteHelper.getBlankGap().getAsMention();
         this.helpMessage = helpMessage;
         this.quiz = new Quiz(getQuestions());
         this.questionTimers = new HashMap<>();

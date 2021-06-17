@@ -55,10 +55,10 @@ public class PageableFacebookPost extends CyclicalPageableEmbed {
                 )
                 .setDescription(
                         text + "\n\n"
-                                + EmoteHelper.formatEmote(emoteHelper.getFacebookReactions())
+                                + emoteHelper.getFacebookReactions().getAsMention()
                                 + " " + df.format(socialResponse.getReactions())
-                                + EmoteHelper.formatEmote(emoteHelper.getBlankGap())
-                                + EmoteHelper.formatEmote(emoteHelper.getFacebookComments())
+                                + emoteHelper.getBlankGap().getAsMention()
+                                + emoteHelper.getFacebookComments().getAsMention()
                                 + " " + df.format(socialResponse.getComments())
                 );
     }

@@ -58,7 +58,7 @@ public class TrailblazerCommand extends DiscordCommand {
         List<Member> mentioned = message.getMentionedMembers();
 
         if(missingEmote == null) {
-            missingEmote = EmoteHelper.formatEmote(context.getEmoteHelper().getFail());
+            missingEmote = context.getEmoteHelper().getFail().getAsMention();
         }
 
         content = content.replace("trailblazer", "").trim();

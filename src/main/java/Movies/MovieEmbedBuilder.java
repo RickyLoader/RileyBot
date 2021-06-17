@@ -171,12 +171,12 @@ public class MovieEmbedBuilder {
         SocialConnections socialConnections = movie.getSocialConnections();
 
         if(socialConnections.hasTrailerUrl()) {
-            String youtubeEmote = EmoteHelper.formatEmote(emoteHelper.getYoutube());
+            String youtubeEmote = emoteHelper.getYoutube().getAsMention();
             elements.add(EmbedHelper.embedURL(youtubeEmote + " Trailer", socialConnections.getTrailerUrl()));
         }
 
         if(socialConnections.hasFacebookUrl()) {
-            String facebookEmote = EmoteHelper.formatEmote(emoteHelper.getFacebook());
+            String facebookEmote = emoteHelper.getFacebook().getAsMention();
             elements.add(EmbedHelper.embedURL(facebookEmote + " Facebook", socialConnections.getFacebookUrl()));
         }
         return elements;

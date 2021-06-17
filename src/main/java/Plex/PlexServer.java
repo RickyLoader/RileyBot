@@ -208,7 +208,7 @@ public class PlexServer {
             public ArrayList<String> getSocialElements() {
                 ArrayList<String> socialElements = super.getSocialElements();
                 if(plexDetails.isOnPlex()) {
-                    String plexEmote = EmoteHelper.formatEmote(emoteHelper.getPlex());
+                    String plexEmote = emoteHelper.getPlex().getAsMention();
                     socialElements.add(EmbedHelper.embedURL(plexEmote + " Plex", plexDetails.getPlexUrl()));
                 }
                 return socialElements;
@@ -489,8 +489,8 @@ public class PlexServer {
                 PlexDetails plexDetails = ((PlexMovie) items.get(index)).getPlexDetails();
                 return new String[]{
                         plexDetails.isOnPlex()
-                                ? EmoteHelper.formatEmote(emoteHelper.getPlex())
-                                : EmoteHelper.formatEmote(emoteHelper.getRadarr()),
+                                ? emoteHelper.getPlex().getAsMention()
+                                : emoteHelper.getRadarr().getAsMention(),
                         plexDetails.getTitle(),
                         plexDetails.getRatingIds().getFormattedId()
                 };
@@ -537,11 +537,11 @@ public class PlexServer {
     private static String buildEmoteKey(PlexMovie[] movies, EmoteHelper emoteHelper, boolean inLibrary) {
         StringBuilder key = new StringBuilder();
         if(Arrays.stream(movies).anyMatch(plexMovie -> plexMovie.getPlexDetails().isOnPlex())) {
-            key.append(EmoteHelper.formatEmote(emoteHelper.getPlex())).append(" = On Plex\n\n");
+            key.append(emoteHelper.getPlex().getAsMention()).append(" = On Plex\n\n");
         }
         if(Arrays.stream(movies).anyMatch(plexMovie -> !plexMovie.getPlexDetails().isOnPlex())) {
             key
-                    .append(EmoteHelper.formatEmote(emoteHelper.getRadarr()))
+                    .append(emoteHelper.getRadarr().getAsMention())
                     .append(
                             inLibrary
                                     ? " = On Radarr - Movie **is not** on Plex but is being monitored.\n\n"

@@ -1,6 +1,5 @@
 package Command.Structure;
 
-import com.sun.org.apache.regexp.internal.RE;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -285,9 +284,9 @@ public class EmbedLoadingMessage {
          * @param emoteHelper Emote helper
          */
         public Status(EmoteHelper emoteHelper) {
-            this.neutral = EmoteHelper.formatEmote(emoteHelper.getNeutral()) + " ";
-            this.fail = EmoteHelper.formatEmote(emoteHelper.getFail()) + " ";
-            this.complete = EmoteHelper.formatEmote(emoteHelper.getComplete()) + " ";
+            this.neutral = emoteHelper.getNeutral().getAsMention() + " ";
+            this.fail = emoteHelper.getFail().getAsMention() + " ";
+            this.complete = emoteHelper.getComplete().getAsMention() + " ";
         }
 
         public String getComplete() {

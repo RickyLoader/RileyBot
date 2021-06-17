@@ -28,16 +28,6 @@ public class EmoteHelper {
     }
 
     /**
-     * Get the String form of an emote used to display the image within a message
-     *
-     * @param e Emote to convert
-     * @return String version of emote
-     */
-    public static String formatEmote(Emote e) {
-        return "<:" + e.getName() + ":" + e.getId() + ">";
-    }
-
-    /**
      * Get a String repeating the mention String of the given emote n times
      *
      * @param e Emote to repeat

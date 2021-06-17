@@ -43,7 +43,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
         channel.sendTyping().queue();
         valheimServer.updateServer();
 
-        if(valheimServer.getServerEvents().isEmpty()){
+        if(valheimServer.getServerEvents().isEmpty()) {
             channel.sendMessage("I am very sorry, I was unable to contact the server!").queue();
             return;
         }
@@ -263,7 +263,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
      * @return String formatted emote
      */
     private String getLogEmote(String key) {
-        return EmoteHelper.formatEmote(logEmotes.get(key.toLowerCase()));
+        return logEmotes.get(key.toLowerCase()).getAsMention();
     }
 
     @Override
@@ -288,14 +288,14 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
         logEmotes.put("eikthyr", emoteHelper.getEikthyr());
 
         // Basic events
-        this.death = EmoteHelper.formatEmote(emoteHelper.getDeath());
-        this.respawn = EmoteHelper.formatEmote(emoteHelper.getRespawn());
-        this.connected = EmoteHelper.formatEmote(emoteHelper.getConnected());
-        this.connecting = EmoteHelper.formatEmote(emoteHelper.getConnecting());
-        this.disconnect = EmoteHelper.formatEmote(emoteHelper.getDisconnected());
-        this.dungeonLoaded = EmoteHelper.formatEmote(emoteHelper.getDungeonLoaded());
-        this.serverStarted = EmoteHelper.formatEmote(emoteHelper.getServerStarted());
-        this.serverStopped = EmoteHelper.formatEmote(emoteHelper.getStop());
-        this.dayStarted = EmoteHelper.formatEmote(emoteHelper.getDayFine());
+        this.death = emoteHelper.getDeath().getAsMention();
+        this.respawn = emoteHelper.getRespawn().getAsMention();
+        this.connected = emoteHelper.getConnected().getAsMention();
+        this.connecting = emoteHelper.getConnecting().getAsMention();
+        this.disconnect = emoteHelper.getDisconnected().getAsMention();
+        this.dungeonLoaded = emoteHelper.getDungeonLoaded().getAsMention();
+        this.serverStarted = emoteHelper.getServerStarted().getAsMention();
+        this.serverStopped = emoteHelper.getStop().getAsMention();
+        this.dayStarted = emoteHelper.getDayFine().getAsMention();
     }
 }

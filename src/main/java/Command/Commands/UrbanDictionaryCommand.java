@@ -151,8 +151,8 @@ public class UrbanDictionaryCommand extends OnReadyDiscordCommand {
 
     @Override
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
-        this.upvote = EmoteHelper.formatEmote(emoteHelper.getUpvote());
-        this.downvote = EmoteHelper.formatEmote(emoteHelper.getDownvote());
+        this.upvote = emoteHelper.getUpvote().getAsMention();
+        this.downvote = emoteHelper.getDownvote().getAsMention();
     }
 
     @Override

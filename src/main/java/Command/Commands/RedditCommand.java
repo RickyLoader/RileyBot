@@ -345,9 +345,9 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
     @Override
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
-        upvote = EmoteHelper.formatEmote(emoteHelper.getRedditUpvote());
-        downvote = EmoteHelper.formatEmote(emoteHelper.getRedditDownvote());
-        blankGap = EmoteHelper.formatEmote(emoteHelper.getBlankGap());
-        comment = EmoteHelper.formatEmote(emoteHelper.getFacebookComments());
+        upvote = emoteHelper.getRedditUpvote().getAsMention();
+        downvote = emoteHelper.getRedditDownvote().getAsMention();
+        blankGap = emoteHelper.getBlankGap().getAsMention();
+        comment = emoteHelper.getFacebookComments().getAsMention();
     }
 }

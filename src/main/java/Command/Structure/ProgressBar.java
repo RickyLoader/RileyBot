@@ -16,9 +16,9 @@ public class ProgressBar {
      * @param section Emote to use as a section of the progress bar
      */
     public ProgressBar(Emote start, Emote section, Emote end) {
-        this.start = EmoteHelper.formatEmote(start);
-        this.section = EmoteHelper.formatEmote(section);
-        this.end = EmoteHelper.formatEmote(end);
+        this.start = start.getAsMention();
+        this.section = section.getAsMention();
+        this.end = end.getAsMention();
     }
 
     /**
