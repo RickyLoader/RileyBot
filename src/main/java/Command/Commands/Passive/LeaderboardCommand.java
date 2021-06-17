@@ -24,7 +24,7 @@ public class LeaderboardCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         String query = context.getLowerCaseMessage();
         if(query.equals(getTrigger())) {
-            PageableTableEmbed leaderboard = getLeaderboardEmbed(context);
+            PageableTableEmbed<Session> leaderboard = getLeaderboardEmbed(context);
             leaderboard.showMessage();
             return;
         }
@@ -77,8 +77,8 @@ public class LeaderboardCommand extends DiscordCommand {
      * @param context Context of command
      * @return Leaderboard embed
      */
-    public PageableTableEmbed getLeaderboardEmbed(CommandContext context) {
-        return new PageableTableEmbed(
+    public PageableTableEmbed<Session> getLeaderboardEmbed(CommandContext context) {
+        return new PageableTableEmbed<Session>(
                 context,
                 Session.getHistory(),
                 Gunfight.THUMBNAIL,
@@ -89,20 +89,14 @@ public class LeaderboardCommand extends DiscordCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                int rank = defaultSort ? (index + 1) : (items.size() - index);
-                Session session = (Session) items.get(index);
+            public String[] getRowValues(int index, Session session, boolean defaultSort) {
+                int rank = defaultSort ? (index + 1) : (getItems().size() - index);
                 return new String[]{String.valueOf(rank), session.getWinLossSummary(), session.formatStreak()};
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                ArrayList<Session> sessions = new ArrayList<>();
-                for(Object session : items) {
-                    sessions.add((Session) session);
-                }
-                Session.sortSessions(sessions, defaultSort);
-                updateItems(sessions);
+            public void sortItems(List<Session> items, boolean defaultSort) {
+                Session.sortSessions(items, defaultSort);
             }
         };
     }

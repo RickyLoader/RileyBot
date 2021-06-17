@@ -199,7 +199,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             ).queue();
             return;
         }
-        new PageableTableEmbed(
+        new PageableTableEmbed<WobblyScore>(
                 context,
                 leaderboard,
                 getEmbedThumbnail(),
@@ -211,9 +211,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                WobblyScore score = (WobblyScore) items.get(index);
-                int rank = defaultSort ? (index + 1) : (items.size() - index);
+            public String[] getRowValues(int index, WobblyScore score, boolean defaultSort) {
+                int rank = defaultSort ? (index + 1) : (getItems().size() - index);
                 return new String[]{
                         String.valueOf(rank),
                         score.getPlayerName(),
@@ -222,13 +221,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                ArrayList<WobblyScore> scores = new ArrayList<>();
-                for(Object o : items) {
-                    scores.add((WobblyScore) o);
-                }
-                WobblyScore.sortLeaderboard(scores, defaultSort);
-                updateItems(scores);
+            public void sortItems(List<WobblyScore> items, boolean defaultSort) {
+                WobblyScore.sortLeaderboard(items, defaultSort);
             }
         }.showMessage();
     }
@@ -260,7 +254,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private void showMissingAttachments(CommandContext context, ArrayList<MissingWeaponAttachments> missing) {
         int total = (int) missing.stream().mapToLong(m -> m.attachmentCodenames.size()).sum();
-        new PageableSortEmbed(
+        new PageableSortEmbed<MissingWeaponAttachments>(
                 context,
                 missing,
                 1
@@ -274,8 +268,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
-                MissingWeaponAttachments current = (MissingWeaponAttachments) getItems().get(currentIndex);
+            public void displayItem(EmbedBuilder builder, int currentIndex, MissingWeaponAttachments current) {
                 Weapon weapon = current.getWeapon();
                 ArrayList<String> attachments = current.getAttachmentCodenames();
                 StringBuilder description = new StringBuilder();
@@ -303,14 +296,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
+            public void sortItems(List<MissingWeaponAttachments> items, boolean defaultSort) {
                 items.sort((o1, o2) -> {
-                    String a = ((MissingWeaponAttachments) o1).getWeapon().getName();
-                    String b = ((MissingWeaponAttachments) o2).getWeapon().getName();
-                    if(defaultSort) {
-                        return a.compareTo(b);
-                    }
-                    return b.compareTo(a);
+                    String n1 = o1.getWeapon().getName();
+                    String n2 = o2.getWeapon().getName();
+                    return defaultSort ? n1.compareTo(n2) : n2.compareTo(n1);
                 });
             }
         }.showMessage();

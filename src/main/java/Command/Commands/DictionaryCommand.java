@@ -58,7 +58,7 @@ public class DictionaryCommand extends DiscordCommand {
      * @param query   Query used to find words
      */
     private void showSimilarWords(CommandContext context, ArrayList<DictWord> words, String query) {
-        new PageableTableEmbed(
+        new PageableTableEmbed<DictWord>(
                 context,
                 words,
                 thumbnail,
@@ -73,8 +73,7 @@ public class DictionaryCommand extends DiscordCommand {
                 words.isEmpty() ? EmbedHelper.RED : EmbedHelper.ORANGE
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                DictWord dictWord = (DictWord) items.get(index);
+            public String[] getRowValues(int index, DictWord dictWord, boolean defaultSort) {
                 return new String[]{
                         dictWord.getWord(),
                         dictWord.getTruncatedDescription(50)
@@ -82,14 +81,13 @@ public class DictionaryCommand extends DiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
+            public void sortItems(List<DictWord> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<DictWord>(query, defaultSort) {
                     @Override
-                    public String getString(Object o) {
-                        return ((DictWord) o).getWord();
+                    public String getString(DictWord o) {
+                        return o.getWord();
                     }
                 });
-
             }
         }.showMessage();
     }

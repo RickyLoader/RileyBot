@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -66,11 +67,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
      */
     private void showDeathsEmbed(CommandContext context) {
         ArrayList<Character> characters = valheimServer.getPlayerList().getKnownCharacters();
-        new ValheimServerMessage(
+        new ValheimServerMessage<Character>(
                 context,
                 characters,
+                getDeathsEmbedTitle(characters),
                 valheimServer,
-                ValheimServerMessage.TYPE.DEATHS,
                 "Try: " + getHelpName(),
                 new String[]{
                         "Character",
@@ -81,8 +82,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 serverStopped
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Character character = (Character) items.get(index);
+            public String[] getRowValues(int index, Character character, boolean defaultSort) {
                 Ratio deathsPerSession = new Ratio(character.getDeaths(), character.getSessions());
                 return new String[]{
                         character.getName(),
@@ -92,12 +92,10 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    int d1 = ((Character) o1).getDeaths();
-                    int d2 = ((Character) o2).getDeaths();
-                    return defaultSort ? d2 - d1 : d1 - d2;
-                });
+            public void sortItems(List<Character> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? o2.getDeaths() - o1.getDeaths()
+                        : o1.getDeaths() - o2.getDeaths());
             }
         }.showMessage();
     }
@@ -109,11 +107,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
      */
     private void showPlayersEmbed(CommandContext context) {
         ArrayList<PlayerConnection> connections = valheimServer.getPlayerList().getAllConnections();
-        new ValheimServerMessage(
+        new ValheimServerMessage<PlayerConnection>(
                 context,
                 connections,
+                getPlayersEmbedTitle(connections),
                 valheimServer,
-                ValheimServerMessage.TYPE.PLAYERS,
                 "Try: " + getHelpName(),
                 new String[]{
                         "Character",
@@ -124,8 +122,16 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 serverStopped
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                PlayerConnection connection = (PlayerConnection) items.get(index);
+            public void sortItems(List<PlayerConnection> items, boolean defaultSort) {
+                items.sort((o1, o2) -> {
+                    Date d1 = o1.getDate();
+                    Date d2 = o2.getDate();
+                    return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
+                });
+            }
+
+            @Override
+            public String[] getRowValues(int index, PlayerConnection connection, boolean defaultSort) {
                 SteamProfile profile = connection.getSteamProfile();
 
                 // Can't know character name prior to connect, can know previously seen character names
@@ -140,16 +146,58 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                                 + " since " + new SimpleDateFormat("HH:mm:ss").format(connection.getDate())
                 };
             }
-
-            @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    Date d1 = ((PlayerConnection) o1).getDate();
-                    Date d2 = ((PlayerConnection) o2).getDate();
-                    return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
-                });
-            }
         }.showMessage();
+    }
+
+    /**
+     * Get the default title to use in the embeds.
+     * This is in the format "[World_Name] | [TYPE] |"
+     *
+     * @param type Type of object to be displayed e.g "Deaths"
+     * @return Default embed title
+     */
+    private String getDefaultEmbedTitle(String type) {
+        return valheimServer.getWorldName()
+                + " | "
+                + StringUtils.capitalize(type.toLowerCase())
+                + " |";
+    }
+
+    /**
+     * Get the title to use in the online players embed.
+     * This is in the format "[World_Name] | Players | x Online"
+     *
+     * @param connections List of connected/connecting players
+     * @return Players embed title
+     */
+    private String getPlayersEmbedTitle(ArrayList<PlayerConnection> connections) {
+        return getDefaultEmbedTitle("Players") + connections.size() + " Online";
+    }
+
+    /**
+     * Get the title to use in the deaths embed.
+     * This is in the format "[World_Name] | Deaths | x Total"
+     *
+     * @param characters List of known characters who have been on the server
+     * @return Deaths embed title
+     */
+    private String getDeathsEmbedTitle(ArrayList<Character> characters) {
+        int deaths = 0;
+        for(Character c : characters) {
+            deaths += c.getDeaths();
+        }
+        return getDefaultEmbedTitle("Deaths") + " " + deaths + " Total";
+    }
+
+    /**
+     * Get the title to use in the logs embed.
+     * This is in the format "[World_Name] | Logs | x Events"
+     *
+     * @param logItems List of log events
+     * @return Logs embed title
+     */
+    private String getEventsEmbedTitle(ArrayList<LogItem> logItems) {
+        return getDefaultEmbedTitle("Logs") + logItems.size() + " Events";
     }
 
     /**
@@ -159,11 +207,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
      */
     private void showEventsEmbed(CommandContext context) {
         ArrayList<LogItem> logs = valheimServer.getServerEvents();
-        new ValheimServerMessage(
+        new ValheimServerMessage<LogItem>(
                 context,
                 logs,
+                getEventsEmbedTitle(logs),
                 valheimServer,
-                ValheimServerMessage.TYPE.LOGS,
                 "Try: " + getHelpName(),
                 new String[]{
                         "Time",
@@ -173,8 +221,7 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 serverStopped
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                LogItem log = (LogItem) items.get(index);
+            public String[] getRowValues(int index, LogItem log, boolean defaultSort) {
                 String message;
                 switch(log.getType()) {
                     case RESPAWN:
@@ -228,6 +275,15 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 };
             }
 
+            @Override
+            public void sortItems(List<LogItem> items, boolean defaultSort) {
+                items.sort((o1, o2) -> {
+                    Date d1 = o1.getDate();
+                    Date d2 = o2.getDate();
+                    return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
+                });
+            }
+
             /**
              * Get a message in the format [STEAM_NAME](STEAM_URL) (KNOWN_CHARACTER_NAMES)
              *
@@ -238,15 +294,6 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 SteamProfile profile = valheimServer.getPlayerList().getSteamProfileById(steamId);
                 String characterNames = "(" + profile.getCharacterNames().trim() + ")";
                 return EmbedHelper.embedURL(profile.getName(), profile.getUrl()) + " " + characterNames;
-            }
-
-            @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    Date d1 = ((LogItem) o1).getDate();
-                    Date d2 = ((LogItem) o2).getDate();
-                    return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
-                });
             }
         }.showMessage();
     }

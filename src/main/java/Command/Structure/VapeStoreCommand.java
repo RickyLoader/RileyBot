@@ -10,8 +10,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -100,7 +98,7 @@ public class VapeStoreCommand extends DiscordCommand {
      * @param footer    Footer to display alongside paging info
      */
     public static void showProduct(CommandContext context, Product product, VapeStore vapeStore, String footer) {
-        new CyclicalPageableEmbed(
+        new CyclicalPageableEmbed<String>(
                 context,
                 product.getImages(),
                 1
@@ -155,17 +153,17 @@ public class VapeStoreCommand extends DiscordCommand {
             }
 
             @Override
+            public void displayItem(EmbedBuilder builder, int currentIndex, String item) {
+                builder.setImage(item);
+            }
+
+            @Override
             public String getPageDetails() {
                 int images = getItems().size();
                 if(images == 0) {
                     return "No product images available | " + footer;
                 }
                 return "Image: " + getPage() + "/" + getPages() + " | " + footer;
-            }
-
-            @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
-                builder.setImage((String) getItems().get(currentIndex));
             }
 
             @Override
@@ -184,7 +182,7 @@ public class VapeStoreCommand extends DiscordCommand {
      */
     private void showProducts(CommandContext context, ArrayList<Product> products, String query) {
         boolean noResults = products.isEmpty();
-        new PageableTableEmbed(
+        new PageableTableEmbed<Product>(
                 context,
                 products,
                 vapeStore.getLogo(),
@@ -200,23 +198,22 @@ public class VapeStoreCommand extends DiscordCommand {
                 noResults ? EmbedHelper.RED : EmbedHelper.GREEN
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Product product = (Product) items.get(index);
+            public void sortItems(List<Product> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<Product>(query, defaultSort) {
+                    @Override
+                    public String getString(Product o) {
+                        return o.getName();
+                    }
+                });
+            }
+
+            @Override
+            public String[] getRowValues(int index, Product product, boolean defaultSort) {
                 return new String[]{
                         String.valueOf(product.getId()),
                         EmbedHelper.embedURL(product.getName(), product.getUrl()),
                         product.getType()
                 };
-            }
-
-            @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
-                    @Override
-                    public String getString(Object o) {
-                        return ((Product) o).getName();
-                    }
-                });
             }
         }.showMessage();
     }
@@ -228,7 +225,7 @@ public class VapeStoreCommand extends DiscordCommand {
      * @param products List of products matching query
      */
     private void showProducts(CommandContext context, ArrayList<Product> products) {
-        new PageableTableEmbed(
+        new PageableTableEmbed<Product>(
                 context,
                 products,
                 vapeStore.getLogo(),
@@ -244,8 +241,7 @@ public class VapeStoreCommand extends DiscordCommand {
                 EmbedHelper.GREEN
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Product product = (Product) items.get(index);
+            public String[] getRowValues(int index, Product product, boolean defaultSort) {
                 return new String[]{
                         String.valueOf(product.getId()),
                         EmbedHelper.embedURL(product.getName(), product.getUrl()),
@@ -254,12 +250,8 @@ public class VapeStoreCommand extends DiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    Date d1 = ((Product) o1).getCreated();
-                    Date d2 = ((Product) o2).getCreated();
-                    return VapeStore.dateSort(d1, d2, defaultSort);
-                });
+            public void sortItems(List<Product> items, boolean defaultSort) {
+                items.sort((o1, o2) -> VapeStore.dateSort(o1.getCreated(), o2.getCreated(), defaultSort));
             }
         }.showMessage();
     }

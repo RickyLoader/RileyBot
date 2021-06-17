@@ -259,7 +259,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             context.getMessageChannel().sendMessage(user.getAsMention() + " You don't have any loans!").queue();
             return;
         }
-        new PageableTableEmbed(
+        new PageableTableEmbed<Loan>(
                 context,
                 loans,
                 EmbedHelper.OSRS_LOGO,
@@ -270,8 +270,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Loan loan = (Loan) items.get(index);
+            public String[] getRowValues(int index, Loan loan, boolean defaultSort) {
                 boolean lending = loan.getLoaner() == user.getIdLong();
                 String targetName = getLoanUserName(context.getJDA(), lending ? loan.getLoanee() : loan.getLoaner());
                 return new String[]{
@@ -282,12 +281,10 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    Date d1 = ((Loan) o1).getDate();
-                    Date d2 = ((Loan) o2).getDate();
-                    return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
-                });
+            public void sortItems(List<Loan> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? o2.getDate().compareTo(o1.getDate())
+                        : o1.getDate().compareTo(o2.getDate()));
             }
         }.showMessage();
     }

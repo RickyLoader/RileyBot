@@ -4,7 +4,6 @@ import Command.Structure.*;
 
 import java.util.List;
 
-
 public class HelpCommand extends DiscordCommand {
 
     public HelpCommand() {
@@ -13,12 +12,12 @@ public class HelpCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        PageableTableEmbed helpTable = getHelpTable(context);
+        PageableTableEmbed<DiscordCommand> helpTable = getHelpTable(context);
         helpTable.showMessage();
     }
 
-    public PageableTableEmbed getHelpTable(CommandContext context) {
-        return new PageableTableEmbed(
+    public PageableTableEmbed<DiscordCommand> getHelpTable(CommandContext context) {
+        return new PageableTableEmbed<DiscordCommand>(
                 context,
                 context.getCommands(),
                 context.getJDA().getSelfUser().getAvatarUrl(),
@@ -28,22 +27,18 @@ public class HelpCommand extends DiscordCommand {
                 new String[]{"Trigger", "Description"},
                 5
         ) {
+
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                DiscordCommand command = (DiscordCommand) items.get(index);
-                return new String[]{command.getTrigger(), command.getDesc()};
+            public String[] getRowValues(int index, DiscordCommand item, boolean defaultSort) {
+                return new String[]{item.getTrigger(), item.getDesc()};
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((o1, o2) -> {
-                    DiscordCommand a = (DiscordCommand) o1;
-                    DiscordCommand b = (DiscordCommand) o2;
-                    if(defaultSort) {
-                        return a.getHelpName().compareTo(b.getHelpName());
-                    }
-                    return b.getHelpName().compareTo(a.getHelpName());
-                });
+            public void sortItems(List<DiscordCommand> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? o1.getTrigger().compareTo(o2.getTrigger())
+                        : o2.getTrigger().compareTo(o1.getTrigger()
+                ));
             }
         };
     }

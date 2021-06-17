@@ -72,7 +72,7 @@ public class GIFCommand extends DiscordCommand {
      * @param gifs    List of GIFS found for query
      */
     private void showGifs(CommandContext context, String query, ArrayList<GIF> gifs) {
-        new CyclicalPageableEmbed(
+        new CyclicalPageableEmbed<GIF>(
                 context,
                 gifs,
                 1
@@ -86,8 +86,7 @@ public class GIFCommand extends DiscordCommand {
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
-                GIF gif = (GIF) getItems().get(currentIndex);
+            public void displayItem(EmbedBuilder builder, int currentIndex, GIF gif) {
                 if(gif.hasTags()) {
                     builder.setDescription(
                             "Tags: "

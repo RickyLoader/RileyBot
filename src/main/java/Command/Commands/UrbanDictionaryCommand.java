@@ -68,7 +68,7 @@ public class UrbanDictionaryCommand extends OnReadyDiscordCommand {
      * @param query       Query used to find definitions
      */
     private void showDefinitions(CommandContext context, ArrayList<Definition> definitions, String query) {
-        new CyclicalPageableEmbed(
+        new CyclicalPageableEmbed<Definition>(
                 context,
                 definitions,
                 1
@@ -79,8 +79,7 @@ public class UrbanDictionaryCommand extends OnReadyDiscordCommand {
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
-                Definition definition = (Definition) getItems().get(currentIndex);
+            public void displayItem(EmbedBuilder builder, int currentIndex, Definition definition) {
                 addDefinitionToEmbed(
                         builder,
                         definition,

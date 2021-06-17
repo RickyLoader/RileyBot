@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Millionaire contestant reward bank
@@ -156,7 +157,7 @@ public class Bank {
      * @param banks     Banks to sort
      * @param ascending Ascending rank
      */
-    public static void sortBanks(ArrayList<Bank> banks, boolean ascending) {
+    public static void sortBanks(List<Bank> banks, boolean ascending) {
         Comparator<Bank> sort = Comparator.comparingLong(Bank::getReward)
                 .thenComparing(Comparator.comparingInt(Bank::getGamesPlayed).reversed());
         banks.sort(ascending ? sort.reversed() : sort);

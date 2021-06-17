@@ -6,13 +6,12 @@ import Command.Structure.PageableTableEmbed;
 import Runescape.OSRS.Polling.Poll;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
  * Pageable OSRS poll message showing search results
  */
-public class PollSearchResultsMessage extends PageableTableEmbed {
+public class PollSearchResultsMessage extends PageableTableEmbed<Poll> {
 
     /**
      * Initialise the message values
@@ -43,20 +42,12 @@ public class PollSearchResultsMessage extends PageableTableEmbed {
     }
 
     @Override
-    public void sortItems(List<?> items, boolean defaultSort) {
-        items.sort((Comparator<Object>) (o1, o2) -> {
-            Poll p1 = (Poll) o1;
-            Poll p2 = (Poll) o2;
-            if(defaultSort) {
-                return p1.getNumber() - p2.getNumber();
-            }
-            return p2.getNumber() - p1.getNumber();
-        });
+    public void sortItems(List<Poll> items, boolean defaultSort) {
+        items.sort((p1, p2) -> defaultSort ? p1.getNumber() - p2.getNumber() : p2.getNumber() - p1.getNumber());
     }
 
     @Override
-    public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-        Poll poll = (Poll) items.get(index);
+    public String[] getRowValues(int index, Poll poll, boolean defaultSort) {
         return new String[]{
                 String.valueOf(poll.getNumber()),
                 EmbedHelper.embedURL(poll.getTitle(), poll.getUrl()),

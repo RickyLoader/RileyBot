@@ -581,11 +581,11 @@ public class CombatRecordImageBuilder extends ImageBuilder {
                             + "** stats available for: **" + assetName + "**\n\nTry using the **Codename**!"
             ) {
                 @Override
-                public void sortItems(List<?> items, boolean defaultSort) {
-                    items.sort(new LevenshteinDistance(assetName, true) {
+                public void sortItems(List<AssetStats<? extends CODAsset>> items, boolean defaultSort) {
+                    items.sort(new LevenshteinDistance<AssetStats<? extends CODAsset>>(assetName, true) {
                         @Override
-                        public String getString(Object o) {
-                            return ((AssetStats<? extends CODAsset>) o).getAsset().getName();
+                        public String getString(AssetStats<? extends CODAsset> o) {
+                            return o.getAsset().getName();
                         }
                     });
                 }

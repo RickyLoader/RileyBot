@@ -160,7 +160,7 @@ public class HubCommand extends DiscordCommand {
      */
     private void showSearchResults(ArrayList<Performer> searchResults, String searchQuery, CommandContext context) {
         int results = searchResults.size();
-        new PageableTableEmbed(
+        new PageableTableEmbed<Performer>(
                 context,
                 searchResults,
                 TheHub.LOGO,
@@ -172,8 +172,7 @@ public class HubCommand extends DiscordCommand {
                 results == 0 ? EmbedHelper.RED : EmbedHelper.ORANGE
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Performer performer = (Performer) items.get(index);
+            public String[] getRowValues(int index, Performer performer, boolean defaultSort) {
                 return new String[]{
                         performer.getName(),
                         EmbedHelper.embedURL(performer.getType().name(), performer.getURL())
@@ -181,11 +180,11 @@ public class HubCommand extends DiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(searchQuery, defaultSort) {
+            public void sortItems(List<Performer> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<Performer>(searchQuery, defaultSort) {
                     @Override
-                    public String getString(Object o) {
-                        return ((Performer) o).getName();
+                    public String getString(Performer o) {
+                        return o.getName();
                     }
                 });
             }

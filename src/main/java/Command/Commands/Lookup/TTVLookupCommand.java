@@ -82,7 +82,7 @@ public class TTVLookupCommand extends LookupCommand {
      * @param context   Command context
      */
     private void showSearchResults(String query, ArrayList<Streamer> streamers, CommandContext context) {
-        new PageableTableEmbed(
+        new PageableTableEmbed<Streamer>(
                 context,
                 streamers,
                 TwitchTV.TWITCH_LOGO,
@@ -93,8 +93,7 @@ public class TTVLookupCommand extends LookupCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Streamer streamer = (Streamer) items.get(index);
+            public String[] getRowValues(int index, Streamer streamer, boolean defaultSort) {
                 return new String[]{
                         streamer.getLoginName(),
                         streamer.isStreaming()
@@ -105,11 +104,11 @@ public class TTVLookupCommand extends LookupCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
+            public void sortItems(List<Streamer> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<Streamer>(query, defaultSort) {
                     @Override
-                    public String getString(Object o) {
-                        return ((Streamer) o).getLoginName();
+                    public String getString(Streamer o) {
+                        return o.getLoginName();
                     }
                 });
             }

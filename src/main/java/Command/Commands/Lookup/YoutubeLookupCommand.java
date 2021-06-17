@@ -25,7 +25,7 @@ public class YoutubeLookupCommand extends LookupCommand {
             context.getMessageChannel().sendMessage("I couldn't find " + name + " on youtube cunt.").queue();
             return;
         }
-        PageableTableEmbed youtubeEmbed = getYoutubeEmbed(context, channel);
+        PageableTableEmbed<YoutubeChannel.Video> youtubeEmbed = getYoutubeEmbed(context, channel);
         youtubeEmbed.showMessage();
     }
 
@@ -46,8 +46,8 @@ public class YoutubeLookupCommand extends LookupCommand {
      * @param channel Youtube channel
      * @return Youtube channel table embed
      */
-    private PageableTableEmbed getYoutubeEmbed(CommandContext context, YoutubeChannel channel) {
-        return new PageableTableEmbed(
+    private PageableTableEmbed<YoutubeChannel.Video> getYoutubeEmbed(CommandContext context, YoutubeChannel channel) {
+        return new PageableTableEmbed<YoutubeChannel.Video>(
                 context,
                 channel.getVideos(),
                 channel.getThumbnail(),
@@ -58,22 +58,15 @@ public class YoutubeLookupCommand extends LookupCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                YoutubeChannel.Video v = (YoutubeChannel.Video) items.get(index);
+            public String[] getRowValues(int index, YoutubeChannel.Video v, boolean defaultSort) {
                 return new String[]{v.getTitle(), v.getUrl(), String.valueOf(v.getViews())};
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    YoutubeChannel.Video v1 = (YoutubeChannel.Video) o1;
-                    YoutubeChannel.Video v2 = (YoutubeChannel.Video) o2;
-
-                    if(defaultSort) {
-                        return (int) (v2.getViews() - v1.getViews());
-                    }
-                    return (int) (v1.getViews() - v2.getViews());
-                });
+            public void sortItems(List<YoutubeChannel.Video> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? Long.compare(o2.getViews(), o1.getViews())
+                        : Long.compare(o1.getViews(), o2.getViews()));
             }
         };
     }

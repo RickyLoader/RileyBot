@@ -92,7 +92,7 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
             channel.sendMessage("There are no scores to show, play some games!").queue();
             return;
         }
-        new PageableTableEmbed(
+        new PageableTableEmbed<Bank>(
                 context,
                 Bank.getLeaderboard(),
                 MillionaireGameshow.THUMB,
@@ -108,24 +108,18 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
                 EmbedHelper.PURPLE
         ) {
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                ArrayList<Bank> banks = new ArrayList<>();
-                for(Object bank : items) {
-                    banks.add((Bank) bank);
-                }
-                Bank.sortBanks(banks, defaultSort);
-                updateItems(banks);
-            }
-
-            @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Bank bank = (Bank) items.get(index);
-                int rank = defaultSort ? (index + 1) : (items.size() - index);
+            public String[] getRowValues(int index, Bank bank, boolean defaultSort) {
+                int rank = defaultSort ? (index + 1) : (getItems().size() - index);
                 return new String[]{
                         String.valueOf(rank),
                         bank.getSummary(),
                         String.valueOf(bank.getGamesPlayed())
                 };
+            }
+
+            @Override
+            public void sortItems(List<Bank> items, boolean defaultSort) {
+                Bank.sortBanks(items, defaultSort);
             }
         }.showMessage();
     }

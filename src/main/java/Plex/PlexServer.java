@@ -462,7 +462,7 @@ public class PlexServer {
      * @param inLibrary     Search was performed on the library (not externally on Radarr)
      */
     private void showSearchResults(CommandContext context, String query, PlexMovie[] searchResults, boolean inLibrary) {
-        new PageableTableEmbed(
+        new PageableTableEmbed<PlexMovie>(
                 context,
                 Arrays.asList(searchResults),
                 inLibrary ? PLEX_ICON : RADARR_ICON,
@@ -475,18 +475,8 @@ public class PlexServer {
         ) {
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
-                    @Override
-                    public String getString(Object o) {
-                        return ((PlexMovie) o).getPlexDetails().getTitle();
-                    }
-                });
-            }
-
-            @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                PlexDetails plexDetails = ((PlexMovie) items.get(index)).getPlexDetails();
+            public String[] getRowValues(int index, PlexMovie item, boolean defaultSort) {
+                PlexDetails plexDetails = item.getPlexDetails();
                 return new String[]{
                         plexDetails.isOnPlex()
                                 ? emoteHelper.getPlex().getAsMention()
@@ -494,6 +484,16 @@ public class PlexServer {
                         plexDetails.getTitle(),
                         plexDetails.getRatingIds().getFormattedId()
                 };
+            }
+
+            @Override
+            public void sortItems(List<PlexMovie> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<PlexMovie>(query, defaultSort) {
+                    @Override
+                    public String getString(PlexMovie o) {
+                        return o.getPlexDetails().getTitle();
+                    }
+                });
             }
         }.showMessage();
     }

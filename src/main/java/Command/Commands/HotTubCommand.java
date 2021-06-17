@@ -40,7 +40,7 @@ public class HotTubCommand extends DiscordCommand {
      * @param streamers List of streamers to display
      */
     private void displayHotTubbers(CommandContext context, ArrayList<Streamer> streamers) {
-        new CyclicalPageableEmbed(
+        new CyclicalPageableEmbed<Streamer>(
                 context,
                 streamers,
                 1
@@ -51,8 +51,7 @@ public class HotTubCommand extends DiscordCommand {
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
-                Streamer streamer = (Streamer) getItems().get(currentIndex);
+            public void displayItem(EmbedBuilder builder, int currentIndex, Streamer streamer) {
                 if(!streamer.hasThumbnail()) {
                     streamer.updateThumbnail(TwitchTV.getInstance().getStreamerProfilePicture(streamer.getId()));
                 }

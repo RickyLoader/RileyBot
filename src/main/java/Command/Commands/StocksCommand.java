@@ -235,7 +235,7 @@ public class StocksCommand extends OnReadyDiscordCommand {
         if(cryptoResults.length > 0) {
             desc += "\n" + cryptoEmote + " = Crypto currency";
         }
-        new PageableTableEmbed(
+        new PageableTableEmbed<Symbol>(
                 context,
                 Arrays.asList(symbols),
                 thumbnail,
@@ -246,8 +246,7 @@ public class StocksCommand extends OnReadyDiscordCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Symbol symbol = (Symbol) items.get(index);
+            public String[] getRowValues(int index, Symbol symbol, boolean defaultSort) {
                 String identifier = getTrigger() + symbol.getSymbol();
                 if(symbol.isCrypto()) {
                     identifier = cryptoEmote + " " + identifier;
@@ -256,15 +255,10 @@ public class StocksCommand extends OnReadyDiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String c1 = ((Symbol) o1).getSymbol();
-                    String c2 = ((Symbol) o2).getSymbol();
-                    if(defaultSort) {
-                        return c1.compareTo(c2);
-                    }
-                    return c2.compareTo(c1);
-                });
+            public void sortItems(List<Symbol> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? o1.getSymbol().compareTo(o2.getSymbol())
+                        : o2.getSymbol().compareTo(o1.getSymbol()));
             }
         }.showMessage();
     }

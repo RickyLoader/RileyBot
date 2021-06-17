@@ -6,7 +6,6 @@ import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.TwitterAdapter;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class TweetsCommand extends DiscordCommand {
@@ -38,8 +37,8 @@ public class TweetsCommand extends DiscordCommand {
      * @param context Command context
      * @return Tweet history pageable embed
      */
-    public PageableEmbed getTweetEmbed(CommandContext context) {
-        return new PageableTableEmbed(
+    public PageableEmbed<Status> getTweetEmbed(CommandContext context) {
+        return new PageableTableEmbed<Status>(
                 context,
                 tweets,
                 twitterManager.getThumbnail(),
@@ -51,21 +50,15 @@ public class TweetsCommand extends DiscordCommand {
                 EmbedHelper.BLUE
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Status status = (Status) items.get(index);
+            public String[] getRowValues(int index, Status status, boolean defaultSort) {
                 return new String[]{status.getCreatedAt().toString(), status.getText()};
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    Status a = (Status) o1;
-                    Status b = (Status) o2;
-                    if(defaultSort) {
-                        return b.getCreatedAt().compareTo(a.getCreatedAt());
-                    }
-                    return a.getCreatedAt().compareTo(b.getCreatedAt());
-                });
+            public void sortItems(List<Status> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? o2.getCreatedAt().compareTo(o1.getCreatedAt())
+                        : o1.getCreatedAt().compareTo(o2.getCreatedAt()));
             }
         };
     }

@@ -76,7 +76,7 @@ public class GrandExchangeCommand extends OnReadyDiscordCommand {
      */
     public void showItemSearchResults(CommandContext context, Item[] items, String query) {
         boolean noResults = items.length == 0;
-        new PageableTableEmbed(
+        new PageableTableEmbed<Item>(
                 context,
                 Arrays.asList(items),
                 thumbnail,
@@ -88,17 +88,16 @@ public class GrandExchangeCommand extends OnReadyDiscordCommand {
                 noResults ? EmbedHelper.RED : EmbedHelper.GREEN
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Item item = (Item) items.get(index);
+            public String[] getRowValues(int index, Item item, boolean defaultSort) {
                 return new String[]{String.valueOf(item.getId()), item.getName()};
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
+            public void sortItems(List<Item> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<Item>(query, defaultSort) {
                     @Override
-                    public String getString(Object o) {
-                        return ((Item) o).getName();
+                    public String getString(Item o) {
+                        return o.getName();
                     }
                 });
             }

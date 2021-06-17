@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Stores information about a previous gunfight game session
@@ -64,7 +65,7 @@ public class Session {
      * @param sessions  Sessions to sort
      * @param ascending Ascending rank
      */
-    public static void sortSessions(ArrayList<Session> sessions, boolean ascending) {
+    public static void sortSessions(List<Session> sessions, boolean ascending) {
         Comparator<Session> sort = Comparator.comparing(Session::getLongestStreak)
                 .thenComparing(Session::getRatio)
                 .thenComparing(Session::getWins)

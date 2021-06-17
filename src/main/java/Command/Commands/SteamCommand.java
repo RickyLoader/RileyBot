@@ -125,7 +125,7 @@ public class SteamCommand extends DiscordCommand {
      */
     private void showSearchResults(CommandContext context, ArrayList<AppInfo> searchResults, String query) {
         boolean noResults = searchResults.isEmpty();
-        new PageableTableEmbed(
+        new PageableTableEmbed<AppInfo>(
                 context,
                 searchResults,
                 SteamStore.STEAM_LOGO,
@@ -141,23 +141,23 @@ public class SteamCommand extends DiscordCommand {
                 noResults ? EmbedHelper.RED : EmbedHelper.BLUE
         ) {
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
-                    @Override
-                    public String getString(Object o) {
-                        return ((AppInfo) o).getName();
-                    }
-                });
-            }
-
-            @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                AppInfo appInfo = (AppInfo) items.get(index);
+            public String[] getRowValues(int index, AppInfo appInfo, boolean defaultSort) {
                 return new String[]{
                         appInfo.getName(),
                         String.valueOf(appInfo.getId())
                 };
             }
+
+            @Override
+            public void sortItems(List<AppInfo> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<AppInfo>(query, defaultSort) {
+                    @Override
+                    public String getString(AppInfo o) {
+                        return o.getName();
+                    }
+                });
+            }
+
         }.showMessage();
     }
 
@@ -168,7 +168,7 @@ public class SteamCommand extends DiscordCommand {
      */
     private void showTopSteamGames(CommandContext context) {
         ArrayList<Application> topApplications = SteamStore.getInstance().fetchTopSteamApplications();
-        new PageableTableEmbed(
+        new PageableTableEmbed<Application>(
                 context,
                 topApplications,
                 SteamStore.STEAM_LOGO,
@@ -184,8 +184,7 @@ public class SteamCommand extends DiscordCommand {
                 EmbedHelper.BLUE
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Application application = (Application) items.get(index);
+            public String[] getRowValues(int index, Application application, boolean defaultSort) {
                 AppInfo appInfo = application.getAppInfo();
                 return new String[]{
                         appInfo.getName() + " (" + appInfo.getId() + ")",
@@ -195,11 +194,12 @@ public class SteamCommand extends DiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    long players1 = ((Application) o1).getConcurrentPlayers();
-                    long players2 = ((Application) o2).getConcurrentPlayers();
+            public void sortItems(List<Application> items, boolean defaultSort) {
+                items.sort((o1, o2) -> {
+                    long players1 = o1.getConcurrentPlayers();
+                    long players2 = o2.getConcurrentPlayers();
                     return defaultSort ? Long.compare(players2, players1) : Long.compare(players1, players2);
+
                 });
             }
         }.showMessage();

@@ -195,7 +195,7 @@ public class XKCDCommand extends DiscordCommand {
      * @param context       Command context for initialising pageable embed
      */
     private void showSearchResults(String query, PublicationDetails[] searchResults, CommandContext context) {
-        new PageableTableEmbed(
+        new PageableTableEmbed<PublicationDetails>(
                 context,
                 Arrays.asList(searchResults),
                 thumbnail,
@@ -211,25 +211,17 @@ public class XKCDCommand extends DiscordCommand {
                 searchResults.length == 0 ? EmbedHelper.RED : EmbedHelper.GREEN
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                PublicationDetails publicationDetails = (PublicationDetails) items.get(index);
+            public String[] getRowValues(int index, PublicationDetails item, boolean defaultSort) {
                 return new String[]{
-                        "#" + publicationDetails.getIssue(),
-                        publicationDetails.getTitle(),
-                        publicationDetails.getFormattedDate()
+                        "#" + item.getIssue(),
+                        item.getTitle(),
+                        item.getFormattedDate()
                 };
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    int i1 = ((PublicationDetails) o1).getIssue();
-                    int i2 = ((PublicationDetails) o2).getIssue();
-                    if(defaultSort) {
-                        return i1 - i2;
-                    }
-                    return i2 - i1;
-                });
+            public void sortItems(List<PublicationDetails> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort ? o1.getIssue() - o2.getIssue() : o2.getIssue() - o1.getIssue());
             }
         }.showMessage();
     }

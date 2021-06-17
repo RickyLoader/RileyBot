@@ -7,13 +7,12 @@ import Runescape.OSRS.Polling.Question;
 import net.dv8tion.jda.api.entities.Emote;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 /**
  * Pageable OSRS poll message showing questions and results
  */
-public class PollMessage extends PageableListEmbed {
+public class PollMessage extends PageableListEmbed<Question> {
     private final String pass, fail, answer;
     private final ProgressBar progressBar;
     private final boolean open;
@@ -53,15 +52,8 @@ public class PollMessage extends PageableListEmbed {
     }
 
     @Override
-    public void sortItems(List<?> items, boolean defaultSort) {
-        items.sort((Comparator<Object>) (o1, o2) -> {
-            Question q1 = (Question) o1;
-            Question q2 = (Question) o2;
-            if(defaultSort) {
-                return q1.getNumber() - q2.getNumber();
-            }
-            return q2.getNumber() - q1.getNumber();
-        });
+    public void sortItems(List<Question> items, boolean defaultSort) {
+        items.sort((o1, o2) -> defaultSort ? o1.getNumber() - o2.getNumber() : o2.getNumber() - o1.getNumber());
     }
 
     /**
@@ -126,7 +118,7 @@ public class PollMessage extends PageableListEmbed {
                 true
         );
 
-        if(opinionQuestion){
+        if(opinionQuestion) {
             maxSwordEmoteLength++; // +1 for checkmark emote
         }
 
@@ -165,9 +157,7 @@ public class PollMessage extends PageableListEmbed {
     }
 
     @Override
-    public String getName(int currentIndex) {
-        Question question = (Question) getItems().get(currentIndex);
-
+    public String getName(Question question) {
         /*
          * If the question is an opinion question, the highest voted opinion will have a checkmark beside it instead
          * of a checkmark beside the question.
@@ -181,7 +171,7 @@ public class PollMessage extends PageableListEmbed {
     }
 
     @Override
-    public String getValue(int currentIndex) {
-        return buildAnswerDisplay(((Question) getItems().get(currentIndex)));
+    public String getValue(Question question) {
+        return buildAnswerDisplay(question);
     }
 }

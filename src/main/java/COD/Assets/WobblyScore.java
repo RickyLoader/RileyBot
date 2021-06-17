@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Wobbly leaderboard entry
@@ -86,7 +86,7 @@ public class WobblyScore {
      * @param leaderboard List of WobblyScore to sort
      * @param descending  Descending order of wobblies
      */
-    public static void sortLeaderboard(ArrayList<WobblyScore> leaderboard, boolean descending) {
+    public static void sortLeaderboard(List<WobblyScore> leaderboard, boolean descending) {
         leaderboard.sort((o1, o2) -> {
             if(descending) {
                 return Long.compare(o2.getWobblies(), o1.getWobblies());

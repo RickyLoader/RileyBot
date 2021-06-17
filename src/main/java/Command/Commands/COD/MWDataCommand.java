@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -93,7 +92,7 @@ public class MWDataCommand extends DiscordCommand {
      * @param title   Embed title to use
      */
     private void showPageableWeapons(CommandContext context, Weapon[] weapons, String title) {
-        new PageableSortEmbed(
+        new PageableSortEmbed<Weapon>(
                 context,
                 Arrays.asList(weapons),
                 1
@@ -108,9 +107,8 @@ public class MWDataCommand extends DiscordCommand {
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
+            public void displayItem(EmbedBuilder builder, int currentIndex, Weapon current) {
                 try {
-                    Weapon current = (Weapon) getItems().get(currentIndex);
                     Weapon.CATEGORY weaponCategory = current.getCategory();
                     builder
                             .setDescription(
@@ -131,15 +129,10 @@ public class MWDataCommand extends DiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String w1 = ((Weapon) o1).getName();
-                    String w2 = ((Weapon) o2).getName();
-                    if(defaultSort) {
-                        return w1.compareTo(w2);
-                    }
-                    return w2.compareTo(w1);
-                });
+            public void sortItems(List<Weapon> items, boolean defaultSort) {
+                items.sort((o1, o2) -> defaultSort
+                        ? o1.getName().compareTo(o2.getName())
+                        : o2.getName().compareTo(o1.getName()));
             }
         }.showMessage();
     }

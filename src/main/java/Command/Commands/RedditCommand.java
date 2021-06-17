@@ -75,7 +75,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
      * @param galleryPost Gallery post to display
      */
     private void showGalleryPost(CommandContext context, RedditPost galleryPost) {
-        new CyclicalPageableEmbed(
+        new CyclicalPageableEmbed<String>(
                 context,
                 galleryPost.getContent().getGallery(),
                 1
@@ -88,13 +88,13 @@ public class RedditCommand extends OnReadyDiscordCommand {
             }
 
             @Override
-            public String getPageDetails() {
-                return "Image: " + getPage() + "/" + getPages();
+            public void displayItem(EmbedBuilder builder, int currentIndex, String item) {
+                builder.setImage(item);
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex) {
-                builder.setImage((String) getItems().get(currentIndex));
+            public String getPageDetails() {
+                return "Image: " + getPage() + "/" + getPages();
             }
 
             @Override

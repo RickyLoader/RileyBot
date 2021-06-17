@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import static TrademeAPI.Listing.*;
@@ -140,7 +139,7 @@ public class TrademeCommand extends DiscordCommand {
      */
     private void showCategories(CommandContext context, ArrayList<Category> categories, String query) {
         boolean searching = query != null;
-        new PageableTableEmbed(
+        new PageableTableEmbed<Category>(
                 context,
                 categories,
                 Trademe.TRADEME_LOGO,
@@ -156,27 +155,23 @@ public class TrademeCommand extends DiscordCommand {
                 searching ? EmbedHelper.RED : EmbedHelper.YELLOW
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                Category category = (Category) items.get(index);
+            public String[] getRowValues(int index, Category category, boolean defaultSort) {
                 return new String[]{category.getNumber(), category.getPath(), category.getName()};
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
+            public void sortItems(List<Category> items, boolean defaultSort) {
                 if(searching) {
-                    items.sort(new LevenshteinDistance(query, defaultSort) {
+                    items.sort(new LevenshteinDistance<Category>(query, defaultSort) {
                         @Override
-                        public String getString(Object o) {
-                            return ((Category) o).getName();
+                        public String getString(Category o) {
+                            return o.getName();
                         }
                     });
-                    return;
                 }
-                items.sort((Comparator<Object>) (o1, o2) -> {
-                    String n1 = ((Category) o1).getPath();
-                    String n2 = ((Category) o2).getPath();
-                    return defaultSort ? n1.compareTo(n2) : n2.compareTo(n1);
-                });
+                items.sort((o1, o2) -> defaultSort
+                        ? o1.getPath().compareTo(o2.getPath())
+                        : o2.getPath().compareTo(o1.getPath()));
             }
         }.showMessage();
     }
@@ -201,7 +196,7 @@ public class TrademeCommand extends DiscordCommand {
      */
     private void showListingResults(CommandContext context, ArrayList<ListingOverview> results, String query, Category category) {
         boolean noResults = results.isEmpty();
-        new PageableTableEmbed(
+        new PageableTableEmbed<ListingOverview>(
                 context,
                 results,
                 Trademe.TRADEME_LOGO,
@@ -215,8 +210,7 @@ public class TrademeCommand extends DiscordCommand {
                 5
         ) {
             @Override
-            public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-                ListingOverview overview = (ListingOverview) items.get(index);
+            public String[] getRowValues(int index, ListingOverview overview, boolean defaultSort) {
                 return new String[]{
                         listingIdPrefix + overview.getId(),
                         EmbedHelper.embedURL(overview.getTitle(), overview.getUrl()),
@@ -225,11 +219,11 @@ public class TrademeCommand extends DiscordCommand {
             }
 
             @Override
-            public void sortItems(List<?> items, boolean defaultSort) {
-                items.sort(new LevenshteinDistance(query, defaultSort) {
+            public void sortItems(List<ListingOverview> items, boolean defaultSort) {
+                items.sort(new LevenshteinDistance<ListingOverview>(query, defaultSort) {
                     @Override
-                    public String getString(Object o) {
-                        return ((ListingOverview) o).getTitle();
+                    public String getString(ListingOverview o) {
+                        return o.getTitle();
                     }
                 });
             }
