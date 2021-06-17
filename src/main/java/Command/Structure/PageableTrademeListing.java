@@ -14,7 +14,7 @@ import static TrademeAPI.Trademe.*;
 /**
  * Page through images in a Trademe listing
  */
-public class PageableTrademeListing extends CyclicalPageableEmbed {
+public class PageableTrademeListing extends CyclicalPageableEmbed<String> {
     private final Listing listing;
     private final String footer;
 
@@ -93,10 +93,10 @@ public class PageableTrademeListing extends CyclicalPageableEmbed {
                 null
         );
     }
-
+    
     @Override
-    public void displayItem(EmbedBuilder builder, int currentIndex) {
-        builder.setImage((String) getItems().get(currentIndex));
+    public void displayItem(EmbedBuilder builder, int currentIndex, String item) {
+        builder.setImage(item);
     }
 
     @Override

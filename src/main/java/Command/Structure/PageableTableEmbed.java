@@ -7,7 +7,7 @@ import java.util.List;
 import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;
 
-public abstract class PageableTableEmbed extends PageableTemplateEmbed {
+public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
     private final String[] columns;
 
     /**
@@ -23,7 +23,7 @@ public abstract class PageableTableEmbed extends PageableTemplateEmbed {
      * @param bound   Maximum items to display
      * @param colour  Optional colour to use for embed
      */
-    public PageableTableEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, String[] columns, int bound, int... colour) {
+    public PageableTableEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, String[] columns, int bound, int... colour) {
         super(context, items, thumb, title, desc, footer, bound, colour);
         this.columns = columns;
         try {
@@ -41,10 +41,11 @@ public abstract class PageableTableEmbed extends PageableTemplateEmbed {
      *
      * @param builder      Embed builder to add fields to
      * @param currentIndex Current index within list of items
+     * @param item         Item at current index
      */
     @Override
-    public void displayItem(EmbedBuilder builder, int currentIndex) {
-        String[] rowValues = getRowValues(currentIndex, getItems(), isDefaultSort());
+    public void displayItem(EmbedBuilder builder, int currentIndex, T item) {
+        String[] rowValues = getRowValues(currentIndex, getItems().get(currentIndex), isDefaultSort());
         try {
             if(rowValues.length != columns.length) {
                 throw new IncorrectQuantityException("You must provide an equal quantity of row values to column values");
@@ -71,11 +72,11 @@ public abstract class PageableTableEmbed extends PageableTemplateEmbed {
      * Get the list of values to display that coincide with the list of column headers
      *
      * @param index       Current index within items
-     * @param items       List of items
+     * @param item        Item at current index
      * @param defaultSort Sort value
      * @return List of values to display as a row
      */
-    public abstract String[] getRowValues(int index, List<?> items, boolean defaultSort);
+    public abstract String[] getRowValues(int index, T item, boolean defaultSort);
 
     /**
      * Exception to throw when incorrect quantity of row or column values provided

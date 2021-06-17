@@ -5,7 +5,7 @@ import java.util.Comparator;
 /**
  * Edit distance between two Strings comparator
  */
-public abstract class LevenshteinDistance implements Comparator<Object> {
+public abstract class LevenshteinDistance<T> implements Comparator<T> {
     private final boolean mostSimilarFirst;
     private final String query;
 
@@ -28,7 +28,7 @@ public abstract class LevenshteinDistance implements Comparator<Object> {
      * @param o2 Object 2
      * @return Edit distance comparison
      */
-    public int compare(Object o1, Object o2) {
+    public int compare(T o1, T o2) {
         int distance1 = getDistance(getString(o1), query);
         int distance2 = getDistance(getString(o2), query);
         return mostSimilarFirst ? distance1 - distance2 : distance2 - distance1;
@@ -40,7 +40,7 @@ public abstract class LevenshteinDistance implements Comparator<Object> {
      * @param o Object to get String for
      * @return String from object
      */
-    public abstract String getString(Object o);
+    public abstract String getString(T o);
 
     /**
      * Get the levenshtein distance between the given Strings.

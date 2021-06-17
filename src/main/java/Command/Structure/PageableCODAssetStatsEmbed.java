@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Page through COD assets
  */
-public abstract class PageableCODAssetStatsEmbed extends PageableTableEmbed {
+public abstract class PageableCODAssetStatsEmbed extends PageableTableEmbed<AssetStats<? extends CODAsset>> {
 
     /**
      * Display a list of player COD asset stats in an embedded message that can be paged through with buttons
@@ -36,8 +36,7 @@ public abstract class PageableCODAssetStatsEmbed extends PageableTableEmbed {
     }
 
     @Override
-    public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-        AssetStats<? extends CODAsset> assetStats = (AssetStats<? extends CODAsset>) items.get(index);
+    public String[] getRowValues(int index, AssetStats<? extends CODAsset> assetStats, boolean defaultSort) {
         CODAsset asset = assetStats.getAsset();
         return new String[]{
                 asset.getCodename(),

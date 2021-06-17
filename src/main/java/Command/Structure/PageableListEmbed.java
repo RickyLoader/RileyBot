@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 
 import java.util.List;
 
-public abstract class PageableListEmbed extends PageableTemplateEmbed {
+public abstract class PageableListEmbed<T> extends PageableTemplateEmbed<T> {
 
     /**
      * Embedded message that can be paged through with emotes and displays as a list of fields
@@ -18,34 +18,28 @@ public abstract class PageableListEmbed extends PageableTemplateEmbed {
      * @param bound   Maximum items to display
      * @param colour  Optional colour to use for embed
      */
-    public PageableListEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
+    public PageableListEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
         super(context, items, thumb, title, desc, footer, bound, colour);
     }
 
-    /**
-     * Add a field for the current item
-     *
-     * @param builder      Embed builder to add fields to
-     * @param currentIndex Current index within list of items
-     */
     @Override
-    public void displayItem(EmbedBuilder builder, int currentIndex) {
-        builder.addField(getName(currentIndex), getValue(currentIndex), false);
+    public void displayItem(EmbedBuilder builder, int currentIndex, T item) {
+        builder.addField(getName(item), getValue(item), false);
     }
 
     /**
      * Get the name to use in a field for the item at the current index
      *
-     * @param currentIndex Current index within list of items
+     * @param item Item at the current index
      * @return Name to use in field
      */
-    public abstract String getName(int currentIndex);
+    public abstract String getName(T item);
 
     /**
      * Get the value to use in a field for the item at the current index
      *
-     * @param currentIndex Current index within list of items
+     * @param item Item at the current index
      * @return Name to use in field
      */
-    public abstract String getValue(int currentIndex);
+    public abstract String getValue(T item);
 }

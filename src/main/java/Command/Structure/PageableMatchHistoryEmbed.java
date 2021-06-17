@@ -17,7 +17,7 @@ import static COD.CODManager.*;
 /**
  * Pageable COD match history embed with map/mode breakdown charts
  */
-public class PageableMatchHistoryEmbed extends PageableTableEmbed {
+public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
     private final Button maps, modes, goBack;
     private final MatchHistory matchHistory;
     private final GAME game;
@@ -71,11 +71,11 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
     }
 
     @Override
-    public void displayItem(EmbedBuilder builder, int currentIndex) {
+    public void displayItem(EmbedBuilder builder, int currentIndex, MatchStats item) {
         if(showingBreakdown()) {
             return;
         }
-        super.displayItem(builder, currentIndex);
+        super.displayItem(builder, currentIndex, item);
     }
 
     /**
@@ -112,23 +112,10 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
     }
 
     @Override
-    public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-        MatchStats matchStats = (MatchStats) items.get(index);
-        int position = defaultSort ? (index + 1) : (items.size() - index);
-        return new String[]{
-                String.valueOf(position),
-                matchStats.getMatchSummary(),
-                getFormattedResult(matchStats)
-        };
-    }
-
-    @Override
-    public void sortItems(List<?> items, boolean defaultSort) {
-        items.sort((Comparator<Object>) (o1, o2) -> {
-            Date d1 = ((MatchStats) o1).getStart();
-            Date d2 = ((MatchStats) o2).getStart();
-            return defaultSort ? d2.compareTo(d1) : d1.compareTo(d2);
-        });
+    public void sortItems(List<MatchStats> items, boolean defaultSort) {
+        items.sort((o1, o2) -> defaultSort
+                ? o2.getStart().compareTo(o1.getStart())
+                : o1.getStart().compareTo(o2.getStart()));
     }
 
     /**
@@ -217,5 +204,15 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed {
             default:
                 return emoteHelper.getDraw().getAsMention();
         }
+    }
+
+    @Override
+    public String[] getRowValues(int index, MatchStats matchStats, boolean defaultSort) {
+        int position = defaultSort ? (index + 1) : (getItems().size() - index);
+        return new String[]{
+                String.valueOf(position),
+                matchStats.getMatchSummary(),
+                getFormattedResult(matchStats)
+        };
     }
 }

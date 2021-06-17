@@ -16,12 +16,12 @@ import java.util.List;
 /**
  * Embedded message that can be paged through with buttons
  */
-public abstract class PageableEmbed {
+public abstract class PageableEmbed<T> {
     private final MessageChannel channel;
     private final int bound, pages;
     private final Button forward, backward;
     private final EmoteHelper emoteHelper;
-    private List<?> items;
+    private List<T> items;
     private long id;
     private int index = 0, page = 1;
     private String lastAction;
@@ -33,7 +33,7 @@ public abstract class PageableEmbed {
      * @param items   List of items to be displayed
      * @param bound   Maximum items to display on one page
      */
-    public PageableEmbed(CommandContext context, List<?> items, int bound) {
+    public PageableEmbed(CommandContext context, List<T> items, int bound) {
         this.channel = context.getMessageChannel();
         this.items = items;
         this.bound = bound;
@@ -67,7 +67,7 @@ public abstract class PageableEmbed {
      *
      * @return List of objects
      */
-    public List<?> getItems() {
+    public List<T> getItems() {
         return items;
     }
 
@@ -135,7 +135,7 @@ public abstract class PageableEmbed {
      * Delete the embed
      */
     public void delete() {
-        channel.retrieveMessageById(id).queue(message -> message.delete().queue());
+        channel.deleteMessageById(id).queue();
     }
 
     /**
@@ -169,8 +169,9 @@ public abstract class PageableEmbed {
      *
      * @param builder      Embed builder to display item in
      * @param currentIndex Current index within list of items
+     * @param item         Item at current index
      */
-    public abstract void displayItem(EmbedBuilder builder, int currentIndex);
+    public abstract void displayItem(EmbedBuilder builder, int currentIndex, T item);
 
     /**
      * Get the id of the embed
@@ -216,7 +217,7 @@ public abstract class PageableEmbed {
         EmbedBuilder embedBuilder = getEmbedBuilder(getPageDetails());
         int max = Math.min(bound, (items.size() - this.index));
         for(int index = this.index; index < (this.index + max); index++) {
-            displayItem(embedBuilder, index);
+            displayItem(embedBuilder, index, items.get(index));
         }
         return embedBuilder.build();
     }
@@ -333,7 +334,7 @@ public abstract class PageableEmbed {
      *
      * @param items List to replace current
      */
-    public void updateItems(List<?> items) {
+    public void updateItems(List<T> items) {
         this.items = items;
     }
 }

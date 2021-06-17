@@ -3,13 +3,12 @@ package Command.Structure;
 import Valheim.Wiki.ValheimPageSummary;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
  * Pageable Valheim wiki search embed
  */
-public class PageableValheimWikiSearchEmbed extends PageableTableEmbed {
+public class PageableValheimWikiSearchEmbed extends PageableTableEmbed<ValheimPageSummary> {
     public static final String THUMBNAIL = "https://goldencheckpoint.com/wp-content/uploads/2021/02/Valheim_logo-800x400.png";
 
     /**
@@ -50,20 +49,14 @@ public class PageableValheimWikiSearchEmbed extends PageableTableEmbed {
     }
 
     @Override
-    public void sortItems(List<?> items, boolean defaultSort) {
-        items.sort((Comparator<Object>) (o1, o2) -> {
-            String n1 = ((ValheimPageSummary) o1).getTitle();
-            String n2 = ((ValheimPageSummary) o2).getTitle();
-            if(defaultSort) {
-                return n1.compareTo(n2);
-            }
-            return n2.compareTo(n1);
-        });
+    public void sortItems(List<ValheimPageSummary> items, boolean defaultSort) {
+        items.sort((o1, o2) -> defaultSort
+                ? o1.getTitle().compareTo(o2.getTitle())
+                : o2.getTitle().compareTo(o1.getTitle()));
     }
 
     @Override
-    public String[] getRowValues(int index, List<?> items, boolean defaultSort) {
-        ValheimPageSummary pageSummary = (ValheimPageSummary) items.get(index);
+    public String[] getRowValues(int index, ValheimPageSummary pageSummary, boolean defaultSort) {
         return new String[]{
                 EmbedHelper.embedURL(pageSummary.getTitle(), pageSummary.getUrl()),
                 pageSummary.getCategory().name()

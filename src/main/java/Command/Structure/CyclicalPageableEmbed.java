@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Pageable message embed which loops around back to the first page after the last page
  */
-public abstract class CyclicalPageableEmbed extends PageableEmbed {
+public abstract class CyclicalPageableEmbed<T> extends PageableEmbed<T> {
 
     /**
      * Initialise the values
@@ -17,7 +17,7 @@ public abstract class CyclicalPageableEmbed extends PageableEmbed {
      * @param items   List of items to be displayed
      * @param bound   Maximum items to display on one page
      */
-    public CyclicalPageableEmbed(CommandContext context, List<?> items, int bound) {
+    public CyclicalPageableEmbed(CommandContext context, List<T> items, int bound) {
         super(context, items, bound);
     }
 

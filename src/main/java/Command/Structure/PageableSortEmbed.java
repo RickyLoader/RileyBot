@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Sortable pageable embed
  */
-public abstract class PageableSortEmbed extends PageableEmbed {
+public abstract class PageableSortEmbed<T> extends PageableEmbed<T> {
     private final Button reverse;
     private boolean defaultSort = true;
 
@@ -20,7 +20,7 @@ public abstract class PageableSortEmbed extends PageableEmbed {
      * @param items   List of items to be displayed
      * @param bound   Maximum items to display
      */
-    public PageableSortEmbed(CommandContext context, List<?> items, int bound) {
+    public PageableSortEmbed(CommandContext context, List<T> items, int bound) {
         super(context, items, bound);
         this.reverse = Button.primary("reverse", Emoji.ofEmote(getEmoteHelper().getReverse()));
         sortItems(items, defaultSort);
@@ -77,5 +77,5 @@ public abstract class PageableSortEmbed extends PageableEmbed {
      * @param items       List of objects to sort
      * @param defaultSort How to sort the items
      */
-    public abstract void sortItems(List<?> items, boolean defaultSort);
+    public abstract void sortItems(List<T> items, boolean defaultSort);
 }

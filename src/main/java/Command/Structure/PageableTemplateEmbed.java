@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Pageable embed from a given template - table, list, etc
  */
-public abstract class PageableTemplateEmbed extends PageableSortEmbed {
+public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
     private final String thumb, title, desc, footer;
     private final int colour;
 
@@ -23,7 +23,7 @@ public abstract class PageableTemplateEmbed extends PageableSortEmbed {
      * @param bound   Maximum items to display
      * @param colour  Optional colour to use for embed
      */
-    public PageableTemplateEmbed(CommandContext context, List<?> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
+    public PageableTemplateEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
         super(context, items, bound);
         this.thumb = thumb;
         this.title = title;

@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 /**
  * Page through images in a facebook post
  */
-public class PageableFacebookPost extends CyclicalPageableEmbed {
+public class PageableFacebookPost extends CyclicalPageableEmbed<String> {
     private final FacebookPost facebookPost;
 
     /**
@@ -69,9 +69,8 @@ public class PageableFacebookPost extends CyclicalPageableEmbed {
     }
 
     @Override
-    public void displayItem(EmbedBuilder builder, int currentIndex) {
-        String image = (String) getItems().get(currentIndex);
-        builder.setImage(image);
+    public void displayItem(EmbedBuilder builder, int currentIndex, String item) {
+        builder.setImage(item);
     }
 
     @Override
