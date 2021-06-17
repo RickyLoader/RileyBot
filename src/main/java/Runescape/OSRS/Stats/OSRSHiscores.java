@@ -100,7 +100,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             criteria.add("Checking account type...");
             criteria.add("Fetching achievements...");
         }
-        if(shouldDisplayXpTracker(args)) {
+        if(shouldFetchXpTracker(args)) {
             criteria.add("Checking XP tracker...");
         }
         return criteria;
@@ -329,7 +329,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             addPlayerAchievements(stats, args);
         }
 
-        if(shouldDisplayXpTracker(args)) {
+        if(shouldFetchXpTracker(args)) {
             getTrackerData(stats);
         }
         return stats;
@@ -746,7 +746,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     @Override
     public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, OSRSHiscoresArgs args) {
         BufferedImage image = new BufferedImage(
-                calculateImageWidth(args),
+                calculateImageWidth(playerStats, args),
                 calculateImageHeight(playerStats, args),
                 BufferedImage.TYPE_INT_ARGB
         );
@@ -790,7 +790,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         }
 
         // Display off to the right of the image
-        if(shouldDisplayXpTracker(args)) {
+        if(shouldDisplayXpTracker(args, playerStats)) {
             BufferedImage xpTrackerSection = buildXpTrackerSection(playerStats);
             g.drawImage(xpTrackerSection, titleSection.getWidth(), 0, null);
         }
@@ -897,10 +897,11 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * haven't specified to display the XP tracker (or the player has no gained XP for the week), there is no need to
      * build this section.
      *
-     * @param args Hiscores arguments
+     * @param stats Player stats
+     * @param args  Hiscores arguments
      * @return Width of hiscores image to create
      */
-    private int calculateImageWidth(OSRSHiscoresArgs args) {
+    private int calculateImageWidth(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
         /*
          * Base width - title section, skills section, and boss section are always displayed,
          * the title section is equal in width to the skills section & boss section combined.
@@ -908,7 +909,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         int width = titleContainer.getWidth();
 
         // XP tracker is optional and is displayed beside the base image, add its width to the base width
-        return shouldDisplayXpTracker(args) ? width + xpContainer.getWidth() : width;
+        return shouldDisplayXpTracker(args, stats) ? width + xpContainer.getWidth() : width;
     }
 
     /**
@@ -943,13 +944,24 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Check if the XP tracker should be drawn on to the hiscores image
+     * Check if the XP tracker data should be fetched for the player
      *
      * @param args Hiscores arguments
+     * @return XP tracker data should be fetched
+     */
+    private boolean shouldFetchXpTracker(OSRSHiscoresArgs args) {
+        return args.displayXpTracker() && !args.searchLeagueStats();
+    }
+
+    /**
+     * Check if the XP tracker section should be drawn on to the hiscores image
+     *
+     * @param args  Hiscores arguments
+     * @param stats Player stats
      * @return Should display XP tracker in hiscores image
      */
-    private boolean shouldDisplayXpTracker(OSRSHiscoresArgs args) {
-        return args.displayXpTracker() && !args.searchLeagueStats();
+    private boolean shouldDisplayXpTracker(OSRSHiscoresArgs args, OSRSPlayerStats stats) {
+        return shouldFetchXpTracker(args) && stats.hasWeeklyGains();
     }
 
     /**
