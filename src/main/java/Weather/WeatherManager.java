@@ -26,33 +26,34 @@ public class WeatherManager {
      * @param emoteHelper Emote helper
      */
     public WeatherManager(EmoteHelper emoteHelper) {
-        this.maxIcon = EmoteHelper.formatEmote(emoteHelper.getMaxTemp());
-        this.minIcon = EmoteHelper.formatEmote(emoteHelper.getMinTemp());
-        this.rain = EmoteHelper.formatEmote(emoteHelper.getRain());
-        this.humidity = EmoteHelper.formatEmote(emoteHelper.getHumidity());
-        this.wind = EmoteHelper.formatEmote(emoteHelper.getWind());
-        this.gust = EmoteHelper.formatEmote(emoteHelper.getGust());
-        this.clothing = EmoteHelper.formatEmote(emoteHelper.getClothing());
-        this.missing = EmoteHelper.formatEmote(emoteHelper.getFail());
-        this.pressure = EmoteHelper.formatEmote(emoteHelper.getPressure());
+        this.maxIcon = emoteHelper.getMaxTemp().getAsMention();
+        this.minIcon = emoteHelper.getMinTemp().getAsMention();
+        this.rain = emoteHelper.getRain().getAsMention();
+        this.humidity = emoteHelper.getHumidity().getAsMention();
+        this.wind = emoteHelper.getWind().getAsMention();
+        this.gust = emoteHelper.getGust().getAsMention();
+        this.clothing = emoteHelper.getClothing().getAsMention();
+        this.missing = emoteHelper.getFail().getAsMention();
+        this.pressure = emoteHelper.getPressure().getAsMention();
 
-        iconTypes.put("DAY_FINE", EmoteHelper.formatEmote(emoteHelper.getDayFine()));
-        iconTypes.put("DAY_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getDayFewShowers()));
-        iconTypes.put("DAY_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getDayPartlyCloudy()));
-        iconTypes.put("DAY_THUNDER", EmoteHelper.formatEmote(emoteHelper.getDayThunder()));
+        iconTypes.put("DAY_FINE", emoteHelper.getDayFine().getAsMention());
+        iconTypes.put("DAY_FEW_SHOWERS", emoteHelper.getDayFewShowers().getAsMention());
+        iconTypes.put("DAY_PARTLY_CLOUDY", emoteHelper.getDayPartlyCloudy().getAsMention());
+        iconTypes.put("DAY_THUNDER", emoteHelper.getDayThunder().getAsMention());
 
-        iconTypes.put("NIGHT_PARTLY_CLOUDY", EmoteHelper.formatEmote(emoteHelper.getNightPartlyCloudy()));
-        iconTypes.put("NIGHT_FINE", EmoteHelper.formatEmote(emoteHelper.getNightFine()));
-        iconTypes.put("NIGHT_FROST", EmoteHelper.formatEmote(emoteHelper.getNightFrost()));
-        iconTypes.put("NIGHT_FEW_SHOWERS", EmoteHelper.formatEmote(emoteHelper.getNightFewShowers()));
+        iconTypes.put("NIGHT_PARTLY_CLOUDY", emoteHelper.getNightPartlyCloudy().getAsMention());
+        iconTypes.put("NIGHT_FINE", emoteHelper.getNightFine().getAsMention());
+        iconTypes.put("NIGHT_FOG", emoteHelper.getNightFog().getAsMention());
+        iconTypes.put("NIGHT_FROST", emoteHelper.getNightFrost().getAsMention());
+        iconTypes.put("NIGHT_FEW_SHOWERS", emoteHelper.getNightFewShowers().getAsMention());
 
-        String showers = EmoteHelper.formatEmote(emoteHelper.getShowers());
-        String cloudy = EmoteHelper.formatEmote(emoteHelper.getCloudy());
-        String windy = EmoteHelper.formatEmote(emoteHelper.getWindy());
-        String windRain = EmoteHelper.formatEmote(emoteHelper.getWindRain());
-        String snow = EmoteHelper.formatEmote(emoteHelper.getSnow());
-        String drizzle = EmoteHelper.formatEmote(emoteHelper.getNightDrizzle());
-        String rain = EmoteHelper.formatEmote(emoteHelper.getRain());
+        String showers = emoteHelper.getShowers().getAsMention();
+        String cloudy = emoteHelper.getCloudy().getAsMention();
+        String windy = emoteHelper.getWindy().getAsMention();
+        String windRain = emoteHelper.getWindRain().getAsMention();
+        String snow = emoteHelper.getSnow().getAsMention();
+        String drizzle = emoteHelper.getNightDrizzle().getAsMention();
+        String rain = emoteHelper.getRain().getAsMention();
 
         iconTypes.put("NIGHT_DRIZZLE", drizzle);
         iconTypes.put("DAY_DRIZZLE", drizzle);

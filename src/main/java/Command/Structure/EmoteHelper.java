@@ -846,4 +846,11 @@ public class EmoteHelper {
     public Emote getPollAnswerShield() {
         return get("854617897603301426");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/854963157277736960.png"/>
+     */
+    public Emote getNightFog() {
+        return get("854963157277736960");
+    }
 }
