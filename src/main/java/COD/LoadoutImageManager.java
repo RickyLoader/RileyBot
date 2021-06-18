@@ -36,6 +36,9 @@ public class LoadoutImageManager {
             UNKNOWN_ATTACHMENT,
             UNKNOWN_EQUIPMENT;
 
+    private static final int GAP = 10;
+    private static final float FONT_SIZE = 30f;
+
     public LoadoutImageManager() {
         ResourceHandler handler = new ResourceHandler();
         String basePath = "/COD/MW/Templates/Loadout/";
@@ -74,6 +77,8 @@ public class LoadoutImageManager {
         BufferedImage tactical = buildEquipmentImage(loadout.getTactical());
         BufferedImage perks = buildPerksImage(loadout.getPerks());
 
+        final int verticalSections = 5;
+
         BufferedImage container = new BufferedImage(
                 header.getWidth(),
                 header.getHeight()
@@ -81,24 +86,24 @@ public class LoadoutImageManager {
                         + secondary.getHeight()
                         + lethal.getHeight()
                         + perks.getHeight()
-                        + 40,
+                        + (GAP * (verticalSections - 1)), // Gap between each vertical section
                 BufferedImage.TYPE_INT_RGB
         );
         Graphics g = container.getGraphics();
         int x = 0, y = 0;
 
         g.drawImage(header, x, y, null);
-        y += header.getHeight() + 10;
+        y += header.getHeight() + GAP;
 
         g.drawImage(primary, x, y, null);
-        y += primary.getHeight() + 10;
+        y += primary.getHeight() + GAP;
 
         g.drawImage(secondary, x, y, null);
-        y += secondary.getHeight() + 10;
+        y += secondary.getHeight() + GAP;
 
         g.drawImage(lethal, x, y, null);
-        g.drawImage(tactical, x + lethal.getWidth() + 10, y, null);
-        y += tactical.getHeight() + 10;
+        g.drawImage(tactical, x + lethal.getWidth() + GAP, y, null);
+        y += tactical.getHeight() + GAP;
 
         g.drawImage(perks, x, y, null);
 
@@ -106,12 +111,12 @@ public class LoadoutImageManager {
             BufferedImage supersImage = buildFieldUpgradesImage(loadout.getFieldUpgrades());
             BufferedImage containerCopy = new BufferedImage(
                     container.getWidth(),
-                    container.getHeight() + 10 + supersImage.getHeight(),
+                    container.getHeight() + GAP + supersImage.getHeight(),
                     BufferedImage.TYPE_INT_RGB
             );
             g = containerCopy.getGraphics();
             g.drawImage(container, 0, 0, null);
-            g.drawImage(supersImage, 0, y + perks.getHeight() + 10, null);
+            g.drawImage(supersImage, 0, y + perks.getHeight() + GAP, null);
             container = containerCopy;
         }
         g.dispose();
@@ -153,7 +158,8 @@ public class LoadoutImageManager {
                 equipment.getImage(),
                 equipment.getName(),
                 equipment.getType() == Weapon.TYPE.UNKNOWN ? UNKNOWN_EQUIPMENT : EQUIPMENT_SECTION,
-                EQUIPMENT_NAME_SECTION
+                EQUIPMENT_NAME_SECTION,
+                FONT_SIZE
         );
     }
 
@@ -172,10 +178,11 @@ public class LoadoutImageManager {
                     perk.getImage(),
                     perk.getName(),
                     perk.getCategory() == Perk.CATEGORY.UNKNOWN ? UNKNOWN_ATTACHMENT : ATTACHMENT_SECTION,
-                    ATTACHMENT_NAME_SECTION
+                    ATTACHMENT_NAME_SECTION,
+                    FONT_SIZE
             );
             g.drawImage(perkImage, x, 0, null);
-            x += perkImage.getWidth() + 10;
+            x += perkImage.getWidth() + GAP;
         }
         g.dispose();
         return perksImage;
@@ -202,10 +209,11 @@ public class LoadoutImageManager {
                     resizedSuper,
                     fieldUpgrade.getName(),
                     SUPER_SECTION,
-                    SUPER_NAME_SECTION
+                    SUPER_NAME_SECTION,
+                    FONT_SIZE
             );
             g.drawImage(superImage, x, 0, null);
-            x += superImage.getWidth() + 10;
+            x += superImage.getWidth() + GAP;
         }
         g.dispose();
         return supersImage;
@@ -245,18 +253,21 @@ public class LoadoutImageManager {
         for(int i = 0; i < attachments.size(); i++) {
             Attachment attachment = attachments.get(i);
             BufferedImage attachmentImage = buildLabelledImage(
-                    attachment.getCategory() == Attachment.CATEGORY.UNKNOWN ? UNKNOWN_ATTACHMENT : attachment.getImage(),
+                    attachment.getCategory() == Attachment.CATEGORY.UNKNOWN
+                            ? UNKNOWN_ATTACHMENT
+                            : attachment.getImage(),
                     attachment.getName(),
                     ATTACHMENT_SECTION,
-                    ATTACHMENT_NAME_SECTION
+                    ATTACHMENT_NAME_SECTION,
+                    25f
             );
             g.drawImage(attachmentImage, x, y, null);
             if((i + 1) % 3 == 0) {
-                y += attachmentImage.getHeight() + 10;
+                y += attachmentImage.getHeight() + GAP;
                 x = 0;
             }
             else {
-                x += attachmentImage.getWidth() + 10;
+                x += attachmentImage.getWidth() + GAP;
             }
         }
         BufferedImage attributesImage = buildAttributesImage(attributes);
@@ -299,7 +310,10 @@ public class LoadoutImageManager {
             );
             y += sectionHeight + gap;
         }
-        return labelContainerImage(image, buildLabelImage("Stats", ATTACHMENT_NAME_SECTION));
+        return labelContainerImage(
+                image,
+                buildLabelImage("Stats", ATTACHMENT_NAME_SECTION, FONT_SIZE)
+        );
     }
 
     /**
@@ -323,7 +337,7 @@ public class LoadoutImageManager {
         g.setFont(FontManager.MODERN_WARFARE_FONT.deriveFont(20f));
         FontMetrics fm = g.getFontMetrics();
 
-        int border = 10;
+        int border = GAP;
         int mid = (image.getHeight() / 2) + (fm.getMaxAscent() / 2);
 
         g.drawString(attribute.getName(), border, mid);
@@ -354,10 +368,11 @@ public class LoadoutImageManager {
      * @param label          Label to write
      * @param imageContainer Image to draw image inside
      * @param labelContainer Image to draw label inside
+     * @param fontSize       Font size to use
      * @return Image with label
      */
-    private BufferedImage buildLabelledImage(BufferedImage image, String label, BufferedImage imageContainer, BufferedImage labelContainer) {
-        BufferedImage title = buildLabelImage(label, labelContainer);
+    private BufferedImage buildLabelledImage(BufferedImage image, String label, BufferedImage imageContainer, BufferedImage labelContainer, float fontSize) {
+        BufferedImage title = buildLabelImage(label, labelContainer, fontSize);
         BufferedImage container = copyImage(imageContainer);
         Graphics g = container.getGraphics();
         g.drawImage(
@@ -380,12 +395,12 @@ public class LoadoutImageManager {
     private BufferedImage labelContainerImage(BufferedImage container, BufferedImage label) {
         BufferedImage background = new BufferedImage(
                 container.getWidth(),
-                container.getHeight() + 10 + label.getHeight(),
+                container.getHeight() + GAP + label.getHeight(),
                 BufferedImage.TYPE_INT_ARGB
         );
         Graphics g = background.getGraphics();
         g.drawImage(container, 0, 0, null);
-        g.drawImage(label, 0, container.getHeight() + 10, null);
+        g.drawImage(label, 0, container.getHeight() + GAP, null);
         g.dispose();
         return background;
     }
@@ -396,12 +411,13 @@ public class LoadoutImageManager {
      *
      * @param label          Text to draw
      * @param labelContainer Image to copy and draw text on to
+     * @param fontSize       Font size to use
      * @return Label image
      */
-    private BufferedImage buildLabelImage(String label, BufferedImage labelContainer) {
+    private BufferedImage buildLabelImage(String label, BufferedImage labelContainer, float fontSize) {
         BufferedImage title = copyImage(labelContainer);
         Graphics g = title.getGraphics();
-        g.setFont(FontManager.MODERN_WARFARE_FONT.deriveFont(30f));
+        g.setFont(FontManager.MODERN_WARFARE_FONT.deriveFont(fontSize));
         g.setColor(Color.BLACK);
         FontMetrics fm = g.getFontMetrics();
         g.drawString(
@@ -429,7 +445,8 @@ public class LoadoutImageManager {
                 loadoutWeapon.getImage(),
                 loadoutWeapon.getName(),
                 weapon.getType() == Weapon.TYPE.UNKNOWN ? UNKNOWN_WEAPON : WEAPON_SECTION,
-                WEAPON_NAME_SECTION
+                WEAPON_NAME_SECTION,
+                FONT_SIZE
         );
 
         // Don't show empty attachment slots under a launcher/knife
@@ -442,12 +459,12 @@ public class LoadoutImageManager {
         );
         BufferedImage container = new BufferedImage(
                 weaponImage.getWidth(),
-                weaponImage.getHeight() + 10 + attachmentImage.getHeight(),
+                weaponImage.getHeight() + GAP + attachmentImage.getHeight(),
                 BufferedImage.TYPE_INT_ARGB
         );
         Graphics g = container.getGraphics();
         g.drawImage(weaponImage, 0, 0, null);
-        g.drawImage(attachmentImage, 0, weaponImage.getHeight() + 10, null);
+        g.drawImage(attachmentImage, 0, weaponImage.getHeight() + GAP, null);
         g.dispose();
         return container;
     }
