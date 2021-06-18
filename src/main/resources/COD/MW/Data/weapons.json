@@ -403,7 +403,7 @@
               "control": 2
             },
             "description": "Longer barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots but hinders mobility.",
-            "real_name": "32.0 Factory Barrel",
+            "real_name": "32.0\" Factory Barrel",
             "category": "frontpiece"
           },
           "brake": {
@@ -455,7 +455,7 @@
               "control": -2
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility. Better for sniping on the move.",
-            "real_name": "17.0 Factory Barrel",
+            "real_name": "17.0\" Factory Barrel",
             "category": "frontpiece"
           },
           "xmags": {
@@ -643,7 +643,7 @@
               "control": 18
             },
             "description": "This beast of a barrel provides maximum recoil control and  shot stability at the cost of mobility and bullet velocity.",
-            "real_name": "26.0 Bull Barrel",
+            "real_name": "26.0\" Bull Barrel",
             "category": "frontpiece",
             "blocksCategory": "muzzle"
           },
@@ -852,7 +852,7 @@
               "control": 9
             },
             "description": "Heavy duty reinforced cylindrical barrel lightens recoil and stabilizes shots at the cost of bullet velocity and mobility.",
-            "real_name": "17.2 Bull Barrel",
+            "real_name": "17.2\" Bull Barrel",
             "blocksCategory": "muzzle",
             "category": "frontpiece"
           },
@@ -879,7 +879,7 @@
               "control": 4
             },
             "description": "Longer barrel increases muzzle velocity and extends range.  Additional weight helps to stabilize shots at the cost of agility.",
-            "real_name": "26.9 HDR Pro",
+            "real_name": "26.9\" HDR Pro",
             "category": "frontpiece"
           },
           "brake": {
@@ -2790,7 +2790,7 @@
               "control": 0
             },
             "description": "Designed to improve muzzle velocity range with as little additional weight as possible.",
-            "real_name": "XRK Horizon 23.0",
+            "real_name": "XRK Horizon 23.0\"",
             "category": "frontpiece"
           },
           "thermal": {
@@ -2946,7 +2946,7 @@
               "control": 4
             },
             "description": "Heavy duty steel barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots, but hinders mobility.",
-            "real_name": "XRK Summit 26.8",
+            "real_name": "XRK Summit 26.8\"",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -3037,7 +3037,7 @@
               "control": -1
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Good for clearing out tight spaces.",
-            "real_name": "Bruen 18.0 Para",
+            "real_name": "Bruen 18.0\" Para",
             "category": "frontpiece"
           },
           "reflexmini": {
@@ -4232,7 +4232,7 @@
               "control": -1
             },
             "description": "Shorter barrel improves agility at a slight cost to bullet velocity and range.",
-            "real_name": "SA87 18.2 Factory",
+            "real_name": "SA87 18.2\" Factory",
             "category": "frontpiece"
           },
           "thermal2": {
@@ -4388,7 +4388,7 @@
               "control": 2
             },
             "description": "Longer barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots, but hinders mobility.",
-            "real_name": "SA87 25.4 Factory",
+            "real_name": "SA87 25.4\" Factory",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -4466,7 +4466,7 @@
               "control": -2
             },
             "description": "Shortest barrel available sacrifices accuracy and range for speed and agility.",
-            "real_name": "SA87 12.4 Factory",
+            "real_name": "SA87 12.4\" Factory",
             "category": "frontpiece"
           },
           "xmags": {
@@ -4953,7 +4953,7 @@
               "control": 2
             },
             "description": "Longer barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots, but hinders mobility.",
-            "real_name": "26.9 Extended Barrel",
+            "real_name": "26.9\" Extended Barrel",
             "category": "frontpiece"
           },
           "thermal2": {
@@ -5109,7 +5109,7 @@
               "control": 0
             },
             "description": "Heavy weight forced-air-cooled barrel slightly increases muzzle velocity and improves range.",
-            "real_name": "25.9 Heavy Barrel",
+            "real_name": "25.9\" Heavy Barrel",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -5187,7 +5187,7 @@
               "control": -1
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Good for clearing out tight spaces.",
-            "real_name": "18.2 Compact Barrel",
+            "real_name": "18.2\" Compact Barrel",
             "category": "frontpiece"
           },
           "xmags": {
@@ -6630,7 +6630,7 @@
               "control": -2
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Good for clearing out tight spaces.",
-            "real_name": "FTAC 8.98 Spitfire",
+            "real_name": "FTAC 8.98\" Spitfire",
             "category": "frontpiece"
           },
           "reflexmini": {
@@ -10975,7 +10975,7 @@
               "control": -1
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Improves combat in tight spaces.",
-            "real_name": "FTAC 13.5 Compact",
+            "real_name": "FTAC 13.5\" Compact",
             "category": "frontpiece"
           },
           "xmags": {
@@ -11553,7 +11553,7 @@
               "control": 0
             },
             "description": "Lightweight shroud and large bore barrel reduce weight for improved handling at the cost of muzzle velocity. ",
-            "real_name": "FSS 14.5 Tac Lite",
+            "real_name": "FSS 14.5\" Tac Lite",
             "category": "frontpiece"
           },
           "glflash": {
@@ -11657,7 +11657,7 @@
               "control": 0
             },
             "description": "Integral suppressor with lightweight aluminum baffles keep the weapon silent and agile, but reduce the muzzle velocity.",
-            "real_name": "FSS 12.4 Predator",
+            "real_name": "FSS 12.4\" Predator",
             "category": "frontpiece",
             "blocksCategory": "muzzle"
           },
@@ -11840,7 +11840,7 @@
               "control": -2
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Good for clearing out tight spaces.",
-            "real_name": "FSS 11.5 Commando",
+            "real_name": "FSS 11.5\" Commando",
             "category": "frontpiece"
           },
           "xmags": {
@@ -13412,7 +13412,7 @@
               "control": 4
             },
             "description": "Longer barrel increases muzzle velocity and extends range.  Additional weight stabilizes grouping but hinders mobility.",
-            "real_name": "FR 24.4 Sniper",
+            "real_name": "FR 24.4\" Sniper",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -13503,7 +13503,7 @@
               "control": -1
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Improves close range combat.",
-            "real_name": "FR 15.9 Commando",
+            "real_name": "FR 15.9\" Commando",
             "category": "frontpiece"
           },
           "xmags": {
@@ -15141,7 +15141,7 @@
               "control": -2
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Good for clearing out tight spaces.",
-            "real_name": "8.1 Compact Barrel",
+            "real_name": "8.1\" Compact Barrel",
             "category": "frontpiece"
           },
           "laserrange": {
@@ -15518,7 +15518,7 @@
               "control": 4
             },
             "description": "23.0 barrel with a built in solid wood grip is the most stable and accurate barrel available. Substantial weight slows movement and handling.",
-            "real_name": "23.0 Romanian",
+            "real_name": "23.0\" Romanian",
             "category": "frontpiece",
             "blocksCategory": "undermount"
           },
@@ -16480,7 +16480,7 @@
               "control": 0
             },
             "description": "Lightweight shroud and large bore barrel reduce weight for improved handling at the cost of muzzle velocity. ",
-            "real_name": "FSS 11.8 Squall",
+            "real_name": "FSS 11.8\" Squall",
             "category": "frontpiece"
           },
           "fastreload": {
@@ -16883,7 +16883,7 @@
               "control": -2
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Excels in CQB and room clearing.",
-            "real_name": "FSS 8.3 Intruder",
+            "real_name": "FSS 8.3\" Intruder",
             "category": "frontpiece"
           },
           "xmags": {
@@ -17617,7 +17617,7 @@
               "control": 4
             },
             "description": "Stainless steel 20.8 barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots but hinders mobility.",
-            "real_name": "FSS 20.8 Nexus",
+            "real_name": "FSS 20.8\" Nexus",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -18275,7 +18275,7 @@
               "control": 0
             },
             "description": "Custom dimpled large bore barrel reduces weight for improved handling at the cost of muzzle velocity. ",
-            "real_name": "18.0 Ultralight",
+            "real_name": "18.0\" Ultralight",
             "category": "frontpiece"
           },
           "glflash": {
@@ -18535,7 +18535,7 @@
               "control": -1
             },
             "description": "Compact medium contoured barrel improves speed and agility with a minor decrease to muzzle velocity and accuracy.",
-            "real_name": "13.0 OSW Para",
+            "real_name": "13.0\" OSW Para",
             "category": "frontpiece"
           },
           "xmags": {
@@ -20121,7 +20121,7 @@
               "control": 5
             },
             "description": "Stainless steel polygonal rifled barrel with guard extension greatly increases muzzle velocity and extends range.  Additional weight stabilizes shots, but hinders mobility.",
-            "real_name": "Singuard Arms 19.8 Prowler",
+            "real_name": "Singuard Arms 19.8\" Prowler",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -20212,7 +20212,7 @@
               "control": 2
             },
             "description": "Titanium-cobalt alloy barrel with guard extension improves  muzzle velocity and range.  Moderate weight increase stabilizes shots but slows handling.",
-            "real_name": "Singuard Arms 16.6 SOCOM",
+            "real_name": "Singuard Arms 16.6\" SOCOM",
             "category": "frontpiece"
           },
           "xmags": {
@@ -20764,7 +20764,7 @@
               "control": 4
             },
             "description": "17.2 barrel with a guard extension increase muzzle velocity and extend range.  Additional weight stabilizes shots at a small cost to mobility.",
-            "real_name": "FORGE TAC 17.2 LB",
+            "real_name": "FORGE TAC 17.2\" LB",
             "category": "frontpiece"
           },
           "glflash": {
@@ -20933,7 +20933,7 @@
               "control": 5
             },
             "description": "20.0 polygonal rifled barrel with guard extension maxes out muzzle velocity and range.  High accuracy comes at the cost of agility.",
-            "real_name": "FORGE TAC 20.0 LB",
+            "real_name": "FORGE TAC 20.0\" LB",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -24507,7 +24507,7 @@
               "control": -1
             },
             "description": "Longer barrel with a ^210 round^7 tube. Tightens pellet spread, extends range, and carries extra ammo at the cost of agility.",
-            "real_name": "XRK 30.0 Sport",
+            "real_name": "XRK 30.0\" Sport",
             "category": "frontpiece"
           },
           "gripvert": {
@@ -24624,7 +24624,7 @@
               "control": -2
             },
             "description": "Designed for short, fast paced raids this compact barrel sports a low weight ^15 round^7 tube.  Sacrifices range and ammo capacity for speed and agility.",
-            "real_name": "XRK 14.0 SWAT",
+            "real_name": "XRK 14.0\" SWAT",
             "category": "frontpiece"
           },
           "reflexmini": {
@@ -24650,7 +24650,7 @@
               "control": 0
             },
             "description": "Designed to reduce collateral damage and maintain mobility, this tapered barrel tightens pellet spread and slightly extends range with only a minor increase to weight.",
-            "real_name": "XRK 18.0 Liberator",
+            "real_name": "XRK 18.0\" Liberator",
             "category": "frontpiece"
           },
           "gripangpro": {
@@ -27899,7 +27899,7 @@
               "control": 0
             },
             "description": "10.6 inch stainless steel barrel with polygonal rifling increases muzzle velocity and improves range with little additional weight.",
-            "real_name": "FSS 10.6 Pro",
+            "real_name": "FSS 10.6\" Pro",
             "category": "frontpiece"
           },
           "barcust": {
@@ -30936,7 +30936,7 @@
               "control": 0
             },
             "description": "Custom barrel with a slight length increase and polygonal rifling for increased muzzle velocity and improved range.  Adds little additional weight.",
-            "real_name": "13.1 First Responder",
+            "real_name": "13.1\" First Responder",
             "category": "frontpiece"
           },
           "thermal2": {
@@ -31092,7 +31092,7 @@
               "control": 4
             },
             "description": "Longer barrel increases muzzle velocity and extends range.  Additional weight stabilizes shots but hinders mobility.",
-            "real_name": "16.5 Factory Carbine",
+            "real_name": "16.5\" Factory Carbine",
             "category": "frontpiece"
           },
           "barcust2": {
@@ -31456,7 +31456,7 @@
               "control": -1
             },
             "description": "Short, compact barrel sacrifices accuracy and range for speed and agility.  Improves performance in close quarters encounters.",
-            "real_name": "8.5 Factory Mini",
+            "real_name": "8.5\" Factory Mini",
             "category": "frontpiece"
           },
           "holo": {
@@ -31763,7 +31763,7 @@
               "control": 4
             },
             "description": "20.0 barrel is a perfect balance of increased muzzle velocity and increased weight.",
-            "real_name": "FSS 20.0 Factory",
+            "real_name": "FSS 20.0\" Factory",
             "category": "frontpiece"
           },
           "acog": {
@@ -31997,7 +31997,7 @@
               "control": 4
             },
             "description": "24.0 barrel extends muzzle velocity and range to the max, but hinders mobility.",
-            "real_name": "FSS 24.0 Factory",
+            "real_name": "FSS 24.0\" Factory",
             "category": "frontpiece"
           },
           "reflexmini2": {
@@ -32088,7 +32088,7 @@
               "control": 2
             },
             "description": "18.0 barrel slightly increases muzzle velocity and extends range with very little additional weight.",
-            "real_name": "FSS 18.0 Factory",
+            "real_name": "FSS 18.0\" Factory",
             "category": "frontpiece"
           },
           "reflexmini": {
@@ -33387,7 +33387,7 @@
                 "control": 0
               },
               "description": "Stainless steel barrel with chrome lined polygonal rifling holds a 1:9.6 twist rate on higher grain rounds, and significantly improves muzzle velocity and range.",
-              "real_name": "ZLR VeraTwist 9.6",
+              "real_name": "ZLR VeraTwist 9.6\"",
               "category": "frontpiece"
             },
             "holo": {
@@ -33654,8 +33654,8 @@
               "range": 4,
               "control": 4
             },
-            "description": "Custom 25.1 heavyweight barrel with polygonal rifling balances increased muzzle velocity with increased weight.",
-            "real_name": "Singuard Custom 25.1",
+            "description": "Custom 25.1 inch heavyweight barrel with polygonal rifling balances increased muzzle velocity with increased weight.",
+            "real_name": "Singuard Custom 25.1\"",
             "category": "frontpiece"
           },
           "silencer": {
@@ -33901,8 +33901,8 @@
               "range": 5,
               "control": 4
             },
-            "description": "Custom 27.6 heavyweight barrel with polygonal rifling increases muzzle velocity to the max.  Additional weight hinders mobility.",
-            "real_name": "Singuard Custom 27.6",
+            "description": "Custom 27.6 inch heavyweight barrel with polygonal rifling increases muzzle velocity to the max.  Additional weight hinders mobility.",
+            "real_name": "Singuard Custom 27.6\"",
             "category": "frontpiece"
           },
           "reflexmini2": {
@@ -33992,8 +33992,8 @@
               "range": 3,
               "control": 2
             },
-            "description": "Custom 21.2 heavyweight barrel with polygonal rifling slightly increases muzzle velocity and extends range with little additional weight",
-            "real_name": "Singuard Custom 21.2",
+            "description": "Custom 21.2 inch heavyweight barrel with polygonal rifling slightly increases muzzle velocity and extends range with little additional weight",
+            "real_name": "Singuard Custom 21.2\"",
             "category": "frontpiece"
           },
           "reflexmini": {
@@ -34221,7 +34221,7 @@
               "control": 2
             },
             "description": "Longer barrel increases muzzle velocity and extends range with a slight weight increase.",
-            "real_name": "FORGE TAC Precision 20.0 ",
+            "real_name": "FORGE TAC Precision 20.0\"",
             "category": "frontpiece"
           },
           "thermal2": {
@@ -34390,7 +34390,7 @@
               "control": 4
             },
             "description": "Longest barrel available increases muzzle velocity and extends range to the max.  Added weight stabilizes shots but hinders mobility.",
-            "real_name": "FORGE TAC Precision 22.0",
+            "real_name": "FORGE TAC Precision 22.0\"",
             "category": "frontpiece"
           },
           "gripvert": {
