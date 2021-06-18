@@ -1,13 +1,16 @@
 package Bot;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 /**
  * Main class, start the bot and apply listener
  */
 public class DiscordBot {
+    public static final String UNKNOWN_USER = "Unknown";
 
     /**
      * Accepts a Discord token as an argument to link the bot to a Discord application
@@ -47,5 +50,29 @@ public class DiscordBot {
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Get the name of a loan user
+     *
+     * @param jda    JDA for resolving user
+     * @param userId ID of user to get name for
+     * @return Name of user or "Unknown" if unable to locate in cache
+     */
+    public static String getUserName(JDA jda, long userId) {
+        User user = jda.getUserById(userId);
+        return user == null ? UNKNOWN_USER : user.getName();
+    }
+
+    /**
+     * Get the mention String for the given user ID
+     *
+     * @param jda    JDA for resolving user
+     * @param userId User ID to get mention String for
+     * @return Mention String for user ID or "Unknown" if unable to locate in cache
+     */
+    public static String getUserMention(JDA jda, long userId) {
+        User user = jda.getUserById(userId);
+        return user == null ? UNKNOWN_USER : user.getAsMention();
     }
 }

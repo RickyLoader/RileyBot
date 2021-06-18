@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static Bot.DiscordBot.*;
+
 /**
  * Track loaned items/coins
  */
@@ -37,8 +39,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
     private static final String
             FORGIVE = "forgive",
             LOANS = "loans",
-            GP = "GP",
-            UNKNOWN_USER = "Unknown";
+            GP = "GP";
     private final BankImageBuilder bankImageBuilder;
     private final GrandExchange grandExchange;
     private final HashMap<Long, Loan> loanMessages;
@@ -272,7 +273,7 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
             @Override
             public String[] getRowValues(int index, Loan loan, boolean defaultSort) {
                 boolean lending = loan.getLoaner() == user.getIdLong();
-                String targetName = getLoanUserName(context.getJDA(), lending ? loan.getLoanee() : loan.getLoaner());
+                String targetName = getUserName(context.getJDA(), lending ? loan.getLoanee() : loan.getLoaner());
                 return new String[]{
                         String.valueOf(loan.getId()),
                         lending ? " to " + targetName : "from " + targetName,
@@ -376,37 +377,13 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
     private byte[] getLoanImage(Loan loan, JDA jda) {
         return ImageLoadingMessage.imageToByteArray(
                 bankImageBuilder.buildImage(
-                        getLoanUserName(jda, loan.getLoaner())
-                                + " -> " + getLoanUserName(jda, loan.getLoanee())
+                        getUserName(jda, loan.getLoaner())
+                                + " -> " + getUserName(jda, loan.getLoanee())
                                 + " (" + loan.getFormattedTotalValue() + ")",
                         loan.getItems(),
                         loan.getCoins()
                 )
         );
-    }
-
-    /**
-     * Get the name of a loan user
-     *
-     * @param jda    JDA for resolving user
-     * @param userId ID of user to get name for
-     * @return Name of user or "Unknown" if unable to locate in cache
-     */
-    private String getLoanUserName(JDA jda, long userId) {
-        User user = jda.getUserById(userId);
-        return user == null ? "Unknown" : user.getName();
-    }
-
-    /**
-     * Get the mention String for the given user ID
-     *
-     * @param jda    JDA for resolving user
-     * @param userId User ID to get mention String for
-     * @return Mention String for user ID or "Unknown" if unable to locate in cache
-     */
-    private String getLoanUserMention(JDA jda, long userId) {
-        User user = jda.getUserById(userId);
-        return user == null ? UNKNOWN_USER : user.getAsMention();
     }
 
     /**
@@ -425,14 +402,14 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
 
         if(request) {
             title += " Request";
-            description += "\n\n**Respond**: " + getLoanUserMention(jda, loan.getLoanee()) + " You have 2 minutes to respond!";
+            description += "\n\n**Respond**: " + getUserMention(jda, loan.getLoanee()) + " You have 2 minutes to respond!";
         }
 
         String attachmentName = "loan.png";
         byte[] loanImage = getLoanImage(loan, jda);
 
         MessageEmbed loanMessage = new EmbedBuilder()
-                .setTitle(title + " | " + getLoanUserName(jda, loan.getLoaner()) + " -> " + getLoanUserName(jda, loan.getLoanee()))
+                .setTitle(title + " | " + getUserName(jda, loan.getLoaner()) + " -> " + getUserName(jda, loan.getLoanee()))
                 .setDescription(description)
                 .setThumbnail(EmbedHelper.OSRS_LOGO)
                 .setImage("attachment://" + attachmentName)
@@ -622,8 +599,8 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
                 loanMessages.remove(messageId);
                 channel.deleteMessageById(messageId).queue();
 
-                String loaner = getLoanUserMention(jda, loan.getLoaner());
-                String loanee = getLoanUserMention(jda, loan.getLoanee());
+                String loaner = getUserMention(jda, loan.getLoaner());
+                String loanee = getUserMention(jda, loan.getLoanee());
 
                 // Both users may decline
                 if(buttonId.equals(decline.getId())) {
