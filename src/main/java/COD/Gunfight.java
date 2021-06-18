@@ -21,12 +21,13 @@ import net.dv8tion.jda.api.interactions.button.Button;
 public class Gunfight {
     public static final String THUMBNAIL = "https://bit.ly/2YTzfTQ";
     private final MessageChannel channel;
-    private final long ownerId;
+    private long ownerUserId, ownerMemberId;
     private final Button win, loss, stop, undo;
     private final GunfightScore score;
     private final LinkedList<GunfightScore> matchUpdateHistory;
     private final ArrayList<Session> leaderboard;
     private final JDA jda;
+    private final GunfightCallback callback;
     private String lastMessage;
     private long startTime = 0, gameID;
     private boolean active;
@@ -35,17 +36,19 @@ public class Gunfight {
      * Constructor to begin gunfight session
      *
      * @param channel     Text channel to play in
-     * @param ownerId     ID of user who started the game
+     * @param member      Member who started the game
      * @param emoteHelper Emote helper
      * @param jda         JDA for resolving owner
+     * @param callback    Interface for callback events
      */
-    public Gunfight(MessageChannel channel, long ownerId, EmoteHelper emoteHelper, JDA jda) {
+    public Gunfight(MessageChannel channel, Member member, EmoteHelper emoteHelper, JDA jda, GunfightCallback callback) {
         this.channel = channel;
-        this.ownerId = ownerId;
+        setOwner(member);
         this.score = new GunfightScore();
         this.matchUpdateHistory = new LinkedList<>();
         this.leaderboard = Session.getHistory();
         this.jda = jda;
+        this.callback = callback;
         this.win = Button.success("win", "Victory");
         this.loss = Button.danger("loss", "Defeat");
         this.stop = Button.danger("stop", Emoji.ofEmote(emoteHelper.getStopWhite()));
@@ -73,7 +76,7 @@ public class Gunfight {
                 .addField("**STREAK**", streak, true)
                 .addBlankField(true)
                 .addField("**LONGEST STREAK**", longestStreak, true)
-                .addField("**BUTTON MANAGER**", DiscordBot.getUserMention(jda, ownerId), false)
+                .addField("**BUTTON MANAGER**", DiscordBot.getUserMention(jda, ownerUserId), false)
                 .setFooter(footer, EmbedHelper.CLOCK_GIF)
                 .build();
     }
@@ -223,11 +226,16 @@ public class Gunfight {
 
     /**
      * Sends the game message and adds the win/loss emotes so the user can click to add score
+     * Once the message is sent, pass the session & old message ID to the callback
      *
      * @param gameMessage Interactive game message
      */
     private void sendGameMessage(MessageEmbed gameMessage) {
-        channel.sendMessage(gameMessage).setActionRows(getButtons()).queue(message -> gameID = message.getIdLong());
+        channel.sendMessage(gameMessage).setActionRows(getButtons()).queue(message -> {
+            long oldId = gameID;
+            gameID = message.getIdLong();
+            callback.messageIdUpdated(this, oldId);
+        });
     }
 
     /**
@@ -245,12 +253,40 @@ public class Gunfight {
     }
 
     /**
-     * Get id of the game message
+     * Get ID of the game message
      *
-     * @return Game message id
+     * @return Game message ID
      */
     public long getGameId() {
         return gameID;
+    }
+
+    /**
+     * Get the user ID of the game owner
+     *
+     * @return Owner user ID
+     */
+    public long getOwnerUserId() {
+        return ownerUserId;
+    }
+
+    /**
+     * Get the member ID of the game owner
+     *
+     * @return Owner member ID
+     */
+    public long getOwnerMemberId() {
+        return ownerMemberId;
+    }
+
+    /**
+     * Set the owner of the session
+     *
+     * @param owner Member to control the session
+     */
+    public void setOwner(Member owner) {
+        this.ownerMemberId = owner.getIdLong();
+        this.ownerUserId = owner.getUser().getIdLong();
     }
 
     /**
@@ -324,7 +360,7 @@ public class Gunfight {
         Random rand = new Random();
         String[] messages = new String[]{};
 
-        String ownerName = DiscordBot.getUserName(jda, ownerId);
+        String ownerName = DiscordBot.getUserName(jda, ownerUserId);
         String mvp;
         if(ownerName.equals(DiscordBot.UNKNOWN_USER)) {
             mvp = ownerName;
@@ -512,5 +548,18 @@ public class Gunfight {
      */
     public long getLastUpdate() {
         return score.getLastUpdate();
+    }
+
+    /**
+     * Interface for Gunfight events
+     */
+    public interface GunfightCallback {
+        /**
+         * Called when the game message ID has changed.
+         *
+         * @param updated      Updated gunfight session - contains new message ID
+         * @param oldMessageId Old message ID
+         */
+        void messageIdUpdated(Gunfight updated, long oldMessageId);
     }
 }
