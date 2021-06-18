@@ -40,8 +40,9 @@ public class GunfightCommand extends OnReadyDiscordCommand {
         }
         gunfight = new Gunfight(
                 context.getMessageChannel(),
-                context.getUser(),
-                context.getEmoteHelper()
+                context.getUser().getIdLong(),
+                context.getEmoteHelper(),
+                context.getJDA()
         );
         gunfightSessions.put(memberId, gunfight);
         gunfight.startGame();

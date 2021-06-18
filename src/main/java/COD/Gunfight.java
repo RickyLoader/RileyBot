@@ -1,8 +1,10 @@
 package COD;
 
+import Bot.DiscordBot;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 
 import java.text.SimpleDateFormat;
@@ -19,11 +21,12 @@ import net.dv8tion.jda.api.interactions.button.Button;
 public class Gunfight {
     public static final String THUMBNAIL = "https://bit.ly/2YTzfTQ";
     private final MessageChannel channel;
-    private final User owner;
+    private final long ownerId;
     private final Button win, loss, stop, undo;
     private final GunfightScore score;
     private final LinkedList<GunfightScore> matchUpdateHistory;
     private final ArrayList<Session> leaderboard;
+    private final JDA jda;
     private String lastMessage;
     private long startTime = 0, gameID;
     private boolean active;
@@ -32,15 +35,17 @@ public class Gunfight {
      * Constructor to begin gunfight session
      *
      * @param channel     Text channel to play in
-     * @param owner       User who started the game
+     * @param ownerId     ID of user who started the game
      * @param emoteHelper Emote helper
+     * @param jda         JDA for resolving owner
      */
-    public Gunfight(MessageChannel channel, User owner, EmoteHelper emoteHelper) {
+    public Gunfight(MessageChannel channel, long ownerId, EmoteHelper emoteHelper, JDA jda) {
         this.channel = channel;
-        this.owner = owner;
+        this.ownerId = ownerId;
         this.score = new GunfightScore();
         this.matchUpdateHistory = new LinkedList<>();
         this.leaderboard = Session.getHistory();
+        this.jda = jda;
         this.win = Button.success("win", "Victory");
         this.loss = Button.danger("loss", "Defeat");
         this.stop = Button.danger("stop", Emoji.ofEmote(emoteHelper.getStopWhite()));
@@ -68,7 +73,7 @@ public class Gunfight {
                 .addField("**STREAK**", streak, true)
                 .addBlankField(true)
                 .addField("**LONGEST STREAK**", longestStreak, true)
-                .addField("**EMOTE MANAGER**", owner.getAsMention(), false)
+                .addField("**BUTTON MANAGER**", DiscordBot.getUserMention(jda, ownerId), false)
                 .setFooter(footer, EmbedHelper.CLOCK_GIF)
                 .build();
     }
@@ -235,7 +240,8 @@ public class Gunfight {
                 win,
                 loss,
                 matchUpdateHistory.isEmpty() ? undo.asDisabled() : undo,
-                stop);
+                stop
+        );
     }
 
     /**
@@ -245,15 +251,6 @@ public class Gunfight {
      */
     public long getGameId() {
         return gameID;
-    }
-
-    /**
-     * Get the user who started the game
-     *
-     * @return User who started the game
-     */
-    public User getOwner() {
-        return owner;
     }
 
     /**
@@ -327,9 +324,16 @@ public class Gunfight {
         Random rand = new Random();
         String[] messages = new String[]{};
 
-        String mvp = (owner.getName().charAt(owner.getName().length() - 1)) == 's'
-                ? owner.getName() + "'"
-                : owner.getName() + "'s";
+        String ownerName = DiscordBot.getUserName(jda, ownerId);
+        String mvp;
+        if(ownerName.equals(DiscordBot.UNKNOWN_USER)) {
+            mvp = ownerName;
+        }
+        else {
+            mvp = (ownerName.charAt(ownerName.length() - 1)) == 's'
+                    ? ownerName + "'"
+                    : ownerName + "'s";
+        }
 
         int wins = score.getWins();
         int losses = score.getLosses();
@@ -370,7 +374,7 @@ public class Gunfight {
             case FIVE_OR_MORE_WIN_AHEAD:
                 messages = new String[]{
                         (wins - losses) + " wins ahead!, amazing work!",
-                        owner.getName() + ", you absolutely carried the team that game! Nice job",
+                        ownerName + ", you absolutely carried the team that game! Nice job",
                         "It's clobbering time!, You clobbered them that game!",
                         "Beautiful, I especially enjoyed " + mvp + " performance, it was incredible!",
                         "The guy who made Downturn would be proud",
