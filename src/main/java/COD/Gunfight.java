@@ -127,6 +127,8 @@ public class Gunfight {
             return;
         }
 
+        score.setLastUpdate(currentTime);
+
         if(buttonId.equals(undo.getId())) {
             undoLast(event);
             return;
@@ -134,9 +136,6 @@ public class Gunfight {
 
         // Before adding the win/loss, add to history for undo purposes
         matchUpdateHistory.push(new GunfightScore(score));
-
-        // Now do update
-        score.setLastUpdate(currentTime);
 
         if(buttonId.equals(win.getId())) {
             score.addWin();
