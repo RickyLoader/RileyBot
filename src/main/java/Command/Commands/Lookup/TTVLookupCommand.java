@@ -62,11 +62,15 @@ public class TTVLookupCommand extends LookupCommand {
         String name = streamerUrl
                 .replace(TwitchTV.TWITCH_URL, "")
                 .replace("/", "")
+                .split("\\?")[0]
                 .trim();
+
         ArrayList<Streamer> streamers = TwitchTV.getInstance().searchStreamersByName(name);
+
         if(streamers.size() != 1) {
             return;
         }
+
         message.delete().queue(
                 deleted -> channel.sendMessage(
                         buildStreamerEmbed(streamers.get(0), message.getMember(), footer)
@@ -216,7 +220,7 @@ public class TTVLookupCommand extends LookupCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        String regex = TwitchTV.TWITCH_URL + "(\\w)+/?";
+        String regex = TwitchTV.TWITCH_URL + "(\\w)+/?(\\?.+)?";
         return super.matches(query, message) || query.matches(regex);
     }
 }
