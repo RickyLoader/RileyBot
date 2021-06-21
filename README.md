@@ -38,4 +38,19 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   #### Example(s)
   ![alt text](src/main/resources/Readme/BlitzCommand/champion_search.gif "Darius champion build")
   </details>
+    <details>
+  <summary>Match History Command</summary>
+ 
+  ### Description
+  Uses the [COD API](https://github.com/Lierrmm/Node-CallOfDuty) to display a player's match history in Modern Warfare/Cold War.
+  
+  [View code](src/main/java/Command/Structure/MatchHistoryCommand.java)
+
+  ### Usage
+  `[platform] [trigger] [name] [match ID]` where `platform` is one of `XBOX, XBL, PSN, BATTLE` (optional & assumed to be Battle.net), `trigger` is one of `mwhistory, cwhistory` (depending on the game), `name` is the player name to search, and `match ID` is optional however when specified will display the player's stats for a specific match.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/MatchHistoryCommand/match_history.gif "View match history")
+  ![alt text](src/main/resources/Readme/MatchHistoryCommand/specific_match.gif "View specific match")
+  </details>
 </details>
