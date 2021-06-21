@@ -53,4 +53,26 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   ![alt text](src/main/resources/Readme/MatchHistoryCommand/match_history.gif "View match history")
   ![alt text](src/main/resources/Readme/MatchHistoryCommand/specific_match.gif "View specific match")
   </details>
+    <details>
+  <summary>Deal or No Deal Command</summary>
+ 
+  ### Description
+  Play a game of Deal or No Deal using a programmatically built image as the UI.
+  
+  [View code](src/main/java/Command/Commands/DealOrNoDealCommand.java)
+
+  ### Usage
+  `dd start` to begin a game
+  
+  `dd select [case #]` to select your case
+  
+  `dd open [case #]` to open a case
+  
+  `dd [deal/no deal]` to make/deny a deal
+  
+  `dd forfeit` to end a game
+ 
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/DealOrNoDealCommand/playing.gif "Playing Deal or No Deal")
+  </details>
 </details>
