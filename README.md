@@ -2,7 +2,7 @@
 
 Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/JDA) Discord API wrapper.
 <details>
-  <summary>Commands</summary>
+  <summary>Command Examples</summary>
 
   ## Commands
   <details>
@@ -84,12 +84,27 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   [View code](src/main/java/Command/Commands/DictionaryCommand.java)
 
   ### Usage
-  `define [word]` where word is the word to find in the dictionary.
+  `define [word]` where `word` is the word to find in the dictionary.
   If more than one word is found, the results will be displayed in a pageable message.
 
   #### Example(s)
   ![alt text](src/main/resources/Readme/DictionaryCommand/definition.gif "Word definition")
   ![alt text](src/main/resources/Readme/DictionaryCommand/multiple_definitions.gif "Multiple results")
+  </details>
+     <details>
+  <summary>Grand Exchange Command</summary>
+ 
+  ### Description
+  Uses the [OSRS Wiki Grand Exchange API](https://oldschool.runescape.wiki/w/RuneScape:Real-time_Prices) to search for & display item prices.
+  
+  [View code](src/main/java/Command/Commands/GrandExchangeCommand.java)
 
+  ### Usage
+  `g.e [query]` where `query` is either the name or ID of an item.
+  If more than one item is found, the results will be displayed in a pageable message.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/GrandExchangeCommand/item_price.gif "Item price")
+  ![alt text](src/main/resources/Readme/GrandExchangeCommand/multiple_items.gif "Multiple results")
   </details>
 </details>
