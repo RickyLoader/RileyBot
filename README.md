@@ -6,5 +6,5 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
 
   ## Commands
   <details>
-
+  </details>
 </details>
