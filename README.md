@@ -75,4 +75,21 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   #### Example(s)
   ![alt text](src/main/resources/Readme/DealOrNoDealCommand/playing.gif "Playing Deal or No Deal")
   </details>
+   <details>
+  <summary>Dictionary Command</summary>
+ 
+  ### Description
+  Uses the Merriam-Webster dictionary to display definitions of a given word, pairs the definition with a random image found using the [Unsplash API - Search photos by keyword endpoint](https://unsplash.com/documentation#search-photos) (with the dictionary word as the keyword).
+  
+  [View code](src/main/java/Command/Commands/DictionaryCommand.java)
+
+  ### Usage
+  `define [word]` where word is the word to find in the dictionary.
+  If more than one word is found, the results will be displayed in a pageable message.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/DictionaryCommand/definition.gif "Word definition")
+  ![alt text](src/main/resources/Readme/DictionaryCommand/multiple_definitions.gif "Multiple results")
+
+  </details>
 </details>
