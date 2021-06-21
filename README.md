@@ -24,4 +24,18 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   ![alt text](src/main/resources/Readme/StocksCommand/single_result.gif "Single result")
   ![alt text](src/main/resources/Readme/StocksCommand/search_results.gif "Multiple results")
   </details>
+  <details>
+  <summary>Blitz Command</summary>
+ 
+  ### Description
+  Uses the [Blitz.gg](https://blitz.gg/) API to display League of Legends champion build data.
+  
+  [View code](src/main/java/Command/Commands/BlitzCommand.java)
+
+  ### Usage
+  `blitz [champion] [role]` where `champion` is the name of a champion and `role` is the name of a role.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/BlitzCommand/champion_search.gif "Darius champion build")
+  </details>
 </details>
