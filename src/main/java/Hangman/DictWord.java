@@ -26,6 +26,9 @@ public class DictWord {
      * @return Formatted definition
      */
     private String formatDefinition(String definition) {
+        if(definition == null) {
+            return null;
+        }
         String replacement = "\n\n**$0**";
         return definition
                 .replaceAll("(\\d+\\.)", replacement)

@@ -61,7 +61,7 @@ public class Hangman {
         this.owner = owner;
 
         this.secretWord = word;
-        this.currentGuess = word.getWord().replaceAll("[a-z]", "_");
+        this.currentGuess = word.getWord().replaceAll("[a-zA-Z]", "_");
 
         this.currentHints = 0;
 

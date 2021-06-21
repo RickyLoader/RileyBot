@@ -206,7 +206,7 @@ public class HangmanCommand extends DiscordCommand {
      * @return Alphabetical input
      */
     private boolean invalidInput(String input) {
-        return !input.matches("[a-z]+");
+        return !input.matches("[a-zA-Z]+");
     }
 
     @Override
