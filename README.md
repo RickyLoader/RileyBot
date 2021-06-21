@@ -107,4 +107,23 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   ![alt text](src/main/resources/Readme/GrandExchangeCommand/item_price.gif "Item price")
   ![alt text](src/main/resources/Readme/GrandExchangeCommand/multiple_items.gif "Multiple results")
   </details>
+       <details>
+  <summary>Gunfight Command</summary>
+ 
+  ### Description
+  Win/loss tracker for Modern Warfare. Buttons are used to add wins & losses, results are saved to a leaderboard.
+  
+  [View code](src/main/java/Command/Commands/Passive/GunfightCommand.java)
+
+  ### Usage
+  `gunfight!` to begin a session or to re-send the tracker message.
+         
+  `leaderboard!` to view the leaderboard.
+         
+  `leaderboard! [#]` to view a specific session from the leaderboard.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/GunfightCommand/tracker.gif "Using the tracker")
+  ![alt text](src/main/resources/Readme/GunfightCommand/leaderboard.gif "Viewing the leaderboard")
+ </details>
 </details>
