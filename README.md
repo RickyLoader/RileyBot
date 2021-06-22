@@ -236,4 +236,24 @@ The questions are retrieved from the [Open Trivia DB](https://opentdb.com/) and 
   ![alt text](src/main/resources/Readme/MWLookupCommand/full_lookup.gif "Looking up player's full stats")
   ![alt text](src/main/resources/Readme/MWLookupCommand/specific_lookup.gif "Looking up a specific stat for the player")
  </details>
+             <details>
+  <summary>MW Random Command</summary>
+ 
+  ### Description
+Generate a random Modern Warfare loadout and build an image to display it. Assign a random name to the loadout.
+               
+The generated loadout abides by all in-game restrictions e.g 2 primary weapons if the `overkill` perk is rolled. This also applies to the weapon attachments, where if a rolled attachment blocks another attachment category e.g a `barrel` attachment blocking the `muzzle` category, no `muzzle` category attachments will be added.
+               
+A short [comment](src/main/java/COD/LoadoutAnalysis.java) about the loadout is generated and appended to the message.
+               
+  Possible weapons & attachments can be seen [here](src/main/resources/COD/MW/Data/weapons.json).
+                              
+  [View code](src/main/java/Command/Commands/COD/MWRandomCommand.java)
+
+  ### Usage
+  `mwrandom`
+             
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/MWRandomCommand/loadouts.gif "Generating loadouts")
+ </details>
 </details>
