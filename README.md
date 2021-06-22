@@ -256,4 +256,25 @@ A short [comment](src/main/java/COD/LoadoutAnalysis.java) about the loadout is g
   #### Example(s)
   ![alt text](src/main/resources/Readme/MWRandomCommand/loadouts.gif "Generating loadouts")
  </details>
+     <details>
+  <summary>OSRS Lending Command</summary>
+ 
+  ### Description
+  Track OSRS item loans between members. Loans are accepted/declined via buttons and are displayed as a dynamically built bank image.
+  
+  [View code](src/main/java/Command/Commands/OSRSLendingCommand.java)
+
+  ### Usage
+ `osrslend [@loanee] [items]` where `@loanee` is the @mention of the member to loan items to, and `items` is a comma separated list of items with optional quantities e.g  `twisted bow, 500GP, monkfish x5`
+       
+ `osrslend forgive [loan id]` where `loan id` is the id of a loan to delete (must be the `loaner` of the items)
+ 
+ `osrslend loans` to view a list of your incoming/outgoing loans
+       
+ `osrslend loans [loan id]` to view the details of a specific loan with the given `loan id`
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/OSRSLendingCommand/creating_loan.gif "Creating a loan")
+  ![alt text](src/main/resources/Readme/OSRSLendingCommand/viewing_loan.gif "Viewing loans")
+  </details>
 </details>
