@@ -217,4 +217,23 @@ The questions are retrieved from the [Open Trivia DB](https://opentdb.com/) and 
   ![alt text](src/main/resources/Readme/MillionaireCommand/leaderboard.gif "Viewing the leaderboard")
 
  </details>
+           <details>
+  <summary>MW Lookup Command</summary>
+ 
+  ### Description
+ Look up a player's Modern Warfare stats and build an image displaying them. This image displays the player's best (most used) weapons, streaks, equipment, field upgrade, and commendations, alongside their Win/Loss and Kill/Death ratios.
+  
+  An optional query may be provided to display only a specific stat e.g a specific weapon or streak.
+             
+  [View code](src/main/java/Command/Commands/Lookup/MWStatsCommand.java)
+
+  ### Usage
+  `[platform] mwlookup [name]` where `platform` is one of `XBOX, XBL, PSN, BATTLE` (optional & assumed to be Battle.net), and `name` is the player name to search.
+  
+  Alternatively, `[platform] mwlookup [name] +[query]` may be provided, where `platform` and `name` are as above, and `query` is the name of a stat to display e.g `+bradley` to display only the player's Infantry Assault Vehicle stats.
+             
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/MWLookupCommand/full_lookup.gif "Looking up player's full stats")
+  ![alt text](src/main/resources/Readme/MWLookupCommand/specific_lookup.gif "Looking up a specific stat for the player")
+ </details>
 </details>
