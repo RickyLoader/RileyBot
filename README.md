@@ -160,4 +160,32 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   #### Example(s)
   ![alt text](src/main/resources/Readme/LOLLookupCommand/lookup.gif "Looking up player stats")
  </details>
+           <details>
+  <summary>Execute Order 66 Command</summary>
+ 
+  ### Description
+This command uses a role named `target`.
+             
+This role is applied to all members when they join and may be manually added/removed as with any role.
+             
+Typing `kill list` will send a private message to the user displaying the list of members who are targeted.
+             
+By typing `execute order 66`, the bot will join the voice channel and play a random audio clip before kicking all members on the list. (Members who the bot cannot kick will be removed from the list prior to executing).
+             
+Kicked members will be sent a message with an invite back to the server.
+  
+  [View code](src/main/java/Command/Commands/ExecuteOrder/ExecuteOrder66Command.java)
+
+  ### Usage
+`kill list` to view targeted members.
+             
+`execute order 66` to kick the targeted members.
+  
+  #### Example(s)
+
+  https://user-images.githubusercontent.com/42688609/122846622-5c0ff880-d35a-11eb-9420-842282f0c7d4.mp4
+             
+  ![alt text](src/main/resources/Readme/ExecuteOrder66Command/apology.png "Apology to the kicked member")
+
+ </details>
 </details>
