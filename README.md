@@ -146,4 +146,18 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   #### Example(s)
   ![alt text](src/main/resources/Readme/HangmanCommand/playing.gif "Playing Hangman with a dictionary selected word")
  </details>
+           <details>
+  <summary>LOL Lookup Command</summary>
+ 
+  ### Description
+ Look up a player's League of Legends stats and build an image displaying them.
+  
+  [View code](src/main/java/Command/Commands/Lookup/LOLLookupCommand.java)
+
+  ### Usage
+  `[region] lollookup [name]` where `region` is the optional region code e.g `oce` (region is assumed to be oce), and `name` is the player's summoner name.  
+  
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/LOLLookupCommand/lookup.gif "Looking up player stats")
+ </details>
 </details>
