@@ -221,7 +221,8 @@ The questions are retrieved from the [Open Trivia DB](https://opentdb.com/) and 
   <summary>MW Lookup Command</summary>
  
   ### Description
- Look up a player's Modern Warfare stats and build an image displaying them. This image displays the player's best (most used) weapons, streaks, equipment, field upgrade, and commendations, alongside their Win/Loss and Kill/Death ratios.
+
+ Uses the [COD API](https://github.com/Lierrmm/Node-CallOfDuty) to look up a player's Modern Warfare stats and build an image displaying them. This image displays the player's best (most used) weapons, streaks, equipment, field upgrade, and commendations, alongside their Win/Loss and Kill/Death ratios.
   
   An optional query may be provided to display only a specific stat e.g a specific weapon or streak.
              
@@ -276,5 +277,39 @@ A short [comment](src/main/java/COD/LoadoutAnalysis.java) about the loadout is g
   #### Example(s)
   ![alt text](src/main/resources/Readme/OSRSLendingCommand/creating_loan.gif "Creating a loan")
   ![alt text](src/main/resources/Readme/OSRSLendingCommand/viewing_loan.gif "Viewing loans")
+  </details>
+       <details>
+  <summary>OSRS Lookup Command</summary>
+ 
+  ### Description
+ Uses the [OSRS Hiscores CSV API](https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player=big+mike) and [Wise Old Man API](https://wiseoldman.net/docs) to look up a player's OSRS stats and build an image displaying them. This image displays the player's skills, bosses, clue scrolls, achievements, account type, and optional XP tracker.
+  
+  [View code](src/main/java/Command/Commands/Lookup/OSRSLookupCommand.java)
+
+  ### Usage
+  `[optional args] osrslookup [name]` where `name` is the name of the player to look up, and `optional args` is any combination of `xp`, `virtual`, and `league`.
+  
+  `xp` uses the [Wise Old Man API](https://wiseoldman.net/docs) to get the player's weekly XP gained and appends it to the image. If the player is not currently tracked on Wise Old Man, a request is made to begin tracking them for next time.
+         
+  `virtual` displays the player's virtual levels instead of their actual levels.
+         
+  `league` displays the player's Trailblazer League stats instead of their normal stats. Will display map/relic unlocks if exported from [osleague.tools](https://www.osleague.tools/) and uploaded using the [TrailBlazer Command](/src/main/java/Command/Commands/Runescape/TrailblazerCommand.java).
+         
+  The image is built in individual sections, allowing the exclusion/inclusion of sections dynamically, e.g if a player has no clue scroll completions, the clue scroll section is not added to the image.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/OSRSLookupCommand/lookup.gif "Looking up player stats")
+          <details>
+          <summary>Normal stats image</summary>
+              ![alt text](src/main/resources/Readme/OSRSLookupCommand/standard.png "Standard image")
+         </details>
+         <details>
+         <summary>League stats image</summary>
+              ![alt text](src/main/resources/Readme/OSRSLookupCommand/league.png "League image")
+         </details>
+         <details>
+           <summary>Virtual stats w/ XP tracker image</summary>       
+              ![alt text](src/main/resources/Readme/OSRSLookupCommand/xp_virtual.png "Virtual stats w/ XP tracker")         
+         </details>
   </details>
 </details>
