@@ -126,4 +126,24 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   ![alt text](src/main/resources/Readme/GunfightCommand/tracker.gif "Using the tracker")
   ![alt text](src/main/resources/Readme/GunfightCommand/leaderboard.gif "Viewing the leaderboard")
  </details>
+         <details>
+  <summary>Hangman Command</summary>
+ 
+  ### Description
+  Play a game of Hangman using a programmatically built image as the UI. The gallows is randomly selected from a variety of options. Either choose a word to play or get the bot to pick one from the dictionary.
+  
+  [View code](src/main/java/Command/Commands/HangmanCommand.java)
+
+  ### Usage
+  `hm start [word]` to start a game using the given `word`.
+           
+  `hm ai` to start a game with a word the bot picks from the dictionary.
+           
+  `hm stop` to forfeit the game.
+  
+  `hm hint` to unlock a letter in the word.
+
+  #### Example(s)
+  ![alt text](src/main/resources/Readme/HangmanCommand/playing.gif "Playing Hangman with a dictionary selected word")
+ </details>
 </details>
