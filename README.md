@@ -188,4 +188,33 @@ Kicked members will be sent a message with an invite back to the server.
   ![alt text](src/main/resources/Readme/ExecuteOrder66Command/apology.png "Apology to the kicked member")
 
  </details>
+             <details>
+  <summary>Millionaire Command</summary>
+ 
+  ### Description
+This command allows the user to play a game of Who Wants to Be a Millionaire.
+Buttons are used to answer questions/use the lifeline and winnings are saved in to a bank which is ranked on a leaderboard.
+               
+The questions are retrieved from the [Open Trivia DB](https://opentdb.com/) and are of random difficulty/topics.
+  
+  [View code](src/main/java/Command/Commands/MillionaireCommand.java)
+
+  ### Usage
+`millionaire start` to start the game.
+               
+`millionaire forfeit` to forfeit the game (keeping the winnings up until that point).
+               
+`millionaire bank` to view your bank.
+               
+`millionaire bank [@someone]` to view another member's bank (where `@someone` is the @mention of another member).
+               
+`millionaire leaderboard` to view the bank leaderboard
+  
+  #### Example(s)
+             
+  ![alt text](src/main/resources/Readme/MillionaireCommand/playing.gif "Playing Who Wants to Be a Millionaire")
+  ![alt text](src/main/resources/Readme/MillionaireCommand/bank.gif "Viewing bank")
+  ![alt text](src/main/resources/Readme/MillionaireCommand/leaderboard.gif "Viewing the leaderboard")
+
+ </details>
 </details>
