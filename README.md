@@ -150,7 +150,7 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   <summary>LOL Lookup Command</summary>
  
   ### Description
- Look up a player's League of Legends stats and build an image displaying them.
+ Uses the [Riot Gamees API](https://developer.riotgames.com/apis) to look up a player's League of Legends stats and build an image displaying them.
   
   [View code](src/main/java/Command/Commands/Lookup/LOLLookupCommand.java)
 
@@ -236,6 +236,14 @@ The questions are retrieved from the [Open Trivia DB](https://opentdb.com/) and 
   #### Example(s)
   ![alt text](src/main/resources/Readme/MWLookupCommand/full_lookup.gif "Looking up player's full stats")
   ![alt text](src/main/resources/Readme/MWLookupCommand/specific_lookup.gif "Looking up a specific stat for the player")
+          <details>
+          <summary>Player stats image</summary>
+              ![alt text](src/main/resources/Readme/MWLookupCommand/stats.png "Player stats image")
+         </details>
+          <details>
+          <summary>Specific stats image</summary>
+              ![alt text](src/main/resources/Readme/MWLookupCommand/specific.png "Specific stats image")
+         </details>
  </details>
              <details>
   <summary>MW Random Command</summary>
@@ -256,6 +264,10 @@ A short [comment](src/main/java/COD/LoadoutAnalysis.java) about the loadout is g
              
   #### Example(s)
   ![alt text](src/main/resources/Readme/MWRandomCommand/loadouts.gif "Generating loadouts")
+          <details>
+          <summary>Example loadout</summary>
+              ![alt text](src/main/resources/Readme/MWRandomCommand/example.png "Example loadout")
+         </details>
  </details>
      <details>
   <summary>OSRS Lending Command</summary>
