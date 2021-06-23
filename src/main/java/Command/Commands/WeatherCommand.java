@@ -1,52 +1,95 @@
 package Command.Commands;
 
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
+import Command.Structure.*;
+import Weather.Forecast;
+import Weather.Location;
 import Weather.WeatherManager;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Get the weather for a NZ location
  */
-public class WeatherCommand extends DiscordCommand {
+public class WeatherCommand extends OnReadyDiscordCommand {
+    private static final String
+            LOCATION = "[NZ location]",
+            TRIGGER = "weather",
+            EXTREMES = "extremes",
+            TOMORROW = "-t";
+    private final String helpText;
     private WeatherManager weatherManager;
 
     public WeatherCommand() {
-        super("weather\nweather [NZ location]\nweather [NZ location] -t", "Get the weather!");
+        super(
+                TRIGGER,
+                "Get the weather!",
+                TRIGGER + " " + LOCATION + "\n"
+                        + TRIGGER + " " + LOCATION + " " + TOMORROW + "\n"
+                        + TRIGGER + " " + EXTREMES
+        );
+        this.helpText = "Type: " + getTrigger() + " for help";
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.weatherManager = new WeatherManager(emoteHelper, helpText);
     }
 
     @Override
     public void execute(CommandContext context) {
-        String message = context.getLowerCaseMessage();
+        String query = context.getLowerCaseMessage().replaceFirst(getTrigger(), "").trim();
         MessageChannel channel = context.getMessageChannel();
-        String help = getHelpName().replaceAll("\n", " | ");
 
-        if(!message.equals("weather") && !message.startsWith("weather ")) {
+        if(query.isEmpty()) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        if(weatherManager == null) {
-            weatherManager = new WeatherManager(context.getEmoteHelper());
-        }
 
-        if(message.equals("weather")) {
-            channel.sendMessage(weatherManager.getExtremes(help)).queue();
+        channel.sendTyping().queue();
+
+        if(query.equals(EXTREMES)) {
+            channel.sendMessage(weatherManager.getExtremeWeatherEmbed()).queue();
             return;
         }
 
-        message = message.replace("weather ", "");
         boolean tomorrow = false;
-        if(message.contains(" -t")) {
+        if(query.contains(TOMORROW)) {
             tomorrow = true;
-            message = message.replace(" -t", "");
+            query = query.replaceFirst(TOMORROW, "").trim();
         }
 
-        channel.sendMessage(weatherManager.getForecast(message, tomorrow, help)).queue();
+        ArrayList<Location> locations = weatherManager.searchLocations(query);
+
+        if(locations.isEmpty()) {
+            channel.sendMessage(weatherManager.getFailedLookupEmbed(query)).queue();
+            return;
+        }
+
+        String finalQuery = query;
+
+        // Filter by exact name
+        ArrayList<Location> filtered = locations
+                .stream()
+                .filter(location -> location.getName().equalsIgnoreCase(finalQuery))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        Location toDisplay = filtered.isEmpty() ? locations.get(0) : filtered.get(0);
+        Forecast forecast = weatherManager.getForecast(toDisplay, tomorrow);
+
+        if(forecast == null) {
+            channel.sendMessage(weatherManager.getNoForecastEmbed(toDisplay)).queue();
+            return;
+        }
+
+        channel.sendMessage(weatherManager.buildForecastEmbed(toDisplay, forecast, tomorrow)).queue();
     }
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("weather");
+        return query.startsWith(getTrigger());
     }
 }
