@@ -26,6 +26,18 @@ public abstract class SelfieCommand extends DiscordCommand {
         this.selfieManager = selfieManager;
     }
 
+    /**
+     * Get the default embed builder with the thumbnail & footer set
+     *
+     * @return Embed builder with thumbnail & footer set
+     */
+    public EmbedBuilder getDefaultEmbedBuilder() {
+        String thumbnailUrl = selfieManager.getThumbnailUrl();
+        return new EmbedBuilder()
+                .setFooter(getFooterHelpText(), thumbnailUrl)
+                .setThumbnail(thumbnailUrl);
+    }
+
     @Override
     public void execute(CommandContext context) {
         MessageChannel channel = context.getMessageChannel();

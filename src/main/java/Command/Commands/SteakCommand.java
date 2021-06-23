@@ -108,13 +108,10 @@ public class SteakCommand extends SelfieCommand {
 
     @Override
     public EmbedBuilder getEmbedBuilder(CommandContext context) {
-        String thumbnailUrl = getSelfieManager().getThumbnailUrl();
-        return new EmbedBuilder()
+        return getDefaultEmbedBuilder()
                 .setColor(EmbedHelper.PURPLE)
-                .setThumbnail(thumbnailUrl)
                 .setTitle(context.getMember().getEffectiveName() + " - Photo with Steak")
-                .setDescription("The **GREATEST** League of Legends player in LCS history!\n\n" + getRandomQuote())
-                .setFooter(getFooterHelpText(), thumbnailUrl);
+                .setDescription("The **GREATEST** League of Legends player in LCS history!\n\n" + getRandomQuote());
     }
 
     private static class Quote {
