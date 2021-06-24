@@ -76,11 +76,7 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
 
     @Override
     public EmbedBuilder getEmbedBuilder(String pageDetails) {
-        EmbedBuilder builder = getDefaultEmbedBuilder(pageDetails).setColor(colour);
-        if(desc != null) {
-            builder.setDescription(desc);
-        }
-        return builder;
+        return getDefaultEmbedBuilder(pageDetails).setColor(colour).setDescription(desc);
     }
 
     @Override
