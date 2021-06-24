@@ -9,6 +9,7 @@ import static Command.Structure.EmbedHelper.getValueField;
 
 public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
     private final String[] columns;
+    public static final int MAX_COLUMNS = 3;
 
     /**
      * Embedded message that can be paged through with emotes and displays as a table.
@@ -27,8 +28,11 @@ public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
         super(context, items, thumb, title, desc, footer, bound, colour);
         this.columns = columns;
         try {
-            if(columns.length > 3) {
-                throw new IncorrectQuantityException("A maximum of 3 columns can be displayed as a table, you provided " + columns.length + " column headers");
+            if(columns.length > MAX_COLUMNS) {
+                throw new IncorrectQuantityException(
+                        "A maximum of " + MAX_COLUMNS + " columns can be displayed as a table," +
+                                " you provided " + columns.length + " column headers"
+                );
             }
         }
         catch(IncorrectQuantityException e) {
@@ -62,8 +66,15 @@ public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
             else {
                 builder.addField(getValueField(rowValues[i]));
             }
-            if(columns.length == 2 && i == 0) {
+
+            // Add blank inline fields to pad out columns such that each column hits the max length
+            if(columns.length < MAX_COLUMNS && i == 0) {
                 builder.addBlankField(true);
+
+                // Add 2 blank fields for single column tables
+                if(columns.length == 1) {
+                    builder.addBlankField(true);
+                }
             }
         }
     }
