@@ -74,6 +74,24 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
         return footer;
     }
 
+    /**
+     * Get the colour to use in the embed
+     *
+     * @return Embed colour
+     */
+    public int getColour() {
+        return colour;
+    }
+
+    /**
+     * Get the description to use in the embed
+     *
+     * @return Embed description
+     */
+    public String getDescription() {
+        return desc;
+    }
+
     @Override
     public EmbedBuilder getEmbedBuilder(String pageDetails) {
         return getDefaultEmbedBuilder(pageDetails).setColor(colour).setDescription(desc);
