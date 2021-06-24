@@ -82,6 +82,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 serverStopped
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "I haven't seen anyone die before!";
+            }
+
+            @Override
             public String[] getRowValues(int index, Character character, boolean defaultSort) {
                 Ratio deathsPerSession = new Ratio(character.getDeaths(), character.getSessions());
                 return new String[]{
@@ -121,6 +126,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 serverStarted,
                 serverStopped
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "No players online!";
+            }
+
             @Override
             public void sortItems(List<PlayerConnection> items, boolean defaultSort) {
                 items.sort((o1, o2) -> {
@@ -220,6 +230,11 @@ public class ValheimServerCommand extends OnReadyDiscordCommand {
                 serverStarted,
                 serverStopped
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "I can't find any logs!";
+            }
+
             @Override
             public String[] getRowValues(int index, LogItem log, boolean defaultSort) {
                 String message;

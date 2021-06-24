@@ -256,10 +256,6 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
      */
     private void showLoans(CommandContext context, User user) {
         ArrayList<Loan> loans = Loan.fetchLoans(context.getUser().getIdLong());
-        if(loans.isEmpty()) {
-            context.getMessageChannel().sendMessage(user.getAsMention() + " You don't have any loans!").queue();
-            return;
-        }
         new PageableTableEmbed<Loan>(
                 context,
                 loans,
@@ -270,6 +266,11 @@ public class OSRSLendingCommand extends OnReadyDiscordCommand {
                 new String[]{"ID", "User", "Date"},
                 5
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "You don't have any loans!";
+            }
+
             @Override
             public String[] getRowValues(int index, Loan loan, boolean defaultSort) {
                 boolean lending = loan.getLoaner() == user.getIdLong();

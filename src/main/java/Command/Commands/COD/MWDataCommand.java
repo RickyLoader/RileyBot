@@ -16,9 +16,11 @@ import java.util.List;
  */
 public class MWDataCommand extends DiscordCommand {
     private final HashMap<String, Weapon.CATEGORY> categories = new HashMap<>();
+    private final String helpMessage;
 
     public MWDataCommand() {
         super("mwdata [weapon name/category]", "Have a look at Modern Warfare weapons!");
+        this.helpMessage = "Type: " + getTrigger() + " for help";
         addCategories();
     }
 
@@ -26,7 +28,6 @@ public class MWDataCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         String message = context.getLowerCaseMessage().replace("mwdata", "").trim();
         MessageChannel channel = context.getMessageChannel();
-        Member member = context.getMember();
 
         if(message.isEmpty()) {
             channel.sendMessage(getHelpNameCoded()).queue();
@@ -45,12 +46,6 @@ public class MWDataCommand extends DiscordCommand {
         }
 
         Weapon[] searchResults = MWManager.getInstance().getWeaponsByName(message);
-        if(searchResults.length == 0) {
-            channel.sendMessage(
-                    member.getAsMention() + " I didn't find any weapons matching **" + message + "**!"
-            ).queue();
-            return;
-        }
 
         if(searchResults.length == 1) {
             channel.sendMessage(buildWeaponEmbed(searchResults[0])).queue();
@@ -99,11 +94,28 @@ public class MWDataCommand extends DiscordCommand {
         ) {
             @Override
             public EmbedBuilder getEmbedBuilder(String pageDetails) {
-                return new EmbedBuilder()
+                return getDefaultEmbedBuilder()
                         .setColor(EmbedHelper.PURPLE)
+                        .setFooter(pageDetails + " | " + helpMessage);
+            }
+
+            @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return getDefaultEmbedBuilder()
+                        .setColor(EmbedHelper.ORANGE)
+                        .setDescription("I didn't find anything for that!")
+                        .setFooter(helpMessage)
+                        .build();
+            }
+
+            /**
+             * Get the default embed builder to use
+             * @return Default embed builder
+             */
+            private EmbedBuilder getDefaultEmbedBuilder() {
+                return new EmbedBuilder()
                         .setTitle(title)
-                        .setThumbnail(Gunfight.THUMBNAIL)
-                        .setFooter(pageDetails + " | " + "Type: " + getTrigger() + " for help");
+                        .setThumbnail(Gunfight.THUMBNAIL);
             }
 
             @Override

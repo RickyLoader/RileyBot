@@ -50,6 +50,11 @@ public class TweetsCommand extends DiscordCommand {
                 EmbedHelper.BLUE
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "I don't have any tweets!";
+            }
+
+            @Override
             public String[] getRowValues(int index, Status status, boolean defaultSort) {
                 return new String[]{status.getCreatedAt().toString(), status.getText()};
             }

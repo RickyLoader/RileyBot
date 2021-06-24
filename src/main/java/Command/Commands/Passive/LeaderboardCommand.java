@@ -89,6 +89,11 @@ public class LeaderboardCommand extends DiscordCommand {
                 5
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "No sessions on the leaderboard!";
+            }
+
+            @Override
             public String[] getRowValues(int index, Session session, boolean defaultSort) {
                 int rank = defaultSort ? (index + 1) : (getItems().size() - index);
                 return new String[]{String.valueOf(rank), session.getWinLossSummary(), session.formatStreak()};

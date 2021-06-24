@@ -159,7 +159,6 @@ public class HubCommand extends DiscordCommand {
      * @param context       Command context
      */
     private void showSearchResults(ArrayList<Performer> searchResults, String searchQuery, CommandContext context) {
-        int results = searchResults.size();
         new PageableTableEmbed<Performer>(
                 context,
                 searchResults,
@@ -169,8 +168,13 @@ public class HubCommand extends DiscordCommand {
                 "Try: " + getHelpName().replace("\n", " | "),
                 new String[]{"Name", "Profile Type"},
                 5,
-                results == 0 ? EmbedHelper.RED : EmbedHelper.ORANGE
+                EmbedHelper.ORANGE
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "There's no one around these parts named **" + searchQuery + "**!";
+            }
+
             @Override
             public String[] getRowValues(int index, Performer performer, boolean defaultSort) {
                 return new String[]{

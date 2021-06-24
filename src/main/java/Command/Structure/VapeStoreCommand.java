@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -158,11 +159,12 @@ public class VapeStoreCommand extends DiscordCommand {
             }
 
             @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return getEmbedBuilder("No product images available | " + footer).build();
+            }
+
+            @Override
             public String getPageDetails() {
-                int images = getItems().size();
-                if(images == 0) {
-                    return "No product images available | " + footer;
-                }
                 return "Image: " + getPage() + "/" + getPages() + " | " + footer;
             }
 
@@ -187,7 +189,7 @@ public class VapeStoreCommand extends DiscordCommand {
                 products,
                 vapeStore.getLogo(),
                 vapeStore.getName() + " Search",
-                "**" + (noResults ? "No" : products.size()) + "** products found for: **" + query + "**",
+                "**" + products.size() + "** products found for: **" + query + "**",
                 footer,
                 new String[]{
                         "ID",
@@ -197,6 +199,11 @@ public class VapeStoreCommand extends DiscordCommand {
                 5,
                 noResults ? EmbedHelper.RED : EmbedHelper.GREEN
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "No products found for: **" + query + "**";
+            }
+
             @Override
             public void sortItems(List<Product> items, boolean defaultSort) {
                 items.sort(new LevenshteinDistance<Product>(query, defaultSort) {
@@ -240,6 +247,11 @@ public class VapeStoreCommand extends DiscordCommand {
                 5,
                 EmbedHelper.GREEN
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "I couldn't find anything!";
+            }
+
             @Override
             public String[] getRowValues(int index, Product product, boolean defaultSort) {
                 return new String[]{

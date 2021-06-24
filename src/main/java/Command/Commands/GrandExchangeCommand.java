@@ -75,18 +75,22 @@ public class GrandExchangeCommand extends OnReadyDiscordCommand {
      * @param query   Search query used to find items
      */
     public void showItemSearchResults(CommandContext context, Item[] items, String query) {
-        boolean noResults = items.length == 0;
         new PageableTableEmbed<Item>(
                 context,
                 Arrays.asList(items),
                 thumbnail,
                 "Grand Exchange Search",
-                (noResults ? "No" : items.length) + " Results found for **" + query + "**!",
+                items.length + " Results found for: **" + query + "**!",
                 "Type: " + getTrigger() + " for help",
                 new String[]{"ID", "Name"},
                 5,
-                noResults ? EmbedHelper.RED : EmbedHelper.GREEN
+                EmbedHelper.GREEN
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "No items found for: **" + query + "**!";
+            }
+
             @Override
             public String[] getRowValues(int index, Item item, boolean defaultSort) {
                 return new String[]{String.valueOf(item.getId()), item.getName()};

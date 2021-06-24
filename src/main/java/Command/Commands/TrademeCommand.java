@@ -155,6 +155,11 @@ public class TrademeCommand extends DiscordCommand {
                 searching ? EmbedHelper.RED : EmbedHelper.YELLOW
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "There's nothing here!";
+            }
+
+            @Override
             public String[] getRowValues(int index, Category category, boolean defaultSort) {
                 return new String[]{category.getNumber(), category.getPath(), category.getName()};
             }
@@ -201,8 +206,8 @@ public class TrademeCommand extends DiscordCommand {
                 results,
                 Trademe.TRADEME_LOGO,
                 "Trademe Search",
-                (noResults ? "No" : results.size())
-                        + " results found for: **" + query + "**"
+                results.size()
+                        + " listings found for: **" + query + "**"
                         + " in category: **"
                         + (category == trademe.getRootCategory() ? category.getName() : category.getPath()) + "**",
                 "Type: " + getTrigger() + " for help",
@@ -235,6 +240,11 @@ public class TrademeCommand extends DiscordCommand {
                     builder.setImage(Trademe.NO_SEARCH_RESULTS_IMAGE);
                 }
                 return builder;
+            }
+
+            @Override
+            public String getNoItemsDescription() {
+                return "No listings found!";
             }
         }.showMessage();
     }

@@ -21,10 +21,11 @@ public class GIFCommand extends DiscordCommand {
     private final HashMap<String, ArrayList<GIF>> gifs = new HashMap<>();
     private final HashSet<String> currentQueries = new HashSet<>();
     private final static String BASE_URL = "https://api.redgifs.com/v1/gfycats/";
-    private final String thumbnail = "https://i.imgur.com/bTDNO9G.jpg";
+    private final String thumbnail = "https://i.imgur.com/bTDNO9G.jpg", helpText;
 
     public GIFCommand() {
         super("gif", "Search for a random GIF!", "gif [search term]");
+        this.helpText = "Try: " + getHelpName();
     }
 
     /**
@@ -101,9 +102,14 @@ public class GIFCommand extends DiscordCommand {
                         .setFooter(
                                 "Uploaded: "
                                         + new SimpleDateFormat("dd/MM/yyyy").format(gif.getUploadDate())
-                                        + " | Try: " + getHelpName(),
+                                        + " | " + helpText,
                                 thumbnail
                         );
+            }
+
+            @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return getEmbedBuilder(helpText).setDescription("There's nothing here!").build();
             }
 
             @Override

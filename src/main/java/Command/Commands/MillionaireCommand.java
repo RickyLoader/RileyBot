@@ -108,6 +108,11 @@ public class MillionaireCommand extends OnReadyDiscordCommand {
                 EmbedHelper.PURPLE
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "The leaderboard is empty!";
+            }
+
+            @Override
             public String[] getRowValues(int index, Bank bank, boolean defaultSort) {
                 int rank = defaultSort ? (index + 1) : (getItems().size() - index);
                 return new String[]{

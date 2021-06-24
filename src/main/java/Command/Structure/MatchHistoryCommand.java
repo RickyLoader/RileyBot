@@ -211,6 +211,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 5
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "There are no wobblies on the leaderboard!";
+            }
+
+            @Override
             public String[] getRowValues(int index, WobblyScore score, boolean defaultSort) {
                 int rank = defaultSort ? (index + 1) : (getItems().size() - index);
                 return new String[]{
@@ -288,6 +293,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 builder
                         .setDescription(description.toString())
                         .setImage(weapon.getImageURL());
+            }
+
+            @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return getEmbedBuilder(getPageDetails()).setDescription("There are no missing attachments!").build();
             }
 
             @Override

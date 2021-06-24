@@ -54,4 +54,9 @@ public class PollSearchResultsMessage extends PageableTableEmbed<Poll> {
                 poll.getStartDateFormatted()
         };
     }
+
+    @Override
+    public String getNoItemsDescription() {
+        return "No results!";
+    }
 }

@@ -201,11 +201,6 @@ public class StocksCommand extends OnReadyDiscordCommand {
         channel.sendTyping().queue();
         Symbol[] searchResults = getSymbolsByQuery(query.toLowerCase(), searchType);
 
-        if(searchResults.length == 0) {
-            channel.sendMessage(member.getAsMention() + " I couldn't find anything for **" + query + "**!").queue();
-            return;
-        }
-
         if(searchResults.length == 1) {
             Symbol symbol = searchResults[0];
             MarketQuote quote = symbol.isCrypto() ? getCryptoMarketQuote(symbol) : getStockMarketQuote(symbol);
@@ -245,6 +240,11 @@ public class StocksCommand extends OnReadyDiscordCommand {
                 new String[]{"Symbol", "Name", "ID"},
                 5
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "No symbols found for: **" + query + "**";
+            }
+
             @Override
             public String[] getRowValues(int index, Symbol symbol, boolean defaultSort) {
                 String identifier = getTrigger() + symbol.getSymbol();

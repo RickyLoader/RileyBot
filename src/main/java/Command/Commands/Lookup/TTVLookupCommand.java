@@ -97,6 +97,11 @@ public class TTVLookupCommand extends LookupCommand {
                 5
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "Nobody here by that name";
+            }
+
+            @Override
             public String[] getRowValues(int index, Streamer streamer, boolean defaultSort) {
                 return new String[]{
                         streamer.getLoginName(),

@@ -93,6 +93,11 @@ public class RedditCommand extends OnReadyDiscordCommand {
             }
 
             @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return getEmbedBuilder("No images to display").build();
+            }
+
+            @Override
             public String getPageDetails() {
                 return "Image: " + getPage() + "/" + getPages();
             }

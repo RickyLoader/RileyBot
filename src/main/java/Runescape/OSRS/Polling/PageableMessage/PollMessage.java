@@ -174,4 +174,9 @@ public class PollMessage extends PageableListEmbed<Question> {
     public String getValue(Question question) {
         return buildAnswerDisplay(question);
     }
+
+    @Override
+    public String getNoItemsDescription() {
+        return "There are no questions for this poll somehow!";
+    }
 }

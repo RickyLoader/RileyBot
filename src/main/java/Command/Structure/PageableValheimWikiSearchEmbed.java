@@ -62,4 +62,9 @@ public class PageableValheimWikiSearchEmbed extends PageableTableEmbed<ValheimPa
                 pageSummary.getCategory().name()
         };
     }
+
+    @Override
+    public String getNoItemsDescription() {
+        return "Nothing to see here!";
+    }
 }

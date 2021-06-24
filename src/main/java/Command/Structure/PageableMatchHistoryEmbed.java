@@ -215,4 +215,9 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
                 getFormattedResult(matchStats)
         };
     }
+
+    @Override
+    public String getNoItemsDescription() {
+        return "This player hasn't got any recent matches!";
+    }
 }

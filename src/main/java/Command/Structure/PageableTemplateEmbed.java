@@ -73,8 +73,17 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
                 .setThumbnail(thumb)
                 .setImage(EmbedHelper.SPACER_IMAGE);
 
-        if(pageDetails.length > 0) {
-            builder.setDescription(pageDetails[0]);
+        boolean hasPageDetails = pageDetails.length > 0;
+        String footer = hasPageDetails ? pageDetails[0] : "";
+
+        if(getFooter() != null) {
+            if(hasPageDetails) {
+                footer += " | ";
+            }
+            footer += getFooter();
+        }
+        if(!footer.isEmpty()) {
+            builder.setFooter(footer);
         }
         return builder;
     }

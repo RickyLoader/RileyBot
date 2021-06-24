@@ -29,6 +29,11 @@ public class HelpCommand extends DiscordCommand {
         ) {
 
             @Override
+            public String getNoItemsDescription() {
+                return "Where have my commands gone?";
+            }
+
+            @Override
             public String[] getRowValues(int index, DiscordCommand item, boolean defaultSort) {
                 return new String[]{item.getTrigger(), item.getDesc()};
             }

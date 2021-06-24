@@ -475,6 +475,11 @@ public class PlexServer {
         ) {
 
             @Override
+            public String getNoItemsDescription() {
+                return "Nothing to see here!";
+            }
+
+            @Override
             public String[] getRowValues(int index, PlexMovie item, boolean defaultSort) {
                 PlexDetails plexDetails = item.getPlexDetails();
                 return new String[]{

@@ -88,6 +88,15 @@ public class UrbanDictionaryCommand extends OnReadyDiscordCommand {
             }
 
             @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return getDefaultEmbedBuilder()
+                        .setColor(EmbedHelper.RED)
+                        .setTitle("No results!")
+                        .setDescription("Urban Dictionary | No results")
+                        .build();
+            }
+
+            @Override
             public boolean nonPagingButtonPressed(String buttonId) {
                 return false;
             }

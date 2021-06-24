@@ -63,15 +63,20 @@ public class DictionaryCommand extends DiscordCommand {
                 words,
                 thumbnail,
                 "Dictionary Search",
-                (words.isEmpty() ? "No" : words.size()) + " words found for: **" + query + "**",
+                words.size() + " words found for: **" + query + "**",
                 footer,
                 new String[]{
                         "Word",
                         "Definition"
                 },
                 5,
-                words.isEmpty() ? EmbedHelper.RED : EmbedHelper.ORANGE
+                EmbedHelper.ORANGE
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "That isn't in the dictionary bro, might need to give Merriam or Webster a call.";
+            }
+
             @Override
             public String[] getRowValues(int index, DictWord dictWord, boolean defaultSort) {
                 return new String[]{

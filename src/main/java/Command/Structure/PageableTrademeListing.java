@@ -100,6 +100,11 @@ public class PageableTrademeListing extends CyclicalPageableEmbed<String> {
     }
 
     @Override
+    protected MessageEmbed getNoItemsEmbed() {
+        return getEmbedBuilder(getPageDetails()).build();
+    }
+
+    @Override
     public String getPageDetails() {
         return listing.hasImages() ? "Photo: " + getPage() + "/" + getPages() : "No images for listing";
     }

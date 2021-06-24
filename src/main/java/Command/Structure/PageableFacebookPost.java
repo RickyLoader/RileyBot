@@ -5,6 +5,7 @@ import Facebook.PostDetails;
 import Facebook.SocialResponse;
 import Facebook.UserDetails;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.text.DecimalFormat;
 
@@ -71,6 +72,11 @@ public class PageableFacebookPost extends CyclicalPageableEmbed<String> {
     @Override
     public void displayItem(EmbedBuilder builder, int currentIndex, String item) {
         builder.setImage(item);
+    }
+
+    @Override
+    protected MessageEmbed getNoItemsEmbed() {
+        return getEmbedBuilder(null).build();
     }
 
     @Override

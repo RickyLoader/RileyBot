@@ -200,7 +200,7 @@ public class XKCDCommand extends DiscordCommand {
                 Arrays.asList(searchResults),
                 thumbnail,
                 "XKCD Comic Search",
-                searchResults.length + " results found for: **" + query + "**",
+                searchResults.length + " comics found for: **" + query + "**",
                 helpMessage,
                 new String[]{
                         "Issue #",
@@ -208,8 +208,13 @@ public class XKCDCommand extends DiscordCommand {
                         "Date"
                 },
                 5,
-                searchResults.length == 0 ? EmbedHelper.RED : EmbedHelper.GREEN
+                EmbedHelper.GREEN
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "No comics found for: **" + query + "**";
+            }
+
             @Override
             public String[] getRowValues(int index, PublicationDetails item, boolean defaultSort) {
                 return new String[]{

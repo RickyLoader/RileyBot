@@ -58,6 +58,11 @@ public class YoutubeLookupCommand extends LookupCommand {
                 5
         ) {
             @Override
+            public String getNoItemsDescription() {
+                return "No videos to display!";
+            }
+
+            @Override
             public String[] getRowValues(int index, YoutubeChannel.Video v, boolean defaultSort) {
                 return new String[]{v.getTitle(), v.getUrl(), String.valueOf(v.getViews())};
             }

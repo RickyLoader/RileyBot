@@ -124,13 +124,12 @@ public class SteamCommand extends DiscordCommand {
      * @param query         Query used to find search results
      */
     private void showSearchResults(CommandContext context, ArrayList<AppInfo> searchResults, String query) {
-        boolean noResults = searchResults.isEmpty();
         new PageableTableEmbed<AppInfo>(
                 context,
                 searchResults,
                 SteamStore.STEAM_LOGO,
                 "Steam Search Results",
-                (noResults ? "No" : searchResults.size())
+                searchResults.size()
                         + " Results found for the query: **" + query + "**",
                 "Type: " + getTrigger() + " for help",
                 new String[]{
@@ -138,8 +137,13 @@ public class SteamCommand extends DiscordCommand {
                         "ID"
                 },
                 5,
-                noResults ? EmbedHelper.RED : EmbedHelper.BLUE
+                EmbedHelper.BLUE
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "No results found!";
+            }
+
             @Override
             public String[] getRowValues(int index, AppInfo appInfo, boolean defaultSort) {
                 return new String[]{
@@ -183,6 +187,11 @@ public class SteamCommand extends DiscordCommand {
                 5,
                 EmbedHelper.BLUE
         ) {
+            @Override
+            public String getNoItemsDescription() {
+                return "There's nothing to see here!";
+            }
+
             @Override
             public String[] getRowValues(int index, Application application, boolean defaultSort) {
                 AppInfo appInfo = application.getAppInfo();

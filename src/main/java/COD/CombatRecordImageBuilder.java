@@ -562,13 +562,8 @@ public class CombatRecordImageBuilder extends ImageBuilder {
 
         ArrayList<AssetStats<? extends CODAsset>> statsList = playerStats.getAssetStatsByName(assetName);
 
-        if(statsList.isEmpty()) {
-            loadingMessage.failLoading("I didn't find any stats for: **" + assetName + "**");
-            return;
-        }
-
         // More than one result - display as pageable embed
-        if(statsList.size() > 1) {
+        if(statsList.size() != 1) {
             loadingMessage.failLoading("You'll have to narrow that query down bro!");
             new PageableCODAssetStatsEmbed(
                     context,
@@ -576,10 +571,14 @@ public class CombatRecordImageBuilder extends ImageBuilder {
                     "MW Stats Search: " + nameQuery.toUpperCase(),
                     MWManager.THUMBNAIL,
                     helpMessage,
-                    "This player has **"
-                            + (statsList.isEmpty() ? "no" : statsList.size())
+                    "This player has **" + statsList.size()
                             + "** stats available for: **" + assetName + "**\n\nTry using the **Codename**!"
             ) {
+                @Override
+                public String getNoItemsDescription() {
+                    return "I didn't find any stats for: **" + assetName + "**";
+                }
+
                 @Override
                 public void sortItems(List<AssetStats<? extends CODAsset>> items, boolean defaultSort) {
                     items.sort(new LevenshteinDistance<AssetStats<? extends CODAsset>>(assetName, true) {

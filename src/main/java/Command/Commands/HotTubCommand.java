@@ -4,10 +4,12 @@ import Command.Commands.Lookup.TTVLookupCommand;
 import Command.Structure.CommandContext;
 import Command.Structure.CyclicalPageableEmbed;
 import Command.Structure.DiscordCommand;
+import Command.Structure.EmbedHelper;
 import Twitch.Streamer;
 import Twitch.TwitchTV;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.ArrayList;
 
@@ -26,10 +28,6 @@ public class HotTubCommand extends DiscordCommand {
         MessageChannel channel = context.getMessageChannel();
         channel.sendTyping().queue();
         ArrayList<Streamer> hotTubStreamers = TwitchTV.getInstance().getStreamersByCategoryId(HOT_TUB_CATEGORY);
-        if(hotTubStreamers.size() == 0) {
-            channel.sendMessage("I didn't see anyone in a hot tub right now!").queue();
-            return;
-        }
         displayHotTubbers(context, hotTubStreamers);
     }
 
@@ -61,6 +59,16 @@ public class HotTubCommand extends DiscordCommand {
                         context.getMember(),
                         "Try: " + getTrigger() + " | " + getPageDetails()
                 );
+            }
+
+            @Override
+            protected MessageEmbed getNoItemsEmbed() {
+                return new EmbedBuilder()
+                        .setThumbnail(TwitchTV.TWITCH_LOGO)
+                        .setColor(EmbedHelper.BLUE)
+                        .setTitle("No Hot Tubbers!")
+                        .setDescription("I didn't find any tubbies bro")
+                        .build();
             }
 
             @Override
