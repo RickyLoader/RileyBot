@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.util.List;
 
@@ -52,15 +53,50 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
 
     @Override
     public EmbedBuilder getEmbedBuilder(String pageDetails) {
-        EmbedBuilder builder = new EmbedBuilder()
-                .setTitle(title)
-                .setThumbnail(thumb)
-                .setColor(colour)
-                .setImage(EmbedHelper.SPACER_IMAGE)
-                .setFooter(pageDetails + " | " + footer);
+        EmbedBuilder builder = getDefaultEmbedBuilder(pageDetails).setColor(colour);
         if(desc != null) {
             builder.setDescription(desc);
         }
         return builder;
+    }
+
+    /**
+     * Get the default embed builder to use initialised with all values
+     * except for the description and colour.
+     *
+     * @param pageDetails Optional String detailing the current page - e.g "Page: 1/5"
+     * @return Default embed builder
+     */
+    private EmbedBuilder getDefaultEmbedBuilder(String... pageDetails) {
+        EmbedBuilder builder = new EmbedBuilder()
+                .setTitle(title)
+                .setThumbnail(thumb)
+                .setImage(EmbedHelper.SPACER_IMAGE);
+
+        if(pageDetails.length > 0) {
+            builder.setDescription(pageDetails[0]);
+        }
+        return builder;
+    }
+
+    @Override
+    public MessageEmbed getNoItemsEmbed() {
+        return getDefaultEmbedBuilder().setDescription(getNoItemsDescription()).setColor(getNoItemsColour()).build();
+    }
+
+    /**
+     * Get the description to use for the embed when there are no items to display
+     *
+     * @return No items embed description
+     */
+    public abstract String getNoItemsDescription();
+
+    /**
+     * Get the colour to use for the embed when there are no items to display
+     *
+     * @return Red colour
+     */
+    public int getNoItemsColour() {
+        return EmbedHelper.RED;
     }
 }

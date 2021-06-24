@@ -21,7 +21,7 @@ public abstract class PageableEmbed<T> {
     private final int bound, pages;
     private final Button forward, backward;
     private final EmoteHelper emoteHelper;
-    private List<T> items;
+    private final List<T> items;
     private long id;
     private int index = 0, page = 1;
     private String lastAction;
@@ -184,7 +184,6 @@ public abstract class PageableEmbed<T> {
 
     /**
      * Edit the embedded message in place by acknowledging the button click event.
-     * This will keep the button displaying the "thinking" animation until the message has been edited.
      *
      * @param event Event to acknowledge
      */
@@ -214,13 +213,25 @@ public abstract class PageableEmbed<T> {
      * @return Message embed
      */
     public MessageEmbed buildMessage() {
-        EmbedBuilder embedBuilder = getEmbedBuilder(getPageDetails());
-        int max = Math.min(bound, (items.size() - this.index));
-        for(int index = this.index; index < (this.index + max); index++) {
-            displayItem(embedBuilder, index, items.get(index));
+        if(items.isEmpty()) {
+            return getNoItemsEmbed();
         }
-        return embedBuilder.build();
+        else {
+            EmbedBuilder embedBuilder = getEmbedBuilder(getPageDetails());
+            int max = Math.min(bound, (items.size() - this.index));
+            for(int index = this.index; index < (this.index + max); index++) {
+                displayItem(embedBuilder, index, items.get(index));
+            }
+            return embedBuilder.build();
+        }
     }
+
+    /**
+     * Get the message embed to use when there are no items to display
+     *
+     * @return No items message embed
+     */
+    protected abstract MessageEmbed getNoItemsEmbed();
 
     /**
      * Get a String detailing the current page - e.g "Page: 1/5"
@@ -327,14 +338,5 @@ public abstract class PageableEmbed<T> {
      */
     private boolean isFirstPage() {
         return index == 0;
-    }
-
-    /**
-     * Replace the list of items
-     *
-     * @param items List to replace current
-     */
-    public void updateItems(List<T> items) {
-        this.items = items;
     }
 }
