@@ -346,7 +346,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             loading.updateStage("Checking player is tracked...");
             NetworkResponse response = fetchRecentPlayerAchievementData(stats.getName(), args.searchLeagueStats());
 
-            if(response.code == -1) {
+            if(response.code == NetworkResponse.TIMEOUT_CODE) {
                 loading.failStage("Achievement tracker didn't respond, unlucky cunt");
                 return;
             }
@@ -468,7 +468,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             String name = playerStats.getName();
             NetworkResponse response = fetchPlayerTrackingData(name, league); // Check if player exists
 
-            if(response.code == -1) {
+            if(response.code == NetworkResponse.TIMEOUT_CODE) {
                 loading.failStage("XP tracker didn't respond, unlucky cunt");
                 return;
             }

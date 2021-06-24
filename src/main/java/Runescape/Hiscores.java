@@ -38,7 +38,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      */
     public String[] hiscoresRequest(String url) {
         NetworkResponse response = new NetworkRequest(url, false).get();
-        if(response.code == 504 || response.code == 408 || response.code == -1) {
+        if(response.code == 504 || response.code == 408 || response.code == NetworkResponse.TIMEOUT_CODE) {
             timeout = true;
             return null;
         }

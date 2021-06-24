@@ -2,34 +2,51 @@ package Network;
 
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
 public class NetworkRequest {
     private final OkHttpClient client;
     private final NetworkResponse timeout;
-    private Request.Builder builder;
+    private final String url;
+    private final boolean local;
 
     /**
      * Initialise an OkHTTP client with a url
      *
      * @param url   URL to query
-     * @param local Boolean use local api
+     * @param local Use local api
      */
     public NetworkRequest(String url, boolean local) {
-        client = new OkHttpClient();
-        timeout = new NetworkResponse(null, -1, null);
+        this.client = new OkHttpClient();
+        this.timeout = new NetworkResponse(null, NetworkResponse.TIMEOUT_CODE, null);
+        this.url = url;
+        this.local = local;
+    }
 
-        try {
-            builder = new Request.Builder().url(
-                    new URL(local ? NetworkInfo.getAddress() + "/DiscordBotAPI/api/" + url : url)
-            );
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+    /**
+     * Get the request builder
+     *
+     * @return Request builder
+     * @throws MalformedURLException On bad URL
+     */
+    private Request.Builder getRequestBuilder() throws MalformedURLException {
+        return new Request.Builder().url(
+                new URL(local ? NetworkInfo.getAddress() + "/DiscordBotAPI/api/" + url : url)
+        );
+    }
+
+    /**
+     * Get the request URL
+     *
+     * @return Request URL
+     */
+    public String getUrl() {
+        return url;
     }
 
     /**
@@ -40,7 +57,7 @@ public class NetworkRequest {
     public NetworkResponse get() {
         try {
             Response response = client.newCall(
-                    builder.addHeader("accept", "application/json").build()
+                    getRequestBuilder().addHeader("accept", "application/json").build()
             ).execute();
             return handleResponse(response);
         }
@@ -57,7 +74,7 @@ public class NetworkRequest {
     public NetworkResponse delete() {
         try {
             Response response = client.newCall(
-                    builder.delete().addHeader("accept", "application/json").build()
+                    getRequestBuilder().delete().addHeader("accept", "application/json").build()
             ).execute();
             return handleResponse(response);
         }
@@ -68,8 +85,11 @@ public class NetworkRequest {
 
     /**
      * Add headers to the builder
+     *
+     * @param builder Request builder to add headers to
+     * @param headers Map of header name -> value to add to the request builder
      */
-    private void parseHeaders(HashMap<String, String> headers) {
+    private void parseHeaders(Request.Builder builder, HashMap<String, String> headers) {
         for(String header : headers.keySet()) {
             builder.addHeader(header, headers.get(header));
         }
@@ -78,12 +98,14 @@ public class NetworkRequest {
     /**
      * Make a GET request
      *
+     * @param headers Map of header name -> value to add to send with the request
      * @return Response from request
      */
     public NetworkResponse get(HashMap<String, String> headers) {
         try {
             headers.put("accept", "application/json");
-            parseHeaders(headers);
+            Request.Builder builder = getRequestBuilder();
+            parseHeaders(builder, headers);
             Response response = client.newCall(builder.build()).execute();
             return handleResponse(response);
         }
@@ -97,14 +119,15 @@ public class NetworkRequest {
      * Make a POST request
      *
      * @param body    body to send
-     * @param headers Headers if required
+     * @param headers Map of header name -> value to add to send with the request
      * @param async   Async request
      * @return Response from request
      */
-    public NetworkResponse post(RequestBody body, HashMap<String, String> headers, boolean async) {
+    public NetworkResponse post(RequestBody body, @Nullable HashMap<String, String> headers, boolean async) {
         try {
+            Request.Builder builder = getRequestBuilder();
             if(headers != null) {
-                parseHeaders(headers);
+                parseHeaders(builder, headers);
             }
             Request request = builder.post(body).build();
             if(async) {
@@ -125,7 +148,6 @@ public class NetworkRequest {
             return handleResponse(response);
         }
         catch(Exception e) {
-            System.out.println(e.getMessage());
             return timeout;
         }
     }
