@@ -8,24 +8,26 @@ import static Command.Structure.EmbedHelper.getTitleField;
 import static Command.Structure.EmbedHelper.getValueField;
 
 public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
-    private final String[] columns;
     public static final int MAX_COLUMNS = 3;
+    private final String[] columns;
 
     /**
-     * Embedded message that can be paged through with emotes and displays as a table.
+     * Embedded message that can be paged through with buttons and displays as a table.
+     * Takes an image file to use as the embed image.
      *
-     * @param context Command context
-     * @param items   List of items to be displayed
-     * @param thumb   Thumbnail to use for embed
-     * @param title   Title to use for embed
-     * @param desc    Description to use for embed
-     * @param footer  Footer to use in the embed
-     * @param columns Column headers to display at the top of message
-     * @param bound   Maximum items to display
-     * @param colour  Optional colour to use for embed
+     * @param context   Command context
+     * @param items     List of items to be displayed
+     * @param thumb     Thumbnail to use for embed
+     * @param imageFile Image file to use as embed image
+     * @param title     Title to use for embed
+     * @param desc      Description to use for embed
+     * @param footer    Footer to use in the embed
+     * @param columns   Column headers to display at the top of message
+     * @param bound     Maximum items to display
+     * @param colour    Optional colour to use for embed
      */
-    public PageableTableEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, String[] columns, int bound, int... colour) {
-        super(context, items, thumb, title, desc, footer, bound, colour);
+    public PageableTableEmbed(CommandContext context, List<T> items, String thumb, byte[] imageFile, String title, String desc, String footer, String[] columns, int bound, int... colour) {
+        super(context, items, thumb, imageFile, title, desc, footer, bound, colour);
         this.columns = columns;
         try {
             if(columns.length > MAX_COLUMNS) {
@@ -38,6 +40,23 @@ public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
         catch(IncorrectQuantityException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Embedded message that can be paged through with buttons and displays as a table.
+     *
+     * @param context Command context
+     * @param items   List of items to be displayed
+     * @param thumb   Thumbnail to use for embed
+     * @param title   Title to use for embed
+     * @param desc    Description to use for embed
+     * @param footer  Footer to use in the embed
+     * @param columns Column headers to display at the top of message
+     * @param bound   Maximum items to display
+     * @param colour  Optional colour to use for embed
+     */
+    public PageableTableEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, String[] columns, int bound, int... colour) {
+        this(context, items, thumb, null, title, desc, footer, columns, bound, colour);
     }
 
     /**

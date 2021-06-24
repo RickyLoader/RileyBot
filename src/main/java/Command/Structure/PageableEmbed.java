@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Embedded message that can be paged through with buttons
@@ -111,12 +112,32 @@ public abstract class PageableEmbed<T> {
      * Send the embed with the paging buttons
      */
     public void showMessage() {
+        getMessageAction().queue(getMessageCallback());
+    }
+
+    /**
+     * Get the message callback to use after sending the pageable message.
+     * Remember the ID of the message for paging.
+     *
+     * @return Message callback
+     */
+    private Consumer<Message> getMessageCallback() {
+        return message -> id = message.getIdLong();
+    }
+
+    /**
+     * Get the message action to use for sending the pageable message.
+     * This action involves building the message and (optionally) adding the paging buttons.
+     *
+     * @return Message action
+     */
+    protected MessageAction getMessageAction() {
         MessageAction sendMessage = channel.sendMessage(buildMessage());
         ActionRow buttonRow = getButtonRow();
         if(buttonRow != null) {
             sendMessage = sendMessage.setActionRows(buttonRow);
         }
-        sendMessage.queue(message -> id = message.getIdLong());
+        return sendMessage;
     }
 
     /**
