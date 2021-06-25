@@ -46,3 +46,5 @@
 /.idea/vcs.xml
 /.idea/workspace.xml
 /src/main/java/Network/Secret.java
+/src/main/java/TheHub
+/src/main/java/Command/Commands/HubCommand.java
