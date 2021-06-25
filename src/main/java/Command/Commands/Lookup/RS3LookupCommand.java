@@ -2,9 +2,11 @@ package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
 import Command.Structure.CommandContext;
+import Command.Structure.EmoteHelper;
 import Command.Structure.LookupCommand;
 import Runescape.HiscoresArgs;
 import Runescape.Stats.RS3Hiscores;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -13,30 +15,33 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a RS3 player and build an image with their stats
  */
 public class RS3LookupCommand extends LookupCommand {
+    private static final String TRIGGER = "rs3lookup", VIRTUAL = "virtual";
     private boolean virtual;
+    private RS3Hiscores hiscores;
 
     public RS3LookupCommand() {
         super(
-                "rs3lookup",
+                TRIGGER,
                 "Check out someone's stats on RS3!",
-                "virtual rs3lookup " + DEFAULT_LOOKUP_ARGS,
+                "[" + VIRTUAL + "] " + TRIGGER + DEFAULT_LOOKUP_ARGS,
                 12
         );
     }
 
     @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.hiscores = new RS3Hiscores(emoteHelper, "Type: " + getTrigger() + " for help");
+    }
+
+    @Override
     public void processName(String name, CommandContext context) {
-        RS3Hiscores hiscores = new RS3Hiscores(
-                context.getEmoteHelper(),
-                "Type: " + getTrigger() + " for help"
-        );
         hiscores.buildImage(name, context.getMessageChannel(), new HiscoresArgs(virtual));
     }
 
     @Override
     public String stripArguments(String query) {
-        if(query.startsWith("virtual")) {
-            query = query.replaceFirst("virtual", "").trim();
+        if(query.startsWith(VIRTUAL)) {
+            query = query.replaceFirst(VIRTUAL, "").trim();
             virtual = true;
         }
         else {
@@ -57,6 +62,6 @@ public class RS3LookupCommand extends LookupCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith(getTrigger()) || query.startsWith("virtual") && query.contains(getTrigger());
+        return super.matches(query, message) || query.startsWith(VIRTUAL) && query.contains(getTrigger());
     }
 }

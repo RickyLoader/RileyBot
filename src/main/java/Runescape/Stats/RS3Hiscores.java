@@ -2,6 +2,7 @@ package Runescape.Stats;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
+import Command.Structure.ImageLoadingMessage;
 import Command.Structure.PieChart;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
@@ -17,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static Command.Structure.PieChart.*;
+import static Runescape.Hiscores.LOADING_UPDATE_TYPE.*;
 import static Runescape.Skill.SKILL_NAME.*;
 import static Runescape.Stats.Clan.*;
 
@@ -25,8 +27,8 @@ import static Runescape.Stats.Clan.*;
  */
 public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     private final Color orange, yellow, red, blue;
-    private final ResourceHandler handler;
     private final String BASE_URL = "https://secure.runescape.com/";
+    private final BufferedImage skillsSection, clanSection, clueSection, titleSection, questSection;
 
     /**
      * Create the RS3 Hiscores instance
@@ -35,12 +37,19 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @param helpMessage Help message to display in loading message
      */
     public RS3Hiscores(EmoteHelper emoteHelper, String helpMessage) {
-        super(emoteHelper, ResourceHandler.RS3_BASE_PATH, FontManager.RS3_FONT, helpMessage);
+        super(emoteHelper, ResourceHandler.RS3_BASE_PATH + "Templates/", FontManager.RS3_FONT, helpMessage);
         this.orange = new Color(EmbedHelper.RUNESCAPE_ORANGE);
         this.yellow = new Color(EmbedHelper.RUNESCAPE_YELLOW);
         this.blue = new Color(EmbedHelper.RUNESCAPE_BLUE);
         this.red = new Color(EmbedHelper.RUNESCAPE_RED);
-        this.handler = new ResourceHandler();
+
+        ResourceHandler handler = getResourceHandler();
+        String templates = getResourcePath();
+        this.skillsSection = handler.getImageResource(templates + "skills_section.png");
+        this.clanSection = handler.getImageResource(templates + "clan_section.png");
+        this.clueSection = handler.getImageResource(templates + "clue_section.png");
+        this.titleSection = handler.getImageResource(templates + "title_section.png");
+        this.questSection = handler.getImageResource(templates + "quest_section.png");
     }
 
     @Override
@@ -74,7 +83,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     }
 
     @Override
-    public BufferedImage buildHiscoresImage(RS3PlayerStats playerStats, HiscoresArgs args) {
+    public BufferedImage buildHiscoresImage(RS3PlayerStats playerStats, HiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         int overhang = 65; // title section left overhang
 
         BufferedImage skillSection = buildSkillSection(playerStats, args);
@@ -130,30 +139,24 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @return Clan image section
      */
     private BufferedImage buildClanSection(Clan clan, String name) {
-        BufferedImage clanSection = null;
-        try {
-            clanSection = handler.getImageResource(getResourcePath() + "Templates/clan_section.png");
-            Graphics g = clanSection.getGraphics();
-            g.setFont(getGameFont().deriveFont(40f));
-            g.setColor(Color.WHITE);
-            g.drawImage(clan.getBanner(), clanSection.getWidth() - clan.getBanner().getWidth(), 0, null);
-            g.drawString(clan.getName(), 100, 50);
+        final BufferedImage clanSection = copyImage(this.clanSection);
+        Graphics g = clanSection.getGraphics();
+        g.setFont(getGameFont().deriveFont(40f));
+        g.setColor(Color.WHITE);
+        g.drawImage(clan.getBanner(), clanSection.getWidth() - clan.getBanner().getWidth(), 0, null);
+        g.drawString(clan.getName(), 100, 50);
 
-            g.setColor(orange);
-            ArrayList<String> owners = clan.getPlayersByRole(ROLE.OWNER);
-            String owner = owners.isEmpty() ? "Unknown" : owners.get(0);
+        g.setColor(orange);
+        ArrayList<String> owners = clan.getPlayersByRole(ROLE.OWNER);
+        String owner = owners.isEmpty() ? "Unknown" : owners.get(0);
 
-            int x = 300;
-            g.setFont(getGameFont().deriveFont(25f));
+        int x = 300;
+        g.setFont(getGameFont().deriveFont(25f));
 
-            g.drawString(owner, x, 150);
-            g.drawString(clan.getRoleByPlayerName(name).getName(), x, 200);
-            g.drawString(String.valueOf(clan.getMemberCount()), x, 250);
-            g.dispose();
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+        g.drawString(owner, x, 150);
+        g.drawString(clan.getRoleByPlayerName(name).getName(), x, 200);
+        g.drawString(String.valueOf(clan.getMemberCount()), x, 250);
+        g.dispose();
         return clanSection;
     }
 
@@ -164,24 +167,18 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @return Clue scroll image section
      */
     private BufferedImage buildClueSection(Clue[] clues) {
-        BufferedImage clueSection = null;
-        try {
-            clueSection = handler.getImageResource(getResourcePath() + "Templates/clue_section.png");
-            Graphics g = clueSection.getGraphics();
-            g.setFont(getGameFont().deriveFont(40f));
-            g.setColor(orange);
-            int x = 330;
-            int y = 174;
-            FontMetrics fm = g.getFontMetrics();
-            for(Clue clue : clues) {
-                g.drawString(clue.getFormattedCompletions(), x, y - (fm.getHeight() / 2) + fm.getAscent());
-                y += 140;
-            }
-            g.dispose();
+        final BufferedImage clueSection = copyImage(this.clueSection);
+        Graphics g = clueSection.getGraphics();
+        g.setFont(getGameFont().deriveFont(40f));
+        g.setColor(orange);
+        int x = 330;
+        int y = 174;
+        FontMetrics fm = g.getFontMetrics();
+        for(Clue clue : clues) {
+            g.drawString(clue.getFormattedCompletions(), x, y - (fm.getHeight() / 2) + fm.getAscent());
+            y += 140;
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+        g.dispose();
         return clueSection;
     }
 
@@ -193,69 +190,60 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @return Skill image section
      */
     private BufferedImage buildSkillSection(RS3PlayerStats playerStats, HiscoresArgs args) {
-        BufferedImage skillSection = null;
-        try {
-            setGameFont(new Font("TrajanPro-Regular", Font.PLAIN, 55));
-            skillSection = getResourceHandler().getImageResource(
-                    getResourcePath() + "Templates/skills_section.png"
-            );
-            Graphics g = skillSection.getGraphics();
-            g.setFont(getGameFont());
+        final BufferedImage skillsSection = copyImage(this.skillsSection);
+        Graphics g = skillsSection.getGraphics();
+        g.setFont(getGameFont().deriveFont(55f));
 
-            // First skill location
-            int x = 170, ogX = x;
-            int y = 72;
+        // First skill location
+        int x = 170, ogX = x;
+        int y = 72;
 
-            int totalY = 1560;
+        int totalY = 1560;
 
-            g.setColor(yellow);
-            Skill[] skills = playerStats.getSkills();
-            for(int i = 0; i < skills.length - 1; i++) {
-                Skill skill = skills[i];
-                int displayLevel = args.displayVirtualLevels() ? skill.getVirtualLevel() : skill.getLevel();
-                boolean master = displayLevel > 99;
-                String level = String.valueOf(displayLevel);
+        g.setColor(yellow);
+        Skill[] skills = playerStats.getSkills();
+        for(int i = 0; i < skills.length - 1; i++) {
+            Skill skill = skills[i];
+            int displayLevel = args.displayVirtualLevels() ? skill.getVirtualLevel() : skill.getLevel();
+            boolean master = displayLevel > 99;
+            String level = String.valueOf(displayLevel);
 
-                g.drawString(level, master ? x - 15 : x, y); // top
-                g.drawString(level, master ? x + 60 : x + 78, y + 64); // bottom
+            g.drawString(level, master ? x - 15 : x, y); // top
+            g.drawString(level, master ? x + 60 : x + 78, y + 64); // bottom
 
-                // Currently 3rd column, reset back to first column and go down a row
-                if((i + 1) % 3 == 0) {
-                    x = ogX;
-                    y += 142;
-                }
-                // Move to next column
-                else {
-                    x += 330;
-                }
+            // Currently 3rd column, reset back to first column and go down a row
+            if((i + 1) % 3 == 0) {
+                x = ogX;
+                y += 142;
             }
-            g.setColor(Color.WHITE);
-            BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
-            String rank = "Rank: " + playerStats.getFormattedRank();
-            x = 365;
-            y = 1430 - rankImage.getHeight(); // Align with bottom skill row
-            g.drawImage(rankImage, x, y, null);
-            g.drawString(
-                    rank,
-                    x + rankImage.getWidth() + 20,
-                    y + (rankImage.getHeight() / 2) + (g.getFontMetrics().getMaxAscent() / 2)
-            );
-            g.drawString(
-                    String.valueOf(
-                            args.displayVirtualLevels()
-                                    ? playerStats.getVirtualTotalLevel()
-                                    : playerStats.getTotalLevel()
-                    ),
-                    240,
-                    totalY
-            );
-            g.drawString(String.valueOf(playerStats.getCombatLevel()), 730, totalY);
-            g.dispose();
+            // Move to next column
+            else {
+                x += 330;
+            }
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return skillSection;
+        g.setColor(Color.WHITE);
+        BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
+        String rank = "Rank: " + playerStats.getFormattedRank();
+        x = 365;
+        y = 1430 - rankImage.getHeight(); // Align with bottom skill row
+        g.drawImage(rankImage, x, y, null);
+        g.drawString(
+                rank,
+                x + rankImage.getWidth() + 20,
+                y + (rankImage.getHeight() / 2) + (g.getFontMetrics().getMaxAscent() / 2)
+        );
+        g.drawString(
+                String.valueOf(
+                        args.displayVirtualLevels()
+                                ? playerStats.getVirtualTotalLevel()
+                                : playerStats.getTotalLevel()
+                ),
+                240,
+                totalY
+        );
+        g.drawString(String.valueOf(playerStats.getCombatLevel()), 730, totalY);
+        g.dispose();
+        return skillsSection;
     }
 
     /**
@@ -265,98 +253,92 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @return Title section of image
      */
     private BufferedImage buildTitleSection(RS3PlayerStats playerStats) {
-        BufferedImage titleSection = null;
-        try {
-            String name = playerStats.getName();
-            titleSection = handler.getImageResource(getResourcePath() + "Templates/title_section.png");
-            BufferedImage avatar = EmbedHelper.downloadImage(
-                    "http://services.runescape.com/m=avatar-rs/" + EmbedHelper.urlEncode(name) + "/chat.gif"
+        final BufferedImage titleSection = copyImage(this.titleSection);
+        String name = playerStats.getName();
+        BufferedImage avatar = EmbedHelper.downloadImage(
+                "http://services.runescape.com/m=avatar-rs/" + EmbedHelper.urlEncode(name) + "/chat.gif"
+        );
+        BufferedImage scaledAvatar = new BufferedImage(287, 287, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = scaledAvatar.createGraphics();
+        g.drawImage(avatar, 0, 0, 287, 287, null);
+        g = titleSection.getGraphics();
+        g.drawImage(scaledAvatar, 110, 124, null);
+
+        g.setFont(getGameFont().deriveFont(75f));
+        FontMetrics fm = g.getFontMetrics();
+        g.setColor(orange);
+
+        int x = 445;
+        int y = 415;
+
+        if(playerStats.hasAccountTypeImage()) {
+            BufferedImage typeImage = getResourceHandler().getImageResource(
+                    PlayerStats.getAccountTypeImagePath(playerStats.getAccountType())
             );
-            BufferedImage scaledAvatar = new BufferedImage(287, 287, BufferedImage.TYPE_INT_ARGB);
-            Graphics g = scaledAvatar.createGraphics();
-            g.drawImage(avatar, 0, 0, 287, 287, null);
+            g.drawImage(typeImage, x, y - typeImage.getHeight(), null);
+            x += typeImage.getWidth() + 50;
+        }
+        g.drawString(name.toUpperCase(), x, y);
+
+        x = 1000;
+        y = 375;
+        int width = fm.stringWidth(name.toUpperCase());
+
+        if(playerStats.hasHCIMStatus() && playerStats.getHcimStatus().isDead()) {
+            HCIMStatus hcimStatus = playerStats.getHcimStatus();
+
+            if(playerStats.isHardcore()) {
+                g.setColor(red);
+                ((Graphics2D) g).setStroke(
+                        new BasicStroke(
+                                10f,
+                                BasicStroke.CAP_ROUND,
+                                BasicStroke.JOIN_ROUND
+                        )
+                );
+                g.drawLine(x - (width / 2), y, x + (width / 2), y);
+            }
+
+            BufferedImage deathSection = getResourceHandler().getImageResource(
+                    getResourcePath() + "Templates/death_section.png"
+            );
+
+            g = deathSection.getGraphics();
+            g.setFont(getGameFont().deriveFont(20f));
+            fm = g.getFontMetrics();
+            g.setColor(Color.WHITE);
+            x = (deathSection.getWidth() / 2);
+            y = 45 + fm.getHeight();
+
+            g.drawString(hcimStatus.getDate(), x - (fm.stringWidth(hcimStatus.getDate()) / 2), y);
+            y += fm.getHeight();
+
+
+            String[] cause = (hcimStatus.getLocation() + " " + hcimStatus.getCause()).split(" ");
+            String curr = "";
+
+            for(String word : cause) {
+                String attempt = curr + " " + word;
+                if(fm.stringWidth(attempt) > deathSection.getWidth()) {
+                    g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
+                    y += fm.getHeight();
+                    curr = word;
+                    continue;
+                }
+                curr = attempt;
+            }
+            g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
             g = titleSection.getGraphics();
-            g.drawImage(scaledAvatar, 110, 124, null);
-
-            g.setFont(getGameFont().deriveFont(75f));
-            FontMetrics fm = g.getFontMetrics();
-            g.setColor(orange);
-
-            int x = 445;
-            int y = 415;
-
-            if(playerStats.hasAccountTypeImage()) {
-                BufferedImage typeImage = handler.getImageResource(
-                        PlayerStats.getAccountTypeImagePath(playerStats.getAccountType())
-                );
-                g.drawImage(typeImage, x, y - typeImage.getHeight(), null);
-                x += typeImage.getWidth() + 50;
-            }
-            g.drawString(name.toUpperCase(), x, y);
-
-            x = 1000;
-            y = 375;
-            int width = fm.stringWidth(name.toUpperCase());
-
-            if(playerStats.hasHCIMStatus() && playerStats.getHcimStatus().isDead()) {
-                HCIMStatus hcimStatus = playerStats.getHcimStatus();
-
-                if(playerStats.isHardcore()) {
-                    g.setColor(red);
-                    ((Graphics2D) g).setStroke(
-                            new BasicStroke(
-                                    10f,
-                                    BasicStroke.CAP_ROUND,
-                                    BasicStroke.JOIN_ROUND
-                            )
-                    );
-                    g.drawLine(x - (width / 2), y, x + (width / 2), y);
-                }
-
-                BufferedImage deathSection = getResourceHandler().getImageResource(
-                        getResourcePath() + "Templates/death_section.png"
-                );
-
-                g = deathSection.getGraphics();
-                g.setFont(getGameFont().deriveFont(20f));
-                fm = g.getFontMetrics();
-                g.setColor(Color.WHITE);
-                x = (deathSection.getWidth() / 2);
-                y = 45 + fm.getHeight();
-
-                g.drawString(hcimStatus.getDate(), x - (fm.stringWidth(hcimStatus.getDate()) / 2), y);
-                y += fm.getHeight();
-
-
-                String[] cause = (hcimStatus.getLocation() + " " + hcimStatus.getCause()).split(" ");
-                String curr = "";
-
-                for(String word : cause) {
-                    String attempt = curr + " " + word;
-                    if(fm.stringWidth(attempt) > deathSection.getWidth()) {
-                        g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
-                        y += fm.getHeight();
-                        curr = word;
-                        continue;
-                    }
-                    curr = attempt;
-                }
-                g.drawString(curr, x - (fm.stringWidth(curr) / 2), y);
-                g = titleSection.getGraphics();
-                g.drawImage(
-                        deathSection,
-                        titleSection.getWidth() - 65 - deathSection.getWidth(),
-                        titleSection.getHeight() - deathSection.getHeight(),
-                        null
-                );
-                return titleSection;
-            }
-
-            g.dispose();
+            g.drawImage(
+                    deathSection,
+                    titleSection.getWidth() - 65 - deathSection.getWidth(),
+                    titleSection.getHeight() - deathSection.getHeight(),
+                    null
+            );
+            return titleSection;
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+
+        g.dispose();
         return titleSection;
     }
 
@@ -367,12 +349,12 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @return Quest section displaying player quest stats
      */
     private BufferedImage buildQuestSection(RuneMetrics runeMetrics) {
+        final BufferedImage questSection = copyImage(this.questSection);
         Section[] sections = new Section[]{
                 new Section("Not Started", runeMetrics.getQuestsNotStarted(), red),
                 new Section("In Progress", runeMetrics.getQuestsStarted(), blue),
                 new Section("Completed", runeMetrics.getQuestsCompleted(), orange)
         };
-        BufferedImage questSection = handler.getImageResource(getResourcePath() + "Templates/quest_section.png");
         PieChart pieChart = new PieChart(sections, getGameFont(), true);
         Graphics g = questSection.getGraphics();
         int y = 150;
@@ -464,20 +446,21 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     /**
      * Get the player's RuneMetrics stats if available
      *
-     * @param name Player name
+     * @param name           Player name
+     * @param loadingMessage Optional loading message
      * @return Player RuneMetrics stats or null
      */
-    private RuneMetrics getRuneMetrics(String name) {
+    private RuneMetrics getRuneMetrics(String name, ImageLoadingMessage... loadingMessage) {
         String url = "https://apps.runescape.com/runemetrics/profile/profile?user=" + EmbedHelper.urlEncode(name);
         JSONObject profile = new JSONObject(
                 new NetworkRequest(url, false).get().body
         );
         String message = "Player's " + EmbedHelper.embedURL("RuneMetrics", url) + " is";
         if(profile.has("error")) {
-            loading.failStage(message + " private (Can't display Quest data)");
+            updateLoadingMessage(FAIL, message + " private (Can't display Quest data)", loadingMessage);
             return null;
         }
-        loading.completeStage(message + " public!");
+        updateLoadingMessage(COMPLETE, message + " public!", loadingMessage);
         return new RuneMetrics(
                 profile.getInt("questsstarted"),
                 profile.getInt("questsnotstarted"),
@@ -488,10 +471,11 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     /**
      * Get the clan that the given player is a member of (if they are in a clan)
      *
-     * @param name Player name
+     * @param name           Player name
+     * @param loadingMessage Optional loading message
      * @return Player clan or null
      */
-    private Clan getClan(String name) {
+    private Clan getClan(String name, ImageLoadingMessage... loadingMessage) {
         String url = BASE_URL
                 + "m=website-data/playerDetails.ws?names=%5B%22"
                 + EmbedHelper.urlEncode(name)
@@ -506,12 +490,12 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
             }
             JSONObject playerClanDetails = new JSONObject(response.substring(matcher.start(), matcher.end()));
             if(!playerClanDetails.has("clan")) {
-                loading.failStage("Player is not part of a " + embedUrl);
+                updateLoadingMessage(FAIL, "Player is not part of a " + embedUrl, loadingMessage);
                 return null;
             }
             String clanName = playerClanDetails.getString("clan");
             String clanNameEncode = EmbedHelper.urlEncode(clanName);
-            loading.updateStage("Player is in the **" + clanName + "** clan, fetching details...");
+            updateLoadingMessage(UPDATE, "Player is in the **" + clanName + "** clan, fetching details...", loadingMessage);
             Clan clan = new Clan(
                     clanName,
                     EmbedHelper.downloadImage(
@@ -534,24 +518,26 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
                 clan.addPlayer(memberDetails[0], ROLE.byName(memberDetails[1]));
             }
             ROLE playerRole = clan.getRoleByPlayerName(name);
-            loading.completeStage(
+            updateLoadingMessage(
+                    COMPLETE,
                     "Player is **"
                             + playerRole.getPrefix()
                             + " "
                             + playerRole.getName()
-                            + "** of the **" + clanName + "** " + embedUrl + "!"
+                            + "** of the **" + clanName + "** " + embedUrl + "!",
+                    loadingMessage
             );
             return clan;
         }
         catch(Exception e) {
             e.printStackTrace();
-            loading.failStage("Unable to determine if player is part of a " + embedUrl);
+            updateLoadingMessage(FAIL, "Unable to determine if player is part of a " + embedUrl, loadingMessage);
             return null;
         }
     }
 
     @Override
-    public RS3PlayerStats fetchPlayerData(String name, HiscoresArgs args) {
+    public RS3PlayerStats fetchPlayerData(String name, HiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         String url = getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
@@ -559,10 +545,10 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
             return null;
         }
 
-        loading.completeStage();
+        completeLoadingMessageStage(loadingMessage);
 
-        RuneMetrics runeMetrics = getRuneMetrics(name);
-        Clan clan = getClan(name);
+        RuneMetrics runeMetrics = getRuneMetrics(name, loadingMessage);
+        Clan clan = getClan(name, loadingMessage);
         Clue[] clues = parseClueScrolls(normal);
 
         RS3PlayerStats normalAccount = new RS3PlayerStats(
@@ -575,11 +561,11 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
                 clan
         );
 
-        loading.updateStage("Player exists, checking ironman hiscores");
+        updateLoadingMessage(UPDATE, "Player exists, checking ironman hiscores", loadingMessage);
         String[] iron = hiscoresRequest(getIronmanAccount(name));
 
         if(iron == null) {
-            loading.completeStage("Player is a normal account!");
+            updateLoadingMessage(COMPLETE, "Player is a normal account!", loadingMessage);
             return normalAccount;
         }
 
@@ -594,11 +580,11 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
         );
 
         if(normalAccount.getTotalXP() > ironAccount.getTotalXP()) {
-            loading.completeStage("Player is a de-ironed normal account!");
+            updateLoadingMessage(COMPLETE, "Player is a de-ironed normal account!", loadingMessage);
             return normalAccount;
         }
 
-        loading.updateStage("Player is an Ironman, checking Hardcore Ironman hiscores");
+        updateLoadingMessage(UPDATE, "Player is an Ironman, checking Hardcore Ironman hiscores", loadingMessage);
         String[] hardcore = hiscoresRequest(getHardcoreAccount(name));
 
         if(hardcore != null) {
@@ -618,24 +604,27 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
             if(hcimStatus.isDead()) {
                 String status = "Player was a Hardcore Ironman and died.";
                 if(ironAccount.getTotalXP() > hardcoreAccount.getTotalXP()) {
-                    loading.completeStage(status + " They were saved by a "
-                            + EmbedHelper.embedURL(
-                            "Jar of divine light",
-                            "https://runescape.fandom.com/wiki/Jar_of_divine_light") + "!"
+                    updateLoadingMessage(
+                            COMPLETE,
+                            status + " They were saved by a "
+                                    + EmbedHelper.embedURL(
+                                    "Jar of divine light",
+                                    "https://runescape.fandom.com/wiki/Jar_of_divine_light") + "!",
+                            loadingMessage
                     );
                     ironAccount.setHcimStatus(hcimStatus);
                     return ironAccount;
                 }
                 else {
-                    loading.completeStage(status + " What a loser!");
+                    updateLoadingMessage(COMPLETE, status + " What a loser!", loadingMessage);
                     return hardcoreAccount;
                 }
             }
-            loading.completeStage("Player is a Hardcore Ironman!");
+            updateLoadingMessage(COMPLETE, "Player is a Hardcore Ironman!", loadingMessage);
             return hardcoreAccount;
         }
 
-        loading.completeStage("Player is an Ironman!");
+        updateLoadingMessage(COMPLETE, "Player is an Ironman!", loadingMessage);
         return ironAccount;
     }
 

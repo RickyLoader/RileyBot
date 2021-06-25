@@ -1,12 +1,11 @@
 package Runescape;
 
-import Command.Structure.EmbedHelper;
-import Command.Structure.EmoteHelper;
-import Command.Structure.ImageBuilder;
-import Command.Structure.ImageLoadingMessage;
+import Command.Structure.*;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,8 +13,13 @@ import java.util.ArrayList;
 
 public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> extends ImageBuilder {
     private final String helpMessage;
-    public ImageLoadingMessage loading;
     private boolean timeout = false;
+
+    public enum LOADING_UPDATE_TYPE {
+        COMPLETE,
+        FAIL,
+        UPDATE
+    }
 
     /**
      * Create a Runescape Hiscores instance
@@ -36,6 +40,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param url Hiscores URL to query
      * @return Response from API
      */
+    @Nullable
     public String[] hiscoresRequest(String url) {
         NetworkResponse response = new NetworkRequest(url, false).get();
         if(response.code == 504 || response.code == 408 || response.code == NetworkResponse.TIMEOUT_CODE) {
@@ -113,11 +118,55 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
     /**
      * Fetch the player data from the hiscores
      *
-     * @param name Player name
-     * @param args Hiscores arguments
+     * @param name           Player name
+     * @param args           Hiscores arguments
+     * @param loadingMessage Optional loading message
      * @return Player data
      */
-    public abstract S fetchPlayerData(String name, T args);
+    @Nullable
+    public abstract S fetchPlayerData(String name, T args, ImageLoadingMessage... loadingMessage);
+
+    /**
+     * Complete the current stage of the given loading message.
+     *
+     * @param loadingMessages Optional loading message
+     */
+    protected void completeLoadingMessageStage(@NotNull ImageLoadingMessage[] loadingMessages) {
+        updateLoadingMessage(LOADING_UPDATE_TYPE.COMPLETE, null, loadingMessages);
+    }
+
+    /**
+     * Pass/fail/update the current stage of the given loading message (if provided).
+     *
+     * @param type            COMPLETE/FAIL/UPDATE to perform
+     * @param message         Optional message to display
+     * @param loadingMessages Optional loading message
+     */
+    protected void updateLoadingMessage(LOADING_UPDATE_TYPE type, @Nullable String message, @NotNull ImageLoadingMessage[] loadingMessages) {
+        if(loadingMessages.length == 0) {
+            return;
+        }
+
+        ImageLoadingMessage loadingMessage = loadingMessages[0];
+        boolean displayMessage = message != null;
+
+        switch(type) {
+            case COMPLETE:
+                if(displayMessage) {
+                    loadingMessage.completeStage(message);
+                }
+                else {
+                    loadingMessage.completeStage();
+                }
+                break;
+            case FAIL:
+                loadingMessage.failStage(displayMessage ? message : EmbedLoadingMessage.LoadingStage.EMPTY_MESSAGE);
+                break;
+            case UPDATE:
+                loadingMessage.updateStage(displayMessage ? message : EmbedLoadingMessage.LoadingStage.EMPTY_MESSAGE);
+                break;
+        }
+    }
 
     /**
      * Get the message to display if a player was not found - Appended to "That player "
@@ -142,7 +191,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
         ArrayList<String> loadingCriteria = getLoadingCriteria(args);
         loadingCriteria.add("Building image...");
 
-        this.loading = new ImageLoadingMessage(
+        ImageLoadingMessage loadingMessage = new ImageLoadingMessage(
                 channel,
                 getEmoteHelper(),
                 getLoadingTitle(nameQuery, args),
@@ -152,19 +201,19 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
                 loadingCriteria.toArray(new String[0])
         );
 
-        loading.showLoading();
+        loadingMessage.showLoading();
 
-        S stats = fetchPlayerData(nameQuery, args);
+        S stats = fetchPlayerData(nameQuery, args, loadingMessage);
 
         if(stats == null) {
             if(timeout) {
-                loading.failLoading(
+                loadingMessage.failLoading(
                         "I wasn't able to connect to the "
                                 + EmbedHelper.embedURL("hiscores", defaultURL)
                 );
                 return;
             }
-            loading.failLoading(
+            loadingMessage.failLoading(
                     "That player "
                             + EmbedHelper.embedURL(getNotFoundMessage(nameQuery, args), defaultURL)
             );
@@ -172,8 +221,8 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
         }
 
         BufferedImage playerImage = buildHiscoresImage(stats, args);
-        loading.completeStage();
-        loading.completeLoading(playerImage, EmbedHelper.embedURL("View raw data", stats.getUrl()));
+        loadingMessage.completeStage();
+        loadingMessage.completeLoading(playerImage, EmbedHelper.embedURL("View raw data", stats.getUrl()));
     }
 
     /**
@@ -204,9 +253,10 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
     /**
      * Build the hiscores image
      *
-     * @param playerStats PlayerStats instance
-     * @param args        Hiscores arguments
+     * @param playerStats    PlayerStats instance
+     * @param args           Hiscores arguments
+     * @param loadingMessage Optional loading message
      * @return Hiscores image
      */
-    public abstract BufferedImage buildHiscoresImage(S playerStats, T args);
+    public abstract BufferedImage buildHiscoresImage(S playerStats, T args, ImageLoadingMessage... loadingMessage);
 }

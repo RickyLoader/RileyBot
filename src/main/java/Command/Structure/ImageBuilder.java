@@ -9,7 +9,7 @@ public abstract class ImageBuilder {
     private final EmoteHelper emoteHelper;
     private final String resourcePath;
     private final ResourceHandler handler;
-    private Font gameFont;
+    private final Font gameFont;
 
     /**
      * Create the image builder
@@ -41,15 +41,6 @@ public abstract class ImageBuilder {
      */
     public Font getGameFont() {
         return gameFont;
-    }
-
-    /**
-     * Set the game font
-     *
-     * @param gameFont Font to set
-     */
-    public void setGameFont(Font gameFont) {
-        this.gameFont = gameFont;
     }
 
     /**

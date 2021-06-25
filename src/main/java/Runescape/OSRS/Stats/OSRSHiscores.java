@@ -6,6 +6,7 @@ import Bot.ResourceHandler;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmoteHelper;
 
+import Command.Structure.ImageLoadingMessage;
 import Command.Structure.PieChart;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
@@ -16,6 +17,7 @@ import Runescape.OSRS.League.Relic;
 import Runescape.OSRS.League.RelicTier;
 import Runescape.Skill.SKILL_NAME;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
+import static Runescape.Hiscores.LOADING_UPDATE_TYPE.*;
 import static Runescape.OSRS.League.LeagueTier.*;
 import static Runescape.Skill.SKILL_NAME.*;
 
@@ -72,19 +75,19 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         this.light = new Color(EmbedHelper.ROW_LIGHT);
         this.parseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        ResourceHandler resourceHandler = getResourceHandler();
+        ResourceHandler handler = getResourceHandler();
         String templates = getResourcePath();
-        this.titleContainer = resourceHandler.getImageResource(templates + "title_container.png");
-        this.achievementsContainer = resourceHandler.getImageResource(templates + "achievements_container.png");
-        this.achievementsTitleContainer = resourceHandler.getImageResource(templates + "achievements_title_container.png");
-        this.bossContainer = resourceHandler.getImageResource(templates + "boss_container.png");
-        this.cluesContainer = resourceHandler.getImageResource(templates + "clues_container.png");
-        this.skillsContainer = resourceHandler.getImageResource(templates + "skills_container.png");
-        this.xpContainer = resourceHandler.getImageResource(templates + "xp_tracker_container.png");
-        this.xpHeader = resourceHandler.getImageResource(templates + "xp_tracker_header.png");
-        this.mapContainer = resourceHandler.getImageResource(templates + "map_container.png");
-        this.relicContainer = resourceHandler.getImageResource(templates + "relic_container.png");
-        this.leagueInfoContainer = resourceHandler.getImageResource(templates + "league_info_container.png");
+        this.titleContainer = handler.getImageResource(templates + "title_container.png");
+        this.achievementsContainer = handler.getImageResource(templates + "achievements_container.png");
+        this.achievementsTitleContainer = handler.getImageResource(templates + "achievements_title_container.png");
+        this.bossContainer = handler.getImageResource(templates + "boss_container.png");
+        this.cluesContainer = handler.getImageResource(templates + "clues_container.png");
+        this.skillsContainer = handler.getImageResource(templates + "skills_container.png");
+        this.xpContainer = handler.getImageResource(templates + "xp_tracker_container.png");
+        this.xpHeader = handler.getImageResource(templates + "xp_tracker_header.png");
+        this.mapContainer = handler.getImageResource(templates + "map_container.png");
+        this.relicContainer = handler.getImageResource(templates + "relic_container.png");
+        this.leagueInfoContainer = handler.getImageResource(templates + "league_info_container.png");
     }
 
     @Override
@@ -188,11 +191,13 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     /**
      * Fetch the player stats
      *
-     * @param name Player name
-     * @param args Hiscores arguments
+     * @param name           Player name
+     * @param args           Hiscores arguments
+     * @param loadingMessage Optional loading message
      * @return Player stats object
      */
-    private OSRSPlayerStats fetchStats(String name, OSRSHiscoresArgs args) {
+    @Nullable
+    private OSRSPlayerStats fetchStats(String name, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         String url = args.searchLeagueStats() ? getLeagueAccount(name) : getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
@@ -200,7 +205,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             return null;
         }
 
-        loading.completeStage();
+        completeLoadingMessageStage(loadingMessage);
 
         List<Boss> bossKills = parseBossKills(normal);
         Clue[] clues = parseClueScrolls(normal);
@@ -220,27 +225,29 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             normalAccount.setLeaguePoints(Integer.parseInt(normal[73]), Long.parseLong(normal[72]));
             String leagueJSON = DiscordUser.getOSRSLeagueData(name);
             if(leagueJSON == null) {
-                loading.failStage("Unable to connect to the API");
+                updateLoadingMessage(FAIL, "Unable to connect to the API", loadingMessage);
                 return normalAccount;
             }
             JSONObject leagueData = new JSONObject(leagueJSON);
             normalAccount.setRegions(Region.parseRegions(leagueData.getJSONArray("regions")));
             normalAccount.setRelicTiers(RelicTier.parseRelics(leagueData.getJSONArray("relics")));
+
             if(normalAccount.hasLeagueUnlockData()) {
-                loading.completeStage();
+                completeLoadingMessageStage(loadingMessage);
             }
             else {
-                loading.failStage("Try 'trailblazer' command to store unlocks");
+                updateLoadingMessage(FAIL, "Try 'trailblazer' command to store unlocks", loadingMessage);
             }
             return normalAccount;
         }
 
-        loading.updateStage("Player exists, checking ironman hiscores");
+        updateLoadingMessage(UPDATE, "Player exists, checking ironman hiscores", loadingMessage);
+
         String ironURL = getIronmanAccount(name);
         String[] iron = hiscoresRequest(ironURL);
 
         if(iron == null) {
-            loading.completeStage("Player is a normal account!");
+            updateLoadingMessage(COMPLETE, "Player is a normal account!", loadingMessage);
             return normalAccount;
         }
 
@@ -255,11 +262,11 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         );
 
         if(normalAccount.getTotalXP() > ironAccount.getTotalXP()) {
-            loading.completeStage("Player is a de-ironed normal account!");
+            updateLoadingMessage(COMPLETE, "Player is a de-ironed normal account!", loadingMessage);
             return normalAccount;
         }
 
-        loading.updateStage("Player is an Ironman, checking Hardcore Ironman hiscores");
+        updateLoadingMessage(UPDATE, "Player is an Ironman, checking Hardcore Ironman hiscores", loadingMessage);
 
         String hardcoreURL = getHardcoreAccount(name);
         String[] hardcore = hiscoresRequest(hardcoreURL);
@@ -276,15 +283,14 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             );
 
             if(ironAccount.getTotalXP() > hardcoreAccount.getTotalXP()) {
-                loading.completeStage("Player was a Hardcore Ironman and died! What a loser!");
+                updateLoadingMessage(COMPLETE, "Player was a Hardcore Ironman and died! What a loser!", loadingMessage);
                 return ironAccount;
             }
-
-            loading.completeStage("Player is a Hardcore Ironman!");
+            updateLoadingMessage(COMPLETE, "Player is a Hardcore Ironman!", loadingMessage);
             return hardcoreAccount;
         }
 
-        loading.updateStage("Player is not hardcore, checking Ultimate Ironman hiscores");
+        updateLoadingMessage(UPDATE, "Player is not hardcore, checking Ultimate Ironman hiscores", loadingMessage);
 
         String ultimateURL = getUltimateAccount(name);
         String[] ultimate = hiscoresRequest(ultimateURL);
@@ -301,20 +307,19 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             );
 
             if(ironAccount.getTotalXP() > ultimateAccount.getTotalXP()) {
-                loading.completeStage("Player is an Ironman who chickened out of Ultimate Ironman!");
+                updateLoadingMessage(COMPLETE, "Player is an Ironman who chickened out of Ultimate Ironman!", loadingMessage);
                 return ironAccount;
             }
-
-            loading.completeStage("Player is an Ultimate Ironman!");
+            updateLoadingMessage(COMPLETE, "Player is an Ultimate Ironman!", loadingMessage);
             return ultimateAccount;
         }
-        loading.completeStage("Player is an Ironman!");
+        updateLoadingMessage(COMPLETE, "Player is an Ironman!", loadingMessage);
         return ironAccount;
     }
 
     @Override
-    public OSRSPlayerStats fetchPlayerData(String name, OSRSHiscoresArgs args) {
-        OSRSPlayerStats stats = fetchStats(name, args);
+    public OSRSPlayerStats fetchPlayerData(String name, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+        OSRSPlayerStats stats = fetchStats(name, args, loadingMessage);
 
         if(stats == null) {
             return null;
@@ -323,14 +328,14 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         if(args.searchLeagueStats()) {
             LeagueTier leagueTier = stats.getLeagueTier();
             leagueTier.setTier(calculateTier(leagueTier.getRank()));
-            loading.completeStage("Player is " + leagueTier.getTierName() + "!");
+            updateLoadingMessage(COMPLETE, "Player is " + leagueTier.getTierName() + "!", loadingMessage);
         }
         else {
-            addPlayerAchievements(stats, args);
+            addPlayerAchievements(stats, args, loadingMessage);
         }
 
         if(shouldFetchXpTracker(args)) {
-            getTrackerData(stats);
+            getTrackerData(stats, loadingMessage);
         }
         return stats;
     }
@@ -338,22 +343,23 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     /**
      * Fetch and add recent achievements for the player
      *
-     * @param stats Player stats
-     * @param args  Hiscores arguments
+     * @param stats          Player stats
+     * @param args           Hiscores arguments
+     * @param loadingMessage Optional loading message
      */
-    private void addPlayerAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+    private void addPlayerAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         try {
-            loading.updateStage("Checking player is tracked...");
+            updateLoadingMessage(UPDATE, "Checking player is tracked...", loadingMessage);
             NetworkResponse response = fetchRecentPlayerAchievementData(stats.getName(), args.searchLeagueStats());
 
             if(response.code == NetworkResponse.TIMEOUT_CODE) {
-                loading.failStage("Achievement tracker didn't respond, unlucky cunt");
+                updateLoadingMessage(FAIL, "Achievement tracker didn't respond, unlucky cunt", loadingMessage);
                 return;
             }
 
             if(response.code == 404) {
                 updatePlayerTracking(stats.getName(), args.searchLeagueStats(), false); // Tracking a new player can take 20+ seconds, don't wait
-                loading.completeStage("Player not tracked - They will be *soon*™");
+                updateLoadingMessage(COMPLETE, "Player not tracked - They will be *soon*™", loadingMessage);
                 return;
             }
 
@@ -380,10 +386,10 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                         )
                 );
             }
-            loading.completeStage(stats.getAchievementSummary());
+            updateLoadingMessage(COMPLETE, stats.getAchievementSummary(), loadingMessage);
         }
         catch(Exception e) {
-            loading.failStage("Failed to parse achievement data!");
+            updateLoadingMessage(FAIL, "Failed to parse achievement data!", loadingMessage);
         }
     }
 
@@ -459,28 +465,29 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * Get the weekly tracker data for the given player.
      * If the player is not currently tracked begin tracking
      *
-     * @param playerStats Player stats
+     * @param playerStats    Player stats
+     * @param loadingMessage Optional loading message
      */
-    private void getTrackerData(OSRSPlayerStats playerStats) {
+    private void getTrackerData(OSRSPlayerStats playerStats, ImageLoadingMessage... loadingMessage) {
         try {
-            loading.updateStage("Checking player is tracked...");
+            updateLoadingMessage(UPDATE, "Checking player is tracked...", loadingMessage);
             boolean league = playerStats.isLeague();
             String name = playerStats.getName();
             NetworkResponse response = fetchPlayerTrackingData(name, league); // Check if player exists
 
             if(response.code == NetworkResponse.TIMEOUT_CODE) {
-                loading.failStage("XP tracker didn't respond, unlucky cunt");
+                updateLoadingMessage(FAIL, "XP tracker didn't respond, unlucky cunt", loadingMessage);
                 return;
             }
 
             if(response.code == 404) {
-                loading.completeStage("Player not tracked - They will be *soon*™");
+                updateLoadingMessage(COMPLETE, "Player not tracked - They will be *soon*™", loadingMessage);
                 return;
             }
 
-            loading.updateStage("Player is tracked, refreshing tracker...");
+            updateLoadingMessage(UPDATE, "Player is tracked, refreshing tracker...", loadingMessage);
             updatePlayerTracking(name, league, true);
-            loading.updateStage("Player is tracked, getting stats...");
+            updateLoadingMessage(UPDATE, "Player is tracked, getting stats...", loadingMessage);
             response = fetchPlayerTrackingData(name, league);
 
             JSONObject week = new JSONObject(response.body).getJSONObject("week");
@@ -511,10 +518,10 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                     ? "Weekly XP " + EmbedHelper.embedURL("obtained", trackerUrl)
                     : "No XP " + EmbedHelper.embedURL("gained", trackerUrl);
 
-            loading.completeStage(details + " for week beginning at: " + beginningAt);
+            updateLoadingMessage(COMPLETE, details + " for week beginning at: " + beginningAt, loadingMessage);
         }
         catch(Exception e) {
-            loading.failStage("Failed to parse Weekly XP");
+            updateLoadingMessage(FAIL, "Failed to parse Weekly XP", loadingMessage);
         }
     }
 
@@ -744,7 +751,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, OSRSHiscoresArgs args) {
+    public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         BufferedImage image = new BufferedImage(
                 calculateImageWidth(playerStats, args),
                 calculateImageHeight(playerStats, args),
@@ -944,7 +951,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     /**
-     * Check if the XP tracker data should be fetched for the player
+     * Check if the XP tracker data should be fetched for the player.
+     * Don't fetch xp if league stats are requested.
      *
      * @param args Hiscores arguments
      * @return XP tracker data should be fetched

@@ -2,6 +2,8 @@ package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,20 +146,11 @@ public class EmbedLoadingMessage {
         updateLoadingMessage();
     }
 
-    /**
-     * Complete the current step with a value to describe what was done
-     *
-     * @param value Value to describe the step completion - "Player is a normal account"!
-     */
-    public void completeStage(String value) {
-        stages.get(currentStep).complete(value, currentTime);
-        nextStage();
-    }
 
     /**
      * Fail the current step with a value describing the error
      */
-    public void failStage(String value) {
+    public void failStage(@NotNull String value) {
         stages.get(currentStep).fail(value, currentTime);
         nextStage();
     }
@@ -171,11 +164,21 @@ public class EmbedLoadingMessage {
     }
 
     /**
+     * Complete the current step with a value to describe what was done
+     *
+     * @param value Value to describe the step completion - "Player is a normal account"!
+     */
+    public void completeStage(@NotNull String value) {
+        stages.get(currentStep).complete(value, currentTime);
+        nextStage();
+    }
+
+    /**
      * Update the current progress of a step
      *
      * @param value Value to show updated progress
      */
-    public void updateStage(String value) {
+    public void updateStage(@NotNull String value) {
         stages.get(currentStep).updateValue(value);
         updateLoadingMessage();
     }
@@ -185,7 +188,7 @@ public class EmbedLoadingMessage {
      *
      * @param value Value to display - "See player data"
      */
-    public void completeLoading(String value) {
+    public void completeLoading(@Nullable String value) {
         LoadingStage done = new LoadingStage("Done!", emoteHelper);
         if(value == null) {
             done.complete(startTime);
@@ -213,7 +216,7 @@ public class EmbedLoadingMessage {
      *
      * @param reason Reason for failure - "That player doesn't exist"
      */
-    public void failLoading(String reason) {
+    public void failLoading(@NotNull String reason) {
         LoadingStage fail = new LoadingStage("FAIL!", emoteHelper);
         fail.fail(reason, startTime);
         for(int i = currentStep; i < stages.size(); i++) {
@@ -305,8 +308,8 @@ public class EmbedLoadingMessage {
     /**
      * Hold information on loading stages
      */
-    static class LoadingStage {
-
+    public static class LoadingStage {
+        public final static String EMPTY_MESSAGE = "";
         private final String title;
         private String currentStatus, value;
         private long duration;
@@ -342,7 +345,7 @@ public class EmbedLoadingMessage {
         public void complete(long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
             this.currentStatus = status.getComplete();
-            this.value = "";
+            this.value = EMPTY_MESSAGE;
         }
 
         /**
@@ -353,7 +356,7 @@ public class EmbedLoadingMessage {
          * @param prevStep Completion time of the previous step
          * @param value    Reason to be shown by completion - "Player is a normal account!"
          */
-        public void complete(String value, long prevStep) {
+        public void complete(@NotNull String value, long prevStep) {
             this.complete(prevStep);
             this.value = value;
         }
@@ -371,7 +374,7 @@ public class EmbedLoadingMessage {
          * @param value    Explanation of failure
          * @param prevStep Completion time of the previous step
          */
-        public void fail(String value, long prevStep) {
+        public void fail(@NotNull String value, long prevStep) {
             this.duration = System.currentTimeMillis() - prevStep;
             this.value = value;
             this.currentStatus = status.getFail();
@@ -391,7 +394,7 @@ public class EmbedLoadingMessage {
          *
          * @param value Status to update
          */
-        public void updateValue(String value) {
+        public void updateValue(@NotNull String value) {
             this.value = value;
         }
 

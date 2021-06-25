@@ -15,14 +15,21 @@ import net.dv8tion.jda.api.entities.User;
  * Look up a OSRS player and build an image with their stats
  */
 public class OSRSLookupCommand extends LookupCommand {
+    private static final String
+            LEAGUE = "league",
+            VIRTUAL = "virtual",
+            XP = "xp",
+            BOSSES = "bosses",
+            TRIGGER = "osrslookup";
+    private boolean league = false, virtual = false, xp = false, bosses = false;
     private OSRSHiscores hiscores;
-    private boolean league = false, virtual = false, xp = false;
 
     public OSRSLookupCommand() {
         super(
-                "osrslookup",
+                TRIGGER,
                 "Check out someone's stats on OSRS!",
-                "[league] [virtual] [xp] osrslookup " + DEFAULT_LOOKUP_ARGS,
+                "[" + LEAGUE + "] [" + VIRTUAL + "] [" + XP + "] " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS + "\n"
+                        + BOSSES + " " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS,
                 12
         );
     }
@@ -49,26 +56,30 @@ public class OSRSLookupCommand extends LookupCommand {
         league = false;
         virtual = false;
         xp = false;
+        bosses = false;
 
         if(query.equals(getTrigger())) {
             return query;
         }
-
         String[] args = query
-                .split(getTrigger())[0]
+                .split(getTrigger())[0] // xp virtual osrslookup me -> xp virtual
                 .trim()
-                .split(" ");
+                .split(" "); // ["xp", "virtual"]
 
         for(String arg : args) {
             switch(arg) {
-                case "league":
+                case LEAGUE:
                     league = true;
                     break;
-                case "virtual":
+                case VIRTUAL:
                     virtual = true;
                     break;
-                case "xp":
+                case XP:
                     xp = true;
+                    break;
+                case BOSSES:
+                    bosses = true;
+                    break;
             }
             query = query.replaceFirst(arg, "").trim();
         }
@@ -85,11 +96,19 @@ public class OSRSLookupCommand extends LookupCommand {
         DiscordUser.saveName(name, DiscordUser.OSRS, channel, user);
     }
 
+    /**
+     * Check if the given query is one of the lookup arguments
+     *
+     * @param query Query to check
+     * @return Query is a lookup arg
+     */
+    private boolean isArg(String query) {
+        return query.equals(LEAGUE) || query.equals(XP) || query.equals(VIRTUAL) || query.equals(BOSSES);
+    }
+
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith(getTrigger()) ||
-                query.startsWith("league") && query.contains(getTrigger()) ||
-                query.startsWith("xp") && query.contains(getTrigger()) ||
-                query.startsWith("virtual") && query.contains(getTrigger());
+        String firstArg = query.split(" ")[0];
+        return super.matches(query, message) || query.contains(getTrigger()) && isArg(firstArg);
     }
 }
