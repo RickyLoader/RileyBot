@@ -15,7 +15,8 @@ public class ResourceHandler {
             RUNESCAPE_BASE_PATH = "/Runescape/",
             OSRS_BASE_PATH = RUNESCAPE_BASE_PATH + "OSRS/",
             OSRS_LEAGUE_PATH = OSRS_BASE_PATH + "League/",
-            RS3_BASE_PATH = RUNESCAPE_BASE_PATH + "RS3/";
+            RS3_BASE_PATH = RUNESCAPE_BASE_PATH + "RS3/",
+            MINECRAFT_BASE_PATH = "/Minecraft/";
 
     /**
      * Get an input stream from a given file path

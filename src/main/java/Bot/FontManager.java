@@ -15,6 +15,7 @@ public class FontManager {
             WISE_OLD_MAN_FONT,
             RS3_FONT,
             DEAL_OR_NO_DEAL_FONT,
+            MINECRAFT_FONT,
             LEAGUE_FONT;
 
     /**
@@ -30,6 +31,7 @@ public class FontManager {
         RS3_FONT = registerFont(ResourceHandler.RS3_BASE_PATH + "rs3.ttf");
         DEAL_OR_NO_DEAL_FONT = registerFont("/DOND/dond.ttf");
         LEAGUE_FONT = registerFont("/LOL/riot_font.otf");
+        MINECRAFT_FONT = registerFont(ResourceHandler.MINECRAFT_BASE_PATH + "font.ttf");
     }
 
     /**
