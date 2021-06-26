@@ -11,6 +11,9 @@ import Command.Structure.PieChart;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import Runescape.*;
+import Runescape.OSRS.Boss.Boss.BOSS_ID;
+import Runescape.OSRS.Boss.BossManager;
+import Runescape.OSRS.Boss.BossStats;
 import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.Relic;
@@ -36,8 +39,10 @@ import static Runescape.Skill.SKILL_NAME.*;
  * Build an image displaying a player's OSRS stats
  */
 public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
-    private final Boss.BOSS_NAME[] bossNames;
+    private final BOSS_ID[] bossIds;
+    private final BossManager bossManager;
     public static final String LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png";
+    public static final int MAX_BOSSES = 5;
     private final Font trackerFont;
     private final String displayFormatDate = "dd/MM/yyyy";
     private final int border = 25; // Horizontal & vertical borders on template images
@@ -68,7 +73,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      */
     public OSRSHiscores(EmoteHelper emoteHelper, String helpMessage) {
         super(emoteHelper, ResourceHandler.OSRS_BASE_PATH + "Templates/", FontManager.OSRS_FONT, helpMessage);
-        this.bossNames = Boss.BOSS_NAME.getNamesInHiscoresOrder();
+        this.bossIds = BossManager.getIdsInHiscoresOrder();
+        this.bossManager = BossManager.getInstance();
         this.trackerFont = FontManager.WISE_OLD_MAN_FONT;
         this.redOverlay = new Color(255, 0, 0, 127); // 50% opacity
         this.dark = new Color(EmbedHelper.ROW_DARK);
@@ -209,7 +215,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         completeLoadingMessageStage(loadingMessage);
 
-        List<Boss> bossKills = parseBossKills(normal);
+        List<BossStats> bossStats = parseBossKills(normal);
         Clue[] clues = parseClueScrolls(normal);
         LastManStanding lmsInfo = parseLmsInfo(normal);
 
@@ -218,7 +224,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                 url,
                 parseSkills(normal),
                 clues,
-                bossKills,
+                bossStats,
                 lmsInfo,
                 args.searchLeagueStats() ? PlayerStats.ACCOUNT.LEAGUE : PlayerStats.ACCOUNT.NORMAL
         );
@@ -258,7 +264,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                 ironURL,
                 parseSkills(iron),
                 clues,
-                bossKills,
+                bossStats,
                 lmsInfo,
                 PlayerStats.ACCOUNT.IRON
         );
@@ -279,7 +285,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                     hardcoreURL,
                     parseSkills(hardcore),
                     clues,
-                    bossKills,
+                    bossStats,
                     lmsInfo,
                     PlayerStats.ACCOUNT.HARDCORE
             );
@@ -303,7 +309,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                     ultimateURL,
                     parseSkills(ultimate),
                     clues,
-                    bossKills,
+                    bossStats,
                     lmsInfo,
                     PlayerStats.ACCOUNT.ULTIMATE
             );
@@ -561,10 +567,10 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * rank and total kills that the player has for that boss.
      * If the list is empty, the image will have a red overlay indicating no boss kills.
      *
-     * @param bosses List of bosses to display
+     * @param bossStats List of bosses to display
      * @return Image displaying player boss kills
      */
-    private BufferedImage buildBossSection(List<Boss> bosses) {
+    public BufferedImage buildBossSection(List<BossStats> bossStats) {
         BufferedImage container = copyImage(bossContainer);
         Graphics g = container.getGraphics();
 
@@ -573,24 +579,22 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         final int adjustedWidth = container.getWidth() - (border * 2);
 
         // Draw a red overlay over the empty boss container
-        if(bosses.isEmpty()) {
+        if(bossStats.isEmpty()) {
             g.setColor(redOverlay);
             g.fillRect(border, border, adjustedWidth, adjustedHeight);
             g.dispose();
             return container;
         }
 
-        final int maxBosses = 5;
-
         // Calculate the height to use for each row (always calculate for max bosses)
-        final int bossRowHeight = adjustedHeight / maxBosses;
+        final int bossRowHeight = adjustedHeight / MAX_BOSSES;
 
-        final int bossDisplayCount = Math.min(maxBosses, bosses.size());
+        final int bossDisplayCount = Math.min(MAX_BOSSES, bossStats.size());
         int y = border;
 
         for(int i = 0; i < bossDisplayCount; i++) {
             final BufferedImage bossImage = buildBossRowImage(
-                    bosses.get(i),
+                    bossStats.get(i),
                     adjustedWidth,
                     bossRowHeight
             );
@@ -605,12 +609,12 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * Build an image displaying the given boss and the player's total kills.
      * This image has a transparent background to be drawn on top of the boss section.
      *
-     * @param boss   Boss to display
-     * @param width  Width of boss image to build
-     * @param height Height of clue image to build
+     * @param bossStats Boss to display
+     * @param width     Width of boss image to build
+     * @param height    Height of clue image to build
      * @return Image displaying a boss and the player's kills/rank for that boss
      */
-    private BufferedImage buildBossRowImage(Boss boss, int width, int height) {
+    private BufferedImage buildBossRowImage(BossStats bossStats, int width, int height) {
         final int boxWidth = (width - border) / 2;
         final int centreVertical = height / 2;
         final int centreHorizontal = boxWidth / 2;
@@ -621,7 +625,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        final BufferedImage bossImage = boss.getFullImage();
+        final BufferedImage bossImage = bossStats.getBoss().getFullImage();
         if(bossImage == null) {
             return bossBox;
         }
@@ -648,7 +652,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         final FontMetrics fm = g.getFontMetrics();
 
         // Draw above centre line
-        final String kills = boss.getFormattedKills();
+        final String kills = bossStats.getFormattedKills();
         g.drawString(
                 kills,
                 centreHorizontal - (fm.stringWidth(kills) / 2),
@@ -657,7 +661,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         // Rank title will be different colour so must be drawn as two separate Strings
         final String rankTitle = "Rank: ";
-        final String rankValue = boss.getFormattedRank(); // 1,234
+        final String rankValue = bossStats.getFormattedRank(); // 1,234
         final int rankTitleWidth = fm.stringWidth(rankTitle);
 
         /*
@@ -767,7 +771,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         BufferedImage skillsSection = buildSkillsSection(playerStats, args);
         g.drawImage(skillsSection, 0, titleSection.getHeight(), null);
 
-        BufferedImage bossSection = buildBossSection(playerStats.getBossKills());
+        BufferedImage bossSection = buildBossSection(playerStats.getBossStats());
         g.drawImage(bossSection, skillsSection.getWidth(), titleSection.getHeight(), null);
 
         // When optional sections are displayed vertically, they should be displayed below the base image
@@ -1702,17 +1706,17 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param csv csv from API
      * @return Sorted list of player boss kill data
      */
-    private List<Boss> parseBossKills(String[] csv) {
-        String[] stats = Arrays.copyOfRange(csv, Boss.BOSS_START_INDEX, Boss.BOSS_END_INDEX);
-        List<Boss> bosses = new ArrayList<>();
+    private List<BossStats> parseBossKills(String[] csv) {
+        String[] stats = Arrays.copyOfRange(csv, BossStats.BOSS_START_INDEX, BossStats.BOSS_END_INDEX);
+        List<BossStats> bossStats = new ArrayList<>();
 
         int i = 0;
-        for(Boss.BOSS_NAME bossName : bossNames) {
+        for(BOSS_ID bossId : bossIds) {
             int kills = Integer.parseInt(stats[i + 1]);
             if(kills > -1) {
-                bosses.add(
-                        new Boss(
-                                bossName,
+                bossStats.add(
+                        new BossStats(
+                                bossManager.getBossById(bossId),
                                 Integer.parseInt(stats[i]),
                                 kills
                         )
@@ -1721,7 +1725,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             i += 2;
         }
         // Sort in descending order of kills
-        Collections.sort(bosses);
-        return bosses;
+        Collections.sort(bossStats);
+        return bossStats;
     }
 }

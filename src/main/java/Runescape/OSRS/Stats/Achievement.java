@@ -1,9 +1,9 @@
 package Runescape.OSRS.Stats;
 
 import Bot.ResourceHandler;
-import Runescape.Boss;
-import Runescape.Clue;
-import Runescape.Skill;
+import Runescape.*;
+import Runescape.OSRS.Boss.Boss;
+import Runescape.OSRS.Boss.BossManager;
 
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
@@ -41,8 +41,8 @@ public class Achievement {
             if(skill != Skill.SKILL_NAME.UNKNOWN) {
                 return SKILL;
             }
-            Boss.BOSS_NAME boss = Boss.BOSS_NAME.fromName(metric);
-            if(boss != Boss.BOSS_NAME.UNKNOWN) {
+            Boss boss = BossManager.getInstance().getBossByName(metric);
+            if(boss.getId() != Boss.BOSS_ID.UNKNOWN) {
                 return BOSS;
             }
             Clue.TYPE clue = Clue.TYPE.fromTypeName(getClueTypeName(metric));
@@ -132,7 +132,7 @@ public class Achievement {
         ResourceHandler resourceHandler = new ResourceHandler();
         switch(type) {
             case BOSS:
-                return resourceHandler.getImageResource(Boss.BOSS_NAME.fromName(metric).getIconImagePath());
+                return BossManager.getInstance().getBossByName(metric).getIconImage();
             case SKILL:
                 return resourceHandler.getImageResource(Skill.SKILL_NAME.fromName(metric).getImagePath());
             case CLUE:

@@ -1,6 +1,6 @@
 package Runescape.OSRS.Stats;
 
-import Runescape.Boss;
+import Runescape.OSRS.Boss.BossStats;
 import Runescape.Clue;
 import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
@@ -15,7 +15,7 @@ import java.util.List;
 import static Runescape.Skill.SKILL_NAME.*;
 
 public class OSRSPlayerStats extends PlayerStats {
-    private final List<Boss> bossKills;
+    private final List<BossStats> bossStatsKills;
     private final ArrayList<Achievement> completedAchievements, inProgressAchievements;
     private final LastManStanding lmsInfo;
     private LeagueTier leagueTier;
@@ -30,13 +30,13 @@ public class OSRSPlayerStats extends PlayerStats {
      * @param url       URL to hiscores CSV
      * @param skills    Array of skill data
      * @param clues     Array of clue data
-     * @param bossKills List of boss kill data
+     * @param bossStats List of boss stats
      * @param lmsInfo   Last man standing info
      * @param type      Account type
      */
-    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<Boss> bossKills, LastManStanding lmsInfo, ACCOUNT type) {
+    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<BossStats> bossStats, LastManStanding lmsInfo, ACCOUNT type) {
         super(name, url, skills, clues, type);
-        this.bossKills = bossKills;
+        this.bossStatsKills = bossStats;
         this.lmsInfo = lmsInfo;
         this.completedAchievements = new ArrayList<>();
         this.inProgressAchievements = new ArrayList<>();
@@ -144,12 +144,12 @@ public class OSRSPlayerStats extends PlayerStats {
     }
 
     /**
-     * Get a list of bosses in order of player kill count
+     * Get a list of boss stats in order of kill count
      *
-     * @return Bosses
+     * @return Player boss stats
      */
-    public List<Boss> getBossKills() {
-        return bossKills;
+    public List<BossStats> getBossStats() {
+        return bossStatsKills;
     }
 
     /**
