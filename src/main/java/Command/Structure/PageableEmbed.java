@@ -251,6 +251,7 @@ public abstract class PageableEmbed<T> {
 
     /**
      * Display the given page of items in the message embed.
+     * TODO abstract
      *
      * @param builder    Embed builder to display page items in
      * @param pageItems  List of items to display on the page (sublist of items)

@@ -41,7 +41,6 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
 
     /**
      * Embedded message that can be paged through with buttons.
-     * Takes an image file to use as the embed image.
      *
      * @param context Command context
      * @param items   List of items to be displayed
