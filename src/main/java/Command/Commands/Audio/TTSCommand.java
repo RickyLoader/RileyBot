@@ -3,7 +3,7 @@ package Command.Commands.Audio;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
-import Network.NetworkInfo;
+import Network.Secret;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 
@@ -55,7 +55,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getGoogleTTS(String content) {
         try {
-            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/google/" + EmbedHelper.urlEncode(content);
+            return Secret.LOCAL_DOMAIN + "DiscordBotAPI/api/google/" + EmbedHelper.urlEncode(content);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -71,7 +71,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getDectalkTTS(String content) {
         try {
-            return NetworkInfo.getAddress() + "/DiscordBotAPI/api/dectalk/" + EmbedHelper.urlEncode(content);
+            return Secret.LOCAL_DOMAIN + "DiscordBotAPI/api/dectalk/" + EmbedHelper.urlEncode(content);
         }
         catch(Exception e) {
             return null;

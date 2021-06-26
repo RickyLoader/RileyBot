@@ -3,7 +3,7 @@ package Command.Commands.Audio;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
-import Network.NetworkInfo;
+import Network.Secret;
 import net.dv8tion.jda.api.entities.Message;
 
 /**
@@ -19,7 +19,7 @@ public class SurvivorCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         try {
-            String location = NetworkInfo.getAddress() + "/DiscordBotApi/api/survivor/";
+            String location = Secret.LOCAL_DOMAIN + "DiscordBotApi/api/survivor/";
             String name = EmbedHelper.urlEncode(context.getLowerCaseMessage().replaceFirst("survivor ", ""));
             context.playAudio(
                     location + name

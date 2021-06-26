@@ -6,6 +6,7 @@ import okhttp3.RequestBody;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -92,6 +93,29 @@ public class ImgurManager {
         catch(Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Pass the image to the local API & save it on the server.
+     *
+     * @param image Image to upload
+     * @param png   Upload as PNG instead of JPG
+     * @return URL to uploaded image or null
+     */
+    @Nullable
+    public static String localUpload(BufferedImage image, boolean png) {
+        String base64 = png ? toBase64PNG(image) : toBase64JPEG(image);
+        if(base64 == null) {
+            return null;
+        }
+        JSONObject body = new JSONObject().put("image", base64);
+        NetworkResponse response = new NetworkRequest("images/upload", true).post(body.toString());
+        if(response.code != 200) {
+            return null;
+        }
+        final String key = "relative_url";
+        JSONObject responseBody = new JSONObject(response.body);
+        return responseBody.has(key) ? Secret.LOCAL_DOMAIN + responseBody.getString(key) : null;
     }
 
     /**
