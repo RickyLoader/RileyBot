@@ -320,7 +320,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    public OSRSPlayerStats fetchPlayerData(String name, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    protected OSRSPlayerStats fetchPlayerData(String name, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         OSRSPlayerStats stats = fetchStats(name, args, loadingMessage);
 
         if(stats == null) {

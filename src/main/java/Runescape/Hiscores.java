@@ -43,10 +43,17 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
     @Nullable
     public String[] hiscoresRequest(String url) {
         NetworkResponse response = new NetworkRequest(url, false).get();
+
+        // Reset timeout
+        timeout = false;
+
+        // Hiscores didn't respond
         if(response.code == 504 || response.code == 408 || response.code == NetworkResponse.TIMEOUT_CODE) {
             timeout = true;
             return null;
         }
+
+        // Player doesn't exist
         if(response.code == 404) {
             return null;
         }
@@ -116,7 +123,8 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
     public abstract String getDefaultURL(String name, T args);
 
     /**
-     * Fetch the player data from the hiscores
+     * Fetch the player data from the hiscores.
+     * This is null if the player doesn't exist/the request failed.
      *
      * @param name           Player name
      * @param args           Hiscores arguments
@@ -124,7 +132,23 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @return Player data
      */
     @Nullable
-    public abstract S fetchPlayerData(String name, T args, ImageLoadingMessage... loadingMessage);
+    protected abstract S fetchPlayerData(String name, T args, ImageLoadingMessage... loadingMessage);
+
+    /**
+     * Fetch the player data from the hiscores.
+     * Return the hiscores stats response which holds the player name & stats.
+     * If the stats are null, either the player doesn't exist or the request failed.
+     * The stats response indicates whether the request failed through
+     * the {@link HiscoresStatsResponse#requestFailed()} method.
+     *
+     * @param name           Player name
+     * @param args           Hiscores arguments
+     * @param loadingMessage Optional loading message
+     * @return Hiscores stats response
+     */
+    public HiscoresStatsResponse<S> getHiscoresStatsResponse(String name, T args, ImageLoadingMessage... loadingMessage) {
+        return new HiscoresStatsResponse<>(name, fetchPlayerData(name, args, loadingMessage), timeout);
+    }
 
     /**
      * Complete the current stage of the given loading message.
@@ -203,10 +227,12 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
 
         loadingMessage.showLoading();
 
-        S stats = fetchPlayerData(nameQuery, args, loadingMessage);
+        HiscoresStatsResponse<S> response = getHiscoresStatsResponse(nameQuery, args, loadingMessage);
+        S stats = response.getStats();
 
+        // Request failed/ player doesn't exist
         if(stats == null) {
-            if(timeout) {
+            if(response.requestFailed()) {
                 loadingMessage.failLoading(
                         "I wasn't able to connect to the "
                                 + EmbedHelper.embedURL("hiscores", defaultURL)

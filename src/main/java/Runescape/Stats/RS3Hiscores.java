@@ -537,7 +537,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     }
 
     @Override
-    public RS3PlayerStats fetchPlayerData(String name, HiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    protected RS3PlayerStats fetchPlayerData(String name, HiscoresArgs args, ImageLoadingMessage... loadingMessage) {
         String url = getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
