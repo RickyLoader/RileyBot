@@ -186,15 +186,6 @@ public abstract class PageableEmbed<T> {
     public abstract EmbedBuilder getEmbedBuilder(String pageDetails);
 
     /**
-     * Display the item of the given index in the embed builder
-     *
-     * @param builder      Embed builder to display item in
-     * @param currentIndex Current index within list of items
-     * @param item         Item at current index
-     */
-    public abstract void displayItem(EmbedBuilder builder, int currentIndex, T item);
-
-    /**
      * Get the id of the embed
      *
      * @return ID of the embed
@@ -239,11 +230,35 @@ public abstract class PageableEmbed<T> {
         }
         else {
             EmbedBuilder embedBuilder = getEmbedBuilder(getPageDetails());
-            int max = Math.min(bound, (items.size() - this.index));
-            for(int index = this.index; index < (this.index + max); index++) {
-                displayItem(embedBuilder, index, items.get(index));
-            }
+            int pageStart = index;
+
+            // Page is either bound length or remainder of items in list
+            int pageEnd = pageStart + Math.min(bound, (items.size() - pageStart));
+
+            displayPageItems(embedBuilder, items.subList(pageStart, pageEnd), pageStart);
             return embedBuilder.build();
+        }
+    }
+
+    /**
+     * Display the given item (item at currentIndex) in the embed builder
+     *
+     * @param builder      Embed builder to display item in
+     * @param currentIndex Current index within list of items
+     * @param item         Item at current index
+     */
+    public abstract void displayItem(EmbedBuilder builder, int currentIndex, T item);
+
+    /**
+     * Display the given page of items in the message embed.
+     *
+     * @param builder    Embed builder to display page items in
+     * @param pageItems  List of items to display on the page (sublist of items)
+     * @param startingAt Index of page start within full list of items
+     */
+    public void displayPageItems(EmbedBuilder builder, List<T> pageItems, int startingAt) {
+        for(int i = 0; i < pageItems.size(); i++) {
+            displayItem(builder, startingAt + i, pageItems.get(i));
         }
     }
 
