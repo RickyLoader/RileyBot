@@ -4,29 +4,39 @@ package Runescape;
  * Arguments for searching OSRS hiscores/building hiscores image
  */
 public class OSRSHiscoresArgs extends HiscoresArgs {
-    private final boolean leagueStats;
-    private final boolean displayXpTracker;
+    private final boolean leagueStats, fetchXpGains, fetchAchievements;
 
     /**
      * Create the hiscores arguments
      *
-     * @param virtual          Display virtual levels
-     * @param leagueStats      Search for league stats instead of normal stats
-     * @param displayXpTracker Display XP tracker info in the image
+     * @param virtual           Display virtual levels
+     * @param leagueStats       Search for league stats instead of normal stats
+     * @param fetchXpGains      Fetch recent XP gains
+     * @param fetchAchievements Fetch player achievements
      */
-    public OSRSHiscoresArgs(boolean virtual, boolean leagueStats, boolean displayXpTracker) {
+    public OSRSHiscoresArgs(boolean virtual, boolean leagueStats, boolean fetchXpGains, boolean fetchAchievements) {
         super(virtual);
         this.leagueStats = leagueStats;
-        this.displayXpTracker = displayXpTracker;
+        this.fetchXpGains = fetchXpGains;
+        this.fetchAchievements = fetchAchievements;
     }
 
     /**
-     * Check whether to display the player's XP tracker info in the image
+     * Check whether to fetch the player's recent achievements
      *
-     * @return Display XP tracker in image
+     * @return Fetch recent achievements
      */
-    public boolean displayXpTracker() {
-        return displayXpTracker;
+    public boolean fetchAchievements() {
+        return fetchAchievements;
+    }
+
+    /**
+     * Check whether to fetch the player's recent XP gains
+     *
+     * @return Fetch XP gains
+     */
+    public boolean fetchXpGains() {
+        return fetchXpGains;
     }
 
     /**

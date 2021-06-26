@@ -21,7 +21,7 @@ public class OSRSLookupCommand extends LookupCommand {
             XP = "xp",
             BOSSES = "bosses",
             TRIGGER = "osrslookup";
-    private boolean league = false, virtual = false, xp = false, bosses = false;
+    private boolean league, virtual, xp, bosses, achievements;
     private OSRSHiscores hiscores;
 
     public OSRSLookupCommand() {
@@ -44,10 +44,11 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
+        OSRSHiscoresArgs args = new OSRSHiscoresArgs(virtual, league, xp, achievements);
         hiscores.buildImage(
                 name,
                 context.getMessageChannel(),
-                new OSRSHiscoresArgs(virtual, league, xp)
+                args
         );
     }
 
@@ -57,6 +58,7 @@ public class OSRSLookupCommand extends LookupCommand {
         virtual = false;
         xp = false;
         bosses = false;
+        achievements = true; // Default fetch achievements
 
         if(query.equals(getTrigger())) {
             return query;
@@ -77,8 +79,11 @@ public class OSRSLookupCommand extends LookupCommand {
                 case XP:
                     xp = true;
                     break;
+                // Don't fetch achievements or xp tracker when doing boss message
                 case BOSSES:
                     bosses = true;
+                    achievements = false;
+                    xp = false;
                     break;
             }
             query = query.replaceFirst(arg, "").trim();

@@ -101,7 +101,9 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         else {
             criteria.add("Player exists...");
             criteria.add("Checking account type...");
-            criteria.add("Fetching achievements...");
+            if(shouldFetchAchievements(args)) {
+                criteria.add("Fetching achievements...");
+            }
         }
         if(shouldFetchXpTracker(args)) {
             criteria.add("Checking XP tracker...");
@@ -330,7 +332,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             leagueTier.setTier(calculateTier(leagueTier.getRank()));
             updateLoadingMessage(COMPLETE, "Player is " + leagueTier.getTierName() + "!", loadingMessage);
         }
-        else {
+        else if(shouldFetchAchievements(args)) {
             addPlayerAchievements(stats, args, loadingMessage);
         }
 
@@ -958,7 +960,17 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @return XP tracker data should be fetched
      */
     private boolean shouldFetchXpTracker(OSRSHiscoresArgs args) {
-        return args.displayXpTracker() && !args.searchLeagueStats();
+        return args.fetchXpGains() && !args.searchLeagueStats();
+    }
+
+    /**
+     * Check if the player's recent achievements should be fetched
+     *
+     * @param args Hiscores arguments
+     * @return Recent achievements should be fetched
+     */
+    private boolean shouldFetchAchievements(OSRSHiscoresArgs args) {
+        return args.fetchAchievements();
     }
 
     /**
@@ -980,7 +992,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @return Should display player achievements in hiscores image
      */
     private boolean shouldDisplayAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
-        return !args.searchLeagueStats() && stats.hasAchievements();
+        return !args.searchLeagueStats() && shouldFetchAchievements(args) && stats.hasAchievements();
     }
 
     /**
