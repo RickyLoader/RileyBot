@@ -15,7 +15,7 @@ import java.util.List;
 import static Runescape.Skill.SKILL_NAME.*;
 
 public class OSRSPlayerStats extends PlayerStats {
-    private final List<BossStats> bossStatsKills;
+    private final List<BossStats> bossStats;
     private final ArrayList<Achievement> completedAchievements, inProgressAchievements;
     private final LastManStanding lmsInfo;
     private LeagueTier leagueTier;
@@ -36,7 +36,7 @@ public class OSRSPlayerStats extends PlayerStats {
      */
     public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<BossStats> bossStats, LastManStanding lmsInfo, ACCOUNT type) {
         super(name, url, skills, clues, type);
-        this.bossStatsKills = bossStats;
+        this.bossStats = bossStats;
         this.lmsInfo = lmsInfo;
         this.completedAchievements = new ArrayList<>();
         this.inProgressAchievements = new ArrayList<>();
@@ -149,7 +149,7 @@ public class OSRSPlayerStats extends PlayerStats {
      * @return Player boss stats
      */
     public List<BossStats> getBossStats() {
-        return bossStatsKills;
+        return bossStats;
     }
 
     /**
