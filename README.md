@@ -64,14 +64,10 @@ Discord Bot written in Java using the [JDA](https://github.com/DV8FromTheWorld/J
   ### Usage
   `dd start` to begin a game
   
-  `dd select [case #]` to select your case
+  `dd select [#]` to select your case
   
-  `dd open [case #]` to open a case
-  
-  `dd [deal/no deal]` to make/deny a deal
-  
-  `dd forfeit` to end a game
- 
+  `dd open [#, #, #...]` to open cases
+
   #### Example(s)
   ![alt text](src/main/resources/Readme/DealOrNoDealCommand/playing.gif "Playing Deal or No Deal")
   </details>

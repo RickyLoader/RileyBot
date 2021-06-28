@@ -4,34 +4,46 @@ import Bot.FontManager;
 import Bot.ResourceHandler;
 import Command.Commands.DealOrNoDealCommand;
 import Command.Structure.EmbedHelper;
-import Command.Structure.ImageBuilder;
-import Command.Structure.ImageLoadingMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.ActionRow;
+import net.dv8tion.jda.api.interactions.button.Button;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.*;
 
+import static Command.Structure.ImageLoadingMessage.imageToByteArray;
+
 /**
  * Deal or No Deal game
+ * TODO use IDs instead of member
  */
 public class DealOrNoDeal {
     private final Member contestant;
     private final MessageChannel channel;
+    private final LinkedList<Integer> offers;
+    private final double[] offerMultipliers = new double[]{0.11, 0.15, 0.22, 0.37, 0.70, 0.90, 1.0};
+    private static final String
+            PATH = "/DOND/",
+            LOGO = "https://i.imgur.com/YKIJisy.png",
+            IMAGE_NAME = "game.png";
+    private final Button keep, swap, accept, decline;
+    private final GameCallback callback;
+    private GAME_STATUS status;
+    private long id;
     private ArrayList<Briefcase> briefcases, availableCases;
     private Briefcase selected;
     private static Font FONT;
-    private long id;
     private boolean visible, finalOffer, running;
-    private GAME_STATUS status;
-    private int casesToOpen, roundCases, maxOffer = 0;
-    private final LinkedList<Integer> offers;
-    private final double[] offerMultipliers = new double[]{0.11, 0.15, 0.22, 0.37, 0.70, 0.90, 1.0};
-    private final static String PATH = "/DOND/", LOGO = "https://i.imgur.com/YKIJisy.png";
+    private int casesToOpen, roundCases, maxOffer;
 
     private static BufferedImage
             BRIEFCASE_CLOSED,
@@ -67,11 +79,17 @@ public class DealOrNoDeal {
      *
      * @param contestant Member to play
      * @param channel    Channel to play in
+     * @param callback   Interface for callback events
      */
-    public DealOrNoDeal(Member contestant, MessageChannel channel) {
+    public DealOrNoDeal(Member contestant, MessageChannel channel, GameCallback callback) {
         this.contestant = contestant;
         this.channel = channel;
         this.offers = new LinkedList<>();
+        this.keep = Button.success("keep", "Keep");
+        this.swap = Button.danger("swap", "Swap");
+        this.accept = Button.success("deal", "Deal");
+        this.decline = Button.danger("decline", "No Deal");
+        this.callback = callback;
     }
 
     /**
@@ -105,6 +123,24 @@ public class DealOrNoDeal {
      */
     public boolean isActive() {
         return running;
+    }
+
+    /**
+     * Get the ID of the contestant
+     *
+     * @return Contestant ID
+     */
+    public long getContestantId() {
+        return contestant.getIdLong();
+    }
+
+    /**
+     * Get the message ID of the game message
+     *
+     * @return Game message ID
+     */
+    public long getMessageId() {
+        return id;
     }
 
     /**
@@ -149,15 +185,66 @@ public class DealOrNoDeal {
      * Mark the game as visible
      *
      * @param gameMessage Game message embed
+     * @param event       Optional button click event to acknowledge
      */
-    private void sendGameMessage(MessageEmbed gameMessage) {
-        channel.sendMessage(gameMessage).addFile(
-                ImageLoadingMessage.imageToByteArray(buildGameImage()),
-                "image.png"
-        ).queue(message -> {
+    private void sendGameMessage(MessageEmbed gameMessage, ButtonClickEvent... event) {
+        // Button to acknowledge
+        if(event.length > 0) {
+            event[0].deferEdit().queue();
+        }
+
+        MessageAction sendMessage = channel.sendMessage(gameMessage)
+                .addFile(imageToByteArray(buildGameImage()), IMAGE_NAME);
+
+        // Offering deal/swap
+        ActionRow buttons = getButtons();
+        if(buttons != null) {
+            sendMessage = sendMessage.setActionRows(buttons);
+        }
+
+        sendMessage.queue(message -> {
+            long oldId = id;
             id = message.getIdLong();
             visible = true;
+            callback.messageIdUpdated(this, oldId);
         });
+    }
+
+    /**
+     * Get the row of buttons to use for the message.
+     * This will be null in all instances except for when a deal or a swap is offered.
+     *
+     * @return Row of buttons to use for message
+     */
+    @Nullable
+    private ActionRow getButtons() {
+        switch(status) {
+            case DEAL_OFFERED:
+                return ActionRow.of(accept, decline);
+            case OFFER_SWAP:
+                return ActionRow.of(keep, swap);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Answer a button that was pressed on the game message
+     *
+     * @param event Button click event
+     */
+    public void buttonPressed(@NotNull ButtonClickEvent event) {
+        switch(status) {
+            case DEAL_OFFERED:
+                answerOffer(event);
+                break;
+            case OFFER_SWAP:
+                answerSwap(event);
+                break;
+            // Shouldn't be reached but would if buttons persisted on the message for some reason
+            default:
+                event.deferReply(true).setContent("That button shouldn't be there!").queue();
+        }
     }
 
     /**
@@ -170,7 +257,7 @@ public class DealOrNoDeal {
                 .setColor(EmbedHelper.YELLOW)
                 .setTitle(contestant.getEffectiveName() + " | Deal or No Deal")
                 .setDescription(getGameStatusMessage())
-                .setImage("attachment://image.png")
+                .setImage("attachment://" + IMAGE_NAME)
                 .setThumbnail(LOGO)
                 .setFooter(getHelpMessage(), running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .build();
@@ -181,16 +268,13 @@ public class DealOrNoDeal {
      *
      * @return Game status help message
      */
+
     private String getHelpMessage() {
         switch(status) {
             case SELECTING_CASE:
                 return "Type: " + DealOrNoDealCommand.SELECT_CASE + " to select your case";
             case OPENING_CASES:
                 return "Type: " + DealOrNoDealCommand.OPEN_CASE + " to open a case";
-            case DEAL_OFFERED:
-                return "Type: " + DealOrNoDealCommand.DEAL_OFFER + " to answer the banker";
-            case OFFER_SWAP:
-                return "Type: " + DealOrNoDealCommand.SWAP_OFFER + " to make your choice";
             default:
                 return "Type: " + DealOrNoDealCommand.TRIGGER + " for help";
         }
@@ -213,15 +297,10 @@ public class DealOrNoDeal {
      * Answer the banker's offer
      * Open the selected case to reveal the reward which was sold to the banker
      *
-     * @param accept Offer accepted
+     * @param event Button used to answer the banker's offer
      */
-    public void answerOffer(boolean accept) {
-        if(status != GAME_STATUS.DEAL_OFFERED) {
-            channel.sendMessage(
-                    contestant.getAsMention() + " I didn't hear the banker call, did you?"
-            ).queue();
-            return;
-        }
+    public void answerOffer(ButtonClickEvent event) {
+        boolean accept = event.getComponentId().equals(this.accept.getId());
         if(accept) {
             selected.openCase();
             status = GAME_STATUS.DEAL_ACCEPTED;
@@ -229,23 +308,17 @@ public class DealOrNoDeal {
         else {
             status = GAME_STATUS.DEAL_DECLINED;
         }
-        updateGame();
+        updateGame(event);
     }
 
     /**
      * Answer the offer to swap cases with the final case
      * Open the selected and final cases to reveal their rewards
      *
-     * @param swap Accept to swap
+     * @param event Button used to answer the swap offer
      */
-    public void answerSwap(boolean swap) {
-        if(status != GAME_STATUS.OFFER_SWAP) {
-            channel.sendMessage(
-                    contestant.getAsMention() + " You're not there yet bro"
-            ).queue();
-            return;
-        }
-
+    public void answerSwap(ButtonClickEvent event) {
+        boolean swap = event.getComponentId().equals(this.swap.getId());
         if(swap) {
             Briefcase newSelection = availableCases.get(0);
             availableCases.add(selected);
@@ -257,7 +330,7 @@ public class DealOrNoDeal {
         selected.openCase();
 
         status = GAME_STATUS.FINALE;
-        updateGame();
+        updateGame(event);
     }
 
     /**
@@ -454,21 +527,25 @@ public class DealOrNoDeal {
      * Update the game message within the channel
      * Delete the previous message and send the new one
      * Mark the game as not visible
+     *
+     * @param event Optional button click event to acknowledge
      */
-    private void updateMessage() {
+    private void updateMessage(ButtonClickEvent... event) {
         MessageEmbed gameMessage = buildGameMessage();
         channel.deleteMessageById(id).queue(success -> {
             visible = false;
-            sendGameMessage(gameMessage);
-        }, throwable -> sendGameMessage(gameMessage));
+            sendGameMessage(gameMessage, event);
+        }, throwable -> sendGameMessage(gameMessage, event));
     }
 
     /**
      * Process game progression
      * Basic game logic - Open n cases - get offer - open n-1 cases... open 1 case until two remain or a deal is made
-     * End conditions - Accepting an offer/Contestant case + 1 other remain, player chooses which to keep
+     * End conditions - Accepting an offer/Contestant case + 1 other remain, player chooses which to keep.
+     *
+     * @param event Optional button click event to acknowledge
      */
-    private void updateGame() {
+    private void updateGame(ButtonClickEvent... event) {
         switch(status) {
             case SELECTED_CASE:
                 roundCases = 6;
@@ -497,7 +574,7 @@ public class DealOrNoDeal {
             case FINALE:
                 running = false;
         }
-        updateMessage();
+        updateMessage(event);
     }
 
     /**
@@ -525,11 +602,13 @@ public class DealOrNoDeal {
     }
 
     /**
-     * Open a case and remove it from the list of available cases.
+     * Open the cases with the given case IDs and remove them from the list of available cases.
+     * If none of the provided case numbers were valid, send a message to the contestant informing them of such.
+     * Update the game message once the cases have been opened.
      *
-     * @param caseNumber Case number to open
+     * @param caseNumbers Case numbers to open
      */
-    public void openCase(int caseNumber) {
+    public void openCases(int[] caseNumbers) {
         if(status != GAME_STATUS.OPENING_CASES) {
             channel.sendMessage(contestant.getAsMention() + " You aren't picking any cases right now!").queue();
             return;
@@ -539,25 +618,29 @@ public class DealOrNoDeal {
             return;
         }
 
-        Briefcase selected = getCase(caseNumber);
+        final int casesToOpen = this.casesToOpen;
 
-        if(selected == null) {
-            channel.sendMessage(contestant.getAsMention() + " How can I open that?").queue();
-            return;
-        }
-        if(selected.isOpened()) {
-            channel.sendMessage(contestant.getAsMention() + " That case is already open for fuck's sake").queue();
-            return;
-        }
-        if(selected == this.selected) {
-            channel.sendMessage(contestant.getAsMention() + " That's your own case!").queue();
-            return;
+        // Loop through opening the given case numbers if they are available to be opened
+        for(int i = 0; i < Math.min(caseNumbers.length, casesToOpen); i++) {
+            Briefcase selected = getCase(caseNumbers[i]);
+            if(selected == null || selected.isOpened() || selected == this.selected) {
+                continue;
+            }
+            selected.openCase();
+            availableCases.remove(selected);
+            this.casesToOpen--;
         }
 
-        selected.openCase();
-        availableCases.remove(selected);
-        casesToOpen--;
-        updateGame();
+        // No cases were opened
+        if(casesToOpen == this.casesToOpen) {
+            channel.sendMessage(
+                    contestant.getAsMention()
+                            + " None of those cases could be opened, are you sure they aren't already open?"
+            ).queue();
+        }
+        else {
+            updateGame();
+        }
     }
 
     /**
@@ -677,7 +760,7 @@ public class DealOrNoDeal {
 
         String caseReward = null, caseNumber = null;
 
-        if(selected != null) {
+        if(status != GAME_STATUS.SELECTING_CASE) {
             caseReward = formatReward(selected.getReward());
             caseNumber = "**Case #" + selected.getCaseNumber() + "**";
         }
@@ -732,5 +815,18 @@ public class DealOrNoDeal {
                 break;
         }
         return builder.toString();
+    }
+
+    /**
+     * Interface for Deal or No Deal events
+     */
+    public interface GameCallback {
+        /**
+         * Called when the game message ID has changed.
+         *
+         * @param updated      Updated Deal or No Deal session - contains new message ID
+         * @param oldMessageId Old message ID
+         */
+        void messageIdUpdated(DealOrNoDeal updated, long oldMessageId);
     }
 }

@@ -1,26 +1,27 @@
 package Command.Commands;
 
 import Bot.ResourceHandler;
-import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
+import Command.Structure.*;
 import DOND.DealOrNoDeal;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
 /**
  * Play Deal or No Deal
  */
-public class DealOrNoDealCommand extends DiscordCommand {
-    private final HashMap<Member, DealOrNoDeal> games;
+public class DealOrNoDealCommand extends OnReadyDiscordCommand {
+    private final HashMap<Long, DealOrNoDeal> gamesByMessageId; // Message Id -> game
+    private final HashMap<Long, DealOrNoDeal> gamesByMemberId; // Member Id -> game
     public final static String
             TRIGGER = "dd",
-            SELECT_CASE = TRIGGER + " select [case #]",
-            OPEN_CASE = TRIGGER + " open [case #]",
-            DEAL_OFFER = TRIGGER + " [deal/no deal]",
-            SWAP_OFFER = TRIGGER + " [keep/swap]",
+            SELECT_CASE = TRIGGER + " select [#]",
+            OPEN_CASE = TRIGGER + " open [#, #, #...]",
             START_GAME = TRIGGER + " start",
             FORFEIT_GAME = TRIGGER + " forfeit";
 
@@ -29,12 +30,11 @@ public class DealOrNoDealCommand extends DiscordCommand {
                 START_GAME + "\n"
                         + FORFEIT_GAME + "\n"
                         + SELECT_CASE + "\n"
-                        + OPEN_CASE + "\n"
-                        + DEAL_OFFER + "\n"
-                        + SWAP_OFFER,
+                        + OPEN_CASE,
                 "Play Deal or No Deal!"
         );
-        this.games = new HashMap<>();
+        this.gamesByMessageId = new HashMap<>();
+        this.gamesByMemberId = new HashMap<>();
         DealOrNoDeal.registerAssets(new ResourceHandler());
     }
 
@@ -50,7 +50,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
             return;
         }
 
-        String action = message.replaceAll("\\d+", "").trim();
+        String action = message.split(" ")[0];
         new Thread(() -> {
             switch(action) {
                 case "start":
@@ -68,14 +68,6 @@ public class DealOrNoDealCommand extends DiscordCommand {
                             action.equals("open")
                     );
                     break;
-                case "keep":
-                case "swap":
-                    answerSwap(contestant, action.equals("swap"), channel);
-                    break;
-                case "no deal":
-                case "deal":
-                    answerOffer(contestant, action.equals("deal"), channel);
-                    break;
                 default:
                     channel.sendMessage(getHelpNameCoded()).queue();
             }
@@ -83,58 +75,30 @@ public class DealOrNoDealCommand extends DiscordCommand {
     }
 
     /**
-     * Select the case to play for/open
+     * Select the case(s) to play for/open
      *
      * @param contestant Member playing
      * @param message    Message containing case number
      * @param channel    Channel to send response
-     * @param open       Opening a case
+     * @param open       Opening cases (message may contain multiple case numbers)
      */
     private void selectCase(Member contestant, String message, MessageChannel channel, boolean open) {
-        DealOrNoDeal game = games.get(contestant);
+        DealOrNoDeal game = gamesByMemberId.get(contestant.getIdLong());
         if(game == null || !game.isActive()) {
             channel.sendMessage(contestant.getAsMention() + " You aren't playing Deal or No Deal!").queue();
             return;
         }
-        int caseNumber = DiscordCommand.toInteger(message);
         if(open) {
-            game.openCase(caseNumber);
+            String[] caseArgs = message.split(",");
+            int[] caseNumbers = new int[caseArgs.length];
+            for(int i = 0; i < caseArgs.length; i++) {
+                caseNumbers[i] = DiscordCommand.toInteger(caseArgs[i].trim());
+            }
+            game.openCases(caseNumbers);
         }
         else {
-            game.selectCase(caseNumber);
+            game.selectCase(DiscordCommand.toInteger(message));
         }
-    }
-
-    /**
-     * Answer the banker's offer
-     *
-     * @param contestant Member playing
-     * @param deal       Answer to offer
-     * @param channel    Channel to send response
-     */
-    private void answerOffer(Member contestant, boolean deal, MessageChannel channel) {
-        DealOrNoDeal game = games.get(contestant);
-        if(game == null || !game.isActive()) {
-            channel.sendMessage(contestant.getAsMention() + " Who are you talking to?").queue();
-            return;
-        }
-        game.answerOffer(deal);
-    }
-
-    /**
-     * Answer the offer to swap cases
-     *
-     * @param contestant Member playing
-     * @param swap       Answer to swap offer
-     * @param channel    Channel to send response
-     */
-    private void answerSwap(Member contestant, boolean swap, MessageChannel channel) {
-        DealOrNoDeal game = games.get(contestant);
-        if(game == null || !game.isActive()) {
-            channel.sendMessage(contestant.getAsMention() + " Nobody offered you a swap.").queue();
-            return;
-        }
-        game.answerSwap(swap);
     }
 
     /**
@@ -144,15 +108,20 @@ public class DealOrNoDealCommand extends DiscordCommand {
      * @param channel    Channel to play in
      */
     private void startGame(Member contestant, MessageChannel channel) {
-        DealOrNoDeal game = games.get(contestant);
+        DealOrNoDeal game = gamesByMemberId.get(contestant.getIdLong());
         if(game != null && game.isActive()) {
             channel.sendMessage(
                     contestant.getAsMention() + " You need to forfeit or finish your current game first!"
             ).queue();
             return;
         }
-        game = new DealOrNoDeal(contestant, channel);
-        games.put(contestant, game);
+        game = new DealOrNoDeal(contestant, channel, (updated, oldMessageId) -> {
+            gamesByMessageId.remove(oldMessageId);
+            if(updated.isActive()) {
+                gamesByMessageId.put(updated.getMessageId(), updated);
+            }
+        });
+        gamesByMemberId.put(contestant.getIdLong(), game);
         game.start();
     }
 
@@ -162,7 +131,7 @@ public class DealOrNoDealCommand extends DiscordCommand {
      * @param contestant Contestant forfeiting
      */
     public void forfeitGame(Member contestant, MessageChannel channel) {
-        DealOrNoDeal game = games.get(contestant);
+        DealOrNoDeal game = gamesByMemberId.get(contestant.getIdLong());
         if(game == null || !game.isActive()) {
             channel.sendMessage(contestant.getAsMention() + " forfeit what?").queue();
             return;
@@ -173,5 +142,27 @@ public class DealOrNoDealCommand extends DiscordCommand {
     @Override
     public boolean matches(String query, Message message) {
         return query.startsWith(TRIGGER);
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        jda.addEventListener(new ButtonListener() {
+            @Override
+            public void handleButtonClick(@NotNull ButtonClickEvent event) {
+                long messageId = event.getMessageIdLong();
+                Member member = event.getMember();
+
+                if(member == null) {
+                    return;
+                }
+
+                DealOrNoDeal game = gamesByMessageId.get(messageId);
+                if(game == null || messageId != game.getMessageId() || member.getIdLong() != game.getContestantId()) {
+                    return;
+                }
+
+                game.buttonPressed(event);
+            }
+        });
     }
 }
