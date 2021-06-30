@@ -24,7 +24,13 @@ public abstract class PageableListEmbed<T> extends PageableTemplateEmbed<T> {
 
     @Override
     public void displayItem(EmbedBuilder builder, int currentIndex, T item) {
-        builder.addField(getName(item), getValue(item), false);
+        final String title = getName(item);
+        try {
+            builder.addField(title, getValue(item), false);
+        }
+        catch(IllegalArgumentException e) {
+            builder.addField(getName(item), "Failed to display field value!", false);
+        }
     }
 
     /**
