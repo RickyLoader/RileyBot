@@ -90,6 +90,7 @@ public class BossManager {
                 KRIL_TSUTSAROTH,
                 MIMIC,
                 NIGHTMARE,
+                PHOSANIS_NIGHTMARE,
                 OBOR,
                 SARACHNIS,
                 SCORPIA,
@@ -133,6 +134,8 @@ public class BossManager {
                 return "TzTok-Jad";
             case VETION:
                 return "Vet'ion";
+            case PHOSANIS_NIGHTMARE:
+                return "Phosani's Nightmare";
             default:
                 // Capitalise first letter of each word
                 String[] nameArgs = id.name().split("_");

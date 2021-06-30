@@ -40,6 +40,7 @@ public class Boss {
         KRIL_TSUTSAROTH,
         MIMIC,
         NIGHTMARE,
+        PHOSANIS_NIGHTMARE,
         OBOR,
         SARACHNIS,
         SCORPIA,
