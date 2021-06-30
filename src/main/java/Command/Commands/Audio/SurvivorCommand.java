@@ -19,7 +19,7 @@ public class SurvivorCommand extends DiscordCommand {
     @Override
     public void execute(CommandContext context) {
         try {
-            String location = Secret.LOCAL_DOMAIN + "DiscordBotApi/api/survivor/";
+            String location = "http://" + Secret.LOCAL_IP + "DiscordBotApi/api/survivor/";
             String name = EmbedHelper.urlEncode(context.getLowerCaseMessage().replaceFirst("survivor ", ""));
             context.playAudio(
                     location + name

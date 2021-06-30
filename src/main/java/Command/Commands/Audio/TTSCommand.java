@@ -55,7 +55,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getGoogleTTS(String content) {
         try {
-            return Secret.LOCAL_DOMAIN + "DiscordBotAPI/api/google/" + EmbedHelper.urlEncode(content);
+            return "http://" + Secret.LOCAL_IP + "DiscordBotAPI/api/google/" + EmbedHelper.urlEncode(content);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -71,7 +71,7 @@ public class TTSCommand extends DiscordCommand {
      */
     private String getDectalkTTS(String content) {
         try {
-            return Secret.LOCAL_DOMAIN + "DiscordBotAPI/api/dectalk/" + EmbedHelper.urlEncode(content);
+            return "http://" + Secret.LOCAL_IP + "DiscordBotAPI/api/dectalk/" + EmbedHelper.urlEncode(content);
         }
         catch(Exception e) {
             return null;
