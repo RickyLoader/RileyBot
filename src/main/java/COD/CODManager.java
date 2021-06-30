@@ -194,19 +194,19 @@ public abstract class CODManager {
     private HashMap<String, Map> readMaps() {
         HashMap<String, Map> maps = new HashMap<>();
         JSONObject mapList = getAssetJSON("maps.json", "maps");
+        final String imageKey = "loading_image_url";
+
         for(String name : mapList.keySet()) {
             String imagePath = basePath + "Maps/" + name;
             JSONObject mapData = mapList.getJSONObject(name);
-            Map.MapBuilder mapBuilder = new Map.MapBuilder(name, mapData.getString("real_name"), game)
-                    .setLoadingImage(resourceHandler.getImageResource(imagePath + ".png"))
-                    .setCompassImage(resourceHandler.getImageResource(imagePath + "_compass.png"));
-            if(mapData.has("compass_image_url")) {
-                mapBuilder.setCompassImageURL(mapData.getString("compass_image_url"));
-            }
-            if(mapData.has("loading_image_url")) {
-                mapBuilder.setLoadingImageURL(mapData.getString("loading_image_url"));
-            }
-            maps.put(name, mapBuilder.build());
+            Map map = new Map(
+                    name,
+                    mapData.getString("real_name"),
+                    game,
+                    resourceHandler.getImageResource(imagePath + ".png"),
+                    mapData.has(imageKey) ? mapData.getString(imageKey) : null
+            );
+            maps.put(name, map);
         }
         return maps;
     }

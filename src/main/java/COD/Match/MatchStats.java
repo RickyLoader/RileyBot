@@ -19,7 +19,6 @@ public class MatchStats {
     private final long duration;
     private final Score score;
     private final MatchPlayer mainPlayer;
-    private String displayImageURL;
 
     public enum RESULT {
         WIN,
@@ -50,32 +49,6 @@ public class MatchStats {
         this.result = result;
         this.mainPlayer = mainPlayer;
         this.score = score;
-        this.displayImageURL = map.getLoadingImageURL();
-    }
-
-    /**
-     * Get the display image URL for the match - by default the map loading screen image
-     *
-     * @return Display image URL
-     */
-    public String getDisplayImageURL() {
-        return displayImageURL;
-    }
-
-    /**
-     * Switch the display image URL between the map compass and map loading screen image
-     */
-    public void switchDisplayImageURL() {
-        this.displayImageURL = displayingLoadingImage() ? map.getCompassImageURL() : map.getLoadingImageURL();
-    }
-
-    /**
-     * Check if the currently displayed image URL is the map's loading image
-     *
-     * @return Currently displaying map loading image
-     */
-    public boolean displayingLoadingImage() {
-        return this.displayImageURL.equals(map.getLoadingImageURL());
     }
 
     /**

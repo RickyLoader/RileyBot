@@ -1,6 +1,7 @@
 package COD.Assets;
 
 import COD.CODManager.GAME;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 
@@ -8,98 +9,20 @@ import java.awt.image.BufferedImage;
  * Hold map name and image info
  */
 public class Map extends CODAsset {
-    private final String loadingImageURL, compassImageURL;
-    private final BufferedImage compassImage;
-
-    public static class MapBuilder {
-        private final String codename, name;
-        private String loadingImageURL, compassImageURL;
-        private BufferedImage loadingImage, compassImage;
-        private final GAME game;
-
-        /**
-         * Create the MapBuilder
-         *
-         * @param codename Map codename e.g "mp_euphrates"
-         * @param name     Map real name e.g "Euphrates Bridge"
-         * @param game     COD game
-         */
-        public MapBuilder(String codename, String name, GAME game) {
-            this.codename = codename;
-            this.name = name;
-            this.game = game;
-        }
-
-        /**
-         * Set the URL to the loading screen image
-         *
-         * @param loadingImageURL URL to loading screen image
-         * @return Builder
-         */
-        public MapBuilder setLoadingImageURL(String loadingImageURL) {
-            this.loadingImageURL = loadingImageURL;
-            return this;
-        }
-
-        /**
-         * Set the URL to the compass image
-         *
-         * @param compassImageURL ImageURL URL to compass image
-         * @return Builder
-         */
-        public MapBuilder setCompassImageURL(String compassImageURL) {
-            this.compassImageURL = compassImageURL;
-            return this;
-        }
-
-        /**
-         * Set the loading screen image
-         *
-         * @param loadingImage Loading screen image
-         * @return Builder
-         */
-        public MapBuilder setLoadingImage(BufferedImage loadingImage) {
-            this.loadingImage = loadingImage;
-            return this;
-        }
-
-        /**
-         * Set the compass image (as seen in game)
-         *
-         * @param compassImage Compass image
-         * @return Builder
-         */
-        public MapBuilder setCompassImage(BufferedImage compassImage) {
-            this.compassImage = compassImage;
-            return this;
-        }
-
-        /**
-         * Build the map from the builder values
-         *
-         * @return Map from builder values
-         */
-        public Map build() {
-            if(loadingImageURL == null) {
-                loadingImageURL = fetchLoadingImageUrl(codename, game);
-            }
-            if(compassImageURL == null) {
-                compassImageURL = fetchCompassImageUrl(codename, game);
-            }
-            return new Map(this);
-        }
-    }
+    private final String imageUrl;
 
     /**
-     * Create a map from the given builder values
+     * Create a map
      *
-     * @param builder Map builder
+     * @param codename Map codename - as named in files
+     * @param name     Map name - as named in-game
+     * @param game     Game map belongs to
+     * @param image    Map loading screen image
+     * @param imageUrl URL to map loading screen image
      */
-    private Map(MapBuilder builder) {
-        super(builder.codename, builder.name, builder.loadingImage);
-        this.loadingImageURL = builder.loadingImageURL;
-        this.compassImageURL = builder.compassImageURL;
-        this.compassImage = builder.compassImage;
+    public Map(String codename, String name, GAME game, @Nullable BufferedImage image, @Nullable String imageUrl) {
+        super(codename, name, image);
+        this.imageUrl = imageUrl == null ? fetchLoadingImageUrl(codename, game) : imageUrl;
     }
 
     /**
@@ -109,7 +32,7 @@ public class Map extends CODAsset {
      * @param game     COD game
      */
     public Map(String codename, GAME game) {
-        this(new MapBuilder(codename, "MISSING: " + codename, game));
+        this(codename, "MISSING: " + codename, game, null, null);
     }
 
     /**
@@ -137,29 +60,11 @@ public class Map extends CODAsset {
     }
 
     /**
-     * Get the URL to an image displaying the map compass
-     *
-     * @return Compass image URL
-     */
-    public String getCompassImageURL() {
-        return compassImageURL;
-    }
-
-    /**
      * Get the URL to an image displaying the map loading screen
      *
      * @return Loading image URL
      */
-    public String getLoadingImageURL() {
-        return loadingImageURL;
-    }
-
-    /**
-     * Get the image of the map compass
-     *
-     * @return Compass image
-     */
-    public BufferedImage getCompassImage() {
-        return compassImage;
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

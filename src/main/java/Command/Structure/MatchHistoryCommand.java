@@ -33,8 +33,8 @@ public class MatchHistoryCommand extends CODLookupCommand {
     private final ArrayList<WobblyScore> leaderboard;
     private final CODManager codManager;
     private final Font font;
-    private final String footer, statsId, switchImageId, defaultButtonId;
-    private Button stats, loadouts, switchImage;
+    private final String footer, statsId, defaultButtonId;
+    private Button stats, loadouts;
     private String matchID;
     private EmoteHelper emoteHelper;
 
@@ -65,7 +65,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 ? FontManager.MODERN_WARFARE_FONT
                 : FontManager.COLD_WAR_FONT;
         this.statsId = "stats";
-        this.switchImageId = "switch";
         this.defaultButtonId = statsId; // Stats page is displayed first
     }
 
@@ -111,7 +110,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
             this.emoteHelper = context.getEmoteHelper();
             this.stats = Button.primary(statsId, Emoji.ofEmote(emoteHelper.getStats()));
             this.loadouts = Button.primary("loadouts", Emoji.ofEmote(emoteHelper.getLoadouts()));
-            this.switchImage = Button.primary(switchImageId, EmbedHelper.BLANK_CHAR);
         }
 
         context.getJDA().addEventListener(getMatchButtonListener());
@@ -181,7 +179,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .addBlankField(true)
                 .addField("Match ID", score.getMatchId(), true)
                 .setColor(EmbedHelper.PURPLE)
-                .setImage(score.getMap().getLoadingImageURL())
+                .setImage(score.getMap().getImageUrl())
                 .build();
         channel.sendMessage(entryEmbed).queue();
     }
@@ -323,7 +321,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Button is valid
      */
     private boolean isValidButton(String buttonId) {
-        return buttonId.equals(stats.getId()) || buttonId.equals(loadouts.getId()) || buttonId.equals(switchImage.getId());
+        return buttonId.equals(stats.getId()) || buttonId.equals(loadouts.getId());
     }
 
     /**
@@ -334,8 +332,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private ButtonListener getMatchButtonListener() {
         return new ButtonListener() {
-            private String last = defaultButtonId;
-
             @Override
             public void handleButtonClick(@NotNull ButtonClickEvent event) {
                 String buttonId = event.getComponentId();
@@ -353,22 +349,13 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 else if(buttonId.equals(loadouts.getId()) && shouldDisplayLoadoutsButton(matchStats)) {
                     content = buildMatchLoadoutEmbed(matchStats);
                 }
-                else if(buttonId.equals(switchImage.getId()) && shouldDisplaySwitchButton(last)) {
-                    matchStats.switchDisplayImageURL();
-                    content = buildMatchEmbed(matchStats);
-                }
 
                 // Shouldn't happen but would if buttons weren't removed when unavailable
                 if(content == null) {
                     return;
                 }
 
-                // Switch image doesn't change the current displayed embed so don't remember as last button press
-                if(!buttonId.equals(switchImage.getId())) {
-                    last = buttonId;
-                }
-
-                event.deferEdit().setEmbeds(content).setActionRows(getButtons(last, matchStats)).queue();
+                event.deferEdit().setEmbeds(content).setActionRows(getButtons(buttonId, matchStats)).queue();
             }
         };
     }
@@ -386,29 +373,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
         ArrayList<Button> buttons = new ArrayList<>();
         buttons.add(currentButtonId.equals(stats.getId()) ? stats.asDisabled() : stats);
 
-        if(shouldDisplaySwitchButton(currentButtonId)) {
-
-            // Label is the opposite of what is currently displayed as it indicates what it will switch to
-            String label = "View " + (matchStats.displayingLoadingImage() ? "Compass" : "Loading");
-            buttons.add(Button.of(switchImage.getStyle(), switchImageId, label));
-        }
-
         if(shouldDisplayLoadoutsButton(matchStats)) {
             buttons.add(currentButtonId.equals(loadouts.getId()) ? loadouts.asDisabled() : loadouts);
         }
 
         return ActionRow.of(buttons);
-    }
-
-    /**
-     * Check if the switch map image button should be displayed on the message embed.
-     * This is if the currently displayed message embed is the stats embed.
-     *
-     * @param currentButtonId Button ID of the currently displayed embed
-     * @return Switch image button should be displayed
-     */
-    private boolean shouldDisplaySwitchButton(String currentButtonId) {
-        return currentButtonId.equals(stats.getId());
     }
 
     /**
@@ -640,7 +609,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .setFooter(footer, "attachment://image.png")
                 .setThumbnail(matchStats.getMode().getImageURL())
                 .setColor(getResultColour(matchStats.getResult()))
-                .setImage(matchStats.getDisplayImageURL());
+                .setImage(matchStats.getMap().getImageUrl());
     }
 
     /**
