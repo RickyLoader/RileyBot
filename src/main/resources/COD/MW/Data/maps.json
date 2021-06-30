@@ -8,6 +8,14 @@
       "real_name": "Krovnik Farmland",
       "loading_image_url": "https://i.imgur.com/FCJI3BD.jpg"
     },
+    "mp_herat": {
+      "real_name": "Al-Raab Airbase",
+      "loading_image_url": "https://i.imgur.com/HvlxOV4.png"
+    },
+    "mp_m_drainage": {
+      "real_name": "Drainage",
+      "loading_image_url": "https://i.imgur.com/6Ti9oSi.png"
+    },
     "mp_m_stadium": {
       "real_name": "Verdansk Stadium",
       "loading_image_url": "https://i.imgur.com/NTYG7Hz.jpg"
@@ -70,7 +78,7 @@
     },
     "mp_hideout": {
       "real_name": "Khandor Hideout",
-      "loading_image_url": "https://i.imgur.com/mIGIJl5.jpg"
+      "loading_image_url": "https://i.imgur.com/ogmgTVa.png"
     },
     "mp_m_wallco2": {
       "real_name": "Aisle 9",
