@@ -2,11 +2,12 @@ package COD;
 
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
+import Network.Secret;
 
 import static Command.Structure.CODLookupCommand.*;
 
 public class CODAPI {
-    private static final String BASE_URL = "http:192.168.1.110:8080/DiscordBotAPI/api/";
+    private static final String BASE_URL = "http://" + Secret.LOCAL_IP + ":8080" + Secret.LOCAL_API_PATH;
     private static final String MODERN_WARFARE_URL = BASE_URL + "modernwarfare/";
     private static final String COLD_WAR_URL = BASE_URL + "coldwar/";
 

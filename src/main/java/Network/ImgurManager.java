@@ -115,7 +115,7 @@ public class ImgurManager {
         }
         final String key = "relative_url";
         JSONObject responseBody = new JSONObject(response.body);
-        return responseBody.has(key) ? "http://" + Secret.LOCAL_IP + responseBody.getString(key) : null;
+        return responseBody.has(key) ? "http://" + Secret.LOCAL_IP + "/" + responseBody.getString(key) : null;
     }
 
     /**

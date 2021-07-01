@@ -36,7 +36,7 @@ public class NetworkRequest {
      */
     private Request.Builder getRequestBuilder() throws MalformedURLException {
         return new Request.Builder().url(
-                new URL(local ? "http://" + Secret.LOCAL_IP + "DiscordBotAPI/api/" + url : url)
+                new URL(local ? "http://" + Secret.LOCAL_IP + Secret.LOCAL_API_PATH + url : url)
         );
     }
 

@@ -131,7 +131,7 @@ public class OSRSLookupCommand extends LookupCommand {
                 String imageUrl = pageImages.get(getPage());
                 if(imageUrl == null) {
                     BufferedImage boss = hiscores.buildBossSection(bossStats);
-                    imageUrl = ImgurManager.localUpload(boss, false);
+                    imageUrl = ImgurManager.uploadImage(boss, false);
                     pageImages.put(getPage(), imageUrl);
                 }
 

@@ -5,6 +5,7 @@ import COD.CODManager.GAME;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -50,6 +51,7 @@ public class DiscordUser {
      * @param nameType Name type to retrieve
      * @return Saved name for given table
      */
+    @Nullable
     public static String getSavedName(long id, String nameType) {
         String json = new NetworkRequest("users/names/" + nameType + "/" + id, true).get().body;
         return json.isEmpty() || new JSONObject(json).isNull(nameType) ? null : new JSONObject(json).getString(nameType);
