@@ -196,6 +196,7 @@ public class DiscordCommandManager {
         addCommand(new OSRSLendingCommand());
         addCommand(new WhipPriceCommand());
         addCommand(new MinecraftServerCommand());
+        addCommand(new StuffNewsCommand());
         /* TODO
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());
