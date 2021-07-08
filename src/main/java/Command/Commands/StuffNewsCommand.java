@@ -22,6 +22,7 @@ public class StuffNewsCommand extends DiscordCommand {
 
     /**
      * Set to secret to prevent showing in help command
+     * Generate an array of news related prefixes to use when referring to a member.
      */
     public StuffNewsCommand() {
         super("[Stuff NZ URL]", "View some Stuff articles!");
@@ -76,6 +77,8 @@ public class StuffNewsCommand extends DiscordCommand {
      */
     private void displayArticle(CommandContext context, Article article) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String memberPrefix = getMemberPrefix();
+
         new CyclicalPageableEmbed<String>(
                 context,
                 article.getImages(),
@@ -89,7 +92,7 @@ public class StuffNewsCommand extends DiscordCommand {
                         .setColor(EmbedHelper.BLUE)
                         .setDescription(
                                 article.getIntro()
-                                        + "\n\n**" + getMemberPrefix() + "**: " + context.getMember().getAsMention()
+                                        + "\n\n**" + memberPrefix + "**: " + context.getMember().getAsMention()
                         )
                         .setFooter(buildFooter(pageDetails));
             }
@@ -98,6 +101,7 @@ public class StuffNewsCommand extends DiscordCommand {
              * Build the footer to use in the pageable article message embed.
              * This is in the format "Image: n/n | [optional author - ] article publish date"
              * e.g "Image: 1/2 | Dave Wobbly - 26/03/2020" or "Image: 1/2 | 26/03/2020"
+             *
              * @param pageDetails Details about the current page e.g "Image: 1/2"
              * @return Embed footer
              */
