@@ -2,6 +2,7 @@ package Command.Structure;
 
 import Bot.ResourceHandler;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -9,6 +10,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -45,6 +47,8 @@ public class EmbedHelper {
             SPACER_IMAGE = "https://i.imgur.com/24Xf03H.png",
             OSRS_LOGO = "https://i.imgur.com/Hoke7jA.png",
             BLANK_CHAR = "\u200e";
+
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11";
 
 
     public static final HashMap<String, String> languages = parseLanguages();
@@ -152,18 +156,33 @@ public class EmbedHelper {
         return "[" + text + "](" + url + ")";
     }
 
+    /**
+     * Download an image from the given URL connection.
+     * Returns null if the image cannot be read.
+     *
+     * @param connection URL connection to download image from
+     * @return Downloaded image or null
+     */
+    @Nullable
+    public static BufferedImage downloadImage(URLConnection connection) {
+        try {
+            connection.connect();
+            return ImageIO.read(connection.getInputStream());
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
 
     /**
-     * Download a video from the given URL.
-     * Returns null if the video size exceeds 8MB
+     * Download a video from the given URL connection.
+     * Returns null if the video size exceeds 8MB or an error occurs.
      *
-     * @param url Video url
-     * @return Byte array of video or null (if 8MB limit reached)
+     * @param connection URL connection to download video from
+     * @return Video byte array or null
      */
-    public static byte[] downloadVideo(String url) {
+    public static byte[] downloadVideo(URLConnection connection) {
         try {
-            URLConnection connection = new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
             connection.connect();
             InputStream is = connection.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -173,7 +192,7 @@ public class EmbedHelper {
                 if((os.size() / 1000) > 8192) {
                     is.close();
                     os.close();
-                    return null;
+                    throw new IOException("Video too large!");
                 }
                 os.write(buffer, 0, bytesIn);
             }
@@ -181,10 +200,27 @@ public class EmbedHelper {
             os.close();
             return os.toByteArray();
         }
-        catch(Exception e) {
-            e.printStackTrace();
+        catch(IOException e) {
+            return null;
         }
-        return null;
+    }
+
+    /**
+     * Download a video from the given URL.
+     * Returns null if the video size exceeds 8MB or an error occurs.
+     *
+     * @param url Video url
+     * @return Video byte array or null
+     */
+    public static byte[] downloadVideo(String url) {
+        try {
+            URLConnection connection = new URL(url).openConnection();
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+            return downloadVideo(new URL(url).openConnection());
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -193,12 +229,12 @@ public class EmbedHelper {
      * @param url URL to image
      * @return Downloaded image or null
      */
+    @Nullable
     public static BufferedImage downloadImage(String url) {
         try {
             URLConnection connection = new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.connect();
-            return ImageIO.read(connection.getInputStream());
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+            return downloadImage(connection);
         }
         catch(Exception e) {
             return null;
