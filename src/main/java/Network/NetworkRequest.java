@@ -22,7 +22,21 @@ public class NetworkRequest {
      * @param local Use local api
      */
     public NetworkRequest(String url, boolean local) {
-        this.client = new OkHttpClient();
+        this(url, local, true);
+    }
+
+    /**
+     * Initialise an OkHTTP client with a url
+     *
+     * @param url      URL to query
+     * @param local    Use local api
+     * @param redirect Follow redirects
+     */
+    public NetworkRequest(String url, boolean local, boolean redirect) {
+        this.client = new OkHttpClient.Builder()
+                .followRedirects(redirect)
+                .followSslRedirects(redirect)
+                .build();
         this.timeout = new NetworkResponse(null, NetworkResponse.TIMEOUT_CODE, null);
         this.url = url;
         this.local = local;
