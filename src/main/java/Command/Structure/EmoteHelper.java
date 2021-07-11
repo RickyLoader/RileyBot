@@ -843,4 +843,29 @@ public class EmoteHelper {
     public Emote getNightFog() {
         return get("854963157277736960");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/863745516540919830.png"/>
+     */
+    public Emote getTikTokPlays() {
+        return get("863745516540919830");
+    }
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/863743264779534366.png"/>
+     */
+    public Emote getTikTokShares() {
+        return get("863743264779534366");
+    }
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/863743264750567434.png"/>
+     */
+    public Emote getTikTokComments() {
+        return get("863743264750567434");
+    }
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/863743264804306954.png"/>
+     */
+    public Emote getTikTokLikes() {
+        return get("863743264804306954");
+    }
 }
