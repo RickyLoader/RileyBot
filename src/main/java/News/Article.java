@@ -12,7 +12,7 @@ public class Article {
     private final String browserUrl, dataUrl, title, intro;
     private final ArrayList<Author> authors;
     private final Date date;
-    private final ArrayList<String> images;
+    private final ArrayList<Image> images;
 
     /**
      * Create the news article
@@ -25,7 +25,7 @@ public class Article {
      * @param date       Date article was posted
      * @param images     List of images
      */
-    public Article(String browserUrl, String dataUrl, ArrayList<Author> authors, String title, @Nullable String intro, Date date, ArrayList<String> images) {
+    public Article(String browserUrl, String dataUrl, ArrayList<Author> authors, String title, @Nullable String intro, Date date, ArrayList<Image> images) {
         this.browserUrl = browserUrl;
         this.dataUrl = dataUrl;
         this.authors = authors;
@@ -67,7 +67,7 @@ public class Article {
      *
      * @return List of images
      */
-    public ArrayList<String> getImages() {
+    public ArrayList<Image> getImages() {
         return images;
     }
 

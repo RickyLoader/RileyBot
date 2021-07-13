@@ -51,11 +51,13 @@ public class StuffNews extends NewsOutlet {
         JSONObject data = new JSONObject(response.body);
 
         JSONArray imageList = data.getJSONArray("images");
-        ArrayList<String> images = new ArrayList<>();
-        final String sourceKey = "src";
+        ArrayList<Image> images = new ArrayList<>();
+        final String sourceKey = "src", captionKey = "caption";
 
         for(int i = 0; i < imageList.length(); i++) {
-            JSONArray variants = imageList.getJSONObject(i).getJSONArray("variants");
+            JSONObject imageSummary = imageList.getJSONObject(i);
+            JSONArray variants = imageSummary.getJSONArray("variants");
+            final String caption = imageSummary.has(captionKey) ? imageSummary.getString(captionKey) : null;
             String imageSrc = null;
 
             for(int j = 0; j < variants.length(); j++) {
@@ -72,7 +74,7 @@ public class StuffNews extends NewsOutlet {
             if(imageSrc == null) {
                 imageSrc = variants.getJSONObject(0).getString(sourceKey);
             }
-            images.add(imageSrc);
+            images.add(new Image(imageSrc, caption));
         }
 
         ArrayList<Author> authors = new ArrayList<>();

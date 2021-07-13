@@ -99,8 +99,8 @@ public class Newshub extends NewsOutlet {
      * @param articleDocument HTML document of article to get images from
      * @return List of images in article document (may be empty)
      */
-    private ArrayList<String> parseImages(Document articleDocument) {
-        ArrayList<String> imageList = new ArrayList<>();
+    private ArrayList<Image> parseImages(Document articleDocument) {
+        ArrayList<Image> imageList = new ArrayList<>();
 
         /*
          * Attempt to retrieve the open graph image tag to use as the first image.
@@ -111,7 +111,7 @@ public class Newshub extends NewsOutlet {
         String thumbnailName = null;
 
         if(thumbnail != null) {
-            imageList.add(thumbnail);
+            imageList.add(new Image(thumbnail, null));
             thumbnailName = getImageFileName(thumbnail);
         }
 
@@ -141,7 +141,13 @@ public class Newshub extends NewsOutlet {
                     continue;
                 }
             }
-            imageList.add(imageUrl);
+            Elements captions = figure.getElementsByClass("c-ArticleFigure-caption");
+            imageList.add(
+                    new Image(
+                            imageUrl,
+                            captions.isEmpty() ? null : captions.get(0).text()
+                    )
+            );
         }
 
         return imageList;

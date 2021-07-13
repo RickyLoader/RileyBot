@@ -6,6 +6,7 @@ import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
 import News.Article;
 import News.Author;
+import News.Image;
 import News.NewsOutlet;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -85,7 +86,7 @@ public class NewsCommand extends DiscordCommand {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String memberPrefix = getMemberPrefix();
 
-        new CyclicalPageableEmbed<String>(
+        new CyclicalPageableEmbed<Image>(
                 context,
                 article.getImages(),
                 1
@@ -138,8 +139,11 @@ public class NewsCommand extends DiscordCommand {
             }
 
             @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex, String imageUrl) {
-                builder.setImage(imageUrl);
+            public void displayItem(EmbedBuilder builder, int currentIndex, Image image) {
+                builder.setImage(image.getUrl());
+                if(image.hasCaption()) {
+                    builder.getDescriptionBuilder().append("\n\n**Caption**: ").append(image.getCaption());
+                }
             }
 
             @Override
