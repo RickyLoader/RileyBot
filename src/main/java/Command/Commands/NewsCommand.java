@@ -66,7 +66,7 @@ public class NewsCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        Article article = newsOutlet.getArticleByUrl(context.getLowerCaseMessage());
+        Article article = newsOutlet.getArticleByUrl(context.getMessageContent());
 
         // Not an article/error fetching
         if(article == null) {
@@ -170,6 +170,6 @@ public class NewsCommand extends DiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return newsOutlet.isNewsUrl(query);
+        return newsOutlet.isNewsUrl(message.getContentDisplay());
     }
 }
