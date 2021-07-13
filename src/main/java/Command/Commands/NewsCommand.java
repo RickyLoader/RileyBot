@@ -7,7 +7,7 @@ import Command.Structure.EmbedHelper;
 import News.Article;
 import News.Author;
 import News.Image;
-import News.NewsOutlet;
+import News.Outlets.NewsOutlet;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;

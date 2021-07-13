@@ -1,5 +1,6 @@
-package News;
+package News.Outlets;
 
+import News.Article;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.ParseException;

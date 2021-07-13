@@ -1,6 +1,6 @@
 package Command.Commands;
 
-import News.StuffNews;
+import News.Outlets.StuffNews;
 
 /**
  * Take Stuff news URLs and embed details about the article

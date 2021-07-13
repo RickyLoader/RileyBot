@@ -1,6 +1,6 @@
 package Command.Commands;
 
-import News.Newshub;
+import News.Outlets.Newshub;
 
 /**
  * Take Newshub news URLs and embed details about the article

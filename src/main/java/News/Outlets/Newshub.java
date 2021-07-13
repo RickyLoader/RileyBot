@@ -1,5 +1,8 @@
-package News;
+package News.Outlets;
 
+import News.Article;
+import News.Author;
+import News.Image;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

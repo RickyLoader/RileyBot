@@ -1,7 +1,10 @@
-package News;
+package News.Outlets;
 
 import Network.NetworkRequest;
 import Network.NetworkResponse;
+import News.Article;
+import News.Author;
+import News.Image;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
