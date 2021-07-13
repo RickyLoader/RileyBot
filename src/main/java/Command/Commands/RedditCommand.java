@@ -5,9 +5,7 @@ import Command.Commands.GIFCommand.GIF;
 import Command.Structure.*;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
-import Reddit.PostContent;
-import Reddit.RedditPost;
-import Reddit.Subreddit;
+import Reddit.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -15,8 +13,10 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -44,7 +44,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 return;
             }
             PostContent postContent = redditPost.getContent();
-            if(postContent.hasGallery()) {
+            if(postContent instanceof GalleryContent) {
                 showGalleryPost(context, redditPost);
                 return;
             }
@@ -52,15 +52,27 @@ public class RedditCommand extends OnReadyDiscordCommand {
             MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost);
             MessageAction sendRedditEmbed = channel.sendMessage(redditEmbed);
 
-            if(postContent.getType() == PostContent.TYPE.VIDEO) {
-                byte[] video = EmbedHelper.downloadVideo(postContent.getContent());
-                deleteUrl.queue(delete -> {
-                    if(video == null) {
-                        sendRedditEmbed.queue(message -> channel.sendMessage(postContent.getContent()).queue());
-                        return;
-                    }
-                    sendRedditEmbed.queue(message -> channel.sendFile(video, "video.mp4").queue());
-                });
+            if(postContent instanceof VideoPostContent) {
+                VideoPostContent videoPostContent = (VideoPostContent) postContent;
+
+                // Send post content
+                deleteUrl.queue(deleted -> sendRedditEmbed.queue(message -> channel.sendTyping().queue()));
+
+                // Attempt to download video
+                byte[] video = EmbedHelper.downloadVideo(
+                        videoPostContent.hasDownloadUrl()
+                                ? videoPostContent.getDownloadUrl()
+                                : videoPostContent.getNoAudioUrl()
+                );
+
+                // Send URL to video if download fails
+                if(video == null) {
+                    channel.sendMessage(videoPostContent.getNoAudioUrl()).queue();
+                    return;
+                }
+
+                // Send video file
+                channel.sendFile(video, "video.mp4").queue();
             }
             else {
                 deleteUrl.queue(delete -> sendRedditEmbed.queue());
@@ -77,7 +89,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
     private void showGalleryPost(CommandContext context, RedditPost galleryPost) {
         new CyclicalPageableEmbed<String>(
                 context,
-                galleryPost.getContent().getGallery(),
+                ((GalleryContent) galleryPost.getContent()).getGallery(),
                 1
         ) {
             @Override
@@ -120,24 +132,24 @@ public class RedditCommand extends OnReadyDiscordCommand {
         String description = buildDescription(post);
         PostContent content = post.getContent();
 
-        switch(content.getType()) {
-            case TEXT:
-                String text = content.getContent();
-                int limit = 300;
-                if(text.length() > limit) {
-                    text = text.substring(0, limit) + "...";
-                }
-                description = text + "\n\n" + description;
-                break;
-            case LINK:
-                description = "**Post link**: " + EmbedHelper.embedURL("View", content.getContent())
-                        + "\n\n" + description;
-                break;
-            case IMAGE:
-                builder.setImage(content.getContent());
-                break;
-            case VIDEO:
-                description = "**Note**: Videos will not have any sound!\n\n" + description;
+        if(content instanceof TextPostContent) {
+            String text = ((TextPostContent) content).getText();
+            int limit = 300;
+            if(text.length() > limit) {
+                text = text.substring(0, limit) + "...";
+            }
+            description = text + "\n\n" + description;
+        }
+        else if(content instanceof LinkContent) {
+            description = "**Post link**: " + EmbedHelper.embedURL("View", ((LinkContent) content).getUrl())
+                    + "\n\n" + description;
+        }
+        else if(content instanceof ImageContent) {
+            builder.setImage(((ImageContent) content).getImageUrl());
+        }
+        else {
+            description = "**Note**: Videos can take a a bit to show up and *may* not have sound!\n\n"
+                    + description;
         }
         return builder
                 .setFooter(buildFooter(post))
@@ -219,7 +231,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 info.getString("title"),
                 info.getString("author"),
                 url,
-                getPostContent(info),
+                getPostContent(info, url),
                 calculateRatio(info.getInt("ups"), info.getDouble("upvote_ratio")),
                 info.getInt("num_comments"),
                 getSubredditInfo(info.getString("subreddit")),
@@ -228,12 +240,35 @@ public class RedditCommand extends OnReadyDiscordCommand {
     }
 
     /**
-     * Get the content of the post - text/URL
+     * Reddit videos have the video & audio tracks served separately, attempt to
+     * use the https://viddit.red/ website to get a download URL for the combined tracks.
      *
-     * @param post Post JSON object
+     * @param postUrl URL to the reddit video post
+     * @return Video download URL or null
+     */
+    @Nullable
+    private String getVideoDownloadUrl(String postUrl) {
+        String url = "https://viddit.red/?url=" + postUrl;
+        try {
+            return Jsoup
+                    .connect(url)
+                    .get()
+                    .getElementById("dlbutton")
+                    .absUrl("href");
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get the content of the post - text/URL/video etc
+     *
+     * @param post    Post JSON object
+     * @param postUrl URL to the reddit post
      * @return Post content
      */
-    private PostContent getPostContent(JSONObject post) {
+    private PostContent getPostContent(JSONObject post, String postUrl) {
         String crosspost = "crosspost_parent_list";
 
         // Media is stored in the original post
@@ -243,21 +278,19 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
         String text = post.getString("selftext");
         if(post.getBoolean("is_video")) {
-            return new PostContent(
-                    post.getJSONObject("media").getJSONObject("reddit_video").getString("fallback_url"),
-                    PostContent.TYPE.VIDEO
+            String noAudioUrl = post.getJSONObject("media").getJSONObject("reddit_video").getString("fallback_url");
+            return new VideoPostContent(
+                    getVideoDownloadUrl(postUrl),
+                    noAudioUrl
             );
         }
         else if(text.isEmpty()) {
             String url = post.getString("url");
             if(post.has("post_hint") && post.getString("post_hint").equals("link")) {
-                return new PostContent(
-                        url,
-                        PostContent.TYPE.LINK
-                );
+                return new LinkContent(url);
             }
             if(url.matches("https://www.reddit.com/gallery/.+")) {
-                PostContent gallery = new PostContent(url, PostContent.TYPE.IMAGE);
+                GalleryContent gallery = new GalleryContent();
                 JSONObject mediaList = post.getJSONObject("media_metadata");
                 for(String key : mediaList.keySet()) {
                     JSONArray mediaUrls = mediaList
@@ -269,15 +302,9 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 }
                 return gallery;
             }
-            return new PostContent(
-                    processImageUrl(url),
-                    PostContent.TYPE.IMAGE
-            );
+            return new ImageContent(processImageUrl(url));
         }
-        return new PostContent(
-                text,
-                PostContent.TYPE.TEXT
-        );
+        return new TextPostContent(text);
     }
 
     /**
