@@ -199,7 +199,7 @@ public class EmoteHelper {
     /**
      * <img src="https://cdn.discordapp.com/emojis/850257322168418337.png"/>
      */
-    public Emote getNightFrost() {
+    public Emote getFrost() {
         return get("850257322168418337");
     }
 
