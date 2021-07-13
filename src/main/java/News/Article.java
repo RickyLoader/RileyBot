@@ -9,7 +9,8 @@ import java.util.Date;
  * News article
  */
 public class Article {
-    private final String browserUrl, dataUrl, title, intro, author;
+    private final String browserUrl, dataUrl, title, intro;
+    private final ArrayList<Author> authors;
     private final Date date;
     private final ArrayList<String> images;
 
@@ -18,16 +19,16 @@ public class Article {
      *
      * @param browserUrl URL to view the article in a browser
      * @param dataUrl    URL to view the article API data
-     * @param author     Article author
+     * @param authors    Article authors
      * @param title      Article title
-     * @param intro      Intro text for article
+     * @param intro      Intro text for article (optional)
      * @param date       Date article was posted
      * @param images     List of images
      */
-    public Article(String browserUrl, String dataUrl, @Nullable String author, String title, String intro, Date date, ArrayList<String> images) {
+    public Article(String browserUrl, String dataUrl, ArrayList<Author> authors, String title, @Nullable String intro, Date date, ArrayList<String> images) {
         this.browserUrl = browserUrl;
         this.dataUrl = dataUrl;
-        this.author = author;
+        this.authors = authors;
         this.title = title;
         this.intro = intro;
         this.date = date;
@@ -44,12 +45,12 @@ public class Article {
     }
 
     /**
-     * Get the author of the article
+     * Get a list of authors of the article
      *
-     * @return Article author
+     * @return Article authors
      */
-    public String getAuthor() {
-        return author;
+    public ArrayList<Author> getAuthors() {
+        return authors;
     }
 
     /**
@@ -108,11 +109,20 @@ public class Article {
     }
 
     /**
-     * Check if the article has an author
+     * Check if the article has any authors
      *
-     * @return Article has author
+     * @return Article has authors
      */
-    public boolean hasAuthor() {
-        return author != null;
+    public boolean hasAuthors() {
+        return !authors.isEmpty();
+    }
+
+    /**
+     * Check if the article has an intro text
+     *
+     * @return Article has intro text
+     */
+    public boolean hasIntro() {
+        return intro != null;
     }
 }

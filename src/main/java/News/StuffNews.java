@@ -6,44 +6,28 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Stuff NZ news parsing using their mobile app API
  */
-public class StuffNews {
+public class StuffNews extends NewsOutlet {
     private static final String
             BASE_URL = "https://www.stuff.co.nz/",
-            ARTICLE_URL = BASE_URL + "[A-Za-z0-9-]+/.+",
             API_ENTRY = "_json/";
-    public static final String LOGO = "https://i.imgur.com/zXaHmO1.png";
 
     /**
-     * Check if the given URL is a Stuff news URL
-     *
-     * @param query Query to check
-     * @return Query is a Stuff news Url
+     * Initialise Stuff news values
      */
-    public static boolean isNewsUrl(String query) {
-        return query.matches(ARTICLE_URL);
+    public StuffNews() {
+        super("Stuff", "https://i.imgur.com/zXaHmO1.png", BASE_URL + "[A-Za-z0-9-]+/.+");
     }
 
-    /**
-     * Get the Stuff article info from the given URL.
-     *
-     * @param articleUrl URL to article
-     * @return Article info or null (if any errors occur/URL is not a news article)
-     */
-    @Nullable
-    public static Article getArticleByUrl(String articleUrl) {
-        if(!isNewsUrl(articleUrl)) {
-            return null;
-        }
+    @Override
+    public @Nullable Article parseArticleByUrl(String articleUrl) {
 
-        String articleLocation = articleUrl.replaceFirst(BASE_URL, ""); // "CATEGORY/ID/PATH-TO-ARTICLE"
+        // "CATEGORY/ID/PATH-TO-ARTICLE"
+        String articleLocation = articleUrl.replaceFirst(BASE_URL, "");
 
         // https://www.stuff.co.nz/_json/CATEGORY/ID/PATH-TO-ARTICLE
         String dataUrl = BASE_URL + API_ENTRY + articleLocation;
@@ -58,7 +42,7 @@ public class StuffNews {
      * @return Article or null (if any errors occur/URL is not a news article)
      */
     @Nullable
-    private static Article parseArticle(String dataUrl) {
+    private Article parseArticle(String dataUrl) {
         NetworkResponse response = new NetworkRequest(dataUrl, false).get();
         if(response.code == NetworkResponse.TIMEOUT_CODE || response.code == 404) {
             return null;
@@ -91,31 +75,21 @@ public class StuffNews {
             images.add(imageSrc);
         }
 
+        ArrayList<Author> authors = new ArrayList<>();
         String author = data.getString("byline");
+
+        if(author != null) {
+            authors.add(new Author(author, null, null));
+        }
+
         return new Article(
                 BASE_URL + data.getString("path").replaceFirst("/", ""),
                 dataUrl,
-                author.isEmpty() ? null : author,
+                authors,
                 data.getString("title"),
                 data.getString("intro"),
                 parseDate(data.getString("datetime_iso8601")),
                 images
         );
-    }
-
-    /**
-     * Parse the given Stuff API date String in to a Date.
-     * The date String should be in ISO 8601 format.
-     *
-     * @param dateString Date String in ISO 8601 format - e.g "20200320T212450+1300"
-     * @return Date from date String (or today's date if unable to parse)
-     */
-    private static Date parseDate(String dateString) {
-        try {
-            return new SimpleDateFormat("yyyyMMdd'T'HHmmssZZZZZ").parse(dateString);
-        }
-        catch(ParseException e) {
-            return new Date();
-        }
     }
 }
