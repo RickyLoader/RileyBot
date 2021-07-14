@@ -198,6 +198,7 @@ public class DiscordCommandManager {
         addCommand(new MinecraftServerCommand());
         addCommand(new StuffNewsCommand());
         addCommand(new NewshubCommand());
+        addCommand(new NZHeraldCommand());
         addCommand(new TikTokCommand());
         /* TODO
             addCommand(new FacebookCommand());
