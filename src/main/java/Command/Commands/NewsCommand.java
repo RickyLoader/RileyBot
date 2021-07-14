@@ -66,14 +66,16 @@ public class NewsCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        Article article = newsOutlet.getArticleByUrl(context.getMessageContent());
+        new Thread(() -> {
+            Article article = newsOutlet.getArticleByUrl(context.getMessageContent());
 
-        // Not an article/error fetching
-        if(article == null) {
-            return;
-        }
+            // Not an article/error fetching
+            if(article == null) {
+                return;
+            }
 
-        context.getMessage().delete().queue(deleted -> displayArticle(context, article));
+            context.getMessage().delete().queue(deleted -> displayArticle(context, article));
+        }).start();
     }
 
     /**
