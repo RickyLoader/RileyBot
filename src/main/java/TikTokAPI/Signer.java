@@ -27,6 +27,7 @@ public class Signer {
      * @see <a href="https://stackoverflow.com/a/52108199/7466895">Modified chrome driver</a>
      */
     public Signer(String userAgent) {
+        System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
         this.browser = new ChromeDriver(getBrowserOptions(userAgent));
         this.userAgent = userAgent;
         browser.get(TikTok.BASE_WEB_URL);
