@@ -11,6 +11,8 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 
+import static Command.Structure.HTMLUtils.getMetaTagValue;
+
 /**
  * Newshub news parsing via scraping their website
  */
@@ -191,27 +193,5 @@ public class Newshub extends NewsOutlet {
         catch(Exception e) {
             return null;
         }
-    }
-
-    /**
-     * Get a value from a meta tag in the given HTML document
-     *
-     * @param document       HTML document to retrieve tag from
-     * @param attributeKey   Key of the meta attribute to retrieve - e.g "name", "property" etc
-     * @param attributeValue Value of the key to retrieve e.g "og:type", "description" etc
-     * @return Meta tag value or null
-     */
-    @Nullable
-    private String getMetaTagValue(Document document, String attributeKey, String attributeValue) {
-        Elements metaTags = document.getElementsByTag("meta");
-        Element desiredTag = null;
-
-        for(Element metaTag : metaTags) {
-            if(!metaTag.attr(attributeKey).equals(attributeValue)) {
-                continue;
-            }
-            desiredTag = metaTag;
-        }
-        return desiredTag == null ? null : desiredTag.attr("content");
     }
 }
