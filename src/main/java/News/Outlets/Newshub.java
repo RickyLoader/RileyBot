@@ -161,8 +161,8 @@ public class Newshub extends NewsOutlet {
      * This is the last argument in an image URL and remains constant despite the non constant size parameters that
      * may precede it.
      *
-     * @param imageUrl URL to a Newshub image e.g "https://URL-TO-IMAGE/SIZE/VERSION/IMAGE_NAME.jpg
-     * @return Image file name e.g "IMAGE_NAME".jpg
+     * @param imageUrl URL to a Newshub image e.g "https://URL-TO-IMAGE/SIZE/VERSION/IMAGE_NAME.jpg"
+     * @return Image file name e.g "IMAGE_NAME.jpg"
      */
     private String getImageFileName(String imageUrl) {
         String[] urlArgs = imageUrl.split("/");
@@ -206,7 +206,6 @@ public class Newshub extends NewsOutlet {
         Elements metaTags = document.getElementsByTag("meta");
         Element desiredTag = null;
 
-        // Attempt to locate page type
         for(Element metaTag : metaTags) {
             if(!metaTag.attr(attributeKey).equals(attributeValue)) {
                 continue;
