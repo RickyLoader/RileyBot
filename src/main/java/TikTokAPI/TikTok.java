@@ -18,17 +18,20 @@ import java.util.HashMap;
  */
 public class TikTok {
     public static final String
+            HOST = "tiktok.com",
             LOGO = "https://i.imgur.com/yVw8Llj.png",
-            BASE_WEB_URL = "https://www.tiktok.com/";
+            BASE_WEB_URL = "https://www." + HOST + "/";
 
     private static final String
-            BASE_SHORT_URL = "https://vm.tiktok.com/",
-            BASE_MOBILE_URL = "https://m.tiktok.com/",
-            WEB_VIDEO_URL = BASE_WEB_URL + "@.+/video/[0-9]+(/)?(\\?.+)?",
-            SHORT_VIDEO_URL = BASE_SHORT_URL + "(.+)+(/)?(\\?.+)?",
-            MOBILE_VIDEO_URL = BASE_MOBILE_URL + "v/[0-9]+(/)?(\\?.+)?",
+            BASE_SHORT_URL = "https://vm." + HOST + "/",
+            BASE_MOBILE_URL = "https://m." + HOST + "/",
             BASE_API_URL = BASE_MOBILE_URL + "api/",
-            USER_AGENT = "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36";
+            USER_ID = "@[A-Za-z0-9_.]+",
+            VIDEO_ID = "[0-9]+",
+            URL_END = "(/)?(\\?.+)?", // Optional trailing slash & URL parameters
+            WEB_VIDEO_URL = BASE_WEB_URL + USER_ID + "/video/" + VIDEO_ID + URL_END,
+            SHORT_VIDEO_URL = BASE_SHORT_URL + "[A-Za-z0-9]+" + URL_END,
+            MOBILE_VIDEO_URL = BASE_MOBILE_URL + "v/" + VIDEO_ID + URL_END;
 
     private final Signer signer;
     private final HashMap<String, String> headers;
@@ -37,7 +40,7 @@ public class TikTok {
      * Initialise the API URL signer & request headers
      */
     public TikTok() {
-        this.signer = new Signer(USER_AGENT);
+        this.signer = new Signer(Signer.DEFAULT_USER_AGENT);
         this.headers = getHeaders();
     }
 
@@ -114,7 +117,17 @@ public class TikTok {
         }
 
         // Shortened video URL requires an extra request to resolve the original URL
-        String[] urlArgs = (isShortVideoUrl(url) ? getFullVideoUrl(url) : url)
+        if(isShortVideoUrl(url)) {
+            String originalUrl = getFullVideoUrl(url);
+
+            // May no longer exist
+            if(originalUrl == null) {
+                return null;
+            }
+            url = originalUrl;
+        }
+
+        String[] urlArgs = url
                 .split("\\?")[0] // Remove any parameters
                 .split("/");
 
@@ -127,8 +140,9 @@ public class TikTok {
      * Return the full URL.
      *
      * @param shortVideoUrl Shortened TikTok URL
-     * @return Full TikTok URL
+     * @return Full TikTok URL or null (if the video no longer exists)
      */
+    @Nullable
     private String getFullVideoUrl(String shortVideoUrl) {
         if(!isShortVideoUrl(shortVideoUrl)) {
             return shortVideoUrl;
@@ -139,14 +153,14 @@ public class TikTok {
 
         // Issue with URL
         if(response.code != 301) {
-            return shortVideoUrl;
+            return null;
         }
 
         String fullUrl = response.headers.get("Location");
 
         // No redirect provided
         if(fullUrl == null) {
-            return shortVideoUrl;
+            return null;
         }
 
         // URL is given in mobile format: https://m.tiktok.com/v/6950804474768264450.html?arg1&arg2...

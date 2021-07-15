@@ -40,7 +40,6 @@ public class TikTokCommand extends OnReadyDiscordCommand {
     @Override
     public void execute(CommandContext context) {
         final MessageChannel channel = context.getMessageChannel();
-        context.getMessage().delete().queue();
 
         new Thread(() -> {
             TikTokPost post = tikTok.getVideoByUrl(context.getMessageContent());
@@ -49,6 +48,8 @@ public class TikTokCommand extends OnReadyDiscordCommand {
             if(post == null) {
                 return;
             }
+
+            context.getMessage().delete().queue();
 
             // Send the message and add the video (to ensure it appears below the message)
             getMessageAction(channel, post).queue(message -> {
