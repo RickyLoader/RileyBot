@@ -27,11 +27,13 @@ public class TikTok {
             BASE_MOBILE_URL = "https://m." + HOST + "/",
             BASE_API_URL = BASE_MOBILE_URL + "api/",
             USER_ID = "@[A-Za-z0-9_.]+",
-            VIDEO_ID = "[0-9]+",
+            NUMERIC_ID = "[0-9]+",
             URL_END = "(/)?(\\?.+)?", // Optional trailing slash & URL parameters
-            WEB_VIDEO_URL = BASE_WEB_URL + USER_ID + "/video/" + VIDEO_ID + URL_END,
-            SHORT_VIDEO_URL = BASE_SHORT_URL + "[A-Za-z0-9]+" + URL_END,
-            MOBILE_VIDEO_URL = BASE_MOBILE_URL + "v/" + VIDEO_ID + URL_END;
+            SHORT_URL = BASE_SHORT_URL + "[A-Za-z0-9]+" + URL_END,
+            WEB_VIDEO_URL = BASE_WEB_URL + USER_ID + "/video/" + NUMERIC_ID + URL_END,
+            MOBILE_VIDEO_URL = BASE_MOBILE_URL + "v/" + NUMERIC_ID + URL_END,
+            WEB_USER_URL = BASE_WEB_URL + USER_ID + URL_END,
+            MOBILE_USER_URL = BASE_MOBILE_URL + "h5/share/usr/" + NUMERIC_ID + URL_END;
 
     private final Signer signer;
     private final HashMap<String, String> headers;
@@ -45,6 +47,50 @@ public class TikTok {
     }
 
     /**
+     * Check if the given URL is a TikTok user profile or video URL.
+     * This will also return true if the URL is shortened, but the full URL will need to be resolved before using.
+     *
+     * @param query Query to check
+     * @return Query is a TikTok user profile/video URL
+     */
+    public static boolean isTikTokUrl(String query) {
+        return isUserUrl(query) || isVideoUrl(query) || isShortUrl(query);
+    }
+
+    /**
+     * Check if the given URL is a TikTok user profile URL
+     * These come in various formats.
+     *
+     * @param query Query to check
+     * @return Query is a TikTok user profile URL
+     */
+    public static boolean isUserUrl(String query) {
+        return isMobileUserUrl(query) || isWebUserUrl(query);
+    }
+
+    /**
+     * Check if the given URL is a mobile TikTok user URL
+     * e.g https://m.tiktok.com/h5/share/usr/6813560925565128838
+     *
+     * @param query Query to check
+     * @return Query is a mobile TikTok user URL
+     */
+    private static boolean isMobileUserUrl(String query) {
+        return query.matches(MOBILE_USER_URL);
+    }
+
+    /**
+     * Check if the given URL is a web (normal) TikTok user URL
+     * e.g https://www.tiktok.com/@davedobbyn
+     *
+     * @param query Query to check
+     * @return Query is a web TikTok user URL
+     */
+    private static boolean isWebUserUrl(String query) {
+        return query.matches(WEB_USER_URL);
+    }
+
+    /**
      * Check if the given URL is a TikTok video URL
      * These come in various formats.
      *
@@ -52,7 +98,7 @@ public class TikTok {
      * @return Query is a TikTok video URL
      */
     public static boolean isVideoUrl(String query) {
-        return isShortVideoUrl(query) || isWebVideoUrl(query) || isMobileVideoUrl(query);
+        return isWebVideoUrl(query) || isMobileVideoUrl(query);
     }
 
     /**
@@ -62,7 +108,7 @@ public class TikTok {
      * @param query Query to check
      * @return Query is a mobile TikTok video URL
      */
-    public static boolean isMobileVideoUrl(String query) {
+    private static boolean isMobileVideoUrl(String query) {
         return query.matches(MOBILE_VIDEO_URL);
     }
 
@@ -73,19 +119,20 @@ public class TikTok {
      * @param query Query to check
      * @return Query is a web TikTok video URL
      */
-    public static boolean isWebVideoUrl(String query) {
+    private static boolean isWebVideoUrl(String query) {
         return query.matches(WEB_VIDEO_URL);
     }
 
     /**
-     * Check if the given URL is a shortened TikTok video URL
+     * Check if the given URL is a shortened TikTok URL
      * e.g https://vm.tiktok.com/ZSJ4XccKG/
+     * This URL may point to a user or a post
      *
      * @param query Query to check
      * @return Query is a shortened TikTok video URL
      */
-    private static boolean isShortVideoUrl(String query) {
-        return query.matches(SHORT_VIDEO_URL);
+    public static boolean isShortUrl(String query) {
+        return query.matches(SHORT_URL);
     }
 
     /**
@@ -116,17 +163,6 @@ public class TikTok {
             return null;
         }
 
-        // Shortened video URL requires an extra request to resolve the original URL
-        if(isShortVideoUrl(url)) {
-            String originalUrl = getFullVideoUrl(url);
-
-            // May no longer exist
-            if(originalUrl == null) {
-                return null;
-            }
-            url = originalUrl;
-        }
-
         String[] urlArgs = url
                 .split("\\?")[0] // Remove any parameters
                 .split("/");
@@ -135,21 +171,21 @@ public class TikTok {
     }
 
     /**
-     * Make a request to TikTok with a shortened TikTok post URL.
-     * TikTok responds with a 301 moved & provides the full URL to the post.
+     * Make a request to TikTok with a shortened TikTok URL.
+     * TikTok responds with a 301 moved & provides the full URL, this URL may point to a user or a post.
      * Return the full URL.
      *
-     * @param shortVideoUrl Shortened TikTok URL
-     * @return Full TikTok URL or null (if the video no longer exists)
+     * @param shortUrl Shortened TikTok URL
+     * @return Full TikTok URL or null (if the redirect no longer exists)
      */
     @Nullable
-    private String getFullVideoUrl(String shortVideoUrl) {
-        if(!isShortVideoUrl(shortVideoUrl)) {
-            return shortVideoUrl;
+    public String getFullUrl(String shortUrl) {
+        if(!isShortUrl(shortUrl)) {
+            return shortUrl;
         }
 
         // Ignore redirects
-        NetworkResponse response = new NetworkRequest(shortVideoUrl, false, false).get();
+        NetworkResponse response = new NetworkRequest(shortUrl, false, false).get();
 
         // Issue with URL
         if(response.code != 301) {
@@ -332,7 +368,7 @@ public class TikTok {
     }
 
     /**
-     * Generate the API URL required to fetch the details of the TikTok video from the given video ID.
+     * Generate the API URL required to fetch the details of a TikTok video from the given video ID.
      *
      * @param videoId Unique video ID - e.g "6982679574333213957"
      * @return API URL required to fetch video details
