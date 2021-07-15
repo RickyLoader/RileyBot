@@ -850,22 +850,46 @@ public class EmoteHelper {
     public Emote getTikTokPlays() {
         return get("863745516540919830");
     }
+
     /**
      * <img src = "https://cdn.discordapp.com/emojis/863743264779534366.png"/>
      */
     public Emote getTikTokShares() {
         return get("863743264779534366");
     }
+
     /**
      * <img src = "https://cdn.discordapp.com/emojis/863743264750567434.png"/>
      */
     public Emote getTikTokComments() {
         return get("863743264750567434");
     }
+
     /**
      * <img src = "https://cdn.discordapp.com/emojis/863743264804306954.png"/>
      */
     public Emote getTikTokLikes() {
         return get("863743264804306954");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/865180970213834762.png"/>
+     */
+    public Emote getTikTokFollowers() {
+        return get("865180970213834762");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/865178766291238962.png"/>
+     */
+    public Emote getTikTokFollowing() {
+        return get("865178766291238962");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/865176840826388500.png"/>
+     */
+    public Emote getTikTokVideos() {
+        return get("865176840826388500");
     }
 }

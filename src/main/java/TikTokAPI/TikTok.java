@@ -7,6 +7,9 @@ import Network.NetworkResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -171,11 +174,39 @@ public class TikTok {
     }
 
     /**
+     * Get a TikTok user by their URL.
+     * This will attempt to scrape the creator's details from the HTML.
+     *
+     * @param url URL to TikTok user
+     * @return TikTok user from URL or null (on scraping error/not a valid URL)
+     */
+    @Nullable
+    public Creator getUserByUrl(String url) {
+        if(!isUserUrl(url)) {
+            return null;
+        }
+
+        url = url.split("\\?")[0]; // Remove any parameters
+        NetworkResponse response = new NetworkRequest(url, false).get(headers);
+
+        // User doesn't exist/is private
+        if(response.code != 200) {
+            return null;
+        }
+        try {
+            return parseCreator(Jsoup.parse(response.body));
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Make a request to TikTok with a shortened TikTok URL.
      * TikTok responds with a 301 moved & provides the full URL, this URL may point to a user or a post.
      * Return the full URL.
      *
-     * @param shortUrl Shortened TikTok URL
+     * @param shortUrl Shortened TikTok URL - e.g https://vm.tiktok.com/ZSJ4XccKG/
      * @return Full TikTok URL or null (if the redirect no longer exists)
      */
     @Nullable
@@ -226,7 +257,11 @@ public class TikTok {
 
         JSONObject videoData = itemData.getJSONObject("video");
 
-        Creator creator = parseCreator(itemData.getJSONObject("author"));
+        Creator creator = parseCreator(
+                itemData.getJSONObject("author"),
+                itemData.getJSONObject("authorStats")
+        );
+
         String description = itemData.getString("desc");
 
         return new TikTokPost(
@@ -242,7 +277,8 @@ public class TikTok {
     }
 
     /**
-     * Parse the social response to a TikTok post from the given API social stats JSON
+     * Parse the social response to a TikTok post from the given API social stats JSON.
+     * This is the number of likes, shares, etc.
      *
      * @param socialData API social stats data
      * @return Social response from data
@@ -253,6 +289,22 @@ public class TikTok {
                 socialData.getInt("commentCount"),
                 socialData.getInt("shareCount"),
                 socialData.getInt("playCount")
+        );
+    }
+
+    /**
+     * Parse a creator's social stats from the given API creator stats JSON.
+     * This is the number of follows, followers, etc.
+     *
+     * @param creatorStats API creator stats data
+     * @return Creator social stats from data
+     */
+    private SocialStats parseSocialStats(JSONObject creatorStats) {
+        return new SocialStats(
+                creatorStats.getInt("followingCount"),
+                creatorStats.getInt("followerCount"),
+                creatorStats.getInt("heartCount"),
+                creatorStats.getInt("videoCount")
         );
     }
 
@@ -273,19 +325,62 @@ public class TikTok {
     /**
      * Parse a TikTok creator from the given API creator JSON
      *
-     * @param creatorData API creator data
+     * @param creatorData  API creator overview data - name etc
+     * @param creatorStats API creator stats data - number of followers etc
      * @return Creator from data
      */
-    private Creator parseCreator(JSONObject creatorData) {
+    private Creator parseCreator(JSONObject creatorData, JSONObject creatorStats) {
         final String uniqueId = creatorData.getString("uniqueId");
         final String signature = creatorData.getString("signature");
+
         return new Creator(
                 uniqueId,
                 creatorData.getString("nickname"),
                 signature.isEmpty() ? null : signature,
-                BASE_WEB_URL + "@" + uniqueId,
-                downloadImage(creatorData.getString("avatarThumb"))
+                buildUserUrl(uniqueId),
+                downloadImage(creatorData.getString("avatarThumb")),
+                parseSocialStats(creatorStats)
         );
+    }
+
+    /**
+     * Attempt to parse a TikTok creator from the HTML document of their profile page.
+     * There is a JSON response embedded in a script element of the HTML that can be parsed.
+     *
+     * @param userDocument HTML document of creator
+     * @return Creator from HTML document or null (if an error occurs)
+     */
+    @Nullable
+    private Creator parseCreator(Document userDocument) {
+        try {
+            final Element script = userDocument.getElementById("__NEXT_DATA__");
+
+            // Script not present
+            if(script == null) {
+                throw new Exception("JSON not present in script tag!");
+            }
+
+            // Exception will be thrown if the user data is not present
+            JSONObject userData = new JSONObject(script.html())
+                    .getJSONObject("props")
+                    .getJSONObject("pageProps")
+                    .getJSONObject("userInfo");
+
+            return parseCreator(userData.getJSONObject("user"), userData.getJSONObject("stats"));
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Build a URL to a creator's page.
+     *
+     * @param uniqueId Creator's unique ID - e.g "davedobbyn"
+     * @return URL to creator's page - e.g "https://www.tiktok.com/@davedobbyn"
+     */
+    private String buildUserUrl(String uniqueId) {
+        return BASE_WEB_URL + "@" + uniqueId;
     }
 
     /**

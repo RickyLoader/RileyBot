@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.text.SimpleDateFormat;
@@ -25,7 +26,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
             CREATOR_FILENAME = "creator.png";
 
     private final TikTok tikTok;
-    private String likes, comments, shares, plays, blank;
+    private String likes, comments, shares, plays, followers, following, videos, blank;
 
     /**
      * Set to secret to prevent showing in help command.
@@ -40,41 +41,64 @@ public class TikTokCommand extends OnReadyDiscordCommand {
     @Override
     public void execute(CommandContext context) {
         final MessageChannel channel = context.getMessageChannel();
+        final AuditableRestAction<Void> deleteAction = context.getMessage().delete();
 
         new Thread(() -> {
-            TikTokPost post = tikTok.getVideoByUrl(context.getMessageContent());
+            String url = context.getMessageContent();
 
-            // API error
-            if(post == null) {
-                return;
+            // Shortened URL requires an extra request to resolve the original URL
+            if(TikTok.isShortUrl(url)) {
+                String originalUrl = tikTok.getFullUrl(url);
+
+                // May no longer exist
+                if(originalUrl == null) {
+                    return;
+                }
+                url = originalUrl;
             }
 
-            context.getMessage().delete().queue();
+            if(TikTok.isVideoUrl(url)) {
+                TikTokPost post = tikTok.getVideoByUrl(url);
 
-            // Send the message and add the video (to ensure it appears below the message)
-            getMessageAction(channel, post).queue(message -> {
-                if(post.hasVideo()) {
-                    channel.sendFile(post.getVideo(), VIDEO_FILENAME).queue();
+                // API error
+                if(post == null) {
+                    return;
                 }
-            });
+
+                deleteAction.queue(deleted -> {
+
+                    // Send the message and add the video (to ensure it appears below the message)
+                    getPostMessageAction(channel, post).queue(message -> {
+                        if(post.hasVideo()) {
+                            channel.sendFile(post.getVideo(), VIDEO_FILENAME).queue();
+                        }
+                    });
+                });
+            }
+            else {
+                Creator creator = tikTok.getUserByUrl(url);
+
+                // Scraping error
+                if(creator == null) {
+                    return;
+                }
+
+                deleteAction.queue(unused -> getCreatorMessageAction(channel, creator).queue());
+            }
         }).start();
     }
 
     /**
-     * Get the message action required to send a TikTok embed to the given channel
+     * Get an embed builder initialised with the TikTok logo as the thumbnail, the colour set to purple, and the
+     * given creator set as the author.
      *
-     * @param channel Channel to send to
-     * @param post    Post to create message action for
-     * @return TikTok post message action
+     * @param creator Creator to use as the embed author
+     * @return TikTok embed builder
      */
-    private MessageAction getMessageAction(MessageChannel channel, TikTokPost post) {
-        Creator creator = post.getCreator();
-        Music music = post.getMusic();
-
-        EmbedBuilder builder = new EmbedBuilder()
-                .setThumbnail(TikTok.LOGO)
+    private EmbedBuilder getTikTokEmbedBuilder(Creator creator) {
+        return new EmbedBuilder()
                 .setColor(EmbedHelper.PURPLE)
-                .setTitle(post.hasDescription() ? post.getDescription() : "No title provided!", post.getUrl())
+                .setThumbnail(TikTok.LOGO)
 
                 // Author image may fail to download - use a default image URL when this happens
                 .setAuthor(
@@ -83,7 +107,58 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                         creator.hasThumbnailImage()
                                 ? ATTACHMENT_PREFIX + CREATOR_FILENAME
                                 : Creator.DEFAULT_THUMBNAIL_URL
-                )
+                );
+    }
+
+    /**
+     * Add the image file of the creator to the given message action if
+     * it is available.
+     *
+     * @param action  Message action to add creator image file to
+     * @param creator Creator with optional image file
+     * @return Action with author image file
+     */
+    private MessageAction addAuthorImage(MessageAction action, Creator creator) {
+        if(!creator.hasThumbnailImage()) {
+            return action;
+        }
+
+        // Add image file if it is available
+        return action.addFile(creator.getThumbnailImage(), CREATOR_FILENAME);
+    }
+
+    /**
+     * Get the message action required to send a TikTok creator embed to the given channel
+     *
+     * @param channel Channel to send to
+     * @param creator Creator to build message action for
+     * @return TikTok creator message action
+     */
+    private MessageAction getCreatorMessageAction(MessageChannel channel, Creator creator) {
+        EmbedBuilder builder = getTikTokEmbedBuilder(creator);
+        String description = (creator.hasSignature() ? creator.getSignature() : "No signature provided!")
+                + "\n\n"
+                + buildCreatorEmoteStatsString(creator.getStats());
+
+        MessageAction action = channel.sendMessage(builder.setDescription(description).build());
+
+        return addAuthorImage(action, creator);
+    }
+
+    /**
+     * Get the message action required to send a TikTok post embed to the given channel
+     *
+     * @param channel Channel to send to
+     * @param post    Post to create message action for
+     * @return TikTok post message action
+     */
+    private MessageAction getPostMessageAction(MessageChannel channel, TikTokPost post) {
+        Creator creator = post.getCreator();
+        Music music = post.getMusic();
+
+        EmbedBuilder builder = getTikTokEmbedBuilder(creator)
+                .setTitle(post.hasDescription() ? post.getDescription() : "No title provided!", post.getUrl())
+
                 // Video may fail to download - use an image preview if available
                 .setImage(
                         shouldDisplayPreviewImage(post)
@@ -107,17 +182,12 @@ public class TikTokCommand extends OnReadyDiscordCommand {
             action = action.addFile(post.getPreviewImage(), VIDEO_PREVIEW_FILENAME);
         }
 
-        // Attach thumbnail image for the creator
-        if(creator.hasThumbnailImage()) {
-            action = action.addFile(creator.getThumbnailImage(), CREATOR_FILENAME);
-        }
-
         // Attach album thumbnail image
         if(music.hasThumbnailImage()) {
             action = action.addFile(music.getThumbnailImage(), MUSIC_FILENAME);
         }
 
-        return action;
+        return addAuthorImage(action, creator);
     }
 
     /**
@@ -135,6 +205,22 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                 + shares + " " + formatSocialCount(socialResponse.getShares())
                 + blank
                 + plays + " " + formatSocialCount(socialResponse.getPlays());
+    }
+
+    /**
+     * Build a String displaying the given creator's stats (followers/likes/etc) with their accompanying emotes.
+     *
+     * @param socialStats Creator's social stats
+     * @return String detailing creator's social stats
+     */
+    private String buildCreatorEmoteStatsString(SocialStats socialStats) {
+        return likes + " " + formatSocialCount(socialStats.getLikes())
+                + blank
+                + followers + " " + formatSocialCount(socialStats.getFollowers())
+                + blank
+                + following + " " + formatSocialCount(socialStats.getFollowing())
+                + blank
+                + videos + " " + formatSocialCount(socialStats.getVideoCount());
     }
 
     /**
@@ -170,7 +256,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return TikTok.isVideoUrl(message.getContentDisplay());
+        return TikTok.isTikTokUrl(message.getContentDisplay());
     }
 
     /**
@@ -182,6 +268,9 @@ public class TikTokCommand extends OnReadyDiscordCommand {
         this.comments = emoteHelper.getTikTokComments().getAsMention();
         this.plays = emoteHelper.getTikTokPlays().getAsMention();
         this.shares = emoteHelper.getTikTokShares().getAsMention();
+        this.followers = emoteHelper.getTikTokFollowers().getAsMention();
+        this.following = emoteHelper.getTikTokFollowing().getAsMention();
+        this.videos = emoteHelper.getTikTokVideos().getAsMention();
         this.blank = emoteHelper.getBlankGap().getAsMention();
     }
 }
