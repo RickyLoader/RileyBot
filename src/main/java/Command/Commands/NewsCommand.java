@@ -1,14 +1,13 @@
 package Command.Commands;
 
-import Command.Structure.CommandContext;
-import Command.Structure.CyclicalPageableEmbed;
-import Command.Structure.DiscordCommand;
-import Command.Structure.EmbedHelper;
+import Command.Structure.*;
 import News.Article;
 import News.Author;
 import News.Image;
 import News.Outlets.NewsOutlet;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
@@ -19,10 +18,11 @@ import java.util.Random;
 /**
  * Take news URLs and embed details about the article
  */
-public class NewsCommand extends DiscordCommand {
+public class NewsCommand extends OnReadyDiscordCommand {
     private final String[] prefixes;
     private final Random random;
     private final NewsOutlet newsOutlet;
+    private Emote parseFailEmote;
 
     /**
      * Set to secret to prevent showing in help command
@@ -66,15 +66,17 @@ public class NewsCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
+        Message message = context.getMessage();
         new Thread(() -> {
             Article article = newsOutlet.getArticleByUrl(context.getMessageContent());
 
             // Not an article/error fetching
             if(article == null) {
+                message.addReaction(parseFailEmote).queue();
                 return;
             }
 
-            context.getMessage().delete().queue(deleted -> displayArticle(context, article));
+            message.delete().queue(deleted -> displayArticle(context, article));
         }).start();
     }
 
@@ -173,5 +175,10 @@ public class NewsCommand extends DiscordCommand {
     @Override
     public boolean matches(String query, Message message) {
         return newsOutlet.isNewsUrl(message.getContentDisplay());
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.parseFailEmote = emoteHelper.getFail();
     }
 }
