@@ -18,7 +18,7 @@ public class Author {
      */
     public Author(String name, @Nullable String imageUrl, @Nullable String profileUrl) {
         this.name = name;
-        this.imageUrl = (imageUrl == null) ? DEFAULT_AUTHOR_IMAGE_URL : imageUrl;
+        this.imageUrl = (imageUrl == null || imageUrl.isEmpty()) ? DEFAULT_AUTHOR_IMAGE_URL : imageUrl;
         this.profileUrl = profileUrl;
     }
 
