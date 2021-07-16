@@ -136,7 +136,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
      */
     private MessageAction getCreatorMessageAction(MessageChannel channel, Creator creator) {
         EmbedBuilder builder = getTikTokEmbedBuilder(creator);
-        String description = (creator.hasSignature() ? creator.getSignature() : "No signature provided!")
+        String description = (creator.hasSignature() ? creator.getSignature() : "No bio yet.")
                 + "\n\n"
                 + buildCreatorEmoteStatsString(creator.getStats());
 
