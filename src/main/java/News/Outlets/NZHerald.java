@@ -68,7 +68,7 @@ public class NZHerald extends NewsOutlet {
     /**
      * Image resolutions are referred to in the API with a key in the format {name}_{size}
      * e.g "original_medium" or "square_large".
-     * Return the size of the given resolution key - e.g "original_medium" -> medium
+     * Return the size of the given resolution key - e.g "original_medium" -> "medium"
      *
      * @param resolutionKey Resolution key - e.g "original_medium"
      * @return Resolution size - e.g "medium"
@@ -94,23 +94,16 @@ public class NZHerald extends NewsOutlet {
     @Override
     protected @Nullable Article parseArticleByUrl(String articleUrl) {
         try {
-            final String articleId = getArticleIdByUrl(articleUrl);
+            JSONObject articleData = fetchArticleDataByUrl(articleUrl);
 
-            // Unable to make headline slug -> ID transform
-            if(articleId == null) {
-                throw new Exception("Unable to locate ID from headline slug: " + getHeadlineSlugFromUrl(articleUrl));
-            }
-
-            JSONObject articleData = fetchArticleDataById(articleId);
-
-            // ID is not an article/doesn't exist
+            // URL is not an article/doesn't exist
             if(articleData == null) {
-                throw new Exception("Unable to locate article data for ID: " + articleId);
+                throw new Exception("Unable to locate article data for URL: " + articleUrl);
             }
 
             return new Article(
                     articleUrl,
-                    API_URL + getArticleDataEndpoint(articleId),
+                    API_URL + getArticleDataUrlEndpoint(articleUrl),
                     parseAuthors(articleData),
                     articleData.getString("headline"),
                     articleData.getString("quickread"),
@@ -125,42 +118,22 @@ public class NZHerald extends NewsOutlet {
     }
 
     /**
-     * Get the headline slug from an article URL.
-     * This is the headline of the article separated by dashes.
-     * e.g "Frank Died" -> "frank-died"
+     * Perform an article search for the given query.
+     * Return the JSON response or null (if a response isn't received)
      *
-     * @param articleUrl URL to an article - e.g "https://www.nzherald.co.nz/{CATEGORY}/frank-died/{ARTICLE_UID}"
-     * @return Headline slug - e.g "frank-died"
-     */
-    private String getHeadlineSlugFromUrl(String articleUrl) {
-        String[] urlArgs = articleUrl
-                .split("\\?")[0] // Remove parameters
-                .split("/");
-
-        return urlArgs[urlArgs.length - 2]; // Last section is UID, second last is headline slug
-    }
-
-    /**
-     * Get the ID of an article from a URL to the article.
-     * The last section in an article URL (after removing parameters) is the article's UID, whereas the required
-     * identifier to get article data is the article's ID.
-     * Attempt to locate this ID by performing a search for the headline slug.
-     *
-     * @param articleUrl URL to an article - e.g "https://www.nzherald.co.nz/{CATEGORY}/{HEADLINE-SLUG}/{ARTICLE_UID}"
-     * @return Article ID - e.g "V6O6KF2MP5EG7ANINGF337QVP4" or null (if unable to locate)
+     * @param query Query to search
+     * @return Return the JSON response or null (if a response isn't received)
      */
     @Nullable
-    private String getArticleIdByUrl(String articleUrl) {
-        final String query = EmbedHelper.urlEncode(getHeadlineSlugFromUrl(articleUrl));
-        JSONObject response = apiRequest("/v2/api/search/?q=" + query);
+    private JSONArray searchArticles(String query) {
+        JSONObject response = apiRequest("/v2/api/search/?q=" + EmbedHelper.urlEncode(query));
 
         // Issue with request
         if(response == null) {
             return null;
         }
 
-        JSONArray results = response.getJSONArray("results");
-        return results.isEmpty() ? null : results.getJSONObject(0).getString("id");
+        return response.getJSONArray("results");
     }
 
     /**
@@ -181,8 +154,13 @@ public class NZHerald extends NewsOutlet {
             images.add(parseImageOrVideo(hero.getJSONObject(contentKey), heroType.equals(IMAGE_TYPE)));
         }
 
+        // Video articles may not have further images after the video preview
+        if(!articleData.has(contentKey)) {
+            return images;
+        }
+
         // The content list is an array of various pieces of the article - e.g text, images, html, etc
-        JSONArray contentList = articleData.getJSONArray("content");
+        JSONArray contentList = articleData.getJSONArray(contentKey);
 
         for(int i = 0; i < contentList.length(); i++) {
             JSONObject content = contentList.getJSONObject(i);
@@ -259,32 +237,77 @@ public class NZHerald extends NewsOutlet {
     }
 
     /**
-     * Attempt to fetch the JSON of an article via the NZ Herald mobile app API.
+     * Attempt to fetch the JSON of an article using its ID via the NZ Herald mobile app API.
+     * This takes the ID of an article (found only in API responses).
+     * The ID found in an article URL is the UID, which will not return a response from the API.
      *
-     * @param articleId Unique ID of the article
+     * @param articleId ID of the article (NOT UID)
      * @return Article JSON or null (if the given ID doesn't exist/isn't an article)
      */
     @Nullable
     private JSONObject fetchArticleDataById(String articleId) {
-        JSONObject response = apiRequest(getArticleDataEndpoint(articleId));
+        return fetchArticleData(getArticleDataIdEndpoint(articleId));
+    }
+
+    /**
+     * Attempt to fetch the JSON of an article using its URL via the NZ Herald mobile app API.
+     *
+     * @param articleUrl URL to an article - e.g "https://www.nzherald.co.nz/{CATEGORY}/frank-died/{ARTICLE_UID}"
+     * @return Article JSON or null (if the given URL doesn't exist/isn't an article)
+     */
+    @Nullable
+    private JSONObject fetchArticleDataByUrl(String articleUrl) {
+        return fetchArticleData(getArticleDataUrlEndpoint(articleUrl));
+    }
+
+    /**
+     * Attempt to fetch the JSON of an article using the given article endpoint.
+     *
+     * @param articleEndpoint Article API endpoint being requested - e.g "/v2/api/content/{ARTICLE_ID}"
+     * @return Article JSON or null (if the article isn't found/result isn't an article)
+     */
+    @Nullable
+    private JSONObject fetchArticleData(String articleEndpoint) {
+        JSONObject response = apiRequest(articleEndpoint);
 
         // ID doesn't exist
         if(response == null) {
             return null;
         }
 
-        // ID may not be for an article
-        return response.getString("type").equals(ARTICLE_CONTENT_TYPE) ? response : null;
+        final String type = response.getString(TYPE_KEY);
+
+        // ID may not be for an article/video (a video has similar data to an article)
+        return type.equals(ARTICLE_CONTENT_TYPE) || type.equals(VIDEO_TYPE) ? response : null;
     }
 
     /**
-     * Get the API endpoint required to make a request for the data of an article with the given ID.
+     * Get the API endpoint required to make a request for the data of an article by its ID.
      *
      * @param articleId Unique ID of the article - e.g "V6O6KF2MP5EG7ANINGF337QVP4"
-     * @return API endpoint for requesting article data - e.g "/v2/api/content/"V6O6KF2MP5EG7ANINGF337QVP4"
+     * @return API endpoint for requesting article data by ID - e.g "/v2/api/content/"V6O6KF2MP5EG7ANINGF337QVP4"
      */
-    private String getArticleDataEndpoint(String articleId) {
-        return "/v2/api/content/" + articleId;
+    private String getArticleDataIdEndpoint(String articleId) {
+        return "/v2/api/content/" + EmbedHelper.urlEncode(articleId);
+    }
+
+    /**
+     * Get the API endpoint required to make a request for the data of an article by its URL.
+     * A URL must end in a '/' to return a response. Parameters will be stripped and a '/' added if required.
+     *
+     * @param articleUrl URL to an article - e.g "https://www.nzherald.co.nz/{CATEGORY}/frank-died/{ARTICLE_UID}"
+     * @return API endpoint for requesting article data by URL - e.g "/v2/api/link?url={ENCODED_URL}"
+     */
+    private String getArticleDataUrlEndpoint(String articleUrl) {
+        final String end = "/";
+        articleUrl = articleUrl.split("\\?")[0]; // Strip parameters
+
+        // Add '/' if required
+        if(!articleUrl.endsWith(end)) {
+            articleUrl += end;
+        }
+
+        return "/v2/api/content/link/?url=" + EmbedHelper.urlEncode(articleUrl);
     }
 
     /**
@@ -297,9 +320,12 @@ public class NZHerald extends NewsOutlet {
     private JSONObject apiRequest(String endpoint) {
         final String url = API_URL + endpoint;
         NetworkResponse response = new NetworkRequest(url, false).get(generateRequestHeaders(endpoint));
+
+        // Request failed - could be auth/etc
         if(response.code != 200) {
             return null;
         }
+
         return new JSONObject(response.body);
     }
 
