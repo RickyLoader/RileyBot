@@ -199,6 +199,8 @@ public class DiscordCommandManager {
         addCommand(new StuffNewsCommand());
         addCommand(new NewshubCommand());
         addCommand(new NZHeraldCommand());
+        addCommand(new GuardianNewsCommand());
+        addCommand(new OneNewsCommand());
         addCommand(new TikTokCommand());
         /* TODO
             addCommand(new FacebookCommand());

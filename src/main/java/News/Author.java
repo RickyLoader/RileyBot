@@ -23,6 +23,16 @@ public class Author {
     }
 
     /**
+     * Create a news author.
+     * The image and profile URL will be set to the default values.
+     *
+     * @param name Author name
+     */
+    public Author(String name) {
+        this(name, null, null);
+    }
+
+    /**
      * Get a URL to the author's profile
      *
      * @return URL to author's profile

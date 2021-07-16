@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import org.jetbrains.annotations.Nullable;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -32,5 +33,21 @@ public class HTMLUtils {
             desiredTag = metaTag;
         }
         return desiredTag == null ? null : desiredTag.attr("content");
+    }
+
+
+    /**
+     * Attempt to strip HTML formatting from the given String
+     *
+     * @param text Text to strip HTML from
+     * @return Text stripped of HTML (or unchanged text if unable to parse)
+     */
+    public static String stripHtml(String text) {
+        try {
+            return Jsoup.parse(text).text();
+        }
+        catch(Exception e) {
+            return text;
+        }
     }
 }
