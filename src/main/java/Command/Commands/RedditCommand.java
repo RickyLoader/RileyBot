@@ -17,7 +17,12 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,15 +45,19 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
         new Thread(() -> {
             RedditPost redditPost = getPostInfo(context.getMessageContent());
+            AuditableRestAction<Void> deleteUrl = context.getMessage().delete();
+
+            // Issue parsing
             if(redditPost == null) {
                 return;
             }
+
             PostContent postContent = redditPost.getContent();
             if(postContent instanceof GalleryContent) {
-                showGalleryPost(context, redditPost);
+                deleteUrl.queue(deleted -> showGalleryPost(context, redditPost));
                 return;
             }
-            AuditableRestAction<Void> deleteUrl = context.getMessage().delete();
+
             MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost);
             MessageAction sendRedditEmbed = channel.sendMessage(redditEmbed);
 
@@ -56,23 +65,24 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 VideoPostContent videoPostContent = (VideoPostContent) postContent;
 
                 // Send post content
-                deleteUrl.queue(deleted -> sendRedditEmbed.queue(message -> channel.sendTyping().queue()));
+                deleteUrl.queue(deleted -> sendRedditEmbed.queue(message -> channel.sendTyping().queue(typing -> {
 
-                // Attempt to download video
-                byte[] video = EmbedHelper.downloadVideo(
-                        videoPostContent.hasDownloadUrl()
-                                ? videoPostContent.getDownloadUrl()
-                                : videoPostContent.getNoAudioUrl()
-                );
+                    // Attempt to download video
+                    byte[] video = EmbedHelper.downloadVideo(
+                            videoPostContent.hasDownloadUrl()
+                                    ? videoPostContent.getDownloadUrl()
+                                    : videoPostContent.getNoAudioUrl()
+                    );
 
-                // Send URL to video if download fails
-                if(video == null) {
-                    channel.sendMessage(videoPostContent.getNoAudioUrl()).queue();
-                    return;
-                }
+                    // Send URL to video if download fails
+                    if(video == null) {
+                        channel.sendMessage(videoPostContent.getNoAudioUrl()).queue();
+                        return;
+                    }
 
-                // Send video file
-                channel.sendFile(video, "video.mp4").queue();
+                    // Send video file
+                    channel.sendFile(video, "video.mp4").queue();
+                })));
             }
             else {
                 deleteUrl.queue(delete -> sendRedditEmbed.queue());
@@ -148,8 +158,27 @@ public class RedditCommand extends OnReadyDiscordCommand {
             builder.setImage(((ImageContent) content).getImageUrl());
         }
         else {
-            description = "**Note**: Videos can take a a bit to show up and *may* not have sound!\n\n"
-                    + description;
+            VideoPostContent videoPostContent = (VideoPostContent) content;
+            Boolean audioStatus = videoPostContent.getAudioStatus();
+            String videoNote;
+
+            // Wasn't able to determine if the post had an audio track (shouldn't really happen but just in case)
+            if(audioStatus == null) {
+                videoNote = "I wasn't able to determine if this post had audio!";
+            }
+            else if(audioStatus) {
+                videoNote = "This post **did** have audio, ";
+
+                // The download URL for video+audio may not have been retrieved for whatever reason (viddit may be down)
+                videoNote += videoPostContent.hasDownloadUrl()
+                        ? "if the video below does not, it was too big to download!"
+                        : "but I was unable to get a download URL for it, blame "
+                        + EmbedHelper.embedURL("viddet", "https://viddit.red/") + "!";
+            }
+            else {
+                videoNote = "This post **did not** have any audio!";
+            }
+            description = "**Note**: " + videoNote + "\n\n" + description;
         }
         return builder
                 .setFooter(buildFooter(post))
@@ -244,7 +273,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
      * use the https://viddit.red/ website to get a download URL for the combined tracks.
      *
      * @param postUrl URL to the reddit video post
-     * @return Video download URL or null
+     * @return Video download URL or null (if there is an error acquiring the download URL)
      */
     @Nullable
     private String getVideoDownloadUrl(String postUrl) {
@@ -278,11 +307,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
         String text = post.getString("selftext");
         if(post.getBoolean("is_video")) {
-            String noAudioUrl = post.getJSONObject("media").getJSONObject("reddit_video").getString("fallback_url");
-            return new VideoPostContent(
-                    getVideoDownloadUrl(postUrl),
-                    noAudioUrl
-            );
+            return parseVideoDetails(postUrl, post.getJSONObject("media").getJSONObject("reddit_video"));
         }
         else if(text.isEmpty()) {
             String url = post.getString("url");
@@ -305,6 +330,69 @@ public class RedditCommand extends OnReadyDiscordCommand {
             return new ImageContent(processImageUrl(url));
         }
         return new TextPostContent(text);
+    }
+
+    /**
+     * Parse video post content from the given video post JSON data.
+     * Attempt to get a download URL for the video with sound (if it has sound),
+     * otherwise provide a URL to the video without sound.
+     *
+     * @param postUrl   URL to video post
+     * @param videoData Video JSON data
+     * @return Video post content
+     */
+    private VideoPostContent parseVideoDetails(String postUrl, JSONObject videoData) {
+        Boolean audioStatus = getAudioStatus(videoData);
+        return new VideoPostContent(
+
+                /*
+                 * Only attempt to get a download URL for the video + audio if the post indicates an audio track is
+                 * present or this is unable to be checked (just in case).
+                 */
+                audioStatus == null || audioStatus ? getVideoDownloadUrl(postUrl) : null,
+
+                videoData.getString("fallback_url"), // No audio URL
+                audioStatus
+        );
+    }
+
+    /**
+     * Check if the video post associated with the given video JSON data has an audio track.
+     * This can be done by querying the {@code dash_url} value and checking for the presence of an audio track in
+     * the given XML. If this fails, null will be returned meaning the post may or may not have audio.
+     *
+     * @param videoData JSON data of video from a video post
+     * @return Video has audio or null (if unable to determine)
+     */
+    @Nullable
+    private Boolean getAudioStatus(JSONObject videoData) {
+        try {
+            DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            NodeList tracks = docBuilder.parse(videoData.getString("dash_url"))
+                    .getDocumentElement()
+                    .getElementsByTagName("Period")
+                    .item(0)
+                    .getChildNodes();
+
+            // Iterate through tracks and return true if an audio track is found
+            for(int i = 0; i < tracks.getLength(); i++) {
+                Node trackNode = tracks.item(i);
+
+                // Not an element
+                if(trackNode.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+
+                // Audio track found
+                if(((Element) trackNode).getAttribute("contentType").equals("audio")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**
