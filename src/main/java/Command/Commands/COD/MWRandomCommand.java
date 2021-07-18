@@ -1,8 +1,8 @@
 package Command.Commands.COD;
 
 import COD.Assets.*;
-import COD.LoadoutAnalysis;
-import COD.MWManager;
+import COD.Loadouts.LoadoutAnalysis;
+import COD.API.MWManager;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
 import Command.Structure.*;

@@ -1,7 +1,7 @@
 package Bot;
 
-import COD.Assets.WobblyScore;
-import COD.CODManager.GAME;
+import COD.Gunfight.WobblyScore;
+import COD.API.CODManager.GAME;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;

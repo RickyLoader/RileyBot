@@ -1,4 +1,4 @@
-package COD;
+package COD.Gunfight;
 
 import Bot.DiscordBot;
 import Command.Structure.EmbedHelper;
@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import COD.GameStatus.*;
+import COD.Gunfight.GameStatus.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.interactions.ActionRow;
 import net.dv8tion.jda.api.interactions.button.Button;

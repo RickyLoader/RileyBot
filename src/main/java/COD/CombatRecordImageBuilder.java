@@ -1,15 +1,22 @@
 package COD;
 
+import Bot.ResourceHandler;
+import COD.API.CODStatsManager.PLATFORM;
+import COD.API.MWStatsManager;
+import COD.API.PlayerStatsResponse;
 import COD.Assets.*;
 import COD.PlayerStats.*;
+import COD.API.MWManager;
 import Command.Structure.*;
-import Command.Structure.CODLookupCommand.PLATFORM;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+
+import static COD.API.MWStatsManager.TRACKER_NAME;
 
 /**
  * Build an image containing the user's Modern Warfare stats
@@ -22,6 +29,19 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             COMMENDATION_QUANTITY_SIZE = 50;
     private static final int BORDER = 5;
 
+    private final BufferedImage
+            lethalSection,
+            tacticalSection,
+            fieldUpgradeSection,
+            winLossSection,
+            commendationsSection,
+            commendationSection,
+            killDeathSection,
+            killstreaksSection,
+            killstreakSection,
+            weaponSection,
+            background;
+
     /**
      * Create the combat record image builder
      *
@@ -33,6 +53,20 @@ public class CombatRecordImageBuilder extends ImageBuilder {
     public CombatRecordImageBuilder(String helpMessage, EmoteHelper emoteHelper, String resourcePath, Font font) {
         super(emoteHelper, "/COD/" + resourcePath + "/Templates/", font);
         this.helpMessage = helpMessage;
+
+        ResourceHandler handler = getResourceHandler();
+        String templates = getResourcePath();
+        this.lethalSection = handler.getImageResource(templates + "lethal_section.png");
+        this.tacticalSection = handler.getImageResource(templates + "tactical_section.png");
+        this.weaponSection = handler.getImageResource(templates + "weapon_section.png");
+        this.fieldUpgradeSection = handler.getImageResource(templates + "field_upgrade_section.png");
+        this.winLossSection = handler.getImageResource(templates + "wl_section.png");
+        this.commendationsSection = handler.getImageResource(templates + "commendations_section.png");
+        this.commendationSection = handler.getImageResource(templates + "commendation_section.png");
+        this.killDeathSection = handler.getImageResource(templates + "kd_section.png");
+        this.killstreaksSection = handler.getImageResource(templates + "killstreaks_section.png");
+        this.killstreakSection = handler.getImageResource(templates + "killstreak_section.png");
+        this.background = handler.getImageResource(templates + "template.png");
     }
 
     /**
@@ -43,12 +77,12 @@ public class CombatRecordImageBuilder extends ImageBuilder {
      */
     private BufferedImage getWeaponImage(Weapon.TYPE type) {
         if(type == Weapon.TYPE.LETHAL) {
-            return getResourceHandler().getImageResource(getResourcePath() + "lethal_section.png");
+            return copyImage(lethalSection);
         }
         if(type == Weapon.TYPE.TACTICAL) {
-            return getResourceHandler().getImageResource(getResourcePath() + "tactical_section.png");
+            return copyImage(tacticalSection);
         }
-        return getResourceHandler().getImageResource(getResourcePath() + "weapon_section.png");
+        return copyImage(weaponSection);
     }
 
     /**
@@ -149,7 +183,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
         BufferedImage image = null;
         FieldUpgrade fieldUpgrade = fieldUpgradeStats.getAsset();
         try {
-            image = getResourceHandler().getImageResource(getResourcePath() + "field_upgrade_section.png");
+            image = copyImage(fieldUpgradeSection);
             BufferedImage superImage = fieldUpgrade.getImage();
 
             Graphics g = image.getGraphics();
@@ -225,22 +259,22 @@ public class CombatRecordImageBuilder extends ImageBuilder {
     /**
      * Draw the win loss ratio on to the win loss section
      *
-     * @param playerStats Player stats
+     * @param basicStats Basic player stats
      * @return Win loss section
      */
-    private BufferedImage drawWinLoss(MWPlayerStats playerStats) {
+    private BufferedImage drawWinLoss(PlayerBasicStats basicStats) {
         BufferedImage image = null;
         try {
-            image = getResourceHandler().getImageResource(getResourcePath() + "wl_section.png");
+            image = copyImage(winLossSection);
             Graphics g = image.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
             int x = 288;
             int y = 160;
-            g.drawString(playerStats.getWins(), x, y);
+            g.drawString(basicStats.getFormattedWins(), x, y);
             y += 165;
-            g.drawString(playerStats.getLosses(), x, y);
+            g.drawString(basicStats.getFormattedLosses(), x, y);
             y += 165;
-            g.drawString(playerStats.getWinLoss(), x, y);
+            g.drawString(basicStats.getFormattedWinLoss(), x, y);
             g.dispose();
         }
         catch(Exception e) {
@@ -252,19 +286,22 @@ public class CombatRecordImageBuilder extends ImageBuilder {
     /**
      * Draw the player commendation stats on to the commendation section
      *
-     * @param playerStats Player stats
+     * @param playerCommendationStats Player commendation stats
      * @return Commendation section
      */
-    private BufferedImage drawCommendations(MWPlayerStats playerStats) {
-        ArrayList<CommendationStats> allCommendationStats = playerStats.getCommendationStats();
+    private BufferedImage drawCommendations(ArrayList<CommendationStats> playerCommendationStats) {
+
+        // Sort in descending order of uses
+        Collections.sort(playerCommendationStats);
+
         BufferedImage image = null;
         try {
-            image = getResourceHandler().getImageResource(getResourcePath() + "commendations_section.png");
+            image = copyImage(commendationsSection);
             Graphics g = image.getGraphics();
             int x = 100;
-            for(int i = 0; i < Math.min(5, allCommendationStats.size()); i++) {
+            for(int i = 0; i < Math.min(5, playerCommendationStats.size()); i++) {
                 g.setFont(getGameFont().deriveFont(COMMENDATION_NAME_SIZE));
-                CommendationStats commendationStats = allCommendationStats.get(i);
+                CommendationStats commendationStats = playerCommendationStats.get(i);
                 Commendation commendation = commendationStats.getAsset();
 
                 BufferedImage icon = commendation.getImage();
@@ -310,9 +347,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
      * @return Image displaying commendation stats
      */
     private BufferedImage drawCommendation(CommendationStats stats) {
-        final BufferedImage image = getResourceHandler().getImageResource(
-                getResourcePath() + "commendation_section.png"
-        );
+        final BufferedImage image = copyImage(commendationSection);
         final Commendation commendation = stats.getAsset();
         final int centreHorizontal = image.getWidth() / 2;
         final int centreVertical = image.getHeight() / 2;
@@ -360,17 +395,17 @@ public class CombatRecordImageBuilder extends ImageBuilder {
     /**
      * Draw the kill death ratio on to the kill death section
      *
-     * @param playerStats Player stats
+     * @param basicStats Basic player stats
      * @return Kill death section
      */
-    private BufferedImage drawKillDeath(MWPlayerStats playerStats) {
+    private BufferedImage drawKillDeath(PlayerBasicStats basicStats) {
         BufferedImage image = null;
         try {
-            image = getResourceHandler().getImageResource(getResourcePath() + "kd_section.png");
+            image = copyImage(killDeathSection);
             Graphics g = image.getGraphics();
             g.setFont(getGameFont().deriveFont(50f));
-            g.drawString(String.valueOf(playerStats.getKD()), 282, 180);
-            g.drawString(String.valueOf(playerStats.getLongestKillStreak()), 282, 462);
+            g.drawString(String.valueOf(basicStats.getFormattedKillDeath()), 282, 180);
+            g.drawString(String.valueOf(basicStats.getLongestKillStreak()), 282, 462);
             g.dispose();
         }
         catch(Exception e) {
@@ -382,14 +417,18 @@ public class CombatRecordImageBuilder extends ImageBuilder {
     /**
      * Draw the player killstreak stats on to the killstreak section
      *
-     * @param playerStats Player stats
+     * @param playerKillstreakStats Player killstreak stats
      * @return Killstreak section
      */
-    private BufferedImage drawKillstreaks(MWPlayerStats playerStats) {
-        ArrayList<KillstreakStats> topKillstreakStats = new ArrayList<>(playerStats.getKillstreakStats().subList(0, 5));
+    private BufferedImage drawKillstreaks(ArrayList<KillstreakStats> playerKillstreakStats) {
+
+        // Sort in descending order of uses
+        Collections.sort(playerKillstreakStats);
+
+        ArrayList<KillstreakStats> topKillstreakStats = new ArrayList<>(playerKillstreakStats.subList(0, 5));
         BufferedImage image = null;
         try {
-            image = getResourceHandler().getImageResource(getResourcePath() + "killstreaks_section.png");
+            image = copyImage(killstreaksSection);
             Graphics g = image.getGraphics();
             KillstreakStats largest = topKillstreakStats
                     .stream()
@@ -403,9 +442,10 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             int maxHeight = largest.getAsset().getImage().getHeight();
             int padding = (image.getWidth() - (280 * 5)) / 6;
             int x = padding;
+
             for(KillstreakStats killstreakStats : topKillstreakStats) {
                 Killstreak killstreak = killstreakStats.getAsset();
-                g.setFont(getGameFont().deriveFont(40f));
+                g.setFont(getGameFont().deriveFont(35f));
                 BufferedImage icon = killstreakStats.getAsset().getImage();
                 int y = (200 + (maxHeight / 2) - (icon.getHeight() / 2));
 
@@ -456,7 +496,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
      * @return Image displaying killstreak stats
      */
     private BufferedImage drawKillstreak(KillstreakStats stats) {
-        BufferedImage image = getResourceHandler().getImageResource(getResourcePath() + "killstreak_section.png");
+        BufferedImage image = copyImage(killstreakSection);
         Graphics g = image.getGraphics();
         g.setFont(getGameFont().deriveFont(50f));
 
@@ -525,18 +565,44 @@ public class CombatRecordImageBuilder extends ImageBuilder {
      * @param nameQuery Player name to search for
      * @param platform  Player platform
      * @param loading   Loading message
-     * @return Player stats found
+     * @return Player stats or null (if unable to retrieve)
      */
+    @Nullable
     private MWPlayerStats initialisePlayerStats(String nameQuery, PLATFORM platform, ImageLoadingMessage loading) {
         loading.showLoading();
-        MWPlayerStats playerStats = new MWPlayerStats(nameQuery, platform);
-        if(playerStats.success()) {
-            loading.completeStage();
+        MWStatsManager statsManager = new MWStatsManager();
+        PlayerStatsResponse<MWPlayerAssetStats, MWPlayerStats> response = statsManager.fetchPlayerStats(nameQuery, platform);
+
+        // No response, try tracker.gg
+        if(!response.statsRetrieved()) {
+            final String failMessage = response.getMessage();
+
+            // Player not found etc
+            if(!failMessage.equals(PlayerStatsResponse.API_FAILURE)) {
+                loading.failLoading(failMessage);
+                return null;
+            }
+
+            // API down, attempt to fall back on COD tracker website
+            loading.updateStage("Failed to contact API, giving " + TRACKER_NAME + " a ring...");
+
+            response = statsManager.fetchPlayerStatsFallback(nameQuery, platform);
+
+            // Failed to contact tracker also, fail loading
+            if(!response.statsRetrieved()) {
+                loading.failLoading(response.getMessage());
+                return null;
+            }
+        }
+
+        // Stats retrieved
+        if(response.hasMessage()) {
+            loading.completeStage(response.getMessage());
         }
         else {
-            loading.failLoading(playerStats.getStatus());
+            loading.completeStage();
         }
-        return playerStats;
+        return response.getStats();
     }
 
     /**
@@ -556,11 +622,11 @@ public class CombatRecordImageBuilder extends ImageBuilder {
 
         MWPlayerStats playerStats = initialisePlayerStats(nameQuery, platform, loadingMessage);
 
-        if(!playerStats.success()) {
+        if(playerStats == null) {
             return;
         }
 
-        ArrayList<AssetStats<? extends CODAsset>> statsList = playerStats.getAssetStatsByName(assetName);
+        ArrayList<AssetStats<? extends CODAsset>> statsList = playerStats.getAssetStats().getAssetStatsByName(assetName);
 
         // More than one result - display as pageable embed
         if(statsList.size() != 1) {
@@ -652,23 +718,59 @@ public class CombatRecordImageBuilder extends ImageBuilder {
                 "MW Player Stats: " + nameQuery.toUpperCase(),
                 channel
         );
+
         MWPlayerStats playerStats = initialisePlayerStats(nameQuery, platform, loadingMessage);
-        if(!playerStats.success()) {
+
+        if(playerStats == null) {
             return;
         }
+
         try {
-            BufferedImage main = getResourceHandler().getImageResource(getResourcePath() + "template.png");
+            BufferedImage main = copyImage(background);
             Graphics g = main.getGraphics();
 
-            g.drawImage(drawWeapon(playerStats.getPrimaryStats()), 17, 119, null);
-            g.drawImage(drawWeapon(playerStats.getSecondaryStats()), 542, 119, null);
-            g.drawImage(drawWeapon(playerStats.getLethalStats()), 1067, 119, null);
-            g.drawImage(drawWeapon(playerStats.getTacticalStats()), 1592, 119, null);
-            g.drawImage(drawSuper(playerStats.getSuperStats()), 1067, 1030, null);
-            g.drawImage(drawKillDeath(playerStats), 1592, 1030, null);
-            g.drawImage(drawWinLoss(playerStats), 1592, 1609, null);
-            g.drawImage(drawCommendations(playerStats), 17, 1290, null);
-            g.drawImage(drawKillstreaks(playerStats), 17, 1869, null);
+            MWPlayerAssetStats assetStats = playerStats.getAssetStats();
+            PlayerBasicStats basicStats = playerStats.getBasicStats();
+            PlayerWeaponStats weaponStats = assetStats.getWeaponStats();
+            PlayerEquipmentStats equipmentStats = assetStats.getEquipmentStats();
+
+            g.drawImage(
+                    drawWeapon(
+                            (WeaponStats) PlayerAssetStats.getFavouriteAsset(weaponStats.getPrimaryWeaponStats())
+                    ),
+                    17, 119, null
+            );
+            g.drawImage(
+                    drawWeapon(
+                            (WeaponStats) PlayerAssetStats.getFavouriteAsset(weaponStats.getSecondaryWeaponStats())
+                    ), 542, 119, null
+            );
+            g.drawImage(
+                    drawWeapon(
+                            (WeaponStats) PlayerAssetStats.getFavouriteAsset(equipmentStats.getLethalStats())
+                    ), 1067, 119, null
+            );
+
+            // Tracker doesn't provided tactical stats
+            ArrayList<TacticalStats> tacticalStats = equipmentStats.getTacticalStats();
+            if(!tacticalStats.isEmpty()) {
+                g.drawImage(
+                        drawWeapon(
+                                (WeaponStats) PlayerAssetStats.getFavouriteAsset(tacticalStats)
+                        ), 1592, 119, null
+                );
+            }
+
+            g.drawImage(
+                    drawSuper(
+                            (FieldUpgradeStats) PlayerAssetStats.getFavouriteAsset(assetStats.getFieldUpgradeStats())
+                    ), 1067, 1030, null
+            );
+
+            g.drawImage(drawKillDeath(basicStats), 1592, 1030, null);
+            g.drawImage(drawWinLoss(basicStats), 1592, 1609, null);
+            g.drawImage(drawCommendations(assetStats.getCommendationStats()), 17, 1290, null);
+            g.drawImage(drawKillstreaks(assetStats.getKillstreakStats()), 17, 1869, null);
             g.setFont(getGameFont().deriveFont(100f));
             g.setColor(Color.BLACK);
             String name = playerStats.getName().toUpperCase();

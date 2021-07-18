@@ -1,4 +1,4 @@
-package COD;
+package COD.Gunfight;
 
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;

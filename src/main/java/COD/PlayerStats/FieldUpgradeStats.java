@@ -90,6 +90,6 @@ public class FieldUpgradeStats extends AssetStats<FieldUpgrade> {
 
     @Override
     public int getSortValue() {
-        return getUses();
+        return getUses() == 0 ? getKills() : getUses(); // Tracker doesn't give uses, sort by kills
     }
 }

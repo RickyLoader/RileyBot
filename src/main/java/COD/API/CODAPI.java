@@ -1,15 +1,15 @@
-package COD;
+package COD.API;
 
+import COD.API.CODStatsManager.PLATFORM;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
 
-import static Command.Structure.CODLookupCommand.*;
-
 public class CODAPI {
-    private static final String BASE_URL = "http://" + Secret.LOCAL_IP + ":8080" + Secret.LOCAL_API_PATH;
-    private static final String MODERN_WARFARE_URL = BASE_URL + "modernwarfare/";
-    private static final String COLD_WAR_URL = BASE_URL + "coldwar/";
+    private static final String
+            BASE_URL = "http://" + Secret.LOCAL_IP + ":8080" + Secret.LOCAL_API_PATH,
+            MODERN_WARFARE_URL = BASE_URL + "modernwarfare/",
+            COLD_WAR_URL = BASE_URL + "coldwar/";
 
     /**
      * Get a player's Modern Warfare stats
@@ -156,7 +156,7 @@ public class CODAPI {
      * @param name Name to encode
      * @return URL encoded name
      */
-    private static String encodeName(String name) {
+    public static String encodeName(String name) {
         return EmbedHelper.urlEncode(name).replaceAll("\\+", "%20");
     }
 }

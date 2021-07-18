@@ -3,12 +3,14 @@ package Command.Commands.Lookup;
 import Bot.FontManager;
 import COD.CombatRecordImageBuilder;
 import Command.Structure.*;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 /**
  * Look up a Modern Warfare player and build an image with their stats
  */
 public class MWStatsCommand extends MWLookupCommand {
+    private CombatRecordImageBuilder combatRecordImageBuilder;
     private String weaponName;
 
     public MWStatsCommand() {
@@ -22,12 +24,6 @@ public class MWStatsCommand extends MWLookupCommand {
     @Override
     public void onArgumentsSet(String name, CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
-        CombatRecordImageBuilder combatRecordImageBuilder = new CombatRecordImageBuilder(
-                "Type: " + getTrigger() + " for help",
-                context.getEmoteHelper(),
-                "MW",
-                FontManager.MODERN_WARFARE_FONT
-        );
 
         if(weaponName == null) {
             combatRecordImageBuilder.buildCombatRecordImage(
@@ -44,6 +40,16 @@ public class MWStatsCommand extends MWLookupCommand {
                     context
             );
         }
+    }
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.combatRecordImageBuilder = new CombatRecordImageBuilder(
+                "Type: " + getTrigger() + " for help",
+                emoteHelper,
+                "MW",
+                FontManager.MODERN_WARFARE_FONT
+        );
     }
 
     @Override

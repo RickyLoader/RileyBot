@@ -1,6 +1,6 @@
 package Command.Structure;
 
-import COD.Assets.Breakdown;
+import COD.Match.Breakdown;
 import COD.Match.MatchHistory;
 import COD.Match.MatchStats;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,7 +12,7 @@ import net.dv8tion.jda.internal.interactions.ButtonImpl;
 
 import java.util.*;
 
-import static COD.CODManager.*;
+import static COD.API.CODManager.*;
 
 /**
  * Pageable COD match history embed with map/mode breakdown charts

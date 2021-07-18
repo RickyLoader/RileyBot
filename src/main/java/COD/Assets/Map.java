@@ -1,6 +1,6 @@
 package COD.Assets;
 
-import COD.CODManager.GAME;
+import COD.API.CODManager.GAME;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;

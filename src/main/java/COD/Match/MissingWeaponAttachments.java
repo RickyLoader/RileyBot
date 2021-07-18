@@ -1,6 +1,7 @@
-package COD.Assets;
+package COD.Match;
 
-import COD.MWManager;
+import COD.API.MWManager;
+import COD.Assets.Weapon;
 import Network.NetworkRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;

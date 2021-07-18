@@ -1,7 +1,7 @@
 package COD.Match;
 
+import COD.API.CODStatsManager.PLATFORM;
 import COD.Assets.Ratio;
-import Command.Structure.CODLookupCommand.PLATFORM;
 import Command.Structure.EmbedHelper;
 
 import java.text.DecimalFormat;

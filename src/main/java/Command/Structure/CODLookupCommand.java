@@ -1,39 +1,10 @@
 package Command.Structure;
 
+import COD.API.CODStatsManager.PLATFORM;
 import net.dv8tion.jda.api.entities.Message;
 
 public abstract class CODLookupCommand extends LookupCommand {
     private PLATFORM platform;
-
-    public enum PLATFORM {
-        BATTLE,
-        XBOX,
-        PSN,
-        NONE;
-
-        /**
-         * Get a platform by name
-         *
-         * @param name Name of platform - "battle"
-         * @return Platform
-         */
-        public static PLATFORM byName(String name) {
-            name = name.toUpperCase();
-            try {
-                return valueOf(name);
-            }
-            catch(IllegalArgumentException e) {
-                switch(name) {
-                    case "XBL":
-                        return XBOX;
-                    case "BATTLENET":
-                        return BATTLE;
-                    default:
-                        return NONE;
-                }
-            }
-        }
-    }
 
     public CODLookupCommand(String trigger, String desc, String helpText) {
         super(

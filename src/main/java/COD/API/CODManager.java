@@ -1,4 +1,4 @@
-package COD;
+package COD.API;
 
 import Bot.ResourceHandler;
 import COD.Assets.*;

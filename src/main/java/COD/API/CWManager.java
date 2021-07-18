@@ -1,4 +1,4 @@
-package COD;
+package COD.API;
 
 public class CWManager extends CODManager {
     private static CWManager instance = null;

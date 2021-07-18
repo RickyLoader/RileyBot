@@ -1,6 +1,6 @@
 package Command.Commands.Lookup;
 
-import COD.CWManager;
+import COD.API.CWManager;
 import Command.Structure.MatchHistoryCommand;
 
 /**

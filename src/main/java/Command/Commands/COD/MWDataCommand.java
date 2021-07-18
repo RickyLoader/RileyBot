@@ -1,8 +1,8 @@
 package Command.Commands.COD;
 
 import COD.Assets.Weapon;
-import COD.Gunfight;
-import COD.MWManager;
+import COD.Gunfight.Gunfight;
+import COD.API.MWManager;
 import Command.Structure.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;

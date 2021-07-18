@@ -1,8 +1,9 @@
-package COD;
+package COD.API;
 
 import COD.Assets.Commendation;
 import COD.Assets.FieldUpgrade;
 import COD.Assets.Killstreak;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -123,6 +124,7 @@ public class MWManager extends CODManager {
      * @param codename Super codename
      * @return Super with codename or null
      */
+    @Nullable
     public FieldUpgrade getSuperByCodename(String codename) {
         return supers.get(codename);
     }
@@ -142,6 +144,7 @@ public class MWManager extends CODManager {
      * @param codename Commendation codename
      * @return Commendation with codename or null
      */
+    @Nullable
     public Commendation getCommendationByCodename(String codename) {
         return commendations.get(codename);
     }
@@ -152,6 +155,7 @@ public class MWManager extends CODManager {
      * @param codename Killstreak codename
      * @return Killstreak with codename or null
      */
+    @Nullable
     public Killstreak getKillstreakByCodename(String codename) {
         return killstreaks.get(codename);
     }

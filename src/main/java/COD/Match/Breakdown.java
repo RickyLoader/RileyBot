@@ -1,4 +1,4 @@
-package COD.Assets;
+package COD.Match;
 
 import Command.Structure.PieChart;
 import Network.ImgurManager;

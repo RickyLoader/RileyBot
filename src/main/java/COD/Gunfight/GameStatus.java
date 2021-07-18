@@ -1,4 +1,4 @@
-package COD;
+package COD.Gunfight;
 
 /**
  * Wrap status of a Gunfight session's score to enum

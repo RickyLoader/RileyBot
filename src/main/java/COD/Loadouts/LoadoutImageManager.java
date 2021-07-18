@@ -1,4 +1,4 @@
-package COD;
+package COD.Loadouts;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;

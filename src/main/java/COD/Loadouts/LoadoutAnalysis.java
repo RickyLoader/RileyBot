@@ -1,4 +1,4 @@
-package COD;
+package COD.Loadouts;
 
 import COD.Assets.Perk;
 import COD.Assets.Weapon;

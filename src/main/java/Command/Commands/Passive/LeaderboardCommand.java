@@ -1,8 +1,8 @@
 package Command.Commands.Passive;
 
-import COD.Gunfight;
+import COD.Gunfight.Gunfight;
 import Command.Structure.*;
-import COD.Session;
+import COD.Gunfight.Session;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;

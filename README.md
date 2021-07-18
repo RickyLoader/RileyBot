@@ -249,7 +249,7 @@ Generate a random Modern Warfare loadout and build an image to display it. Assig
                
 The generated loadout abides by all in-game restrictions e.g 2 primary weapons if the `overkill` perk is rolled. This also applies to the weapon attachments, where if a rolled attachment blocks another attachment category e.g a `barrel` attachment blocking the `muzzle` category, no `muzzle` category attachments will be added.
                
-A short [comment](src/main/java/COD/LoadoutAnalysis.java) about the loadout is generated and appended to the message.
+A short [comment](src/main/java/COD/Loadouts/LoadoutAnalysis.java) about the loadout is generated and appended to the message.
                
   Possible weapons & attachments can be seen [here](src/main/resources/COD/MW/Data/weapons.json).
                               

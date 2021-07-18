@@ -2,8 +2,11 @@ package Command.Structure;
 
 import Bot.DiscordUser;
 import Bot.FontManager;
-import COD.*;
+import COD.API.*;
+import COD.API.CODStatsManager.PLATFORM;
 import COD.Assets.*;
+import COD.Gunfight.*;
+import COD.Loadouts.LoadoutImageManager;
 import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;

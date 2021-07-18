@@ -2,7 +2,7 @@ package Command.Commands.Passive;
 
 import Bot.DiscordBot;
 import Command.Structure.*;
-import COD.Gunfight;
+import COD.Gunfight.Gunfight;
 import Countdown.Countdown;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
