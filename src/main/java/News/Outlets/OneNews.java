@@ -153,7 +153,7 @@ public class OneNews extends NewsOutlet {
         try {
             Document articleDocument = Jsoup.connect(articleUrl).get();
 
-            // "app-id={APP_ID}, app-argument=tvnz-one-news://story/content/{RELATIVE_URL}"
+            // "app-id={APP_ID}, app-argument=tvnz-one-news://story/{RELATIVE_PATH}"
             final String mobileArguments = HTMLUtils.getMetaTagValue(
                     articleDocument,
                     "name",
@@ -166,8 +166,8 @@ public class OneNews extends NewsOutlet {
             }
 
             return mobileArguments
-                    .split(",")[1].trim() // "app-argument=tvnz-one-news://story/content/{RELATIVE_URL}"
-                    .replaceFirst("app-argument=tvnz-one-news://story/", ""); // {RELATIVE_URL}
+                    .split(",")[1].trim() // "app-argument=tvnz-one-news://story/{RELATIVE_PATH}"
+                    .replaceFirst("app-argument=tvnz-one-news://story/", ""); // {RELATIVE_PATH}
         }
         catch(Exception e) {
             return null;
