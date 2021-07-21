@@ -14,12 +14,13 @@ public class CODAPI {
     public static final String API_FAILURE_MESSAGE = "Failed to communicate with API, try again later.";
 
     /**
-     * Get a player's Modern Warfare stats
+     * Get a player's Modern Warfare stats JSON
      *
      * @param name     Player name
      * @param platform Player platform
-     * @return Player stats
+     * @return Player stats JSON or null
      */
+    @Nullable
     public static String getMWStats(String name, PLATFORM platform) {
         String json = null;
         try {
@@ -40,7 +41,7 @@ public class CODAPI {
      *
      * @param name     Player name
      * @param platform Player platform
-     * @return Player match history JSON or nulll
+     * @return Player match history JSON or null
      */
     @Nullable
     public static String getMWMatchHistoryJson(String name, PLATFORM platform) {
@@ -64,8 +65,9 @@ public class CODAPI {
      *
      * @param matchId  Match Id
      * @param platform Player platform
-     * @return Player match
+     * @return Match JSON or null
      */
+    @Nullable
     public static String getMWMatch(String matchId, PLATFORM platform) {
         return getMatch(matchId, platform, MODERN_WARFARE_URL);
     }
@@ -75,8 +77,9 @@ public class CODAPI {
      *
      * @param matchId  Match Id
      * @param platform Player platform
-     * @return Player match
+     * @return Match JSON or null
      */
+    @Nullable
     public static String getCWMatch(String matchId, PLATFORM platform) {
         return getMatch(matchId, platform, COLD_WAR_URL);
     }
@@ -111,9 +114,10 @@ public class CODAPI {
      * @param matchId  Match Id
      * @param platform Player platform
      * @param gameUrl  Base URL for game
-     * @return Match JSON
+     * @return Match JSON or null
      */
-    public static String getMatch(String matchId, PLATFORM platform, String gameUrl) {
+    @Nullable
+    private static String getMatch(String matchId, PLATFORM platform, String gameUrl) {
         String json = null;
         try {
             json = new NetworkRequest(
@@ -125,34 +129,6 @@ public class CODAPI {
             e.printStackTrace();
         }
         return json;
-    }
-
-    /**
-     * Get the list of players in a modern warfare match
-     *
-     * @param matchID  Match id
-     * @param platform Match platform
-     * @return Match players
-     */
-    public static String getMWMatchPlayers(String matchID, PLATFORM platform) {
-        return new NetworkRequest(
-                MODERN_WARFARE_URL + "match/" + matchID + "/" + platform.name().toLowerCase(),
-                false
-        ).get().body;
-    }
-
-    /**
-     * Get the list of players in a cold war match
-     *
-     * @param matchID  Match id
-     * @param platform Match platform
-     * @return Match players
-     */
-    public static String getCWMatchPlayers(String matchID, PLATFORM platform) {
-        return new NetworkRequest(
-                COLD_WAR_URL + "match/" + matchID + "/" + platform.name().toLowerCase(),
-                false
-        ).get().body;
     }
 
     /**

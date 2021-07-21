@@ -18,6 +18,7 @@ public class MatchPlayer {
     private final double distanceTravelled, percentTimeMoving;
     private final Loadout[] loadouts;
     private byte[] loadoutImage;
+    public static String UNAVAILABLE = "-";
 
     /**
      * Create the match player from the given builder
@@ -444,7 +445,7 @@ public class MatchPlayer {
      */
     public String getShotSummary() {
         if(accuracy == null) {
-            return "-";
+            return UNAVAILABLE;
         }
         return getShotsFired() + "/" + getShotsHit();
     }
@@ -455,7 +456,7 @@ public class MatchPlayer {
      * @return Player accuracy
      */
     public String getAccuracySummary() {
-        return hasAccuracy() ? accuracy.getRatioPercentage() : "-";
+        return hasAccuracy() ? accuracy.getRatioPercentage() : UNAVAILABLE;
     }
 
     /**

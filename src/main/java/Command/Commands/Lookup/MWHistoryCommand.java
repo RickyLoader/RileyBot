@@ -22,6 +22,11 @@ public class MWHistoryCommand extends MatchHistoryCommand {
     }
 
     @Override
+    public @Nullable String getSpecificMatchJSON(String matchId, CODStatsManager.PLATFORM platform) {
+        return CODAPI.getMWMatch(matchId, platform);
+    }
+
+    @Override
     public @Nullable JSONArray getTrackerMatchHistoryJson(String name, CODStatsManager.PLATFORM platform) {
         return TrackerAPI.getMWMatchHistoryJson(name, platform);
     }

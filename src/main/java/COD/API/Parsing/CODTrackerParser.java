@@ -131,9 +131,9 @@ public class CODTrackerParser<T extends CODManager> extends CODParser<T> {
                 .setTeam(getOptionalString(playerStats, TEAM_KEY))
 
                 // Values not provided
-                .setUno("-")
-                .setNemesis("-")
-                .setMostKilled("-")
+                .setUno(MatchPlayer.UNAVAILABLE)
+                .setNemesis(MatchPlayer.UNAVAILABLE)
+                .setMostKilled(MatchPlayer.UNAVAILABLE)
 
                 .setLongestStreak(getLongestStreak(playerStats))
                 .setDamageDealt(getDamageDealt(playerStats))
@@ -194,7 +194,7 @@ public class CODTrackerParser<T extends CODManager> extends CODParser<T> {
         if(playerStats.has(key) && !playerStats.getJSONObject(key).getString(VALUE_KEY).isEmpty()) {
             return playerStats.getJSONObject(key).getString(VALUE_KEY);
         }
-        return "-";
+        return MatchPlayer.UNAVAILABLE;
     }
 
     /**

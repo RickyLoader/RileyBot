@@ -47,6 +47,15 @@ public class MatchHistory {
     }
 
     /**
+     * Check if there are any matches in the match history
+     *
+     * @return Match history has matches
+     */
+    public boolean hasMatches() {
+        return !matchStats.isEmpty();
+    }
+
+    /**
      * Create a pie chart for the frequency of maps played in the match history
      */
     private Breakdown createMapBreakdown() {

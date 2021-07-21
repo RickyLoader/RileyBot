@@ -40,24 +40,7 @@ public class CODAPIParser<T extends CODManager> extends CODParser<T> {
         JSONObject summary = matchHistoryData.getJSONObject("summary").getJSONObject("all");
 
         for(int i = 0; i < matchList.length(); i++) {
-            JSONObject matchData = matchList.getJSONObject(i);
-            MatchPlayer player = parseMatchPlayer(matchData, new MatchPlayer.MatchPlayerBuilder(name, platform));
-
-            matchStats.add(
-                    new MatchStats(
-                            matchData.getString("matchID"),
-                            getManager().getMapByCodename(matchData.getString("map")),
-                            getManager().getModeByCodename(matchData.getString("mode")),
-                            new Date(matchData.getLong("utcStartSeconds") * 1000),
-                            new Date(matchData.getLong("utcEndSeconds") * 1000),
-                            player,
-                            new Score(
-                                    matchData.getInt(TEAM_1_SCORE_KEY),
-                                    matchData.getInt(TEAM_2_SCORE_KEY),
-                                    parseMatchResult(matchData)
-                            )
-                    )
-            );
+            matchStats.add(parseMatchStats(name, platform, matchList.getJSONObject(i)));
         }
         return new MatchHistory(
                 name,
@@ -67,6 +50,32 @@ public class CODAPIParser<T extends CODManager> extends CODParser<T> {
                         summary.getInt("deaths")
                 ),
                 getManager().getFont()
+        );
+    }
+
+    /**
+     * Parse the match stats API JSON in to an object
+     *
+     * @param name           Name of player which match history belongs to
+     * @param platform       Player platform
+     * @param matchStatsData Match stats JSON data
+     * @return Match stats
+     */
+    public MatchStats parseMatchStats(String name, PLATFORM platform, JSONObject matchStatsData) {
+        MatchPlayer player = parseMatchPlayer(matchStatsData, new MatchPlayer.MatchPlayerBuilder(name, platform));
+
+        return new MatchStats(
+                matchStatsData.getString("matchID"),
+                getManager().getMapByCodename(matchStatsData.getString("map")),
+                getManager().getModeByCodename(matchStatsData.getString("mode")),
+                new Date(matchStatsData.getLong("utcStartSeconds") * 1000),
+                new Date(matchStatsData.getLong("utcEndSeconds") * 1000),
+                player,
+                new Score(
+                        matchStatsData.getInt(TEAM_1_SCORE_KEY),
+                        matchStatsData.getInt(TEAM_2_SCORE_KEY),
+                        parseMatchResult(matchStatsData)
+                )
         );
     }
 
@@ -136,7 +145,9 @@ public class CODAPIParser<T extends CODManager> extends CODParser<T> {
      * @return Value or '-'
      */
     private String getOptionalString(JSONObject playerStats, String key) {
-        return playerStats.has(key) && !playerStats.getString(key).isEmpty() ? playerStats.getString(key) : "-";
+        return playerStats.has(key) && !playerStats.getString(key).isEmpty()
+                ? playerStats.getString(key)
+                : MatchPlayer.UNAVAILABLE;
     }
 
     /**

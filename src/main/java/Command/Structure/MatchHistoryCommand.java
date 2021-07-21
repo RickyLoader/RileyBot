@@ -43,7 +43,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     private final CODTrackerParser<CODManager> trackerParser;
 
     private Button stats, loadouts;
-    private String matchID;
+    private String matchId;
     private EmoteHelper emoteHelper;
     private static final String
             STATS_BUTTON_ID = "stats",
@@ -93,38 +93,147 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
 
         String lastArg = args[args.length - 1];
         if(lastArg.matches("\\d+") || lastArg.equals(LATEST)) {
-            matchID = lastArg;
+            matchId = lastArg;
             return query.replace(lastArg, "").trim();
         }
-        matchID = null;
+        matchId = null;
         return query;
     }
 
     @Override
     public void onArgumentsSet(String name, CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
-        channel.sendTyping().queue();
 
         if(name.equals(WOBBLIES)) {
-            if(matchID != null) {
+            if(matchId != null) {
                 showSpecificWobblyScore(channel);
                 return;
             }
             showWobblyLeaderboard(context);
             return;
         }
+
+        channel.sendTyping().queue();
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
 
+        // Error fetching match history - error message has already been sent
         if(matchHistory == null) {
             return;
         }
-        addMissingWobblyScores(matchHistory.getMatches());
 
-        if(matchID != null) {
-            sendMatchEmbed(matchHistory, channel);
+        // No match history
+        if(!matchHistory.hasMatches()) {
+            channel.sendMessage(buildErrorEmbed("EMPTY", "This player has no recent matches!")).queue();
             return;
         }
+
+        addMissingWobblyScores(matchHistory.getMatches());
+
+        // Show specific match
+        if(matchId != null) {
+            if(matchId.equals(LATEST)) {
+                sendMatchEmbed(matchHistory.getMatches().get(0), channel);
+                return;
+            }
+
+            MatchStats matchStats = matchHistory.getMatch(matchId);
+
+            // Not found in recent matches, attempt to locate by ID
+            if(matchStats == null) {
+
+                /*
+                 * Player's UNO is required as matches retrieved by match ID return all player stats with only UNO
+                 * available to identify player. If their UNO is not in any of their recent matches
+                 * (it's always returned now, but wasn't always so if the match history is old it won't be in there),
+                 * there's no way to identify which player they are.
+                 */
+                String uno = null;
+                for(MatchStats stats : matchHistory.getMatches()) {
+                    if(stats.getMainPlayer().getUno().equals(MatchPlayer.UNAVAILABLE)) {
+                        continue;
+                    }
+                    uno = stats.getMainPlayer().getUno();
+                }
+
+                if(uno == null) {
+                    channel.sendMessage(
+                            buildErrorEmbed(
+                                    "UNO",
+                                    "I am unable to display matches outside of this player's most recent matches."
+                            )
+                    ).queue();
+                    return;
+                }
+
+                matchStats = getMatchById(matchId, name, uno, getPlatform(), channel);
+
+                // Error fetching match stats - error message has already been sent
+                if(matchStats == null) {
+                    return;
+                }
+            }
+            sendMatchEmbed(matchStats, channel);
+            return;
+        }
+
         getMatchHistoryEmbed(context, matchHistory).showMessage();
+    }
+
+    /**
+     * Get match stats for a player from outside their recent matches.
+     * This requires the match ID and the player's UNO ID. When requesting match stats like this, the stats
+     * of all players are returned with the only identifying info being the player's UNO ID.
+     * The UNO ID can be found in any match stats within a player's recent matches, if the player has no recent matches,
+     * there is no way to get from an e.g Battle.net name to an UNO.
+     * If any errors occur, send a message to the given channel detailing the error.
+     *
+     * @param matchID  Match ID - e.g "7267476866035099410"
+     * @param name     Player name
+     * @param uno      Player UNO ID - e.g "9621104712623016829"
+     * @param platform Player platform - e.g BATTLE
+     * @param channel  Channel to send errors to
+     * @return Match stats or null (if an error occurs)
+     */
+    @Nullable
+    private MatchStats getMatchById(String matchID, String name, String uno, PLATFORM platform, MessageChannel channel) {
+        final String json = getSpecificMatchJSON(matchID, platform);
+
+        // No response, send an error
+        if(json == null || new JSONObject(json).has(STATUS_KEY)) {
+            channel.sendMessage(
+                    buildErrorEmbed(
+                            "FAIL",
+                            json == null
+                                    ? "I was unable to get the API on the phone!"
+                                    : new JSONObject(json).getString(STATUS_KEY)
+                    )
+            ).queue();
+            return null;
+        }
+
+        JSONArray players = new JSONObject(json).getJSONArray("allPlayers");
+
+        // Match doesn't exist
+        if(players.isEmpty()) {
+            channel.sendMessage(
+                    buildErrorEmbed("NO MATCH", "No match with the ID: **" + matchID + "** exists!")
+            ).queue();
+            return null;
+        }
+
+        // Attempt to locate player within list of returned players
+        for(int i = 0; i < players.length(); i++) {
+            MatchStats matchStats = apiParser.parseMatchStats(name, platform, players.getJSONObject(i));
+            if(!matchStats.getMainPlayer().getUno().equals(uno)) {
+                continue;
+            }
+            return matchStats;
+        }
+
+        channel.sendMessage(
+                buildErrorEmbed("NOT PRESENT", "This player was not present in that match!")
+        ).queue();
+        return null;
     }
 
     /**
@@ -135,7 +244,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     private void showSpecificWobblyScore(MessageChannel channel) {
         int index = 0;
         try {
-            index = Integer.parseInt(matchID) - 1;
+            index = Integer.parseInt(matchId) - 1;
         }
         catch(NumberFormatException e) {
             e.printStackTrace();
@@ -313,33 +422,21 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
 
     /**
      * Create and send an embed for a specific match
-     * Attach emotes if the match has player information to toggle between
-     * match stats and player information when clicked
+     * Attach emotes if the match has information to toggle between.
      *
-     * @param matchHistory Match history of player
-     * @param channel      Channel to send to
+     * @param matchStats Player match stats
+     * @param channel    Channel to send to
      */
-    private void sendMatchEmbed(MatchHistory matchHistory, MessageChannel channel) {
-        MatchStats matchStats = matchID.equals(LATEST)
-                ? matchHistory.getMatches().get(0)
-                : matchHistory.getMatch(matchID);
-        if(matchStats == null) {
-            channel.sendMessage(
-                    buildErrorEmbed(
-                            "Error Fetching Match",
-                            "No match found with id: **" + matchID + "**" +
-                                    " for player: **" + matchHistory.getName().toUpperCase() + "**"
-                    )
-            ).queue();
-            return;
-        }
+    private void sendMatchEmbed(MatchStats matchStats, MessageChannel channel) {
 
         MessageEmbed matchEmbed = buildMatchEmbed(matchStats);
         MessageAction sendMessage = channel.sendMessage(matchEmbed).setActionRows(getButtons(defaultButtonId, matchStats));
         MatchPlayer player = matchStats.getMainPlayer();
         Consumer<Message> callback = message -> matchMessages.put(message.getIdLong(), matchStats);
+
         if(player.hasLoadouts()) {
             player.setLoadoutImage(buildLoadoutImage(player.getLoadouts()));
+
             /*
              * Setting the attached loadout image file as the embed footer icon prevents it from displaying as
              * a separate message.
@@ -637,6 +734,16 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
      */
     @Nullable
     public abstract String getMatchHistoryJSON(String name, PLATFORM platform);
+
+    /**
+     * Get the JSON of a specific match from the API
+     *
+     * @param matchId  Match ID
+     * @param platform Player platform
+     * @return Match JSON or null
+     */
+    @Nullable
+    public abstract String getSpecificMatchJSON(String matchId, PLATFORM platform);
 
     /**
      * Get the match history JSON from the tracker API
