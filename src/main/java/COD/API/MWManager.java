@@ -1,5 +1,7 @@
 package COD.API;
 
+import Bot.DiscordUser;
+import Bot.FontManager;
 import COD.Assets.Commendation;
 import COD.Assets.FieldUpgrade;
 import COD.Assets.Killstreak;
@@ -22,7 +24,7 @@ public class MWManager extends CODManager {
      * Create the MW manager
      */
     private MWManager() {
-        super(GAME.MW);
+        super("Modern Warfare", DiscordUser.MW, "MW", FontManager.MODERN_WARFARE_FONT);
         this.supers = readSupers();
         this.commendations = readCommendations();
         this.killstreaks = readKillstreaks();

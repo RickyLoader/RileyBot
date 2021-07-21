@@ -3,6 +3,7 @@ package Command.Commands.COD;
 import COD.Assets.*;
 import COD.Loadouts.LoadoutAnalysis;
 import COD.API.MWManager;
+import COD.Loadouts.LoadoutImageManager;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
 import Command.Structure.*;
@@ -98,7 +99,7 @@ public class MWRandomCommand extends DiscordCommand {
      */
     private byte[] buildLoadoutImage(Loadout loadout, String loadoutName, Member member) {
         return ImageLoadingMessage.imageToByteArray(
-                MatchHistoryCommand.loadoutImageManager.buildLoadoutImage(
+                LoadoutImageManager.getInstance().buildLoadoutImage(
                         loadout,
                         loadoutName + " | " + member.getEffectiveName()
                 )

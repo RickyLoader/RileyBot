@@ -38,8 +38,9 @@ public class LoadoutImageManager {
 
     private static final int GAP = 10;
     private static final float FONT_SIZE = 30f;
+    private static LoadoutImageManager instance;
 
-    public LoadoutImageManager() {
+    private LoadoutImageManager() {
         ResourceHandler handler = new ResourceHandler();
         String basePath = "/COD/MW/Templates/Loadout/";
         this.LOADOUT_HEADER = handler.getImageResource(basePath + "loadout_header.png");
@@ -59,6 +60,18 @@ public class LoadoutImageManager {
         this.UNKNOWN_WEAPON = handler.getImageResource(basePath + "unknown_weapon.png");
         this.UNKNOWN_ATTACHMENT = handler.getImageResource(basePath + "unknown_attachment.png");
         this.UNKNOWN_EQUIPMENT = handler.getImageResource(basePath + "unknown_equipment.png");
+    }
+
+    /**
+     * Get an instance of the LoadoutImageManager class
+     *
+     * @return Instance
+     */
+    public static LoadoutImageManager getInstance() {
+        if(instance == null) {
+            instance = new LoadoutImageManager();
+        }
+        return instance;
     }
 
     /**

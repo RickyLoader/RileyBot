@@ -12,7 +12,6 @@ import java.util.Date;
  */
 public class MatchStats {
     private final Date start, end;
-    private final RESULT result;
     private final Map map;
     private final Mode mode;
     private final String id;
@@ -35,18 +34,16 @@ public class MatchStats {
      * @param mode       Match mode
      * @param start      Start data
      * @param end        End date
-     * @param result     Result of match
      * @param mainPlayer Player who requested match stats
      * @param score      Match score
      */
-    public MatchStats(String id, Map map, Mode mode, Date start, Date end, RESULT result, MatchPlayer mainPlayer, Score score) {
+    public MatchStats(String id, Map map, Mode mode, Date start, Date end, MatchPlayer mainPlayer, Score score) {
         this.id = id;
         this.map = map;
         this.mode = mode;
         this.start = start;
         this.end = end;
         this.duration = end.getTime() - start.getTime();
-        this.result = result;
         this.mainPlayer = mainPlayer;
         this.score = score;
     }
@@ -65,8 +62,8 @@ public class MatchStats {
      *
      * @return Match score
      */
-    public String getScore() {
-        return score.getScore();
+    public Score getScore() {
+        return score;
     }
 
     /**
@@ -157,20 +154,11 @@ public class MatchStats {
     }
 
     /**
-     * Get the match result - win, loss, draw, forfeit
-     *
-     * @return Match result
-     */
-    public RESULT getResult() {
-        return result;
-    }
-
-    /**
      * Check if the player completed the match
      *
      * @return Player completed match
      */
     public boolean playerCompleted() {
-        return result != RESULT.FORFEIT;
+        return score.getResult() != RESULT.FORFEIT;
     }
 }

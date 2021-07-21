@@ -1,5 +1,8 @@
 package COD.API;
 
+import Bot.DiscordUser;
+import Bot.FontManager;
+
 public class CWManager extends CODManager {
     private static CWManager instance = null;
     public static String THUMBNAIL = "https://i.imgur.com/0uCij2q.png";
@@ -8,7 +11,7 @@ public class CWManager extends CODManager {
      * Create the CW manager
      */
     private CWManager() {
-        super(GAME.CW);
+        super("Cold War", DiscordUser.CW, "CW", FontManager.COLD_WAR_FONT);
     }
 
     /**

@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -150,6 +151,7 @@ public abstract class SavedNameCommand extends OnReadyDiscordCommand {
      * @param id ID of user
      * @return User's saved name
      */
+    @Nullable
     public abstract String getSavedName(long id);
 
     /**

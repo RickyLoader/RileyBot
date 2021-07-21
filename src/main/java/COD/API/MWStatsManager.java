@@ -1,28 +1,27 @@
 package COD.API;
 
-import COD.API.Parsing.MWAPIStatsParser;
-import COD.API.Parsing.MWTrackerStatsParser;
+import COD.API.Parsing.MWAPIParser;
+import COD.API.Parsing.MWTrackerParser;
 import COD.PlayerStats.*;
 import Command.Structure.EmbedHelper;
-import Network.NetworkRequest;
-import Network.NetworkResponse;
 import org.json.JSONObject;
+
+import static COD.API.TrackerAPI.TRACKER_NAME;
 
 /**
  * Get player Modern Warfare stats
  */
 public class MWStatsManager extends CODStatsManager<MWManager, MWPlayerAssetStats, MWPlayerStats> {
-    private final MWAPIStatsParser apiParser;
-    private final MWTrackerStatsParser trackerParser;
-    public static final String TRACKER_NAME = "tracker.gg";
+    private final MWAPIParser apiParser;
+    private final MWTrackerParser trackerParser;
 
     /**
      * Initialise the resource manager
      */
     public MWStatsManager() {
         super(MWManager.getInstance());
-        this.apiParser = new MWAPIStatsParser(getManager());
-        this.trackerParser = new MWTrackerStatsParser(getManager());
+        this.apiParser = new MWAPIParser(getManager());
+        this.trackerParser = new MWTrackerParser(getManager());
     }
 
     @Override
@@ -42,14 +41,7 @@ public class MWStatsManager extends CODStatsManager<MWManager, MWPlayerAssetStat
             return new PlayerStatsResponse<>(status);
         }
 
-        MWPlayerStats playerStats = new MWPlayerStats(
-                name,
-                platform,
-                apiParser.parseAssetStats(data.getJSONObject("data").getJSONObject("lifetime")),
-                apiParser.parseBasicStats(data.getJSONObject("basic"))
-        );
-
-        return new PlayerStatsResponse<>(playerStats);
+        return new PlayerStatsResponse<>(apiParser.parseStatsResponse(name, platform, data));
     }
 
     /**
@@ -61,45 +53,28 @@ public class MWStatsManager extends CODStatsManager<MWManager, MWPlayerAssetStat
      * @return Stats response - contains player stats and optionally messages from the API
      */
     public PlayerStatsResponse<MWPlayerAssetStats, MWPlayerStats> fetchPlayerStatsFallback(String name, PLATFORM platform) {
-        final String urlPath = platform.getTrackerName()
-                + "/" + CODAPI.encodeName(name)
-                + "/";
+        final JSONObject playerStats = TrackerAPI.getMWPlayerStatsJson(name, platform);
 
-        final String viewUrl = "https://cod.tracker.gg/modern-warfare/profile/" + urlPath;
-        final String baseUrl = "https://api.tracker.gg/api/v2/modern-warfare/standard/profile/" + urlPath;
-
-        final String enquiry = "**" + name + "** on " + TRACKER_NAME + " (platform = " + platform.name() + ")";
-
-        // Basic stats & commendations
-        NetworkResponse basicResponse = new NetworkRequest(baseUrl, false).get();
+        // URL to view stats in browser
+        final String profileUrl = TrackerAPI.getMWProfileUrl(name, platform);
 
         // No response from tracker
-        if(basicResponse.code != 200) {
+        if(playerStats == null) {
             return new PlayerStatsResponse<>(
-                    "No response for: " + enquiry
+                    "No response for: "
+                            + EmbedHelper.embedURL(name, profileUrl)
+                            + " on " + TRACKER_NAME + " (platform = " + platform.name() + ")"
             );
         }
 
-        final String segmentUrl = baseUrl + "segments/";
-
-        NetworkResponse killstreakResponse = new NetworkRequest(segmentUrl + "killstreak", false).get();
-        NetworkResponse weaponResponse = new NetworkRequest(segmentUrl + "weapon", false).get();
-
-        // Issue fetching weapons/killstreaks
-        if(killstreakResponse.code != 200 || weaponResponse.code != 200) {
-            return new PlayerStatsResponse<>("Not enough data available for: " + enquiry);
-        }
-
         return new PlayerStatsResponse<>(
-                trackerParser.parseTrackerResponse(
+                trackerParser.parseStatsResponse(
                         name,
                         platform,
-                        new JSONObject(basicResponse.body),
-                        new JSONObject(weaponResponse.body),
-                        new JSONObject(killstreakResponse.body)
+                        playerStats
                 ),
                 "API down, stats retrieved from "
-                        + EmbedHelper.embedURL(TRACKER_NAME, viewUrl)
+                        + EmbedHelper.embedURL(TRACKER_NAME, profileUrl)
                         + " instead.\n**Some will be missing** because they're lazy."
         );
     }

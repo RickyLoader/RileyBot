@@ -25,9 +25,18 @@ public class Score {
      *
      * @return Formatted score
      */
-    public String getScore() {
+    public String getFormattedScore() {
         int min = Math.min(scoreA, scoreB);
         int max = Math.max(scoreA, scoreB);
         return result == MatchStats.RESULT.WIN ? max + "/" + min : min + "/" + max;
+    }
+
+    /**
+     * Get the result of the match - WIN/LOSS etc
+     *
+     * @return Match result
+     */
+    public MatchStats.RESULT getResult() {
+        return result;
     }
 }

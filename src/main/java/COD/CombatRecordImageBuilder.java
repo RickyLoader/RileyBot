@@ -16,7 +16,8 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
-import static COD.API.MWStatsManager.TRACKER_NAME;
+import static COD.API.CODAPI.API_FAILURE_MESSAGE;
+import static COD.API.TrackerAPI.TRACKER_NAME;
 
 /**
  * Build an image containing the user's Modern Warfare stats
@@ -578,7 +579,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             final String failMessage = response.getMessage();
 
             // Player not found etc
-            if(!failMessage.equals(PlayerStatsResponse.API_FAILURE)) {
+            if(!failMessage.equals(API_FAILURE_MESSAGE)) {
                 loading.failLoading(failMessage);
                 return null;
             }

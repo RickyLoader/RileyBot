@@ -4,6 +4,7 @@ import Bot.ResourceHandler;
 import COD.Assets.*;
 import org.json.JSONObject;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
@@ -15,27 +16,28 @@ import static COD.Assets.Attachment.*;
 public abstract class CODManager {
     final ResourceHandler resourceHandler;
     final String basePath;
+    private final String gameName, gameId;
     private final HashMap<String, Weapon> weapons;
     private final HashMap<String, Map> maps;
     private final HashMap<String, Mode> modes;
     private final HashMap<String, Perk> perks;
-    private final GAME game;
     private final HashMap<Weapon.CATEGORY, BufferedImage> missingWeaponImages = new HashMap<>();
     private final BufferedImage missingPerkImage, missingModeImage;
-
-    public enum GAME {
-        CW,
-        MW
-    }
+    private final Font font;
 
     /**
      * Create the COD manager
      *
-     * @param game COD game
+     * @param gameName   Name of the game - e.g "Modern Warfare"
+     * @param gameId     ID of the game used in the db - e.g "mw"
+     * @param folderName Name of the folder within the COD folder where resources are stored - e.g "MW"
+     * @param font       COD font
      */
-    public CODManager(GAME game) {
-        this.game = game;
-        this.basePath = "/COD/" + game.name() + "/";
+    public CODManager(String gameName, String gameId, String folderName, Font font) {
+        this.gameName = gameName;
+        this.gameId = gameId;
+        this.font = font;
+        this.basePath = "/COD/" + folderName + "/";
         this.resourceHandler = new ResourceHandler();
         this.weapons = readWeapons();
         this.maps = readMaps();
@@ -43,6 +45,24 @@ public abstract class CODManager {
         this.perks = readPerks();
         this.missingPerkImage = resourceHandler.getImageResource(basePath + "Perks/missing.png");
         this.missingModeImage = resourceHandler.getImageResource(basePath + "Modes/missing.png");
+    }
+
+    /**
+     * Get the name of the game - e.g "Modern Warfare"
+     *
+     * @return Name of the game
+     */
+    public String getGameName() {
+        return gameName;
+    }
+
+    /**
+     * Get the COD font
+     *
+     * @return COD font
+     */
+    public Font getFont() {
+        return font;
     }
 
     /**
@@ -202,7 +222,6 @@ public abstract class CODManager {
             Map map = new Map(
                     name,
                     mapData.getString("real_name"),
-                    game,
                     resourceHandler.getImageResource(imagePath + ".png"),
                     mapData.has(imageKey) ? mapData.getString(imageKey) : null
             );
@@ -286,7 +305,7 @@ public abstract class CODManager {
     public Map getMapByCodename(String codename) {
         Map map = maps.get(codename);
         if(map == null) {
-            map = new Map(codename, game);
+            map = new Map(codename);
             maps.put(codename, map);
         }
         return map;
@@ -387,11 +406,11 @@ public abstract class CODManager {
     }
 
     /**
-     * Get the COD game
+     * Get the ID of the game - e.g "MW"
      *
-     * @return Game
+     * @return Game ID
      */
-    public GAME getGame() {
-        return game;
+    public String getGameId() {
+        return gameId;
     }
 }

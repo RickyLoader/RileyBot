@@ -1,7 +1,6 @@
 package COD.Gunfight;
 
 import COD.API.CODManager;
-import COD.API.CODManager.GAME;
 import COD.Assets.Map;
 import COD.Assets.Mode;
 import org.json.JSONObject;
@@ -15,12 +14,20 @@ import java.util.List;
  */
 public class WobblyScore {
     private final long wobblies;
-    private final String name, matchId, key;
+    private final String name, matchId, key, gameId;
     private final long dateMs;
     private final double metres;
     private final Map map;
     private final Mode mode;
-    private final GAME game;
+    private static final String
+            WOBBLIES_KEY = "wobblies",
+            PLAYER_NAME_KEY = "player_name",
+            GAME_ID_KEY = "game",
+            MAP_ID_KEY = "map_id",
+            MODE_ID_KEY = "mode_id",
+            MATCH_ID_KEY = "match_id",
+            METRES_KEY = "metres",
+            DATE_KEY = "dateMs";
 
     /**
      * Create a wobbly score
@@ -32,9 +39,9 @@ public class WobblyScore {
      * @param map      Map
      * @param mode     Mode
      * @param matchId  Match Id
-     * @param game     COD game
+     * @param gameId   COD game ID - e.g "MW"
      */
-    public WobblyScore(long wobblies, double metres, String name, long dateMs, Map map, Mode mode, String matchId, GAME game) {
+    public WobblyScore(long wobblies, double metres, String name, long dateMs, Map map, Mode mode, String matchId, String gameId) {
         this.wobblies = wobblies;
         this.name = name;
         this.dateMs = dateMs;
@@ -42,7 +49,7 @@ public class WobblyScore {
         this.mode = mode;
         this.matchId = matchId;
         this.metres = metres;
-        this.game = game;
+        this.gameId = gameId;
         this.key = matchId + name;
     }
 
@@ -140,14 +147,14 @@ public class WobblyScore {
      */
     public JSONObject toJSON() {
         return new JSONObject()
-                .put("wobblies", wobblies)
-                .put("player_name", name)
-                .put("game", game.name().toUpperCase())
-                .put("map_id", map.getCodename())
-                .put("mode_id", mode.getCodename())
-                .put("match_id", matchId)
-                .put("metres", metres)
-                .put("dateMs", dateMs);
+                .put(WOBBLIES_KEY, wobblies)
+                .put(PLAYER_NAME_KEY, name)
+                .put(GAME_ID_KEY, gameId)
+                .put(MAP_ID_KEY, map.getCodename())
+                .put(MODE_ID_KEY, mode.getCodename())
+                .put(MATCH_ID_KEY, matchId)
+                .put(METRES_KEY, metres)
+                .put(DATE_KEY, dateMs);
     }
 
     /**
@@ -159,14 +166,14 @@ public class WobblyScore {
      */
     public static WobblyScore fromJSON(JSONObject json, CODManager codManager) {
         return new WobblyScore(
-                json.getLong("wobblies"),
-                json.getDouble("metres"),
-                json.getString("player_name"),
-                json.getLong("dateMs"),
-                codManager.getMapByCodename(json.getString("map_id")),
-                codManager.getModeByCodename(json.getString("mode_id")),
-                json.getString("match_id"),
-                codManager.getGame()
+                json.getLong(WOBBLIES_KEY),
+                json.getDouble(METRES_KEY),
+                json.getString(PLAYER_NAME_KEY),
+                json.getLong(DATE_KEY),
+                codManager.getMapByCodename(json.getString(MAP_ID_KEY)),
+                codManager.getModeByCodename(json.getString(MODE_ID_KEY)),
+                json.getString(MATCH_ID_KEY),
+                json.getString(GAME_ID_KEY)
         );
     }
 }

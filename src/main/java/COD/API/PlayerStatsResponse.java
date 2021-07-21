@@ -12,7 +12,6 @@ public class PlayerStatsResponse<E extends PlayerAssetStats, T extends CODPlayer
     private final T stats;
     private final String message;
     private final boolean success;
-    public static final String API_FAILURE = "Failed to communicate with API, try again later.";
 
     /**
      * Create the successful player stats response

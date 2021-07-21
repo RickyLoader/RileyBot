@@ -3,6 +3,7 @@ package Command.Structure;
 import COD.Match.Breakdown;
 import COD.Match.MatchHistory;
 import COD.Match.MatchStats;
+import COD.Match.Score;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -12,15 +13,13 @@ import net.dv8tion.jda.internal.interactions.ButtonImpl;
 
 import java.util.*;
 
-import static COD.API.CODManager.*;
-
 /**
  * Pageable COD match history embed with map/mode breakdown charts
  */
 public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
     private final Button maps, modes, goBack;
     private final MatchHistory matchHistory;
-    private final GAME game;
+    private final String gameName;
 
     /**
      * Embedded COD match history message which can be paged through with emotes.
@@ -28,16 +27,16 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
      *
      * @param context      Command context
      * @param matchHistory Match history to
-     * @param game         COD game
+     * @param gameName     COD game name - e.g "Modern Warfare"
      * @param thumb        Thumbnail to use for embed
      * @param trigger      Trigger to display in footer
      */
-    public PageableMatchHistoryEmbed(CommandContext context, MatchHistory matchHistory, GAME game, String thumb, String trigger) {
+    public PageableMatchHistoryEmbed(CommandContext context, MatchHistory matchHistory, String gameName, String thumb, String trigger) {
         super(
                 context,
                 matchHistory.getMatches(),
                 thumb,
-                game.name().toUpperCase() + " Match History: " + matchHistory.getName().toUpperCase(),
+                gameName + " Match History: " + matchHistory.getName().toUpperCase(),
                 matchHistory.getSummary(),
                 "Type: " + trigger + " for help",
                 new String[]{"Match", "Details", "Result"},
@@ -67,7 +66,7 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
                 Emoji.ofEmote(emoteHelper.getBackward())
         );
         this.matchHistory = matchHistory;
-        this.game = game;
+        this.gameName = gameName;
     }
 
     @Override
@@ -87,7 +86,7 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
     private MessageEmbed buildBreakdownEmbed(Breakdown breakdown) {
         return new EmbedBuilder()
                 .setTitle(
-                        game.name().toUpperCase()
+                        gameName
                                 + " Match History "
                                 + matchHistory.getName().toUpperCase()
                                 + "\n" + breakdown.getTitle() + " Breakdown"
@@ -184,8 +183,9 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
      * @return Formatted result
      */
     public String getFormattedResult(MatchStats matchStats) {
-        MatchStats.RESULT result = matchStats.getResult();
-        return result.toString() + " " + getResultEmote(result, getEmoteHelper()) + "\n(" + matchStats.getScore() + ")";
+        final Score score = matchStats.getScore();
+        final MatchStats.RESULT result = score.getResult();
+        return result.toString() + " " + getResultEmote(result, getEmoteHelper()) + "\n(" + score.getFormattedScore() + ")";
     }
 
     /**

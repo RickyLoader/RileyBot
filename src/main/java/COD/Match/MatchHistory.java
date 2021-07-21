@@ -117,7 +117,7 @@ public class MatchHistory {
     private void calculateSummary() {
         int wins = 0, losses = 0;
         for(MatchStats matchStats : this.matchStats) {
-            switch(matchStats.getResult()) {
+            switch(matchStats.getScore().getResult()) {
                 case WIN:
                     wins++;
                     break;

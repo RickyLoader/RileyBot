@@ -1,20 +1,23 @@
 package Command.Structure;
 
 import Bot.DiscordUser;
-import Bot.FontManager;
 import COD.API.*;
 import COD.API.CODStatsManager.PLATFORM;
-import COD.Assets.*;
+import COD.API.Parsing.CODAPIParser;
+import COD.API.Parsing.CODTrackerParser;
+import COD.Assets.Map;
 import COD.Gunfight.*;
 import COD.Loadouts.LoadoutImageManager;
 import COD.Match.*;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.interactions.ActionRow;
 import net.dv8tion.jda.api.interactions.button.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,47 +31,55 @@ import java.util.stream.Collectors;
 /**
  * View a COD player's match history
  */
-public class MatchHistoryCommand extends CODLookupCommand {
-    public static final LoadoutImageManager loadoutImageManager = new LoadoutImageManager();
-    private static final String LATEST = "latest";
+public abstract class MatchHistoryCommand extends CODLookupCommand {
     private final HashMap<Long, MatchStats> matchMessages;
     private final HashSet<String> leaderboardSeen;
     private final ArrayList<WobblyScore> leaderboard;
     private final CODManager codManager;
-    private final Font font;
-    private final String footer, statsId, defaultButtonId;
+    private final String footer, defaultButtonId;
+    private final LoadoutImageManager loadoutImageManager;
+    private final String thumbnail;
+    private final CODAPIParser<CODManager> apiParser;
+    private final CODTrackerParser<CODManager> trackerParser;
+
     private Button stats, loadouts;
     private String matchID;
     private EmoteHelper emoteHelper;
+    private static final String
+            STATS_BUTTON_ID = "stats",
+            STATUS_KEY = "status",
+            LATEST = "latest",
+            WOBBLIES = "wobblies",
+            WOBBLIES_SPECIFIC = WOBBLIES + " [rank]";
 
     /**
      * Create the command
      *
      * @param trigger    Command trigger
      * @param codManager COD asset manager
+     * @param thumbnail  Thumbnail to use in the match embeds
      */
-    public MatchHistoryCommand(String trigger, CODManager codManager) {
+    public MatchHistoryCommand(String trigger, CODManager codManager, String thumbnail) {
         super(
                 trigger,
                 "Have a gander at a player's match history!",
                 getHelpText(trigger) + " [match id/" + LATEST + "]\n\n"
-                        + trigger + " missing\n"
-                        + trigger + " wobblies\n"
-                        + trigger + " wobblies [rank]"
+                        + trigger + " " + WOBBLIES + "\n"
+                        + trigger + " " + WOBBLIES_SPECIFIC
         );
+        this.thumbnail = thumbnail;
+        this.loadoutImageManager = LoadoutImageManager.getInstance();
         this.matchMessages = new HashMap<>();
         this.codManager = codManager;
         this.footer = "Type " + getTrigger() + " for help";
+        this.defaultButtonId = STATS_BUTTON_ID; // Stats page is displayed first
+        this.apiParser = new CODAPIParser<>(codManager);
+        this.trackerParser = new CODTrackerParser<>(codManager);
         this.leaderboard = getWobblyLeaderboard();
         this.leaderboardSeen = leaderboard
                 .stream()
                 .map(WobblyScore::getKey)
                 .collect(Collectors.toCollection(HashSet::new));
-        this.font = codManager.getGame() == CODManager.GAME.MW
-                ? FontManager.MODERN_WARFARE_FONT
-                : FontManager.COLD_WAR_FONT;
-        this.statsId = "stats";
-        this.defaultButtonId = statsId; // Stats page is displayed first
     }
 
     @Override
@@ -90,47 +101,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
     }
 
     @Override
-    public String getSavedName(long id) {
-        return DiscordUser.getSavedName(
-                id,
-                codManager.getGame() == CODManager.GAME.MW ? DiscordUser.MW : DiscordUser.CW
-        );
-    }
-
-    @Override
-    public void saveName(String name, MessageChannel channel, User user) {
-        DiscordUser.saveName(
-                name,
-                codManager.getGame() == CODManager.GAME.MW ? DiscordUser.MW : DiscordUser.CW,
-                channel,
-                user
-        );
-    }
-
-    @Override
     public void onArgumentsSet(String name, CommandContext context) {
-        if(emoteHelper == null) {
-            this.emoteHelper = context.getEmoteHelper();
-            this.stats = Button.primary(statsId, Emoji.ofEmote(emoteHelper.getStats()));
-            this.loadouts = Button.primary("loadouts", Emoji.ofEmote(emoteHelper.getLoadouts()));
-        }
-
-        context.getJDA().addEventListener(getMatchButtonListener());
-
         MessageChannel channel = context.getMessageChannel();
         channel.sendTyping().queue();
-        if(name.equals("missing")) {
-            ArrayList<MissingWeaponAttachments> missing = MissingWeaponAttachments.getMissingAttachments();
-            if(missing.isEmpty()) {
-                channel.sendMessage("No missing attachments!").queue();
-            }
-            else {
-                showMissingAttachments(context, missing);
-            }
-            return;
-        }
 
-        if(name.equals("wobblies")) {
+        if(name.equals(WOBBLIES)) {
             if(matchID != null) {
                 showSpecificWobblyScore(channel);
                 return;
@@ -139,9 +114,12 @@ public class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
         MatchHistory matchHistory = getMatchHistory(name, getPlatform(), channel);
+
         if(matchHistory == null) {
             return;
         }
+        addMissingWobblyScores(matchHistory.getMatches());
+
         if(matchID != null) {
             sendMatchEmbed(matchHistory, channel);
             return;
@@ -167,9 +145,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
             return;
         }
         WobblyScore score = leaderboard.get(index);
-        MessageEmbed entryEmbed = new EmbedBuilder()
-                .setTitle(codManager.getGame().name().toUpperCase() + " Wobbly Rank #" + (index + 1))
-                .setThumbnail(getEmbedThumbnail())
+        Map map = score.getMap();
+
+        EmbedBuilder entryEmbedBuilder = new EmbedBuilder()
+                .setTitle(codManager.getGameName() + " Wobbly Rank #" + (index + 1))
+                .setThumbnail(thumbnail)
                 .setDescription("Use **" + getTrigger() + " wobblies** to view the full leaderboard.")
                 .addField("Name", score.getPlayerName(), true)
                 .addField("Date", score.getDateString(), true)
@@ -181,10 +161,12 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .addField("Mode", score.getMode().getName(), true)
                 .addBlankField(true)
                 .addField("Match ID", score.getMatchId(), true)
-                .setColor(EmbedHelper.PURPLE)
-                .setImage(score.getMap().getImageUrl())
-                .build();
-        channel.sendMessage(entryEmbed).queue();
+                .setColor(EmbedHelper.PURPLE);
+
+        if(map.hasImageUrl()) {
+            entryEmbedBuilder.setImage(map.getImageUrl());
+        }
+        channel.sendMessage(entryEmbedBuilder.build()).queue();
     }
 
     /**
@@ -196,15 +178,15 @@ public class MatchHistoryCommand extends CODLookupCommand {
         if(leaderboard.isEmpty()) {
             context.getMessageChannel().sendMessage(
                     "There are no wobblies on the leaderboard for "
-                            + codManager.getGame().name().toUpperCase() + "!"
+                            + codManager.getGameName() + "!"
             ).queue();
             return;
         }
         new PageableTableEmbed<WobblyScore>(
                 context,
                 leaderboard,
-                getEmbedThumbnail(),
-                codManager.getGame().name().toUpperCase() + " Wobbly Leaderboard",
+                thumbnail,
+                codManager.getGameName() + " Wobbly Leaderboard",
                 "Use **" + getTrigger() + " wobblies [rank]** to view more details.\n\n"
                         + "Here are the " + leaderboard.size() + " wobbly scores:",
                 footer,
@@ -240,7 +222,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private ArrayList<WobblyScore> getWobblyLeaderboard() {
         ArrayList<WobblyScore> wobblyScores = new ArrayList<>();
-        String json = DiscordUser.getWobbliesLeaderboard(codManager.getGame());
+        String json = DiscordUser.getWobbliesLeaderboard(codManager.getGameId());
         if(json == null) {
             return wobblyScores;
         }
@@ -250,71 +232,6 @@ public class MatchHistoryCommand extends CODLookupCommand {
         }
         WobblyScore.sortLeaderboard(wobblyScores, true);
         return wobblyScores;
-    }
-
-    /**
-     * Show the missing weapon attachments in a pageable embed
-     *
-     * @param context Command context
-     * @param missing Missing weapon attachments
-     */
-    private void showMissingAttachments(CommandContext context, ArrayList<MissingWeaponAttachments> missing) {
-        int total = (int) missing.stream().mapToLong(m -> m.attachmentCodenames.size()).sum();
-        new PageableSortEmbed<MissingWeaponAttachments>(
-                context,
-                missing,
-                1
-        ) {
-            @Override
-            public EmbedBuilder getEmbedBuilder(String pageDetails) {
-                return new EmbedBuilder()
-                        .setThumbnail(getEmbedThumbnail())
-                        .setTitle(total + " Missing attachments (" + missing.size() + " Weapons)")
-                        .setFooter(pageDetails + " | Type: " + getTrigger() + " for help");
-            }
-
-            @Override
-            public void displayItem(EmbedBuilder builder, int currentIndex, MissingWeaponAttachments current) {
-                Weapon weapon = current.getWeapon();
-                ArrayList<String> attachments = current.getAttachmentCodenames();
-                StringBuilder description = new StringBuilder();
-                description
-                        .append("**Weapon**: ")
-                        .append(weapon.getName()).append(" (").append(weapon.getCodename()).append(")")
-                        .append("\n")
-                        .append("**Missing**: ").append(attachments.size()).append(" attachments")
-                        .append("\n\n");
-
-                for(int i = 0; i < attachments.size(); i++) {
-                    description.append(i + 1).append(". ").append(attachments.get(i));
-                    if(i < attachments.size() - 1) {
-                        description.append("\n");
-                    }
-                }
-                builder
-                        .setDescription(description.toString())
-                        .setImage(weapon.getImageURL());
-            }
-
-            @Override
-            protected MessageEmbed getNoItemsEmbed() {
-                return getEmbedBuilder(getPageDetails()).setDescription("There are no missing attachments!").build();
-            }
-
-            @Override
-            public boolean nonPagingButtonPressed(String buttonId) {
-                return false;
-            }
-
-            @Override
-            public void sortItems(List<MissingWeaponAttachments> items, boolean defaultSort) {
-                items.sort((o1, o2) -> {
-                    String n1 = o1.getWeapon().getName();
-                    String n2 = o2.getWeapon().getName();
-                    return defaultSort ? n1.compareTo(n2) : n2.compareTo(n1);
-                });
-            }
-        }.showMessage();
     }
 
     /**
@@ -479,7 +396,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         MatchPlayer player = matchStats.getMainPlayer();
         EmbedBuilder builder = getDefaultMatchEmbedBuilder(matchStats)
                 .setTitle(
-                        codManager.getGame().name().toUpperCase()
+                        codManager.getGameName()
                                 + " Match Summary: " + matchStats.getMainPlayer().getName().toUpperCase()
                 )
                 .addField("**Date**", matchStats.getDateString(), true)
@@ -517,9 +434,9 @@ public class MatchHistoryCommand extends CODLookupCommand {
                 .addField("**Match XP**", player.getExperience(), true)
                 .addField(
                         "**Result**",
-                        matchStats.getResult().toString()
-                                + " (" + matchStats.getScore() + ") "
-                                + PageableMatchHistoryEmbed.getResultEmote(matchStats.getResult(), emoteHelper),
+                        matchStats.getScore().getResult().toString()
+                                + " (" + matchStats.getScore().getFormattedScore() + ") "
+                                + PageableMatchHistoryEmbed.getResultEmote(matchStats.getScore().getResult(), emoteHelper),
                         true
                 )
                 .build();
@@ -557,7 +474,7 @@ public class MatchHistoryCommand extends CODLookupCommand {
         summary += "\n\nSome attachments haven't been mapped yet and they will be **RED**!";
         return getDefaultMatchEmbedBuilder(matchStats)
                 .setTitle(
-                        codManager.getGame().name().toUpperCase()
+                        codManager.getGameName()
                                 + " Match Loadouts: " + player.getName().toUpperCase()
                 )
                 .setDescription(summary)
@@ -593,11 +510,11 @@ public class MatchHistoryCommand extends CODLookupCommand {
      */
     private MessageEmbed buildErrorEmbed(String title, String error) {
         return new EmbedBuilder()
-                .setTitle(codManager.getGame().name().toUpperCase() + " Match History: " + title)
-                .setThumbnail(getEmbedThumbnail())
+                .setTitle(codManager.getGameName() + " Match History: " + title)
+                .setThumbnail(thumbnail)
                 .setColor(EmbedHelper.RED)
                 .setDescription(error)
-                .setFooter(footer, getEmbedThumbnail())
+                .setFooter(footer, thumbnail)
                 .build();
     }
 
@@ -608,22 +525,17 @@ public class MatchHistoryCommand extends CODLookupCommand {
      * @return Default embed builder for a match
      */
     private EmbedBuilder getDefaultMatchEmbedBuilder(MatchStats matchStats) {
-        return new EmbedBuilder()
+        EmbedBuilder builder = new EmbedBuilder()
                 .setFooter(footer, "attachment://image.png")
                 .setThumbnail(matchStats.getMode().getImageURL())
-                .setColor(getResultColour(matchStats.getResult()))
-                .setImage(matchStats.getMap().getImageUrl());
-    }
+                .setColor(getResultColour(matchStats.getScore().getResult()));
 
-    /**
-     * Get the thumbnail to use in the embed
-     *
-     * @return Embed thumbnail
-     */
-    private String getEmbedThumbnail() {
-        return codManager.getGame() == CODManager.GAME.MW
-                ? MWManager.THUMBNAIL
-                : CWManager.THUMBNAIL;
+        Map map = matchStats.getMap();
+        if(map.hasImageUrl()) {
+            builder.setImage(map.getImageUrl());
+        }
+
+        return builder;
     }
 
     /**
@@ -637,319 +549,120 @@ public class MatchHistoryCommand extends CODLookupCommand {
         return new PageableMatchHistoryEmbed(
                 context,
                 matchHistory,
-                codManager.getGame(),
-                getEmbedThumbnail(),
+                codManager.getGameName(),
+                thumbnail,
                 getTrigger()
         );
     }
 
     /**
-     * Get the player's match history
+     * Get a player's match history.
+     * If any errors occur, send a message to the given channel detailing the error.
      *
      * @param name     Player name
      * @param platform Player platform
      * @param channel  Channel to send errors to
-     * @return Match history
+     * @return Match history or null
      */
+    @Nullable
     private MatchHistory getMatchHistory(String name, PLATFORM platform, MessageChannel channel) {
-        ArrayList<MatchStats> matchStats = new ArrayList<>();
-        JSONObject overview = new JSONObject(getMatchHistoryJSON(name, platform));
-        if(overview.has("status")) {
-            channel.sendMessage(
-                    buildErrorEmbed(
-                            "Error Fetching Player: " + name,
-                            overview.getString("status")
-                    )
-            ).queue();
-            return null;
+        final String json = getMatchHistoryJSON(name, platform);
+
+        // No response, try the tracker
+        if(json == null || new JSONObject(json).has(STATUS_KEY)) {
+            final JSONArray trackerJson = getTrackerMatchHistoryJson(name, platform);
+            if(trackerJson == null) {
+                channel.sendMessage(
+                        buildErrorEmbed(
+                                "FAIL",
+                                json == null
+                                        ? "I was unable to get the API on the phone!"
+                                        : new JSONObject(json).getString(STATUS_KEY)
+                        )
+                ).queue();
+                return null;
+            }
+            return trackerParser.parseMatchHistory(name, platform, trackerJson);
         }
 
-        JSONArray matchList = overview.getJSONArray("matches");
-        JSONObject summary = overview.getJSONObject("summary").getJSONObject("all");
-        ArrayList<WobblyScore> scores = new ArrayList<>();
-        for(int i = 0; i < matchList.length(); i++) {
-            JSONObject matchData = matchList.getJSONObject(i);
-            MatchPlayer player = parseMatchPlayer(matchData, new MatchPlayer.MatchPlayerBuilder(name, platform));
-            MatchStats.RESULT result = parseResult(
-                    (!matchData.getBoolean("isPresentAtEnd") || matchData.isNull("result")) ? "FORFEIT" : matchData.getString("result")
-            );
+        return apiParser.parseMatchHistory(name, platform, new JSONObject(json));
+    }
 
-            MatchStats match = new MatchStats(
-                    matchData.getString("matchID"),
-                    codManager.getMapByCodename(matchData.getString("map")),
-                    codManager.getModeByCodename(matchData.getString("mode")),
-                    new Date(matchData.getLong("utcStartSeconds") * 1000),
-                    new Date(matchData.getLong("utcEndSeconds") * 1000),
-                    result,
-                    player,
-                    new Score(
-                            matchData.getInt("team1Score"),
-                            matchData.getInt("team2Score"),
-                            result
-                    )
-            );
-            matchStats.add(match);
+    /**
+     * Add any unseen matches to the wobbly scores
+     *
+     * @param matches List of match stats
+     */
+    private void addMissingWobblyScores(ArrayList<MatchStats> matches) {
+        ArrayList<WobblyScore> scores = new ArrayList<>();
+
+        for(MatchStats matchStats : matches) {
+            MatchPlayer player = matchStats.getMainPlayer();
+
             WobblyScore wobblyScore = new WobblyScore(
                     player.getWobblies(),
                     player.getMetres(),
                     player.getName(),
-                    match.getStart().getTime(),
-                    match.getMap(),
-                    match.getMode(),
-                    match.getId(),
-                    codManager.getGame()
+                    matchStats.getStart().getTime(),
+                    matchStats.getMap(),
+                    matchStats.getMode(),
+                    matchStats.getId(),
+                    codManager.getGameId()
             );
+
             if(leaderboardSeen.contains(wobblyScore.getKey())) {
                 continue;
             }
+
             scores.add(wobblyScore);
             leaderboardSeen.add(wobblyScore.getKey());
             leaderboard.add(wobblyScore);
         }
-        if(!scores.isEmpty()) {
-            DiscordUser.addWobbliesToLeaderboard(scores);
-            WobblyScore.sortLeaderboard(leaderboard, true);
+
+        // No new scores to add
+        if(scores.isEmpty()) {
+            return;
         }
-        return new MatchHistory(
-                name,
-                matchStats,
-                new Ratio(
-                        summary.getInt("kills"),
-                        summary.getInt("deaths")
-                ),
-                font
-        );
+
+        DiscordUser.addWobbliesToLeaderboard(scores);
+        WobblyScore.sortLeaderboard(leaderboard, true);
     }
 
     /**
-     * Parse a match player from the given match JSON
-     *
-     * @param matchData Match JSON
-     * @param builder   Player builder
-     * @return Match player
-     */
-    private MatchPlayer parseMatchPlayer(JSONObject matchData, MatchPlayer.MatchPlayerBuilder builder) {
-        JSONObject player = matchData.getJSONObject("player");
-        JSONObject playerStats = matchData.getJSONObject("playerStats");
-        builder.setTimePlayed(playerStats.getLong("timePlayed") * 1000)
-                .setKD(
-                        new Ratio(
-                                playerStats.getInt("kills"),
-                                playerStats.getInt("deaths")
-                        )
-                )
-                .setAccuracy(
-                        playerStats.has("shotsLanded") ? new Ratio(
-                                playerStats.getInt("shotsLanded"),
-                                playerStats.getInt("shotsFired")
-                        ) : null
-                )
-                .setTeam(getOptionalString(player, "team"))
-                .setUno(getOptionalString(player, "uno"))
-                .setNemesis(getOptionalString(player, "nemesis"))
-                .setMostKilled(getOptionalString(player, "mostKilled"))
-                .setLongestStreak(getLongestStreak(playerStats))
-                .setDamageDealt(getDamageDealt(playerStats))
-                .setDamageReceived(getOptionalInt(playerStats, "damageTaken"))
-                .setXP(getOptionalInt(playerStats, "matchXp"))
-                .setDistanceTravelled(getOptionalInt(playerStats, "distanceTraveled"))
-                .setLoadouts(parseLoadouts(player.getJSONArray("loadout")));
-
-        if(playerStats.has("percentTimeMoving")) {
-            builder.setPercentTimeMoving(playerStats.getDouble("percentTimeMoving"));
-        }
-
-        return builder.build();
-    }
-
-    /**
-     * Parse the provided loadout JSON into an array of loadouts
-     *
-     * @param loadoutList JSON loadout array
-     * @return Array of player loadouts
-     */
-    private Loadout[] parseLoadouts(JSONArray loadoutList) {
-        ArrayList<Loadout> loadouts = new ArrayList<>();
-        for(int i = 0; i < loadoutList.length(); i++) {
-            JSONObject loadoutData = loadoutList.getJSONObject(i);
-            loadouts.add(
-                    new Loadout.LoadoutBuilder()
-                            .setPrimaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("primaryWeapon")))
-                            .setSecondaryWeapon(parseLoadoutWeapon(loadoutData.getJSONObject("secondaryWeapon")))
-                            .setPerks(parsePerks(loadoutData.getJSONArray("perks")))
-                            .setLethalEquipment(
-                                    parseWeapon(
-                                            loadoutData.getJSONObject("lethal"),
-                                            Weapon.CATEGORY.LETHALS
-                                    )
-                            )
-                            .setTacticalEquipment(
-                                    (TacticalWeapon) parseWeapon(
-                                            loadoutData.getJSONObject("tactical"),
-                                            Weapon.CATEGORY.TACTICALS
-                                    )
-                            )
-                            .build()
-            );
-        }
-        return loadouts.stream().distinct().toArray(Loadout[]::new);
-    }
-
-    /**
-     * Parse an array of perks from the match loadout JSON
-     *
-     * @param perkJSONArray JSON array of perks
-     * @return Array of perks
-     */
-    private Perk[] parsePerks(JSONArray perkJSONArray) {
-        ArrayList<Perk> perks = new ArrayList<>();
-        for(int i = 0; i < perkJSONArray.length(); i++) {
-            String codename = perkJSONArray.getJSONObject(i).getString("name");
-            if(codename.equals("specialty_null")) {
-                continue;
-            }
-            perks.add(codManager.getPerkByCodename(codename));
-        }
-        return perks.toArray(new Perk[0]);
-    }
-
-    /**
-     * Parse a weapon from the match loadout weapon JSON
-     *
-     * @param loadoutWeapon Match loadout weapon JSON
-     * @param category      Weapon category
-     * @return Weapon
-     */
-    private Weapon parseWeapon(JSONObject loadoutWeapon, Weapon.CATEGORY category) {
-        String codename = loadoutWeapon.getString("name");
-        if(codename.equals("none")) {
-            return null;
-        }
-        if(category == Weapon.CATEGORY.UNKNOWN) {
-            category = Weapon.getCategoryFromWeaponCodename(codename);
-        }
-        return codManager.getWeaponByCodename(codename, category);
-    }
-
-    /**
-     * Parse a loadout weapon from the match loadout weapon JSON
-     *
-     * @param loadoutWeapon Match loadout weapon JSON
-     * @return Loadout weapon containing weapon & attachments
-     */
-    private LoadoutWeapon parseLoadoutWeapon(JSONObject loadoutWeapon) {
-        Weapon weapon = parseWeapon(loadoutWeapon, Weapon.CATEGORY.UNKNOWN);
-        if(weapon == null) {
-            return null;
-        }
-        ArrayList<Attachment> attachments = new ArrayList<>();
-        if(loadoutWeapon.has("attachments")) {
-            JSONArray attachmentData = loadoutWeapon.getJSONArray("attachments");
-            for(int i = 0; i < attachmentData.length(); i++) {
-                String attachmentName = attachmentData.getJSONObject(i).getString("name");
-                if(attachmentName.equals("none")) {
-                    continue;
-                }
-                Attachment attachment = weapon.getAttachmentByCodename(attachmentName);
-                if(attachment == null) {
-                    MissingWeaponAttachments.addMissingAttachment(attachmentName, weapon.getCodename());
-                    attachment = new Attachment(
-                            attachmentName,
-                            "MISSING: " + attachmentName,
-                            Attachment.CATEGORY.UNKNOWN,
-                            Attachment.CATEGORY.UNKNOWN,
-                            null,
-                            null
-                    );
-                }
-                attachments.add(attachment);
-            }
-        }
-        return new LoadoutWeapon(weapon, attachments, loadoutWeapon.getInt("variant"));
-    }
-
-    /**
-     * Get the match history JSON
+     * Get the match history JSON from the API
      *
      * @param name     Player name
      * @param platform Player platform
-     * @return Match history JSON
+     * @return Match history JSON or null
      */
-    private String getMatchHistoryJSON(String name, PLATFORM platform) {
-        return codManager.getGame() == CODManager.GAME.MW
-                ? CODAPI.getMWMatchHistory(name, platform)
-                : CODAPI.getCWMatchHistory(name, platform);
-    }
+    @Nullable
+    public abstract String getMatchHistoryJSON(String name, PLATFORM platform);
 
     /**
-     * Get an optional integer value from the player stats match JSON
-     * Return 0 if absent
+     * Get the match history JSON from the tracker API
      *
-     * @param playerStats Player stats match JSON
-     * @param key         Value key
-     * @return Value or 0
+     * @param name     Player name
+     * @param platform Player platform
+     * @return Match history JSON or null
      */
-    private int getOptionalInt(JSONObject playerStats, String key) {
-        return playerStats.has(key) ? playerStats.getInt(key) : 0;
+    @Nullable
+    public abstract JSONArray getTrackerMatchHistoryJson(String name, PLATFORM platform);
+
+    @Override
+    public void onReady(JDA jda, EmoteHelper emoteHelper) {
+        this.emoteHelper = emoteHelper;
+        this.stats = Button.primary(STATS_BUTTON_ID, Emoji.ofEmote(emoteHelper.getStats()));
+        this.loadouts = Button.primary("loadouts", Emoji.ofEmote(emoteHelper.getLoadouts()));
+        jda.addEventListener(getMatchButtonListener());
     }
 
-    /**
-     * Get an optional String value from the player stats match JSON
-     * Return '-' if absent
-     *
-     * @param playerStats Player stats match JSON
-     * @param key         Value key
-     * @return Value or '-'
-     */
-    private String getOptionalString(JSONObject playerStats, String key) {
-        return playerStats.has(key) && !playerStats.getString(key).isEmpty() ? playerStats.getString(key) : "-";
+    @Override
+    public String getSavedName(long id) {
+        return DiscordUser.getSavedName(id, codManager.getGameId());
     }
 
-    /**
-     * Get the damage dealt value from the match JSON
-     * The key varies by game
-     *
-     * @param playerStats Player stats match JSON
-     * @return Damage dealt
-     */
-    private int getDamageDealt(JSONObject playerStats) {
-        return Math.max(
-                getOptionalInt(playerStats, "damageDone"),
-                getOptionalInt(playerStats, "damageDealt")
-        );
-    }
-
-    /**
-     * Get the longest streak value from the match JSON
-     * The key varies by game
-     *
-     * @param playerStats Player stats match JSON
-     * @return Longest streak
-     */
-    private int getLongestStreak(JSONObject playerStats) {
-        return Math.max(
-                getOptionalInt(playerStats, "longestStreak"),
-                getOptionalInt(playerStats, "highestStreak")
-        );
-    }
-
-    /**
-     * Parse the result of the match from the given String
-     *
-     * @param result Result of match - win, loss, draw, forfeit
-     * @return Match result
-     */
-    private MatchStats.RESULT parseResult(String result) {
-        switch(result.toLowerCase()) {
-            case "win":
-                return MatchStats.RESULT.WIN;
-            case "loss":
-            case "lose":
-                return MatchStats.RESULT.LOSS;
-            case "forfeit":
-                return MatchStats.RESULT.FORFEIT;
-            default:
-                return MatchStats.RESULT.DRAW;
-        }
+    @Override
+    public void saveName(String name, MessageChannel channel, User user) {
+        DiscordUser.saveName(name, codManager.getGameId(), channel, user);
     }
 }

@@ -2,6 +2,7 @@ package COD.API.Parsing;
 
 import COD.API.CODStatsManager.PLATFORM;
 import COD.API.MWManager;
+import COD.API.TrackerAPI;
 import COD.Assets.*;
 import COD.PlayerStats.*;
 import org.json.JSONArray;
@@ -9,50 +10,41 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import static COD.Assets.FieldUpgrade.MULTIPLE_FIELD_UPGRADES_ID;
+
 /**
- * Parsing Modern Warfare stats response from cod.tracker.gg
+ * Parsing Modern Warfare player data from cod.tracker.gg JSON
  */
-public class MWTrackerStatsParser extends MWStatsParser {
-    private static final String
-            VALUE_KEY = "value",
-            DATA_KEY = "data",
-            STATS_KEY = "stats",
-            KILLS_KEY = "kills",
-            DEATHS_KEY = "deaths",
-            USES_KEY = "uses",
-            KEY = "key",
-            LOWER_HEADSHOTS_KEY = "headshots",
-            ATTRIBUTES_KEY = "attributes";
+public class MWTrackerParser extends CODTrackerParser<MWManager> {
+    private static final String KEY = "key";
 
     /**
      * Create the tracker stats parser
      *
      * @param manager Modern Warfare manager
      */
-    public MWTrackerStatsParser(MWManager manager) {
+    public MWTrackerParser(MWManager manager) {
         super(manager);
     }
 
     /**
      * Parse a Modern Warfare player's stats response from cod.tracker.gg
      *
-     * @param name           Player name - adhering to platform rules
-     * @param platform       Player platform
-     * @param basicData      Basic player JSON
-     * @param weaponData     Player weapon JSON
-     * @param killstreakData Player killstreak JSON
+     * @param name        Player name - adhering to platform rules
+     * @param platform    Player platform
+     * @param playerStats Player stats JSON
      * @return Player stats
      */
-    public MWPlayerStats parseTrackerResponse(String name, PLATFORM platform, JSONObject basicData, JSONObject weaponData, JSONObject killstreakData) {
-        JSONArray mainData = basicData.getJSONObject("data").getJSONArray("segments");
-        JSONObject playerData = mainData.getJSONObject(0).getJSONObject(STATS_KEY);
-        JSONObject commendationsData = mainData.getJSONObject(1).getJSONObject(STATS_KEY);
-
+    public MWPlayerStats parseStatsResponse(String name, PLATFORM platform, JSONObject playerStats) {
         return new MWPlayerStats(
                 name,
                 platform,
-                parseAssetStats(weaponData, killstreakData, commendationsData),
-                parseBasicStats(playerData)
+                parseAssetStats(
+                        playerStats.getJSONArray(TrackerAPI.WEAPONS_KEY),
+                        playerStats.getJSONArray(TrackerAPI.KILLSTREAKS_KEY),
+                        playerStats.getJSONObject(TrackerAPI.COMMENDATIONS_KEY)
+                ),
+                parseBasicStats(playerStats.getJSONObject(TrackerAPI.BASIC_KEY))
         );
     }
 
@@ -64,15 +56,13 @@ public class MWTrackerStatsParser extends MWStatsParser {
      * @param commendationsData Player commendations data
      * @return Player asset stats
      */
-    private MWPlayerAssetStats parseAssetStats(JSONObject weaponData, JSONObject killstreakData, JSONObject commendationsData) {
+    private MWPlayerAssetStats parseAssetStats(JSONArray weaponData, JSONArray killstreakData, JSONObject commendationsData) {
         ArrayList<FieldUpgradeStats> fieldUpgradeStats = new ArrayList<>();
         PlayerWeaponStats weaponStats = new PlayerWeaponStats();
         PlayerEquipmentStats equipmentStats = new PlayerEquipmentStats();
 
-        JSONArray assetList = weaponData.getJSONArray(DATA_KEY);
-
-        for(int i = 0; i < assetList.length(); i++) {
-            JSONObject assetData = assetList.getJSONObject(i);
+        for(int i = 0; i < weaponData.length(); i++) {
+            JSONObject assetData = weaponData.getJSONObject(i);
             JSONObject attributes = assetData.getJSONObject(ATTRIBUTES_KEY);
             JSONObject stats = assetData.getJSONObject(STATS_KEY);
 
@@ -83,13 +73,20 @@ public class MWTrackerStatsParser extends MWStatsParser {
             final String codename = attributes.getString(KEY);
 
             // Parse field upgrade
-            if(categoryKey.equals("supers")) {
+            if(categoryKey.equals(SUPERS_KEY)) {
+
+                // Counts Field Upgrade Pro (Running 2 field upgrades) as a field upgrade itself
+                if(codename.equals(MULTIPLE_FIELD_UPGRADES_ID)) {
+                    continue;
+                }
+
                 FieldUpgrade fieldUpgrade = getManager().getSuperByCodename(codename);
 
                 // Unable to locate super of the given codename
                 if(fieldUpgrade == null) {
                     continue;
                 }
+
                 fieldUpgradeStats.add(
                         new FieldUpgradeStats(
                                 fieldUpgrade,
@@ -131,15 +128,15 @@ public class MWTrackerStatsParser extends MWStatsParser {
                                                 getIntValue(stats, DEATHS_KEY)
                                         )
                                         .setAccuracy(
-                                                getIntValue(stats, "hits"),
-                                                getIntValue(stats, "shots")
+                                                getIntValue(stats, HITS_KEY),
+                                                getIntValue(stats, SHOTS_KEY)
                                         )
                                         .setHeadshots(
                                                 getIntValue(
                                                         stats,
                                                         stats.has(LOWER_HEADSHOTS_KEY)
                                                                 ? LOWER_HEADSHOTS_KEY
-                                                                : "headShots"
+                                                                : UPPER_HEADSHOTS_KEY
                                                 )
                                         )
                                         .setWeapon(weapon)
@@ -165,12 +162,11 @@ public class MWTrackerStatsParser extends MWStatsParser {
      * @param killstreaksData Player killstreak stats JSON.
      * @return Player killstreak stats list
      */
-    private ArrayList<KillstreakStats> parseKillstreakStats(JSONObject killstreaksData) {
+    private ArrayList<KillstreakStats> parseKillstreakStats(JSONArray killstreaksData) {
         ArrayList<KillstreakStats> killstreakStatsList = new ArrayList<>();
-        JSONArray killstreaksDataList = killstreaksData.getJSONArray(DATA_KEY);
 
-        for(int i = 0; i < killstreaksDataList.length(); i++) {
-            JSONObject killstreakData = killstreaksDataList.getJSONObject(i);
+        for(int i = 0; i < killstreaksData.length(); i++) {
+            JSONObject killstreakData = killstreaksData.getJSONObject(i);
             JSONObject stats = killstreakData.getJSONObject(STATS_KEY);
             Killstreak killstreak = getManager().getKillstreakByCodename(
                     killstreakData.getJSONObject(ATTRIBUTES_KEY).getString(KEY)
@@ -185,7 +181,7 @@ public class MWTrackerStatsParser extends MWStatsParser {
                     new KillstreakStats(
                             killstreak,
                             getIntValue(stats, USES_KEY),
-                            getIntValue(stats, "extraStat1")
+                            getIntValue(stats, EXTRA_STAT_1_KEY)
                     )
             );
         }
@@ -229,25 +225,13 @@ public class MWTrackerStatsParser extends MWStatsParser {
         return new PlayerBasicStats(
                 getIntValue(basicData, "longestKillstreak"),
                 new Ratio(
-                        getIntValue(basicData, "wins"),
-                        getIntValue(basicData, "losses")
+                        getIntValue(basicData, WINS_KEY),
+                        getIntValue(basicData, LOSSES_KEY)
                 ),
                 new Ratio(
                         getIntValue(basicData, KILLS_KEY),
                         getIntValue(basicData, DEATHS_KEY)
                 )
         );
-    }
-
-    /**
-     * Stats are stored in a JSON object containing an object for each stat - e.g kills, deaths, etc.
-     * Retrieve the integer value for the given stat key.
-     *
-     * @param statsData Stats
-     * @param statKey   Stat to retrieve - e.g "kills"
-     * @return Stat value - e.g 100
-     */
-    private int getIntValue(JSONObject statsData, String statKey) {
-        return statsData.getJSONObject(statKey).getInt(VALUE_KEY);
     }
 }

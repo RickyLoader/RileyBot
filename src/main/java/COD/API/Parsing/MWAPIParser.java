@@ -1,5 +1,6 @@
 package COD.API.Parsing;
 
+import COD.API.CODStatsManager;
 import COD.API.MWManager;
 import COD.Assets.*;
 import COD.PlayerStats.*;
@@ -7,17 +8,20 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import static COD.Assets.FieldUpgrade.MULTIPLE_FIELD_UPGRADES_ID;
+
 /**
- * Parsing Modern Warfare stats response from the API
+ * Parsing Modern Warfare player data from COD API JSON
  */
-public class MWAPIStatsParser extends MWStatsParser {
+public class MWAPIParser extends CODAPIParser<MWManager> {
+    private static final String PROPERTIES_KEY = "properties";
 
     /**
      * Create the API stats parser
      *
      * @param manager Modern Warfare manager
      */
-    public MWAPIStatsParser(MWManager manager) {
+    public MWAPIParser(MWManager manager) {
         super(manager);
     }
 
@@ -39,25 +43,24 @@ public class MWAPIStatsParser extends MWStatsParser {
         }
 
         for(String name : supportStreaksData.keySet()) {
-            JSONObject killstreakData = supportStreaksData.getJSONObject(name).getJSONObject("properties");
+            JSONObject killstreakData = supportStreaksData.getJSONObject(name).getJSONObject(PROPERTIES_KEY);
             Killstreak killstreak = getManager().getKillstreakByCodename(name);
 
             // Unable to locate killstreak of the given codename
-            if(killstreak == null){
+            if(killstreak == null) {
                 continue;
             }
 
             stats.add(
                     new KillstreakStats(
                             killstreak,
-                            killstreakData.getInt("extraStat1"),
-                            killstreakData.getInt("uses")
+                            killstreakData.getInt(EXTRA_STAT_1_KEY),
+                            killstreakData.getInt(USES_KEY)
                     )
             );
         }
         return stats;
     }
-
 
     /**
      * Parse the player's field upgrade JSON in to a list of field upgrade stats
@@ -71,19 +74,23 @@ public class MWAPIStatsParser extends MWStatsParser {
         for(String superName : superData.keySet()) {
 
             // Counts Field Upgrade Pro (Running 2 field upgrades) as a field upgrade itself
-            if(superName.equals("super_select")) {
+            if(superName.equals(MULTIPLE_FIELD_UPGRADES_ID)) {
                 continue;
             }
-            JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject("properties");
+
+            JSONObject fieldUpgradeData = superData.getJSONObject(superName).getJSONObject(PROPERTIES_KEY);
             FieldUpgrade fieldUpgrade = getManager().getSuperByCodename(superName);
+
+            // Unable to locate super of the given codename
             if(fieldUpgrade == null) {
                 continue;
             }
+
             fieldUpgradeStats.add(
                     new FieldUpgradeStats(
                             fieldUpgrade,
-                            fieldUpgradeData.getInt("kills"),
-                            fieldUpgradeData.getInt("uses"),
+                            fieldUpgradeData.getInt(KILLS_KEY),
+                            fieldUpgradeData.getInt(USES_KEY),
                             fieldUpgradeData.getInt("misc1")
                     )
             );
@@ -98,16 +105,14 @@ public class MWAPIStatsParser extends MWStatsParser {
      * @return Player stats
      */
     public MWPlayerAssetStats parseAssetStats(JSONObject playerData) {
-        final String supersKey = "supers";
-
         // Contains all weapons/equipment/field upgrades
         JSONObject weapons = playerData.getJSONObject("itemData");
 
         // Parse field upgrades separately to weapons
-        ArrayList<FieldUpgradeStats> supers = parseFieldUpgradeStats(weapons.getJSONObject(supersKey));
+        ArrayList<FieldUpgradeStats> supers = parseFieldUpgradeStats(weapons.getJSONObject(SUPERS_KEY));
 
         // Remove as to not parse when parsing weapons
-        weapons.remove(supersKey);
+        weapons.remove(SUPERS_KEY);
 
         PlayerWeaponStats weaponStats = new PlayerWeaponStats();
         PlayerEquipmentStats equipmentStats = new PlayerEquipmentStats();
@@ -119,7 +124,7 @@ public class MWAPIStatsParser extends MWStatsParser {
 
             // Weapons within category
             for(String weaponName : categoryData.keySet()) {
-                JSONObject weaponData = categoryData.getJSONObject(weaponName).getJSONObject("properties");
+                JSONObject weaponData = categoryData.getJSONObject(weaponName).getJSONObject(PROPERTIES_KEY);
                 Weapon weapon = getManager().getWeaponByCodename(weaponName, category);
 
                 switch(weapon.getType()) {
@@ -127,8 +132,8 @@ public class MWAPIStatsParser extends MWStatsParser {
                         equipmentStats.addLethalStats(
                                 new LethalStats(
                                         weapon,
-                                        weaponData.getInt("kills"),
-                                        weaponData.getInt("uses")
+                                        weaponData.getInt(KILLS_KEY),
+                                        weaponData.getInt(USES_KEY)
                                 )
                         );
                         break;
@@ -136,8 +141,8 @@ public class MWAPIStatsParser extends MWStatsParser {
                         equipmentStats.addTacticalStats(
                                 new TacticalStats(
                                         (TacticalWeapon) weapon,
-                                        weaponData.getInt("extraStat1"),
-                                        weaponData.getInt("uses")
+                                        weaponData.getInt(EXTRA_STAT_1_KEY),
+                                        weaponData.getInt(USES_KEY)
                                 )
                         );
                         break;
@@ -145,17 +150,17 @@ public class MWAPIStatsParser extends MWStatsParser {
                         weaponStats.addWeaponStats(
                                 new StandardWeaponStats.StandardWeaponStatsBuilder()
                                         .setKillDeath(
-                                                weaponData.getInt("kills"),
-                                                weaponData.getInt("deaths")
+                                                weaponData.getInt(KILLS_KEY),
+                                                weaponData.getInt(DEATHS_KEY)
                                         )
                                         .setAccuracy(
-                                                weaponData.getInt("hits"),
-                                                weaponData.getInt("shots")
+                                                weaponData.getInt(HITS_KEY),
+                                                weaponData.getInt(SHOTS_KEY)
                                         )
                                         .setHeadshots(
-                                                weaponData.has("headshots")
-                                                        ? weaponData.getInt("headshots")
-                                                        : weaponData.getInt("headShots")
+                                                weaponData.has(LOWER_HEADSHOTS_KEY)
+                                                        ? weaponData.getInt(LOWER_HEADSHOTS_KEY)
+                                                        : weaponData.getInt(UPPER_HEADSHOTS_KEY)
                                         )
                                         .setWeapon(weapon)
                                         .build()
@@ -170,7 +175,7 @@ public class MWAPIStatsParser extends MWStatsParser {
                 equipmentStats,
                 parseKillstreakStats(playerData.getJSONObject("scorestreakData")),
                 supers,
-                parseCommendationStats(playerData.getJSONObject("accoladeData").getJSONObject("properties"))
+                parseCommendationStats(playerData.getJSONObject("accoladeData").getJSONObject(PROPERTIES_KEY))
         );
     }
 
@@ -183,8 +188,8 @@ public class MWAPIStatsParser extends MWStatsParser {
     public PlayerBasicStats parseBasicStats(JSONObject basicData) {
         return new PlayerBasicStats(
                 basicData.getInt("recordKillStreak"),
-                new Ratio(basicData.getInt("kills"), basicData.getInt("deaths")),
-                new Ratio(basicData.getInt("wins"), basicData.getInt("losses"))
+                new Ratio(basicData.getInt(KILLS_KEY), basicData.getInt(DEATHS_KEY)),
+                new Ratio(basicData.getInt(WINS_KEY), basicData.getInt(LOSSES_KEY))
         );
     }
 
@@ -211,5 +216,22 @@ public class MWAPIStatsParser extends MWStatsParser {
         }
 
         return commendationStats;
+    }
+
+    /**
+     * Parse a Modern Warfare player's stats response from the API
+     *
+     * @param name        Player name - adhering to platform rules
+     * @param platform    Player platform
+     * @param playerStats Player stats JSON
+     * @return Player stats
+     */
+    public MWPlayerStats parseStatsResponse(String name, CODStatsManager.PLATFORM platform, JSONObject playerStats) {
+        return new MWPlayerStats(
+                name,
+                platform,
+                parseAssetStats(playerStats.getJSONObject("data").getJSONObject("lifetime")),
+                parseBasicStats(playerStats.getJSONObject("basic"))
+        );
     }
 }

@@ -227,6 +227,9 @@ public class MatchPlayer {
          * @return Match player
          */
         public MatchPlayer build() {
+            if(loadouts == null) {
+                loadouts = new Loadout[0];
+            }
             return new MatchPlayer(this);
         }
     }

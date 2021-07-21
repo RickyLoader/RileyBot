@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public class FieldUpgrade extends CODAsset {
     private final String propertyName;
+    public static final String MULTIPLE_FIELD_UPGRADES_ID = "super_select";
 
     /**
      * Create a killstreak

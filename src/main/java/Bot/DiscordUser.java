@@ -1,7 +1,6 @@
 package Bot;
 
 import COD.Gunfight.WobblyScore;
-import COD.API.CODManager.GAME;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -54,7 +53,7 @@ public class DiscordUser {
     @Nullable
     public static String getSavedName(long id, String nameType) {
         String json = new NetworkRequest("users/names/" + nameType + "/" + id, true).get().body;
-        return json.isEmpty() || new JSONObject(json).isNull(nameType) ? null : new JSONObject(json).getString(nameType);
+        return json == null || json.isEmpty() || new JSONObject(json).isNull(nameType) ? null : new JSONObject(json).getString(nameType);
     }
 
     /**
@@ -81,12 +80,13 @@ public class DiscordUser {
     /**
      * Get the wobbly leaderboard
      *
-     * @param game COD game
-     * @return Wobbly leaderboard
+     * @param gameId COD game ID - e.g "MW"
+     * @return Wobbly leaderboard or null
      */
-    public static String getWobbliesLeaderboard(GAME game) {
-        String json = new NetworkRequest("wobblies/" + game.name().toUpperCase(), true).get().body;
-        return json.isEmpty() ? null : json;
+    @Nullable
+    public static String getWobbliesLeaderboard(String gameId) {
+        String json = new NetworkRequest("wobblies/" + gameId, true).get().body;
+        return json == null || json.isEmpty() ? null : json;
     }
 
     /**

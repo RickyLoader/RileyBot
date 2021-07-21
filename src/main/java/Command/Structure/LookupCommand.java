@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public abstract class LookupCommand extends SavedNameCommand {
     public static final String DEFAULT_LOOKUP_ARGS = "[name/me/@someone]", SAVE_TYPE_NAME = "name";
-    private final ArrayList<String> currentLookups = new ArrayList<>();
+    private final HashSet<String> currentLookups = new HashSet<>();
 
     /**
      * Initialise the command

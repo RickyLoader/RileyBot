@@ -4,12 +4,14 @@ import COD.API.CODStatsManager.PLATFORM;
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.Secret;
+import org.jetbrains.annotations.Nullable;
 
 public class CODAPI {
     private static final String
             BASE_URL = "http://" + Secret.LOCAL_IP + ":8080" + Secret.LOCAL_API_PATH,
             MODERN_WARFARE_URL = BASE_URL + "modernwarfare/",
             COLD_WAR_URL = BASE_URL + "coldwar/";
+    public static final String API_FAILURE_MESSAGE = "Failed to communicate with API, try again later.";
 
     /**
      * Get a player's Modern Warfare stats
@@ -34,25 +36,27 @@ public class CODAPI {
     }
 
     /**
-     * Get a player's Modern Warfare match history
+     * Get a player's Modern Warfare match history JSON
      *
      * @param name     Player name
      * @param platform Player platform
-     * @return Player match history
+     * @return Player match history JSON or nulll
      */
-    public static String getMWMatchHistory(String name, PLATFORM platform) {
-        return getMatchHistory(name, platform, MODERN_WARFARE_URL);
+    @Nullable
+    public static String getMWMatchHistoryJson(String name, PLATFORM platform) {
+        return getMatchHistoryJson(name, platform, MODERN_WARFARE_URL);
     }
 
     /**
-     * Get a player's Cold War match history
+     * Get a player's Cold War match history JSON
      *
      * @param name     Player name
      * @param platform Player platform
-     * @return Player match history
+     * @return Player match history JSON or null
      */
-    public static String getCWMatchHistory(String name, PLATFORM platform) {
-        return getMatchHistory(name, platform, COLD_WAR_URL);
+    @Nullable
+    public static String getCWMatchHistoryJson(String name, PLATFORM platform) {
+        return getMatchHistoryJson(name, platform, COLD_WAR_URL);
     }
 
     /**
@@ -78,14 +82,15 @@ public class CODAPI {
     }
 
     /**
-     * Get a player's match history
+     * Get a player's match history JSON
      *
      * @param name     Player name
      * @param platform Player platform
      * @param gameUrl  Base URL for game
-     * @return Player match history
+     * @return Player match history JSON or null
      */
-    private static String getMatchHistory(String name, PLATFORM platform, String gameUrl) {
+    @Nullable
+    private static String getMatchHistoryJson(String name, PLATFORM platform, String gameUrl) {
         String json = null;
         try {
             String nameEncode = encodeName(name);
