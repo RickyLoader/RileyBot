@@ -548,7 +548,7 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     private int getWobblyRank(MatchStats matchStats) {
         for(int i = 0; i < leaderboard.size(); i++) {
             WobblyScore score = leaderboard.get(i);
-            if(score.getKey().equals(matchStats.getId() + matchStats.getMainPlayer().getName())) {
+            if(score.getKey().equals(WobblyScore.generateKey(matchStats))) {
                 return i + 1;
             }
         }

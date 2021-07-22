@@ -3,6 +3,7 @@ package COD.Gunfight;
 import COD.API.CODManager;
 import COD.Assets.Map;
 import COD.Assets.Mode;
+import COD.Match.MatchStats;
 import org.json.JSONObject;
 
 import java.sql.Date;
@@ -50,7 +51,28 @@ public class WobblyScore {
         this.matchId = matchId;
         this.metres = metres;
         this.gameId = gameId;
-        this.key = matchId + name;
+        this.key = generateKey(matchId, name);
+    }
+
+    /**
+     * Generate a wobblies db key
+     *
+     * @param matchId    ID of a match
+     * @param playerName Player name
+     * @return Wobblies db key
+     */
+    private static String generateKey(String matchId, String playerName) {
+        return matchId + playerName;
+    }
+
+    /**
+     * Generate a key from the given match stats
+     *
+     * @param matchStats Match stats to generate key for
+     * @return Wobblies db key
+     */
+    public static String generateKey(MatchStats matchStats) {
+        return generateKey(matchStats.getId(), matchStats.getMainPlayer().getName());
     }
 
     /**
