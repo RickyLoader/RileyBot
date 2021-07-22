@@ -2,6 +2,7 @@ package R34;
 
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
+import Network.NetworkResponse;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,9 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -21,12 +20,14 @@ import java.util.regex.Pattern;
 public class R34ImageCollector {
     public static final String THUMBNAIL = "https://i.imgur.com/IPRigRp.png";
     private final static String
-            BASE_URL = "https://rule34.xxx/index.php?page=",
+            HOST_URL = "https://rule34.xxx/",
+            BASE_URL = HOST_URL + "index.php?page=",
             BASE_VIEW_URL = BASE_URL + "post&s=view&id=",
             BASE_API_SEARCH_URL = BASE_URL + "dapi&q=index&json=1&s=",
             BASE_IMAGE_SEARCH_BY_TAGS_URL = BASE_API_SEARCH_URL + "post&tags=",
             BASE_IMAGE_SEARCH_BY_ID_URL = BASE_API_SEARCH_URL + "post&id=",
-            BASE_TAG_SEARCH_URL = BASE_URL + "tags&s=list&sort=asc&order_by=updated&tags=";
+            BASE_TAG_SEARCH_URL = BASE_URL + "tags&s=list&sort=asc&order_by=updated&tags=",
+            RANDOM_IMAGE_URL = BASE_URL + "post&s=random";
 
     /**
      * Search for images with the given tag query.
@@ -71,7 +72,7 @@ public class R34ImageCollector {
     /**
      * Search for an image with the given ID.
      *
-     * @param id Image ID - e.g "4921679"
+     * @param id Image ID - e.g "4921679" or "random"
      * @return Image found for the given ID or null (if the API doesn't respond or the ID doesn't exist)
      */
     @Nullable
@@ -178,6 +179,8 @@ public class R34ImageCollector {
             results.add(image);
         }
 
+        // Sort randomly
+        Collections.shuffle(results);
         return results;
     }
 
@@ -224,6 +227,45 @@ public class R34ImageCollector {
                 );
             }
             return tags;
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Attempt to get a random image.
+     * Make multiple attempts before returning null.
+     *
+     * @return Random image or null
+     */
+    @Nullable
+    public static Image getRandomImage() {
+        Image random = null;
+        int tries = 3;
+
+        while(tries > 0 && random == null) {
+            random = fetchRandomImage();
+            tries--;
+        }
+
+        return random;
+    }
+
+    /**
+     * Attempt to fetch a random image.
+     * This can be done by querying the {@code RANDOM} URL without following redirects to get a 302 Found response.
+     * The relative URL of a random image will be returned in the {@code Location} response header.
+     * As creating an image from the URL may fail for a number of reasons (may be a video/API down etc), the
+     * returned image may be null.
+     *
+     * @return Random image or null
+     */
+    @Nullable
+    private static Image fetchRandomImage() {
+        try {
+            NetworkResponse response = new NetworkRequest(RANDOM_IMAGE_URL, false, false).get();
+            return searchImagesByUrl(HOST_URL + response.headers.get("Location"));
         }
         catch(Exception e) {
             return null;

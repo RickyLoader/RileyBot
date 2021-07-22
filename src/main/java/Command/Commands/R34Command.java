@@ -18,6 +18,7 @@ import java.util.List;
 public class R34Command extends OnReadyDiscordCommand {
     private static final String
             TRIGGER = "r34",
+            RANDOM = "random",
             IMAGE_SEARCH_HELP = TRIGGER + " [tag]",
             TAGS = "tags",
             TAG_SEARCH_HELP = TRIGGER + " " + TAGS + " [query]";
@@ -30,6 +31,7 @@ public class R34Command extends OnReadyDiscordCommand {
                 "View some neat images!",
                 IMAGE_SEARCH_HELP
                         + "\n" + TAG_SEARCH_HELP
+                        + "\n" + TRIGGER + " " + RANDOM
                         + "\n[image url]"
                         + "\n\nTags are exact and if misspelled will not find any images, try "
                         + TAG_SEARCH_HELP
@@ -54,8 +56,9 @@ public class R34Command extends OnReadyDiscordCommand {
                 message.addReaction(failEmote).queue();
                 return;
             }
-
-            message.delete().queue(deleted -> channel.sendMessage(buildImageEmbed(image, member)).queue());
+            message.delete().queue(deleted -> channel.sendMessage(
+                    buildImageEmbed(image, "R34 User Post: " + member.getEffectiveName())
+            ).queue());
             return;
         }
 
@@ -101,6 +104,20 @@ public class R34Command extends OnReadyDiscordCommand {
             displayTags(context, tags, query);
         }
 
+        // Get random image
+        else if(query.equals(RANDOM)) {
+            channel.sendTyping().queue();
+            Image random = R34ImageCollector.getRandomImage();
+
+            // May fail to find a random image
+            if(random == null) {
+                channel.sendMessage(member.getAsMention() + "I'm sorry, I have failed you.").queue();
+                return;
+            }
+
+            channel.sendMessage(buildImageEmbed(random, "R34 Random")).queue();
+        }
+
         // Search images
         else {
             channel.sendTyping().queue();
@@ -121,16 +138,16 @@ public class R34Command extends OnReadyDiscordCommand {
     /**
      * Build a message embed displaying the given image
      *
-     * @param image  Image to display
-     * @param member Member who sent the image
+     * @param image Image to display
+     * @param title Title to use in the embed
      * @return Message embed displaying image
      */
-    private MessageEmbed buildImageEmbed(Image image, Member member) {
+    private MessageEmbed buildImageEmbed(Image image, String title) {
         return new EmbedBuilder()
                 .setThumbnail(R34ImageCollector.THUMBNAIL)
                 .setImage(image.getImageUrl())
                 .setColor(EmbedHelper.PURPLE)
-                .setTitle("R34 Image: " + member.getEffectiveName())
+                .setTitle(title, image.getPostUrl())
                 .setDescription(buildImageDescription(image))
                 .setFooter(footer)
                 .build();
@@ -231,7 +248,7 @@ public class R34Command extends OnReadyDiscordCommand {
             public String[] getRowValues(int index, Tag tag, boolean defaultSort) {
                 return new String[]{
                         String.valueOf(tag.getTotalPosts()),
-                        "```" + tag.getName() + "```",
+                        tag.getName().replaceAll("_","\\\\_"),
                         tag.getType()
                 };
             }
