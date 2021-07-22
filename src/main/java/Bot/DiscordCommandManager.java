@@ -202,6 +202,7 @@ public class DiscordCommandManager {
         addCommand(new GuardianNewsCommand());
         addCommand(new OneNewsCommand());
         addCommand(new TikTokCommand());
+        addCommand(new R34Command());
         /* TODO
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());
