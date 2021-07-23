@@ -4,7 +4,7 @@ package Runescape;
  * Arguments for searching OSRS hiscores/building hiscores image
  */
 public class OSRSHiscoresArgs extends HiscoresArgs {
-    private final boolean leagueStats, fetchXpGains, fetchAchievements;
+    private final boolean leagueStats, fetchXpGains, fetchAchievements, showBoxes;
 
     /**
      * Create the hiscores arguments
@@ -13,12 +13,23 @@ public class OSRSHiscoresArgs extends HiscoresArgs {
      * @param leagueStats       Search for league stats instead of normal stats
      * @param fetchXpGains      Fetch recent XP gains
      * @param fetchAchievements Fetch player achievements
+     * @param showBoxes         Show the individual image boxes in the image
      */
-    public OSRSHiscoresArgs(boolean virtual, boolean leagueStats, boolean fetchXpGains, boolean fetchAchievements) {
+    public OSRSHiscoresArgs(boolean virtual, boolean leagueStats, boolean fetchXpGains, boolean fetchAchievements, boolean showBoxes) {
         super(virtual);
         this.leagueStats = leagueStats;
         this.fetchXpGains = fetchXpGains;
         this.fetchAchievements = fetchAchievements;
+        this.showBoxes = showBoxes;
+    }
+
+    /**
+     * Check whether to show individual image boxes in the image
+     *
+     * @return Show image boxes
+     */
+    public boolean showBoxes() {
+        return showBoxes;
     }
 
     /**

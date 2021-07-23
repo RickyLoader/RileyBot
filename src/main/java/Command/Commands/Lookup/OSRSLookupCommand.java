@@ -29,11 +29,12 @@ public class OSRSLookupCommand extends LookupCommand {
             LEAGUE = "league",
             VIRTUAL = "virtual",
             XP = "xp",
+            SHOW_BOXES = "showboxes",
             BOSSES = "bosses",
             TRIGGER = "osrslookup",
             BOSS_HELP = BOSSES + " " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS;
     public static final String UPLOAD_ERROR_BOSS_IMAGE_URL = "https://i.imgur.com/GE3DI2N.png";
-    private boolean league, virtual, xp, bosses, achievements;
+    private boolean league, virtual, xp, bosses, achievements, showBoxes;
     private OSRSHiscores hiscores;
 
     public OSRSLookupCommand() {
@@ -56,7 +57,7 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
-        OSRSHiscoresArgs args = new OSRSHiscoresArgs(virtual, league, xp, achievements);
+        OSRSHiscoresArgs args = new OSRSHiscoresArgs(virtual, league, xp, achievements, showBoxes);
         MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
 
@@ -79,7 +80,7 @@ public class OSRSLookupCommand extends LookupCommand {
                 }
                 return;
             }
-            displayPageableBossMessage(context, stats);
+            displayPageableBossMessage(context, stats, args);
         }
         else {
             hiscores.buildImage(
@@ -95,8 +96,9 @@ public class OSRSLookupCommand extends LookupCommand {
      *
      * @param context     Command context
      * @param playerStats Player stats
+     * @param args        Hiscores arguments
      */
-    private void displayPageableBossMessage(CommandContext context, OSRSPlayerStats playerStats) {
+    private void displayPageableBossMessage(CommandContext context, OSRSPlayerStats playerStats, OSRSHiscoresArgs args) {
         final HashMap<Integer, String> pageImages = new HashMap<>(); // page -> page image URL
         final List<BossStats> bossStats = playerStats.getBossStats();
 
@@ -130,7 +132,7 @@ public class OSRSLookupCommand extends LookupCommand {
             public void displayPageItems(EmbedBuilder builder, List<BossStats> bossStats, int startingAt) {
                 String imageUrl = pageImages.get(getPage());
                 if(imageUrl == null) {
-                    BufferedImage boss = hiscores.buildBossSection(bossStats);
+                    BufferedImage boss = hiscores.buildBossSection(bossStats, args);
                     imageUrl = ImgurManager.uploadImage(boss, false);
                     pageImages.put(getPage(), imageUrl);
                 }
@@ -162,6 +164,7 @@ public class OSRSLookupCommand extends LookupCommand {
         virtual = false;
         xp = false;
         bosses = false;
+        showBoxes = false;
         achievements = true; // Default fetch achievements
 
         if(query.equals(getTrigger())) {
@@ -174,6 +177,9 @@ public class OSRSLookupCommand extends LookupCommand {
 
         for(String arg : args) {
             switch(arg) {
+                case SHOW_BOXES:
+                    showBoxes = true;
+                    break;
                 case LEAGUE:
                     league = true;
                     break;
@@ -212,7 +218,7 @@ public class OSRSLookupCommand extends LookupCommand {
      * @return Query is a lookup arg
      */
     private boolean isArg(String query) {
-        return query.equals(LEAGUE) || query.equals(XP) || query.equals(VIRTUAL) || query.equals(BOSSES);
+        return query.equals(LEAGUE) || query.equals(XP) || query.equals(VIRTUAL) || query.equals(BOSSES) || query.equals(SHOW_BOXES);
     }
 
     @Override

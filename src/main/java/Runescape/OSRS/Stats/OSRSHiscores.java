@@ -568,9 +568,10 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * If the list is empty, the image will have a red overlay indicating no boss kills.
      *
      * @param bossStats List of bosses to display
+     * @param args      Hiscores arguments
      * @return Image displaying player boss kills
      */
-    public BufferedImage buildBossSection(List<BossStats> bossStats) {
+    public BufferedImage buildBossSection(List<BossStats> bossStats, OSRSHiscoresArgs args) {
         BufferedImage container = copyImage(bossContainer);
         Graphics g = container.getGraphics();
 
@@ -596,7 +597,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             final BufferedImage bossImage = buildBossRowImage(
                     bossStats.get(i),
                     adjustedWidth,
-                    bossRowHeight
+                    bossRowHeight,
+                    args
             );
             g.drawImage(bossImage, border, y, null);
             y += bossRowHeight;
@@ -612,39 +614,51 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param bossStats Boss to display
      * @param width     Width of boss image to build
      * @param height    Height of clue image to build
+     * @param args      Hiscores arguments
      * @return Image displaying a boss and the player's kills/rank for that boss
      */
-    private BufferedImage buildBossRowImage(BossStats bossStats, int width, int height) {
+    private BufferedImage buildBossRowImage(BossStats bossStats, int width, int height, OSRSHiscoresArgs args) {
         final int boxWidth = (width - border) / 2;
         final int centreVertical = height / 2;
         final int centreHorizontal = boxWidth / 2;
+        Graphics g;
 
+        // Boss image side of the boss row
         BufferedImage bossBox = new BufferedImage(
                 boxWidth,
                 height,
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        final BufferedImage bossImage = bossStats.getBoss().getFullImage();
-        if(bossImage == null) {
-            return bossBox;
-        }
-
-        Graphics g = bossBox.getGraphics();
-        // Draw boss image centred in boss box
-        g.drawImage(
-                bossImage,
-                centreHorizontal - (bossImage.getWidth() / 2),
-                centreVertical - (bossImage.getHeight() / 2),
-                null
-        );
-
+        // Boss kill count/rank side of the boss row
         final BufferedImage textBox = new BufferedImage(
                 boxWidth,
                 height,
                 BufferedImage.TYPE_INT_ARGB
         );
 
+        // Fill the background of the boss row sections with random colours
+        if(args.showBoxes()) {
+            fillImage(bossBox);
+            fillImage(textBox);
+        }
+
+        final BufferedImage bossImage = bossStats.getBoss().getFullImage();
+
+        // Image may be missing, skip drawing boss but still draw rank/kill count
+        if(bossImage != null) {
+            g = bossBox.getGraphics();
+
+            // Draw boss image centred in boss box
+            g.drawImage(
+                    bossImage,
+                    centreHorizontal - (bossImage.getWidth() / 2),
+                    centreVertical - (bossImage.getHeight() / 2),
+                    null
+            );
+        }
+
+        // Draw rank & kill count
         g = textBox.getGraphics();
         g.setFont(getGameFont().deriveFont(70f));
         g.setColor(Color.YELLOW);
@@ -672,11 +686,12 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         // Draw rank below centre line
         final int y = centreVertical + fm.getMaxAscent();
-        g.drawString(rankValue, x + rankTitleWidth, y); // Add rank title width to leave room for rank title to be drawn
+
+        // Add rank title width to leave room for rank title to be drawn
+        g.drawString(rankValue, x + rankTitleWidth, y);
 
         g.setColor(Color.WHITE);
         g.drawString(rankTitle, x, y);
-
 
         // Combine in to row with border-sized gap in centre for mid border
         final BufferedImage row = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -685,6 +700,17 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         g.drawImage(textBox, boxWidth + border, 0, null);
         g.dispose();
         return row;
+    }
+
+    /**
+     * Fill the given image with a random colour
+     *
+     * @param image Image to fill
+     */
+    private void fillImage(BufferedImage image) {
+        Graphics g = image.getGraphics();
+        g.setColor(EmbedHelper.getRandomColour());
+        g.fillRect(0, 0, image.getWidth(), image.getHeight());
     }
 
     /**
@@ -771,14 +797,14 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         BufferedImage skillsSection = buildSkillsSection(playerStats, args);
         g.drawImage(skillsSection, 0, titleSection.getHeight(), null);
 
-        BufferedImage bossSection = buildBossSection(playerStats.getBossStats());
+        BufferedImage bossSection = buildBossSection(playerStats.getBossStats(), args);
         g.drawImage(bossSection, skillsSection.getWidth(), titleSection.getHeight(), null);
 
         // When optional sections are displayed vertically, they should be displayed below the base image
         int y = titleSection.getHeight() + skillsSection.getHeight();
 
         if(shouldDisplayClues(playerStats)) {
-            BufferedImage clueSection = buildClueSection(playerStats.getClues());
+            BufferedImage clueSection = buildClueSection(playerStats.getClues(), args);
             g.drawImage(clueSection, 0, y, null);
             y += clueSection.getHeight();
         }
@@ -1322,9 +1348,10 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * Clue scrolls without any completions are displayed with a red overlay.
      *
      * @param clues List of clue scroll completions
+     * @param args  Hiscores arguments
      * @return Image displaying player clue scroll completions
      */
-    private BufferedImage buildClueSection(Clue[] clues) {
+    private BufferedImage buildClueSection(Clue[] clues, OSRSHiscoresArgs args) {
         final BufferedImage container = copyImage(cluesContainer);
 
         Graphics g = container.getGraphics();
@@ -1342,7 +1369,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             if(clue.getType() == Clue.TYPE.ALL) {
                 continue;
             }
-            final BufferedImage clueImage = buildClueImage(clue, clueWidth, clueHeight);
+            final BufferedImage clueImage = buildClueImage(clue, clueWidth, clueHeight, args);
             g.drawImage(clueImage, x, border, null);
             x += clueWidth;
         }
@@ -1357,11 +1384,12 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param clue   Clue to display
      * @param width  Width of clue image to build
      * @param height Height of clue image to build
+     * @param args   Hiscores arguments
      * @return Clue image
      */
-    private BufferedImage buildClueImage(Clue clue, int width, int height) {
+    private BufferedImage buildClueImage(Clue clue, int width, int height, OSRSHiscoresArgs args) {
         final BufferedImage background = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = background.getGraphics();
+        final Graphics g = background.getGraphics();
 
         g.setFont(getGameFont().deriveFont(65f));
         g.setColor(Color.YELLOW);
@@ -1369,6 +1397,11 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         final int centreVertical = height / 2;
         final int centreHorizontal = width / 2;
+
+        // Fill the background of the clue section with a random colour
+        if(args.showBoxes()) {
+            fillImage(background);
+        }
 
         final BufferedImage clueImage = clue.getFullImage(ResourceHandler.OSRS_BASE_PATH);
 
@@ -1428,8 +1461,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         g.setColor(Color.WHITE);
         g.drawString(rankTitle, rankX, y);
 
-        // Draw a red overlay on incomplete clues
-        if(!clue.hasCompletions()) {
+        // Draw a red overlay on incomplete clues (not when showing boxes)
+        if(!clue.hasCompletions() && !args.showBoxes()) {
             g.setColor(redOverlay);
             g.fillRect(0, 0, width, height);
         }
