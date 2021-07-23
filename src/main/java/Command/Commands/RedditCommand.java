@@ -3,9 +3,12 @@ package Command.Commands;
 import COD.Assets.Ratio;
 import Command.Commands.GIFCommand.GIF;
 import Command.Structure.*;
+import Countdown.Countdown;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import Reddit.*;
+import Reddit.PollContent.RedditPoll;
+import Reddit.PollContent.RedditPoll.Option;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -25,6 +28,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -32,7 +37,12 @@ import java.util.Date;
  */
 public class RedditCommand extends OnReadyDiscordCommand {
     private final String thumbnail = "https://i.imgur.com/zSNgbNA.png";
-    private String upvote, downvote, comment, blankGap;
+    private static final String
+            POLL_KEY = "poll_data",
+            VOTE_COUNT_KEY = "vote_count",
+            CROSSPOST_KEY = "crosspost_parent_list";
+
+    private String upvote, downvote, comment, winner, blankGap;
 
     public RedditCommand() {
         super("[reddit url]", "Embed Reddit posts/videos!");
@@ -157,6 +167,9 @@ public class RedditCommand extends OnReadyDiscordCommand {
         else if(content instanceof ImageContent) {
             builder.setImage(((ImageContent) content).getImageUrl());
         }
+        else if(content instanceof PollContent) {
+            description = buildPollPostDescription((PollContent) content);
+        }
         else {
             VideoPostContent videoPostContent = (VideoPostContent) content;
             Boolean audioStatus = videoPostContent.getAudioStatus();
@@ -183,6 +196,84 @@ public class RedditCommand extends OnReadyDiscordCommand {
         return builder
                 .setFooter(buildFooter(post))
                 .setDescription(description).build();
+    }
+
+    /**
+     * Build a String detailing the given poll post content to display in a message embed.
+     * Display the post text (usually describing the poll), as well as the poll options and their votes (if available).
+     *
+     * @param content Poll post content
+     * @return String detailing poll
+     */
+    private String buildPollPostDescription(PollContent content) {
+        final DecimalFormat voteFormat = new DecimalFormat("#,###");
+        final String dateFormat = "dd/MM/yyyy", timeFormat = "HH:mm:ss";
+        RedditPoll poll = content.getPoll();
+        final Date closingDate = poll.getClosingDate();
+
+        String description = content.getText()
+                + "\n\n**Total Votes**: " + voteFormat.format(poll.getTotalVotes());
+
+        Option[] options = poll.getOptions();
+
+        // Can display option votes
+        if(poll.isClosed()) {
+
+            // Sort in descending order of votes
+            Arrays.sort(options, Comparator.comparingInt(Option::getVotes).reversed());
+            final int winningVotes = options[0].getVotes();
+
+            StringBuilder optionsBuilder = new StringBuilder();
+
+            for(int i = 0; i < options.length; i++) {
+                Option option = options[i];
+
+                // "1. Yes `(12)` <checkmark emote>
+                optionsBuilder
+                        .append(i + 1).append(". ")
+                        .append(option.getText())
+                        .append(" `(").append(voteFormat.format(option.getVotes())).append(")`");
+
+                // Either winning option or an option with equal votes to the highest (draw)
+                if(option.getVotes() == winningVotes) {
+                    optionsBuilder.append(" ").append(winner);
+                }
+
+                if(i != options.length - 1) {
+                    optionsBuilder.append("\n");
+                }
+            }
+
+            // Exact closing time isn't relevant if the poll is closed
+            description += "\n**Closed**: " + new SimpleDateFormat(dateFormat).format(closingDate)
+                    + "\n\n**Options**:\n\n" + optionsBuilder.toString();
+        }
+
+        // Option votes unavailable until poll closes, display without votes
+        else {
+            final long daysRemaining = Countdown.from(System.currentTimeMillis(), closingDate.getTime()).getDays();
+
+            // Display only time if the closing date is in under a day, otherwise display full date
+            final String dateString = new SimpleDateFormat(
+                    daysRemaining > 0 ? dateFormat + " " + timeFormat : timeFormat
+            ).format(closingDate);
+
+            final String codeBlock = "```";
+            StringBuilder optionsBlock = new StringBuilder(codeBlock);
+
+            for(int i = 0; i < options.length; i++) {
+                optionsBlock.append(i + 1).append(". ").append(options[i].getText());
+                if(i != options.length - 1) {
+                    optionsBlock.append("\n");
+                }
+            }
+
+            optionsBlock.append(codeBlock);
+
+            description += " (option votes aren't disclosed until closing)\n**Closing**: " + dateString
+                    + "\n\n**Options**: " + optionsBlock.toString();
+        }
+        return description;
     }
 
     /**
@@ -298,15 +389,17 @@ public class RedditCommand extends OnReadyDiscordCommand {
      * @return Post content
      */
     private PostContent getPostContent(JSONObject post, String postUrl) {
-        String crosspost = "crosspost_parent_list";
 
         // Media is stored in the original post
-        if(post.has(crosspost)) {
-            post = post.getJSONArray(crosspost).getJSONObject(0);
+        if(post.has(CROSSPOST_KEY)) {
+            post = post.getJSONArray(CROSSPOST_KEY).getJSONObject(0);
         }
 
         String text = post.getString("selftext");
-        if(post.getBoolean("is_video")) {
+        if(post.has(POLL_KEY)) {
+            return parsePollDetails(post.getJSONObject(POLL_KEY), text);
+        }
+        else if(post.getBoolean("is_video")) {
             return parseVideoDetails(postUrl, post.getJSONObject("media").getJSONObject("reddit_video"));
         }
         else if(text.isEmpty()) {
@@ -330,6 +423,39 @@ public class RedditCommand extends OnReadyDiscordCommand {
             return new ImageContent(processImageUrl(url));
         }
         return new TextPostContent(text);
+    }
+
+    /**
+     * Parse poll post content from the given JSON data for a poll.
+     *
+     * @param pollData Poll JSON data
+     * @param postText Text from the poll post - usually describes poll
+     * @return Poll post content
+     */
+    private PollContent parsePollDetails(JSONObject pollData, String postText) {
+        JSONArray optionsData = pollData.getJSONArray("options");
+
+        Option[] options = new Option[optionsData.length()];
+
+        // Parse poll options
+        for(int i = 0; i < optionsData.length(); i++) {
+            JSONObject optionData = optionsData.getJSONObject(i);
+            final String text = optionData.getString("text");
+
+            // Option votes are not available until poll closes
+            options[i] = optionData.has(VOTE_COUNT_KEY)
+                    ? new Option(text, optionData.getInt(VOTE_COUNT_KEY))
+                    : new Option(text);
+        }
+
+        return new PollContent(
+                postText,
+                new RedditPoll(
+                        pollData.getInt("total_vote_count"),
+                        new Date(pollData.getLong("voting_end_timestamp")),
+                        options
+                )
+        );
     }
 
     /**
@@ -460,7 +586,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.matches("https://(www.)?reddit.com/r/.+/comments/.+/.+/?");
+        return query.matches("https://(www.|old.)?reddit.com/r/.+/comments/.+/.+/?");
     }
 
     @Override
@@ -469,5 +595,6 @@ public class RedditCommand extends OnReadyDiscordCommand {
         downvote = emoteHelper.getRedditDownvote().getAsMention();
         blankGap = emoteHelper.getBlankGap().getAsMention();
         comment = emoteHelper.getFacebookComments().getAsMention();
+        winner = emoteHelper.getComplete().getAsMention();
     }
 }

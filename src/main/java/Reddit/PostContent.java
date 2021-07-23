@@ -11,7 +11,8 @@ public class PostContent {
         IMAGE,
         LINK,
         VIDEO,
-        GALLERY
+        GALLERY,
+        POLL
     }
 
     /**
