@@ -176,7 +176,7 @@ public class MovieEmbedBuilder {
         }
 
         if(socialConnections.hasFacebookUrl()) {
-            String facebookEmote = emoteHelper.getFacebook().getAsMention();
+            String facebookEmote = emoteHelper.getFacebookCircle().getAsMention();
             elements.add(EmbedHelper.embedURL(facebookEmote + " Facebook", socialConnections.getFacebookUrl()));
         }
         return elements;

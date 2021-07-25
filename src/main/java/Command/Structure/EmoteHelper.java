@@ -87,8 +87,15 @@ public class EmoteHelper {
     /**
      * <img src="https://cdn.discordapp.com/emojis/755358696162459718.png"/>
      */
-    public Emote getFacebook() {
+    public Emote getFacebookCircle() {
         return get("755358696162459718");
+    }
+
+    /**
+     * <img src="https://cdn.discordapp.com/emojis/868840915098275872.png"/>
+     */
+    public Emote getFacebookSquare() {
+        return get("868840915098275872");
     }
 
     /**
@@ -891,5 +898,47 @@ public class EmoteHelper {
      */
     public Emote getTikTokVideos() {
         return get("865176840826388500");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868836307152023582.png"/>
+     */
+    public Emote getHeight() {
+        return get("868836307152023582");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868836307210764289.png"/>
+     */
+    public Emote getWeight() {
+        return get("868836307210764289");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868840315870670858.png"/>
+     */
+    public Emote getInstagram() {
+        return get("868840315870670858");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868840316051021825.png"/>
+     */
+    public Emote getTwitter() {
+        return get("868840316051021825");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868842177080471572.png"/>
+     */
+    public Emote getWebsite() {
+        return get("868842177080471572");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868842864531087381.png"/>
+     */
+    public Emote getUnknown() {
+        return get("868842864531087381");
     }
 }
