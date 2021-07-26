@@ -941,4 +941,39 @@ public class EmoteHelper {
     public Emote getUnknown() {
         return get("868842864531087381");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868905282481324092.png"/>
+     */
+    public Emote getBronze() {
+        return get("868905282481324092");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868905282770722856.png"/>
+     */
+    public Emote getSilver() {
+        return get("868905282770722856");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868904913969745990.png"/>
+     */
+    public Emote getGold() {
+        return get("868904913969745990");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868906105160486983.png"/>
+     */
+    public Emote getTotalMedals() {
+        return get("868906105160486983");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/868910950755999745.png"/>
+     */
+    public Emote getMedalRank() {
+        return get("868910950755999745");
+    }
 }
