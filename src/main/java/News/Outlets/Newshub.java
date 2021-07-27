@@ -1,5 +1,6 @@
 package News.Outlets;
 
+import Command.Structure.HTMLUtils;
 import News.Article;
 import News.Author;
 import News.Image;
@@ -17,7 +18,9 @@ import static Command.Structure.HTMLUtils.getMetaTagValue;
  * Newshub news parsing via scraping their website
  */
 public class Newshub extends NewsOutlet {
-    private static final String BASE_URL = "https://www.newshub.co.nz/";
+    private static final String
+            SOURCE_KEY = "srcset",
+            BASE_URL = "https://www.newshub.co.nz/";
 
     /**
      * Initialise Newshub values
@@ -59,7 +62,7 @@ public class Newshub extends NewsOutlet {
                     articleDocument.getElementsByClass("c-ArticleHeading-title").get(0).text(),
 
                     // Open graph 'description' tag holds the brief article summary - may not always be present
-                    getMetaTagValue(articleDocument, "name", "description"),
+                    HTMLUtils.getMetaTagValue(articleDocument, "property", "og:description"),
 
                     parseDate(getMetaTagValue(articleDocument, "property", "article:published_time")),
                     parseImages(articleDocument)
@@ -89,7 +92,7 @@ public class Newshub extends NewsOutlet {
             authors.add(
                     new Author(
                             author.getElementsByClass(authorPrefix + "authorName").get(0).text(),
-                            images.isEmpty() ? null : images.get(0).attr("srcset"),
+                            images.isEmpty() ? null : images.get(0).attr(SOURCE_KEY),
                             profileUrls.isEmpty() ? null : profileUrls.get(0).absUrl("href")
                     )
             );
@@ -136,7 +139,7 @@ public class Newshub extends NewsOutlet {
                 continue;
             }
 
-            String imageUrl = sources.get(0).attr("srcset");
+            String imageUrl = sources.get(0).attr(SOURCE_KEY);
 
             // The thumbnail image may be an image selected from within the article, skip if it is seen again
             if(thumbnailName != null) {
