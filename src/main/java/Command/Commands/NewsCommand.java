@@ -117,7 +117,7 @@ public class NewsCommand extends OnReadyDiscordCommand {
 
                     builder.setAuthor(
                             name,
-                            primaryAuthor.hasProfileUrl() ? primaryAuthor.getProfileUrl() : article.getBrowserUrl(),
+                            primaryAuthor.hasProfileUrl() ? primaryAuthor.getProfileUrl() : null,
                             primaryAuthor.getImageUrl());
                 }
                 return builder;

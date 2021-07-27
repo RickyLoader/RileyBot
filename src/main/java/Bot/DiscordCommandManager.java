@@ -201,6 +201,7 @@ public class DiscordCommandManager {
         addCommand(new NZHeraldCommand());
         addCommand(new GuardianNewsCommand());
         addCommand(new OneNewsCommand());
+        addCommand(new LADbibleCommand());
         addCommand(new TikTokCommand());
         addCommand(new R34Command());
         addCommand(new OlympicsCommand());
