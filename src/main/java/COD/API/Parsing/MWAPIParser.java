@@ -227,11 +227,12 @@ public class MWAPIParser extends CODAPIParser<MWManager> {
      * @return Player stats
      */
     public MWPlayerStats parseStatsResponse(String name, CODStatsManager.PLATFORM platform, JSONObject playerStats) {
+        JSONObject stats = playerStats.getJSONObject("data").getJSONObject("lifetime");
         return new MWPlayerStats(
                 name,
                 platform,
-                parseAssetStats(playerStats.getJSONObject("data").getJSONObject("lifetime")),
-                parseBasicStats(playerStats.getJSONObject("basic"))
+                parseAssetStats(stats),
+                parseBasicStats(stats.getJSONObject("all").getJSONObject(PROPERTIES_KEY))
         );
     }
 }
