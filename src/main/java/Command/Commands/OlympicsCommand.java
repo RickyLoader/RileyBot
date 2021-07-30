@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static Command.Structure.PageableTableEmbed.MAX_COLUMNS;
 
@@ -57,7 +58,8 @@ public class OlympicsCommand extends OnReadyDiscordCommand {
             ATHLETE_SEARCH_HELP = ATHLETE_ARGS + " [athlete name/id]",
             ATHLETES_BY_COUNTRY_ARGS = ATHLETE_ARGS + " " + COUNTRY_ARG,
             ATHLETES_BY_COUNTRY_HELP = ATHLETES_BY_COUNTRY_ARGS + " [country code]",
-            ATHLETE_MEDALS_HELP = ATHLETE_ARGS + " " + MEDALS_ARG,
+            ATHLETE_MEDALS_ARGS = ATHLETE_ARGS + " " + MEDALS_ARG,
+            ATHLETE_MEDALS_HELP = ATHLETE_MEDALS_ARGS + " [country code]",
             COUNTRY_ARGS = TRIGGER + " " + COUNTRY_ARG,
             COUNTRY_FOOTER = "Type: " + COUNTRY_ARGS + " for help",
             COUNTRY_SEARCH_HELP = COUNTRY_ARGS + " [country name/code/" + ALL + "]",
@@ -198,6 +200,12 @@ public class OlympicsCommand extends OnReadyDiscordCommand {
                 + "\t\t" + ATHLETES_BY_COUNTRY_ARGS + " NZL"
                 + "\n\nView medalists:\n\n"
                 + ATHLETE_MEDALS_HELP
+                + "\n\n\tExamples:\n"
+                + "\t\tView all medalists:\n"
+                + "\t\t\t" + ATHLETE_MEDALS_ARGS
+                + "\n\n\t\tView medalists by country:\n"
+                + "\t\t\t" + ATHLETE_MEDALS_ARGS + " NZL"
+                + "\n\t\t\t" + ATHLETE_MEDALS_ARGS + " CHN"
                 + "```";
 
         // Send athlete help message
@@ -233,9 +241,20 @@ public class OlympicsCommand extends OnReadyDiscordCommand {
         }
 
         // View medalists
-        else if(query.equals(MEDALS_ARG)) {
+        else if(query.startsWith(MEDALS_ARG)) {
             channel.sendTyping().queue();
-            showMedalists(context, olympics.fetchAthleteMedalists());
+
+            final String countryCode = query.replaceFirst(MEDALS_ARG, "").trim();
+            ArrayList<AthleteMedalCount> medalists = olympics.fetchAthleteMedalists();
+
+            // Filter by country code
+            if(!countryCode.isEmpty()) {
+                medalists = medalists
+                        .stream()
+                        .filter(m -> m.getAthlete().getCountry().getCode().equalsIgnoreCase(countryCode))
+                        .collect(Collectors.toCollection(ArrayList::new));
+            }
+            showMedalists(context, medalists);
         }
 
         // Search athletes by name/ID
