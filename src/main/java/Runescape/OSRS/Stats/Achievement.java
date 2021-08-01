@@ -134,7 +134,7 @@ public class Achievement {
             case BOSS:
                 return BossManager.getInstance().getBossByName(metric).getIconImage();
             case SKILL:
-                return resourceHandler.getImageResource(Skill.SKILL_NAME.fromName(metric).getImagePath());
+                return resourceHandler.getImageResource(Skill.SKILL_NAME.fromName(metric).getImagePath(false));
             case CLUE:
                 Clue.TYPE clueType = Clue.TYPE.fromTypeName(getClueTypeName(metric));
                 return resourceHandler.getImageResource(

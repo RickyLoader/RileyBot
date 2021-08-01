@@ -2,11 +2,9 @@ package Runescape.OSRS.Stats;
 
 import Runescape.OSRS.Boss.BossStats;
 import Runescape.Clue;
-import Runescape.OSRS.League.LeagueTier;
-import Runescape.OSRS.League.Region;
-import Runescape.OSRS.League.RelicTier;
 import Runescape.PlayerStats;
 import Runescape.Skill;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,13 +12,13 @@ import java.util.List;
 
 import static Runescape.Skill.SKILL_NAME.*;
 
+/**
+ * OSRS player stats from hiscores
+ */
 public class OSRSPlayerStats extends PlayerStats {
     private final List<BossStats> bossStats;
     private final ArrayList<Achievement> completedAchievements, inProgressAchievements;
     private final LastManStanding lmsInfo;
-    private LeagueTier leagueTier;
-    private ArrayList<Region> regions;
-    private ArrayList<RelicTier> relicTiers;
     private Date trackerStart, trackerEnd;
 
     /**
@@ -125,25 +123,6 @@ public class OSRSPlayerStats extends PlayerStats {
     }
 
     /**
-     * Get the league tier info
-     *
-     * @return League tier
-     */
-    public LeagueTier getLeagueTier() {
-        return leagueTier;
-    }
-
-    /**
-     * Set the player league points
-     *
-     * @param leaguePoints League points to set
-     * @param rank         League point rank
-     */
-    public void setLeaguePoints(int leaguePoints, long rank) {
-        this.leagueTier = new LeagueTier((leaguePoints == -1 ? 0 : leaguePoints), rank);
-    }
-
-    /**
      * Get a list of boss stats in order of kill count
      *
      * @return Player boss stats
@@ -153,59 +132,13 @@ public class OSRSPlayerStats extends PlayerStats {
     }
 
     /**
-     * Get the player unlocked relic tiers
-     *
-     * @return Player unlocked relic tiers
-     */
-    public ArrayList<RelicTier> getRelicTiers() {
-        return relicTiers;
-    }
-
-    /**
-     * Get the player unlocked regions
-     *
-     * @return Player unlocked regions
-     */
-    public ArrayList<Region> getRegions() {
-        return regions;
-    }
-
-    /**
-     * Set the list of player unlocked relic tiers
-     *
-     * @param relicTiers List of relic tiers the player has unlocked
-     */
-    public void setRelicTiers(ArrayList<RelicTier> relicTiers) {
-        this.relicTiers = relicTiers;
-    }
-
-    /**
-     * Set the list of player unlocked regions
-     *
-     * @param regions List of regions the player has unlocked
-     */
-    public void setRegions(ArrayList<Region> regions) {
-        this.regions = regions;
-    }
-
-    /**
-     * Check if the player has any stored relic & region
-     * unlock data
-     *
-     * @return Player has stored relic & region data
-     */
-    public boolean hasLeagueUnlockData() {
-        return !relicTiers.isEmpty() && !regions.isEmpty();
-    }
-
-    /**
      * Add weekly gained XP to the skill of the given name
      *
      * @param skillName Skill name
      * @param gained    XP gained
      */
     public void addGainedXP(Skill.SKILL_NAME skillName, long gained) {
-        getSkill(skillName).setGained(gained);
+        getSkill(skillName).setGainedXp(gained);
     }
 
     /**
@@ -214,16 +147,16 @@ public class OSRSPlayerStats extends PlayerStats {
      * @return Player has weekly gained XP
      */
     public boolean hasWeeklyGains() {
-        return getTotal().hasGainedXP();
+        return getTotalLevel().hasGainedXp();
     }
 
     /**
-     * Get the weekly gained XP
+     * Check if the player has any weekly gained XP records
      *
-     * @return Weekly gained XP
+     * @return Player has weekly gained XP records
      */
-    public long getGainedXP() {
-        return getTotal().getGainedXP();
+    public boolean hasWeeklyRecords() {
+        return getTotalLevel().hasRecordXp();
     }
 
     /**
@@ -232,7 +165,7 @@ public class OSRSPlayerStats extends PlayerStats {
      * @param start Start date of tracker
      * @param end   End date of tracker
      */
-    public void setTrackerPeriod(Date start, Date end) {
+    public void setTrackerPeriod(@Nullable Date start, @Nullable Date end) {
         this.trackerStart = start;
         this.trackerEnd = end;
     }
@@ -242,6 +175,7 @@ public class OSRSPlayerStats extends PlayerStats {
      *
      * @return End date
      */
+    @Nullable
     public Date getTrackerEndDate() {
         return trackerEnd;
     }
@@ -249,8 +183,9 @@ public class OSRSPlayerStats extends PlayerStats {
     /**
      * Get the start date of the XP tracker
      *
-     * @return End date
+     * @return Start date
      */
+    @Nullable
     public Date getTrackerStartDate() {
         return trackerStart;
     }

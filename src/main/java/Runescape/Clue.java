@@ -159,12 +159,12 @@ public class Clue {
     }
 
     /**
-     * Get the rank formatted with commas
+     * Get the rank formatted with commas e.g 1234 -> 1,234
      * If the rank is -1 (unranked) return a dash ("-")
      * @return Formatted rank
      */
     public String getFormattedRank() {
-        if(rank == -1) {
+        if(rank == PlayerStats.UNRANKED) {
             return "-";
         }
         return NumberFormat.getNumberInstance().format(rank);

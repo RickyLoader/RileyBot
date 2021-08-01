@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 
+import static Runescape.OSRS.Boss.Boss.*;
 import static Runescape.OSRS.Boss.Boss.BOSS_ID.*;
 
 /**
@@ -27,9 +28,11 @@ public class BossManager {
             Boss boss = new Boss(
                     id,
                     getNameById(id),
+                    getShortNameById(id),
                     getKillQualifierById(id),
                     resourceHandler.getImageResource(getIconImagePathById(id)),
-                    resourceHandler.getImageResource(getFullImagePathById(id))
+                    resourceHandler.getImageResource(getFullImagePathById(id)),
+                    resourceHandler.getImageResource(getBackgroundImagePathById(id))
             );
             bosses.put(id, boss);
         }
@@ -43,6 +46,29 @@ public class BossManager {
      */
     public String getFullImagePathById(BOSS_ID id) {
         return BASE_IMAGE_PATH + "Full/" + id.name() + ".png";
+    }
+
+    /**
+     * Get the path to a background image of a boss from the given boss ID.
+     *
+     * @param id Boss ID
+     * @return Path to boss background image
+     */
+    public String getBackgroundImagePathById(BOSS_ID id) {
+        final String backgroundPath = BASE_IMAGE_PATH + "Background/";
+        switch(id) {
+            case THEATRE_OF_BLOOD:
+            case THEATRE_OF_BLOOD_HARD_MODE:
+                return backgroundPath + THEATRE_OF_BLOOD_FILENAME;
+            case CHAMBERS_OF_XERIC:
+            case CHAMBERS_OF_XERIC_CHALLENGE_MODE:
+                return backgroundPath + CHAMBERS_OF_XERIC_FILENAME;
+            case NIGHTMARE:
+            case PHOSANIS_NIGHTMARE:
+                return backgroundPath + NIGHTMARE_FILENAME;
+            default:
+                return backgroundPath + id.name() + ".png";
+        }
     }
 
     /**
@@ -113,10 +139,49 @@ public class BossManager {
     }
 
     /**
+     * Get the shortened name of a boss by the given boss ID.
+     * If the boss name is already short, the shortened name will be the boss name.
+     *
+     * @param id Boss ID
+     * @return Shortened boss name e.g "Zilyana"
+     */
+    public String getShortNameById(BOSS_ID id) {
+        final String archaeologist = "Archae.";
+        final String chambers = "C.O.X";
+
+        switch(id) {
+            case COMMANDER_ZILYANA:
+                return "Zilyana";
+            case THERMONUCLEAR_SMOKE_DEVIL:
+                return "Thermy";
+            case THEATRE_OF_BLOOD_HARD_MODE:
+                return "T.O.B: Hard Mode";
+            case THE_CORRUPTED_GAUNTLET:
+                return "The Gauntlet (C)";
+            case PHOSANIS_NIGHTMARE:
+                return "Phosani's NM";
+            case GROTESQUE_GUARDIANS:
+                return "Grot. Guardians";
+            case DERANGED_ARCHAEOLOGIST:
+                return "Deranged " + archaeologist;
+            case DAGANNOTH_SUPREME:
+                return "Dag. Supreme";
+            case CRAZY_ARCHAEOLOGIST:
+                return "Crazy " + archaeologist;
+            case CHAMBERS_OF_XERIC:
+                return chambers;
+            case CHAMBERS_OF_XERIC_CHALLENGE_MODE:
+                return chambers + ": (CM)";
+            default:
+                return getNameById(id);
+        }
+    }
+
+    /**
      * Get the name of a boss by the given boss ID.
      *
      * @param id Boss ID
-     * @return Boss name
+     * @return Boss name e.g "Commander Zilyana"
      */
     public String getNameById(BOSS_ID id) {
         switch(id) {

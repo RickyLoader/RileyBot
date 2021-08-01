@@ -8,8 +8,12 @@ import java.awt.image.BufferedImage;
  */
 public class Boss {
     private final BOSS_ID id;
-    private final String name, qualifier;
-    private final BufferedImage iconImage, fullImage;
+    private final String name, shortName, qualifier;
+    private final BufferedImage iconImage, fullImage, backgroundImage;
+    static final String
+            CHAMBERS_OF_XERIC_FILENAME = "CHAMBERS_OF_XERIC.png",
+            NIGHTMARE_FILENAME = "NIGHTMARE.png",
+            THEATRE_OF_BLOOD_FILENAME = "THEATRE_OF_BLOOD.png";
 
     public enum BOSS_ID {
         ABYSSAL_SIRE,
@@ -78,29 +82,43 @@ public class Boss {
     }
 
     /**
-     * Create the boss
+     * Create a boss
      *
-     * @param id        ID of boss
-     * @param name      Name of boss
-     * @param qualifier Kill qualifier - e.g "kill" or "clear"
-     * @param iconImage Small icon image of boss
-     * @param fullImage Full sized image of boss
+     * @param id              ID of boss
+     * @param name            Name of boss - e.g "Commander Zilyana"
+     * @param shortName       Short name of boss  - e.g "Zilyana"
+     * @param qualifier       Kill qualifier - e.g "kill" or "clear"
+     * @param iconImage       Small icon image of boss
+     * @param fullImage       Full sized image of boss
+     * @param backgroundImage Background image related to the boss - e.g God Wars Dungeon for a God Wars boss
      */
-    public Boss(BOSS_ID id, String name, String qualifier, @Nullable BufferedImage iconImage, @Nullable BufferedImage fullImage) {
+    public Boss(BOSS_ID id, String name, String shortName, String qualifier, @Nullable BufferedImage iconImage, @Nullable BufferedImage fullImage, @Nullable BufferedImage backgroundImage) {
         this.id = id;
         this.name = name;
+        this.shortName = shortName;
         this.qualifier = qualifier;
         this.iconImage = iconImage;
         this.fullImage = fullImage;
+        this.backgroundImage = backgroundImage;
     }
 
     /**
      * Get the name of the boss
      *
-     * @return Boss name
+     * @return Boss name e.g "Commander Zilyana"
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Get the shortened name of the boss.
+     * If the boss name is already short, the short name will be the boss name.
+     *
+     * @return Shortened boss name e.g "Zilyana"
+     */
+    public String getShortName() {
+        return shortName;
     }
 
     /**
@@ -143,4 +161,14 @@ public class Boss {
         return iconImage;
     }
 
+    /**
+     * Get the boss background image.
+     * This is an image related to the boss e.g the environment that the boss is located in etc.
+     *
+     * @return Boss background image (May be null if the boss has no background image)
+     */
+    @Nullable
+    public BufferedImage getBackgroundImage() {
+        return backgroundImage;
+    }
 }

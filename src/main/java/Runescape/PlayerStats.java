@@ -2,7 +2,6 @@ package Runescape;
 
 import Bot.ResourceHandler;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 
 /**
@@ -17,7 +16,9 @@ public abstract class PlayerStats {
     private final ACCOUNT type;
     private final Skill total, virtualTotal;
     private final int combatLevel;
-    public final DecimalFormat commaFormat = new DecimalFormat("#,###");
+
+    // Value given to a players skill ranks/boss kills/etc that are not ranked (not in top 2 million players)
+    public static final int UNRANKED = -1;
 
     public enum ACCOUNT {
         NORMAL, IRON, ULTIMATE, LEAGUE, HARDCORE
@@ -81,7 +82,7 @@ public abstract class PlayerStats {
             if(skill.getName() == Skill.SKILL_NAME.OVERALL) {
                 continue;
             }
-            xp += skill.getXP();
+            xp += skill.getXp();
             level += skill.getVirtualLevel();
         }
         return new Skill(
@@ -118,16 +119,6 @@ public abstract class PlayerStats {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Get the player hiscores rank relative to the account type.
-     * Formatted with comma separator.
-     *
-     * @return Player hiscores rank
-     */
-    public String getFormattedRank() {
-        return commaFormat.format(total.getRank());
     }
 
     /**
@@ -207,21 +198,12 @@ public abstract class PlayerStats {
     }
 
     /**
-     * Get the virtual total level
+     * Get the virtual total level skill
      *
-     * @return Virtual total level
+     * @return Virtual total level skill
      */
-    public int getVirtualTotalLevel() {
-        return virtualTotal.getLevel();
-    }
-
-    /**
-     * Get the total level
-     *
-     * @return Total level
-     */
-    public int getTotalLevel() {
-        return total.getLevel();
+    public Skill getVirtualTotalLevel() {
+        return virtualTotal;
     }
 
     /**
@@ -229,8 +211,8 @@ public abstract class PlayerStats {
      *
      * @return Total XP
      */
-    public long getTotalXP() {
-        return total.getXP();
+    public long getTotalXp() {
+        return total.getXp();
     }
 
     /**
@@ -238,16 +220,7 @@ public abstract class PlayerStats {
      *
      * @return Total level skill
      */
-    public Skill getTotal() {
+    public Skill getTotalLevel() {
         return total;
-    }
-
-    /**
-     * Get the player rank
-     *
-     * @return Player rank
-     */
-    public long getRank() {
-        return total.getRank();
     }
 }

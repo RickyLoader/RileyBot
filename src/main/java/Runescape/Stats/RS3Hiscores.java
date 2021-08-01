@@ -223,7 +223,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
         }
         g.setColor(Color.WHITE);
         BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
-        String rank = "Rank: " + playerStats.getFormattedRank();
+        String rank = "Rank: " + playerStats.getTotalLevel().getFormattedRank();
         x = 365;
         y = 1430 - rankImage.getHeight(); // Align with bottom skill row
         g.drawImage(rankImage, x, y, null);
@@ -579,7 +579,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
                 clan
         );
 
-        if(normalAccount.getTotalXP() > ironAccount.getTotalXP()) {
+        if(normalAccount.getTotalXp() > ironAccount.getTotalXp()) {
             updateLoadingMessage(COMPLETE, "Player is a de-ironed normal account!", loadingMessage);
             return normalAccount;
         }
@@ -603,7 +603,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
 
             if(hcimStatus.isDead()) {
                 String status = "Player was a Hardcore Ironman and died.";
-                if(ironAccount.getTotalXP() > hardcoreAccount.getTotalXP()) {
+                if(ironAccount.getTotalXp() > hardcoreAccount.getTotalXp()) {
                     updateLoadingMessage(
                             COMPLETE,
                             status + " They were saved by a "

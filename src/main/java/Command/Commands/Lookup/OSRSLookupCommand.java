@@ -26,23 +26,102 @@ import java.util.List;
  */
 public class OSRSLookupCommand extends LookupCommand {
     private static final String
-            LEAGUE = "league",
-            VIRTUAL = "virtual",
-            XP = "xp",
-            SHOW_BOXES = "showboxes",
-            BOSSES = "bosses",
             TRIGGER = "osrslookup",
-            BOSS_HELP = BOSSES + " " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS;
+            BOSS_HELP = ARGUMENT.BOSSES.getValue() + " " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS;
     public static final String UPLOAD_ERROR_BOSS_IMAGE_URL = "https://i.imgur.com/GE3DI2N.png";
-    private boolean league, virtual, xp, bosses, achievements, showBoxes;
+    private boolean league, virtual, xp, bosses, achievements, showBoxes, max;
     private OSRSHiscores hiscores;
+
+    private enum ARGUMENT {
+        LEAGUE,
+        BOSSES,
+        VIRTUAL,
+        SHOW_BOXES,
+        ACHIEVEMENTS,
+        XP,
+        MAX,
+        NONE;
+
+        /**
+         * Get the value of the argument. By default this is the lower case name of the enum, but may be different.
+         * E.g SHOW_BOXES -> "showboxes"
+         *
+         * @return Argument value
+         */
+        public String getValue() {
+            switch(this) {
+                case SHOW_BOXES:
+                    return "showboxes";
+                default:
+                    return this.name().toLowerCase();
+            }
+        }
+
+        /**
+         * Check if the argument is exclusive and can only be used alone
+         *
+         * @return Argument is exclusive
+         */
+        public boolean isExclusive() {
+            return this == BOSSES || this == NONE;
+        }
+
+        /**
+         * Check if the given String matches one of the arguments
+         *
+         * @param input Input to check for argument
+         * @return Input is an argument
+         */
+        public static boolean isArgument(String input) {
+            return getArgument(input) != NONE;
+        }
+
+        /**
+         * Get an argument from the given String
+         *
+         * @param input String to get argument for - e.g "xp"
+         * @return Argument from String - e.g XP (or NONE)
+         */
+        public static ARGUMENT getArgument(String input) {
+            for(ARGUMENT argument : ARGUMENT.values()) {
+                if(argument.getValue().equalsIgnoreCase(input)) {
+                    return argument;
+                }
+            }
+            return NONE;
+        }
+
+        /**
+         * Get a list of arguments that can be used together in the format "arg arg.."
+         *
+         * @return String containing list of available arguments
+         */
+        public static String getHelpMessage() {
+            StringBuilder helpMessage = new StringBuilder();
+            final String separator = ", ";
+
+            for(ARGUMENT argument : ARGUMENT.values()) {
+                if(argument.isExclusive()) {
+                    continue;
+                }
+                helpMessage.append(argument.getValue()).append(separator);
+            }
+
+            String result = helpMessage.toString();
+            if(result.endsWith(separator)) {
+                result = result.substring(0, result.length() - separator.length());
+            }
+            return result;
+        }
+    }
 
     public OSRSLookupCommand() {
         super(
                 TRIGGER,
                 "Check out someone's stats on OSRS!",
-                "[" + LEAGUE + "] [" + VIRTUAL + "] [" + XP + "] " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS + "\n"
-                        + BOSS_HELP,
+                "[arguments*] " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS + "\n"
+                        + BOSS_HELP
+                        + "\n\n*Arguments:\n\n" + ARGUMENT.getHelpMessage() + "\n\nCan use multiple (space separated)",
                 12
         );
     }
@@ -57,7 +136,14 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
-        OSRSHiscoresArgs args = new OSRSHiscoresArgs(virtual, league, xp, achievements, showBoxes);
+        OSRSHiscoresArgs args = new OSRSHiscoresArgs(
+                virtual,
+                league,
+                xp,
+                achievements,
+                showBoxes,
+                max
+        );
         MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
 
@@ -165,29 +251,38 @@ public class OSRSLookupCommand extends LookupCommand {
         xp = false;
         bosses = false;
         showBoxes = false;
-        achievements = true; // Default fetch achievements
+        max = false;
+        achievements = false;
 
         if(query.equals(getTrigger())) {
             return query;
         }
+
         String[] args = query
                 .split(getTrigger())[0] // xp virtual osrslookup me -> xp virtual
                 .trim()
                 .split(" "); // ["xp", "virtual"]
 
         for(String arg : args) {
-            switch(arg) {
+            ARGUMENT argument = ARGUMENT.getArgument(arg);
+            switch(argument) {
                 case SHOW_BOXES:
                     showBoxes = true;
                     break;
                 case LEAGUE:
                     league = true;
                     break;
+                case ACHIEVEMENTS:
+                    achievements = true;
+                    break;
                 case VIRTUAL:
                     virtual = true;
                     break;
                 case XP:
                     xp = true;
+                    break;
+                case MAX:
+                    max = true;
                     break;
                 // Don't fetch achievements or xp tracker when doing boss message
                 case BOSSES:
@@ -211,19 +306,9 @@ public class OSRSLookupCommand extends LookupCommand {
         DiscordUser.saveName(name, DiscordUser.OSRS, channel, user);
     }
 
-    /**
-     * Check if the given query is one of the lookup arguments
-     *
-     * @param query Query to check
-     * @return Query is a lookup arg
-     */
-    private boolean isArg(String query) {
-        return query.equals(LEAGUE) || query.equals(XP) || query.equals(VIRTUAL) || query.equals(BOSSES) || query.equals(SHOW_BOXES);
-    }
-
     @Override
     public boolean matches(String query, Message message) {
         String firstArg = query.split(" ")[0];
-        return super.matches(query, message) || query.contains(getTrigger()) && isArg(firstArg);
+        return super.matches(query, message) || query.contains(getTrigger()) && ARGUMENT.isArgument(firstArg);
     }
 }

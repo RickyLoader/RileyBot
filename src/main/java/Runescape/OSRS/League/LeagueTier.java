@@ -7,9 +7,12 @@ import org.apache.commons.lang3.StringUtils;
  * Hold league points/tier
  */
 public class LeagueTier {
+    public static final int
+            LEAGUE_POINTS_INDEX = 73,
+            LEAGUE_POINTS_RANK_INDEX = 72;
     private final int points;
     private final long rank;
-    private LEAGUE_TIER tier;
+    private final LEAGUE_TIER tier;
 
     public enum LEAGUE_TIER {
         DRAGON,
@@ -25,10 +28,12 @@ public class LeagueTier {
     /**
      * Create a league tier
      *
+     * @param tier   Tier
      * @param points League points
      * @param rank   League point rank
      */
-    public LeagueTier(int points, long rank) {
+    public LeagueTier(LEAGUE_TIER tier, int points, long rank) {
+        this.tier = tier;
         this.points = points;
         this.rank = rank;
     }
@@ -62,15 +67,6 @@ public class LeagueTier {
             return tierName;
         }
         return tierName + " tier";
-    }
-
-    /**
-     * Set the league tier
-     *
-     * @param tier League tier
-     */
-    public void setTier(LEAGUE_TIER tier) {
-        this.tier = tier;
     }
 
     /**
