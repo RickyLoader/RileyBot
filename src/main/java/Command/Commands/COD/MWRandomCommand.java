@@ -30,8 +30,8 @@ public class MWRandomCommand extends DiscordCommand {
                 Arrays.asList(
                         "iw8_fists", // Fists - Unequippable
                         "iw8_la_mike32", // MGL-32 Grenade Launcher - Only equippable in spec ops
-                        "iw8_sm_secho", // Unreleased Scorpion Evo
                         "iw8_lm_slima", // Unreleased LMG
+
                         // Purchasable Throwing knife variants
                         "equip_throwing_knife_drill",
                         "equip_throwing_knife_fire",

@@ -25356,6 +25356,726 @@
     },
     "weapon_smg": {
       "iw8_sm_secho": {
+        "attachments": {
+          "stockh": {
+            "description": "Marksman stock provides stability while aiming.",
+            "real_name": "CX-MM",
+            "category": "backpiece",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "stockno": {
+            "description": "Forward Recon configuration - The ultimate run and gun modification when agility is more important than precision.",
+            "real_name": "CX-FR",
+            "category": "backpiece",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "stockfold": {
+            "description": "Ultralight Forward Assault Stock speeds up weapon handling and movement at the expense of aiming stability.",
+            "real_name": "CX-FA",
+            "category": "backpiece",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "barcust": {
+            "description": "445mm heavy weight polygonal rifled barrel with guard extension maxes out muzzle velocity for superior range.",
+            "real_name": "CX-38E",
+            "category": "frontpiece",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "barlong": {
+            "description": "412mm barrel with a guarded extension increases muzzle velocity and extends range. Additional weight stabilizes shots at a small cost to mobility.",
+            "real_name": "CX-38",
+            "category": "frontpiece",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "barsil2": {
+            "description": "Fully shrouded monolithic integral suppressor keeps the weapon silent and increases range for longer distance stealth assaults.",
+            "real_name": "CX-38S",
+            "category": "frontpiece",
+            "blocksCategory": "muzzle",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "barsil": {
+            "description": "Compact stainless steel monolithic suppressed barrel. Proprietary baffle design provides top tier rweapon suppression in a small package.",
+            "real_name": "CX-23S",
+            "category": "frontpiece",
+            "blocksCategory": "muzzle",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "barshort": {
+            "description": "Short, compact barrel with a built in angled grip sacrifices range for speed and agility. Good for clearing out tight spaces.",
+            "real_name": "CX-23",
+            "category": "frontpiece",
+            "blocksCategory": "undermount",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "comp": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": 3
+            },
+            "description": "Expels gases upward to aggressively fight muzzle climb.",
+            "real_name": "Compensator",
+            "category": "muzzle"
+          },
+          "melee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Muzzle attachment that enables 1 hit melee kills",
+            "real_name": "Breacher Device",
+            "category": "Muzzle"
+          },
+          "brake": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 0,
+              "control": 1
+            },
+            "description": "Redirects gases outward to stabilize the weapon for better control of sustained fire.",
+            "real_name": "Muzzle Brake",
+            "category": "muzzle"
+          },
+          "flashhider": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": -1,
+              "control": 0
+            },
+            "description": "Suppress the flash of your weapon to help keep your target visible and your position concealed.  Slightly lowers muzzle velocity.",
+            "real_name": "Flash Guard",
+            "category": "muzzle"
+          },
+          "pistolgrip01": {
+            "description": "Molded grip keeps the weapon in control during maneuvers. Not as steady as a standard grip.",
+            "real_name": "CX-9 Ace Grip",
+            "category": "reargrip",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "pistolgrip02": {
+            "description": "Slotted synthetic grip is streamlined for close quarters combat. Gets you on target faster.",
+            "real_name": "CX-9 Tac Grip",
+            "category": "reargrip",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "pistolgrip03": {
+            "description": "Pistol grip shape keeps gun tight in hand. Less steady, but helps control recoil. Well balanced for greater full-auto stability.",
+            "real_name": "CX-9 Clutch Grip",
+            "category": "reargrip",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "gunperk_hardmelee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Melee produces greater stun on targets.",
+            "real_name": "Heavy Hitter",
+            "category": "gunperk"
+          },
+          "fastreload": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 2,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Training in reloading faster when under pressure.",
+            "real_name": "Sleight of Hand",
+            "category": "gunperk"
+          },
+          "maxammo": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Start with Maximum Reserve Ammo.",
+            "real_name": "Fully Loaded",
+            "category": "gunperk"
+          },
+          "gunperk_xp": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Earn additional XP for kills.",
+            "real_name": "Mo' Money",
+            "category": "gunperk"
+          },
+          "gunperk_fastmelee": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Training in executing melee maneuvers with great speed.",
+            "real_name": "Fast Melee",
+            "category": "gunperk"
+          },
+          "ammomod_wound": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Bullets cause target healing to be briefly delayed.",
+            "real_name": "Frangible - Wounding",
+            "category": "gunperk"
+          },
+          "gunperk_marksman": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "See enemy nameplates at greater distances.",
+            "real_name": "Recon",
+            "category": "gunperk"
+          },
+          "fmj": {
+            "stats": {
+              "damage": 5,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Increases bullet penetration and damage against equipment and killstreaks.",
+            "real_name": "FMJ",
+            "category": "gunperk"
+          },
+          "ammomod_slow": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Bullets slow enemy movement and briefly disable tactical sprint when shooting legs.",
+            "real_name": "Frangible - Disabling",
+            "category": "gunperk"
+          },
+          "drums": {
+            "description": "Drum magazines hold 50 rounds of 9mm Parabellum, maximizing ammo capacity at the expense of mobility.",
+            "real_name": "50 Round Drums",
+            "category": "magazine",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "xmags": {
+            "description": "Extended magazines hold 30 rounds of 9mm Parabellum ammunition with a slight weight increase.",
+            "real_name": "30 Round Mags",
+            "category": "magazine",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "smags": {
+            "description": "Gun mod for lightweight single stack 12 round magazines. Comes equipped with a 3-round burst fire mode and 9mm Hollow Point ammunition to ensure every shot counts.",
+            "real_name": "9mm Hollow Point 12-R Mags",
+            "category": "magazine",
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            }
+          },
+          "silencer3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 3,
+              "control": -1
+            },
+            "description": "Monolithic core provides superior sound suppression and increased range.  Moderate weight increase affects agility.",
+            "real_name": "Monolithic Suppressor",
+            "category": "muzzle"
+          },
+          "silencer": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Titanium can with stainless steel baffles.  Silences weapon with very little additional weight.",
+            "real_name": "Tactical Suppressor",
+            "category": "muzzle"
+          },
+          "silencer2": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 1,
+              "range": -4,
+              "control": 0
+            },
+            "description": "Lightweight aluminum suppressor sacrifices range for stealth and agility.",
+            "real_name": "Lightweight Suppressor",
+            "category": "muzzle"
+          },
+          "laser": {
+            "stats": {
+              "damage": 0,
+              "mobility": 1,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Low power 1mW red laser improves hip fire accuracy while remaining undetected.",
+            "real_name": "1mW Laser",
+            "category": "extra"
+          },
+          "laserbalanced": {
+            "stats": {
+              "damage": 0,
+              "mobility": 2,
+              "firerate": 0,
+              "accuracy": 2,
+              "range": 0,
+              "control": 3
+            },
+            "description": "High power 5mW tactical green laser.  Improves accuracy while aiming down sights.  Exposes position when active.",
+            "real_name": "Tac Laser",
+            "category": "extra"
+          },
+          "laserrange": {
+            "stats": {
+              "damage": 0,
+              "mobility": 2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Ultra bright 5mW green laser greatly improves hip fire accuracy and speeds up target acquisition after sprinting.  Exposes position when active.  Only for the aggressive.",
+            "real_name": "5mW Laser",
+            "category": "extra"
+          },
+          "gripcust": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 0,
+              "range": 0,
+              "control": 0
+            },
+            "description": "Standard foregrip improves vertical recoil and stabilizes weapon while aiming for improved long range combat.",
+            "real_name": "Ranger Foregrip",
+            "category": "undermount"
+          },
+          "gripvert": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 1,
+              "control": 2
+            },
+            "description": "Extended foregrip reduces vertical recoil and provides stability from the hip for fast-paced guerrilla tactics.",
+            "real_name": "Merc Foregrip",
+            "category": "undermount"
+          },
+          "gripvertpro": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": 1
+            },
+            "description": "No frills foregrip helps control vertical recoil for faster follow-up shots.",
+            "real_name": "Operator Foregrip",
+            "category": "undermount"
+          },
+          "gripang": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": 3
+            },
+            "description": "Heavy weight angled grip keeps the weapon steady while aiming, and helps maintain control during heavy fire.",
+            "real_name": "Commando Foregrip",
+            "category": "undermount"
+          },
+          "gripangpro": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 1,
+              "range": 1,
+              "control": 6
+            },
+            "description": "Streamlined foregrip provides superior control acquiring targets.",
+            "real_name": "Tactical Foregrip",
+            "category": "undermount"
+          },
+          "reflex4": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Russian reflex sight with a low-intrusion frame for improved target tracking.",
+            "real_name": "Monocle Reflex Sight",
+            "category": "optic"
+          },
+          "hybrid": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 5,
+              "control": -3
+            },
+            "description": "^23.25x^7 Scout with integral reflex sight for quickly transitioning between sights. ",
+            "real_name": "Integral Hybrid",
+            "category": "optic"
+          },
+          "hybrid3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -4,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 5,
+              "control": -5
+            },
+            "description": "^23.25x^7 Thermal scope with a side-mounting reflex sight toggles thermal imaging with a flick of the wrist.  ^1Not compatible with Night Vision Goggles.^7 ",
+            "real_name": "Thermal Hybrid",
+            "category": "optic"
+          },
+          "acog3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -4,
+              "firerate": 0,
+              "accuracy": 6,
+              "range": 4,
+              "control": -3
+            },
+            "description": "Advanced optic with ^23.5x^7 magnification provides excellent target acquisition.",
+            "real_name": "Cronen C480 Pro Optic",
+            "category": "optic"
+          },
+          "reflex3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Precision reflex sight of Russian origin.",
+            "real_name": "Viper Reflex Sight",
+            "category": "optic"
+          },
+          "holo3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": -2
+            },
+            "description": "Advanced holographic sight of American origin.",
+            "real_name": "PBX Holo 7 Sight",
+            "category": "optic"
+          },
+          "reflexmini3": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Circular reflex frame from Cronen keeps the focus on the target.",
+            "real_name": "Cronen LP945 Mini Reflex",
+            "category": "optic"
+          },
+          "hybrid4": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 5,
+              "control": -3
+            },
+            "description": "^23.25x^7 Scout with a side-mounting reflex sight lets you change engagement distances with a flick of the wrist. ",
+            "real_name": "Canted Hybrid",
+            "category": "optic"
+          },
+          "thermal2": {
+            "stats": {
+              "damage": 0,
+              "mobility": -4,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 4,
+              "control": -4
+            },
+            "description": "3.25x scope with thermal imaging highlights targets and provides visibility in all lighting conditions. Not compatible with Night Vision Goggles.",
+            "real_name": "Merc Thermal Optic",
+            "category": "optic"
+          },
+          "acog2": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 4,
+              "control": -3
+            },
+            "description": "Russian combat optic with ^23.0x^7 magnification provides reliable target acquisition.",
+            "real_name": "VLK 3.0x Optic",
+            "category": "optic"
+          },
+          "reflexmini": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "G.I. Miniature reflex optic features a wide, thin frame for an unobstructed sight picture.",
+            "real_name": "G.I. Mini Reflex",
+            "category": "optic"
+          },
+          "acog": {
+            "stats": {
+              "damage": 0,
+              "mobility": -3,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 4,
+              "control": -3
+            },
+            "description": "Precision optic with ^23.25x^7 magnification for long range target acquisition.",
+            "real_name": "Scout Combat Optic",
+            "category": "optic"
+          },
+          "thermal": {
+            "stats": {
+              "damage": 0,
+              "mobility": -4,
+              "firerate": 0,
+              "accuracy": 5,
+              "range": 4,
+              "control": -4
+            },
+            "description": "Advanced ^23.25x^7 Gen 3 night vision with thermal overlay for enhanced situational awareness. ^1Not compatible with Night Vision Goggles.^7",
+            "real_name": "Solozero NVG Enhanced",
+            "category": "optic"
+          },
+          "reflex": {
+            "stats": {
+              "damage": 0,
+              "mobility": -1,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Reflex sight of American origin. Provides higher precision.",
+            "real_name": "Operator Reflex Sight",
+            "category": "optic"
+          },
+          "holo2": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": -2
+            },
+            "description": "Advanced holographic sight of Russian origin.",
+            "real_name": "APX5 Holographic Sight",
+            "category": "optic"
+          },
+          "reflexmini2": {
+            "stats": {
+              "damage": 0,
+              "mobility": 0,
+              "firerate": 0,
+              "accuracy": 3,
+              "range": 0,
+              "control": -1
+            },
+            "description": "Well-rounded precision sight from Solozero Optics provides a balanced sight picture.",
+            "real_name": "Solozero Optics Mini Reflex",
+            "category": "optic"
+          },
+          "holo": {
+            "stats": {
+              "damage": 0,
+              "mobility": -2,
+              "firerate": 0,
+              "accuracy": 4,
+              "range": 2,
+              "control": -2
+            },
+            "description": "Advanced holographic sight of American origin.",
+            "real_name": "Corp Combat Holo Sight",
+            "category": "optic"
+          }
+        },
         "image_url": "https://i.imgur.com/ejgoAKS.png",
         "real_name": "CX-9"
       },
