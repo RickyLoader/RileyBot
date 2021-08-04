@@ -1,6 +1,7 @@
 package Reddit;
 
 import COD.Assets.Ratio;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
@@ -27,7 +28,7 @@ public class RedditPost {
      * @param subreddit  Subreddit where post was created
      * @param datePosted Date of post
      */
-    public RedditPost(String title, String author, String url, PostContent content, Ratio votes, int comments, Subreddit subreddit, Date datePosted) {
+    public RedditPost(String title, String author, String url, PostContent content, Ratio votes, int comments, @Nullable Subreddit subreddit, Date datePosted) {
         this.title = title;
         this.author = author;
         this.url = url;
@@ -97,6 +98,7 @@ public class RedditPost {
      *
      * @return Subreddit
      */
+    @Nullable
     public Subreddit getSubreddit() {
         return subreddit;
     }

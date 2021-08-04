@@ -7,6 +7,7 @@ import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -166,6 +167,62 @@ public class GIFCommand extends DiscordCommand {
         catch(Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Check if the given URL is a Gfycat or RedGIFs URL
+     *
+     * @param url URL to check
+     * @return URL is Gfycat/RedGIFs URL
+     */
+    public static boolean isGifUrl(String url) {
+        return isRedGifsUrl(url) || isGfycatUrl(url);
+
+    }
+
+    /**
+     * Check if the given URL is a RedGIFs URL
+     *
+     * @param url URL to check
+     * @return URL is RedGIFs URL
+     */
+    private static boolean isRedGifsUrl(String url) {
+        return url.matches("https?://(www\\.)?redgifs.com/watch/.+");
+    }
+
+    /**
+     * Check if the given URL is a Gfycat URL
+     *
+     * @param url URL to check
+     * @return URL is Gfycat URL
+     */
+    private static boolean isGfycatUrl(String url) {
+        return url.matches("https://(www\\.)?gfycat.com/.+");
+    }
+
+    /**
+     * Get a Gfycat or RedGIFs GIF by URL.
+     *
+     * @param url URL to GIF
+     * @return GIF or null (if unable to retrieve)
+     */
+    @Nullable
+    public static GIF getGifByUrl(String url) {
+
+        // Invalid URL
+        if(!isGifUrl(url)){
+            return null;
+        }
+
+        // Remove trailing slash
+        if(url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        String[] urlArgs = url.split("/");
+        final String id = urlArgs[urlArgs.length - 1];
+
+        return getGifById(id, isRedGifsUrl(url));
     }
 
     /**

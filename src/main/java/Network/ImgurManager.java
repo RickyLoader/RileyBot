@@ -4,17 +4,24 @@ import Command.Structure.EmbedHelper;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.apache.commons.codec.binary.Base64;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ImgurManager {
-    public static final String BASE_URL = "https://i.imgur.com/";
+    private static final String
+            BASE_URL = "https://i.imgur.com/",
+            BASE_API_URL = "https://api.imgur.com/3/",
+            IMGUR_DOMAIN_REGEX = "https?://(i.)?imgur.com/",
+            LINK_KEY = "link",
+            DATA_KEY = "data";
 
     /**
      * Strip the alpha channel from the image before saving as JPG
@@ -23,7 +30,11 @@ public class ImgurManager {
      * @return JPG ready image
      */
     public static BufferedImage stripAlpha(BufferedImage image) {
-        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage copy = new BufferedImage(
+                image.getWidth(),
+                image.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+        );
         Graphics g = copy.getGraphics();
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, copy.getWidth(), copy.getHeight());
@@ -82,40 +93,15 @@ public class ImgurManager {
                     .addFormDataPart("type", "URL")
                     .build();
 
-            String url = "https://api.imgur.com/3/image";
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
             JSONObject response = new JSONObject(
-                    new NetworkRequest(url, false).post(body, headers, false).body
+                    new NetworkRequest(BASE_API_URL + "image", false)
+                            .post(body, getHeaders(), false).body
             );
-            return response.getJSONObject("data").getString("link");
+            return response.getJSONObject(DATA_KEY).getString(LINK_KEY);
         }
         catch(Exception e) {
             return null;
         }
-    }
-
-    /**
-     * Pass the image to the local API & save it on the server.
-     *
-     * @param image Image to upload
-     * @param png   Upload as PNG instead of JPG
-     * @return URL to uploaded image or null
-     */
-    @Nullable
-    public static String localUpload(BufferedImage image, boolean png) {
-        String base64 = png ? toBase64PNG(image) : toBase64JPEG(image);
-        if(base64 == null) {
-            return null;
-        }
-        JSONObject body = new JSONObject().put("image", base64);
-        NetworkResponse response = new NetworkRequest("images/upload", true).post(body.toString());
-        if(response.code != 200) {
-            return null;
-        }
-        final String key = "relative_url";
-        JSONObject responseBody = new JSONObject(response.body);
-        return responseBody.has(key) ? "http://" + Secret.LOCAL_IP + "/" + responseBody.getString(key) : null;
     }
 
     /**
@@ -136,7 +122,7 @@ public class ImgurManager {
                 .build();
 
         NetworkResponse response = new NetworkRequest(url, false).post(body);
-        return new JSONObject(response.body).getJSONObject("data").getString("url");
+        return new JSONObject(response.body).getJSONObject(DATA_KEY).getString("url");
     }
 
     /**
@@ -158,12 +144,9 @@ public class ImgurManager {
                     .addFormDataPart("type", "base64")
                     .build();
 
-            String url = "https://api.imgur.com/3/image";
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
-
-            String response = new NetworkRequest(url, false).post(body, headers, false).body;
-            return new JSONObject(response).getJSONObject("data").getString("link");
+            String response = new NetworkRequest(BASE_API_URL + "image", false)
+                    .post(body, getHeaders(), false).body;
+            return new JSONObject(response).getJSONObject(DATA_KEY).getString(LINK_KEY);
         }
         catch(Exception e) {
             return null;
@@ -183,16 +166,80 @@ public class ImgurManager {
                     .addFormDataPart("type", "base64")
                     .build();
 
-            String url = "https://api.imgur.com/3/upload";
+            String response = new NetworkRequest(BASE_API_URL + "upload", false)
+                    .post(body, getHeaders(), false).body;
 
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
-
-            String response = new NetworkRequest(url, false).post(body, headers, false).body;
-            return BASE_URL + new JSONObject(response).getJSONObject("data").getString("id");
+            return BASE_URL + new JSONObject(response).getJSONObject(DATA_KEY).getString("id");
         }
         catch(Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Get the authentication headers required to make requests to the API
+     *
+     * @return Map of authentication headers
+     */
+    private static HashMap<String, String> getHeaders() {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "CLIENT-ID " + Secret.IMGUR_CLIENT_ID);
+        return headers;
+    }
+
+    /**
+     * Get a list of image URLs from the given URL to an Imgur album
+     *
+     * @param albumUrl URL to Imgur album
+     * @return List of image URLs in the album or null (if an error occurs)
+     */
+    @Nullable
+    public static ArrayList<String> getAlbumImagesByUrl(String albumUrl) {
+        if(!isAlbumUrl(albumUrl)) {
+            return null;
+        }
+        try {
+            ArrayList<String> images = new ArrayList<>();
+
+            // Remove trailing slash
+            if(albumUrl.endsWith("/")) {
+                albumUrl = albumUrl.substring(0, albumUrl.length() - 1);
+            }
+            String[] urlArgs = albumUrl.split("/");
+            final String hash = urlArgs[urlArgs.length - 1];
+
+            NetworkResponse response = new NetworkRequest(BASE_API_URL + "album/" + hash, false)
+                    .get(getHeaders());
+
+            JSONArray imageList = new JSONObject(response.body).getJSONObject(DATA_KEY).getJSONArray("images");
+
+            for(int i = 0; i < imageList.length(); i++) {
+                images.add(imageList.getJSONObject(i).getString(LINK_KEY));
+            }
+            return images;
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Check if the given URL is an Imgur album URL
+     *
+     * @param url URL to check
+     * @return URL is an album URL
+     */
+    public static boolean isAlbumUrl(String url) {
+        return url.matches(BASE_API_URL + "a/.+/?");
+    }
+
+    /**
+     * Check if the given URL is an Imgur image/gif URL
+     *
+     * @param url URL to check
+     * @return URL is an image/gif URL
+     */
+    public static boolean isImageUrl(String url) {
+        return url.matches(IMGUR_DOMAIN_REGEX + ".+.(gifv|png|jpeg|jpg)/?");
     }
 }

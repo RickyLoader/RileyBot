@@ -6,19 +6,20 @@ import org.jetbrains.annotations.Nullable;
  * Reddit video post content
  */
 public class VideoPostContent extends PostContent {
-    private final String noAudioUrl;
-    private final String downloadUrl;
+    private final String noAudioUrl, downloadUrl, thumbnailUrl;
     private final Boolean audioStatus;
 
     /**
      * Create the Video post content
      *
-     * @param downloadUrl Optional URL to download the video with audio included (this is for downloading and will not embed)
-     * @param noAudioUrl  URL to the video (does not include audio)
-     * @param audioStatus Video post had audio (if null this was unable to be determined)
+     * @param thumbnailUrl URL to a thumbnail for the video
+     * @param downloadUrl  Optional URL to download the video with audio included (this is for downloading and will not embed)
+     * @param noAudioUrl   URL to the video (does not include audio)
+     * @param audioStatus  Video post had audio (if null this was unable to be determined)
      */
-    public VideoPostContent(@Nullable String downloadUrl, String noAudioUrl, @Nullable Boolean audioStatus) {
+    public VideoPostContent(String thumbnailUrl, @Nullable String downloadUrl, String noAudioUrl, @Nullable Boolean audioStatus) {
         super(TYPE.VIDEO);
+        this.thumbnailUrl = thumbnailUrl;
         this.downloadUrl = downloadUrl;
         this.noAudioUrl = noAudioUrl;
         this.audioStatus = audioStatus;
@@ -63,5 +64,14 @@ public class VideoPostContent extends PostContent {
      */
     public boolean hasDownloadUrl() {
         return downloadUrl != null;
+    }
+
+    /**
+     * Get a URL to a thumbnail of the video
+     *
+     * @return URL to video thumbnail
+     */
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 }
