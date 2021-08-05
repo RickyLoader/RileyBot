@@ -20,6 +20,15 @@ public class Image {
     }
 
     /**
+     * Create a news article image without a caption
+     *
+     * @param url URL to the image
+     */
+    public Image(String url) {
+        this(url, null);
+    }
+
+    /**
      * Get the URL to the image
      *
      * @return URL to image

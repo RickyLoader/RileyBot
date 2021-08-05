@@ -12,6 +12,7 @@ import java.util.Date;
  */
 public abstract class NewsOutlet {
     private final String name, articleUrlRegex, logo;
+    private final int colour;
 
     /**
      * Create a news outlet
@@ -19,11 +20,22 @@ public abstract class NewsOutlet {
      * @param name            Name of the outlet - e.g "Stuff"
      * @param logo            URL to the outlet's logo image
      * @param articleUrlRegex Regular expression to match article URLs from this news outlet
+     * @param colour          Colour to use when embedding articles from this outlet
      */
-    public NewsOutlet(String name, String logo, String articleUrlRegex) {
+    public NewsOutlet(String name, String logo, String articleUrlRegex, int colour) {
         this.name = name;
         this.logo = logo;
         this.articleUrlRegex = articleUrlRegex;
+        this.colour = colour;
+    }
+
+    /**
+     * Get the colour to use when embedding articles
+     *
+     * @return Colour
+     */
+    public int getColour() {
+        return colour;
     }
 
     /**

@@ -1,5 +1,6 @@
 package News.Outlets;
 
+import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import News.Article;
@@ -23,7 +24,12 @@ public class StuffNews extends NewsOutlet {
      * Initialise Stuff news values
      */
     public StuffNews() {
-        super("Stuff", "https://i.imgur.com/zXaHmO1.png", BASE_URL + "[A-Za-z0-9-]+/.+");
+        super(
+                "Stuff",
+                "https://i.imgur.com/zXaHmO1.png",
+                BASE_URL + "[A-Za-z0-9-]+/.+",
+                EmbedHelper.STUFF_NEWS
+        );
     }
 
     @Override

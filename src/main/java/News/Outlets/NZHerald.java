@@ -45,7 +45,12 @@ public class NZHerald extends NewsOutlet {
      * Initialise NZ Herald values
      */
     public NZHerald() {
-        super("NZ Herald", "https://i.imgur.com/hszDKPY.png", BASE_URL + "(.+)/(.+)(/)?(.+)?");
+        super(
+                "NZ Herald",
+                "https://i.imgur.com/hszDKPY.png",
+                BASE_URL + "(.+)/(.+)(/)?(.+)?",
+                EmbedHelper.RED
+        );
         this.resolutionOrderMap = getResolutionOrderMap();
     }
 

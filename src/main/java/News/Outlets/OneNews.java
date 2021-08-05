@@ -28,7 +28,12 @@ public class OneNews extends NewsOutlet {
      * Initialise One News values
      */
     public OneNews() {
-        super("One News", "https://i.imgur.com/4Gp3qnH.png", BASE_ARTICLE_URL + "(.+)/(.+)(/)?(.+)?");
+        super(
+                "One News",
+                "https://i.imgur.com/4Gp3qnH.png",
+                BASE_ARTICLE_URL + "(.+)/(.+)(/)?(.+)?",
+                EmbedHelper.RED
+        );
     }
 
     @Override

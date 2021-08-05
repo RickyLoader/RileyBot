@@ -1,5 +1,6 @@
 package News.Outlets;
 
+import Command.Structure.EmbedHelper;
 import Command.Structure.HTMLUtils;
 import News.Article;
 import News.Author;
@@ -29,7 +30,8 @@ public class Newshub extends NewsOutlet {
         super(
                 "Newshub",
                 "https://i.imgur.com/GajefpZ.png",
-                BASE_URL + "home/(.+).html(/)?(.+)?"
+                BASE_URL + "home/(.+).html(/)?(.+)?",
+                EmbedHelper.RED
         );
     }
 
@@ -119,7 +121,7 @@ public class Newshub extends NewsOutlet {
         String thumbnailName = null;
 
         if(thumbnail != null) {
-            imageList.add(new Image(thumbnail, null));
+            imageList.add(new Image(thumbnail));
             thumbnailName = getImageFileName(thumbnail);
         }
 

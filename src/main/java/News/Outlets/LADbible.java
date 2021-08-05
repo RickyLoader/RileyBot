@@ -1,5 +1,6 @@
 package News.Outlets;
 
+import Command.Structure.EmbedHelper;
 import Command.Structure.HTMLUtils;
 import News.Article;
 import News.Author;
@@ -31,7 +32,8 @@ public class LADbible extends NewsOutlet {
         super(
                 "LADbible",
                 "https://i.imgur.com/FCfoRUl.png",
-                BASE_URL + "news/[a-z-\\d]+(-\\d+)(/)?(.+)?"
+                BASE_URL + "news/[a-z-\\d]+(-\\d+)(/)?(.+)?",
+                EmbedHelper.LADBIBLE
         );
     }
 

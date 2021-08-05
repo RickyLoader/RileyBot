@@ -196,12 +196,7 @@ public class DiscordCommandManager {
         addCommand(new OSRSLendingCommand());
         addCommand(new WhipPriceCommand());
         addCommand(new MinecraftServerCommand());
-        addCommand(new StuffNewsCommand());
-        addCommand(new NewshubCommand());
-        addCommand(new NZHeraldCommand());
-        addCommand(new GuardianNewsCommand());
-        addCommand(new OneNewsCommand());
-        addCommand(new LADbibleCommand());
+        addCommand(new NewsCommand());
         addCommand(new TikTokCommand());
         addCommand(new R34Command());
         addCommand(new OlympicsCommand());

@@ -4,12 +4,13 @@ import Command.Structure.*;
 import News.Article;
 import News.Author;
 import News.Image;
-import News.Outlets.NewsOutlet;
+import News.Outlets.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,21 +22,39 @@ import java.util.Random;
 public class NewsCommand extends OnReadyDiscordCommand {
     private final String[] prefixes;
     private final Random random;
-    private final NewsOutlet newsOutlet;
+    private final ArrayList<NewsOutlet> newsOutlets;
     private Emote parseFailEmote;
 
     /**
      * Set to secret to prevent showing in help command
-     * Generate an array of news related prefixes to use when referring to a member.
-     *
-     * @param newsOutlet News outlet to embed URLs from
+     * Generate an array of news related prefixes to use when referring to a member & a list of news outlets
+     * to monitor URLs from.
      */
-    public NewsCommand(NewsOutlet newsOutlet) {
-        super("[" + newsOutlet.getName() + " URL]", "View some " + newsOutlet.getName() + " articles!");
+    public NewsCommand() {
+        super("[News URL]", "View some articles!");
         this.random = new Random();
         this.prefixes = getPrefixes();
-        this.newsOutlet = newsOutlet;
+        this.newsOutlets = getNewsOutlets();
         setSecret(true);
+        setBotInput(true);
+    }
+
+    /**
+     * Get a list of news outlets to monitor for article URLs
+     *
+     * @return List of news outlets
+     */
+    private ArrayList<NewsOutlet> getNewsOutlets() {
+        ArrayList<NewsOutlet> newsOutlets = new ArrayList<>();
+        newsOutlets.add(new Guardian());
+        newsOutlets.add(new LADbible());
+        newsOutlets.add(new Newshub());
+        newsOutlets.add(new NZHerald());
+        newsOutlets.add(new OneNews());
+        newsOutlets.add(new StuffNews());
+        newsOutlets.add(new HollywoodReporter());
+        newsOutlets.add(new RadioNewZealand());
+        return newsOutlets;
     }
 
     /**
@@ -68,6 +87,14 @@ public class NewsCommand extends OnReadyDiscordCommand {
     public void execute(CommandContext context) {
         Message message = context.getMessage();
         new Thread(() -> {
+            final String url = context.getMessageContent();
+            NewsOutlet newsOutlet = getNewsOutletFromUrl(url);
+
+            // URL doesn't match an outlet
+            if(newsOutlet == null) {
+                return;
+            }
+
             Article article = newsOutlet.getArticleByUrl(context.getMessageContent());
 
             // Not an article/error fetching
@@ -76,17 +103,18 @@ public class NewsCommand extends OnReadyDiscordCommand {
                 return;
             }
 
-            message.delete().queue(deleted -> displayArticle(context, article));
+            message.delete().queue(deleted -> displayArticle(context, article, newsOutlet));
         }).start();
     }
 
     /**
      * Display the given article in a pageable message (to page through images)
      *
-     * @param context Command context
-     * @param article Article to display
+     * @param context    Command context
+     * @param article    Article to display
+     * @param newsOutlet News outlet where article is from
      */
-    private void displayArticle(CommandContext context, Article article) {
+    private void displayArticle(CommandContext context, Article article, NewsOutlet newsOutlet) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String memberPrefix = getMemberPrefix();
 
@@ -100,7 +128,7 @@ public class NewsCommand extends OnReadyDiscordCommand {
                 EmbedBuilder builder = new EmbedBuilder()
                         .setTitle(article.getTitle(), article.getBrowserUrl())
                         .setThumbnail(newsOutlet.getLogo())
-                        .setColor(EmbedHelper.BLUE)
+                        .setColor(newsOutlet.getColour())
                         .setDescription(buildDescription())
                         .setFooter(pageDetails + " | Published: " + dateFormat.format(article.getDate()));
 
@@ -172,9 +200,26 @@ public class NewsCommand extends OnReadyDiscordCommand {
         return prefixes[random.nextInt(prefixes.length)];
     }
 
+    /**
+     * Get a news outlet by a URL to an article from the outlet.
+     * Return the matching outlet or null (if no match is found).
+     *
+     * @param url URL to an article
+     * @return News outlet where article is from
+     */
+    @Nullable
+    private NewsOutlet getNewsOutletFromUrl(String url) {
+        for(NewsOutlet outlet : newsOutlets) {
+            if(outlet.isNewsUrl(url)) {
+                return outlet;
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean matches(String query, Message message) {
-        return newsOutlet.isNewsUrl(message.getContentDisplay());
+        return getNewsOutletFromUrl(message.getContentDisplay()) != null;
     }
 
     @Override

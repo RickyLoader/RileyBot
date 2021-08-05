@@ -1,5 +1,6 @@
 package News.Outlets;
 
+import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import News.Article;
@@ -24,7 +25,12 @@ public class Guardian extends NewsOutlet {
      * Initialise The Guardian values
      */
     public Guardian() {
-        super("The Guardian", "https://i.imgur.com/2pd59wD.jpg", BASE_URL + "(.+)/(.+)(/)?(.+)?");
+        super(
+                "The Guardian",
+                "https://i.imgur.com/2pd59wD.jpg",
+                BASE_URL + "(.+)/(.+)(/)?(.+)?",
+                EmbedHelper.BLUE
+        );
     }
 
     @Override

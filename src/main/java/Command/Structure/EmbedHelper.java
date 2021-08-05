@@ -38,6 +38,8 @@ public class EmbedHelper {
             RUNESCAPE_RED = 11672635,
             RUNESCAPE_BLUE = 6206918,
             ROW_DARK = 1973790,
+            STUFF_NEWS = 6144890,
+            LADBIBLE = 14439508,
             ROW_LIGHT = 3160122,
             FIRE_ORANGE = 16544773;
 
