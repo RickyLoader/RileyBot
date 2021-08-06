@@ -700,9 +700,9 @@ public class OlympicsCommand extends OnReadyDiscordCommand {
                 null,
                 COUNTRY_FOOTER,
                 new String[]{
+                        "Rank",
                         "Country",
-                        "Medals",
-                        "Rank"
+                        "Medals"
                 },
                 5,
                 EmbedHelper.PURPLE
@@ -715,9 +715,9 @@ public class OlympicsCommand extends OnReadyDiscordCommand {
             @Override
             public String[] getRowValues(int index, MedalStanding medalStanding, boolean defaultSort) {
                 return new String[]{
+                        medalRankEmote + " " + medalStanding.getRank(),
                         medalStanding.getCountry().getSummary(),
                         buildMedalCountString(medalStanding.getMedalCount()),
-                        medalRankEmote + " " + medalStanding.getRank()
                 };
             }
 
@@ -744,7 +744,7 @@ public class OlympicsCommand extends OnReadyDiscordCommand {
         return goldEmote + " " + medalCount.getGoldMedals()
                 + " " + silverEmote + " " + medalCount.getSilverMedals()
                 + " " + bronzeEmote + " " + medalCount.getBronzeMedals()
-                + " " + totalEmote + " " + medalCount.getTotalMedals();
+                + "\n" + totalEmote + " " + medalCount.getTotalMedals();
     }
 
     /**
