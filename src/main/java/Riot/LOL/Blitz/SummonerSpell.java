@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import Bot.ResourceHandler;
 
@@ -18,7 +18,7 @@ public class SummonerSpell {
      * @param key  Spell key - SummonerHaste
      */
     public SummonerSpell(String name, String key) {
-        this.spellImage = new ResourceHandler().getImageResource("/LOL/Summoner/Spells/" + key + ".png");
+        this.spellImage = new ResourceHandler().getImageResource(ResourceHandler.LEAGUE_BASE_PATH + "Summoner/Spells/" + key + ".png");
         this.name = name;
     }
 

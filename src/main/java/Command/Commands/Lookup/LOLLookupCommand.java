@@ -2,8 +2,8 @@ package Command.Commands.Lookup;
 
 import Bot.FontManager;
 import Command.Structure.CommandContext;
-import LOL.SummonerImage;
-import LOL.SummonerOverview;
+import Riot.LOL.SummonerImage;
+import Riot.LOL.SummonerOverview;
 
 /**
  * Look up a LOL summoner and create an image displaying their stats

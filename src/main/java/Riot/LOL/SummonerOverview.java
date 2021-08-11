@@ -1,4 +1,4 @@
-package LOL;
+package Riot.LOL;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
  * Hold basic LOL summoner overview - name, id, region, etc
  */
 public class SummonerOverview {
-    public static final String BASE_PATH = "/LOL/Summoner/";
+    public static final String BASE_PATH = ResourceHandler.LEAGUE_BASE_PATH + "Summoner/";
     private final String apiURL;
     private final Region region;
     private final boolean exists;

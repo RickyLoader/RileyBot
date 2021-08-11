@@ -1,4 +1,4 @@
-package LOL;
+package Riot.LOL;
 
 import Bot.ResourceHandler;
 import Network.Secret;
@@ -36,7 +36,7 @@ public class SummonerStats {
         this.handler = new ResourceHandler();
         this.champions = fetchChampions();
         fetchRankedQueues();
-        this.profileBanner = handler.getImageResource("/LOL/Summoner/Banners/" + getHighestRank() + ".png");
+        this.profileBanner = handler.getImageResource(SummonerOverview.BASE_PATH + "Banners/" + getHighestRank() + ".png");
     }
 
     /**
@@ -198,7 +198,7 @@ public class SummonerStats {
             this.id = id;
             this.level = level;
             this.points = points;
-            this.masteryIconPath = "/LOL/Champions/Mastery/" + level + ".png";
+            this.masteryIconPath = Riot.LOL.Blitz.Champion.BASE_PATH + "Mastery/" + level + ".png";
             getChampionInfo();
         }
 
@@ -271,13 +271,13 @@ public class SummonerStats {
         private void getChampionInfo() {
             try {
                 JSONObject champions = new JSONObject(
-                        handler.getResourceFileAsString("/LOL/Data/champions.json")
+                        handler.getResourceFileAsString(ResourceHandler.LEAGUE_BASE_PATH + "Data/champions.json")
                 ).getJSONObject("data");
                 for(String championName : champions.keySet()) {
                     JSONObject champion = champions.getJSONObject(championName);
                     if(champion.getString("key").equals(String.valueOf(id))) {
                         this.name = championName;
-                        this.imagePath = "/LOL/Champions/Images/" + champion.getString("id") + ".png";
+                        this.imagePath = Riot.LOL.Blitz.Champion.BASE_PATH + "Images/" + champion.getString("id") + ".png";
                     }
                 }
             }

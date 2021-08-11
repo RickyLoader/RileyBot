@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import Bot.ResourceHandler;
 
@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 public class Item {
     private final String name;
     private final BufferedImage itemImage;
-    public final static String IMAGE_PATH = "/LOL/Items/";
+    public final static String IMAGE_PATH = ResourceHandler.LEAGUE_BASE_PATH + "Items/";
 
     /**
      * Create an item

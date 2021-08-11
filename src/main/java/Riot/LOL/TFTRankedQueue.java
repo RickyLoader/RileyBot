@@ -1,4 +1,4 @@
-package LOL;
+package Riot.LOL;
 
 /**
  * TFT ranked queue info

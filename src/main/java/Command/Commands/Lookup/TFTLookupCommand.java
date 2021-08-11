@@ -4,8 +4,8 @@ import Bot.FontManager;
 import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.ImageLoadingMessage;
-import LOL.SummonerOverview;
-import LOL.TFTRankedQueue;
+import Riot.LOL.SummonerOverview;
+import Riot.LOL.TFTRankedQueue;
 import Network.NetworkRequest;
 import Network.Secret;
 import net.dv8tion.jda.api.entities.Member;
@@ -57,7 +57,7 @@ public class TFTLookupCommand extends SummonerLookupCommand {
      * @return Image displaying summoner TFT stats
      */
     private BufferedImage buildStatsImage(TFTRankedQueue queue) {
-        BufferedImage man = new ResourceHandler().getImageResource("/LOL/man.png");
+        BufferedImage man = new ResourceHandler().getImageResource(ResourceHandler.LEAGUE_BASE_PATH + "man.png");
         BufferedImage helmet = new BufferedImage(
                 200,
                 260,
@@ -115,7 +115,7 @@ public class TFTLookupCommand extends SummonerLookupCommand {
      * @return Image displaying summoner details
      */
     private BufferedImage buildTitleImage(SummonerOverview overview) {
-        BufferedImage title = new ResourceHandler().getImageResource("/LOL/name.png");
+        BufferedImage title = new ResourceHandler().getImageResource(ResourceHandler.LEAGUE_BASE_PATH + "name.png");
         Graphics g = title.getGraphics();
         g.drawImage(
                 overview.getProfileIcon(),

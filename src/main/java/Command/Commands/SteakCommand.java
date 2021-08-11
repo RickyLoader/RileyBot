@@ -1,5 +1,6 @@
 package Command.Commands;
 
+import Bot.ResourceHandler;
 import Command.Structure.CommandContext;
 import Command.Structure.EmbedHelper;
 import Command.Structure.SelfieCommand;
@@ -18,7 +19,7 @@ public class SteakCommand extends SelfieCommand {
                 "steak",
                 "Get a photo with steak!",
                 new SelfieManager(
-                        "/LOL/steak.png",
+                        ResourceHandler.LEAGUE_BASE_PATH + "steak.png",
                         "https://i.imgur.com/KXnIE3C.png",
                         new SelfieManager.ProfileDimensions(
                                 180,

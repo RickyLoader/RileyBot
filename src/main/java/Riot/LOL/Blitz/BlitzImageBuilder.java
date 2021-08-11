@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
@@ -17,7 +17,7 @@ public class BlitzImageBuilder {
     public BlitzImageBuilder() {
         ResourceHandler handler = new ResourceHandler();
         this.blitzFont = FontManager.BLITZ_FONT;
-        this.next = handler.getImageResource("/LOL/next.png");
+        this.next = handler.getImageResource(ResourceHandler.LEAGUE_BASE_PATH + "next.png");
         this.abilityOrderTemplate = handler.getImageResource(Ability.ORDER_PATH + "ability_order.png");
     }
 

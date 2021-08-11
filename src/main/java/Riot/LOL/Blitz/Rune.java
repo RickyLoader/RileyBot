@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import Bot.ResourceHandler;
 
@@ -23,7 +23,7 @@ public class Rune {
      */
     public Rune(int id, String name, String image, boolean keyRune) {
         String filename = image.contains("/") ? (image.substring(image.lastIndexOf("/") + 1)) : image;
-        this.image = new ResourceHandler().getImageResource("/LOL/Summoner/Runes/" + filename);
+        this.image = new ResourceHandler().getImageResource(ResourceHandler.LEAGUE_BASE_PATH + "Summoner/Runes/" + filename);
         this.id = id;
         this.name = name;
         this.keyRune = keyRune;

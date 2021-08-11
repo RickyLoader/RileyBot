@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 /**
  * Build information

@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import java.awt.image.BufferedImage;
 
@@ -7,7 +7,9 @@ import java.awt.image.BufferedImage;
  */
 public class Ability {
     private final BufferedImage buttonImage, abilityImage;
-    public static final String PATH = "/LOL/Champions/Abilities/", ORDER_PATH = PATH + "Order/";
+    public static final String
+            BASE_PATH = Champion.BASE_PATH + "Abilities/",
+            ORDER_PATH = BASE_PATH + "Order/";
 
     /**
      * Create an ability

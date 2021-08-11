@@ -1,5 +1,6 @@
-package LOL;
+package Riot.LOL;
 
+import Bot.ResourceHandler;
 import Command.Structure.EmoteHelper;
 import Command.Structure.ImageBuilder;
 import Command.Structure.ImageLoadingMessage;
@@ -21,7 +22,7 @@ public class SummonerImage extends ImageBuilder {
      * @param font        Font to use in image
      */
     public SummonerImage(MessageChannel channel, EmoteHelper emoteHelper, Font font) {
-        super(emoteHelper, "/LOL/", font);
+        super(emoteHelper, ResourceHandler.LEAGUE_BASE_PATH, font);
         this.channel = channel;
     }
 

@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import Bot.ResourceHandler;
 import Network.NetworkRequest;
@@ -154,7 +154,7 @@ public class Blitz {
                 handler.getImageResource(Ability.ORDER_PATH + "R.png")
         };
 
-        BufferedImage missingImage = handler.getImageResource(Ability.PATH + "Default.png");
+        BufferedImage missingImage = handler.getImageResource(Ability.BASE_PATH + "Default.png");
 
         for(String championKey : championData.keySet()) {
             JSONObject champion = championData.getJSONObject(championKey);
@@ -167,7 +167,7 @@ public class Blitz {
                 JSONObject ability = abilityData.getJSONObject(i);
                 int index = i - 1;
                 BufferedImage abilityImage = handler.getImageResource(
-                        Ability.PATH + ability.getJSONObject("image").getString("full")
+                        Ability.BASE_PATH + ability.getJSONObject("image").getString("full")
                 );
                 abilities[index] = new Ability(
                         buttons[index],
@@ -348,13 +348,12 @@ public class Blitz {
      * @return Blitz.gg champion data for given role
      */
     private String getBlitzData(Champion champion, String role, String version) {
-        String url = "https://beta.iesdev.com/api/lolstats/champions/"
+        String url = "https://league-champion-aggregate.iesdev.com/api/champions/"
                 + champion.getId()
                 + "?patch="
                 + version
                 + "&queue=420&region=world&tier=PLATINUM_PLUS&role="
                 + role;
-
         return new NetworkRequest(url, false).get().body;
     }
 

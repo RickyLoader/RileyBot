@@ -16,6 +16,8 @@ public class ResourceHandler {
             OSRS_BASE_PATH = RUNESCAPE_BASE_PATH + "OSRS/",
             OSRS_LEAGUE_PATH = OSRS_BASE_PATH + "League/",
             RS3_BASE_PATH = RUNESCAPE_BASE_PATH + "RS3/",
+            RIOT_BASE_PATH = "/Riot/",
+            LEAGUE_BASE_PATH = RIOT_BASE_PATH + "LOL/",
             MINECRAFT_BASE_PATH = "/Minecraft/";
 
     /**

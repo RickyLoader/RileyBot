@@ -23,14 +23,14 @@ public class FontManager {
      */
     public static void initialiseFonts() {
         MODERN_WARFARE_FONT = registerFont("/COD/MW/ModernWarfare.otf");
-        BLITZ_FONT = registerFont("/LOL/blitz_font.ttf");
         COLD_WAR_FONT = registerFont("/COD/CW/ColdWar.ttf");
         OSRS_FONT = registerFont(ResourceHandler.OSRS_BASE_PATH + "osrs.ttf");
         OSRS_BANK_FONT = registerFont(ResourceHandler.OSRS_BASE_PATH + "osrs_bank.ttf");
         WISE_OLD_MAN_FONT = registerFont(ResourceHandler.OSRS_BASE_PATH + "wise_old_man.ttf");
         RS3_FONT = registerFont(ResourceHandler.RS3_BASE_PATH + "rs3.ttf");
         DEAL_OR_NO_DEAL_FONT = registerFont("/DOND/dond.ttf");
-        LEAGUE_FONT = registerFont("/LOL/riot_font.otf");
+        BLITZ_FONT = registerFont(ResourceHandler.LEAGUE_BASE_PATH + "blitz_font.ttf");
+        LEAGUE_FONT = registerFont(ResourceHandler.LEAGUE_BASE_PATH + "league_font.otf");
         MINECRAFT_FONT = registerFont(ResourceHandler.MINECRAFT_BASE_PATH + "font.ttf");
     }
 

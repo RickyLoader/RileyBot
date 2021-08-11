@@ -1,4 +1,4 @@
-package LOL.Blitz;
+package Riot.LOL.Blitz;
 
 import Bot.ResourceHandler;
 
@@ -11,6 +11,7 @@ public class Champion {
     private final String name, id;
     private final Ability[] abilities;
     private final BufferedImage championImage;
+    public static final String BASE_PATH = ResourceHandler.LEAGUE_BASE_PATH + "Champions/";
 
     /**
      * Create a champion
@@ -23,10 +24,11 @@ public class Champion {
     public Champion(String name, String id, String key, Ability[] abilities) {
         this.name = name;
         this.id = id;
-        String path = "/LOL/Champions/Thumbnails/";
+
+        String thumbnailPath = BASE_PATH + "Thumbnails/";
         ResourceHandler resourceHandler = new ResourceHandler();
-        BufferedImage image = resourceHandler.getImageResource(path + key + ".png");
-        this.championImage = (image == null) ? resourceHandler.getImageResource(path + "Default.png") : image;
+        BufferedImage image = resourceHandler.getImageResource(thumbnailPath + key + ".png");
+        this.championImage = (image == null) ? resourceHandler.getImageResource(thumbnailPath + "Default.png") : image;
         this.abilities = abilities;
     }
 

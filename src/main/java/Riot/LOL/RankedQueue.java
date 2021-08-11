@@ -1,4 +1,4 @@
-package LOL;
+package Riot.LOL;
 
 import Bot.ResourceHandler;
 import COD.Assets.Ratio;
@@ -14,6 +14,7 @@ public class RankedQueue {
     private final String tier, rank, queue;
     private final BufferedImage helmet, banner;
     private boolean unranked = false;
+    public static final String BASE_PATH = SummonerOverview.BASE_PATH + "Ranked/";
 
     /**
      * Create a ranked queue
@@ -32,8 +33,8 @@ public class RankedQueue {
         this.rank = rank;
         this.queue = queue;
         ResourceHandler handler = new ResourceHandler();
-        this.helmet = handler.getImageResource("/LOL/Summoner/Ranked/Helmets/" + tier + "/" + rank + ".png");
-        this.banner = handler.getImageResource("/LOL/Summoner/Ranked/Banners/" + tier + ".png");
+        this.helmet = handler.getImageResource(BASE_PATH + "Helmets/" + tier + "/" + rank + ".png");
+        this.banner = handler.getImageResource(BASE_PATH + "Banners/" + tier + ".png");
     }
 
     /**
