@@ -1,5 +1,6 @@
 package TikTokAPI;
 
+import Bot.ResourceHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -18,19 +19,26 @@ public class Signer {
     public static String DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36";
 
     /**
-     * Initialise a headless browser to the TikTok home page.
+     * Initialise a headless browser to the TikTok home page and load the signing script in to the page.
      * From here the signing function in their Javascript can be called.
      * A modified chrome driver executable is used to bypass Selenium detection.
      *
      * @param userAgent User agent to use when signing. Requests made with a
      *                  signed URL must be made with the same user agent.
      * @see <a href="https://stackoverflow.com/a/52108199/7466895">Modified chrome driver</a>
+     * @see <a href="https://github.com/carcabot/tiktok-signature">Signing script</a>
      */
     public Signer(String userAgent) {
         System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
         this.browser = new ChromeDriver(getBrowserOptions(userAgent));
         this.userAgent = userAgent;
+
+        // Open TikTok home page
         browser.get(TikTok.BASE_WEB_URL);
+
+        // Load signing script
+        final String script = new ResourceHandler().getResourceFileAsString("/TikTok/signer.js");
+        browser.executeScript(script);
     }
 
     /**

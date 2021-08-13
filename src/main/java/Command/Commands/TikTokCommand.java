@@ -5,6 +5,7 @@ import Command.Structure.*;
 import TikTokAPI.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
@@ -27,6 +28,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
 
     private final TikTok tikTok;
     private String likes, comments, shares, plays, followers, following, videos, blank;
+    private Emote parseFail;
 
     /**
      * Set to secret to prevent showing in help command.
@@ -41,7 +43,8 @@ public class TikTokCommand extends OnReadyDiscordCommand {
     @Override
     public void execute(CommandContext context) {
         final MessageChannel channel = context.getMessageChannel();
-        final AuditableRestAction<Void> deleteAction = context.getMessage().delete();
+        final Message requestMessage = context.getMessage();
+        final AuditableRestAction<Void> deleteAction = requestMessage.delete();
 
         new Thread(() -> {
             String url = context.getMessageContent();
@@ -52,6 +55,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
 
                 // May no longer exist
                 if(originalUrl == null) {
+                    failRequest(requestMessage);
                     return;
                 }
                 url = originalUrl;
@@ -62,6 +66,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
 
                 // API error
                 if(post == null) {
+                    failRequest(requestMessage);
                     return;
                 }
 
@@ -80,12 +85,22 @@ public class TikTokCommand extends OnReadyDiscordCommand {
 
                 // Scraping error
                 if(creator == null) {
+                    failRequest(requestMessage);
                     return;
                 }
 
                 deleteAction.queue(unused -> getCreatorMessageAction(channel, creator).queue());
             }
         }).start();
+    }
+
+    /**
+     * Add a reaction to the given message indicating that the TikTok request failed
+     *
+     * @param message Message to add failed reaction to
+     */
+    private void failRequest(Message message) {
+        message.addReaction(parseFail).queue();
     }
 
     /**
@@ -272,5 +287,6 @@ public class TikTokCommand extends OnReadyDiscordCommand {
         this.following = emoteHelper.getTikTokFollowing().getAsMention();
         this.videos = emoteHelper.getTikTokVideos().getAsMention();
         this.blank = emoteHelper.getBlankGap().getAsMention();
+        this.parseFail = emoteHelper.getFail();
     }
 }
