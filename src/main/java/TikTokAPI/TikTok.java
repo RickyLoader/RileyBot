@@ -31,7 +31,7 @@ public class TikTok {
             BASE_API_URL = BASE_MOBILE_URL + "api/",
             USER_ID = "@[A-Za-z0-9_.]+",
             NUMERIC_ID = "[0-9]+",
-            URL_END = "(/)?(\\?.+)?", // Optional trailing slash & URL parameters
+            URL_END = "(/)?(\\?.*)?", // Optional trailing slash & URL parameters
             SHORT_URL = BASE_SHORT_URL + "[A-Za-z0-9]+" + URL_END,
             WEB_VIDEO_URL = BASE_WEB_URL + USER_ID + "/video/" + NUMERIC_ID + URL_END,
             MOBILE_VIDEO_URL = BASE_MOBILE_URL + "v/" + NUMERIC_ID + URL_END,
