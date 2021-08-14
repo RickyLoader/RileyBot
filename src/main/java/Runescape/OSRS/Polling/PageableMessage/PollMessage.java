@@ -13,7 +13,7 @@ import java.util.List;
  * Pageable OSRS poll message showing questions and results
  */
 public class PollMessage extends PageableListEmbed<Question> {
-    private final String pass, fail, answer;
+    private final String pass, fail;
     private final ProgressBar progressBar;
     private final boolean open;
     private final Emote blankEmote;
@@ -46,7 +46,6 @@ public class PollMessage extends PageableListEmbed<Question> {
         );
         this.pass = emoteHelper.getComplete().getAsMention();
         this.fail = emoteHelper.getFail().getAsMention();
-        this.answer = emoteHelper.getPollAnswerShield().getAsMention();
         this.open = poll.isOpen();
         this.blankEmote = emoteHelper.getBlankGap();
     }
@@ -86,9 +85,9 @@ public class PollMessage extends PageableListEmbed<Question> {
                                 question.isOpinionQuestion()
                         )
                 )
-                        .append(" ")
+                        .append("`")
                         .append(a.formatVotes())
-                        .append(answer)
+                        .append("` ")
                         .append(a.getText(maxAnswerLength));
             }
 
