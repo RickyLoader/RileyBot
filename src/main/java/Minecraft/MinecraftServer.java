@@ -15,6 +15,9 @@ import static Command.Structure.ImageLoadingMessage.imageToByteArray;
  * Hold Minecraft server info/players using the Minecraft Server Status API
  */
 public class MinecraftServer {
+    private static final int
+            NO_PORT = 0,
+            UNAVAILABLE = -1;
     private static final String
             API_URL = "https://api.mcsrvstat.us/",
             DEFAULT_ICON_URL = "https://i.imgur.com/hpQ2JZo.png", // Default server icon
@@ -26,7 +29,7 @@ public class MinecraftServer {
     private byte[] detailsImage;
     private long lastFetched;
     private boolean online, hasData;
-    private int maxPlayers;
+    private int maxPlayers, currentPlayers;
     private String mapName, version, iconUrl, hostname;
     private String[] motd;
 
@@ -45,6 +48,15 @@ public class MinecraftServer {
     }
 
     /**
+     * Create the Minecraft server with a hostname
+     *
+     * @param hostname Hostname of the server
+     */
+    public MinecraftServer(String hostname) {
+        this(hostname, NO_PORT);
+    }
+
+    /**
      * Build the address String, this is in the format "address:port".
      * Port is truncated if unacceptable.
      *
@@ -54,7 +66,7 @@ public class MinecraftServer {
      */
     private String buildAddressString(String address, int port) {
         String addressString = address;
-        if(port > 0) {
+        if(port != NO_PORT) {
             addressString += ":" + port;
         }
         return addressString;
@@ -128,7 +140,7 @@ public class MinecraftServer {
      * @return Maximum players String
      */
     public String getMaxPlayersString() {
-        return hasData ? String.valueOf(maxPlayers) : UNKNOWN;
+        return hasData && maxPlayers != UNAVAILABLE ? String.valueOf(maxPlayers) : UNKNOWN;
     }
 
     /**
@@ -139,7 +151,17 @@ public class MinecraftServer {
      * @return Current player count String
      */
     public String getCurrentPlayerCountString() {
-        return hasData ? String.valueOf(players.size()) : UNKNOWN;
+        final int currentPlayers = getCurrentPlayerCount();
+        return currentPlayers == UNAVAILABLE ? UNKNOWN : String.valueOf(currentPlayers);
+    }
+
+    /**
+     * Get the current player count. This is -1 if the server data has not been fetched yet.
+     *
+     * @return Current player count
+     */
+    public int getCurrentPlayerCount() {
+        return hasData ? currentPlayers : UNAVAILABLE;
     }
 
     /**
@@ -241,6 +263,7 @@ public class MinecraftServer {
 
         // Reset player list
         players.clear();
+        currentPlayers = 0;
 
         // First time the server is seen online the data can be grabbed
         if(!hasData && online) {
@@ -254,9 +277,14 @@ public class MinecraftServer {
 
         this.version = info.getString("version");
 
-        // Map name isn't always included, default to Minecraft
+        // Sometimes the version is a massive list of supported versions
+        if(version.length() > 10) {
+            this.version = "Many";
+        }
+
+        // Map name isn't always included, default to "Minecraft Server"
         final String mapKey = "map";
-        this.mapName = info.has(mapKey) ? info.getString(mapKey) : "Minecraft";
+        this.mapName = info.has(mapKey) ? info.getString(mapKey) : "Minecraft Server";
 
         // MOTD - Message of the day - can be multiple lines
         JSONArray motd = info.getJSONObject("motd").getJSONArray("raw");
@@ -264,7 +292,7 @@ public class MinecraftServer {
 
         this.motd = new String[length];
         for(int i = 0; i < length; i++) {
-            this.motd[i] = motd.getString(i).trim();
+            this.motd[i] = motd.getString(i);
         }
 
         // Only included when a hostname is detected
@@ -283,6 +311,7 @@ public class MinecraftServer {
 
         JSONObject playersData = info.getJSONObject("players");
         this.maxPlayers = playersData.getInt("max");
+        this.currentPlayers = playersData.getInt("online");
 
         // Only included when players are online
         final String playerListKey = "uuid";

@@ -4,25 +4,47 @@ import Command.Structure.*;
 import Minecraft.MinecraftServer;
 import Minecraft.Player;
 import Network.Secret;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * View online players/server info for the Minecraft server
  */
 public class MinecraftServerCommand extends DiscordCommand {
-    private static final String LOGO = "https://i.imgur.com/IoMVICZ.png";
-    private final MinecraftServer minecraftServer;
+    private static final String
+            TRIGGER = "mc",
+            LOGO = "https://i.imgur.com/IoMVICZ.png";
+    private final HashMap<String, MinecraftServer> servers;
+    private final String mainServerAddress;
 
     /**
      * Initialise default Minecraft server
      */
     public MinecraftServerCommand() {
-        super("mc", "View information about the minecraft server!");
-        this.minecraftServer = new MinecraftServer(Secret.MINECRAFT_SERVER_IP, Secret.MINECRAFT_SERVER_PORT);
+        super(
+                TRIGGER,
+                "View information about the minecraft server!",
+                TRIGGER + " [ip:port] | [hostname]"
+        );
+        this.servers = new HashMap<>();
+
+        MinecraftServer mainServer = new MinecraftServer(Secret.MINECRAFT_SERVER_IP, Secret.MINECRAFT_SERVER_PORT);
+        this.mainServerAddress = mainServer.getAddressString();
+        mapServer(mainServer);
+    }
+
+    /**
+     * Map the given server from address String -> server
+     *
+     * @param server Server to map
+     */
+    private void mapServer(MinecraftServer server) {
+        servers.put(server.getAddressString(), server);
     }
 
     @Override
@@ -31,11 +53,42 @@ public class MinecraftServerCommand extends DiscordCommand {
             MessageChannel channel = context.getMessageChannel();
             channel.sendTyping().queue();
 
+            final String serverAddress = context
+                    .getLowerCaseMessage()
+                    .replaceFirst(getTrigger(), "")
+                    .trim();
+
+            MinecraftServer minecraftServer = serverAddress.isEmpty()
+                    ? servers.get(mainServerAddress)
+                    : getServer(serverAddress);
+
             // Attempt to refresh the server data (may still be cached in which case no refresh will occur)
             minecraftServer.refreshServerData();
 
-            displayServerDetails(context);
+            displayServerDetails(context, minecraftServer);
         }).start();
+    }
+
+    /**
+     * Get a minecraft server by address. Retrieve from the map if it is available, otherwise create and map the
+     * server.
+     *
+     * @param serverAddress Server address
+     * @return Minecraft server from address
+     */
+    private MinecraftServer getServer(String serverAddress) {
+        final String[] serverArgs = serverAddress.split(":");
+
+        if(servers.containsKey(serverAddress)) {
+            return servers.get(serverAddress);
+        }
+
+        MinecraftServer server = serverArgs.length == 1
+                ? new MinecraftServer(serverAddress)
+                : new MinecraftServer(serverArgs[0], toInteger(serverArgs[1]));
+
+        mapServer(server);
+        return server;
     }
 
     /**
@@ -43,32 +96,35 @@ public class MinecraftServerCommand extends DiscordCommand {
      * The message will display the server details as well as players.
      *
      * @param context Command context
+     * @param server  Minecraft server to display
      */
-    private void displayServerDetails(CommandContext context) {
-        String footer = "Try: " + getTrigger();
-        Date nextRefresh = minecraftServer.getCacheExpiryDate();
+    private void displayServerDetails(CommandContext context, MinecraftServer server) {
+        String footer = "Try: " + getHelpName();
+        Date nextRefresh = server.getCacheExpiryDate();
         if(nextRefresh != null) {
             footer += " | Next refresh at: "
                     + new SimpleDateFormat("HH:mm:ss").format(nextRefresh);
         }
 
-        final int players = minecraftServer.getPlayers().size();
+        final int players = server.getPlayers().size();
 
         new PageableTableEmbed<Player>(
                 context,
-                minecraftServer.getPlayers(),
+                server.getPlayers(),
                 LOGO,
-                minecraftServer.getDetailsImage(),
-                "Minecraft Server | " + minecraftServer.getAddressString(),
+                server.getDetailsImage(),
+                "Minecraft Server | " + server.getAddressString(),
                 players + " " + (players == 1 ? "Player online, what a loser!" : "Players online:"),
                 footer,
                 new String[]{"Name", "Details"},
                 3,
-                minecraftServer.hasData() ? EmbedHelper.GREEN : EmbedHelper.RED
+                server.hasData() ? EmbedHelper.GREEN : EmbedHelper.RED
         ) {
             @Override
             public String getNoItemsDescription() {
-                return "No players online!";
+
+                // Player list may be empty even when there are players online, check for this
+                return server.getCurrentPlayerCount() == 0 ? "No players online!" : "Player list unavailable!";
             }
 
             @Override
@@ -80,7 +136,7 @@ public class MinecraftServerCommand extends DiscordCommand {
             public String[] getRowValues(int index, Player player, boolean defaultSort) {
                 return new String[]{
                         player.getName(),
-                        EmbedHelper.embedURL("View",player.getDetailsUrl())
+                        EmbedHelper.embedURL("View", player.getDetailsUrl())
                 };
             }
 
@@ -93,5 +149,10 @@ public class MinecraftServerCommand extends DiscordCommand {
                 });
             }
         }.showMessage();
+    }
+
+    @Override
+    public boolean matches(String query, Message message) {
+        return query.startsWith(getTrigger());
     }
 }

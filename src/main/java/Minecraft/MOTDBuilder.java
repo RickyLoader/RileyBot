@@ -6,6 +6,7 @@ import Command.Structure.EmbedHelper;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 import static Command.Structure.ImageBuilder.copyImage;
 
@@ -14,13 +15,18 @@ import static Command.Structure.ImageBuilder.copyImage;
  */
 public class MOTDBuilder {
     private static MOTDBuilder instance = null;
+    private static final String
+            MODIFIER = "§", // Prefix before a MOTD text modifier
+            RESET = "§r", // Reset colour text modifier
+            MODIFIER_REGEX = MODIFIER + "[a-z0-9]"; // Regex to match a modifier
     private static final int
             BORDER = 4, // Border around background image
             LINE_SPACING = 20, // Lines are drawn at every 20 pixels after the border
             SERVER_ICON_SIZE = 64; // Server icons are 64x64
-
+    private static final Color GREY = Color.decode("#AAAAAA");
     public static final int MAX_LINES = 2;
     private final BufferedImage background, offlineIcon, onlineIcon;
+    private final HashMap<String, Color> colours;
 
     /**
      * Initialise the required images & templates for building an MOTD image
@@ -31,6 +37,36 @@ public class MOTDBuilder {
         this.background = resourceHandler.getImageResource(path + "motd_template.png");
         this.offlineIcon = resourceHandler.getImageResource(path + "offline_icon.png");
         this.onlineIcon = resourceHandler.getImageResource(path + "online_icon.png");
+        this.colours = buildColourMap();
+    }
+
+    /**
+     * Build a map of text modifier -> colour.
+     * E.g "§c" -> red
+     *
+     * @return Map of text modifier -> colour
+     * @see <a href="https://minecraft.fandom.com/wiki/Formatting_codes#Color_codes">For colour codes</a>
+     */
+    private HashMap<String, Color> buildColourMap() {
+        HashMap<String, Color> colours = new HashMap<>();
+        colours.put(MODIFIER + "0", Color.BLACK);
+        colours.put(MODIFIER + "1", Color.decode("#0000AA")); // Dark blue
+        colours.put(MODIFIER + "2", Color.decode("#00AA00")); // Dark green
+        colours.put(MODIFIER + "3", Color.decode("#00AAAA")); // Dark aqua
+        colours.put(MODIFIER + "4", Color.decode("#AA0000")); // Dark red
+        colours.put(MODIFIER + "5", Color.decode("#AA00AA")); // Dark purple
+        colours.put(MODIFIER + "6", Color.decode("#FFAA00")); // Gold
+        colours.put(MODIFIER + "7", GREY);
+        colours.put(MODIFIER + "8", Color.decode("#555555")); // Dark grey
+        colours.put(MODIFIER + "9", Color.decode("#5555FF")); // Blue
+        colours.put(MODIFIER + "a", Color.decode("#55FF55")); // Green
+        colours.put(MODIFIER + "b", Color.decode("#55FFFF")); // Aqua
+        colours.put(MODIFIER + "c", Color.decode("#FF5555")); // Red
+        colours.put(MODIFIER + "d", Color.decode("#FF55FF")); // Light purple
+        colours.put(MODIFIER + "e", Color.decode("#FFFF55")); // Yellow
+        colours.put(MODIFIER + "f", Color.WHITE);
+        colours.put(MODIFIER + "g", Color.decode("#DDD605")); // Gold
+        return colours;
     }
 
     /**
@@ -67,13 +103,11 @@ public class MOTDBuilder {
         final int textX = BORDER + SERVER_ICON_SIZE + BORDER;
         final int titleRowY = BORDER + LINE_SPACING;
 
-        g.setColor(Color.WHITE);
-
-        // Draw server name + version e.g "[version] name
+        // Draw server name + version e.g "[version] name"
         final String serverName = "[" + server.getVersion() + "] " + server.getMapName();
-        g.drawString(serverName, textX, titleRowY);
+        drawFormattedText(g, serverName, textX, titleRowY, Color.WHITE);
 
-        g.setColor(Color.decode("#b3adad")); // Grey
+        g.setColor(GREY);
 
         // Draw connection icon
         final BufferedImage connectionIcon = server.isOnline() ? onlineIcon : offlineIcon;
@@ -91,8 +125,7 @@ public class MOTDBuilder {
 
             // Cap MOTD lines at the max lines
             for(int i = 0; i < Math.min(motd.length, MAX_LINES); i++) {
-                String line = motd[i];
-                g.drawString(line, textX, motdY);
+                drawFormattedText(g, motd[i], textX, motdY, GREY);
                 motdY += LINE_SPACING;
             }
         }
@@ -104,5 +137,37 @@ public class MOTDBuilder {
 
         g.dispose();
         return background;
+    }
+
+    /**
+     * Draw text on to the given graphics instance.
+     * Strip and use any colour modifiers in the text.
+     *
+     * @param g             Graphics instance to draw on
+     * @param text          Text to draw
+     * @param x             X co-ordinate for text
+     * @param y             Y co-ordinate for text
+     * @param defaultColour Default colour to use
+     */
+    private void drawFormattedText(Graphics g, String text, int x, int y, Color defaultColour) {
+        final String splitRegex = "(?<=" + MODIFIER_REGEX + ")|(?=" + MODIFIER_REGEX + ")";
+
+        // "§1text1 §2text2" -> [§1, text1, §2, text2]
+        String[] textParts = text.split(splitRegex);
+        g.setColor(defaultColour);
+
+        for(String part : textParts) {
+            if(part.matches(MODIFIER_REGEX)) {
+                Color colour = part.matches(RESET) ? defaultColour : colours.get(part);
+
+                // May be a non colour related modifier
+                if(colour != null) {
+                    g.setColor(colour);
+                }
+                continue;
+            }
+            g.drawString(part, x, y);
+            x += g.getFontMetrics().stringWidth(part);
+        }
     }
 }
