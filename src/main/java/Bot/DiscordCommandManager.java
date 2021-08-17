@@ -200,6 +200,7 @@ public class DiscordCommandManager {
         addCommand(new TikTokCommand());
         addCommand(new R34Command());
         addCommand(new OlympicsCommand());
+        addCommand(new InstagramCommand());
         /* TODO
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());
