@@ -29,9 +29,11 @@ public class StocksCommand extends OnReadyDiscordCommand {
             finnhubBaseUrl = "https://finnhub.io/api/v1/",
             thumbnail = "https://i.imgur.com/HaSlhp2.png";
 
-    private final static String
-            stock = "stock",
-            crypto = "crypto";
+    private static final String
+            ALF_SAD_GIF = "https://media.giphy.com/media/axJZCNO2pnpakVzkOV/giphy.gif",
+            ALF_HAPPY_GIF = "https://media.giphy.com/media/8ibiL6qNFUIuOLxVIG/giphy.gif",
+            STOCK = "stock",
+            CRYPTO = "crypto";
 
     private final ArrayList<Symbol> marketSymbols;
     private boolean stockSymbols = false;
@@ -64,7 +66,7 @@ public class StocksCommand extends OnReadyDiscordCommand {
         super(
                 "$",
                 "Check out some stocks & crypto!",
-                "$[" + stock + "/" + crypto + "] [stock/crypto symbol or search term]"
+                "$[" + STOCK + "/" + CRYPTO + "] [stock/crypto symbol or search term]"
         );
         this.marketSymbols = getMarketSymbols();
     }
@@ -189,12 +191,12 @@ public class StocksCommand extends OnReadyDiscordCommand {
 
         SEARCH_TYPE searchType = SEARCH_TYPE.ALL;
 
-        if(query.startsWith(crypto)) {
-            query = query.replaceFirst(crypto, "").trim();
+        if(query.startsWith(CRYPTO)) {
+            query = query.replaceFirst(CRYPTO, "").trim();
             searchType = SEARCH_TYPE.CRYPTO_ONLY;
         }
-        else if(query.startsWith(stock)) {
-            query = query.replaceFirst(stock, "").trim();
+        else if(query.startsWith(STOCK)) {
+            query = query.replaceFirst(STOCK, "").trim();
             searchType = SEARCH_TYPE.STOCK_ONLY;
         }
 
@@ -275,15 +277,12 @@ public class StocksCommand extends OnReadyDiscordCommand {
 
         Symbol symbol = quote.getSymbol();
         boolean down = quote.getDiff() < 0;
-        String image = symbol.isCrypto()
-                ? down ? "https://i.imgur.com/RGKvAAY.png" : "https://i.imgur.com/PfFFF8P.png"
-                : down ? "https://i.imgur.com/o2ohqxr.png" : "https://i.imgur.com/BNSHZDo.png";
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(symbol.getName() + " (" + symbol.getSymbol() + ")")
                 .setFooter("Try: " + getHelpName())
                 .setThumbnail(symbol.hasLogoUrl() ? symbol.getLogoUrl() : thumbnail)
-                .setImage(image)
+                .setImage(down ? ALF_SAD_GIF : ALF_HAPPY_GIF)
                 .setColor(down ? EmbedHelper.RED : EmbedHelper.GREEN)
                 .addField(
                         "Current Price\n(C)",
