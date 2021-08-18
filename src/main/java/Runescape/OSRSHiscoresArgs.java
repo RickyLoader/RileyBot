@@ -4,7 +4,7 @@ package Runescape;
  * Arguments for searching OSRS hiscores/building hiscores image
  */
 public class OSRSHiscoresArgs extends HiscoresArgs {
-    private final boolean leagueStats, fetchXpGains, fetchAchievements, showBoxes, highlightMaxedSkills;
+    private final boolean leagueStats, fetchXpGains, fetchAchievements, showBoxes, highlightMaxedSkills, bossBackgrounds;
 
     /**
      * Create the hiscores arguments
@@ -15,14 +15,16 @@ public class OSRSHiscoresArgs extends HiscoresArgs {
      * @param fetchAchievements    Fetch player achievements
      * @param showBoxes            Show the individual image boxes in the image
      * @param highlightMaxedSkills Highlight maxed skills as green
+     * @param bossBackgrounds      Show boss lair background image behind boss images
      */
-    public OSRSHiscoresArgs(boolean virtual, boolean leagueStats, boolean fetchXpGains, boolean fetchAchievements, boolean showBoxes, boolean highlightMaxedSkills) {
+    public OSRSHiscoresArgs(boolean virtual, boolean leagueStats, boolean fetchXpGains, boolean fetchAchievements, boolean showBoxes, boolean highlightMaxedSkills, boolean bossBackgrounds) {
         super(virtual);
         this.leagueStats = leagueStats;
         this.fetchXpGains = fetchXpGains;
         this.fetchAchievements = fetchAchievements;
         this.showBoxes = showBoxes;
         this.highlightMaxedSkills = highlightMaxedSkills;
+        this.bossBackgrounds = bossBackgrounds;
     }
 
     /**
@@ -68,5 +70,15 @@ public class OSRSHiscoresArgs extends HiscoresArgs {
      */
     public boolean searchLeagueStats() {
         return leagueStats;
+    }
+
+    /**
+     * Check whether to display a background behind each boss in the boss image, this
+     * background is usually an image of the boss lair.
+     *
+     * @return Show boss backgrounds
+     */
+    public boolean showBossBackgrounds() {
+        return bossBackgrounds;
     }
 }

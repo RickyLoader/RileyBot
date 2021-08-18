@@ -691,9 +691,9 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         Graphics g;
 
-        // Draw boss background (if available)
+        // Draw boss background (if requested & available)
         final BufferedImage bossBackground = boss.getBackgroundImage();
-        if(bossBackground != null) {
+        if(bossBackground != null && args.showBossBackgrounds()) {
             g = row.getGraphics();
             g.drawImage(bossBackground, 0, 0, null);
         }

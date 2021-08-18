@@ -29,7 +29,7 @@ public class OSRSLookupCommand extends LookupCommand {
             TRIGGER = "osrslookup",
             BOSS_HELP = ARGUMENT.BOSSES.getValue() + " " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS;
     public static final String UPLOAD_ERROR_BOSS_IMAGE_URL = "https://i.imgur.com/GE3DI2N.png";
-    private boolean league, virtual, xp, bosses, achievements, showBoxes, max;
+    private boolean league, virtual, xp, bosses, achievements, showBoxes, max, bossBackgrounds;
     private OSRSHiscores hiscores;
 
     private enum ARGUMENT {
@@ -40,6 +40,7 @@ public class OSRSLookupCommand extends LookupCommand {
         ACHIEVEMENTS,
         XP,
         MAX,
+        BOSS_BACKGROUNDS,
         NONE;
 
         /**
@@ -52,6 +53,8 @@ public class OSRSLookupCommand extends LookupCommand {
             switch(this) {
                 case SHOW_BOXES:
                     return "showboxes";
+                case BOSS_BACKGROUNDS:
+                    return "bossbg";
                 default:
                     return this.name().toLowerCase();
             }
@@ -142,7 +145,8 @@ public class OSRSLookupCommand extends LookupCommand {
                 xp,
                 achievements,
                 showBoxes,
-                max
+                max,
+                bossBackgrounds
         );
         MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
@@ -253,6 +257,7 @@ public class OSRSLookupCommand extends LookupCommand {
         showBoxes = false;
         max = false;
         achievements = false;
+        bossBackgrounds = false;
 
         if(query.equals(getTrigger())) {
             return query;
@@ -284,6 +289,10 @@ public class OSRSLookupCommand extends LookupCommand {
                 case MAX:
                     max = true;
                     break;
+                case BOSS_BACKGROUNDS:
+                    bossBackgrounds = true;
+                    break;
+
                 // Don't fetch achievements or xp tracker when doing boss message
                 case BOSSES:
                     bosses = true;
