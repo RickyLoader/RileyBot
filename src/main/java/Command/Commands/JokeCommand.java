@@ -1,20 +1,16 @@
 package Command.Commands;
 
+import Command.Structure.BrockCommand;
 import Command.Structure.CommandContext;
-import Command.Structure.DiscordCommand;
 import Network.NetworkRequest;
-import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.entities.Member;
 import org.json.JSONObject;
 
 import java.util.Random;
 
-import static Network.Secret.BROCK_ID;
-
 /**
  * Get a random dad joke if brock ain't around
  */
-public class JokeCommand extends DiscordCommand {
+public class JokeCommand extends BrockCommand {
     private final Random random = new Random();
     private final String[] brockMessages;
 
@@ -24,13 +20,7 @@ public class JokeCommand extends DiscordCommand {
     }
 
     @Override
-    public void execute(CommandContext context) {
-        Member brock = context.getGuild().getMemberById(BROCK_ID);
-
-        if(brock != null && brock.getOnlineStatus() != OnlineStatus.OFFLINE) {
-            return;
-        }
-
+    protected void onAbsent(CommandContext context) {
         String joke = new JSONObject(
                 new NetworkRequest("https://icanhazdadjoke.com", false).get().body
         ).getString("joke");
@@ -55,7 +45,7 @@ public class JokeCommand extends DiscordCommand {
      * @return Brock messages
      */
     private String[] createBrockMessages() {
-        String mention = "<@" + BROCK_ID + ">";
+        final String mention = getUserMention();
         return new String[]{
                 "For fuck's sake " + mention,
                 "Fine, I'll do it myself",

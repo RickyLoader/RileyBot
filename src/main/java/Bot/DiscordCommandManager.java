@@ -201,6 +201,7 @@ public class DiscordCommandManager {
         addCommand(new R34Command());
         addCommand(new OlympicsCommand());
         addCommand(new InstagramCommand());
+        addCommand(new CovidCommand());
         /* TODO
             addCommand(new FacebookCommand());
             addCommand(new TeamTreesGuessingCommand());

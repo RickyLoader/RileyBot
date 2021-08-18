@@ -15,6 +15,7 @@ public class FontManager {
             WISE_OLD_MAN_FONT,
             RS3_FONT,
             DEAL_OR_NO_DEAL_FONT,
+            WHITEBOARD_FONT,
             MINECRAFT_FONT,
             LEAGUE_FONT;
 
@@ -32,6 +33,7 @@ public class FontManager {
         BLITZ_FONT = registerFont(ResourceHandler.LEAGUE_BASE_PATH + "blitz_font.ttf");
         LEAGUE_FONT = registerFont(ResourceHandler.LEAGUE_BASE_PATH + "league_font.otf");
         MINECRAFT_FONT = registerFont(ResourceHandler.MINECRAFT_BASE_PATH + "font.ttf");
+        WHITEBOARD_FONT = registerFont(ResourceHandler.COVID_BASE_PATH + "marker.ttf");
     }
 
     /**
