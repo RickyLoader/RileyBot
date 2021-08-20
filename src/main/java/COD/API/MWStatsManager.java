@@ -4,9 +4,10 @@ import COD.API.Parsing.MWAPIParser;
 import COD.API.Parsing.MWTrackerParser;
 import COD.PlayerStats.*;
 import Command.Structure.EmbedHelper;
+import TrackerGG.CODTrackerAPI;
 import org.json.JSONObject;
 
-import static COD.API.TrackerAPI.TRACKER_NAME;
+import static TrackerGG.CODTrackerAPI.DOMAIN;
 
 /**
  * Get player Modern Warfare stats
@@ -53,17 +54,17 @@ public class MWStatsManager extends CODStatsManager<MWManager, MWPlayerAssetStat
      * @return Stats response - contains player stats and optionally messages from the API
      */
     public PlayerStatsResponse<MWPlayerAssetStats, MWPlayerStats> fetchPlayerStatsFallback(String name, PLATFORM platform) {
-        final JSONObject playerStats = TrackerAPI.getMWPlayerStatsJson(name, platform);
+        final JSONObject playerStats = CODTrackerAPI.getMWPlayerStatsJson(name, platform);
 
         // URL to view stats in browser
-        final String profileUrl = TrackerAPI.getMWProfileUrl(name, platform);
+        final String profileUrl = CODTrackerAPI.getMWProfileUrl(name, platform);
 
         // No response from tracker
         if(playerStats == null) {
             return new PlayerStatsResponse<>(
                     "No response for: "
                             + EmbedHelper.embedURL(name, profileUrl)
-                            + " on " + TRACKER_NAME + " (platform = " + platform.name() + ")"
+                            + " on " + DOMAIN + " (platform = " + platform.name() + ")"
             );
         }
 
@@ -74,7 +75,7 @@ public class MWStatsManager extends CODStatsManager<MWManager, MWPlayerAssetStat
                         playerStats
                 ),
                 "API down, stats retrieved from "
-                        + EmbedHelper.embedURL(TRACKER_NAME, profileUrl)
+                        + EmbedHelper.embedURL(DOMAIN, profileUrl)
                         + " instead.\n**Some will be missing** because they're lazy."
         );
     }

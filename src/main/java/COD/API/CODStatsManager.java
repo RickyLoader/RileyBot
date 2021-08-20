@@ -37,24 +37,6 @@ public abstract class CODStatsManager<T extends CODManager, V extends PlayerAsse
                 }
             }
         }
-
-        /**
-         * Get the name of the platform as used by cod.tracker.gg
-         *
-         * @return Platform name
-         */
-        public String getTrackerName() {
-            switch(this) {
-                case PSN:
-                    return "psn";
-                case XBOX:
-                    return "xbl";
-                case BATTLE:
-                    return "battlenet";
-                default:
-                    return null;
-            }
-        }
     }
 
     /**

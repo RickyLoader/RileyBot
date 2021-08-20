@@ -3,7 +3,7 @@ package Command.Commands.Lookup;
 import COD.API.CODAPI;
 import COD.API.CODStatsManager;
 import COD.API.CWManager;
-import COD.API.TrackerAPI;
+import TrackerGG.CODTrackerAPI;
 import Command.Structure.MatchHistoryCommand;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -28,6 +28,6 @@ public class CWHistoryCommand extends MatchHistoryCommand {
 
     @Override
     public @Nullable JSONArray getTrackerMatchHistoryJson(String name, CODStatsManager.PLATFORM platform) {
-        return TrackerAPI.getCWMatchHistoryJson(name, platform);
+        return CODTrackerAPI.getCWMatchHistoryJson(name, platform);
     }
 }

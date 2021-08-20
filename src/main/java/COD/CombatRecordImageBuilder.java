@@ -8,6 +8,7 @@ import COD.Assets.*;
 import COD.PlayerStats.*;
 import COD.API.MWManager;
 import Command.Structure.*;
+import TrackerGG.CODTrackerAPI;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,6 @@ import java.util.*;
 import java.util.List;
 
 import static COD.API.CODAPI.API_FAILURE_MESSAGE;
-import static COD.API.TrackerAPI.TRACKER_NAME;
 
 /**
  * Build an image containing the user's Modern Warfare stats
@@ -585,7 +585,7 @@ public class CombatRecordImageBuilder extends ImageBuilder {
             }
 
             // API down, attempt to fall back on COD tracker website
-            loading.updateStage("Failed to contact API, giving " + TRACKER_NAME + " a ring...");
+            loading.updateStage("Failed to contact API, giving " + CODTrackerAPI.DOMAIN + " a ring...");
 
             response = statsManager.fetchPlayerStatsFallback(nameQuery, platform);
 

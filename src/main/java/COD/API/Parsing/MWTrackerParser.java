@@ -2,7 +2,7 @@ package COD.API.Parsing;
 
 import COD.API.CODStatsManager.PLATFORM;
 import COD.API.MWManager;
-import COD.API.TrackerAPI;
+import TrackerGG.CODTrackerAPI;
 import COD.Assets.*;
 import COD.PlayerStats.*;
 import org.json.JSONArray;
@@ -40,11 +40,11 @@ public class MWTrackerParser extends CODTrackerParser<MWManager> {
                 name,
                 platform,
                 parseAssetStats(
-                        playerStats.getJSONArray(TrackerAPI.WEAPONS_KEY),
-                        playerStats.getJSONArray(TrackerAPI.KILLSTREAKS_KEY),
-                        playerStats.getJSONObject(TrackerAPI.COMMENDATIONS_KEY)
+                        playerStats.getJSONArray(CODTrackerAPI.WEAPONS_KEY),
+                        playerStats.getJSONArray(CODTrackerAPI.KILLSTREAKS_KEY),
+                        playerStats.getJSONObject(CODTrackerAPI.COMMENDATIONS_KEY)
                 ),
-                parseBasicStats(playerStats.getJSONObject(TrackerAPI.BASIC_KEY))
+                parseBasicStats(playerStats.getJSONObject(CODTrackerAPI.BASIC_KEY))
         );
     }
 
