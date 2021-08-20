@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
@@ -37,7 +38,9 @@ public class CovidCommand extends BrockCommand {
             ALLOW_NULL_PARAMETER = "allowNull=true",
             BASE_URL = "https://disease.sh/",
             BASE_API_URL = BASE_URL + "v3/covid-19/",
-            WHITEBOARD_FILENAME = "whiteboard.png";
+            WHITEBOARD_FILENAME = "whiteboard.png",
+            MESSAGE_KEY = "message",
+            WHITEBOARD_ENDPOINT = "whiteboard/messages";
 
     // Location of whiteboard in image
     private static final int
@@ -48,10 +51,10 @@ public class CovidCommand extends BrockCommand {
     private final HashMap<String, byte[]> whiteboardImages;
     private final DecimalFormat statFormat;
     private final String[] brockMessages;
-    private final ArrayList<String> whiteboardMessages;
     private final BufferedImage whiteboardImage;
     private final Font font;
     private final Random random;
+    private String lastMessage;
 
     /**
      * Initialise whiteboard images & Brock messages
@@ -70,8 +73,6 @@ public class CovidCommand extends BrockCommand {
         this.statFormat = new DecimalFormat("#,###");
         this.brockMessages = generateBrockMessages();
 
-        this.whiteboardImages = new HashMap<>();
-        this.whiteboardMessages = generateWhiteboardMessages();
         this.whiteboardImage = new ResourceHandler().getImageResource(
                 ResourceHandler.COVID_BASE_PATH + WHITEBOARD_FILENAME
         );
@@ -81,9 +82,12 @@ public class CovidCommand extends BrockCommand {
         affineTransform.rotate(Math.toRadians(4), 0, 0);
         this.font = FontManager.WHITEBOARD_FONT.deriveFont(20f).deriveFont(affineTransform);
 
-        // Cache whiteboard images
+        // Create and store an image for each stored message
+        this.whiteboardImages = new HashMap<>();
+        ArrayList<String> whiteboardMessages = fetchStoredMessages();
+
         for(String message : whiteboardMessages) {
-            buildWhiteboardImage(message);
+            mapMessage(message);
         }
     }
 
@@ -104,27 +108,39 @@ public class CovidCommand extends BrockCommand {
     }
 
     /**
-     * Create a list of messages talking to Brock to be used in the whiteboard image.
+     * Fetch the list of stored messages talking to Brock to be used in the whiteboard image.
      *
-     * @return Whiteboard messages
+     * @return Stored whiteboard messages
      */
-    private ArrayList<String> generateWhiteboardMessages() {
-        return new ArrayList<>(
-                Arrays.asList(
-                        "I miss you Brock",
-                        "Where are you Brock?",
-                        "Cum back Brock!",
-                        "<-- Not Brock",
-                        "<-- Orange",
-                        "<-- I'm with cunt",
-                        "Where is Brock?",
-                        "Brock Brock Brock Brock Brock Brock Brock Brock Brock Brock Brock Brock",
-                        "That's a lot of damage",
-                        "Slobber up those vaccines!",
-                        "Pump those numbers up",
-                        "Brock could have prevented this"
-                )
-        );
+    private ArrayList<String> fetchStoredMessages() {
+        NetworkResponse response = new NetworkRequest(WHITEBOARD_ENDPOINT, true).get();
+        JSONArray messageArray = new JSONArray(response.body);
+
+        ArrayList<String> storedMessages = new ArrayList<>();
+        for(int i = 0; i < messageArray.length(); i++) {
+            storedMessages.add(messageArray.getJSONObject(i).getString(MESSAGE_KEY));
+        }
+        return storedMessages;
+    }
+
+    /**
+     * Map the given message to an image of Alf holding a whiteboard with the message on it
+     *
+     * @param message Message to map
+     */
+    private void mapMessage(String message) {
+        byte[] image = buildWhiteboardImage(message);
+        whiteboardImages.put(message, image);
+    }
+
+    /**
+     * Store the given message in the database asynchronously (who cares if it fails)
+     *
+     * @param message Message to store
+     */
+    private void storeMessage(String message) {
+        final String body = new JSONObject().put(MESSAGE_KEY, message).toString();
+        new NetworkRequest(WHITEBOARD_ENDPOINT, true).post(body, true);
     }
 
     @Override
@@ -153,15 +169,25 @@ public class CovidCommand extends BrockCommand {
 
             channel.sendTyping().queue();
 
-            // Add to the pool and send an example of what it will look like (also caches)
-            whiteboardMessages.add(message);
-            byte[] exampleImage = buildWhiteboardImage(message);
+            String createImageDetails;
 
+            if(whiteboardImages.containsKey(message)) {
+                createImageDetails = "I've already got that message, here's what it looks like:";
+            }
+
+            // Create and map an image to this message, submit to database
+            else {
+                mapMessage(message);
+                storeMessage(message);
+                createImageDetails = "I added your message to the possibilities, here's what it will look like:";
+            }
+
+            // Show what the image looks like
             channel.sendMessage(
                     context.getMember().getAsMention()
-                            + " I added your message to the possibilities, here's what it will look like:"
+                            + " " + createImageDetails
             )
-                    .addFile(exampleImage, WHITEBOARD_FILENAME).queue();
+                    .addFile(whiteboardImages.get(message), WHITEBOARD_FILENAME).queue();
             return;
         }
 
@@ -192,29 +218,37 @@ public class CovidCommand extends BrockCommand {
         // Parse stats (includes making a request for vaccine doses)
         CovidStats covidStats = parseCovidStats(countryData, yesterday);
 
-        // Build whiteboard image
-        final String whiteboardMessage = whiteboardMessages.get(random.nextInt(whiteboardMessages.size()));
-
         channel.sendMessage(buildCovidMessage(covidStats))
-                .addFile(buildWhiteboardImage(whiteboardMessage), WHITEBOARD_FILENAME)
+                .addFile(getRandomWhiteboardImage(), WHITEBOARD_FILENAME)
                 .queue();
+    }
+
+    /**
+     * Get a random whiteboard image to display. Remember the last message that was displayed as to not
+     * display it twice in a row.
+     *
+     * @return Random whiteboard image
+     */
+    private byte[] getRandomWhiteboardImage() {
+        final ArrayList<String> keys = new ArrayList<>(whiteboardImages.keySet());
+        String message = null;
+
+        while(message == null || message.equals(lastMessage)) {
+            message = keys.get(random.nextInt(keys.size()));
+        }
+
+        lastMessage = message;
+        return whiteboardImages.get(message);
     }
 
     /**
      * Build an image of Alf in a hazmat suit holding a whiteboard.
      * Draw the given message on to the whiteboard.
-     * Images will only be built once for each message (they will be mapped to the message).
      *
      * @param message Message to draw on the whiteboard
      * @return Byte array of Alf whiteboard image
      */
     private byte[] buildWhiteboardImage(String message) {
-
-        // May have built this image before
-        if(whiteboardImages.containsKey(message)) {
-            return whiteboardImages.get(message);
-        }
-
         BufferedImage whiteboardImage = ImageBuilder.copyImage(this.whiteboardImage);
         Graphics g = whiteboardImage.getGraphics();
 
@@ -237,6 +271,7 @@ public class CovidCommand extends BrockCommand {
                 currentWord = fitStringToWidth(currentWord, fm, whiteboardWidth);
             }
 
+            // Check if the current word can be added to what has built up without going off the whiteboard
             String currentLine = (messageBuilder + " " + currentWord).trim();
 
             // Draw what is built up so far and reset
@@ -246,6 +281,8 @@ public class CovidCommand extends BrockCommand {
                         whiteboardMid - (fm.stringWidth(messageBuilder) / 2),
                         y
                 );
+
+                // Reset the current line
                 currentLine = currentWord;
                 y += fm.getMaxAscent();
             }
@@ -263,10 +300,7 @@ public class CovidCommand extends BrockCommand {
 
         g.dispose();
 
-        // Map resulting image
-        byte[] result = ImageLoadingMessage.imageToByteArray(whiteboardImage);
-        whiteboardImages.put(message, result);
-        return result;
+        return ImageLoadingMessage.imageToByteArray(whiteboardImage);
     }
 
     /**
