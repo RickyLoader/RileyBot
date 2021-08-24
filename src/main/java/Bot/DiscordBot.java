@@ -2,9 +2,10 @@ package Bot;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 /**
  * Main class, start the bot and apply listener
@@ -35,7 +36,8 @@ public class DiscordBot {
     private static void login(String token, Listener listener) {
         try {
             JDABuilder
-                    .create(token,
+                    .create(
+                            token,
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_VOICE_STATES,
@@ -43,7 +45,8 @@ public class DiscordBot {
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
                             GatewayIntent.GUILD_PRESENCES
                     )
-                    .setActivity(Activity.watching("the Hangman championship"))
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
+                    .enableCache(CacheFlag.ACTIVITY)
                     .addEventListeners(listener)
                     .build();
         }
@@ -53,7 +56,7 @@ public class DiscordBot {
     }
 
     /**
-     * Get the name of a loan user
+     * Get the name of a user by the given user ID
      *
      * @param jda    JDA for resolving user
      * @param userId ID of user to get name for

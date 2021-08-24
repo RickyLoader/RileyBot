@@ -7,9 +7,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
-import net.dv8tion.jda.api.interactions.button.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +62,7 @@ public class Poll {
         this.redBar = createProgressBar(emoteHelper.getRedProgressBar());
         this.yellowBar = createProgressBar(emoteHelper.getYellowProgressBar());
         this.greenBar = createProgressBar(emoteHelper.getGreenProgressBar());
-        this.winning = Emoji.ofEmote(emoteHelper.getTrophy());
+        this.winning = Emoji.fromEmote(emoteHelper.getTrophy());
         jda.addEventListener(new ButtonListener() {
             @Override
             public void handleButtonClick(@NotNull ButtonClickEvent event) {

@@ -1,6 +1,6 @@
 package Command.Structure;
 
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.Button;
 
 import java.util.ArrayList;
 import java.util.List;

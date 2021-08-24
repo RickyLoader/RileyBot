@@ -7,8 +7,8 @@ import COD.Match.Score;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.button.Button;
-import net.dv8tion.jda.api.interactions.button.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 
 import java.util.*;
@@ -49,21 +49,21 @@ public class PageableMatchHistoryEmbed extends PageableTableEmbed<MatchStats> {
                 "Maps",
                 ButtonStyle.PRIMARY,
                 false,
-                Emoji.ofEmote(emoteHelper.getMapBreakdown())
+                Emoji.fromEmote(emoteHelper.getMapBreakdown())
         );
         this.modes = new ButtonImpl(
                 "modes",
                 "Modes",
                 ButtonStyle.PRIMARY,
                 false,
-                Emoji.ofEmote(emoteHelper.getModeBreakdown())
+                Emoji.fromEmote(emoteHelper.getModeBreakdown())
         );
         this.goBack = new ButtonImpl(
                 "back",
                 "Return",
                 ButtonStyle.DANGER,
                 false,
-                Emoji.ofEmote(emoteHelper.getBackward())
+                Emoji.fromEmote(emoteHelper.getBackward())
         );
         this.matchHistory = matchHistory;
         this.gameName = gameName;

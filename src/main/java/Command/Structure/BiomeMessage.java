@@ -4,7 +4,7 @@ import Valheim.Wiki.ValheimBiome;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -28,9 +28,9 @@ public class BiomeMessage extends ValheimMessage {
         super(biome, context, footer);
         this.biome = biome;
         EmoteHelper emoteHelper = context.getEmoteHelper();
-        this.creatures = Button.success("creatures", Emoji.ofEmote(emoteHelper.getCreatures()));
-        this.pointOfInterest = Button.success("interest", Emoji.ofEmote(emoteHelper.getPointOfInterest()));
-        this.resources = Button.success("resources", Emoji.ofEmote(emoteHelper.getResources()));
+        this.creatures = Button.success("creatures", Emoji.fromEmote(emoteHelper.getCreatures()));
+        this.pointOfInterest = Button.success("interest", Emoji.fromEmote(emoteHelper.getPointOfInterest()));
+        this.resources = Button.success("resources", Emoji.fromEmote(emoteHelper.getResources()));
     }
 
     @Override

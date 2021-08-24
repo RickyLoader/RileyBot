@@ -3,10 +3,10 @@ package Command.Structure;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.UpdateAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.UpdateInteractionAction;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -40,8 +40,8 @@ public abstract class PageableEmbed<T> {
         this.bound = bound;
         this.pages = items.size() <= bound ? 1 : (int) Math.ceil(items.size() / (double) bound);
         this.emoteHelper = context.getEmoteHelper();
-        this.forward = Button.success("forward", Emoji.ofEmote(emoteHelper.getForward()));
-        this.backward = Button.success("backward", Emoji.ofEmote(emoteHelper.getBackward()));
+        this.forward = Button.success("forward", Emoji.fromEmote(emoteHelper.getForward()));
+        this.backward = Button.success("backward", Emoji.fromEmote(emoteHelper.getBackward()));
 
         context.getJDA().addEventListener(new ButtonListener() {
             @Override
@@ -200,7 +200,7 @@ public abstract class PageableEmbed<T> {
      * @param event Event to acknowledge
      */
     private void updateMessage(ButtonClickEvent event) {
-        UpdateAction updateMessage = event.deferEdit().setEmbeds(buildMessage());
+        UpdateInteractionAction updateMessage = event.deferEdit().setEmbeds(buildMessage());
         ActionRow buttonRow = getButtonRow();
         if(buttonRow != null) {
             updateMessage = updateMessage.setActionRows(buttonRow);

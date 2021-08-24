@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.UpdateAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.UpdateInteractionAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
@@ -145,7 +145,7 @@ public class YuGiOhCommand extends OnReadyDiscordCommand {
     private void updateCardImage(ButtonClickEvent event) {
         Card card = cardMessages.get(event.getMessageIdLong());
         card.updateImage();
-        UpdateAction updateAction = event.deferEdit().setEmbeds(buildCardMessage(card));
+        UpdateInteractionAction updateAction = event.deferEdit().setEmbeds(buildCardMessage(card));
         if(card.hasMultipleImages()) {
             updateAction = updateAction.setActionRows(ActionRow.of(switchImage));
         }
@@ -161,7 +161,7 @@ public class YuGiOhCommand extends OnReadyDiscordCommand {
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
         this.upvote = emoteHelper.getUpvote().getAsMention();
         this.downvote = emoteHelper.getDownvote().getAsMention();
-        this.switchImage = Button.primary(switchImageId, Emoji.ofEmote(emoteHelper.getNextImage()));
+        this.switchImage = Button.primary(switchImageId, Emoji.fromEmote(emoteHelper.getNextImage()));
         jda.addEventListener(new ButtonListener() {
             @Override
             public void handleButtonClick(@NotNull ButtonClickEvent event) {

@@ -1,7 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public abstract class PageableSortEmbed<T> extends PageableEmbed<T> {
      */
     public PageableSortEmbed(CommandContext context, List<T> items, int bound) {
         super(context, items, bound);
-        this.reverse = Button.primary("reverse", Emoji.ofEmote(getEmoteHelper().getReverse()));
+        this.reverse = Button.primary("reverse", Emoji.fromEmote(getEmoteHelper().getReverse()));
         sortItems(items, defaultSort);
     }
 

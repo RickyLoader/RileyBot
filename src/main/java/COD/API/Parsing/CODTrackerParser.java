@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static TrackerGG.TrackerAPI.METADATA_KEY;
+
 /**
  * Parsing player data from cod.tracker.gg JSON
  */
@@ -22,7 +24,6 @@ public class CODTrackerParser<T extends CODManager> extends CODParser<T> {
     static final String
             ATTRIBUTES_KEY = "attributes",
             STATS_KEY = "stats",
-            METADATA_KEY = "metadata",
             SEGMENTS_KEY = "segments",
             RESULT_KEY = "hasWon",
             VALUE_KEY = "value";

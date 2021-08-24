@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -758,8 +758,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
     @Override
     public void onReady(JDA jda, EmoteHelper emoteHelper) {
         this.emoteHelper = emoteHelper;
-        this.stats = Button.primary(STATS_BUTTON_ID, Emoji.ofEmote(emoteHelper.getStats()));
-        this.loadouts = Button.primary("loadouts", Emoji.ofEmote(emoteHelper.getLoadouts()));
+        this.stats = Button.primary(STATS_BUTTON_ID, Emoji.fromEmote(emoteHelper.getStats()));
+        this.loadouts = Button.primary("loadouts", Emoji.fromEmote(emoteHelper.getLoadouts()));
         jda.addEventListener(getMatchButtonListener());
     }
 

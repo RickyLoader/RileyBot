@@ -5,9 +5,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
-import net.dv8tion.jda.api.interactions.button.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.internal.interactions.ButtonImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -96,14 +96,14 @@ public class BrewTrackerCommand extends OnReadyDiscordCommand {
                     "Add Beer",
                     ButtonStyle.SUCCESS,
                     false,
-                    Emoji.ofEmote(emoteHelper.getAddBeer())
+                    Emoji.fromEmote(emoteHelper.getAddBeer())
             );
             this.decrement = new ButtonImpl(
                     "decrement",
                     "Remove Beer",
                     ButtonStyle.DANGER,
                     false,
-                    Emoji.ofEmote(emoteHelper.getSubtractBeer())
+                    Emoji.fromEmote(emoteHelper.getSubtractBeer())
             );
             this.emptyBeer = emoteHelper.getEmptyBeer();
             sendMessage(getEmbed());

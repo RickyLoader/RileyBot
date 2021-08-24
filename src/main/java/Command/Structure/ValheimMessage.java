@@ -5,10 +5,10 @@ import Valheim.Wiki.ValheimWikiAsset;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.UpdateAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.UpdateInteractionAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public abstract class ValheimMessage {
         this.emoteHelper = context.getEmoteHelper();
         this.channel = context.getMessageChannel();
         this.footer = footer;
-        this.home = Button.success("home", Emoji.ofEmote(emoteHelper.getHome()));
+        this.home = Button.success("home", Emoji.fromEmote(emoteHelper.getHome()));
         this.lastButtonId = home.getId();
 
         context.getJDA().addEventListener(new ButtonListener() {
@@ -153,7 +153,7 @@ public abstract class ValheimMessage {
      * @param event          Button click event to acknowledge
      */
     private void updateMessage(MessageEmbed updatedContent, ButtonClickEvent event) {
-        UpdateAction updateAction = event.deferEdit().setEmbeds(updatedContent);
+        UpdateInteractionAction updateAction = event.deferEdit().setEmbeds(updatedContent);
         if(hasButtons()) {
             updateAction = updateAction.setActionRows(getButtonRow());
         }

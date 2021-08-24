@@ -12,8 +12,8 @@ import java.util.*;
 
 import COD.Gunfight.GameStatus.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 
 /**
  * Interactive win/loss tracker for Modern Warfare - use buttons to track score and submit to leaderboard
@@ -51,8 +51,8 @@ public class Gunfight {
         this.callback = callback;
         this.win = Button.success("win", "Victory");
         this.loss = Button.danger("loss", "Defeat");
-        this.stop = Button.danger("stop", Emoji.ofEmote(emoteHelper.getStopWhite()));
-        this.undo = Button.primary("undo", Emoji.ofEmote(emoteHelper.getUndo()));
+        this.stop = Button.danger("stop", Emoji.fromEmote(emoteHelper.getStopWhite()));
+        this.undo = Button.primary("undo", Emoji.fromEmote(emoteHelper.getUndo()));
     }
 
     /**

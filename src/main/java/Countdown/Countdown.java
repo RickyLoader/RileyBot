@@ -14,7 +14,7 @@ public class Countdown {
      *
      * @param period Millisecond period to create countdown for
      */
-    private Countdown(long period) {
+    public Countdown(long period) {
         this.timeMs = period;
         this.totalSeconds = period / 1000;
         this.totalMinutes = totalSeconds / 60;
@@ -28,7 +28,7 @@ public class Countdown {
     }
 
     /**
-     * Create a Countdown until the current time in ms
+     * Create a Countdown between the given times in ms
      *
      * @param from From time in ms
      * @param to   To time in ms

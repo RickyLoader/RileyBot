@@ -98,9 +98,9 @@
             <version>1.47.0.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.DV8FromTheWorld</groupId>
+            <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>f957801</version>
+            <version>4.3.0_277</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

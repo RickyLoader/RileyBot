@@ -6,8 +6,8 @@ import Network.NetworkRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.ActionRow;
-import net.dv8tion.jda.api.interactions.button.Button;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
@@ -60,10 +60,10 @@ public class MillionaireGameshow {
      */
     private HashMap<String, Button> getAnswerButtons(EmoteHelper emoteHelper) {
         HashMap<String, Button> answerButtons = new HashMap<>();
-        Button a = Button.success("A:", Emoji.ofEmote(emoteHelper.getMillionaireOptionA()));
-        Button b = Button.success("B:", Emoji.ofEmote(emoteHelper.getMillionaireOptionB()));
-        Button c = Button.success("C:", Emoji.ofEmote(emoteHelper.getMillionaireOptionC()));
-        Button d = Button.success("D:", Emoji.ofEmote(emoteHelper.getMillionaireOptionD()));
+        Button a = Button.success("A:", Emoji.fromEmote(emoteHelper.getMillionaireOptionA()));
+        Button b = Button.success("B:", Emoji.fromEmote(emoteHelper.getMillionaireOptionB()));
+        Button c = Button.success("C:", Emoji.fromEmote(emoteHelper.getMillionaireOptionC()));
+        Button d = Button.success("D:", Emoji.fromEmote(emoteHelper.getMillionaireOptionD()));
         answerButtons.put(a.getId(), a);
         answerButtons.put(b.getId(), b);
         answerButtons.put(c.getId(), c);
