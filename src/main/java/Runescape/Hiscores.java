@@ -10,8 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashSet;
 
-public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> extends ImageBuilder {
+public abstract class Hiscores<T extends Enum<T>, S extends PlayerStats> extends ImageBuilder {
     private final String helpMessage;
     private boolean timeout = false;
 
@@ -120,7 +121,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param args Hiscores arguments
      * @return default URL to display in loading
      */
-    public abstract String getDefaultURL(String name, T args);
+    public abstract String getDefaultURL(String name, HashSet<T> args);
 
     /**
      * Fetch the player data from the hiscores.
@@ -132,7 +133,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @return Player data
      */
     @Nullable
-    protected abstract S fetchPlayerData(String name, T args, ImageLoadingMessage... loadingMessage);
+    protected abstract S fetchPlayerData(String name, HashSet<T> args, ImageLoadingMessage... loadingMessage);
 
     /**
      * Fetch the player data from the hiscores.
@@ -146,7 +147,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param loadingMessage Optional loading message
      * @return Hiscores stats response
      */
-    public HiscoresStatsResponse<S> getHiscoresStatsResponse(String name, T args, ImageLoadingMessage... loadingMessage) {
+    public HiscoresStatsResponse<S> getHiscoresStatsResponse(String name, HashSet<T> args, ImageLoadingMessage... loadingMessage) {
         return new HiscoresStatsResponse<>(name, fetchPlayerData(name, args, loadingMessage), timeout);
     }
 
@@ -199,18 +200,17 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param args Hiscores arguments
      * @return Player not found error message
      */
-    public abstract String getNotFoundMessage(String name, T args);
+    public abstract String getNotFoundMessage(String name, HashSet<T> args);
 
     /**
      * Look a player up on the hiscores and build an image displaying their skills.
      * Send this message to the provided channel.
      * During this process, update a loading message within the channel to indicate the current progress.
-     *
-     * @param nameQuery Player name
+     *  @param nameQuery Player name
      * @param channel   Channel to send the image to
      * @param args      Arguments for building image/looking up stats
      */
-    public void buildImage(String nameQuery, MessageChannel channel, T args) {
+    public void buildImage(String nameQuery, MessageChannel channel, HashSet<T> args) {
         String defaultURL = getDefaultURL(nameQuery, args);
         ArrayList<String> loadingCriteria = getLoadingCriteria(args);
         loadingCriteria.add("Building image...");
@@ -258,7 +258,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param args Hiscores arguments
      * @return Loading message title
      */
-    public abstract String getLoadingTitle(String name, T args);
+    public abstract String getLoadingTitle(String name, HashSet<T> args);
 
     /**
      * Get the thumbnail to be used in the loading message
@@ -266,7 +266,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param args Hiscores arguments
      * @return Loading message thumbnail
      */
-    public abstract String getLoadingThumbnail(T args);
+    public abstract String getLoadingThumbnail(HashSet<T> args);
 
     /**
      * Get the loading criteria to use
@@ -274,7 +274,7 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param args Hiscores arguments
      * @return Loading criteria
      */
-    public abstract ArrayList<String> getLoadingCriteria(T args);
+    public abstract ArrayList<String> getLoadingCriteria(HashSet<T> args);
 
     /**
      * Build the hiscores image
@@ -284,5 +284,5 @@ public abstract class Hiscores<T extends HiscoresArgs, S extends PlayerStats> ex
      * @param loadingMessage Optional loading message
      * @return Hiscores image
      */
-    public abstract BufferedImage buildHiscoresImage(S playerStats, T args, ImageLoadingMessage... loadingMessage);
+    public abstract BufferedImage buildHiscoresImage(S playerStats, HashSet<T> args, ImageLoadingMessage... loadingMessage);
 }

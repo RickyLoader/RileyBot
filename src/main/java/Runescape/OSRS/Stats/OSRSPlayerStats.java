@@ -114,15 +114,6 @@ public class OSRSPlayerStats extends PlayerStats {
     }
 
     /**
-     * Check if the stats are from a league
-     *
-     * @return Stats are from a league
-     */
-    public boolean isLeague() {
-        return getAccountType() == PlayerStats.ACCOUNT.LEAGUE;
-    }
-
-    /**
      * Get a list of boss stats in order of kill count
      *
      * @return Player boss stats

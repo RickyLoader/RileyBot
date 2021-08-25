@@ -21,7 +21,7 @@ public abstract class PlayerStats {
     public static final int UNRANKED = -1;
 
     public enum ACCOUNT {
-        NORMAL, IRON, ULTIMATE, LEAGUE, HARDCORE
+        NORMAL, IRON, ULTIMATE, LEAGUE, HARDCORE, DMM
     }
 
     /**

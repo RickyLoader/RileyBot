@@ -8,7 +8,6 @@ import Runescape.OSRS.Boss.BossStats;
 import Runescape.HiscoresStatsResponse;
 import Runescape.OSRS.Stats.OSRSHiscores;
 import Runescape.OSRS.Stats.OSRSPlayerStats;
-import Runescape.OSRSHiscoresArgs;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
@@ -19,6 +18,7 @@ import net.dv8tion.jda.api.entities.User;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -29,11 +29,12 @@ public class OSRSLookupCommand extends LookupCommand {
             TRIGGER = "osrslookup",
             BOSS_HELP = ARGUMENT.BOSSES.getValue() + " " + TRIGGER + " " + DEFAULT_LOOKUP_ARGS;
     public static final String UPLOAD_ERROR_BOSS_IMAGE_URL = "https://i.imgur.com/GE3DI2N.png";
-    private boolean league, virtual, xp, bosses, achievements, showBoxes, max, bossBackgrounds;
+    private final HashSet<ARGUMENT> arguments;
     private OSRSHiscores hiscores;
 
-    private enum ARGUMENT {
+    public enum ARGUMENT {
         LEAGUE,
+        DMM,
         BOSSES,
         VIRTUAL,
         SHOW_BOXES,
@@ -127,6 +128,7 @@ public class OSRSLookupCommand extends LookupCommand {
                         + "\n\n*Arguments:\n\n" + ARGUMENT.getHelpMessage() + "\n\nCan use multiple (space separated)",
                 12
         );
+        this.arguments = new HashSet<>();
     }
 
     @Override
@@ -139,21 +141,12 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
-        OSRSHiscoresArgs args = new OSRSHiscoresArgs(
-                virtual,
-                league,
-                xp,
-                achievements,
-                showBoxes,
-                max,
-                bossBackgrounds
-        );
         MessageChannel channel = context.getMessageChannel();
         Member member = context.getMember();
 
-        if(bosses) {
+        if(arguments.contains(ARGUMENT.BOSSES)) {
             channel.sendTyping().queue();
-            HiscoresStatsResponse<OSRSPlayerStats> response = hiscores.getHiscoresStatsResponse(name, args);
+            HiscoresStatsResponse<OSRSPlayerStats> response = hiscores.getHiscoresStatsResponse(name, arguments);
             OSRSPlayerStats stats = response.getStats();
             if(stats == null) {
                 if(response.requestFailed()) {
@@ -170,13 +163,13 @@ public class OSRSLookupCommand extends LookupCommand {
                 }
                 return;
             }
-            displayPageableBossMessage(context, stats, args);
+            displayPageableBossMessage(context, stats, arguments);
         }
         else {
             hiscores.buildImage(
                     name,
                     context.getMessageChannel(),
-                    args
+                    arguments
             );
         }
     }
@@ -188,7 +181,7 @@ public class OSRSLookupCommand extends LookupCommand {
      * @param playerStats Player stats
      * @param args        Hiscores arguments
      */
-    private void displayPageableBossMessage(CommandContext context, OSRSPlayerStats playerStats, OSRSHiscoresArgs args) {
+    private void displayPageableBossMessage(CommandContext context, OSRSPlayerStats playerStats, HashSet<ARGUMENT> args) {
         final HashMap<Integer, String> pageImages = new HashMap<>(); // page -> page image URL
         final List<BossStats> bossStats = playerStats.getBossStats();
 
@@ -250,15 +243,9 @@ public class OSRSLookupCommand extends LookupCommand {
 
     @Override
     public String stripArguments(String query) {
-        league = false;
-        virtual = false;
-        xp = false;
-        bosses = false;
-        showBoxes = false;
-        max = false;
-        achievements = false;
-        bossBackgrounds = false;
+        arguments.clear();
 
+        // No args
         if(query.equals(getTrigger())) {
             return query;
         }
@@ -270,36 +257,21 @@ public class OSRSLookupCommand extends LookupCommand {
 
         for(String arg : args) {
             ARGUMENT argument = ARGUMENT.getArgument(arg);
+
             switch(argument) {
-                case SHOW_BOXES:
-                    showBoxes = true;
+                case BOSSES:
+                    arguments.remove(ARGUMENT.ACHIEVEMENTS);
+                    arguments.remove(ARGUMENT.XP);
                     break;
                 case LEAGUE:
-                    league = true;
+                    arguments.remove(ARGUMENT.DMM);
                     break;
-                case ACHIEVEMENTS:
-                    achievements = true;
-                    break;
-                case VIRTUAL:
-                    virtual = true;
-                    break;
-                case XP:
-                    xp = true;
-                    break;
-                case MAX:
-                    max = true;
-                    break;
-                case BOSS_BACKGROUNDS:
-                    bossBackgrounds = true;
-                    break;
-
-                // Don't fetch achievements or xp tracker when doing boss message
-                case BOSSES:
-                    bosses = true;
-                    achievements = false;
-                    xp = false;
+                case DMM:
+                    arguments.remove(ARGUMENT.LEAGUE);
                     break;
             }
+
+            arguments.add(argument);
             query = query.replaceFirst(arg, "").trim();
         }
         return query;

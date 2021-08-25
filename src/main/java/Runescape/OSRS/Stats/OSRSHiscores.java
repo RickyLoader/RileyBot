@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
+import static Command.Commands.Lookup.OSRSLookupCommand.*;
 import static Runescape.Hiscores.LOADING_UPDATE_TYPE.*;
 import static Runescape.OSRS.League.LeagueTier.*;
 import static Runescape.Skill.SKILL_NAME.*;
@@ -42,14 +43,16 @@ import static Runescape.Stats.WiseOldMan.TrackerResponse.XP_KEY;
 /**
  * Build an image displaying a player's OSRS stats
  */
-public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
+public class OSRSHiscores extends Hiscores<ARGUMENT, OSRSPlayerStats> {
     private final BOSS_ID[] bossIds;
     private final BossManager bossManager;
-    public static final String LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png";
     private final Font trackerFont;
     private final String displayFormatDate = "dd/MM/yyyy";
     private final Color redOverlay, greenOverlay, blackOverlay, dark, light;
     private static final float STANDARD_FONT_SIZE = 65;
+    public static final String
+            LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png",
+            DMM_THUMBNAIL = "https://i.imgur.com/O2HpIt3.png";
 
     public static final int
             MAX_BOSSES = 5,
@@ -126,12 +129,15 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    public ArrayList<String> getLoadingCriteria(OSRSHiscoresArgs args) {
+    public ArrayList<String> getLoadingCriteria(HashSet<ARGUMENT> args) {
         ArrayList<String> criteria = new ArrayList<>();
-        if(args.searchLeagueStats()) {
+        if(args.contains(ARGUMENT.LEAGUE)) {
             criteria.add("Player has League stats...");
             criteria.add("Player has stored Relic/Region data...");
             criteria.add("Calculating League Tier...");
+        }
+        else if(args.contains(ARGUMENT.DMM)) {
+            criteria.add("Player has DMM stats...");
         }
         else {
             criteria.add("Player exists...");
@@ -150,13 +156,26 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    public String getLoadingTitle(String name, OSRSHiscoresArgs args) {
-        return "OSRS " + (args.searchLeagueStats() ? "League" : "Hiscores") + " lookup: " + name.toUpperCase();
+    public String getLoadingTitle(String name, HashSet<ARGUMENT> args) {
+        String lookupPrefix = "Hiscores";
+        if(args.contains(ARGUMENT.LEAGUE)) {
+            lookupPrefix = "league";
+        }
+        else if(args.contains(ARGUMENT.DMM)) {
+            lookupPrefix = "DMM";
+        }
+        return "OSRS " + lookupPrefix + " lookup: " + name.toUpperCase();
     }
 
     @Override
-    public String getLoadingThumbnail(OSRSHiscoresArgs args) {
-        return args.searchLeagueStats() ? LEAGUE_THUMBNAIL : EmbedHelper.OSRS_LOGO;
+    public String getLoadingThumbnail(HashSet<ARGUMENT> args) {
+        if(args.contains(ARGUMENT.LEAGUE)){
+            return LEAGUE_THUMBNAIL;
+        }
+        else if(args.contains(ARGUMENT.DMM)){
+            return DMM_THUMBNAIL;
+        }
+        return EmbedHelper.OSRS_LOGO;
     }
 
     /**
@@ -208,13 +227,27 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    public String getDefaultURL(String name, OSRSHiscoresArgs args) {
-        return args.searchLeagueStats() ? getLeagueAccount(name) : getNormalAccount(name);
+    public String getDefaultURL(String name, HashSet<ARGUMENT> args) {
+        if(args.contains(ARGUMENT.LEAGUE)) {
+            return getLeagueAccount(name);
+        }
+        else if(args.contains(ARGUMENT.DMM)) {
+            return getDeadmanAccount(name);
+        }
+        return getNormalAccount(name);
     }
 
     @Override
-    public String getNotFoundMessage(String name, OSRSHiscoresArgs args) {
-        return args.searchLeagueStats() ? "isn't on the league hiscores" : "doesn't exist cunt";
+    public String getNotFoundMessage(String name, HashSet<ARGUMENT> args) {
+        if(args.contains(ARGUMENT.LEAGUE)) {
+            return "isn't on the league hiscores";
+        }
+        else if(args.contains(ARGUMENT.DMM)) {
+            return "isn't on the DMM hiscores";
+        }
+        else {
+            return "doesn't exist cunt";
+        }
     }
 
     /**
@@ -226,6 +259,16 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      */
     private String getLeagueAccount(String name) {
         return getURL("_seasonal", name);
+    }
+
+    /**
+     * Get the URL to request an account's deadman stats from the hiscores.
+     *
+     * @param name Player name
+     * @return URL to deadman account hiscores CSV
+     */
+    private String getDeadmanAccount(String name) {
+        return getURL("_tournament", name);
     }
 
     /**
@@ -251,6 +294,9 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                 break;
             case HARDCORE:
                 url = getHardcoreAccount(name);
+                break;
+            case DMM:
+                url = getDeadmanAccount(name);
                 break;
 
             // ULTIMATE
@@ -330,10 +376,27 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @return Player stats object
      */
     @Nullable
-    private OSRSPlayerStats fetchStats(String name, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    private OSRSPlayerStats fetchStats(String name, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
+        PlayerStats.ACCOUNT type;
+
+        // Fetch league stats
+        if(args.contains(ARGUMENT.LEAGUE)) {
+            type = PlayerStats.ACCOUNT.LEAGUE;
+        }
+
+        // Fetch DMM stats
+        else if(args.contains(ARGUMENT.DMM)) {
+            type = PlayerStats.ACCOUNT.DMM;
+        }
+
+        // Locate account type
+        else {
+            type = PlayerStats.ACCOUNT.NORMAL;
+        }
+
         OSRSPlayerStats normalAccount = parseStats(
                 name,
-                args.searchLeagueStats() ? PlayerStats.ACCOUNT.LEAGUE : PlayerStats.ACCOUNT.NORMAL
+                type
         );
 
         // Player does not exist
@@ -343,6 +406,11 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         // Player exists
         completeLoadingMessageStage(loadingMessage);
+
+        // DMM stats
+        if(type == PlayerStats.ACCOUNT.DMM) {
+            return normalAccount;
+        }
 
         // Update league loading messages
         if(normalAccount instanceof OSRSLeaguePlayerStats) {
@@ -422,7 +490,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    protected OSRSPlayerStats fetchPlayerData(String name, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    protected OSRSPlayerStats fetchPlayerData(String name, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         OSRSPlayerStats stats = fetchStats(name, args, loadingMessage);
 
         // Player doesn't exist/hiscores down
@@ -453,12 +521,12 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args           Hiscores arguments
      * @param loadingMessage Optional loading message
      */
-    private void addPlayerXpTracker(OSRSPlayerStats stats, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    private void addPlayerXpTracker(OSRSPlayerStats stats, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         try {
             updateLoadingMessage(UPDATE, "Checking Weekly XP...", loadingMessage);
             WiseOldMan.TrackerResponse response = WiseOldMan.getInstance().getXpTrackerData(
                     stats.getName(),
-                    args.searchLeagueStats()
+                    args.contains(ARGUMENT.LEAGUE)
             );
 
             JSONObject responseData = response.getData();
@@ -528,7 +596,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
                     .format(stats.getTrackerStartDate());
 
             String trackerUrl = WiseOldMan.getInstance().getXpTrackerBrowserUrl(
-                    stats.getName(), args.searchLeagueStats()
+                    stats.getName(), args.contains(ARGUMENT.LEAGUE)
             );
 
             String details = stats.hasWeeklyGains()
@@ -549,12 +617,12 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args           Hiscores arguments
      * @param loadingMessage Optional loading message
      */
-    private void addPlayerAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    private void addPlayerAchievements(OSRSPlayerStats stats, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         try {
             updateLoadingMessage(UPDATE, "Checking tracker...", loadingMessage);
             WiseOldMan.TrackerResponse response = WiseOldMan.getInstance().getPlayerAchievementsData(
                     stats.getName(),
-                    args.searchLeagueStats()
+                    args.contains(ARGUMENT.LEAGUE)
             );
 
             JSONObject responseData = response.getData();
@@ -636,7 +704,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args      Hiscores arguments
      * @return Image displaying player boss kills
      */
-    public BufferedImage buildBossSection(List<BossStats> bossStats, OSRSHiscoresArgs args) {
+    public BufferedImage buildBossSection(List<BossStats> bossStats, HashSet<ARGUMENT> args) {
         BufferedImage container = copyImage(bossContainer);
         Graphics g = container.getGraphics();
 
@@ -682,7 +750,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args      Hiscores arguments
      * @return Image displaying a boss and the player's kills/rank for that boss
      */
-    private BufferedImage buildBossRowImage(BossStats bossStats, int width, int height, OSRSHiscoresArgs args) {
+    private BufferedImage buildBossRowImage(BossStats bossStats, int width, int height, HashSet<ARGUMENT> args) {
         final int boxWidth = (width - BORDER) / 2;
         final int centreVertical = height / 2;
         final int centreHorizontal = boxWidth / 2;
@@ -693,7 +761,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         // Draw boss background (if requested & available)
         final BufferedImage bossBackground = boss.getBackgroundImage();
-        if(bossBackground != null && args.showBossBackgrounds()) {
+        if(bossBackground != null && args.contains(ARGUMENT.BOSS_BACKGROUNDS)) {
             g = row.getGraphics();
             g.drawImage(bossBackground, 0, 0, null);
         }
@@ -713,7 +781,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         );
 
         // Fill the background of the boss row sections with random colours
-        if(args.showBoxes()) {
+        if(args.contains(ARGUMENT.SHOW_BOXES)) {
             fillImage(bossBox);
             fillImage(textBox);
         }
@@ -807,7 +875,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Image displaying player skills
      */
-    private BufferedImage buildSkillsSection(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+    private BufferedImage buildSkillsSection(OSRSPlayerStats stats, HashSet<ARGUMENT> args) {
         BufferedImage container = copyImage(skillsContainer);
 
         // Adjusted dimensions after factoring in border that surrounds skills container image
@@ -859,11 +927,11 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Total experience image
      */
-    private BufferedImage buildTotalXpImage(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+    private BufferedImage buildTotalXpImage(OSRSPlayerStats stats, HashSet<ARGUMENT> args) {
         BufferedImage totalXpImage = copyImage(totalXpBox);
 
         // Fill the background of the total XP box with a random colour
-        if(args.showBoxes()) {
+        if(args.contains(ARGUMENT.SHOW_BOXES)) {
             fillImage(totalXpImage);
         }
 
@@ -915,21 +983,21 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Skill image
      */
-    private BufferedImage buildSkillImage(Skill skill, OSRSHiscoresArgs args) {
+    private BufferedImage buildSkillImage(Skill skill, HashSet<ARGUMENT> args) {
         boolean totalLevel = skill.getName() == OVERALL;
         BufferedImage skillImage = totalLevel
                 ? copyImage(totalLevelBox)
-                : args.fetchXpGains() ? copyImage(xpSkillBox) : copyImage(skillBox);
+                : args.contains(ARGUMENT.XP) ? copyImage(xpSkillBox) : copyImage(skillBox);
         Graphics g = skillImage.getGraphics();
         g.setFont(getGameFont().deriveFont(STANDARD_FONT_SIZE));
 
 
         // Fill the background of the skill box with a random colour
-        if(args.showBoxes()) {
+        if(args.contains(ARGUMENT.SHOW_BOXES)) {
             fillImage(skillImage);
         }
 
-        final int displayLevel = args.displayVirtualLevels() ? skill.getVirtualLevel() : skill.getLevel();
+        final int displayLevel = args.contains(ARGUMENT.VIRTUAL) ? skill.getVirtualLevel() : skill.getLevel();
         final String level = skill.isRanked() ? String.valueOf(displayLevel) : "-";
         final int centreX = skillImage.getWidth() / 2;
 
@@ -959,7 +1027,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         }
 
         // Drawing skill with xp
-        if(args.fetchXpGains()) {
+        if(args.contains(ARGUMENT.XP)) {
             g.setColor(Color.YELLOW);
             final int centreY = skillImage.getHeight() / 2;
 
@@ -978,7 +1046,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
             }
 
             // Draw a progress bar at the bottom of the skill image indicating progress to the next level
-            if(args.fetchXpGains() && skill.isRanked() && skill.getLevel() < Skill.DEFAULT_MAX) {
+            if(skill.isRanked() && skill.getLevel() < Skill.DEFAULT_MAX) {
                 final int progressBarHeight = 20;
 
                 // XP required to be the current level (not current XP)
@@ -1085,12 +1153,12 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
          * Draw a red overlay on unranked skills (not when showing boxes).
          * This is because unranked skills are reported as 1 regardless of what the player's actual level is.
          */
-        if(!skill.isRanked() && !args.showBoxes()) {
+        if(!skill.isRanked() && !args.contains(ARGUMENT.SHOW_BOXES)) {
             highlightSkillBox(skillImage, redOverlay);
         }
 
         // Draw a green overlay on maxed skills (if specified)
-        if(args.highlightMaxedSkills() && skill.getLevel() == Skill.DEFAULT_MAX) {
+        if(args.contains(ARGUMENT.MAX) && skill.getLevel() == Skill.DEFAULT_MAX) {
             highlightSkillBox(skillImage, greenOverlay);
         }
 
@@ -1139,7 +1207,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
     }
 
     @Override
-    public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, OSRSHiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    public BufferedImage buildHiscoresImage(OSRSPlayerStats playerStats, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         BufferedImage image = new BufferedImage(
                 calculateImageWidth(playerStats, args),
                 calculateImageHeight(playerStats, args),
@@ -1256,7 +1324,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Height of hiscores image to create
      */
-    private int calculateImageHeight(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+    private int calculateImageHeight(OSRSPlayerStats stats, HashSet<ARGUMENT> args) {
 
         /*
          * Base height - title section, skills section, and boss section are always displayed
@@ -1297,7 +1365,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Width of hiscores image to create
      */
-    private int calculateImageWidth(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+    private int calculateImageWidth(OSRSPlayerStats stats, HashSet<ARGUMENT> args) {
 
         /*
          * Base width - title section, skills section, and boss section are always displayed,
@@ -1347,8 +1415,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args Hiscores arguments
      * @return XP tracker data should be fetched
      */
-    private boolean shouldFetchXpTracker(OSRSHiscoresArgs args) {
-        return args.fetchXpGains() && !args.searchLeagueStats();
+    private boolean shouldFetchXpTracker(HashSet<ARGUMENT> args) {
+        return args.contains(ARGUMENT.XP) && !args.contains(ARGUMENT.LEAGUE) && !args.contains(ARGUMENT.DMM);
     }
 
     /**
@@ -1357,8 +1425,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args Hiscores arguments
      * @return Recent achievements should be fetched
      */
-    private boolean shouldFetchAchievements(OSRSHiscoresArgs args) {
-        return args.fetchAchievements() && !args.searchLeagueStats();
+    private boolean shouldFetchAchievements(HashSet<ARGUMENT> args) {
+        return args.contains(ARGUMENT.ACHIEVEMENTS) && !args.contains(ARGUMENT.LEAGUE) && !args.contains(ARGUMENT.DMM);
     }
 
     /**
@@ -1368,7 +1436,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param stats Player stats
      * @return Should display XP tracker in hiscores image
      */
-    private boolean shouldDisplayXpTracker(OSRSHiscoresArgs args, OSRSPlayerStats stats) {
+    private boolean shouldDisplayXpTracker(HashSet<ARGUMENT> args, OSRSPlayerStats stats) {
         return shouldFetchXpTracker(args) && (stats.hasWeeklyGains() || stats.hasWeeklyRecords());
     }
 
@@ -1379,7 +1447,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Should display player achievements in hiscores image
      */
-    private boolean shouldDisplayAchievements(OSRSPlayerStats stats, OSRSHiscoresArgs args) {
+    private boolean shouldDisplayAchievements(OSRSPlayerStats stats, HashSet<ARGUMENT> args) {
         return shouldFetchAchievements(args) && stats.hasAchievements();
     }
 
@@ -1655,7 +1723,8 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
 
         final PlayerStats.ACCOUNT accountType = stats.getAccountType();
 
-        if(accountType != PlayerStats.ACCOUNT.NORMAL && !stats.isLeague()) {
+        // Draw account type image
+        if(accountType != PlayerStats.ACCOUNT.NORMAL && accountType != PlayerStats.ACCOUNT.LEAGUE && accountType != PlayerStats.ACCOUNT.DMM) {
             final BufferedImage accountImage = getResourceHandler().getImageResource(
                     PlayerStats.getAccountTypeImagePath(stats.getAccountType())
             );
@@ -1709,7 +1778,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args  Hiscores arguments
      * @return Image displaying player clue scroll completions
      */
-    private BufferedImage buildClueSection(Clue[] clues, OSRSHiscoresArgs args) {
+    private BufferedImage buildClueSection(Clue[] clues, HashSet<ARGUMENT> args) {
         final BufferedImage container = copyImage(cluesContainer);
 
         Graphics g = container.getGraphics();
@@ -1745,7 +1814,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
      * @param args   Hiscores arguments
      * @return Clue image
      */
-    private BufferedImage buildClueImage(Clue clue, int width, int height, OSRSHiscoresArgs args) {
+    private BufferedImage buildClueImage(Clue clue, int width, int height, HashSet<ARGUMENT> args) {
         final BufferedImage background = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         final Graphics g = background.getGraphics();
 
@@ -1757,7 +1826,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         final int centreHorizontal = width / 2;
 
         // Fill the background of the clue section with a random colour
-        if(args.showBoxes()) {
+        if(args.contains(ARGUMENT.SHOW_BOXES)) {
             fillImage(background);
         }
 
@@ -1821,7 +1890,7 @@ public class OSRSHiscores extends Hiscores<OSRSHiscoresArgs, OSRSPlayerStats> {
         g.drawString(rankTitle, rankX, y);
 
         // Draw a red overlay on incomplete clues (not when showing boxes)
-        if(!clue.hasCompletions() && !args.showBoxes()) {
+        if(!clue.hasCompletions() && !args.contains(ARGUMENT.SHOW_BOXES)) {
             g.setColor(redOverlay);
             g.fillRect(0, 0, width, height);
         }

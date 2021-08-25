@@ -4,28 +4,34 @@ import Bot.DiscordUser;
 import Command.Structure.CommandContext;
 import Command.Structure.EmoteHelper;
 import Command.Structure.LookupCommand;
-import Runescape.HiscoresArgs;
 import Runescape.Stats.RS3Hiscores;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.HashSet;
+
 /**
  * Look up a RS3 player and build an image with their stats
  */
 public class RS3LookupCommand extends LookupCommand {
-    private static final String TRIGGER = "rs3lookup", VIRTUAL = "virtual";
-    private boolean virtual;
+    private static final String TRIGGER = "rs3lookup";
+    private final HashSet<ARGUMENT> arguments;
     private RS3Hiscores hiscores;
+
+    public enum ARGUMENT {
+        VIRTUAL
+    }
 
     public RS3LookupCommand() {
         super(
                 TRIGGER,
                 "Check out someone's stats on RS3!",
-                "[" + VIRTUAL + "] " + TRIGGER + DEFAULT_LOOKUP_ARGS,
+                "[" + ARGUMENT.VIRTUAL.name().toLowerCase() + "] " + TRIGGER + DEFAULT_LOOKUP_ARGS,
                 12
         );
+        this.arguments = new HashSet<>();
     }
 
     @Override
@@ -35,18 +41,18 @@ public class RS3LookupCommand extends LookupCommand {
 
     @Override
     public void processName(String name, CommandContext context) {
-        hiscores.buildImage(name, context.getMessageChannel(), new HiscoresArgs(virtual));
+        hiscores.buildImage(name, context.getMessageChannel(), arguments);
     }
 
     @Override
     public String stripArguments(String query) {
-        if(query.startsWith(VIRTUAL)) {
-            query = query.replaceFirst(VIRTUAL, "").trim();
-            virtual = true;
+        arguments.clear();
+
+        if(query.startsWith(ARGUMENT.VIRTUAL.name().toLowerCase())) {
+            query = query.replaceFirst(ARGUMENT.VIRTUAL.name().toLowerCase(), "").trim();
+            arguments.add(ARGUMENT.VIRTUAL);
         }
-        else {
-            virtual = false;
-        }
+
         return query;
     }
 
@@ -62,6 +68,7 @@ public class RS3LookupCommand extends LookupCommand {
 
     @Override
     public boolean matches(String query, Message message) {
-        return super.matches(query, message) || query.startsWith(VIRTUAL) && query.contains(getTrigger());
+        return super.matches(query, message)
+                || query.startsWith(ARGUMENT.VIRTUAL.name().toLowerCase()) && query.contains(getTrigger());
     }
 }

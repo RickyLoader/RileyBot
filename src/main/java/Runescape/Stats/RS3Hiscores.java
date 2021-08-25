@@ -2,6 +2,7 @@ package Runescape.Stats;
 
 import Bot.FontManager;
 import Bot.ResourceHandler;
+import Command.Commands.Lookup.RS3LookupCommand.ARGUMENT;
 import Command.Structure.ImageLoadingMessage;
 import Command.Structure.PieChart;
 import Command.Structure.EmbedHelper;
@@ -14,6 +15,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +27,7 @@ import static Runescape.Stats.Clan.*;
 /**
  * Build an image displaying a player's RS3 stats
  */
-public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
+public class RS3Hiscores extends Hiscores<ARGUMENT, RS3PlayerStats> {
     private final Color orange, yellow, red, blue;
     private final String BASE_URL = "https://secure.runescape.com/";
     private final BufferedImage skillsSection, clanSection, clueSection, titleSection, questSection;
@@ -58,22 +60,22 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     }
 
     @Override
-    public String getDefaultURL(String name, HiscoresArgs args) {
+    public String getDefaultURL(String name, HashSet<ARGUMENT> args) {
         return getNormalAccount(name);
     }
 
     @Override
-    public String getLoadingTitle(String name, HiscoresArgs args) {
+    public String getLoadingTitle(String name, HashSet<ARGUMENT> args) {
         return "RS3 Hiscores lookup: " + name.toUpperCase();
     }
 
     @Override
-    public String getLoadingThumbnail(HiscoresArgs args) {
+    public String getLoadingThumbnail(HashSet<ARGUMENT> args) {
         return "https://vignette.wikia.nocookie.net/runescape2/images/a/a7/RuneScape_Companion_logo.png";
     }
 
     @Override
-    public ArrayList<String> getLoadingCriteria(HiscoresArgs args) {
+    public ArrayList<String> getLoadingCriteria(HashSet<ARGUMENT> args) {
         ArrayList<String> loadingCriteria = new ArrayList<>();
         loadingCriteria.add("Player exists...");
         loadingCriteria.add("Checking RuneMetrics...");
@@ -83,7 +85,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     }
 
     @Override
-    public BufferedImage buildHiscoresImage(RS3PlayerStats playerStats, HiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    public BufferedImage buildHiscoresImage(RS3PlayerStats playerStats, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         int overhang = 65; // title section left overhang
 
         BufferedImage skillSection = buildSkillSection(playerStats, args);
@@ -189,7 +191,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
      * @param args        Hiscores arguments
      * @return Skill image section
      */
-    private BufferedImage buildSkillSection(RS3PlayerStats playerStats, HiscoresArgs args) {
+    private BufferedImage buildSkillSection(RS3PlayerStats playerStats, HashSet<ARGUMENT> args) {
         final BufferedImage skillsSection = copyImage(this.skillsSection);
         Graphics g = skillsSection.getGraphics();
         g.setFont(getGameFont().deriveFont(55f));
@@ -204,7 +206,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
         Skill[] skills = playerStats.getSkills();
         for(int i = 0; i < skills.length - 1; i++) {
             Skill skill = skills[i];
-            int displayLevel = args.displayVirtualLevels() ? skill.getVirtualLevel() : skill.getLevel();
+            int displayLevel = args.contains(ARGUMENT.VIRTUAL) ? skill.getVirtualLevel() : skill.getLevel();
             boolean master = displayLevel > 99;
             String level = String.valueOf(displayLevel);
 
@@ -234,9 +236,9 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
         );
         g.drawString(
                 String.valueOf(
-                        args.displayVirtualLevels()
-                                ? playerStats.getVirtualTotalLevel()
-                                : playerStats.getTotalLevel()
+                        args.contains(ARGUMENT.VIRTUAL)
+                                ? playerStats.getVirtualTotalLevel().getLevel()
+                                : playerStats.getTotalLevel().getLevel()
                 ),
                 240,
                 totalY
@@ -537,7 +539,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     }
 
     @Override
-    protected RS3PlayerStats fetchPlayerData(String name, HiscoresArgs args, ImageLoadingMessage... loadingMessage) {
+    protected RS3PlayerStats fetchPlayerData(String name, HashSet<ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         String url = getNormalAccount(name);
         String[] normal = hiscoresRequest(url);
 
@@ -629,7 +631,7 @@ public class RS3Hiscores extends Hiscores<HiscoresArgs, RS3PlayerStats> {
     }
 
     @Override
-    public String getNotFoundMessage(String name, HiscoresArgs args) {
+    public String getNotFoundMessage(String name, HashSet<ARGUMENT> args) {
         return "doesn't exist cunt";
     }
 }
