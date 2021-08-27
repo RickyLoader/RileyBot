@@ -1,4 +1,4 @@
-package Runescape.Stats;
+package Runescape.Hiscores;
 
 import Network.NetworkRequest;
 import Network.NetworkResponse;

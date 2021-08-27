@@ -28,7 +28,7 @@ public class Breakdown {
      * @return URL to the chart image or null
      */
     private String uploadChart() {
-        return ImgurManager.alternativeUpload(chart.getFullImage(true));
+        return ImgurManager.alternativeUpload(chart.getFullImage(true), true);
     }
 
     /**

@@ -1,4 +1,4 @@
-package Runescape.OSRS.Stats;
+package Runescape.Stats;
 
 import Bot.ResourceHandler;
 

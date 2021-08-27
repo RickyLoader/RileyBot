@@ -33,7 +33,7 @@ public class Hangman {
     private boolean running, victory, stopped, paused;
 
     /**
-     * Create the hangman instance
+     * Create the hangman instance. Games can be started from this instance once created.
      *
      * @param helpMessage Help message to display
      */
@@ -61,22 +61,43 @@ public class Hangman {
         this.owner = owner;
 
         this.secretWord = word;
+
+        // "word" -> "____" or "two words" -> "___ ____" (spaces not converted to underscores)
         this.currentGuess = word.getWord().replaceAll("[a-zA-Z]", "_");
 
         this.currentHints = 0;
 
         this.secretWordMap = new HashMap<>();
         this.guesses = new LinkedHashSet<>();
+
+        // List of possible hints (unique characters in the word)
         this.hints = new ArrayList<>();
-        char[] characters = secretWord.getWord().toCharArray();
+
+        /*
+         * Create a map of unique characters in the word to a list of
+         * indexes within the word where this character appears.
+         */
+        final char[] characters = secretWord.getWord().toLowerCase().toCharArray();
 
         for(int i = 0; i < characters.length; i++) {
-            char c = characters[i];
+            final char c = characters[i];
+
+            // Don't map spaces as there is no need to guess them (or get them as hints).
+            if(c == ' ') {
+                continue;
+            }
+
             ArrayList<Integer> indexes = secretWordMap.get(c);
+
+            /*
+             * First time seeing character, create an empty list of indexes for the character.
+             * Add to the list of possible hints.
+             */
             if(indexes == null) {
                 hints.add(String.valueOf(c));
                 indexes = new ArrayList<>();
             }
+
             indexes.add(i);
             secretWordMap.put(c, indexes);
         }
@@ -105,13 +126,19 @@ public class Hangman {
      * Update the game message and check the current status of the game
      */
     private void updateGame() {
-        if(currentGuess.equals(secretWord.getWord())) {
+
+        // The current guess is now equal to the word, the player has won the game
+        if(currentGuess.equalsIgnoreCase(secretWord.getWord())) {
             running = false;
             victory = true;
         }
+
+        // The player has guessed incorrectly too many times, they have lost
         else if(gallows.MAX_STAGES - gallows.getStage() == 0) {
             running = false;
         }
+
+        // Delete the current game message and send the new one
         channel.deleteMessageById(gameID).queue(delete -> {
             sendGameMessage();
             if(!running) {
@@ -146,17 +173,21 @@ public class Hangman {
      * @return Game message
      */
     private MessageEmbed buildGameMessage() {
-        EmbedBuilder builder = new EmbedBuilder()
+        final EmbedBuilder builder = new EmbedBuilder()
                 .setTitle(owner.getEffectiveName().toUpperCase() + " | Hangman - " + getGameStatus())
                 .setFooter(helpMessage, running ? EmbedHelper.CLOCK_GIF : EmbedHelper.CLOCK_STOPPED)
                 .setThumbnail(gallows.getImagePreview())
                 .setImage("attachment://image.png")
                 .setColor(getColour());
 
-        String desc = "\n**Guesses**: " + getGuessSummary() + "\n**Hints**: " + getHintSummary();
+        String desc = "\n**Guesses**: " + getGuessSummary()
+                + "\n**Hints**: " + getHintSummary();
+
+        // Add the dictionary definition of the secret word if the game has ended
         if(!running) {
             desc += "\n\n**Definition**: " + ((secretWord.hasDefinition()) ? secretWord.getDefinition() : "Fuck knows");
         }
+
         return builder
                 .setDescription(desc)
                 .build();
@@ -172,7 +203,8 @@ public class Hangman {
     }
 
     /**
-     * Get the current game status message
+     * Get the current game status message.
+     * Used in the title of the game message.
      *
      * @return Game status message
      */
@@ -185,8 +217,9 @@ public class Hangman {
     }
 
     /**
-     * Get the hint summary for the game embed
-     * Either message informing that no hints are available or x/y hints where x = used hints & y = total hints
+     * Get the hint summary for the game message.
+     * This is either a message informing that no hints are available or
+     * x/y hints where x = used hints & y = total hints e.g "0/3", "1/3", etc.
      *
      * @return Hint summary
      */
@@ -198,10 +231,10 @@ public class Hangman {
     }
 
     /**
-     * Get the guess summary for the game embed
-     * Return guessed characters in the order they were guessed
-     * Display in bold if the guess was correct or struck through if not
-     * Show total guessed characters in parenthesis
+     * Get the guess summary for the game message.
+     * Return guessed characters in the order they were guessed.
+     * Display the guess in bold if it was correct or struck through if not.
+     * Show total guessed characters in parenthesis.
      *
      * @return Guess summary
      */
@@ -210,7 +243,7 @@ public class Hangman {
                 .stream()
                 .map(e -> {
                     String guess = e.toUpperCase();
-                    if((e.length() == 1 && secretWordMap.containsKey(e.charAt(0))) || e.equals(secretWord.getWord())) {
+                    if((e.length() == 1 && secretWordMap.containsKey(e.charAt(0))) || e.equalsIgnoreCase(secretWord.getWord())) {
                         return "**" + guess + "**";
                     }
                     return "~~" + guess + "~~";
@@ -232,7 +265,11 @@ public class Hangman {
             Font font = g.getFontMetrics().getFont().deriveFont(50f);
             FontMetrics fm = g.getFontMetrics(font);
 
-            String guess = StringUtils.join(
+            /*
+             * Display the word with the characters separated by a space, this makes a more obvious distinction
+             * between characters (and prevents underscores merging in to a line e.g "___" vs "_ _ _").
+             */
+            final String guess = StringUtils.join(
                     (running ? currentGuess : secretWord.getWord())
                             .toUpperCase().split(""), " "
             );
@@ -272,6 +309,8 @@ public class Hangman {
      * @param player Player who guessed
      */
     public void guess(String guess, Member player) {
+
+        // This guess has already been made, inform the player
         if(guesses.contains(guess)) {
             channel.sendMessage(
                     player.getAsMention() + " " + guess + " has already been guessed, should've gone to Specsavers"
@@ -279,13 +318,18 @@ public class Hangman {
             return;
         }
 
+        // The guess is a single character, check if it is in the secret word
         if(guess.length() == 1) {
             guesses.add(guess);
             guessCharacter(guess.charAt(0));
             updateGame();
         }
+
+        // The guess is a String, check if it matches the entire secret word
         else if(guessWord(guess, player)) {
             guesses.add(guess);
+
+            // Only update the game if it was a valid guess
             updateGame();
         }
     }
@@ -296,10 +340,14 @@ public class Hangman {
      * @param guess Guess character
      */
     private void guessCharacter(Character guess) {
+
+        // Character is not in the word, add a fail
         if(!secretWordMap.containsKey(guess)) {
             gallows.incrementStage();
             return;
         }
+
+        // Remove the character from the possible hints
         hints.remove(String.valueOf(guess));
         addCharacterToGuess(guess);
     }
@@ -312,9 +360,11 @@ public class Hangman {
      * @return Valid guess
      */
     private boolean guessWord(String guess, Member player) {
-        int guessLength = guess.length();
-        String secretWord = this.secretWord.getWord();
-        int secretLength = secretWord.length();
+        final String secretWord = this.secretWord.getWord();
+        final int secretLength = secretWord.length();
+        final int guessLength = guess.length();
+
+        // Don't count an invalid length guess as a fail, e.g guessing "appl" against "apple"
         if(guessLength != secretLength) {
             channel.sendMessage(
                     player.getAsMention()
@@ -324,30 +374,48 @@ public class Hangman {
                             + secretLength
                             + " letter word..."
             ).queue();
+
+            // Guess not counted
             return false;
         }
 
-        if(!secretWord.equals(guess)) {
-            gallows.incrementStage();
-        }
-        else {
+        // Player guessed correctly, set the current guess to the guessed word
+        if(secretWord.equals(guess)) {
             currentGuess = guess;
             hints = new ArrayList<>();
         }
+
+        // Incorrect guess, add a fail
+        else {
+            gallows.incrementStage();
+        }
+
+        // Valid guess
         return true;
     }
 
     /**
      * Add a correct character to the current guess
      *
-     * @param guess Character guess
+     * @param guess Character guess e.g 'a'
      */
     private void addCharacterToGuess(Character guess) {
-        char[] currentGuess = this.currentGuess.toCharArray();
-        ArrayList<Integer> indexes = secretWordMap.get(guess);
+
+        // "_____" -> [_,_,_,_,_]
+        final char[] currentGuess = this.currentGuess.toCharArray();
+
+        // List of indexes where the character is seen within the word
+        final ArrayList<Integer> indexes = secretWordMap.get(guess);
+
+        /*
+         * Iterate through the indexes changing the underscore (hidden) characters within the current guess
+         * to the guessed character. E.g [_,_,_,_,_] -> [_,a,_,a,_]
+         */
         for(int index : indexes) {
             currentGuess[index] = guess;
         }
+
+        // The current guess is now "_a_a_"
         this.currentGuess = String.valueOf(currentGuess);
     }
 
@@ -366,6 +434,8 @@ public class Hangman {
      * @param player Player who asked for hint
      */
     public void getHint(Member player) {
+
+        // The player has used all of their hints
         if(currentHints == MAX_HINTS) {
             channel.sendMessage(
                     player.getAsMention()
@@ -374,14 +444,25 @@ public class Hangman {
             return;
         }
 
+        /*
+         * Hints are a list of the unique characters in the secret word, and are removed when used/guessed.
+         * If only one is left, there is only one letter in the secret word left to guess, don't allow the player to
+         * use a hint for it.
+         */
         if(hints.size() == 1) {
             channel.sendMessage(player.getAsMention() + " NO, Use your brain for the last letter").queue();
             return;
         }
 
-        String hint = hints.get(new Random().nextInt(hints.size()));
+        // Roll a random character in the possible hints
+        final String hint = hints.get(new Random().nextInt(hints.size()));
+
+        // Add it as a guess (so the player cannot waste a guess on it later)
         guesses.add(hint);
+
+        // Remove it as a possible hint (so it cannot be rolled again and unlock nothing)
         hints.remove(hint);
+
         this.currentHints++;
         addCharacterToGuess(hint.charAt(0));
         updateGame();

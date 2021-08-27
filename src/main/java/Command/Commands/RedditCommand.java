@@ -9,10 +9,7 @@ import Reddit.PollContent.RedditPoll.Option;
 import Reddit.Reddit.URL_TYPE;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +42,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
     public void execute(CommandContext context) {
         new Thread(() -> {
             final String url = context.getMessageContent();
-            URL_TYPE type = Reddit.getUrlType(url);
+            final URL_TYPE type = Reddit.getUrlType(url);
 
             if(type == URL_TYPE.SUBREDDIT) {
                 handleSubredditUrl(context, url);
@@ -100,7 +97,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 addPostTitleToEmbedBuilder(builder, post)
                         .setFooter(getPageDetails() + " | " + buildFooter(post), getContentTypeImage(content));
 
-                String description = buildPostDescription(post);
+                String description = buildPostDescription(post, context.getMember());
 
                 // Show image
                 if(content instanceof ImageContent) {
@@ -164,7 +161,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
             return;
         }
 
-        MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost);
+        MessageEmbed redditEmbed = buildRedditPostEmbed(redditPost, context.getMember());
         MessageAction sendRedditEmbed = channel.sendMessage(redditEmbed);
 
         // Send video after the post details
@@ -230,7 +227,7 @@ public class RedditCommand extends OnReadyDiscordCommand {
                                 buildFooter(galleryPost) + " | " + getPageDetails(),
                                 getContentTypeImage(content)
                         )
-                        .setDescription(buildPostDescription(galleryPost));
+                        .setDescription(buildPostDescription(galleryPost, context.getMember()));
             }
 
             @Override
@@ -253,12 +250,13 @@ public class RedditCommand extends OnReadyDiscordCommand {
     /**
      * Get a message embed detailing the given Reddit post
      *
-     * @param post Reddit post
+     * @param post     Reddit post
+     * @param postedBy Member who posted the link
      * @return Message embed detailing Reddit post
      */
-    private MessageEmbed buildRedditPostEmbed(RedditPost post) {
+    private MessageEmbed buildRedditPostEmbed(RedditPost post, Member postedBy) {
         EmbedBuilder builder = getDefaultEmbedBuilder(post);
-        String description = buildPostDescription(post);
+        String description = buildPostDescription(post, postedBy);
         PostContent content = post.getContent();
 
         if(content instanceof ImageContent) {
@@ -310,8 +308,8 @@ public class RedditCommand extends OnReadyDiscordCommand {
 
         Option[] options = poll.getOptions();
 
-        // Can display option votes
-        if(poll.isClosed()) {
+        // Results are available - display option votes
+        if(poll.resultsAvailable()) {
 
             // Sort in descending order of votes
             Arrays.sort(options, Comparator.comparingInt(Option::getVotes).reversed());
@@ -338,8 +336,9 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 }
             }
 
-            // Exact closing time isn't relevant if the poll is closed
-            description += "\n**Closed**: " + new SimpleDateFormat(dateFormat).format(closingDate)
+            // Display closing date
+            description += "\n**" + (poll.isClosed() ? "Closed" : "Closing") + "**: "
+                    + new SimpleDateFormat(dateFormat).format(closingDate)
                     + "\n\n**Options**:\n\n" + optionsBuilder.toString();
         }
 
@@ -461,13 +460,16 @@ public class RedditCommand extends OnReadyDiscordCommand {
      * Build the description to use in a message embed for the given Reddit post.
      * This is the details of a poll in a poll post, the URL in a link post, etc.
      *
-     * @param post Reddit post
+     * @param post     Reddit post
+     * @param postedBy Member who posted the link
      * @return Embed description
      */
-    private String buildPostDescription(RedditPost post) {
+    private String buildPostDescription(RedditPost post, Member postedBy) {
         DecimalFormat commaFormat = new DecimalFormat("#,###");
         Ratio votes = post.getVotes();
-        String description = upvote + " " + commaFormat.format(votes.getNumerator())
+
+        String description = "**Posted By**: " + postedBy.getAsMention() + "\n\n"
+                + upvote + " " + commaFormat.format(votes.getNumerator())
                 + " (" + votes.getNumeratorPercentage() + ")"
                 + blankGap
                 + downvote + " " + commaFormat.format(votes.getDenominator())

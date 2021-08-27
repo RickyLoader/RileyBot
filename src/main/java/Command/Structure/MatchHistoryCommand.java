@@ -64,8 +64,8 @@ public abstract class MatchHistoryCommand extends CODLookupCommand {
                 trigger,
                 "Have a gander at a player's match history!",
                 getHelpText(trigger) + " [match id/" + LATEST + "]\n\n"
-                        + trigger + " " + WOBBLIES + "\n"
-                        + trigger + " " + WOBBLIES_SPECIFIC
+                        + "\t" + trigger + " " + WOBBLIES
+                        + "\n\t" + trigger + " " + WOBBLIES_SPECIFIC
         );
         this.thumbnail = thumbnail;
         this.loadoutImageManager = LoadoutImageManager.getInstance();

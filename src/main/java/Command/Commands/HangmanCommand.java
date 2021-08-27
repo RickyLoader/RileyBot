@@ -23,11 +23,36 @@ import static Command.Structure.PageableTableEmbed.*;
 public class HangmanCommand extends DiscordCommand {
     private final HashMap<MessageChannel, Hangman> hangmanGames;
     private final Dictionary dictionary;
-    private final int MIN_LENGTH = 5, MAX_LENGTH = 25;
+    private static final int
+            MIN_LENGTH = 1,
+            MAX_LENGTH = 25;
+    private static final String
+            TRIGGER = "hm",
+            ALT_TRIGGER = "hangman",
+            TRIGGER_HELP = "[trigger]",
+            GUESS = "guess",
+            START = "start",
+            HINT = "hint",
+            STOP = "stop",
+            AI = "ai",
+            SPOILER_TAG = "||",
+            WORD_HELP = SPOILER_TAG + "word" + SPOILER_TAG;
     private final ArrayList<Gallows> gallows;
 
+    /**
+     * Initialise dictionary for AI, gallows, and map of running games
+     */
     public HangmanCommand() {
-        super("hm start [word]\nhm guess [word/letter]\nhm hint\nhm stop\nhm ai", "Play hangman!");
+        super(
+                TRIGGER,
+                "Play hangman!",
+                TRIGGER_HELP + " = " + TRIGGER + "/" + ALT_TRIGGER
+                        + "\n\n" + TRIGGER_HELP + " " + START + " " + WORD_HELP
+                        + "\n" + TRIGGER_HELP + " " + GUESS + " [word/letter]"
+                        + "\n" + TRIGGER_HELP + " " + HINT
+                        + "\n" + TRIGGER_HELP + " " + STOP
+                        + "\n" + TRIGGER_HELP + " " + AI
+        );
         this.hangmanGames = new HashMap<>();
         this.dictionary = filterDictionary();
         this.gallows = createGallows();
@@ -35,74 +60,86 @@ public class HangmanCommand extends DiscordCommand {
 
     /**
      * Create a filtered copy of the Webster's English dictionary containing only words that
-     * meet the criteria to be used in hangman
+     * meet the criteria to be used in hangman.
      *
-     * @return English Dictionary
+     * @return Filtered english Dictionary
      */
     private Dictionary filterDictionary() {
         Dictionary dictionary = new Dictionary();
         ArrayList<DictWord> allWords = Dictionary.getInstance().getWords();
+
         for(DictWord dictWord : allWords) {
             String word = dictWord.getWord();
-            if(invalidInput(word) || word.length() < MIN_LENGTH || word.length() > MAX_LENGTH) {
+
+            // Doesn't meet criteria for hangman game
+            if(invalidInput(word)) {
                 continue;
             }
+
             dictionary.addWord(dictWord);
         }
         return dictionary;
     }
 
-
     @Override
     public void execute(CommandContext context) {
-        MessageChannel channel = context.getMessageChannel();
-        Member player = context.getMember();
-        String content = context.getLowerCaseMessage();
+        final MessageChannel channel = context.getMessageChannel();
+        final Member player = context.getMember();
+        final String content = context.getLowerCaseMessage();
+        final String[] args = content.split(" ");
 
-        String[] args = content.split(" ");
+        // "hm" or "hangman"
         if(args.length == 1) {
             channel.sendMessage(getHelpNameCoded()).queue();
             return;
         }
-        String trigger = args[0], op = args[1];
-        String message = content.replaceFirst(trigger, "").trim();
+
+        final String trigger = args[0];
+
+        // "guess", "stop", etc
+        final String op = args[1];
+
+        final String message = content.replaceFirst(trigger, "").trim();
         Hangman game = hangmanGames.get(channel);
 
+        // Create a game
         if(game == null) {
             game = new Hangman("Type: hm for help");
             hangmanGames.put(channel, game);
         }
 
+        // Message is not currently visible
         if(!game.canUpdate()) {
             channel.sendMessage("Slow down NOW").queue();
             return;
         }
 
-        Hangman finalGame = game;
+        final Hangman finalGame = game;
+        context.getMessage().delete().queue();
+
         new Thread(() -> {
             switch(op) {
-                case "start":
-                    context.getMessage().delete().queue();
-                    startGame(finalGame, message, channel, player, trigger);
+                case START:
+                    startGame(finalGame, message, channel, player);
                     break;
-                case "guess":
+                case GUESS:
                     playerGuess(finalGame, player, channel, message);
                     break;
-                case "stop":
+                case STOP:
                     if(!finalGame.isRunning()) {
                         channel.sendMessage(player.getAsMention() + " There isn't a game to stop!").queue();
                         return;
                     }
                     finalGame.stopGame();
                     break;
-                case "hint":
+                case HINT:
                     if(!finalGame.isRunning()) {
                         channel.sendMessage(player.getAsMention() + " Here's a hint: You can't get a hint for a Hangman game if there are no Hangman games!").queue();
                         return;
                     }
                     finalGame.getHint(player);
                     break;
-                case "ai":
+                case AI:
                     if(finalGame.isRunning()) {
                         channel.sendMessage(player.getAsMention() + " Stop the current game if you want to play Hangman with me cunt").queue();
                         return;
@@ -136,20 +173,24 @@ public class HangmanCommand extends DiscordCommand {
      * @param message Player message - "guess [word]"
      */
     private void playerGuess(Hangman game, Member player, MessageChannel channel, String message) {
+
+        // Game is no longer running and guesses can't be made
         if(!game.isRunning()) {
             channel.sendMessage(player.getAsMention() + " There isn't a game to guess the word for!").queue();
             return;
         }
+
+        // Owner cannot guess on their own game
         if(player == game.getOwner()) {
             channel.sendMessage(player.getAsMention() + " The word picker can't make a fucking guess cunt").queue();
             return;
         }
 
-        String guess = message.replaceFirst("guess", "").trim();
+        final String guess = message.replaceFirst(GUESS, "").trim();
+
+        // The guess does not meet the same criteria that was used to check the hangman word (it cannot be correct)
         if(invalidInput(guess)) {
-            channel.sendMessage(
-                    player.getAsMention() + " Give me a proper fucking word/letter cunt"
-            ).queue();
+            channel.sendMessage(player.getAsMention() + " Give me a proper fucking word/letter cunt").queue();
             return;
         }
         game.guess(guess, player);
@@ -162,38 +203,54 @@ public class HangmanCommand extends DiscordCommand {
      * @param message Player message - "start [word]"
      * @param channel Channel to play in
      * @param player  Player starting game
-     * @param trigger Trigger player used
      */
-    private void startGame(Hangman game, String message, MessageChannel channel, Member player, String trigger) {
+    private void startGame(Hangman game, String message, MessageChannel channel, Member player) {
+
+        // There is already a game running in the channel
         if(game.isRunning()) {
-            channel.sendMessage(player.getAsMention() + " There's already a game running in this channel, you have to stop it first!").queue();
-            return;
-        }
-        String word = message.replace("start", "").trim();
-
-        if(!word.startsWith("||") || !word.endsWith("||")) {
-            channel.sendMessage(player.getAsMention() + " Place your word inside a spoiler tag! e.g: ```" + trigger + " start ||word||```").queue();
-            return;
-        }
-        word = word.replaceAll("\\|", "");
-
-        if(invalidInput(word)) {
             channel.sendMessage(
-                    player.getAsMention() + " Input must be a one word, using only the alphabet."
+                    player.getAsMention()
+                            + " There's already a game running in this channel, you have to stop it first!"
             ).queue();
             return;
         }
 
-        if(word.length() < MIN_LENGTH || word.length() > MAX_LENGTH) {
-            channel.sendMessage(player.getAsMention() + " Minimum of " + MIN_LENGTH + " / Maximum of " + MAX_LENGTH + " characters").queue();
+        String word = message.replace(START, "").trim();
+
+        /*
+         * Word must be wrapped in spoiler tags. Not necessary, but there's a chance other players may see the word
+         * before the bot has a chance to delete it otherwise.
+         */
+        if(!word.startsWith(SPOILER_TAG) || !word.endsWith(SPOILER_TAG)) {
+            channel.sendMessage(
+                    player.getAsMention() + " Place your word inside a spoiler tag! e.g: " + WORD_HELP
+            ).queue();
             return;
         }
 
-        DictWord dictWord = dictionary.getWord(word);
+        word = word
+                .replace(SPOILER_TAG, "")
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        // Not a valid word to use, inform the player
+        if(invalidInput(word)) {
+            channel.sendMessage(
+                    player.getAsMention()
+                            + " Minimum of " + MIN_LENGTH + " / Maximum of " + MAX_LENGTH + " characters "
+                            + "(using only the alphabet)"
+            ).queue();
+            return;
+        }
+
+        // Attempt to retrieve the word from the dictionary (allows showing the definition once the game has ended)
+        final DictWord dictWord = dictionary.getWord(word);
 
         game.startGame(
                 getRandomGallows(),
                 channel,
+
+                // Not in the dictionary, create a dictionary word with no description
                 dictWord == null ? new DictWord(word) : dictWord,
                 player
         );
@@ -206,14 +263,13 @@ public class HangmanCommand extends DiscordCommand {
      * @return Alphabetical input
      */
     private boolean invalidInput(String input) {
-        return !input.matches("[a-zA-Z]+");
+        return !input.matches("[a-zA-Z ]+") || input.length() < MIN_LENGTH || input.length() > MAX_LENGTH;
     }
 
     @Override
     public boolean matches(String query, Message message) {
-        return query.startsWith("hm") || query.startsWith("hangman");
+        return query.startsWith(TRIGGER) || query.startsWith(ALT_TRIGGER);
     }
-
 
     /**
      * Create the list of gallows instances that may be used for the game of Hangman

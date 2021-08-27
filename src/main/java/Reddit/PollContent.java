@@ -45,21 +45,22 @@ public class PollContent extends PostContent {
     public static class RedditPoll {
         private final int totalVotes;
         private final Date closingDate;
-        private final boolean closed;
+        private final boolean resultsAvailable;
         private final Option[] options;
 
         /**
          * Create the Reddit poll
          *
-         * @param totalVotes  Total votes in the poll (always available, answer votes are not until closing)
-         * @param closingDate Closing date of the poll
-         * @param options     Poll options
+         * @param totalVotes       Total votes in the poll
+         * @param closingDate      Closing date of the poll
+         * @param options          Poll options
+         * @param resultsAvailable Results of the poll are available
          */
-        public RedditPoll(int totalVotes, Date closingDate, Option[] options) {
+        public RedditPoll(int totalVotes, Date closingDate, Option[] options, boolean resultsAvailable) {
             this.totalVotes = totalVotes;
             this.closingDate = closingDate;
             this.options = options;
-            this.closed = new Date().after(closingDate);
+            this.resultsAvailable = resultsAvailable;
         }
 
         /**
@@ -77,7 +78,17 @@ public class PollContent extends PostContent {
          * @return Poll is closed
          */
         public boolean isClosed() {
-            return closed;
+            return new Date().after(closingDate);
+        }
+
+        /**
+         * Check whether the results of the poll are available.
+         * This is true if the poll has closed or a user has voted in the poll.
+         *
+         * @return Results are available
+         */
+        public boolean resultsAvailable() {
+            return resultsAvailable;
         }
 
         /**
@@ -102,27 +113,38 @@ public class PollContent extends PostContent {
          * Reddit poll option
          */
         public static class Option {
-            private final String text;
-            private final int votes;
+            private final String text, id;
+            private int votes;
 
             /**
              * Create a poll option
              *
+             * @param id    ID of the option
              * @param text  Option text - e.g "Yes"
              * @param votes Number of votes for the option
              */
-            public Option(String text, int votes) {
+            public Option(String id, String text, int votes) {
+                this.id = id;
                 this.text = text;
                 this.votes = votes;
             }
 
             /**
-             * Create a poll option with 0 votes
+             * Set the number of votes
              *
-             * @param text Option text - e.g "Yes"
+             * @param votes Number of votes for the option
              */
-            public Option(String text) {
-                this(text, 0);
+            public void updateVotes(int votes) {
+                this.votes = votes;
+            }
+
+            /**
+             * Get the ID of the option
+             *
+             * @return Option ID
+             */
+            public String getId() {
+                return id;
             }
 
             /**

@@ -1,28 +1,50 @@
 package Runescape.Stats;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Hold information on a HCIM death
  */
 public class HCIMStatus {
-    private boolean dead;
-    private String cause, location, date;
+    private final boolean dead;
+    private final String cause, location, date;
 
     /**
      * Create a HCIM status
      *
-     * @param name Player name
+     * @param dead     Account is dead (other values should not be set)
+     * @param cause    Cause of death - e.g "Fighting against: Dharok The Wretched"
+     * @param location Location of death - e.g "In an unknown location"
+     * @param date     Date of death - e.g "12-Jan-2018 23:16"
      */
-    public HCIMStatus(String name) {
-        fetchStatus(name);
+    private HCIMStatus(boolean dead, @Nullable String cause, @Nullable String location, @Nullable String date) {
+        this.dead = dead;
+        this.cause = cause;
+        this.location = location;
+        this.date = date;
     }
 
     /**
-     * Get death status
+     * Create a HCIM status for a dead account
+     *
+     * @param cause    Cause of death - e.g "Fighting against: Dharok The Wretched"
+     * @param location Location of death - e.g "In an unknown location"
+     * @param date     Date of death - e.g "12-Jan-2018 23:16"
+     */
+    public HCIMStatus(@NotNull String cause, @NotNull String location, @NotNull String date) {
+        this(true, cause, location, date);
+    }
+
+    /**
+     * Create a HCIM status for an alive account
+     */
+    public HCIMStatus() {
+        this(false, null, null, null);
+    }
+
+    /**
+     * Check whether the account has died as a HCIM
      *
      * @return Death status
      */
@@ -31,7 +53,8 @@ public class HCIMStatus {
     }
 
     /**
-     * Get date of death
+     * Get the date of death
+     * e.g "12-Jan-2018 23:16"
      *
      * @return Date of death
      */
@@ -40,7 +63,8 @@ public class HCIMStatus {
     }
 
     /**
-     * Get location of death
+     * Get the location of death
+     * e.g "In an unknown location"
      *
      * @return Location of death
      */
@@ -49,34 +73,12 @@ public class HCIMStatus {
     }
 
     /**
-     * Get cause for death
+     * Get cause of death
+     * e.g "Fighting against: Dharok The Wretched"
      *
      * @return Death cause
      */
     public String getCause() {
         return cause;
-    }
-
-    /**
-     * Check HCIM status by parsing hiscores for death icon
-     *
-     * @param name Player name
-     */
-    private void fetchStatus(String name) {
-        String url = "https://secure.runescape.com/m=hiscore_hardcore_ironman/ranking?user=" + name;
-        try{
-            Document d = Jsoup.connect(url).get();
-            Element column = d.selectFirst(".hover .col2 .death-icon .death-icon__details");
-            this.dead = column != null;
-            if(dead) {
-                Elements values = column.children();
-                this.date = values.get(1).text();
-                this.location = values.get(2).text();
-                this.cause = values.get(3).text();
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
     }
 }

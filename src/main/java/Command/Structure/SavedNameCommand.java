@@ -48,7 +48,7 @@ public abstract class SavedNameCommand extends OnReadyDiscordCommand {
         super(
                 trigger,
                 desc,
-                getDefaultHelpText(trigger, defaultLookupArgs, saveTypeName) + "\n\n" + helpText
+                getDefaultHelpText(trigger, defaultLookupArgs, saveTypeName) + "\n\nOther Usage:\n\t" + helpText
         );
         this.maxLength = maxLength;
         this.saveTypeName = saveTypeName;
@@ -63,7 +63,8 @@ public abstract class SavedNameCommand extends OnReadyDiscordCommand {
      * @return trigger [defaultLookupArgs] trigger save [your name]
      */
     public static String getDefaultHelpText(String trigger, String defaultLookupArgs, String saveTypeName) {
-        return trigger + " " + defaultLookupArgs + "\n" + trigger + " save [your " + saveTypeName + "]";
+        return "Basic Use:\n\t" + trigger + " " + defaultLookupArgs
+                + "\n\t" + trigger + " save [your " + saveTypeName + "]";
     }
 
     /**

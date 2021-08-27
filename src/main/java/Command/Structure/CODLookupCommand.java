@@ -11,7 +11,7 @@ public abstract class CODLookupCommand extends LookupCommand {
                 trigger,
                 desc,
                 getHelpText(trigger)
-                        + "\n" + helpText
+                        + "\n\t" + helpText
                         + "\n\nPlatform is assumed to be Battle.net (name#123) unless a platform is specified."
                         + "\n\nAccepted platforms: XBOX, XBL, PSN, BATTLE",
                 30

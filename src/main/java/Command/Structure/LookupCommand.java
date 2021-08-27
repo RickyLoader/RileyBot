@@ -11,7 +11,10 @@ import java.util.List;
  * Look up a user and do something with their saved name
  */
 public abstract class LookupCommand extends SavedNameCommand {
-    public static final String DEFAULT_LOOKUP_ARGS = "[name/me/@someone]", SAVE_TYPE_NAME = "name";
+    public static final String
+            LOOKUP_ARGS = "name/me/@someone",
+            DEFAULT_LOOKUP_ARGS = "[" + LOOKUP_ARGS + "]",
+            SAVE_TYPE_NAME = "name";
     private final HashSet<String> currentLookups = new HashSet<>();
 
     /**
@@ -40,10 +43,29 @@ public abstract class LookupCommand extends SavedNameCommand {
      * @param maxLength Max length of name
      */
     public LookupCommand(String trigger, String desc, String helpText, int maxLength) {
+        this(
+                trigger,
+                desc,
+                helpText,
+                DEFAULT_LOOKUP_ARGS,
+                maxLength
+        );
+    }
+
+    /**
+     * Initialise the command
+     *
+     * @param trigger           Trigger of command
+     * @param desc              Description of command
+     * @param helpText          Help text to be appended to default lookup actions
+     * @param defaultLookupArgs Lookup arguments to display with the default help messages - e.g "[name/me/@someone]"
+     * @param maxLength         Max length of name
+     */
+    public LookupCommand(String trigger, String desc, String helpText, String defaultLookupArgs, int maxLength) {
         super(
                 trigger,
                 desc,
-                DEFAULT_LOOKUP_ARGS,
+                defaultLookupArgs,
                 helpText,
                 maxLength,
                 SAVE_TYPE_NAME

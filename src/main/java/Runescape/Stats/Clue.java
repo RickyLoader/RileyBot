@@ -1,4 +1,4 @@
-package Runescape;
+package Runescape.Stats;
 
 import Bot.ResourceHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -146,7 +146,7 @@ public class Clue {
      * @return Clue completions String
      */
     public String getFormattedCompletions() {
-        return new DecimalFormat("x#,###").format(completions == -1 ? 0 : completions);
+        return new DecimalFormat("x#,###").format(completions);
     }
 
     /**

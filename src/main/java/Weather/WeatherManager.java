@@ -411,7 +411,10 @@ public class WeatherManager {
                 .setColor(EmbedHelper.RED)
                 .setTitle("Weather | No forecast data")
                 .setDescription(
-                        "I wasn't able to find any forecast data for the location: **" + location.getName() + "**"
+                        "I wasn't able to find any forecast data for the location: "
+                                + EmbedHelper.embedURL(location.getName(), location.getDataUrl())
+                                + ".\n\n"
+                                + "This could be because weather was cancelled today or MetService is having issues."
                 )
                 .build();
     }
@@ -436,15 +439,24 @@ public class WeatherManager {
      */
     @Nullable
     private JSONObject getForecastData(Location location) {
-        String data = new NetworkRequest(location.getDataUrl(), false).get().body;
-        if(data == null) {
-            System.out.println(location.getDataUrl());
+        final NetworkResponse response = new NetworkRequest(location.getDataUrl(), false).get();
+
+        // No response from MetService
+        if(response.code != 200) {
             return null;
         }
-        return new JSONObject(data)
-                .getJSONObject("layout")
-                .getJSONObject("primary")
-                .getJSONObject("slots");
+
+        try {
+            return new JSONObject(response.body)
+                    .getJSONObject("layout")
+                    .getJSONObject("primary")
+                    .getJSONObject("slots");
+        }
+
+        // Not JSON response
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -458,6 +470,7 @@ public class WeatherManager {
     public Forecast getForecast(Location location, boolean tomorrow) {
         JSONObject forecastData = getForecastData(location);
 
+        // No response
         if(forecastData == null) {
             return null;
         }
@@ -544,6 +557,29 @@ public class WeatherManager {
     }
 
     /**
+     * Get an optional JSON object from the given JSON data representing the local weather observations
+     * of a location.
+     *
+     * @param observationsData Local weather observations data
+     * @param key              Observation to retrieve data for - e.g "rain"
+     * @return Observation data or null
+     */
+    @Nullable
+    private JSONObject getLocalObservationData(JSONObject observationsData, String key) {
+
+        // Key not included - no observation for this type e.g "rain"
+        if(!observationsData.has(key)) {
+            return null;
+        }
+
+        final JSONArray observationData = observationsData.getJSONArray(key);
+
+        return observationData.isEmpty()
+                ? null // Key is included but no data, what's the point
+                : observationData.getJSONObject(0);
+    }
+
+    /**
      * Parse the given local observation data in to an object.
      * Local observations are the observations of various weather events for a forecast, e.g wind speed or rainfall
      *
@@ -552,25 +588,23 @@ public class WeatherManager {
      */
     private LocalObservations parseLocalObservations(JSONObject localObservationsData) {
         JSONObject observationsData = localObservationsData.getJSONObject("observations");
-        JSONObject temperature = observationsData.getJSONObject("temperature");
+        JSONObject temperature = observationsData.getJSONArray("temperature").getJSONObject(0);
 
         LocalObservationsBuilder observationsBuilder = new LocalObservationsBuilder(
                 temperature.getDouble("current"),
                 temperature.getDouble("feelsLike")
         );
 
-        final String clothingKey = "clothing";
-        if(observationsData.has(clothingKey)) {
-            JSONObject clothing = observationsData.getJSONObject("clothing");
+        JSONObject clothing = getLocalObservationData(localObservationsData, "clothing");
+        if(clothing != null) {
             observationsBuilder.setClothing(
                     clothing.getString("layers"),
                     clothing.getString("windproofLayers")
             );
         }
 
-        final String rainKey = "rain";
-        if(observationsData.has(rainKey)) {
-            JSONObject rain = observationsData.getJSONObject("rain");
+        JSONObject rain = getLocalObservationData(localObservationsData, "rain");
+        if(rain != null) {
             final String
                     humidityKey = "relativeHumidity",
                     rainfallKey = "rainfall";
@@ -586,10 +620,8 @@ public class WeatherManager {
             );
         }
 
-        final String windKey = "wind";
-        if(observationsData.has(windKey)) {
-            JSONObject wind = observationsData.getJSONObject(windKey);
-
+        JSONObject wind = getLocalObservationData(localObservationsData, "wind");
+        if(wind != null) {
             String windDirection = wind.getString("direction");
             String windStrength = wind.getString("strength");
             Double avgSpeed = parseAmbiguousValue(wind.get("averageSpeed"));
@@ -609,13 +641,12 @@ public class WeatherManager {
             );
         }
 
-        final String pressureKey = "pressure";
-        if(observationsData.has(pressureKey)) {
-            JSONObject pressureData = observationsData.getJSONObject(pressureKey);
-            Double pressure = parseAmbiguousValue(pressureData.get("atSeaLevel"));
+        JSONObject pressure = getLocalObservationData(localObservationsData, "pressure");
+        if(pressure != null) {
+            Double pressureValue = parseAmbiguousValue(pressure.get("atSeaLevel"));
             observationsBuilder.setPressure(
-                    pressure == null ? null : pressure.intValue(),
-                    pressureData.getString("trend")
+                    pressureValue == null ? null : pressureValue.intValue(),
+                    pressure.getString("trend")
             );
         }
         return observationsBuilder.build();

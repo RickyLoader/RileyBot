@@ -99,6 +99,9 @@ public class NZHerald extends NewsOutlet {
     @Override
     protected @Nullable Article parseArticleByUrl(String articleUrl) {
         try {
+
+            // Sometimes URL looks like -> [article URL]#Echobox=1631416616-1 & the "echobox" breaks the API response
+            articleUrl = articleUrl.split("#")[0];
             JSONObject articleData = fetchArticleDataByUrl(articleUrl);
 
             // URL is not an article/doesn't exist
@@ -117,7 +120,6 @@ public class NZHerald extends NewsOutlet {
             );
         }
         catch(Exception e) {
-            System.out.println(e.getMessage());
             return null;
         }
     }

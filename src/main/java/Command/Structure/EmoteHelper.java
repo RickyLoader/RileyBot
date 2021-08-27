@@ -976,4 +976,11 @@ public class EmoteHelper {
     public Emote getMedalRank() {
         return get("868910950755999745");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/883217090474025000.png"/>
+     */
+    public Emote getRefresh() {
+        return get("883217090474025000");
+    }
 }

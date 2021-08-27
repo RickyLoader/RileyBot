@@ -1,5 +1,6 @@
-package Runescape;
+package Runescape.Hiscores;
 
+import Runescape.Stats.PlayerStats;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class HiscoresStatsResponse<T extends PlayerStats> {
     private final boolean requestFailed;
-    private final String name;
+    private final String name, url;
     private final T stats;
 
     /**
@@ -18,12 +19,23 @@ public class HiscoresStatsResponse<T extends PlayerStats> {
      *
      * @param name          Player name
      * @param stats         Player stats (will be null if the player doesn't exist/the request timed out/failed)
+     * @param url           URL used to fetch the stats
      * @param requestFailed Request timed out/failed
      */
-    public HiscoresStatsResponse(String name, @Nullable T stats, boolean requestFailed) {
+    public HiscoresStatsResponse(String name, String url, @Nullable T stats, boolean requestFailed) {
         this.name = name;
+        this.url = url;
         this.stats = stats;
         this.requestFailed = requestFailed;
+    }
+
+    /**
+     * Get the URL used to fetch the stats
+     *
+     * @return URL for fetching stats
+     */
+    public String getUrl() {
+        return url;
     }
 
     /**

@@ -1,4 +1,4 @@
-package Runescape;
+package Runescape.Stats;
 
 import Bot.ResourceHandler;
 
@@ -13,18 +13,22 @@ public class Skill {
     private final long rank, xp;
     private final int level, virtualLevel;
     private final SKILL_NAME name;
-    public final DecimalFormat commaFormat = new DecimalFormat("#,###");
+    public static final DecimalFormat commaFormat = new DecimalFormat("#,###");
     private long gained, record;
     public static final int
             ICON_WIDTH = 50,
             DEFAULT_MAX = 99,
-            ABSOLUTE_MAX = 120;
+            ABSOLUTE_MAX = 126,
+            MAX_RANK = 2000000,
+            MAX_XP = 200000000;
     public static final String
             RANK_IMAGE_PATH = ResourceHandler.RUNESCAPE_BASE_PATH + "rank.png",
             BASE_IMAGE_PATH = ResourceHandler.OSRS_BASE_PATH + "Skills/",
             BASE_LARGE_IMAGE_PATH = BASE_IMAGE_PATH + "Large/",
             LARGE_COMBAT_IMAGE_PATH = BASE_LARGE_IMAGE_PATH + "COMBAT.png",
             BASE_SMALL_IMAGE_PATH = BASE_IMAGE_PATH + "Small/";
+
+    public static final long MAX_LEVEL_XP = getLevelExperience(DEFAULT_MAX);
 
     public enum SKILL_NAME {
         ATTACK,
@@ -57,7 +61,6 @@ public class Skill {
         ARCHAEOLOGY,
         OVERALL,
         COMBAT,
-        VIRTUAL_TOTAL_LEVEL,
         UNKNOWN;
 
         /**
@@ -89,17 +92,36 @@ public class Skill {
     /**
      * Create a skill
      *
+     * @param name         Skill name
+     * @param rank         Skill rank
+     * @param level        Level
+     * @param xp           XP value
+     * @param virtualLevel Virtual level (levels after max)
+     */
+    public Skill(SKILL_NAME name, long rank, int level, long xp, int virtualLevel) {
+        this.name = name;
+        this.rank = rank;
+        this.level = fixLevel(name, level);
+        this.xp = xp;
+        this.virtualLevel = virtualLevel;
+    }
+
+    /**
+     * Create a skill, calculate the virtual level.
+     *
      * @param name  Skill name
      * @param rank  Skill rank
      * @param level Level
      * @param xp    XP value
      */
     public Skill(SKILL_NAME name, long rank, int level, long xp) {
-        this.name = name;
-        this.rank = rank;
-        this.level = fixLevel(name, level);
-        this.xp = xp;
-        this.virtualLevel = name == SKILL_NAME.OVERALL || this.level <= 98 ? this.level : calculateVirtualLevel((int) xp);
+        this(
+                name,
+                rank,
+                level,
+                xp,
+                level <= (DEFAULT_MAX - 1) ? level : calculateVirtualLevel((int) xp)
+        );
     }
 
     /**
@@ -112,10 +134,43 @@ public class Skill {
     public Skill(SKILL_NAME name, int rankIndex, String[] csv) {
         this(
                 name,
-                Long.parseLong(csv[rankIndex]),
-                Integer.parseInt(csv[rankIndex + 1]),
-                Long.parseLong(csv[rankIndex + 2])
+                parseRank(csv, rankIndex),
+                parseLevel(csv, rankIndex),
+                parseXp(csv, rankIndex)
         );
+    }
+
+    /**
+     * Parse the rank of the skill using CSV from the hiscores API.
+     *
+     * @param csv       Hiscores CSV
+     * @param rankIndex Index of skill rank value - other values can be obtained relative to this index
+     * @return Skill rank
+     */
+    protected static long parseRank(String[] csv, int rankIndex) {
+        return Long.parseLong(csv[rankIndex]);
+    }
+
+    /**
+     * Parse the level of the skill using CSV from the hiscores API.
+     *
+     * @param csv       Hiscores CSV
+     * @param rankIndex Index of skill rank value - other values can be obtained relative to this index
+     * @return Skill level
+     */
+    protected static int parseLevel(String[] csv, int rankIndex) {
+        return Integer.parseInt(csv[rankIndex + 1]);
+    }
+
+    /**
+     * Parse the XP of the skill using CSV from the hiscores API.
+     *
+     * @param csv       Hiscores CSV
+     * @param rankIndex Index of skill rank value - other values can be obtained relative to this index
+     * @return Skill XP
+     */
+    protected static long parseXp(String[] csv, int rankIndex) {
+        return Long.parseLong(csv[rankIndex + 2]);
     }
 
     /**
@@ -124,13 +179,14 @@ public class Skill {
      * @param number Number to format e.g 1000
      * @return Formatted number String e.g "1,000"
      */
-    private String formatNumber(long number) {
+    public static String formatNumber(long number) {
         return commaFormat.format(number);
     }
 
     /**
      * Check if the player is ranked in this skill.
-     * If a player is not ranked, the level returned from the hiscores will be 1 (even if the player is not level 1).
+     * If a player is not ranked, the rank returned from the hiscores will be -1 and the level will be 1
+     * (even if the player has leveled the skill).
      * A player is considered unranked if they are not in the top 2 million players for a given skill.
      *
      * @return Player is ranked in the skill
@@ -230,7 +286,7 @@ public class Skill {
      * @param xp XP to calculate virtual level for
      * @return Virtual level
      */
-    private int calculateVirtualLevel(int xp) {
+    private static int calculateVirtualLevel(int xp) {
         int level;
         for(level = DEFAULT_MAX; level <= ABSOLUTE_MAX; level++) {
             if(getLevelExperience(level) > xp) {
@@ -246,7 +302,7 @@ public class Skill {
      * @param level Level to calculate experience for
      * @return Experience at given level
      */
-    private int getLevelExperience(int level) {
+    public static int getLevelExperience(int level) {
         double xp = 0;
         for(int i = 1; i < level; i++) {
             xp += Math.floor(
@@ -273,10 +329,12 @@ public class Skill {
      * @return Experience at next level
      */
     public int getXpAtNextLevel() {
-        if(level == ABSOLUTE_MAX) {
-            return getLevelExperience(level);
+
+        // The max XP falls part way through the max virtual level, show max XP as the next goal once at 125/126
+        if(virtualLevel >= ABSOLUTE_MAX - 1) {
+            return MAX_XP;
         }
-        return getLevelExperience(level + 1);
+        return getLevelExperience(virtualLevel + 1);
     }
 
     /**
@@ -285,7 +343,7 @@ public class Skill {
      * @return Experience to be current level
      */
     public int getXpAtCurrentLevel() {
-        return getLevelExperience(level);
+        return getLevelExperience(virtualLevel);
     }
 
     /**
@@ -332,7 +390,7 @@ public class Skill {
      * @param level Level provided by hiscores
      * @return Fixed level
      */
-    private int fixLevel(SKILL_NAME name, int level) {
+    private static int fixLevel(SKILL_NAME name, int level) {
         switch(name) {
             case HITPOINTS:
                 return level == 1 ? 10 : level;
@@ -341,5 +399,35 @@ public class Skill {
             default:
                 return level;
         }
+    }
+
+    /**
+     * Get the percentage progress until the next level.
+     * If the player has max XP, this will be 1.0.
+     *
+     * @return Percentage progress
+     */
+    public double getProgressUntilNextLevel() {
+
+        // XP required to be the current level (not current XP)
+        final int xpAtCurrentLevel = getXpAtCurrentLevel();
+
+        // Total XP required to go from current level (not current XP) to the next level
+        final int totalXpInLevel = getXpAtNextLevel() - xpAtCurrentLevel;
+
+        // Percentage progress until next level (e.g 0.42)
+        return totalXpInLevel == 0 ? 1.0 : ((xp - xpAtCurrentLevel) / (double) totalXpInLevel);
+    }
+
+    /**
+     * Check if the given skill is "maxed" based on the max possible level/XP.
+     * The max XP falls part way through the max virtual level, meaning a skill may be the max virtual level without
+     * having the max XP. In these cases, the skill is not considered maxed until the max XP is reached.
+     *
+     * @param virtual Use virtual levels
+     * @return Skill is maxed
+     */
+    public boolean isMaxed(boolean virtual) {
+        return virtual ? xp == Skill.MAX_XP : level >= Skill.DEFAULT_MAX;
     }
 }

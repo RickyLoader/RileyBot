@@ -1,11 +1,9 @@
-package Runescape.OSRS.Stats;
+package Runescape.Stats;
 
-import Runescape.Clue;
 import Runescape.OSRS.Boss.BossStats;
 import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.RelicTier;
-import Runescape.Skill;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,20 +17,22 @@ public class OSRSLeaguePlayerStats extends OSRSPlayerStats {
     private final ArrayList<Region> regions;
 
     /**
-     * Create OSRS player stats
+     * Create OSRS seasonal league player stats.
+     * These hold extra info for the league, e.g league points/tier and stored relics/regions.
      *
      * @param name       Player name
      * @param url        URL to hiscores CSV
-     * @param skills     Array of skill data
+     * @param skills     Array of player skills (excluding total level)
      * @param clues      Array of clue data
+     * @param total      Total level
      * @param bossStats  List of boss stats
      * @param lmsInfo    Last man standing info
      * @param leagueTier League tier & points
      * @param relicTiers List of relic tiers the player has unlocked
      * @param regions    List of regions the player has unlocked
      */
-    public OSRSLeaguePlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<BossStats> bossStats, LastManStanding lmsInfo, LeagueTier leagueTier, ArrayList<RelicTier> relicTiers, ArrayList<Region> regions) {
-        super(name, url, skills, clues, bossStats, lmsInfo, ACCOUNT.LEAGUE);
+    public OSRSLeaguePlayerStats(String name, String url, Skill[] skills, Clue[] clues, TotalLevel total, List<BossStats> bossStats, LastManStanding lmsInfo, LeagueTier leagueTier, ArrayList<RelicTier> relicTiers, ArrayList<Region> regions) {
+        super(name, url, skills, clues, total, bossStats, lmsInfo, ACCOUNT.LEAGUE);
         this.leagueTier = leagueTier;
         this.relicTiers = relicTiers;
         this.regions = regions;

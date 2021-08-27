@@ -1,30 +1,42 @@
 package Runescape.Stats;
 
-import Runescape.Clue;
-import Runescape.PlayerStats;
-import Runescape.Skill;
-
-import static Runescape.Skill.SKILL_NAME.*;
+import static Runescape.Stats.Skill.SKILL_NAME.*;
 
 public class RS3PlayerStats extends PlayerStats {
-    private final RuneMetrics runeMetrics;
-    private final Clan clan;
+    private RuneMetrics runeMetrics;
+    private Clan clan;
     private HCIMStatus hcimStatus;
 
     /**
      * Create RS3 player stats
      *
-     * @param name        Player name
-     * @param url         URL to hiscores CSV
-     * @param skills      Array of skill data
-     * @param clues       Array of clue data
-     * @param runeMetrics RuneMetrics data
-     * @param type        Account type
+     * @param name   Player name
+     * @param url    URL to hiscores CSV
+     * @param skills Array of player skills (excluding total level)
+     * @param clues  Array of clue data
+     * @param total  Total level
+     * @param type   Account type
      */
-    public RS3PlayerStats(String name, String url, Skill[] skills, Clue[] clues, RuneMetrics runeMetrics, ACCOUNT type, Clan clan) {
-        super(name, url, skills, clues, type);
-        this.runeMetrics = runeMetrics;
+    public RS3PlayerStats(String name, String url, Skill[] skills, Clue[] clues, TotalLevel total, ACCOUNT type) {
+        super(name, url, skills, clues, total, type);
+    }
+
+    /**
+     * Set the clan that the player is a member of
+     *
+     * @param clan Player clan
+     */
+    public void setClan(Clan clan) {
         this.clan = clan;
+    }
+
+    /**
+     * Set the player's RuneMetrics
+     *
+     * @param runeMetrics Player RuneMetrics
+     */
+    public void setRuneMetrics(RuneMetrics runeMetrics) {
+        this.runeMetrics = runeMetrics;
     }
 
     /**

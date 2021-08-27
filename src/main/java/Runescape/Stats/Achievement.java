@@ -1,7 +1,6 @@
-package Runescape.OSRS.Stats;
+package Runescape.Stats;
 
 import Bot.ResourceHandler;
-import Runescape.*;
 import Runescape.OSRS.Boss.Boss;
 import Runescape.OSRS.Boss.BossManager;
 
@@ -31,21 +30,23 @@ public class Achievement {
         UNKNOWN;
 
         /**
-         * Get an achievement type from the achievement metric
+         * Get an achievement type from the achievement metric.
+         * Attempt to locate the metric in the various categories, e.g check if it is a skill name, a boss name,
+         * a clue type, etc.
          *
          * @param metric Achievement metric e.g "attack", "commander_zilyana" etc
          * @return Achievement type
          */
         public static TYPE fromAchievementMetric(String metric) {
-            Skill.SKILL_NAME skill = Skill.SKILL_NAME.fromName(metric);
+            final Skill.SKILL_NAME skill = Skill.SKILL_NAME.fromName(metric);
             if(skill != Skill.SKILL_NAME.UNKNOWN) {
                 return SKILL;
             }
-            Boss boss = BossManager.getInstance().getBossByName(metric);
+            final Boss boss = BossManager.getInstance().getBossByName(metric);
             if(boss.getId() != Boss.BOSS_ID.UNKNOWN) {
                 return BOSS;
             }
-            Clue.TYPE clue = Clue.TYPE.fromTypeName(getClueTypeName(metric));
+            final Clue.TYPE clue = Clue.TYPE.fromTypeName(getClueTypeName(metric));
             if(clue != Clue.TYPE.UNKNOWN) {
                 return CLUE;
             }

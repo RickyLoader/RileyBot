@@ -1,59 +1,39 @@
 package Command.Commands.Lookup;
 
 import Bot.DiscordUser;
-import Command.Structure.CommandContext;
 import Command.Structure.EmoteHelper;
-import Command.Structure.LookupCommand;
-import Runescape.Stats.RS3Hiscores;
+import Runescape.Hiscores.RS3Hiscores;
+import Runescape.Stats.PlayerStats;
+import Runescape.ImageBuilding.RS3HiscoresImageBuilder;
+import Runescape.Stats.RS3PlayerStats;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.HashSet;
+import java.util.Arrays;
 
 /**
  * Look up a RS3 player and build an image with their stats
  */
-public class RS3LookupCommand extends LookupCommand {
-    private static final String TRIGGER = "rs3lookup";
-    private final HashSet<ARGUMENT> arguments;
-    private RS3Hiscores hiscores;
-
-    public enum ARGUMENT {
-        VIRTUAL
-    }
+public class RS3LookupCommand extends RunescapeLookupCommand<RS3PlayerStats, RS3Hiscores, RS3HiscoresImageBuilder> {
 
     public RS3LookupCommand() {
         super(
-                TRIGGER,
+                "rs3lookup",
                 "Check out someone's stats on RS3!",
-                "[" + ARGUMENT.VIRTUAL.name().toLowerCase() + "] " + TRIGGER + DEFAULT_LOOKUP_ARGS,
-                12
+                Arrays.asList(
+                        ARGUMENT.VIRTUAL,
+                        ARGUMENT.RUNEMETRICS,
+                        ARGUMENT.CLAN
+                ),
+                Arrays.asList(
+                        PlayerStats.ACCOUNT.NORMAL,
+                        PlayerStats.ACCOUNT.IRON,
+                        PlayerStats.ACCOUNT.HARDCORE,
+                        PlayerStats.ACCOUNT.LOCATE
+                ),
+                new RS3Hiscores()
         );
-        this.arguments = new HashSet<>();
-    }
-
-    @Override
-    public void onReady(JDA jda, EmoteHelper emoteHelper) {
-        this.hiscores = new RS3Hiscores(emoteHelper, "Type: " + getTrigger() + " for help");
-    }
-
-    @Override
-    public void processName(String name, CommandContext context) {
-        hiscores.buildImage(name, context.getMessageChannel(), arguments);
-    }
-
-    @Override
-    public String stripArguments(String query) {
-        arguments.clear();
-
-        if(query.startsWith(ARGUMENT.VIRTUAL.name().toLowerCase())) {
-            query = query.replaceFirst(ARGUMENT.VIRTUAL.name().toLowerCase(), "").trim();
-            arguments.add(ARGUMENT.VIRTUAL);
-        }
-
-        return query;
     }
 
     @Override
@@ -67,8 +47,7 @@ public class RS3LookupCommand extends LookupCommand {
     }
 
     @Override
-    public boolean matches(String query, Message message) {
-        return super.matches(query, message)
-                || query.startsWith(ARGUMENT.VIRTUAL.name().toLowerCase()) && query.contains(getTrigger());
+    protected RS3HiscoresImageBuilder initialiseImageBuilder(RS3Hiscores hiscores, JDA jda, EmoteHelper emoteHelper) {
+        return new RS3HiscoresImageBuilder(hiscores, emoteHelper, "Type: " + getTrigger() + " for help");
     }
 }

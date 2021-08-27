@@ -1,7 +1,5 @@
 package Hangman;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * Dictionary word
  */
@@ -15,7 +13,7 @@ public class DictWord {
      * @param definition Dictionary definition
      */
     public DictWord(String word, String definition) {
-        this.word = StringUtils.capitalize(word);
+        this.word = word;
         this.definition = formatDefinition(definition);
     }
 

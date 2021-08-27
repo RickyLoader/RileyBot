@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Look up multiple users and do something with their saved names
  */
 public abstract class MultiLookupCommand extends SavedNameCommand {
-    private final static String DEFAULT_LOOKUP_ARGS = "[me] [@user1, @user2...]";
+    private final static String DEFAULT_LOOKUP_ARGS = "[@user1, @user2, me...]";
 
     /**
      * Initialise the command

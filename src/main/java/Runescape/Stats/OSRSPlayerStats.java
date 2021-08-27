@@ -1,16 +1,13 @@
-package Runescape.OSRS.Stats;
+package Runescape.Stats;
 
 import Runescape.OSRS.Boss.BossStats;
-import Runescape.Clue;
-import Runescape.PlayerStats;
-import Runescape.Skill;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static Runescape.Skill.SKILL_NAME.*;
+import static Runescape.Stats.Skill.SKILL_NAME.*;
 
 /**
  * OSRS player stats from hiscores
@@ -26,14 +23,15 @@ public class OSRSPlayerStats extends PlayerStats {
      *
      * @param name      Player name
      * @param url       URL to hiscores CSV
-     * @param skills    Array of skill data
+     * @param skills    Array of player skills (excluding total level)
      * @param clues     Array of clue data
+     * @param total     Total level
      * @param bossStats List of boss stats
      * @param lmsInfo   Last man standing info
      * @param type      Account type
      */
-    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, List<BossStats> bossStats, LastManStanding lmsInfo, ACCOUNT type) {
-        super(name, url, skills, clues, type);
+    public OSRSPlayerStats(String name, String url, Skill[] skills, Clue[] clues, TotalLevel total, List<BossStats> bossStats, LastManStanding lmsInfo, ACCOUNT type) {
+        super(name, url, skills, clues, total, type);
         this.bossStats = bossStats;
         this.lmsInfo = lmsInfo;
         this.completedAchievements = new ArrayList<>();
@@ -52,6 +50,15 @@ public class OSRSPlayerStats extends PlayerStats {
         else {
             inProgressAchievements.add(achievement);
         }
+    }
+
+    /**
+     * Check if the stats are for a seasonal league
+     *
+     * @return Stats are for seasonal league
+     */
+    public boolean isLeague() {
+        return getAccountType() == ACCOUNT.LEAGUE;
     }
 
     /**
@@ -120,16 +127,6 @@ public class OSRSPlayerStats extends PlayerStats {
      */
     public List<BossStats> getBossStats() {
         return bossStats;
-    }
-
-    /**
-     * Add weekly gained XP to the skill of the given name
-     *
-     * @param skillName Skill name
-     * @param gained    XP gained
-     */
-    public void addGainedXP(Skill.SKILL_NAME skillName, long gained) {
-        getSkill(skillName).setGainedXp(gained);
     }
 
     /**

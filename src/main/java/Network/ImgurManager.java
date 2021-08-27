@@ -108,21 +108,27 @@ public class ImgurManager {
      * Upload the given image to imgbb
      *
      * @param image Image to upload
+     * @param png   Upload as PNG instead of JPG
      * @return URL to uploaded image or null
      */
-    public static String alternativeUpload(BufferedImage image) {
-        String base64 = toBase64PNG(image);
-        if(base64 == null) {
+    public static String alternativeUpload(BufferedImage image, boolean png) {
+        try {
+            final String base64 = png ? toBase64PNG(image) : toBase64JPEG(image);
+            if(base64 == null) {
+                return null;
+            }
+
+            final String url = "https://api.imgbb.com/1/upload?key=" + Secret.IMGBB_KEY;
+            RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("image", base64)
+                    .build();
+
+            NetworkResponse response = new NetworkRequest(url, false).post(body);
+            return new JSONObject(response.body).getJSONObject(DATA_KEY).getString("url");
+        }
+        catch(Exception e) {
             return null;
         }
-
-        String url = "https://api.imgbb.com/1/upload?key=" + Secret.IMGBB_KEY;
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("image", base64)
-                .build();
-
-        NetworkResponse response = new NetworkRequest(url, false).post(body);
-        return new JSONObject(response.body).getJSONObject(DATA_KEY).getString("url");
     }
 
     /**
@@ -134,7 +140,7 @@ public class ImgurManager {
      */
     public static String uploadImage(BufferedImage image, boolean png) {
         try {
-            String base64 = png ? toBase64PNG(image) : toBase64JPEG(image);
+            final String base64 = png ? toBase64PNG(image) : toBase64JPEG(image);
             if(base64 == null) {
                 return null;
             }
@@ -144,11 +150,12 @@ public class ImgurManager {
                     .addFormDataPart("type", "base64")
                     .build();
 
-            String response = new NetworkRequest(BASE_API_URL + "image", false)
+            final String response = new NetworkRequest(BASE_API_URL + "image", false)
                     .post(body, getHeaders(), false).body;
             return new JSONObject(response).getJSONObject(DATA_KEY).getString(LINK_KEY);
         }
         catch(Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

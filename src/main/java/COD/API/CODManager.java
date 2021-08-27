@@ -78,8 +78,9 @@ public abstract class CODManager {
      * @return Map of codename -> weapon
      */
     private HashMap<String, Weapon> readWeapons() {
-        HashMap<String, Weapon> weapons = new HashMap<>();
-        JSONObject weaponList = getAssetJSON("weapons.json", "weapons");
+        final HashMap<String, Weapon> weapons = new HashMap<>();
+        final JSONObject weaponList = getAssetJSON("weapons.json", "weapons");
+        final String propertyKey = "property";
 
         for(String categoryName : weaponList.keySet()) {
             JSONObject categoryData = weaponList.getJSONObject(categoryName);
@@ -99,7 +100,7 @@ public abstract class CODManager {
                             weaponName,
                             gameName,
                             imageURL,
-                            weaponData.has("property") ? weaponData.getString("property") : null,
+                            weaponData.has(propertyKey) ? weaponData.getString(propertyKey) : null,
                             image
                     );
                 }
@@ -135,11 +136,14 @@ public abstract class CODManager {
      * @return Map of weapon variant id -> weapon variant
      */
     private HashMap<Integer, Variant> parseVariants(JSONObject weaponData, String weaponName, String weaponCategory) {
-        HashMap<Integer, Variant> variants = new HashMap<>();
-        if(!weaponData.has("variants")) {
+        final HashMap<Integer, Variant> variants = new HashMap<>();
+        final String variantsKey = "variants";
+
+        if(!weaponData.has(variantsKey)) {
             return variants;
         }
-        JSONObject variantData = weaponData.getJSONObject("variants");
+
+        JSONObject variantData = weaponData.getJSONObject(variantsKey);
         for(String variantIdString : variantData.keySet()) {
             JSONObject variant = variantData.getJSONObject(variantIdString);
             int variantId = Integer.parseInt(variantIdString);
@@ -165,11 +169,15 @@ public abstract class CODManager {
      * @return Map of attachment codename -> attachment
      */
     private HashMap<String, Attachment> parseAttachments(JSONObject weaponData, String weaponName, String weaponCategory) {
-        HashMap<String, Attachment> attachments = new HashMap<>();
-        if(!weaponData.has("attachments")) {
+        final HashMap<String, Attachment> attachments = new HashMap<>();
+        final String attachmentsKey = "attachments";
+        final String categoryBlockKey = "blocksCategory";
+
+        if(!weaponData.has(attachmentsKey)) {
             return attachments;
         }
-        JSONObject attachmentData = weaponData.getJSONObject("attachments");
+
+        JSONObject attachmentData = weaponData.getJSONObject(attachmentsKey);
         for(String attachmentName : attachmentData.keySet()) {
             JSONObject attachment = attachmentData.getJSONObject(attachmentName);
             String imagePath = basePath + "Attachments/"
@@ -187,8 +195,8 @@ public abstract class CODManager {
                     .setControlStat(stats.getInt("control"))
                     .build();
 
-            CATEGORY blockedCategory = attachment.has("blocksCategory")
-                    ? CATEGORY.valueOf(attachment.getString("blocksCategory").toUpperCase())
+            CATEGORY blockedCategory = attachment.has(categoryBlockKey)
+                    ? CATEGORY.valueOf(attachment.getString(categoryBlockKey).toUpperCase())
                     : CATEGORY.NONE;
 
             attachments.put(

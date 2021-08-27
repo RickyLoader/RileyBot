@@ -5,6 +5,12 @@ import Command.Commands.GIFCommand;
 import Network.ImgurManager;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
+import Network.Secret;
+import Reddit.PollContent.RedditPoll.Option;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,6 +23,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Reddit API functions
@@ -25,21 +32,20 @@ public class Reddit {
     public static final String LOGO = "https://i.imgur.com/zSNgbNA.png";
     private static final String
             BASE_URL = "https://www.reddit.com",
-            SUBREDDIT_REGEX = "https://(www.|old.)?reddit.com/r/[a-zA-Z0-9_]+/?",
+            BASE_DOMAIN = "(www\\.|old\\.|v\\.)?redd(\\.?)it.(com)?",
+            API_DOMAIN = "oauth.reddit.com",
+            SUBREDDIT_REGEX = "https://" + BASE_DOMAIN + "/r/[a-zA-Z0-9_]+/?",
             STANDARD_URL_REGEX = SUBREDDIT_REGEX + ".+/comments/.+/.+/?",
-            VIDEO_URL_REGEX = BASE_URL + "/video/.+",
+            VIDEO_URL_REGEX = "https://" + BASE_DOMAIN + "/video/.+",
             SHORTENED_VIDEO_URL_REGEX = "https://v.redd.it/.+",
             GALLERY_POST_URL_REGEX = BASE_URL + "/gallery/.+",
-            POLL_KEY = "poll_data",
             DATA_KEY = "data",
-            HINT_KEY = "post_hint",
-            JSON = ".json?raw_json=1",
+            ID_KEY = "id",
             CHILDREN_KEY = "children",
             URL_KEY = "url",
-            THUMBNAIL_KEY = "thumbnail",
-            MEDIA_KEY = "media",
-            VOTE_COUNT_KEY = "vote_count",
-            CROSSPOST_KEY = "crosspost_parent_list";
+            POLL_ENDPOINT_ID = "a20cc8dd230d"; // Independent from a specific poll
+
+    private AccessToken accessToken;
 
     public enum URL_TYPE {
         SUBREDDIT, // https://www.reddit.com/r/Eyebleach/
@@ -48,6 +54,97 @@ public class Reddit {
         STANDARD_VIDEO, // https://reddit.com/video/1li3tukkbje71
         GALLERY_POST, // https://www.reddit.com/gallery/hrrh23
         NONE
+    }
+
+    /**
+     * Login to Reddit
+     */
+    public Reddit() {
+        this.accessToken = login();
+    }
+
+    /**
+     * Attempt to get an access token for authenticating with the Reddit API.
+     * This may fail and null will be returned.
+     *
+     * @return Access token or null
+     */
+    @Nullable
+    private AccessToken login() {
+        final String url = BASE_URL + "/api/v1/access_token";
+
+        // Attach client ID & client secret for authentication
+        final HashMap<String, String> headers = new HashMap<>();
+        final String authString = Secret.REDDIT_CLIENT_ID + ":" + Secret.REDDIT_CLIENT_SECRET;
+        headers.put("Authorization", "Basic " + Base64.encodeBase64String(authString.getBytes()));
+
+        // Attach the access token grant type & client login credentials
+        final FormBody requestBody = new FormBody.Builder()
+                .add("grant_type", "password")
+                .add("username", Secret.REDDIT_USER)
+                .add("password", Secret.REDDIT_PASSWORD)
+                .build();
+
+        final NetworkResponse response = new NetworkRequest(url, false).post(requestBody, headers, false);
+
+        // Reddit did not respond
+        if(response.code != 200) {
+            return null;
+        }
+
+        final JSONObject responseBody = new JSONObject(response.body);
+        final String accessTokenKey = "access_token";
+
+        // Error with the request
+        if(!responseBody.has(accessTokenKey)) {
+            return null;
+        }
+
+        return new AccessToken(
+                responseBody.getString(accessTokenKey),
+                new Date(System.currentTimeMillis() + responseBody.getInt("expires_in") * 1000L)
+        );
+    }
+
+    /**
+     * Make an authenticated request to the Reddit API and return the JSON response.
+     * If an error occurs e.g authentication, null will be returned.
+     *
+     * @param url Reddit URL - Subreddit/post etc (not API URL)
+     * @return JSON response
+     */
+    @Nullable
+    private String performApiRequest(String url) {
+
+        // Strip parameters
+        url = url.split("\\?")[0];
+
+        // Make sure the access token is available
+        if(this.accessToken.isExpired()) {
+            final AccessToken accessToken = login();
+
+            // Failed to login
+            if(accessToken == null) {
+                return null;
+            }
+
+            this.accessToken = accessToken;
+        }
+
+        final String apiUrl = url.replaceFirst(BASE_DOMAIN, API_DOMAIN) + "?api_type=json&raw_json=1";
+
+        // Attach access token to request
+        final HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + accessToken.getToken());
+
+        final NetworkResponse response = new NetworkRequest(apiUrl, false).get(headers);
+
+        // Issue with request
+        if(response.code != 200) {
+            return null;
+        }
+
+        return response.body;
     }
 
     /**
@@ -99,16 +196,14 @@ public class Reddit {
             }
         }
 
-        // Strip parameters
-        url = url.split("\\?")[0];
-        NetworkResponse response = new NetworkRequest(url + JSON, false).get();
+        final String responseBody = performApiRequest(url);
 
         // Failed to retrieve JSON (issue with Reddit/URL)
-        if(response.code != 200) {
+        if(responseBody == null) {
             return null;
         }
 
-        JSONObject postData = new JSONArray(response.body)
+        JSONObject postData = new JSONArray(responseBody)
                 .getJSONObject(0)
                 .getJSONObject(DATA_KEY)
                 .getJSONArray(CHILDREN_KEY)
@@ -288,7 +383,6 @@ public class Reddit {
         return type != URL_TYPE.NONE && type != URL_TYPE.SUBREDDIT;
     }
 
-
     /**
      * Reddit videos have the video & audio tracks served separately, attempt to
      * use the https://viddit.red/ website to get a download URL for the combined tracks.
@@ -322,15 +416,17 @@ public class Reddit {
     private PostContent getPostContent(JSONObject post, String postUrl, boolean fetchVideo) {
 
         // Media is stored in the original post
-        if(post.has(CROSSPOST_KEY)) {
-            post = post.getJSONArray(CROSSPOST_KEY).getJSONObject(0);
+        final String crosspostKey = "crosspost_parent_list";
+        if(post.has(crosspostKey)) {
+            post = post.getJSONArray(crosspostKey).getJSONObject(0);
         }
 
         final String text = post.getString("selftext");
 
         // Poll post
-        if(post.has(POLL_KEY)) {
-            return parsePollDetails(post.getJSONObject(POLL_KEY), text);
+        final String pollKey = "poll_data";
+        if(post.has(pollKey)) {
+            return parsePollDetails(post.getJSONObject(pollKey), text, post.getString("name"));
         }
 
         // Video post
@@ -343,8 +439,9 @@ public class Reddit {
             final String url = post.getString(URL_KEY);
 
             // Link post/embedded video
-            if(post.has(HINT_KEY)) {
-                final String hint = post.getString(HINT_KEY);
+            final String hintKey = "post_hint";
+            if(post.has(hintKey)) {
+                final String hint = post.getString(hintKey);
 
                 // Link may lead to an image
                 switch(hint) {
@@ -407,36 +504,130 @@ public class Reddit {
     }
 
     /**
+     * Parse a map of options from a poll.
+     * These optionally include the number of votes for the option.
+     * Map from option ID -> option
+     *
+     * @param optionsData Poll options JSON data array
+     * @return Map of poll options
+     */
+    private HashMap<String, Option> parsePollOptions(JSONArray optionsData) {
+        final HashMap<String, Option> options = new HashMap<>();
+
+        final String voteCountKey = "vote_count";
+        for(int i = 0; i < optionsData.length(); i++) {
+            final JSONObject optionData = optionsData.getJSONObject(i);
+            final String id = optionData.getString(ID_KEY);
+
+            options.put(
+                    id,
+                    new Option(
+                            optionData.getString(ID_KEY),
+                            optionData.getString("text"),
+
+                            // Option votes may not be available
+                            optionData.has(voteCountKey) ? optionData.getInt(voteCountKey) : 0
+                    )
+            );
+        }
+
+        return options;
+    }
+
+    /**
      * Parse poll post content from the given JSON data for a poll.
+     * Poll results are unavailable until either the poll ends, or the user votes in the poll.
+     * If the results are unavailable, attempt to vote for a random option and retrieve the results.
      *
      * @param pollData Poll JSON data
      * @param postText Text from the poll post - usually describes poll
+     * @param postId   ID of the post - e.g "t3_pj92ok"
      * @return Poll post content
      */
-    private PollContent parsePollDetails(JSONObject pollData, String postText) {
-        JSONArray optionsData = pollData.getJSONArray("options");
+    private PollContent parsePollDetails(JSONObject pollData, String postText, String postId) {
+        final String optionsKey = "options";
+        final JSONArray pollOptionsData = pollData.getJSONArray(optionsKey);
+        final Date closingDate = new Date(pollData.getLong("voting_end_timestamp"));
 
-        PollContent.RedditPoll.Option[] options = new PollContent.RedditPoll.Option[optionsData.length()];
+        // Poll results are available if the user has voted or the poll has closed
+        boolean resultsAvailable = !pollData.isNull("user_selection")
+                || new Date(System.currentTimeMillis()).after(closingDate);
 
-        // Parse poll options
-        for(int i = 0; i < optionsData.length(); i++) {
-            JSONObject optionData = optionsData.getJSONObject(i);
-            final String text = optionData.getString("text");
+        final HashMap<String, Option> options = parsePollOptions(pollOptionsData);
 
-            // Option votes are not available until poll closes
-            options[i] = optionData.has(VOTE_COUNT_KEY)
-                    ? new PollContent.RedditPoll.Option(text, optionData.getInt(VOTE_COUNT_KEY))
-                    : new PollContent.RedditPoll.Option(text);
+        // Attempt to vote in the poll and retrieve the results (may fail)
+        if(!resultsAvailable) {
+            final String voteResponse = voteInPoll(postId, new ArrayList<>(options.values()).get(0).getId());
+
+            // Vote successful, parse options (vote results included)
+            if(voteResponse != null) {
+                final JSONArray updatedPollOptionsData = new JSONObject(voteResponse)
+                        .getJSONObject(DATA_KEY)
+                        .getJSONObject("updatePostPollVoteState")
+                        .getJSONObject("poll")
+                        .getJSONArray(optionsKey);
+
+                // Add votes to options
+                for(int i = 0;i<updatedPollOptionsData.length();i++){
+                    final JSONObject optionData = updatedPollOptionsData.getJSONObject(i);
+                    options.get(optionData.getString(ID_KEY)).updateVotes(optionData.getInt("voteCount"));
+                }
+
+                resultsAvailable = true;
+            }
         }
 
         return new PollContent(
                 postText,
                 new PollContent.RedditPoll(
+
+                        // Total votes are always available, where these votes were placed is not
                         pollData.getInt("total_vote_count"),
-                        new Date(pollData.getLong("voting_end_timestamp")),
-                        options
+
+                        closingDate,
+                        options.values().toArray(new Option[0]),
+                        resultsAvailable
                 )
         );
+    }
+
+    /**
+     * Attempt to vote for an option in a given poll. If this is successful, return the JSON response
+     * (containing the poll options now including votes). Otherwise null will be returned.
+     *
+     * @param postId   ID of the post - e.g "t3_pj92ok"
+     * @param optionId ID of the poll option to vote for - e.g "10315707"
+     * @return JSON response or null (if fail)
+     */
+    @Nullable
+    private String voteInPoll(String postId, String optionId) {
+        final HashMap<String, String> headers = new HashMap<>();
+
+        // Hardcode access token, they explicitly ignore others
+        headers.put("Authorization", "Bearer 1126098154451-wT8yxSAusBkvo0kJ0ybPkvvvakM");
+
+        final String body = new JSONObject()
+                .put("id", POLL_ENDPOINT_ID)
+                .put("variables",
+                        new JSONObject()
+                                .put("input",
+                                        new JSONObject()
+                                                .put("postId", postId)
+                                                .put("optionId", optionId)
+                                )
+                )
+                .toString();
+
+        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
+        final String url = "https://gql.reddit.com/?request_timestamp=" + System.currentTimeMillis();
+        final NetworkResponse response = new NetworkRequest(url, false).post(requestBody, headers, false);
+
+        // Issue with response
+        if(response.code != 200) {
+            return null;
+        }
+
+        return response.body;
     }
 
     /**
@@ -450,11 +641,11 @@ public class Reddit {
      * @return Video post content
      */
     private VideoPostContent parseVideoDetails(String postUrl, JSONObject videoData, boolean fetchVideo) {
-        JSONObject details = videoData.getJSONObject(MEDIA_KEY).getJSONObject("reddit_video");
+        JSONObject details = videoData.getJSONObject("media").getJSONObject("reddit_video");
         Boolean audioStatus = getAudioStatus(details);
 
         return new VideoPostContent(
-                videoData.getString(THUMBNAIL_KEY),
+                videoData.getString("thumbnail"),
 
                 /*
                  * Only attempt to get a download URL for the video + audio if the post indicates an audio track is
@@ -569,9 +760,14 @@ public class Reddit {
     @Nullable
     private Subreddit getSubredditByName(String name) {
         try {
-            String json = new NetworkRequest(BASE_URL + "/r/" + name + "/about" + JSON, false).get().body;
+            final String responseBody = performApiRequest(BASE_URL + "/r/" + name + "/about");
 
-            JSONObject info = new JSONObject(json)
+            // Failed to retrieve JSON (issue with Reddit/URL)
+            if(responseBody == null) {
+                return null;
+            }
+
+            JSONObject info = new JSONObject(responseBody)
                     .getJSONObject(DATA_KEY);
 
             String icon = info.getString("icon_img");
@@ -596,12 +792,18 @@ public class Reddit {
      */
     public ArrayList<RedditPost> getPostsBySubreddit(Subreddit subreddit) {
         try {
-            ArrayList<RedditPost> posts = new ArrayList<>();
+            final String responseBody = performApiRequest(subreddit.getUrl());
 
-            NetworkResponse response = new NetworkRequest(subreddit.getUrl() + JSON, false).get();
-            JSONArray postList = new JSONObject(response.body)
+            // Failed to retrieve JSON (issue with Reddit/URL)
+            if(responseBody == null) {
+                return null;
+            }
+
+            final JSONArray postList = new JSONObject(responseBody)
                     .getJSONObject(DATA_KEY)
                     .getJSONArray(CHILDREN_KEY);
+
+            ArrayList<RedditPost> posts = new ArrayList<>();
 
             for(int i = 0; i < postList.length(); i++) {
                 posts.add(parsePost(postList.getJSONObject(i), false, subreddit));

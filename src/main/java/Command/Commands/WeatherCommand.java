@@ -78,8 +78,10 @@ public class WeatherCommand extends OnReadyDiscordCommand {
                 .collect(Collectors.toCollection(ArrayList::new));
 
         Location toDisplay = filtered.isEmpty() ? locations.get(0) : filtered.get(0);
-        Forecast forecast = weatherManager.getForecast(toDisplay, tomorrow);
 
+        final Forecast forecast = weatherManager.getForecast(toDisplay, tomorrow);
+
+        // No data/MetService down
         if(forecast == null) {
             channel.sendMessage(weatherManager.getNoForecastEmbed(toDisplay)).queue();
             return;
