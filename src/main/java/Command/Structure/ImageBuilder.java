@@ -78,4 +78,24 @@ public abstract class ImageBuilder {
         g.dispose();
         return copy;
     }
+
+    /**
+     * Resize the given image (this returns a copy of the image).
+     *
+     * @param image  Image to resize
+     * @param width  Desired width of resized image
+     * @param height Desired height of resized image
+     * @return Resized image (copy of the original image)
+     */
+    public static BufferedImage resizeImage(BufferedImage image, int width, int height) {
+        BufferedImage resized = new BufferedImage(
+                width,
+                height,
+                BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics g = resized.getGraphics();
+        g.drawImage(image, 0, 0, width, height, null);
+        g.dispose();
+        return resized;
+    }
 }

@@ -6,6 +6,7 @@ import COD.Assets.*;
 import COD.Assets.Attributes.Attribute;
 import COD.Match.Loadout;
 import COD.Match.LoadoutWeapon;
+import Command.Structure.ImageBuilder;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -212,7 +213,7 @@ public class LoadoutImageManager {
         int x = 0;
         Graphics g = supersImage.getGraphics();
         for(FieldUpgrade fieldUpgrade : fieldUpgrades) {
-            BufferedImage resizedSuper = resizeImage(
+            BufferedImage resizedSuper = ImageBuilder.resizeImage(
                     fieldUpgrade.getImage(),
                     SUPER_SECTION.getWidth(),
                     SUPER_SECTION.getHeight()
@@ -230,26 +231,6 @@ public class LoadoutImageManager {
         }
         g.dispose();
         return supersImage;
-    }
-
-    /**
-     * Resize the given image
-     *
-     * @param image  Image to resize
-     * @param width  Desired width of resized image
-     * @param height Desired height of resized image
-     * @return Resized image
-     */
-    private BufferedImage resizeImage(BufferedImage image, int width, int height) {
-        BufferedImage resized = new BufferedImage(
-                width,
-                height,
-                BufferedImage.TYPE_INT_ARGB
-        );
-        Graphics g = resized.getGraphics();
-        g.drawImage(image, 0, 0, width, height, null);
-        g.dispose();
-        return resized;
     }
 
     /**
