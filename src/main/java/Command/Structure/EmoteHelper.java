@@ -847,7 +847,7 @@ public class EmoteHelper {
     /**
      * <img src = "https://cdn.discordapp.com/emojis/854963157277736960.png"/>
      */
-    public Emote getNightFog() {
+    public Emote getFog() {
         return get("854963157277736960");
     }
 
@@ -982,5 +982,33 @@ public class EmoteHelper {
      */
     public Emote getRefresh() {
         return get("883217090474025000");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/889832470315429908.png"/>
+     */
+    public Emote getLocateRunescapeAccountType() {
+        return get("889832470315429908");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/889829150167293972.png"/>
+     */
+    public Emote getUltimateIronmanHelmet() {
+        return get("889829150167293972");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/889828773288083467.png"/>
+     */
+    public Emote getIronmanHelmet() {
+        return get("889828773288083467");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/889828738659938324.png"/>
+     */
+    public Emote getHardcoreIronmanHelmet() {
+        return get("889828738659938324");
     }
 }
