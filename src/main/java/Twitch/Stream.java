@@ -1,5 +1,7 @@
 package Twitch;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.text.NumberFormat;
 import java.util.Date;
 
@@ -10,7 +12,7 @@ public class Stream {
     private final String title, thumbnail;
     private final Game game;
     private final Date started;
-    private final int viewers;
+    private final Integer viewers;
 
     /**
      * Create a stream
@@ -18,10 +20,10 @@ public class Stream {
      * @param title     Stream title
      * @param game      Game being played in stream
      * @param started   Date of stream start
-     * @param viewers   Number of viewers watching the stream
+     * @param viewers   Number of viewers watching the stream (this is null if unable to locate)
      * @param thumbnail URL to the stream thumbnail
      */
-    public Stream(String title, Game game, Date started, int viewers, String thumbnail) {
+    public Stream(String title, Game game, Date started, @Nullable Integer viewers, String thumbnail) {
         this.title = title;
         this.game = game;
         this.started = started;
@@ -47,7 +49,7 @@ public class Stream {
     public String formatViewers() {
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(true);
-        return format.format(viewers);
+        return viewers == null ? "Unknown" : format.format(viewers);
     }
 
     /**

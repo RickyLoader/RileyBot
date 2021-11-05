@@ -4,6 +4,7 @@ import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
 import Network.Secret;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,6 +26,7 @@ public class TwitchTV {
 
     private final static String
             LOGIN_KEY = "broadcaster_login",
+            DATA_KEY = "data",
             VIEWER_KEY = "viewer_count";
 
     private final HashMap<String, Game> gamesById;
@@ -55,25 +57,33 @@ public class TwitchTV {
      * Fetch the total followers for the given Twitch channel id
      *
      * @param id Twitch channel id
-     * @return Total followers
+     * @return Total followers or null
      */
-    public int fetchFollowers(String id) {
-        JSONObject response = new JSONObject(twitchRequest("users/follows?to_id=" + id).body);
-        return response.getInt("total");
+    @Nullable
+    public Integer fetchFollowers(String id) {
+        final JSONObject response = twitchRequest("users/follows?to_id=" + id);
+        return response == null ? null : response.getInt("total");
     }
 
     /**
      * Search Twitch for streamers with the given query in their name.
      *
      * @param nameQuery Query to search for in the streamer name
-     * @return List of Twitch streamer results
+     * @return List of Twitch streamer results (may be empty if results are unable to be retrieved)
      */
     public ArrayList<Streamer> searchStreamersByName(String nameQuery) {
-        String endpoint = "search/channels?first=20&query=" + nameQuery;
-        JSONArray results = new JSONObject(twitchRequest(endpoint).body).getJSONArray("data");
-        ArrayList<Streamer> streamers = new ArrayList<>();
-        for(int i = 0; i < results.length(); i++) {
-            JSONObject streamerData = results.getJSONObject(i);
+        final ArrayList<Streamer> streamers = new ArrayList<>();
+        final JSONObject response = twitchRequest("search/channels?first=20&query=" + nameQuery);
+
+        // Failed to retrieve any results
+        if(response == null) {
+            return streamers;
+        }
+
+        final JSONArray streamerList = response.getJSONArray(DATA_KEY);
+
+        for(int i = 0; i < streamerList.length(); i++) {
+            JSONObject streamerData = streamerList.getJSONObject(i);
             streamers.add(
                     parseStreamer(
                             streamerData,
@@ -82,10 +92,12 @@ public class TwitchTV {
                     )
             );
         }
+
         ArrayList<Streamer> matching = streamers
                 .stream()
                 .filter(s -> s.getLoginName().equalsIgnoreCase(nameQuery))
                 .collect(Collectors.toCollection(ArrayList::new));
+
         return matching.isEmpty() ? streamers : matching;
     }
 
@@ -93,12 +105,19 @@ public class TwitchTV {
      * Get the top 20 online streamers in the given category.
      *
      * @param categoryId ID of category to get streamers from
-     * @return List of online Twitch streamer results
+     * @return List of online Twitch streamer results (may be empty if results are unable to be retrieved)
      */
     public ArrayList<Streamer> getStreamersByCategoryId(long categoryId) {
-        ArrayList<Streamer> streamers = new ArrayList<>();
-        String endpoint = "streams?game_id=" + categoryId;
-        JSONArray results = new JSONObject(twitchRequest(endpoint).body).getJSONArray("data");
+        final ArrayList<Streamer> streamers = new ArrayList<>();
+        final JSONObject response = twitchRequest("streams?game_id=" + categoryId);
+
+        // Failed to retrieve any results
+        if(response == null) {
+            return streamers;
+        }
+
+        final JSONArray results = response.getJSONArray(DATA_KEY);
+
         for(int i = 0; i < results.length(); i++) {
             JSONObject streamer = results.getJSONObject(i);
             streamers.add(parseStreamer(streamer, false, false));
@@ -110,12 +129,19 @@ public class TwitchTV {
      * Get the profile picture for the given streamer ID
      *
      * @param id Streamer ID
-     * @return Streamer profile picture
+     * @return Streamer profile picture or null
      */
+    @Nullable
     public String getStreamerProfilePicture(String id) {
-        JSONObject results = new JSONObject(twitchRequest("users?id=" + id).body);
-        return results
-                .getJSONArray("data")
+        final JSONObject response = twitchRequest("users?id=" + id);
+
+        // Failed to retrieve image
+        if(response == null) {
+            return null;
+        }
+
+        return response
+                .getJSONArray(DATA_KEY)
                 .getJSONObject(0)
                 .getString("profile_image_url");
     }
@@ -157,19 +183,32 @@ public class TwitchTV {
         }
 
         if(!fromSearch || streamer.getBoolean("is_live")) {
+            final Integer viewers;
+
+            if(streamer.has(VIEWER_KEY)) {
+                viewers = streamer.getInt(VIEWER_KEY);
+            }
+
+            // Make an extra request for viewers
+            else {
+                viewers = fetchViewers(id);
+            }
+
             builder.setStream(
                     new Stream(
                             streamer.getString("title"),
                             fetchGameById(streamer.getString("game_id")),
                             parseDate(streamer.getString("started_at")),
-                            streamer.has(VIEWER_KEY) ? streamer.getInt(VIEWER_KEY) : fetchViewers(id),
+                            viewers,
                             Stream.getThumbnail(loginName)
                     )
             );
         }
+
         if(showFollowers) {
             builder.setFollowers(fetchFollowers(id));
         }
+
         return builder.build();
     }
 
@@ -191,14 +230,27 @@ public class TwitchTV {
     }
 
     /**
-     * Fetch the number of stream viewers via the streamer's unique id
+     * Attempt to fetch the number of stream viewers via the streamer's unique id.
+     * The request for viewers may fail to return any for some reason blame Red Bull.
      *
      * @param id Streamer id
-     * @return Number of viewers watching streamer's current stream
+     * @return Number of viewers watching streamer's current stream (or null)
      */
-    private int fetchViewers(String id) {
-        JSONObject response = new JSONObject(twitchRequest("streams?user_id=" + id).body);
-        return response.getJSONArray("data").getJSONObject(0).getInt(VIEWER_KEY);
+    @Nullable
+    private Integer fetchViewers(String id) {
+        final JSONObject response = twitchRequest("streams?user_id=" + id);
+        try {
+
+            // Unable to retrieve response for current stream viewers
+            if(response == null) {
+                throw new Exception("No response for current stream: " + id);
+            }
+
+            return response.getJSONArray(DATA_KEY).getJSONObject(0).getInt(VIEWER_KEY);
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -207,12 +259,20 @@ public class TwitchTV {
      * @param gameId Unique id of game
      * @return Game object
      */
+    @Nullable
     private Game fetchGameById(String gameId) {
         if(gamesById.containsKey(gameId)) {
             return gamesById.get(gameId);
         }
-        String endpoint = "games?id=" + gameId;
-        JSONObject gameData = new JSONObject(twitchRequest(endpoint).body).getJSONArray("data").getJSONObject(0);
+
+        final JSONObject response = twitchRequest("games?id=" + gameId);
+
+        // No response for game ID
+        if(response == null) {
+            return null;
+        }
+
+        final JSONObject gameData = response.getJSONArray(DATA_KEY).getJSONObject(0);
         Game game = new Game(
                 gameData.getString("name"),
                 gameData.getString("id"),
@@ -223,14 +283,21 @@ public class TwitchTV {
     }
 
     /**
-     * Perform a Twitch API request
+     * Perform a Twitch API request and return the response JSON.
      *
      * @param endpoint Twitch endpoint - e.g "search/channels?first=20&query=channel%20name"
-     * @return API response
+     * @return API JSON response or null
      */
-    private NetworkResponse twitchRequest(String endpoint) {
-        String url = "https://api.twitch.tv/helix/" + endpoint;
-        return new NetworkRequest(url, false).get(getAuthHeaders());
+    @Nullable
+    private JSONObject twitchRequest(String endpoint) {
+        final String url = "https://api.twitch.tv/helix/" + endpoint;
+
+        try {
+            return new JSONObject(new NetworkRequest(url, false).get(getAuthHeaders()).body);
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     /**

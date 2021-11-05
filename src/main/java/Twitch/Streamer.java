@@ -1,5 +1,7 @@
 package Twitch;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.text.NumberFormat;
 
 /**
@@ -9,7 +11,7 @@ public class Streamer {
     private final String loginName, displayName, id, language, url;
     private final Stream stream;
     private String thumbnail;
-    private final int followers;
+    private final Integer followers;
 
     /**
      * Create a Streamer from the builder values
@@ -30,7 +32,7 @@ public class Streamer {
     public static class StreamerBuilder {
         private String loginName, displayName, id, language, thumbnail, url;
         private Stream stream;
-        private int followers;
+        private Integer followers;
 
         /**
          * Set the streamer login name - e.g "loserfruit".
@@ -104,10 +106,10 @@ public class Streamer {
         /**
          * Set the total number of followers for the streamer
          *
-         * @param followers Total number of followers
+         * @param followers Total number of followers (this is null if unable to locate)
          * @return Builder
          */
-        public StreamerBuilder setFollowers(int followers) {
+        public StreamerBuilder setFollowers(@Nullable Integer followers) {
             this.followers = followers;
             return this;
         }
@@ -157,7 +159,7 @@ public class Streamer {
      * @return Streamer has followers
      */
     public boolean hasFollowers() {
-        return followers > 0;
+        return followers != null;
     }
 
     /**
