@@ -15,20 +15,23 @@ public class TrackerAPI {
     public static final String
             DEFAULT_DOMAIN = "tracker.gg",
             BASIC_KEY = "basic",
+            STATS_KEY = "stats",
+            METADATA_KEY = "metadata",
             WEAPONS_KEY = "weapon";
 
     protected static final String
             BASE_API_URL = "https://api.tracker.gg/api/v2/",
-            STATS_KEY = "stats",
             DATA_KEY = "data",
             SEGMENTS_KEY = "segments",
             MW_PATH = "modern-warfare",
-            CW_PATH = "cold-war";
+            CW_PATH = "cold-war",
+            VALORANT = "valorant";
 
     public enum TRACKER_PLATFORM {
         BATTLE,
         XBOX,
         PSN,
+        RIOT,
         NONE;
 
         /**
