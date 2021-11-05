@@ -1,5 +1,6 @@
 package Command.Commands.Audio;
 
+import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
@@ -14,8 +15,10 @@ public class GhostCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        context.playAudio(
-                "https://www.youtube.com/watch?v=q3O4lCKcuWc"
+        DiscordAudioPlayer.getInstance(context.getGuild()).play(
+                "https://www.youtube.com/watch?v=q3O4lCKcuWc",
+                context.getMember(),
+                context.getMessageChannel()
         );
     }
 }

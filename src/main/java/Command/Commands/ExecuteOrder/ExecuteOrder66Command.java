@@ -1,5 +1,6 @@
 package Command.Commands.ExecuteOrder;
 
+import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import Command.Structure.EmbedHelper;
@@ -78,8 +79,10 @@ public class ExecuteOrder66Command extends DiscordCommand {
                 buildStatusMessage()
         ).queue(message -> {
             id = message.getIdLong();
-            context.playAudio(
+            DiscordAudioPlayer.getInstance(context.getGuild()).play(
                     executor.getTrack(),
+                    context.getMember(),
+                    channel,
                     () -> new Thread(() -> {
                         purgeTargets(context);
                         executor = null;

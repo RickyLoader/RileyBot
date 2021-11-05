@@ -1,5 +1,6 @@
 package Command.Commands.Audio;
 
+import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 
@@ -16,7 +17,8 @@ public class KnockCommand extends DiscordCommand {
     public void execute(CommandContext context) {
         context.getMessage().delete().queue(
                 delete -> {
-                    context.playAudio(lastKnock);
+                    DiscordAudioPlayer.getInstance(context.getGuild())
+                            .play(lastKnock, context.getMember(), context.getMessageChannel());
                     lastKnock = lastKnock.equals(leftKnock) ? rightKnock : leftKnock;
                 }
         );

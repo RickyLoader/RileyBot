@@ -14,37 +14,66 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.apache.http.client.config.RequestConfig;
 
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DiscordAudioPlayer {
+    private static final HashMap<Guild, DiscordAudioPlayer> AUDIO_PLAYERS = new HashMap<>();
     private final AudioPlayer player;
     private final AudioPlayerManager manager;
+    private final Guild guild;
+    private Timer timer;
+    private boolean isRunning;
 
     /**
      * Create the audio player
+     *
+     * @param guild Guild where audio will be played
      */
-    public DiscordAudioPlayer() {
+    private DiscordAudioPlayer(Guild guild) {
+        this.guild = guild;
         this.manager = new DefaultAudioPlayerManager();
         manager.setHttpRequestConfigurator((config) -> RequestConfig.copy(config).setConnectTimeout(10000).build());
         AudioSourceManagers.registerRemoteSources(manager);
         this.player = manager.createPlayer();
+        this.timer = new Timer();
+        if(guild.getAudioManager().getSendingHandler() == null) {
+            guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
+        }
+    }
+
+    /**
+     * Get/create an instance of the audio player for the given guild.
+     *
+     * @param guild Guild to get audio player for
+     * @return Audio player
+     */
+    public static DiscordAudioPlayer getInstance(Guild guild) {
+        DiscordAudioPlayer player = AUDIO_PLAYERS.get(guild);
+
+        // Create an audio player for the guild and map for later retrieval
+        if(player == null) {
+            player = new DiscordAudioPlayer(guild);
+            AUDIO_PLAYERS.put(guild, player);
+        }
+
+        return player;
     }
 
     /**
      * Join the given voice channel
      *
-     * @param vc    Voice channel to join
-     * @param guild Guild for audio manager
+     * @param vc Voice channel to join
      */
-    public void join(VoiceChannel vc, Guild guild) {
+    public void join(VoiceChannel vc) {
         guild.getAudioManager().openAudioConnection(vc);
     }
 
     /**
      * Stop the audio & leave the voice channel
-     *
-     * @param guild Guild for audio manager
      */
-    public void stop(Guild guild) {
+    public void stop() {
         guild.getAudioManager().closeAudioConnection();
         player.stopTrack();
     }
@@ -77,23 +106,42 @@ public class DiscordAudioPlayer {
      * @param audio   URL to audio
      * @param member  Member to join voice channel of
      * @param channel Channel to send status updates to
-     * @param guild   Guild for audio manager
      * @param doAfter Method to execute once the audio is complete/cancelled
      */
-    public void play(String audio, Member member, MessageChannel channel, Guild guild, TrackEndListener.Response... doAfter) {
-        if(guild.getAudioManager().getSendingHandler() == null) {
-            guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
-        }
+    public void play(String audio, Member member, MessageChannel channel, TrackEndListener.Response... doAfter) {
+        final TrackEndListener.Response onTrackFinish = doAfter.length > 0 ? doAfter[0] : null;
+        final TrackEndListener trackEndListener = new TrackEndListener(audio, guild, onTrackFinish);
+        player.addListener(trackEndListener);
 
-        player.addListener(doAfter.length > 0 ? new TrackEndListener(guild, doAfter[0]) : new TrackEndListener(guild));
         VoiceChannel vc = getMemberVoiceChannel(member);
 
         if(vc == null) {
-            channel.sendMessage("You're not in a voice channel").queue();
+            channel.sendMessage(member.getAsMention() + " You're not in a voice channel!").queue();
             return;
         }
 
-        join(vc, guild);
+        join(vc);
+
+        // Initialise a timer task to leave the voice channel
+        TimerTask leaveTask = new TimerTask() {
+            @Override
+            public void run() {
+                channel.sendMessage("goodbye").queue();
+                stop();
+                isRunning = false;
+            }
+        };
+
+        // Stop the current timer task (if there is one running)
+        if(isRunning) {
+            timer.cancel();
+            timer = new Timer();
+            isRunning = false;
+        }
+
+        // Schedule a leave for an hour from now
+        timer.schedule(leaveTask, 1000 * 60 * 60);
+        isRunning = true;
 
         manager.loadItem(audio, new AudioLoadResultHandler() {
 
@@ -128,6 +176,7 @@ public class DiscordAudioPlayer {
                 if(doAfter.length > 0) {
                     doAfter[0].processFinish();
                 }
+                player.removeListener(trackEndListener);
             }
         });
     }

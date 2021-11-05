@@ -1,0 +1,98 @@
+[
+  {
+    "name": "A Team",
+    "text": "[dah<300,30>][dah<60,30>][dah<200,25>][dah<1000,30>][dah<200,23>][dah<400,25>][dah<700,18>]"
+  },
+  {
+    "name": "Imperial March",
+    "text": "[dah<600,20>][dah<600,20>][dah<600,20>][dah<500,16>][dah<130,23>][dah<600,20>][dah<500,16>][dah<130,23>][dah<600,20>][dah<600,27>][dah<600,27>][dah<600,27>][dah<500,28>][dah<130,23>][dah<600,19>][dah<500,16>][dah<130,23>][dah<600,20>]"
+  },
+  {
+    "name": "John Madden Pizza",
+    "text": "[:nh]I'm gonna eat a pizza. [:dial67589340] Hi, can i order a pizza? [:nv]no! [:nh]why? [:nv] cuz you are john madden![:np]"
+  },
+  {
+    "name": "Portal 2 Space Core",
+    "text": "[<1,30>]spayyyyyyyyyyyace"
+  },
+  {
+    "name": "Censored Swearing",
+    "text": "you're a,[:tone 1000,300] with,[:tone 1000,300] in your,[:tone 1000,300]"
+  },
+  {
+    "name": "Tetris Tune",
+    "text": "[:t 430,500][:t 320,250][:t 350,250][:t 390,500][:t 350,250][:t 330,250][:t 290,500][:t 290,250][:t 350,250][:t 430,500]"
+  },
+  {
+    "name": "Funky Town",
+    "text": "[:t 520,250][:t 520,250][:t 460,250][:t 520,500][:t 390,500][:t 390,250][:t 520,250][:t 700,250][:t 660,250][:t 520,500]"
+  },
+  {
+    "name": "Glados",
+    "text": "[:dial6387657]The birth parents you are trying to call do not love you, please hang up[:t 350,500][:t 1,500][:t 350,500]"
+  },
+  {
+    "name": "John Madden Choir",
+    "text": "Dram[aa<250,21>] matic [hxae<250,26>]coir[hxae<250,28>]na[aa<450,29>][aa<200,26>]with jonh[mae<900,24>deh<1000,26>nn]"
+  },
+  {
+    "name": "Mario",
+    "text": "[:tone 165,200][:tone 165,400][:tone 165,400][:tone 131,200][:tone 165,400][:tone 196,800][:tone 98,1000]"
+  },
+  {
+    "name": "Whaling",
+    "text": "[<1,13>]we're[<1,18>]whalers[<1,17]on[<1,18>]the[<1,20>]moon[<400,13>]we[<1,20>]carry[<1,18>]a[<1,20>]har[<1,22>]poon[<1,22>]but there[<1,23>]aint no[<1,15>]whales[<1,23>]so we[<1,22>]tell tall[<1,18>]tales and[<1,20>]sing our[<1,18>]whale[<1,17>]ing[_<1,18>]tune"
+  },
+  {
+    "name": "Call Me Maybe",
+    "text": "[s<1,20>]hey.[s<1,12>]eye[s<1,15>]just[s<1,20>]met[s<1,15>]you.[s<1,12>]and this[s<1,15>]is[s<1,24>]creh[eh<200,24>]e[s<1,20>]Z[s<1,20>]but[s<1,24>]here's[s<1,25>]my[s<1,24>]numb[s<1,20>]ber.[s<1,20>]so[s<1,24>]call[s<1,22>]me, may[s<1,20>]be"
+  },
+  {
+    "name": "Gaben",
+    "text": "[gey<800,13>ih<800,15>beh<800,17>n][_<800,17>][gey<800,17>ih<800,18>beh<800,20>n][gey<400,20>ih<800,25>ih<400,24>ih<400,25>ih<800,20 >ih<400,18>ih<800,17>ih<800,15>beh<800,13>n]"
+  },
+  {
+    "name": "Soviet",
+    "text": "[lxao<400,23>lxao<800,28>lxao<600,23>lxao<200,25>lx ao<1600,27>lxao<800,25>lxao<600,23>lxao<200,21>lxa o<1600,23>] [lxao<400,16>][lxao<400,16>][lxao<800,18>][lxao<400,18>][lxao<400,20>][lxao<800,21>][lxao<400,21>][lxao<400,23>] [lxao<800,25>][lxao<400,27>][lxao<400,28>][lxao<800,30>][_<400,23>][lxao<400,23>][lxao<800,32>][lxao<600,30>] [lxao<200,28>][lxao<800,30>][lxao<400,27>][lxao<400,23>][lxao<800,28>][lxao<400,27>][lxao<400,25>][lxao<800,27>] [lxao<400,20>][lxao<400,20>][lxao<800,25>][lxao<400,23>][lxao<400,21>][lxao<800,23>][lxao<400,16>][lxao<400,16>] [lxao<800,28>][lxao<800,27>][lxao<200,25>][lxao<1600,23>]"
+  },
+  {
+    "name": "Friday",
+    "text": "[fray<400,15>dey<400,12>][fray<400,15>dey<400,12>][gah<99,14>t][daw<200,14>n<99,14>aa<150,12>n][fray<400,15>dey<400,12>][fray<400,15>dey<400,12>]"
+  },
+  {
+    "name": "My Little Pony",
+    "text": "[Mah<500,31>][Rih<500,34>][Tuh<500,31>][Pow<999,29>][Niy<1099,34>][Mah<500,27>][Rih<500,29>][Tuh<500,27>][Pow<999,26>][Niy<1099,22>][ah<999,24>][ah<999,26>][ah<999,27>][ah<999,29>]"
+  },
+  {
+    "name": "Happy Birthday John Madden",
+    "text": "[hxae<300,10>piy<300,10>brr<600,12>th<100>dey<600,10>tuw<600,15>yu<1200,14>_<120>][hxae<300,10>piy<300,10>brr<600,12>th<100>dey<600,10>tuw<600,17>yu<1200,15>_<120>][hxae<300,10>piy<300,10>brr<600,22>th<100>dey<600,19>jh<100>aa<600,15>n<100>m<100>ae<600,14>d<50>dih<600,12>n][hxae<300,20>piy<300,20>brr<600,19>th<100>dey<600,15>tuw<600,17>yu<1200,15>_<120>]"
+  },
+  {
+    "name": "Batman",
+    "text": "[nae<99,20>nae<99,20>nae<99,19>nae<99,19>nae<99,18>nae<99,18>nae<99,19>nae<99,19>bae<140,25>ttmae<600,25>nn]"
+  },
+  {
+    "name": "Scooby Doo",
+    "text": "[skuw<200,24>biy<200,24>duw<200,22>biy<200,22>duw<600,20>_<200>weh<200,22>rraa<400,24>rryu<600,17>]"
+  },
+  {
+    "name": "Taps",
+    "text": "[pr<600,18>][pr<200,18>][pr<1800,23>_>pr<600,18>][pr<300,23>][pr<1800,27>][pr<600,18>][pr<300,23>][pr<1200,27>][pr<600,18>][pr<300,23>][pr<1200,27>][pr<600,18>][pr<300,23>][pr<1800,27>][pr<600,23>][pr<300,27>][pr<1800,30>][pr<900,27>][pr<900,23>][pr<1800,18>][pr<600,18>][pr<200,18>][pr<1800,23>]"
+  },
+  {
+    "name": "2001 Space Odyssey",
+    "text": "[bah<1500,13>][bah<1500,20>][bah<1500,25>][bah<800,28>][bah<800,27>] [bah<200,8>][bah<200,13>][bah<200,8>][bah<200,13>][bah<200,8>][bah<200,13>] [bah<200,8>][bah<800,1>] [bah<1500,13>][bah<1500,20>][bah<1500,25>][bah<800,28>][bah<800,29>] [bah<200,8>][bah<200,13>][bah<200,8>][bah<200,13>][bah<200,8>][bah<200,13>] [bah<200,8>][bah<800,1>] [bah<1500,13>][bah<1500,20>][bah<1500,25>][bah<400,32>][bah<800,34>] [bah<400,22>][bah<400,24>][bah<1500,27>][bah<400,24>][bah<400,26>][bah<400,27>][bah<1600,29>] [bah<400,27>][bah<400,29>][bah<1600,31>][bah<1600,33>][bah<1600,34>]"
+  },
+  {
+    "name": "Pirate",
+    "text": "[yxar<500,25>hxar<500,25>fih<150,27>del<150,24>diy<150,22>diy<500,20>] "
+  },
+  {
+    "name": "Hey Yeah",
+    "text": "[sow<150,28>ay<150,28>kkray<300,37>ssuh<300,37>mmttay<300,33>mms<50>wweh<150,33>nnay<150,33>mm<50>llay<150,28>ihnn<150,28>] [ih<150,28>nnbeh<150,27>eh<300,25>dd<50>guh<150,26>sstuw<150,26>geh<150,37>ttow<300,35>ttwah<150,33>tts<50>ih<150,35>] [mah<300,37>hxae<300,33>dd<50>ae<150,33>dd<50>ay<300,33>mm<10>ffiy<150,33>llih<150,35>nnpeh<150,28>kkuw<300,26>llyur<300,25>] [sow<150,28>ay<150,28>wwey<300,37>kkih<150,37>nnth<20>uh<150,37>mor<200,33>nnihn<200,33>ae<200,33>nndday<200,33>ssteh<300,28>pp] [aw<300,28>ttssah<150,26>ay<150,25>ddae<150,25>nday<150,25>ttey<150,26>kkuh<150,26>ddiy<150,37>ppbr<20>eh<300,35>thae<300,33>] [ndgeh<300,35>ttrih<300,37>llhxay<300,33>ae<150,33>nnay<150,33>say<300,33>_<300>ae<150,33>tteh<150,33>ttaw<150,33>ppuh<150,33>] [ffmaa<200,33>lluh<300,33>nngswah<300,35>ssgow<150,35>ih<300,37>ngaw<300,33>nn] [ae<150,28>nnday<300,30>ssae<300,28>_<300>hxeh<750,37>ey<200,33>eh<750,33>ey<200,28>eh<750,28>ey<400,26>ey<400,25>] [hxeh<750,37>ey<200,33>eh<750,33>ey<200,26>eh<750,26>_<750>ay<150,35>sseh<200,37>hxeh<300,33>eh<300,30>] [wwah<300,35>ttsgow<300,35>ih<400,37>nnaw<300,33>nn<90>]"
+  },
+  {
+    "name": "Windows",
+    "text": "[dah<500,26>dah<180,14>dah<180,21>dah<500,19>dah<180,26>dah<500,21>]"
+  }
+]

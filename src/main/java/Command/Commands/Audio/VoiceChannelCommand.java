@@ -1,5 +1,6 @@
 package Command.Commands.Audio;
 
+import Audio.DiscordAudioPlayer;
 import Command.Structure.CommandContext;
 import Command.Structure.DiscordCommand;
 import net.dv8tion.jda.api.entities.Message;
@@ -15,7 +16,7 @@ public class VoiceChannelCommand extends DiscordCommand {
 
     @Override
     public void execute(CommandContext context) {
-        context.getAudioPlayer().stop(context.getGuild());
+        DiscordAudioPlayer.getInstance(context.getGuild()).stop();
     }
 
     @Override
