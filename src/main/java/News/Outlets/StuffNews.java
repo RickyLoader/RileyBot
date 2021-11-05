@@ -17,7 +17,8 @@ import java.util.ArrayList;
  */
 public class StuffNews extends NewsOutlet {
     private static final String
-            BASE_URL = "https://www.stuff.co.nz/",
+            DOMAIN = "stuff.co.nz",
+            BASE_URL = "https://www." + DOMAIN + "/",
             API_ENTRY = "_json/";
 
     /**
@@ -27,7 +28,7 @@ public class StuffNews extends NewsOutlet {
         super(
                 "Stuff",
                 "https://i.imgur.com/zXaHmO1.png",
-                BASE_URL + "[A-Za-z0-9-]+/.+",
+                "https://(www|i)." + DOMAIN + "/[A-Za-z0-9-]+/.+",
                 EmbedHelper.STUFF_NEWS
         );
     }
@@ -36,7 +37,7 @@ public class StuffNews extends NewsOutlet {
     public @Nullable Article parseArticleByUrl(String articleUrl) {
 
         // "CATEGORY/ID/PATH-TO-ARTICLE"
-        String articleLocation = articleUrl.replaceFirst(BASE_URL, "");
+        String articleLocation = articleUrl.split(DOMAIN)[1].replaceFirst("/", "").trim();
 
         // https://www.stuff.co.nz/_json/CATEGORY/ID/PATH-TO-ARTICLE
         String dataUrl = BASE_URL + API_ENTRY + articleLocation;
