@@ -6,6 +6,7 @@ import TikTokAPI.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
@@ -45,6 +46,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
         final MessageChannel channel = context.getMessageChannel();
         final Message requestMessage = context.getMessage();
         final AuditableRestAction<Void> deleteAction = requestMessage.delete();
+        final Member member = context.getMember();
 
         new Thread(() -> {
             String url = context.getMessageContent();
@@ -73,7 +75,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                 deleteAction.queue(deleted -> {
 
                     // Send the message and add the video (to ensure it appears below the message)
-                    getPostMessageAction(channel, post).queue(message -> {
+                    getPostMessageAction(channel, post, member).queue(message -> {
                         if(post.hasVideo()) {
                             channel.sendFile(post.getVideo(), VIDEO_FILENAME).queue();
                         }
@@ -89,7 +91,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                     return;
                 }
 
-                deleteAction.queue(unused -> getCreatorMessageAction(channel, creator).queue());
+                deleteAction.queue(unused -> getCreatorMessageAction(channel, creator, member).queue());
             }
         }).start();
     }
@@ -106,11 +108,13 @@ public class TikTokCommand extends OnReadyDiscordCommand {
     /**
      * Get an embed builder initialised with the TikTok logo as the thumbnail, the colour set to purple, and the
      * given creator set as the author.
+     * Also add the member who posted the TikTok URL to the description.
      *
      * @param creator Creator to use as the embed author
+     * @param poster  Member who posted TikTok URL.
      * @return TikTok embed builder
      */
-    private EmbedBuilder getTikTokEmbedBuilder(Creator creator) {
+    private EmbedBuilder getTikTokEmbedBuilder(Creator creator, Member poster) {
         return new EmbedBuilder()
                 .setColor(EmbedHelper.PURPLE)
                 .setThumbnail(TikTok.LOGO)
@@ -122,7 +126,8 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                         creator.hasThumbnailImage()
                                 ? ATTACHMENT_PREFIX + CREATOR_FILENAME
                                 : Creator.DEFAULT_THUMBNAIL_URL
-                );
+                )
+                .setDescription("**Biggest fan**: " + poster.getAsMention());
     }
 
     /**
@@ -147,16 +152,17 @@ public class TikTokCommand extends OnReadyDiscordCommand {
      *
      * @param channel Channel to send to
      * @param creator Creator to build message action for
+     * @param poster  Member who posted TikTok URL.
      * @return TikTok creator message action
      */
-    private MessageAction getCreatorMessageAction(MessageChannel channel, Creator creator) {
-        EmbedBuilder builder = getTikTokEmbedBuilder(creator);
+    private MessageAction getCreatorMessageAction(MessageChannel channel, Creator creator, Member poster) {
+        EmbedBuilder builder = getTikTokEmbedBuilder(creator, poster);
         String description = (creator.hasSignature() ? creator.getSignature() : "No bio yet.")
+                + "\n\n" + builder.getDescriptionBuilder().toString()
                 + "\n\n"
                 + buildCreatorEmoteStatsString(creator.getStats());
 
         MessageAction action = channel.sendMessage(builder.setDescription(description).build());
-
         return addAuthorImage(action, creator);
     }
 
@@ -165,13 +171,15 @@ public class TikTokCommand extends OnReadyDiscordCommand {
      *
      * @param channel Channel to send to
      * @param post    Post to create message action for
+     * @param poster  Member who posted TikTok URL.
      * @return TikTok post message action
      */
-    private MessageAction getPostMessageAction(MessageChannel channel, TikTokPost post) {
+    private MessageAction getPostMessageAction(MessageChannel channel, TikTokPost post, Member poster) {
         Creator creator = post.getCreator();
         Music music = post.getMusic();
 
-        EmbedBuilder builder = getTikTokEmbedBuilder(creator)
+        EmbedBuilder builder = getTikTokEmbedBuilder(creator, poster);
+        builder
                 .setTitle(post.hasDescription() ? post.getDescription() : "No title provided!", post.getUrl())
 
                 // Video may fail to download - use an image preview if available
@@ -187,6 +195,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                 )
                 .setDescription(
                         "**Posted**: " + new SimpleDateFormat("dd/MM/yyyy").format(post.getDate())
+                                + "\n" + builder.getDescriptionBuilder().toString()
                                 + "\n\n" + buildSocialEmoteDescription(post.getSocialResponse())
                 );
 
