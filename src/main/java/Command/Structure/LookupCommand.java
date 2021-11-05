@@ -113,14 +113,27 @@ public abstract class LookupCommand extends SavedNameCommand {
      */
     private void lookupUser(String name, CommandContext context) {
         MessageChannel channel = context.getMessageChannel();
-        if(currentLookups.contains(name.toLowerCase())) {
+        String nameKey = name.toLowerCase();
+
+        // Name currently being looked up
+        if(currentLookups.contains(nameKey)) {
             channel.sendMessage("Patience is a virtue cunt").queue();
             return;
         }
-        currentLookups.add(name.toLowerCase());
+
+        // Mark name as active
+        currentLookups.add(nameKey);
+
         new Thread(() -> {
-            processName(name, context);
-            currentLookups.remove(name.toLowerCase());
+            try {
+                processName(name, context);
+            }
+            catch(Exception e) {
+                System.out.println(e.getMessage() + " occurred with: " + name);
+            }
+
+            // Name has completed lookup
+            currentLookups.remove(nameKey);
         }).start();
     }
 
