@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -35,6 +36,34 @@ public class HTMLUtils {
         return desiredTag == null ? null : desiredTag.attr("content");
     }
 
+    /**
+     * Attempt to retrieve embedded JSON from the given HTML document.
+     * This is JSON-LD found in the head of the page usually containing a basic overview.
+     *
+     * @param document HTML document to retrieve JSON from
+     * @return JSON or null
+     */
+    @Nullable
+    public static JSONObject getEmbeddedJson(Document document) {
+        Elements scripts = document.getElementsByTag("head")
+                .first()
+                .getElementsByTag("script")
+                .attr("type", "application/ld+json");
+
+        String targetValue = null;
+
+        for(Element script : scripts) {
+            String value = script.html();
+
+            // Assume the first one is JSON-LD
+            if(value.contains("@context")) {
+                targetValue = value;
+                break;
+            }
+        }
+
+        return targetValue == null ? null : new JSONObject(targetValue);
+    }
 
     /**
      * Attempt to strip HTML formatting from the given String
