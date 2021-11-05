@@ -1,7 +1,5 @@
 package Command.Structure;
 
-import Audio.DiscordAudioPlayer;
-import Audio.TrackEndListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -13,32 +11,16 @@ import java.util.stream.Collectors;
 public class CommandContext {
     private final GuildMessageReceivedEvent event;
     private final ArrayList<DiscordCommand> commands;
-    private final DiscordAudioPlayer player;
     private final EmoteHelper emoteHelper;
 
-    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands, DiscordAudioPlayer player, EmoteHelper emoteHelper) {
+    public CommandContext(GuildMessageReceivedEvent event, ArrayList<DiscordCommand> commands, EmoteHelper emoteHelper) {
         this.event = event;
         this.commands = commands;
-        this.player = player;
         this.emoteHelper = emoteHelper;
     }
 
     public EmoteHelper getEmoteHelper() {
         return emoteHelper;
-    }
-
-    public DiscordAudioPlayer getAudioPlayer() {
-        return player;
-    }
-
-    public void playAudio(String audio, TrackEndListener.Response... doAfter) {
-        player.play(
-                audio,
-                getMember(),
-                getMessageChannel(),
-                getGuild(),
-                doAfter
-        );
     }
 
     /**
