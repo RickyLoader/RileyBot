@@ -33,15 +33,6 @@ public class PlexServer {
     }
 
     /**
-     * Return whether the emote helper is initialised
-     *
-     * @return Emote helper initialised
-     */
-    public boolean hasEmotes() {
-        return emoteHelper != null;
-    }
-
-    /**
      * Initialise the emote helper
      *
      * @param emoteHelper Emote helper
