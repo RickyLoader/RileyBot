@@ -10,7 +10,7 @@ import java.util.Date;
 public class Poll {
     private final Date start, end;
     private final String title, description, url;
-    private final int votes, number;
+    private final int votes, countedVotes, number;
     private final Question[] questions;
     private final boolean open;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -28,6 +28,17 @@ public class Poll {
         this.end = builder.end;
         this.questions = builder.questions;
         this.open = new Date(System.currentTimeMillis()).before(end);
+
+        // Sum the votes on each poll question
+        int countedVotes = 0;
+        if(questions != null) {
+            for(Question question : questions) {
+                for(Answer answer : question.getAnswers()) {
+                    countedVotes += answer.getVotes();
+                }
+            }
+        }
+        this.countedVotes = countedVotes;
     }
 
     public static class PollBuilder {
@@ -187,6 +198,21 @@ public class Poll {
      */
     public boolean isOpen() {
         return open;
+    }
+
+    /**
+     * Check if the results are available for the poll.
+     * This is when the wiki has added them, which may be some time after the poll closes.
+     *
+     * @return Results are available
+     */
+    public boolean resultsAvailable() {
+
+        /*
+         * The wiki often displays a small number of votes on each question prior to the
+         * real results actually being available, wait for a more significant vote count.
+         */
+        return countedVotes > 1000;
     }
 
     /**

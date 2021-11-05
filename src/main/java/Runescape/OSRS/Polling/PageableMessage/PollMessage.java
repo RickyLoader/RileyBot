@@ -15,7 +15,7 @@ import java.util.List;
 public class PollMessage extends PageableListEmbed<Question> {
     private final String pass, fail;
     private final ProgressBar progressBar;
-    private final boolean open;
+    private final boolean hideResults;
     private final Emote blankEmote;
 
     /**
@@ -31,9 +31,7 @@ public class PollMessage extends PageableListEmbed<Question> {
                 Arrays.asList(poll.getQuestions()),
                 EmbedHelper.OSRS_LOGO,
                 "OSRS Poll #" + poll.getNumber() + "\n\n" + poll.getOpenPeriod(),
-                "**Title**: "
-                        + EmbedHelper.embedURL(poll.getTitle(), poll.getUrl())
-                        + "\n**Votes**: " + (poll.isOpen() ? "None" : poll.getFormattedTotalVotes()),
+                getDescription(poll),
                 footer,
                 3,
                 poll.isOpen() ? EmbedHelper.ORANGE : EmbedHelper.GREEN
@@ -46,13 +44,35 @@ public class PollMessage extends PageableListEmbed<Question> {
         );
         this.pass = emoteHelper.getComplete().getAsMention();
         this.fail = emoteHelper.getFail().getAsMention();
-        this.open = poll.isOpen();
+
+        // Don't show the results if the poll is still running, or the votes are not correct on the wiki yet
+        this.hideResults = poll.isOpen() || !poll.resultsAvailable();
         this.blankEmote = emoteHelper.getBlankGap();
     }
 
     @Override
     public void sortItems(List<Question> items, boolean defaultSort) {
         items.sort((o1, o2) -> defaultSort ? o1.getNumber() - o2.getNumber() : o2.getNumber() - o1.getNumber());
+    }
+
+    /**
+     * Get the description to use in the poll message. This displays
+     * the total number of votes in the poll, the poll title, etc.
+     *
+     * @param poll Poll to get description for
+     * @return Poll message description
+     */
+    private static String getDescription(Poll poll) {
+        final String desc = "**Title**: "
+                + EmbedHelper.embedURL(poll.getTitle(), poll.getUrl())
+                + "\n**Votes**: " + (poll.isOpen() ? "None" : poll.getFormattedTotalVotes());
+
+        // Results are available when the poll closes, however may be delayed for some time
+        return poll.isOpen()
+                ? desc
+                : poll.resultsAvailable()
+                ? desc
+                : desc + "\n**Note**: The poll has ended but the results are not available on the Wiki yet!";
     }
 
     /**
@@ -65,16 +85,17 @@ public class PollMessage extends PageableListEmbed<Question> {
     private String buildAnswerDisplay(Question question) {
         StringBuilder builder = new StringBuilder();
         Answer[] answers = question.getAnswers();
+
         final int maxAnswerLength = 4;
 
         for(int i = 0; i < answers.length; i++) {
             Answer a = answers[i];
 
             /*
-             * Votes are hidden until the poll closes (but wiki often displays 3-4 votes on open polls for some reason),
-             * only display the answer text when the poll is open
+             * Votes are hidden until the poll closes, display only the answer text when the poll is open (or when the
+             * results are not on the wiki yet).
              */
-            if(open) {
+            if(hideResults) {
                 builder.append(a.getText());
             }
             else {
@@ -95,7 +116,9 @@ public class PollMessage extends PageableListEmbed<Question> {
                 builder.append("\n");
             }
         }
-        return open
+
+        return hideResults
+
                 // Code block truncates first line if a \n character isn't included?
                 ? "```" + "\n" + builder.toString() + "```"
                 : builder.toString();
@@ -111,6 +134,7 @@ public class PollMessage extends PageableListEmbed<Question> {
      * @return Image of a sword
      */
     private String buildSword(double percentageVotes, double winningPercentageVotes, boolean opinionQuestion) {
+
         // Emote length of winning answer's sword emote
         int maxSwordEmoteLength = progressBar.getEmoteLength(
                 calculateSwordSections(winningPercentageVotes),
@@ -157,11 +181,12 @@ public class PollMessage extends PageableListEmbed<Question> {
 
     @Override
     public String getName(Question question) {
+
         /*
          * If the question is an opinion question, the highest voted opinion will have a checkmark beside it instead
          * of a checkmark beside the question.
          */
-        if(open || question.isOpinionQuestion()) {
+        if(hideResults || question.isOpinionQuestion()) {
             return question.getText();
         }
 
