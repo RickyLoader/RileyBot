@@ -1,0 +1,90 @@
+{
+    "weapons": {
+        "SMGs": {
+            "spectre": {
+                "cost": 1600,
+                "name": "Spectre"
+            },
+            "stinger": {
+                "cost": 950,
+                "name": "Stinger"
+            }
+        },
+        "Melee": {
+            "melee": {
+                "cost": 0,
+                "name": "Melee"
+            }
+        },
+        "Assault Rifles": {
+            "phantom": {
+                "cost": 2900,
+                "name": "Phantom"
+            },
+            "bulldog": {
+                "cost": 2050,
+                "name": "Bulldog"
+            },
+            "vandal": {
+                "cost": 2900,
+                "name": "Vandal"
+            },
+            "guardian": {
+                "cost": 2250,
+                "name": "Guardian"
+            }
+        },
+        "Shotguns": {
+            "bucky": {
+                "cost": 850,
+                "name": "Bucky"
+            },
+            "judge": {
+                "cost": 1850,
+                "name": "Judge"
+            }
+        },
+        "Heavy Weapons": {
+            "ares": {
+                "cost": 1550,
+                "name": "Ares"
+            },
+            "odin": {
+                "cost": 3200,
+                "name": "Odin"
+            }
+        },
+        "Sniper Rifles": {
+            "marshal": {
+                "cost": 950,
+                "name": "Marshal"
+            },
+            "operator": {
+                "cost": 4700,
+                "name": "Operator"
+            }
+        },
+        "Sidearms": {
+            "frenzy": {
+                "cost": 450,
+                "name": "Frenzy"
+            },
+            "ghost": {
+                "cost": 500,
+                "name": "Ghost"
+            },
+            "classic": {
+                "cost": 0,
+                "name": "Classic"
+            },
+            "shorty": {
+                "cost": 150,
+                "name": "Shorty"
+            },
+            "sheriff": {
+                "cost": 800,
+                "name": "Sheriff"
+            }
+        }
+    }
+}

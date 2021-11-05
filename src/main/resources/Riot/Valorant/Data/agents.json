@@ -1,0 +1,312 @@
+{
+  "roles": [
+    "Controller",
+    "Initiator",
+    "Sentinel",
+    "Duelist"
+  ],
+  "agents": {
+    "brimstone": {
+      "abilities": {
+        "grenade": {
+          "name": "Stim Beacon"
+        },
+        "ability1": {
+          "name": "Incendiary"
+        },
+        "ultimate": {
+          "name": "Orbital Strike"
+        },
+        "ability2": {
+          "name": "Sky Smoke"
+        }
+      },
+      "colour": "#FECC26",
+      "role": "Controller",
+      "name": "Brimstone"
+    },
+    "breach": {
+      "abilities": {
+        "ability1": {
+          "name": "Flashpoint"
+        },
+        "grenade": {
+          "name": "Aftershock"
+        },
+        "ultimate": {
+          "name": "Rolling Thunder"
+        },
+        "ability2": {
+          "name": "Fault Line"
+        }
+      },
+      "colour": "#FFEF95",
+      "role": "Initiator",
+      "name": "Breach"
+    },
+    "yoru": {
+      "abilities": {
+        "grenade": {
+          "name": "FAKEOUT"
+        },
+        "ability1": {
+          "name": "BLINDSIDE"
+        },
+        "ultimate": {
+          "name": "DIMENSIONAL DRIFT"
+        },
+        "ability2": {
+          "name": "GATECRASH"
+        }
+      },
+      "colour": "#414e94",
+      "role": "Duelist",
+      "name": "Yoru"
+    },
+    "jett": {
+      "abilities": {
+        "ability1": {
+          "name": "Updraft"
+        },
+        "grenade": {
+          "name": "Cloudburst"
+        },
+        "ultimate": {
+          "name": "Blade Storm"
+        },
+        "ability2": {
+          "name": "Tailwind"
+        }
+      },
+      "colour": "#98DCFF",
+      "role": "Duelist",
+      "name": "Jett"
+    },
+    "raze": {
+      "abilities": {
+        "ability1": {
+          "name": "Blast Pack"
+        },
+        "grenade": {
+          "name": "Boom Bot"
+        },
+        "ultimate": {
+          "name": "Showstopper"
+        },
+        "ability2": {
+          "name": "Paint Shells"
+        }
+      },
+      "colour": "#FF5589",
+      "role": "Duelist",
+      "name": "Raze"
+    },
+    "reyna": {
+      "abilities": {
+        "ability1": {
+          "name": "Devour"
+        },
+        "grenade": {
+          "name": "Leer"
+        },
+        "ultimate": {
+          "name": "Empress"
+        },
+        "ability2": {
+          "name": "Dismiss"
+        }
+      },
+      "colour": "#f650d3",
+      "role": "Duelist",
+      "name": "Reyna"
+    },
+    "skye": {
+      "abilities": {
+        "ability1": {
+          "name": "Trailblazer"
+        },
+        "grenade": {
+          "name": "Regrowth"
+        },
+        "ultimate": {
+          "name": "Seekers"
+        },
+        "ability2": {
+          "name": "Guiding Light"
+        }
+      },
+      "colour": "#6a8659",
+      "role": "Initiator",
+      "name": "Skye"
+    },
+    "phoenix": {
+      "abilities": {
+        "grenade": {
+          "name": "Blaze"
+        },
+        "ability1": {
+          "name": "Curveball"
+        },
+        "ultimate": {
+          "name": "Run it Back"
+        },
+        "ability2": {
+          "name": "Hot Hands"
+        }
+      },
+      "colour": "#FF6C40",
+      "role": "Duelist",
+      "name": "Phoenix"
+    },
+    "sova": {
+      "abilities": {
+        "ability1": {
+          "name": "Shock Bolt"
+        },
+        "grenade": {
+          "name": "Owl Drone"
+        },
+        "ultimate": {
+          "name": "Hunter's Fury"
+        },
+        "ability2": {
+          "name": "Recon Bolt"
+        }
+      },
+      "colour": "#2688FF",
+      "role": "Initiator",
+      "name": "Sova"
+    },
+    "omen": {
+      "abilities": {
+        "ability1": {
+          "name": "Paranoia"
+        },
+        "grenade": {
+          "name": "Shrouded Step"
+        },
+        "ultimate": {
+          "name": "From the Shadows"
+        },
+        "ability2": {
+          "name": "Dark Cover"
+        }
+      },
+      "colour": "#8980EB",
+      "role": "Controller",
+      "name": "Omen"
+    },
+    "cypher": {
+      "abilities": {
+        "ability1": {
+          "name": "Cyber Cage"
+        },
+        "grenade": {
+          "name": "Trapwire"
+        },
+        "ultimate": {
+          "name": "Neural Theft"
+        },
+        "ability2": {
+          "name": "Spycam"
+        }
+      },
+      "colour": "#EDE8E1",
+      "role": "Sentinel",
+      "name": "Cypher"
+    },
+    "sage": {
+      "abilities": {
+        "ability1": {
+          "name": "Slow Orb"
+        },
+        "grenade": {
+          "name": "Barrier Orb"
+        },
+        "ultimate": {
+          "name": "Resurrection"
+        },
+        "ability2": {
+          "name": "Healing Orb"
+        }
+      },
+      "colour": "#52FFD0",
+      "role": "Sentinel",
+      "name": "Sage"
+    },
+    "killjoy": {
+      "abilities": {
+        "grenade": {
+          "name": "Nanoswarm"
+        },
+        "ability1": {
+          "name": "ALARMBOT"
+        },
+        "ultimate": {
+          "name": "Lockdown"
+        },
+        "ability2": {
+          "name": "TURRET"
+        }
+      },
+      "colour": "#FEC0CB",
+      "role": "Sentinel",
+      "name": "Killjoy"
+    },
+    "viper": {
+      "abilities": {
+        "ability1": {
+          "name": "Poison Cloud"
+        },
+        "grenade": {
+          "name": "Snake Bite"
+        },
+        "ultimate": {
+          "name": "Viper's Pit"
+        },
+        "ability2": {
+          "name": "Toxic Screen"
+        }
+      },
+      "colour": "#1BB728",
+      "role": "Controller",
+      "name": "Viper"
+    },
+    "astra": {
+      "abilities": {
+        "ability1": {
+          "name": "Nova Pulse"
+        },
+        "grenade": {
+          "name": "Gravity Well"
+        },
+        "ultimate": {
+          "name": "Astral Form / Cosmic Divide"
+        },
+        "ability2": {
+          "name": "Nebula  / Dissipate"
+        }
+      },
+      "role": "Controller",
+      "name": "Astra"
+    },
+    "kayo": {
+      "abilities": {
+        "grenade": {
+          "name": "FRAG/ment"
+        },
+        "ability1": {
+          "name": "FLASH/drive"
+        },
+        "ultimate": {
+          "name": "NULL/cmd"
+        },
+        "ability2": {
+          "name": "ZERO/point"
+        }
+      },
+      "role": "Initiator",
+      "name": "KAY/O"
+    }
+  }
+}

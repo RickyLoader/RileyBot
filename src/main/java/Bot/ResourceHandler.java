@@ -18,6 +18,7 @@ public class ResourceHandler {
             RS3_BASE_PATH = RUNESCAPE_BASE_PATH + "RS3/",
             RIOT_BASE_PATH = "/Riot/",
             LEAGUE_BASE_PATH = RIOT_BASE_PATH + "LOL/",
+            VALORANT_BASE_PATH = RIOT_BASE_PATH + "Valorant/",
             COVID_BASE_PATH = "/COVID/",
             MINECRAFT_BASE_PATH = "/Minecraft/";
 
