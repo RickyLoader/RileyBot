@@ -1,11 +1,14 @@
 package Bot;
 
+import Network.Secret;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -73,5 +76,17 @@ public class Listener extends ListenerAdapter {
         if(!targetRole.isEmpty()) {
             guild.addRoleToMember(target, targetRole.get(0)).queue();
         }
+    }
+
+    @Override
+    public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
+        final MessageChannel channel = event.getJDA().getTextChannelById(Secret.SELF_CHANNEL_ID);
+
+        // Cannot find channel
+        if(channel == null) {
+            return;
+        }
+
+        channel.sendMessage(event.getMessage()).queue();
     }
 }

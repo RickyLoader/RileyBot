@@ -43,7 +43,8 @@ public class DiscordBot {
                             GatewayIntent.GUILD_VOICE_STATES,
                             GatewayIntent.GUILD_EMOJIS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                            GatewayIntent.GUILD_PRESENCES
+                            GatewayIntent.GUILD_PRESENCES,
+                            GatewayIntent.DIRECT_MESSAGES
                     )
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .enableCache(CacheFlag.ACTIVITY)
