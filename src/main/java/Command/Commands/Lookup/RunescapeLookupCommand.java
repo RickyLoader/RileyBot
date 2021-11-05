@@ -39,7 +39,7 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
     protected B imageBuilder;
 
     public enum ARGUMENT {
-        VIRTUAL("Display virtual levels for skills above level " + Skill.DEFAULT_MAX + "."),
+        VIRTUAL("Display virtual levels for skills above the max level."),
         SHOW_BOXES("Debug - fill image containers with random colours"),
         ACHIEVEMENTS(
                 "Fetch and display player achievements from the Wise Old Man tracker."
@@ -54,11 +54,11 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
                         + "\n\n- Display progress until next level under each (non maxed (*)) skill."
                         + "\n\n- Outline the highest XP skill(s) in black (Hidden if all skills are the same XP)."
                         + "\n\n- Outline the closest to leveling (*) skill(s) in purple."
-                        + " (Hidden if all skills are maxed)."
+                        + " (Hidden if all skills are equal distance to leveling)."
                         + "\n\n(*) Affected by virtual argument"
         ),
         MAX(
-                "- Highlight skills that are level " + Skill.DEFAULT_MAX + " or " + Skill.MAX_XP + "XP (*)"
+                "- Highlight skills that are maxed (*)"
                         + "\n\n- Display the number of maxed skills in the total level box e.g \"Maxed: 1/23\" (*)"
                         + "\n\n- Display the XP progress towards max in the total XP box (*)"
                         + "\n\n(*) Affected by virtual argument"

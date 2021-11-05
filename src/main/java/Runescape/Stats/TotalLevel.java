@@ -6,36 +6,53 @@ package Runescape.Stats;
 public class TotalLevel extends Skill {
 
     /**
-     * Create a total level skill using the CSV from the hiscores API.
+     * Create a total level skill
      *
-     * @param rankIndex Index of skill rank value - other values can be obtained relative to this index
-     * @param csv       CSV from API
-     * @param skills    Player skills (used to calculate virtual total)
+     * @param rank          Total level rank
+     * @param level         Total level (sum of skill levels)
+     * @param xp            Total XP
+     * @param virtualLevel  Virtual level (sum of skill virtual levels)
+     * @param maxTotalLevel Total level when all skills are at their max level - e.g 2277
+     * @param xpAtMaxLevel  XP at the max level (sum of XP at the max level for all skills)
+     * @param maxXp         Maximum possible XP - e.g 4,600,000,000
      */
-    public TotalLevel(int rankIndex, String[] csv, Skill[] skills) {
-        super(
-                SKILL_NAME.OVERALL,
-                parseRank(csv, rankIndex),
-                parseLevel(csv, rankIndex),
-                parseXp(csv, rankIndex),
-                calculateVirtualLevel(skills)
-        );
+    private TotalLevel(int rank, int level, long xp, int virtualLevel, int maxTotalLevel, long xpAtMaxLevel, long maxXp) {
+        super(SKILL_NAME.OVERALL, rank, level, xp, virtualLevel, maxTotalLevel, xpAtMaxLevel, maxXp);
+    }
+
+    @Override
+    public boolean isMaxed(boolean virtual) {
+        return virtual ? getXp() == getMaxXp() : getLevel() == getMaxLevel();
     }
 
     /**
-     * Calculate the virtual total level by summing all levels.
+     * Create a total level from the given player skills
      *
-     * @param skills Skills to add
-     * @return Virtual total level
+     * @param rankIndex Index of skill rank value - other values can be obtained relative to this index
+     * @param csv       CSV from API
+     * @param skills    Player skills to calculate total level values from
+     * @return Total level
      */
-    private static int calculateVirtualLevel(Skill[] skills) {
-        int level = 0;
+    public static TotalLevel fromSkills(int rankIndex, String[] csv, Skill[] skills) {
+        int virtualLevel = 0, maxTotalLevel = 0;
+        long xpAtMaxLevel = 0, maxXp = 0;
+
+        // Sum skill values
         for(Skill skill : skills) {
-            if(skill.getName() == Skill.SKILL_NAME.OVERALL || !skill.isRanked()) {
-                continue;
-            }
-            level += skill.getVirtualLevel();
+            virtualLevel += skill.getVirtualLevel();
+            maxTotalLevel += skill.getMaxLevel();
+            xpAtMaxLevel += skill.getXpAtMaxLevel();
+            maxXp += skill.getMaxXp();
         }
-        return level;
+
+        return new TotalLevel(
+                parseRank(csv, rankIndex),
+                parseLevel(csv, rankIndex),
+                parseXp(csv, rankIndex),
+                virtualLevel,
+                maxTotalLevel,
+                xpAtMaxLevel,
+                maxXp
+        );
     }
 }

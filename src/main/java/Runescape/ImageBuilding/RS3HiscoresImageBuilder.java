@@ -180,7 +180,7 @@ public class RS3HiscoresImageBuilder extends HiscoresImageBuilder<RS3PlayerStats
         for(int i = 0; i < skills.length; i++) {
             Skill skill = skills[i];
             int displayLevel = args.contains(ARGUMENT.VIRTUAL) ? skill.getVirtualLevel() : skill.getLevel();
-            boolean master = displayLevel > Skill.DEFAULT_MAX;
+            boolean master = displayLevel > Skill.DEFAULT_MAX_LEVEL;
             String level = String.valueOf(displayLevel);
 
             g.drawString(level, master ? x - 15 : x, y); // top

@@ -2,14 +2,19 @@ package Runescape.Hiscores;
 
 import Network.NetworkRequest;
 import Network.NetworkResponse;
+import Runescape.OSRS.League.LeagueTier;
+import Runescape.Stats.PlayerStats;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static Network.NetworkResponse.TIMEOUT_CODE;
+import static Runescape.Stats.PlayerStats.ACCOUNT.*;
 
 /**
  * Wise Old Man OSRS tracker API functions
@@ -17,8 +22,19 @@ import static Network.NetworkResponse.TIMEOUT_CODE;
 public class WiseOldMan {
     private final HashMap<String, Long> lastUpdated;
     private final TrackerResponse apiDownResponse;
+    private static final HashSet<PlayerStats.ACCOUNT> SUPPORTED_ACCOUNT_TYPES = new HashSet<>(
+            Arrays.asList(
+                    NORMAL,
+                    IRON,
+                    ULTIMATE,
+                    HARDCORE,
+                    LOCATE
+            )
+    );
+
     private static final String
-            PLAYER_DATA_ENTRY = "api/players/";
+            API_ENTRY = "api/",
+            PLAYER_DATA_ENTRY = API_ENTRY + "players/";
     private static WiseOldMan instance;
 
     /**
@@ -39,6 +55,22 @@ public class WiseOldMan {
             instance = new WiseOldMan();
         }
         return instance;
+    }
+
+    /**
+     * Check if the given account type is supported by Wise Old Man.
+     * Certain temporary/seasonal account types are unsupported.
+     * Unsupported account types will still return data from Wise Old Man,
+     * but it will pertain to the player's normal account type.
+     * <p>
+     * e.g If a Hardcore Ironman is playing DMM, you cannot view the player's DMM XP gains, what will be returned
+     * is their normal (Hardcore Ironman) XP gains.
+     *
+     * @param accountType Account type to check
+     * @return Account type is supported
+     */
+    public static boolean isSupportedAccountType(PlayerStats.ACCOUNT accountType) {
+        return SUPPORTED_ACCOUNT_TYPES.contains(accountType);
     }
 
     /**
@@ -69,6 +101,40 @@ public class WiseOldMan {
         }
         catch(Exception e) {
             return new TrackerResponse("Failed to fetch achievements!");
+        }
+    }
+
+    /**
+     * Calculate a player's league tier manually from the given rank
+     *
+     * @param rank Player league point rank
+     * @return League tier
+     */
+    public LeagueTier.LEAGUE_TIER calculateLeagueTier(long rank) {
+        LeagueTier.LEAGUE_TIER tier = LeagueTier.LEAGUE_TIER.UNQUALIFIED;
+        try {
+            final String json = new NetworkRequest(
+                    getTrackerDomain(true) + API_ENTRY + "/league/tiers",
+                    false
+            ).get().body;
+
+            if(json == null) {
+                throw new Exception();
+            }
+
+            JSONArray tiers = new JSONArray(json);
+            for(int i = 0; i < tiers.length(); i++) {
+                JSONObject tierInfo = tiers.getJSONObject(i);
+                if(rank > tierInfo.getLong("threshold")) {
+                    break;
+                }
+                tier = LeagueTier.LEAGUE_TIER.valueOf(tierInfo.getString("name").toUpperCase());
+            }
+
+            return tier;
+        }
+        catch(Exception e) {
+            return tier;
         }
     }
 

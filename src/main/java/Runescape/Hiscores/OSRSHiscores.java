@@ -3,6 +3,7 @@ package Runescape.Hiscores;
 import Bot.DiscordUser;
 import Command.Commands.Lookup.RunescapeLookupCommand;
 import Command.Structure.EmbedHelper;
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
@@ -14,6 +15,7 @@ import Runescape.OSRS.League.LeagueTier;
 import Runescape.OSRS.League.Region;
 import Runescape.OSRS.League.RelicTier;
 import Runescape.Stats.*;
+import net.dv8tion.jda.api.entities.Emote;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,7 +43,8 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
             MVALUE = "hiscore_oldschool",
             RANKING_PAGE = "overall",
             LEAGUE_THUMBNAIL = "https://i.imgur.com/xksIl6S.png",
-            DMM_THUMBNAIL = "https://i.imgur.com/O2HpIt3.png";
+            TOURNAMENT_THUMBNAIL = "https://i.imgur.com/O2HpIt3.png",
+            DMM_THUMBNAIL = "https://i.imgur.com/nJVs5Ey.png";
 
     private final HashMap<PlayerStats.ACCOUNT, Integer> lowestRankMap = new HashMap<>();
     private final Boss.BOSS_ID[] bossIds;
@@ -145,8 +148,9 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
      * @return XP tracker data should be fetched
      */
     private boolean shouldFetchXpTracker(HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType) {
-        return args.contains(RunescapeLookupCommand.ARGUMENT.XP_TRACKER) && !args.contains(RunescapeLookupCommand.ARGUMENT.BOSSES)
-                && accountType != PlayerStats.ACCOUNT.LEAGUE && accountType != PlayerStats.ACCOUNT.DMM;
+        return args.contains(RunescapeLookupCommand.ARGUMENT.XP_TRACKER)
+                && !args.contains(RunescapeLookupCommand.ARGUMENT.BOSSES)
+                && WiseOldMan.isSupportedAccountType(accountType);
     }
 
     /**
@@ -157,31 +161,49 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
      * @return Recent achievements should be fetched
      */
     private boolean shouldFetchAchievements(HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType) {
-        return args.contains(RunescapeLookupCommand.ARGUMENT.ACHIEVEMENTS) && !args.contains(RunescapeLookupCommand.ARGUMENT.BOSSES)
-                && accountType != PlayerStats.ACCOUNT.LEAGUE && accountType != PlayerStats.ACCOUNT.DMM;
+        return args.contains(RunescapeLookupCommand.ARGUMENT.ACHIEVEMENTS)
+                && !args.contains(RunescapeLookupCommand.ARGUMENT.BOSSES)
+                && WiseOldMan.isSupportedAccountType(accountType);
     }
 
     @Override
-    public String getLoadingTitle(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType) {
+    public String getLoadingTitle(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType, EmoteHelper emoteHelper) {
         String lookupPrefix = "Hiscores";
-        if(accountType == PlayerStats.ACCOUNT.LEAGUE) {
-            lookupPrefix = "league";
+
+        switch(accountType) {
+            case LEAGUE:
+                lookupPrefix = "League";
+                break;
+            case DMM:
+            case TOURNAMENT:
+                lookupPrefix = "DMM";
+                break;
         }
-        else if(accountType == PlayerStats.ACCOUNT.DMM) {
-            lookupPrefix = "DMM";
+
+        String title = "OSRS " + lookupPrefix + " Lookup: ";
+
+        final Emote accountTypeEmote = accountType.getEmote(emoteHelper);
+
+        // Add the optional account type emote as a prefix to the player name (e.g an ironman helmet)
+        if(accountTypeEmote != null) {
+            title += accountTypeEmote.getAsMention() + " ";
         }
-        return "OSRS " + lookupPrefix + " lookup: " + name.toUpperCase();
+
+        return title + name.toUpperCase();
     }
 
     @Override
     public String getLoadingThumbnail(HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType) {
-        if(accountType == PlayerStats.ACCOUNT.LEAGUE) {
-            return LEAGUE_THUMBNAIL;
+        switch(accountType) {
+            case LEAGUE:
+                return LEAGUE_THUMBNAIL;
+            case TOURNAMENT:
+                return TOURNAMENT_THUMBNAIL;
+            case DMM:
+                return DMM_THUMBNAIL;
+            default:
+                return EmbedHelper.OSRS_LOGO;
         }
-        else if(accountType == PlayerStats.ACCOUNT.DMM) {
-            return DMM_THUMBNAIL;
-        }
-        return EmbedHelper.OSRS_LOGO;
     }
 
     /**
@@ -282,7 +304,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
 
     @Override
     protected @Nullable OSRSPlayerStats locatePlayerStats(String name, ImageLoadingMessage... loadingMessage) {
-        updateLoadingMessage(UPDATE, "Checking player exists...", loadingMessage);
+        updateLoadingMessage(UPDATE, "Checking name exists...", loadingMessage);
         OSRSPlayerStats normalAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.NORMAL);
 
         // Player doesn't exist
@@ -315,11 +337,11 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
         // Player appears on the hardcore ironman hiscores, may be dead
         if(hardcoreAccount != null) {
 
-            // Player has died and reverted to a normal ironman
-            if(((OSRSHardcorePlayerStats) hardcoreAccount).isDead()) {
+            // Player has died and/or reverted to a normal ironman
+            if(ironAccount.getTotalXp() > hardcoreAccount.getTotalXp() || ((OSRSHardcorePlayerStats) hardcoreAccount).isDead()) {
                 updateLoadingMessage(
                         COMPLETE,
-                        "Player was a Hardcore Ironman and died! What a loser!",
+                        "Player was a Hardcore Ironman and died/reverted! What a loser!",
                         loadingMessage
                 );
                 return ironAccount;
@@ -370,11 +392,15 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
 
             // Nothing more required
             default:
-                final Skill[] skills = parseSkills(statsCsv);
+                final Skill[] skills = parseSkills(
+                        statsCsv,
+                        Skill.DEFAULT_XP_AT_MAX_LEVEL,
+                        Skill.DEFAULT_MAX_XP
+                );
                 return new OSRSPlayerStats(
                         statsResponse.getName(),
                         statsResponse.getUrl(),
-                        parseSkills(statsCsv),
+                        skills,
                         parseClueScrolls(statsCsv),
                         parseTotalLevel(statsCsv, skills),
                         parseBossStats(statsCsv),
@@ -393,12 +419,17 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
      */
     private OSRSHardcorePlayerStats parseHardcoreStats(HiscoresApiResponse statsResponse) {
         final String[] statsCsv = statsResponse.getStatsCsv();
-        final Skill[] skills = parseSkills(statsCsv);
+
+        final Skill[] skills = parseSkills(
+                statsCsv,
+                Skill.DEFAULT_XP_AT_MAX_LEVEL,
+                Skill.DEFAULT_MAX_XP
+        );
 
         return new OSRSHardcorePlayerStats(
                 statsResponse.getName(),
                 statsResponse.getUrl(),
-                parseSkills(statsCsv),
+                skills,
                 parseClueScrolls(statsCsv),
                 parseTotalLevel(statsCsv, skills),
                 parseBossStats(statsCsv),
@@ -443,8 +474,8 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
         final long rank = Long.parseLong(statsCsv[LEAGUE_POINTS_RANK_INDEX]);
 
         LeagueTier leagueTier = new LeagueTier(
-                calculateTier(rank),
-                leaguePoints == PlayerStats.UNRANKED ? 0 : leaguePoints,
+                WiseOldMan.getInstance().calculateLeagueTier(rank),
+                leaguePoints == RankedMetric.UNRANKED ? 0 : leaguePoints,
                 rank
         );
 
@@ -474,11 +505,16 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
         // Optionally complete "Calculating League Tier" loading stage
         updateLoadingMessage(COMPLETE, "Player is " + leagueTier.getTierName() + "!", loadingMessage);
 
-        final Skill[] skills = parseSkills(statsCsv);
+        final Skill[] skills = parseSkills(
+                statsCsv,
+                Skill.DEFAULT_XP_AT_MAX_LEVEL,
+                Skill.DEFAULT_MAX_XP
+        );
+
         return new OSRSLeaguePlayerStats(
                 statsResponse.getName(),
                 statsResponse.getUrl(),
-                parseSkills(statsCsv),
+                skills,
                 parseClueScrolls(statsCsv),
                 parseTotalLevel(statsCsv, skills),
                 parseBossStats(statsCsv),
@@ -646,70 +682,38 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
     }
 
     /**
-     * Calculate a player's league tier manually from the given rank
-     *
-     * @param rank Player league point rank
-     * @return League tier
-     */
-    private LeagueTier.LEAGUE_TIER calculateTier(long rank) {
-        LeagueTier.LEAGUE_TIER tier = LeagueTier.LEAGUE_TIER.UNQUALIFIED;
-        try {
-            final String json = new NetworkRequest(
-                    "https://trailblazer.wiseoldman.net/api/league/tiers",
-                    false
-            ).get().body;
-
-            if(json == null) {
-                throw new Exception();
-            }
-
-            JSONArray tiers = new JSONArray(json);
-            for(int i = 0; i < tiers.length(); i++) {
-                JSONObject tierInfo = tiers.getJSONObject(i);
-                if(rank > tierInfo.getLong("threshold")) {
-                    break;
-                }
-                tier = LeagueTier.LEAGUE_TIER.valueOf(tierInfo.getString("name").toUpperCase());
-            }
-
-            return tier;
-        }
-        catch(Exception e) {
-            return tier;
-        }
-    }
-
-    /**
      * Parse and sort skill data from the API CSV to the in-game display order
      *
-     * @param csv CSV from API
+     * @param csv          CSV from API
+     * @param xpAtMaxLevel XP at the max level for the skill - e.g the XP for level 99
+     * @param maxXp        Max possible XP for skill - e.g 200,000,000
      * @return Sorted CSV
      */
-    private Skill[] parseSkills(String[] csv) {
+    private Skill[] parseSkills(String[] csv, long xpAtMaxLevel, long maxXp) {
         return new Skill[]{
-                new Skill(ATTACK, 3, csv),
-                new Skill(HITPOINTS, 12, csv),
-                new Skill(MINING, 45, csv),
-                new Skill(STRENGTH, 9, csv),
-                new Skill(AGILITY, 51, csv),
-                new Skill(SMITHING, 42, csv),
-                new Skill(DEFENCE, 6, csv),
-                new Skill(HERBLORE, 48, csv),
-                new Skill(FISHING, 33, csv),
-                new Skill(RANGED, 15, csv),
-                new Skill(THIEVING, 54, csv),
-                new Skill(COOKING, 24, csv),
-                new Skill(PRAYER, 18, csv),
-                new Skill(CRAFTING, 39, csv),
-                new Skill(FIREMAKING, 36, csv),
-                new Skill(MAGIC, 21, csv),
-                new Skill(FLETCHING, 30, csv),
-                new Skill(WOODCUTTING, 27, csv),
-                new Skill(RUNECRAFTING, 63, csv),
-                new Skill(SLAYER, 57, csv),
-                new Skill(FARMING, 60, csv),
-                new Skill(CONSTRUCTION, 69, csv),
-                new Skill(HUNTER, 66, csv)
+                new Skill(ATTACK, 3, csv, xpAtMaxLevel, maxXp),
+                new Skill(HITPOINTS, 12, csv, xpAtMaxLevel, maxXp),
+                new Skill(MINING, 45, csv, xpAtMaxLevel, maxXp),
+                new Skill(STRENGTH, 9, csv, xpAtMaxLevel, maxXp),
+                new Skill(AGILITY, 51, csv, xpAtMaxLevel, maxXp),
+                new Skill(SMITHING, 42, csv, xpAtMaxLevel, maxXp),
+                new Skill(DEFENCE, 6, csv, xpAtMaxLevel, maxXp),
+                new Skill(HERBLORE, 48, csv, xpAtMaxLevel, maxXp),
+                new Skill(FISHING, 33, csv, xpAtMaxLevel, maxXp),
+                new Skill(RANGED, 15, csv, xpAtMaxLevel, maxXp),
+                new Skill(THIEVING, 54, csv, xpAtMaxLevel, maxXp),
+                new Skill(COOKING, 24, csv, xpAtMaxLevel, maxXp),
+                new Skill(PRAYER, 18, csv, xpAtMaxLevel, maxXp),
+                new Skill(CRAFTING, 39, csv, xpAtMaxLevel, maxXp),
+                new Skill(FIREMAKING, 36, csv, xpAtMaxLevel, maxXp),
+                new Skill(MAGIC, 21, csv, xpAtMaxLevel, maxXp),
+                new Skill(FLETCHING, 30, csv, xpAtMaxLevel, maxXp),
+                new Skill(WOODCUTTING, 27, csv, xpAtMaxLevel, maxXp),
+                new Skill(RUNECRAFTING, 63, csv, xpAtMaxLevel, maxXp),
+                new Skill(SLAYER, 57, csv, xpAtMaxLevel, maxXp),
+                new Skill(FARMING, 60, csv, xpAtMaxLevel, maxXp),
+                new Skill(CONSTRUCTION, 69, csv, xpAtMaxLevel, maxXp),
+                new Skill(HUNTER, 66, csv, xpAtMaxLevel, maxXp)
         };
     }
 
@@ -727,7 +731,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
         int i = 0;
         for(Boss.BOSS_ID bossId : bossIds) {
             int kills = Integer.parseInt(stats[i + 1]);
-            if(kills > PlayerStats.UNRANKED) {
+            if(kills > RankedMetric.UNRANKED) {
                 bossStats.add(
                         new BossStats(
                                 bossManager.getBossById(bossId),

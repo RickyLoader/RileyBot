@@ -51,7 +51,7 @@ public abstract class HiscoresImageBuilder<S extends PlayerStats, H extends Hisc
         ImageLoadingMessage loadingMessage = new ImageLoadingMessage(
                 channel,
                 getEmoteHelper(),
-                hiscores.getLoadingTitle(nameQuery, args, accountType),
+                hiscores.getLoadingTitle(nameQuery, args, accountType, getEmoteHelper()),
                 "Give me a second, their website can be slow as fuck.",
                 hiscores.getLoadingThumbnail(args, accountType),
                 helpMessage,
@@ -81,7 +81,7 @@ public abstract class HiscoresImageBuilder<S extends PlayerStats, H extends Hisc
                     ? "doesn't exist bro"
                     : "doesn't have any " + accountType.name().toLowerCase() + " stats!";
 
-            loadingMessage.failLoading("That player " + EmbedHelper.embedURL(message, response.getUrl()));
+            loadingMessage.failLoading("That name " + EmbedHelper.embedURL(message, response.getUrl()));
             return;
         }
 

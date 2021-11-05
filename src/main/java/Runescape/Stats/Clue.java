@@ -7,17 +7,16 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 /**
  * Hold data on a clue scroll
  */
-public class Clue {
+public class Clue extends RankedMetric {
     public static final int
             CLUE_START_INDEX = 78,
             CLUE_END_INDEX = 92;
     private static final String BASE_IMAGE_PATH = "Clues/";
-    private final int rank, completions;
+    private final int completions;
     private final TYPE type;
 
     public enum TYPE {
@@ -108,8 +107,8 @@ public class Clue {
      * @param completions Clue completions
      */
     public Clue(TYPE type, int rank, int completions) {
+        super(rank);
         this.type = type;
-        this.rank = rank;
         this.completions = completions;
     }
 
@@ -147,27 +146,6 @@ public class Clue {
      */
     public String getFormattedCompletions() {
         return new DecimalFormat("x#,###").format(completions);
-    }
-
-    /**
-     * Get the rank of the clue scroll completions
-     *
-     * @return Completions rank
-     */
-    public int getRank() {
-        return rank;
-    }
-
-    /**
-     * Get the rank formatted with commas e.g 1234 -> 1,234
-     * If the rank is -1 (unranked) return a dash ("-")
-     * @return Formatted rank
-     */
-    public String getFormattedRank() {
-        if(rank == PlayerStats.UNRANKED) {
-            return "-";
-        }
-        return NumberFormat.getNumberInstance().format(rank);
     }
 
     /**

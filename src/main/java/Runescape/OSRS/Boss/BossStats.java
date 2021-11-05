@@ -1,17 +1,18 @@
 package Runescape.OSRS.Boss;
 
-import java.text.DecimalFormat;
+import Runescape.Stats.RankedMetric;
+
 import java.text.NumberFormat;
 
 /**
  * Hold a OSRS players stats for a given boss, sortable by kill count
  */
-public class BossStats implements Comparable<BossStats> {
+public class BossStats extends RankedMetric implements Comparable<BossStats> {
     public static final int
             BOSS_START_INDEX = 96,
             BOSS_END_INDEX = 190;
     private final Boss boss;
-    private final int rank, kills;
+    private final int kills;
 
     /**
      * Create the boss stats
@@ -21,8 +22,8 @@ public class BossStats implements Comparable<BossStats> {
      * @param kills Boss kills
      */
     public BossStats(Boss boss, int rank, int kills) {
+        super(rank);
         this.boss = boss;
-        this.rank = rank;
         this.kills = kills;
     }
 
@@ -36,30 +37,12 @@ public class BossStats implements Comparable<BossStats> {
     }
 
     /**
-     * Get the boss kills rank formatted with a comma
-     *
-     * @return Comma formatted boss kills rank
-     */
-    public String getFormattedRank() {
-        return new DecimalFormat("#,###").format(rank);
-    }
-
-    /**
      * Get the boss kills
      *
      * @return Boss kills
      */
     public int getKills() {
         return kills;
-    }
-
-    /**
-     * Get the boss kills rank
-     *
-     * @return Boss kills rank
-     */
-    public int getRank() {
-        return rank;
     }
 
     /**

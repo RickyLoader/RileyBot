@@ -1,6 +1,8 @@
 package Runescape.Stats;
 
 import Bot.ResourceHandler;
+import Command.Structure.EmoteHelper;
+import net.dv8tion.jda.api.entities.Emote;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
@@ -22,16 +24,14 @@ public abstract class PlayerStats {
     private final int combatLevel, totalMaxedSkills, totalMaxedVirtualSkills;
     private final long xpTowardsMax;
 
-    // Value given to a players skill xp/boss kills/etc that are not ranked (not in top 2 million players)
-    public static final int UNRANKED = -1;
-
     public enum ACCOUNT {
         NORMAL("", "normal"),
         IRON("_ironman", "ironman"),
         ULTIMATE("_ultimate", "ultimate_ironman"),
         LEAGUE("_seasonal", "seasonal"),
         HARDCORE("_hardcore_ironman", "hardcore_ironman"),
-        DMM("_tournament", "tournament"),
+        TOURNAMENT("_tournament", "tournament"),
+        DMM("_deadman", "deadman"),
         LOCATE();
 
         private final String urlSuffix, databaseKey;
@@ -114,6 +114,28 @@ public abstract class PlayerStats {
             // E.g "iron.png"
             return new ResourceHandler().getImageResource(IMAGE_PATH + this.name().toLowerCase() + ".png");
         }
+
+        /**
+         * Get an emote for the account type (not all account types have an emote).
+         *
+         * @param emoteHelper Emote helper for retrieving emote
+         * @return Account type emote or null
+         */
+        @Nullable
+        public Emote getEmote(EmoteHelper emoteHelper) {
+            switch(this) {
+                case LOCATE:
+                    return emoteHelper.getLocateRunescapeAccountType();
+                case ULTIMATE:
+                    return emoteHelper.getUltimateIronmanHelmet();
+                case IRON:
+                    return emoteHelper.getIronmanHelmet();
+                case HARDCORE:
+                    return emoteHelper.getHardcoreIronmanHelmet();
+                default:
+                    return null;
+            }
+        }
     }
 
     /**
@@ -157,8 +179,8 @@ public abstract class PlayerStats {
                 totalMaxedSkills++;
 
                 // Don't count XP over level 99
-                if(skill.getXp() > Skill.MAX_LEVEL_XP) {
-                    final long xpToRemove = (skill.getXp() - Skill.MAX_LEVEL_XP);
+                if(skill.getXp() > skill.getXpAtMaxLevel()) {
+                    final long xpToRemove = (skill.getXp() - skill.getXpAtMaxLevel());
                     xpTowardsMax -= xpToRemove;
                 }
             }
@@ -203,10 +225,10 @@ public abstract class PlayerStats {
 
     /**
      * Calculate the skill that is closest to leveling.
-     * This is null if all skills are equal.
+     * This is null if all skills are equal TODO or it is a group.
      *
      * @param skills  Player skills
-     * @param virtual Include virtual levels
+     * @param virtual Include progress to virtual levels
      * @return Closest to level skill
      */
     @Nullable
@@ -215,16 +237,7 @@ public abstract class PlayerStats {
         skills = Arrays.stream(skills)
 
                 // Ignore maxed skills as they have 100% progress
-                .filter(skill -> {
-                    final boolean notMaxed = skill.getVirtualLevel() < Skill.ABSOLUTE_MAX;
-
-                    // Exclude virtual levels
-                    if(!virtual) {
-                        return notMaxed && skill.getLevel() < Skill.DEFAULT_MAX;
-                    }
-
-                    return notMaxed;
-                })
+                .filter(skill -> skill.isRanked() && !skill.isMaxed(virtual))
 
                 .sorted(Comparator.comparingDouble(Skill::getProgressUntilNextLevel))
                 .toArray(Skill[]::new);
@@ -378,16 +391,6 @@ public abstract class PlayerStats {
      */
     public Skill getTotalLevel() {
         return total;
-    }
-
-    /**
-     * Get the total XP the player would have if all skills were maxed.
-     *
-     * @param virtual Use virtual max
-     * @return Total maxed XP
-     */
-    public long getXpAtMax(boolean virtual) {
-        return skills.length * (virtual ? Skill.MAX_XP : Skill.MAX_LEVEL_XP);
     }
 
     /**

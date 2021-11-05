@@ -2,6 +2,7 @@ package Runescape.Hiscores;
 
 import Command.Commands.Lookup.RunescapeLookupCommand;
 import Command.Structure.EmbedHelper;
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
 import Runescape.Stats.*;
@@ -510,7 +511,7 @@ public class RS3Hiscores extends Hiscores<RS3PlayerStats> {
     }
 
     @Override
-    public String getLoadingTitle(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType) {
+    public String getLoadingTitle(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType, EmoteHelper emoteHelper) {
         return "RS3 Hiscores lookup: " + name.toUpperCase();
     }
 

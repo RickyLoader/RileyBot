@@ -7,12 +7,12 @@ import java.text.NumberFormat;
 /**
  * Hold data on player last man standing info
  */
-public class LastManStanding {
+public class LastManStanding extends RankedMetric {
     public static final String POINTS_ICON = ResourceHandler.OSRS_BASE_PATH + "LMS/LMS.png";
     public static final int
             RANK_INDEX = 92,
             POINTS_INDEX = 93;
-    private final int rank, points;
+    private final int points;
 
     /**
      * Create the Last Man Standing info
@@ -21,17 +21,8 @@ public class LastManStanding {
      * @param points LMS total points
      */
     public LastManStanding(int rank, int points) {
-        this.rank = rank;
+        super(rank);
         this.points = points;
-    }
-
-    /**
-     * Get the player's LMS point rank
-     *
-     * @return LMS points rank
-     */
-    public int getRank() {
-        return rank;
     }
 
     /**
@@ -41,15 +32,6 @@ public class LastManStanding {
      */
     public int getPoints() {
         return points;
-    }
-
-    /**
-     * Get the rank formatted with commas
-     *
-     * @return Formatted rank
-     */
-    public String getFormattedRank() {
-        return NumberFormat.getNumberInstance().format(rank);
     }
 
     /**

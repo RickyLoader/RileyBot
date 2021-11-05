@@ -3,6 +3,7 @@ package Runescape.Hiscores;
 import Command.Commands.Lookup.RunescapeLookupCommand;
 import Command.Structure.EmbedHelper;
 import Command.Structure.EmbedLoadingMessage;
+import Command.Structure.EmoteHelper;
 import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
@@ -263,7 +264,7 @@ public abstract class Hiscores<S extends PlayerStats> {
 
     /**
      * Get the stats of a player for the given account type.
-     * Update and complete the loading stage of "Player has [account type] stats" if a loading message is provided.
+     * Update and complete the loading stage of "Checking [account type] stats" if a loading message is provided.
      *
      * @param name           Player name
      * @param accountType    Account type
@@ -279,7 +280,7 @@ public abstract class Hiscores<S extends PlayerStats> {
             return null;
         }
 
-        // Optionally complete the loading stage of "Player has [account type] stats".
+        // Optionally complete the loading stage of "Checking [account type] stats".
         completeLoadingMessageStage(loadingMessage);
         return parseStats(statsResponse, loadingMessage);
     }
@@ -451,7 +452,7 @@ public abstract class Hiscores<S extends PlayerStats> {
      * @return Total level
      */
     protected TotalLevel parseTotalLevel(String[] statsCsv, Skill[] skills) {
-        return new TotalLevel(0, statsCsv, skills);
+        return TotalLevel.fromSkills(0, statsCsv, skills);
     }
 
     /**
@@ -548,7 +549,7 @@ public abstract class Hiscores<S extends PlayerStats> {
             loadingCriteria.add("Checking account type...");
         }
         else {
-            loadingCriteria.add("Fetching player " + accountType.name().toLowerCase() + "  stats...");
+            loadingCriteria.add("Checking " + accountType.name().toLowerCase() + " stats...");
         }
 
         return loadingCriteria;
@@ -584,9 +585,10 @@ public abstract class Hiscores<S extends PlayerStats> {
      * @param name        Player name
      * @param args        Hiscores arguments
      * @param accountType Account type
+     * @param emoteHelper Emote helper
      * @return Loading message title
      */
-    public abstract String getLoadingTitle(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType);
+    public abstract String getLoadingTitle(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, PlayerStats.ACCOUNT accountType, EmoteHelper emoteHelper);
 
     /**
      * Get the thumbnail to be used in the loading message

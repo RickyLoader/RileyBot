@@ -387,7 +387,7 @@ public class OSRSHiscoresImageBuilder extends HiscoresImageBuilder<OSRSPlayerSta
             // When not showing virtual max, only count the XP required to max each skill
             final long xpProgress = virtual ? total.getXp() : stats.getXpTowardsMax();
 
-            final long goalXp = stats.getXpAtMax(virtual);
+            final long goalXp = virtual ? total.getMaxXp() : total.getXpAtMaxLevel();
             final double progressPercentage = xpProgress / (double) goalXp;
 
             // "182,598,913/299,791,913 (60.91%)"
@@ -461,6 +461,7 @@ public class OSRSHiscoresImageBuilder extends HiscoresImageBuilder<OSRSPlayerSta
 
         final boolean virtual = args.contains(ARGUMENT.VIRTUAL);
 
+        // TODO Don't display virtual level when it is a group skill
         final int displayLevel = virtual ? skill.getVirtualLevel() : skill.getLevel();
 
         final String level = skill.isRanked() ? String.valueOf(displayLevel) : "-";
@@ -536,7 +537,7 @@ public class OSRSHiscoresImageBuilder extends HiscoresImageBuilder<OSRSPlayerSta
                 outlineSkillBox(skillImage, closestToLevelColour);
             }
 
-            // Draw a progress bar at the bottom of the skill image indicating progress to the next level
+            // Draw a progress bar at the bottom of the skill image indicating progress to the next level TODO check if group and don't draw progress bar
             if(skill.isRanked() && !skill.isMaxed(virtual)) {
                 final int progressBarHeight = 20;
                 final double levelProgress = skill.getProgressUntilNextLevel();
@@ -598,7 +599,7 @@ public class OSRSHiscoresImageBuilder extends HiscoresImageBuilder<OSRSPlayerSta
 
         // Drawing normal skill
         else {
-            boolean master = displayLevel > Skill.DEFAULT_MAX;
+            boolean master = displayLevel > Skill.DEFAULT_MAX_LEVEL;
 
             // Offset x when skill level is higher than 99 (to allow more room to draw)
             final int masterOffset = 10;
@@ -1360,7 +1361,7 @@ public class OSRSHiscoresImageBuilder extends HiscoresImageBuilder<OSRSPlayerSta
 
         // Draw rank info on right side of title section
         final Skill totalLevel = stats.getTotalLevel();
-        final String rank = "Rank: " + (totalLevel.isRanked() ? totalLevel.getFormattedRank() : "-");
+        final String rank = "Rank: " + totalLevel.getFormattedRank();
         final BufferedImage rankImage = getResourceHandler().getImageResource(Skill.RANK_IMAGE_PATH);
         final int rankX = container.getWidth() - edgePadding - fm.stringWidth(rank);
 
