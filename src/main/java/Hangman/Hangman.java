@@ -185,7 +185,8 @@ public class Hangman {
 
         // Add the dictionary definition of the secret word if the game has ended
         if(!running) {
-            desc += "\n\n**Definition**: " + ((secretWord.hasDefinition()) ? secretWord.getDefinition() : "Fuck knows");
+            desc += "\n\n**Definition**: "
+                    + ((secretWord.hasDefinition()) ? secretWord.getTruncatedDescription(500) : "Fuck knows");
         }
 
         return builder
