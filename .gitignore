@@ -48,3 +48,9 @@
 /src/main/java/Network/Secret.java
 /src/main/java/TheHub
 /src/main/java/Command/Commands/HubCommand.java
+/.idea/
+/out/artifacts/DiscordBot_jar/
+/debug.log
+/target/classes/
+/src/main/resources/Riot/LOL/man.png
+/src/main/resources/Riot/LOL/name.png
