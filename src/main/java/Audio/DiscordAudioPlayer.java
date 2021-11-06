@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.managers.AudioManager;
 import org.apache.http.client.config.RequestConfig;
 
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class DiscordAudioPlayer {
     private final AudioPlayerManager manager;
     private final Guild guild;
     private Timer timer;
-    private boolean isRunning;
+    private boolean isTimerRunning;
 
     /**
      * Create the audio player
@@ -72,11 +73,40 @@ public class DiscordAudioPlayer {
 
     /**
      * Stop the audio & leave the voice channel
+     *
+     * @return Audio was stopped
      */
-    public void stop() {
-        guild.getAudioManager().closeAudioConnection();
+    public boolean stop() {
+        AudioManager manager = guild.getAudioManager();
+
+        // Not connected/playing
+        if(!manager.isConnected() && !isPlaying()) {
+            return false;
+        }
+
+        manager.closeAudioConnection();
         player.stopTrack();
+
+        // Reset timer task that is set to leave the voice channel
+        resetTimer();
+        return true;
     }
+
+    /**
+     * Reset the timer that is set to leave the voice channel
+     */
+    private void resetTimer() {
+
+        // Cancel scheduled task
+        if(isTimerRunning) {
+            timer.cancel();
+        }
+
+        // Reset timer
+        timer = new Timer();
+        isTimerRunning = false;
+    }
+
 
     /**
      * Get the voice channel of the given member
@@ -126,22 +156,24 @@ public class DiscordAudioPlayer {
         TimerTask leaveTask = new TimerTask() {
             @Override
             public void run() {
-                channel.sendMessage("goodbye").queue();
-                stop();
-                isRunning = false;
+
+                // Mark task as executed prior to resetting timer, so a cancel isn't attempted (would throw exception)
+                isTimerRunning = false;
+
+                // Only send message if audio was stopped/channel was left
+                if(stop()) {
+                    channel.sendMessage("goodbye").queue();
+                }
             }
         };
 
-        // Stop the current timer task (if there is one running)
-        if(isRunning) {
-            timer.cancel();
-            timer = new Timer();
-            isRunning = false;
-        }
 
-        // Schedule a leave for an hour from now
+        // Reset the current timer & schedule a leave for an hour from now
+        resetTimer();
         timer.schedule(leaveTask, 1000 * 60 * 60);
-        isRunning = true;
+
+        // Mark task as pending
+        isTimerRunning = true;
 
         manager.loadItem(audio, new AudioLoadResultHandler() {
 
@@ -167,7 +199,7 @@ public class DiscordAudioPlayer {
             @Override
             public void loadFailed(FriendlyException e) {
                 System.out.println("Load failed: " + e.getMessage());
-                guild.getAudioManager().closeAudioConnection();
+                stop();
                 channel.sendMessage(
                         "I couldn't get "
                                 + (audio.toLowerCase().contains("youtube") ? "YouTube" : "anyone")
