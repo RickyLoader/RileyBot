@@ -101,7 +101,7 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
                 return;
             }
             channel.sendTyping().queue();
-            Photo photo = uploadPhotography(attachment.getUrl(), attachment.isVideo());
+            Photo photo = uploadPhotography(attachment.getUrl(), attachment.isVideo(), message.getGuild());
             if(photo == null) {
                 channel.sendMessage("I'm so sorry, I couldn't save this, please forgive me").queue();
                 return;
@@ -134,11 +134,12 @@ public class PhotographyCommand extends OnReadyDiscordCommand {
      *
      * @param url   Discord url of photo/video
      * @param video URL is a video URL
+     * @param guild Guild where photo will be sent
      * @return Photo
      */
-    private Photo uploadPhotography(String url, boolean video) {
+    private Photo uploadPhotography(String url, boolean video, Guild guild) {
         try {
-            String imgurUrl = video ? ImgurManager.uploadVideo(url) : ImgurManager.uploadImage(url);
+            String imgurUrl = video ? ImgurManager.uploadVideo(url, guild) : ImgurManager.uploadImage(url);
             JSONObject body = new JSONObject().put("url", imgurUrl);
             JSONObject response = new JSONObject(
                     new NetworkRequest("photography/add", true).post(body.toString()).body

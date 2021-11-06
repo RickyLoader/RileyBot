@@ -175,7 +175,8 @@ public class RedditCommand extends OnReadyDiscordCommand {
                 byte[] video = EmbedHelper.downloadVideo(
                         videoPostContent.hasDownloadUrl()
                                 ? videoPostContent.getDownloadUrl()
-                                : videoPostContent.getNoAudioUrl()
+                                : videoPostContent.getNoAudioUrl(),
+                        context.getGuild()
                 );
 
                 // Send URL to video if download fails

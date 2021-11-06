@@ -2,6 +2,7 @@ package Facebook;
 
 import Command.Structure.EmbedHelper;
 import Network.Secret;
+import net.dv8tion.jda.api.entities.Guild;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -72,10 +73,11 @@ public class FacebookScraper {
     /**
      * Fetch the Facebook post from the given url
      *
-     * @param url URL to facebook post
+     * @param url   URL to facebook post
+     * @param guild Guild where post will be sent
      * @return Facebook post
      */
-    public FacebookPost fetchFacebookPost(String url) {
+    public FacebookPost fetchFacebookPost(String url, Guild guild) {
         ChromeDriver browser = new ChromeDriver(new ChromeOptions().setHeadless(true));
         try {
             loadCookies(browser);
@@ -87,7 +89,7 @@ public class FacebookScraper {
             if(postElement == null) {
                 throw new Exception("Unable to resolve post element for " + url);
             }
-            Attachments attachments = parsePostAttachments(postElement, browser);
+            Attachments attachments = parsePostAttachments(postElement, browser, guild);
             endSession(browser);
             return new FacebookPost(
                     parseUserDetails(postElement),
@@ -156,9 +158,10 @@ public class FacebookScraper {
      *
      * @param post    HTML element representing a Facebook post
      * @param browser Browser to use
+     * @param guild   Guild where post will be sent
      * @return Post attachments
      */
-    private Attachments parsePostAttachments(Element post, ChromeDriver browser) {
+    private Attachments parsePostAttachments(Element post, ChromeDriver browser, Guild guild) {
         Elements media = post.child(0).child(0).child(0).child(2).select("a");
         Attachments attachments = new Attachments();
 
@@ -168,7 +171,7 @@ public class FacebookScraper {
             if(href.contains("video")) {
                 attachments.addVideo(
                         new VideoAttachment(
-                                downloadVideo(decodeVideo(href)),
+                                downloadVideo(decodeVideo(href), guild),
                                 thumbnail
                         )
                 );

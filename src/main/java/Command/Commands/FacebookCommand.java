@@ -26,7 +26,7 @@ public class FacebookCommand extends DiscordCommand {
         EmoteHelper emoteHelper = context.getEmoteHelper();
 
         new Thread(() -> {
-            FacebookPost facebookPost = scraper.fetchFacebookPost(url);
+            FacebookPost facebookPost = scraper.fetchFacebookPost(url, context.getGuild());
 
             if(facebookPost == null) {
                 return;

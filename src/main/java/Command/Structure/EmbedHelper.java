@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import Bot.ResourceHandler;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -41,7 +42,10 @@ public class EmbedHelper {
             STUFF_NEWS = 6144890,
             LADBIBLE = 14439508,
             ROW_LIGHT = 3160122,
-            FIRE_ORANGE = 16544773;
+            FIRE_ORANGE = 16544773,
+            STANDARD_FILE_SIZE_LIMIT = 8192,
+            LEVEL_2_FILE_SIZE_LIMIT = 51200,
+            LEVEL_3_FILE_SIZE_LIMIT = 102400;
 
     public static final String
             CLOCK_GIF = "https://i.imgur.com/v2u22T6.gif",
@@ -178,20 +182,23 @@ public class EmbedHelper {
 
     /**
      * Download a video from the given URL connection.
-     * Returns null if the video size exceeds 8MB or an error occurs.
+     * Returns null if the video size exceeds the server limit or an error occurs.
      *
      * @param connection URL connection to download video from
+     * @param guild      Guild where this video will be sent (to determine failing if size is too large)
      * @return Video byte array or null
      */
-    public static byte[] downloadVideo(URLConnection connection) {
+    public static byte[] downloadVideo(URLConnection connection, Guild guild) {
         try {
             connection.connect();
             InputStream is = connection.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            byte[] buffer = new byte[8000];
+            int uploadLimit = getFileSizeLimit(guild);
+
+            byte[] buffer = new byte[uploadLimit];
             int bytesIn;
             while((bytesIn = is.read(buffer)) != -1) {
-                if((os.size() / 1000) > 8192) {
+                if((os.size() / 1000) > uploadLimit) {
                     is.close();
                     os.close();
                     throw new IOException("Video too large!");
@@ -208,17 +215,50 @@ public class EmbedHelper {
     }
 
     /**
-     * Download a video from the given URL.
-     * Returns null if the video size exceeds 8MB or an error occurs.
+     * Get the upload file size limit for the given server.
+     * This is determined by the boost status of the server and is in kilobytes.
      *
-     * @param url Video url
+     * @param guild Server to get upload file size limit for
+     * @return Upload file size limit e.g 8192
+     */
+    private static int getFileSizeLimit(Guild guild) {
+        final Guild.BoostTier tier = Guild.BoostTier.fromKey(guild.getBoostTier().getKey());
+
+        int size;
+
+        switch(tier) {
+            case NONE:
+            case UNKNOWN:
+            case TIER_1:
+            default:
+                size = STANDARD_FILE_SIZE_LIMIT;
+                break;
+            case TIER_2:
+                size = LEVEL_2_FILE_SIZE_LIMIT;
+                break;
+            case TIER_3:
+                size = LEVEL_3_FILE_SIZE_LIMIT;
+                break;
+        }
+
+        System.out.println("Max upload size for server of tier: " + tier + " is " + size + " KiB");
+
+        return size;
+    }
+
+    /**
+     * Download a video from the given URL.
+     * Returns null if the video size exceeds the server limit or an error occurs.
+     *
+     * @param url   Video url
+     * @param guild Guild where this video will be sent (to determine failing if size is too large)
      * @return Video byte array or null
      */
-    public static byte[] downloadVideo(String url) {
+    public static byte[] downloadVideo(String url, Guild guild) {
         try {
             URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("User-Agent", USER_AGENT);
-            return downloadVideo(new URL(url).openConnection());
+            return downloadVideo(new URL(url).openConnection(), guild);
         }
         catch(Exception e) {
             return null;

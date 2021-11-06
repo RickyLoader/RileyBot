@@ -64,7 +64,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
             }
 
             if(TikTok.isVideoUrl(url)) {
-                TikTokPost post = tikTok.getVideoByUrl(url);
+                TikTokPost post = tikTok.getVideoByUrl(url, context.getGuild());
 
                 // API error
                 if(post == null) {

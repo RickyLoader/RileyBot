@@ -112,7 +112,7 @@ public class InstagramCommand extends OnReadyDiscordCommand {
 
         channel.sendMessage(videoEmbedBuilder.build()).queue(message -> {
             channel.sendTyping().queue();
-            byte[] video = EmbedHelper.downloadVideo(videoDetails.getVideoUrl());
+            byte[] video = EmbedHelper.downloadVideo(videoDetails.getVideoUrl(), context.getGuild());
 
             // Failed to download
             if(video == null) {

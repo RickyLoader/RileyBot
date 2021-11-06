@@ -4,6 +4,7 @@ import Command.Structure.EmbedHelper;
 import Command.Structure.ImageLoadingMessage;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
+import net.dv8tion.jda.api.entities.Guild;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -157,11 +158,12 @@ public class TikTok {
     /**
      * Get a TikTok video by its URL.
      *
-     * @param url URL to TikTok video
+     * @param url   URL to TikTok video
+     * @param guild Guild where video will be sent
      * @return TikTok video from URL or null (on API error/not a valid URL)
      */
     @Nullable
-    public TikTokPost getVideoByUrl(String url) {
+    public TikTokPost getVideoByUrl(String url, Guild guild) {
         if(!isVideoUrl(url)) {
             return null;
         }
@@ -170,7 +172,7 @@ public class TikTok {
                 .split("\\?")[0] // Remove any parameters
                 .split("/");
 
-        return getVideoById(urlArgs[urlArgs.length - 1]); // Video ID is always the final argument
+        return getVideoById(urlArgs[urlArgs.length - 1], guild); // Video ID is always the final argument
     }
 
     /**
@@ -238,10 +240,11 @@ public class TikTok {
      * Get a TikTok video by its unique ID.
      *
      * @param videoId Unique video ID - e.g "6982679574333213957"
+     * @param guild   Guild where video will be sent
      * @return TikTok video from ID or null (on API error/invalid ID)
      */
     @Nullable
-    private TikTokPost getVideoById(@NotNull String videoId) {
+    private TikTokPost getVideoById(@NotNull String videoId, Guild guild) {
         final String url = generateApiVideoUrl(videoId);
         final String itemKey = "itemInfo";
 
@@ -265,7 +268,7 @@ public class TikTok {
         String description = itemData.getString("desc");
 
         return new TikTokPost(
-                downloadVideo(videoData.getString("downloadAddr")),
+                downloadVideo(videoData.getString("downloadAddr"), guild),
                 description.isEmpty() ? null : description,
                 BASE_WEB_URL + "@" + creator.getId() + "/video/" + videoData.getString("id"),
                 downloadImage(videoData.getString("cover")),
@@ -428,11 +431,12 @@ public class TikTok {
      * Returns null if the video size exceeds 8MB or an error occurs.
      *
      * @param videoUrl Video download address
+     * @param guild    Guild where video will be sent
      * @return Video byte array or null
      */
-    private byte[] downloadVideo(String videoUrl) {
+    private byte[] downloadVideo(String videoUrl, Guild guild) {
         URLConnection connection = initialiseDownloadConnection(videoUrl);
-        return connection == null ? null : EmbedHelper.downloadVideo(connection);
+        return connection == null ? null : EmbedHelper.downloadVideo(connection, guild);
     }
 
     /**

@@ -1,6 +1,7 @@
 package Network;
 
 import Command.Structure.EmbedHelper;
+import net.dv8tion.jda.api.entities.Guild;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.apache.commons.codec.binary.Base64;
@@ -164,12 +165,13 @@ public class ImgurManager {
      * Upload a video from the given URL to Imgur and return the link
      *
      * @param video Video URL
+     * @param guild Guild where video will be sent
      * @return Link to video or null
      */
-    public static String uploadVideo(String video) {
+    public static String uploadVideo(String video, Guild guild) {
         try {
             RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("video", Base64.encodeBase64String(EmbedHelper.downloadVideo(video)))
+                    .addFormDataPart("video", Base64.encodeBase64String(EmbedHelper.downloadVideo(video, guild)))
                     .addFormDataPart("type", "base64")
                     .build();
 
