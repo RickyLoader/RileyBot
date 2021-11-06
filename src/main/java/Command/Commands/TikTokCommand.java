@@ -179,6 +179,17 @@ public class TikTokCommand extends OnReadyDiscordCommand {
         Music music = post.getMusic();
 
         EmbedBuilder builder = getTikTokEmbedBuilder(creator, poster);
+
+        String description = "**Posted**: " + new SimpleDateFormat("dd/MM/yyyy").format(post.getDate())
+                + "\n" + builder.getDescriptionBuilder().toString();
+
+        // Video failed to download, notify why there is no video attached/why there is an image instead
+        if(!post.hasVideo()) {
+            description += "\n**Note**: This video was too large to download, I'll show a thumbnail if I have one.";
+        }
+
+        description += "\n\n" + buildSocialEmoteDescription(post.getSocialResponse());
+
         builder
                 .setTitle(post.hasDescription() ? post.getDescription() : "No title provided!", post.getUrl())
 
@@ -193,11 +204,7 @@ public class TikTokCommand extends OnReadyDiscordCommand {
                                 ? ATTACHMENT_PREFIX + MUSIC_FILENAME
                                 : Music.DEFAULT_THUMBNAIL_URL
                 )
-                .setDescription(
-                        "**Posted**: " + new SimpleDateFormat("dd/MM/yyyy").format(post.getDate())
-                                + "\n" + builder.getDescriptionBuilder().toString()
-                                + "\n\n" + buildSocialEmoteDescription(post.getSocialResponse())
-                );
+                .setDescription(description);
 
         MessageAction action = channel.sendMessage(builder.build());
 
