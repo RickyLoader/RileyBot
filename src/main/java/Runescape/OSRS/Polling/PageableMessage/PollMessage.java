@@ -65,7 +65,7 @@ public class PollMessage extends PageableListEmbed<Question> {
     private static String getDescription(Poll poll) {
         final String desc = "**Title**: "
                 + EmbedHelper.embedURL(poll.getTitle(), poll.getUrl())
-                + "\n**Votes**: " + (poll.isOpen() ? "None" : poll.getFormattedTotalVotes());
+                + "\n**Votes**: " + (poll.isOpen() ? "*Poll still running*" : poll.getFormattedTotalVotes());
 
         // Results are available when the poll closes, however may be delayed for some time
         return poll.isOpen()
