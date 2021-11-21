@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
+import java.util.Random;
+
 /**
  * Main class, start the bot and apply listener
  */
@@ -78,5 +80,14 @@ public class DiscordBot {
     public static String getUserMention(JDA jda, long userId) {
         User user = jda.getUserById(userId);
         return user == null ? UNKNOWN_USER : user.getAsMention();
+    }
+
+    /**
+     * Return true or false randomly
+     *
+     * @return True or false
+     */
+    public static boolean coinFlip() {
+        return new Random().nextInt(2) == 1;
     }
 }

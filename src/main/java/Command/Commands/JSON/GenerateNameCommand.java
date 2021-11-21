@@ -1,5 +1,6 @@
 package Command.Commands.JSON;
 
+import Bot.DiscordBot;
 import Command.Structure.CommandContext;
 import Command.Structure.JSONListCommand;
 
@@ -25,7 +26,7 @@ public class GenerateNameCommand extends JSONListCommand {
             }
         }
 
-        if(name.length() < maxLength && rand.nextInt(2) == 1) {
+        if(name.length() < maxLength && DiscordBot.coinFlip()) {
             int charToMax = (maxLength - name.length());
             name.append(rand.nextInt(10 ^ charToMax));
         }
