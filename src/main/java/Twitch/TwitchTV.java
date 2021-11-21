@@ -2,7 +2,6 @@ package Twitch;
 
 import Command.Structure.EmbedHelper;
 import Network.NetworkRequest;
-import Network.NetworkResponse;
 import Network.Secret;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -22,6 +21,7 @@ import java.util.stream.Collectors;
 public class TwitchTV {
     public static final String
             TWITCH_URL = "https://www.twitch.tv/",
+            STREAMER_URL_REGEX = TWITCH_URL + "(\\w)+/?(\\?.+)?",
             TWITCH_LOGO = "https://i.imgur.com/w1zOkVd.png";
 
     private final static String
@@ -310,5 +310,15 @@ public class TwitchTV {
         headers.put("Client-Id", oAuth.getClientId());
         headers.put("Authorization", "Bearer " + oAuth.getAccessToken());
         return headers;
+    }
+
+    /**
+     * Check if the given URL is a URL to a Twitch.tv streamer.
+     *
+     * @param url URL to check
+     * @return URL is a URL to a streamer
+     */
+    public static boolean isStreamerUrl(String url) {
+        return url.matches(STREAMER_URL_REGEX);
     }
 }
