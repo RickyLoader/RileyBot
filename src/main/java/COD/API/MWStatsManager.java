@@ -34,12 +34,19 @@ public class MWStatsManager extends CODStatsManager<MWManager, MWPlayerAssetStat
             return new PlayerStatsResponse<>("Failed to communicate with API, try again later.");
         }
 
-        JSONObject data = new JSONObject(json);
-        final String status = data.getString("status");
+        JSONObject data;
 
-        // Player doesn't exist etc
-        if(!status.equals("success")) {
-            return new PlayerStatsResponse<>(status);
+        try {
+            data = new JSONObject(json);
+            final String status = data.getString("status");
+
+            // Player doesn't exist etc
+            if(!status.equals("success")) {
+                return new PlayerStatsResponse<>(status);
+            }
+        }
+        catch(Exception e) {
+            return new PlayerStatsResponse<>("Cables are a bit wonky at the moment, try again later.");
         }
 
         return new PlayerStatsResponse<>(apiParser.parseStatsResponse(name, platform, data));
