@@ -1011,4 +1011,25 @@ public class EmoteHelper {
     public Emote getHardcoreIronmanHelmet() {
         return get("889828738659938324");
     }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/912231653135482880.png"/>
+     */
+    public Emote getStar() {
+        return get("912231653135482880");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/912231653060018176.png"/>
+     */
+    public Emote getHalfStar() {
+        return get("912231653060018176");
+    }
+
+    /**
+     * <img src = "https://cdn.discordapp.com/emojis/912232991743414302.png"/>
+     */
+    public Emote getEmptyStar() {
+        return get("912232991743414302");
+    }
 }

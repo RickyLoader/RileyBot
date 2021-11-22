@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,32 +38,35 @@ public class HTMLUtils {
     }
 
     /**
-     * Attempt to retrieve embedded JSON from the given HTML document.
-     * This is JSON-LD found in the head of the page usually containing a basic overview.
+     * Attempt to retrieve a JSON array containing the embedded JSON from the given HTML document.
+     * This is JSON-LD which usually contains a basic overview of the page.
      *
      * @param document HTML document to retrieve JSON from
-     * @return JSON or null
+     * @return JSON array or null
      */
-    @Nullable
-    public static JSONObject getEmbeddedJson(Document document) {
-        Elements scripts = document.getElementsByTag("head")
-                .first()
+    public static JSONArray getEmbeddedJsonArray(Document document) {
+        Elements scripts = document
                 .getElementsByTag("script")
                 .attr("type", "application/ld+json");
 
-        String targetValue = null;
+        JSONArray results = new JSONArray();
 
         for(Element script : scripts) {
             String value = script.html();
 
-            // Assume the first one is JSON-LD
-            if(value.contains("@context")) {
-                targetValue = value;
-                break;
+            try {
+                if(value.startsWith("[") && value.endsWith("]")) {
+                    results.put(new JSONArray(value));
+                }
+                else if(value.startsWith("{") && value.endsWith("}")) {
+                    results.put(new JSONObject(value));
+                }
+            }
+            catch(Exception e) {
+                System.out.println("Failed to parse value as JSON: " + value);
             }
         }
-
-        return targetValue == null ? null : new JSONObject(targetValue);
+        return results;
     }
 
     /**

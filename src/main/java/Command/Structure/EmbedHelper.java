@@ -43,6 +43,7 @@ public class EmbedHelper {
             LADBIBLE = 14439508,
             ROW_LIGHT = 3160122,
             FIRE_ORANGE = 16544773,
+            PBTECH_BLUE = 2641020,
             STANDARD_FILE_SIZE_LIMIT = 8192,
             LEVEL_2_FILE_SIZE_LIMIT = 51200,
             LEVEL_3_FILE_SIZE_LIMIT = 102400;
