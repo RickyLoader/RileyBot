@@ -3,6 +3,7 @@ package Command.Structure;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
     private static final String IMAGE_FILENAME = "image.png";
-    private final String thumb, title, desc, footer;
+    private final String thumb, title, titleUrl, desc, footer;
     private final byte[] imageFile;
     private final int colour;
 
@@ -24,15 +25,17 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
      * @param thumb     Thumbnail to use for embed
      * @param imageFile Image file to use as embed image
      * @param title     Title to use for embed
+     * @param titleUrl  Optional URL to use in embed title
      * @param desc      Description to use for embed
      * @param footer    Footer to use in the embed
      * @param bound     Maximum items to display
      * @param colour    Optional colour to use for embed
      */
-    public PageableTemplateEmbed(CommandContext context, List<T> items, String thumb, byte[] imageFile, String title, String desc, String footer, int bound, int... colour) {
+    public PageableTemplateEmbed(CommandContext context, List<T> items, String thumb, byte[] imageFile, String title, @Nullable String titleUrl, String desc, String footer, int bound, int... colour) {
         super(context, items, bound);
         this.thumb = thumb;
         this.title = title;
+        this.titleUrl = titleUrl;
         this.desc = desc;
         this.footer = footer;
         this.colour = colour.length == 0 ? EmbedHelper.YELLOW : colour[0];
@@ -52,7 +55,7 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
      * @param colour  Optional colour to use for embed
      */
     public PageableTemplateEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, int bound, int... colour) {
-        this(context, items, thumb, null, title, desc, footer, bound, colour);
+        this(context, items, thumb, null, title, null, desc, footer, bound, colour);
     }
 
     /**
@@ -111,7 +114,7 @@ public abstract class PageableTemplateEmbed<T> extends PageableSortEmbed<T> {
      */
     private EmbedBuilder getDefaultEmbedBuilder(String... pageDetails) {
         EmbedBuilder builder = new EmbedBuilder()
-                .setTitle(title)
+                .setTitle(title, titleUrl)
                 .setThumbnail(thumb)
                 .setImage(imageFile == null ? EmbedHelper.SPACER_IMAGE : "attachment://" + IMAGE_FILENAME);
 

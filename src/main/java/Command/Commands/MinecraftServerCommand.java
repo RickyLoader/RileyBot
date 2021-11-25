@@ -114,6 +114,7 @@ public class MinecraftServerCommand extends DiscordCommand {
                 LOGO,
                 server.getDetailsImage(),
                 "Minecraft Server | " + server.getAddressString(),
+                null,
                 players + " " + (players == 1 ? "Player online, what a loser!" : "Players online:"),
                 footer,
                 new String[]{"Name", "Details"},

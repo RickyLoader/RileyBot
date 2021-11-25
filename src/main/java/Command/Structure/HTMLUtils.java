@@ -25,6 +25,22 @@ public class HTMLUtils {
      */
     @Nullable
     public static String getMetaTagValue(Document document, String attributeKey, String attributeValue) {
+        Element desiredTag = getMetaTag(document, attributeKey, attributeValue);
+        return desiredTag == null ? null : desiredTag.attr("content");
+    }
+
+    /**
+     * Get a meta tag in the given HTML document.
+     * E.g with the following meta tag: <meta property="og:title" content="Cool title"/>
+     * To retrieve the meta tag, {@code attributeKey} = "property" and {@code attributeValue} = "og:title"
+     *
+     * @param document       HTML document to retrieve tag from
+     * @param attributeKey   Key of the meta attribute to retrieve - e.g "name", "property" etc
+     * @param attributeValue Value of the key to retrieve e.g "og:type", "description" etc
+     * @return Meta tag or null
+     */
+    @Nullable
+    public static Element getMetaTag(Document document, String attributeKey, String attributeValue) {
         Elements metaTags = document.getElementsByTag("meta");
         Element desiredTag = null;
 
@@ -34,7 +50,7 @@ public class HTMLUtils {
             }
             desiredTag = metaTag;
         }
-        return desiredTag == null ? null : desiredTag.attr("content");
+        return desiredTag;
     }
 
     /**

@@ -1,6 +1,7 @@
 package Command.Structure;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -20,14 +21,15 @@ public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
      * @param thumb     Thumbnail to use for embed
      * @param imageFile Image file to use as embed image
      * @param title     Title to use for embed
+     * @param titleUrl  Optional URL to use in embed title
      * @param desc      Description to use for embed
      * @param footer    Footer to use in the embed
      * @param columns   Column headers to display at the top of message
      * @param bound     Maximum items to display
      * @param colour    Optional colour to use for embed
      */
-    public PageableTableEmbed(CommandContext context, List<T> items, String thumb, byte[] imageFile, String title, String desc, String footer, String[] columns, int bound, int... colour) {
-        super(context, items, thumb, imageFile, title, desc, footer, bound, colour);
+    public PageableTableEmbed(CommandContext context, List<T> items, String thumb, byte[] imageFile, String title, @Nullable String titleUrl, String desc, String footer, String[] columns, int bound, int... colour) {
+        super(context, items, thumb, imageFile, title, titleUrl, desc, footer, bound, colour);
         this.columns = columns;
         try {
             if(columns.length > MAX_COLUMNS) {
@@ -56,7 +58,7 @@ public abstract class PageableTableEmbed<T> extends PageableTemplateEmbed<T> {
      * @param colour  Optional colour to use for embed
      */
     public PageableTableEmbed(CommandContext context, List<T> items, String thumb, String title, String desc, String footer, String[] columns, int bound, int... colour) {
-        this(context, items, thumb, null, title, desc, footer, columns, bound, colour);
+        this(context, items, thumb, null, title, null, desc, footer, columns, bound, colour);
     }
 
     /**
