@@ -16,7 +16,7 @@ import static TrademeAPI.Trademe.*;
  */
 public class PageableTrademeListing extends CyclicalPageableEmbed<String> {
     private final Listing listing;
-    private final String footer;
+    private final String footer, auctionMaster;
 
     /**
      * Initialise the values
@@ -29,6 +29,7 @@ public class PageableTrademeListing extends CyclicalPageableEmbed<String> {
         super(context, listing.getImages(), 1);
         this.listing = listing;
         this.footer = footer;
+        this.auctionMaster = context.getMember().getAsMention();
     }
 
     @Override
@@ -51,6 +52,7 @@ public class PageableTrademeListing extends CyclicalPageableEmbed<String> {
                                 + overview.getPriceDisplay()
                                 + "\n" + emoteHelper.getCategory().getAsMention() + emoteGap
                                 + overview.getCategory().getPath()
+                                + "\n\n**Auction Master**: " + auctionMaster
                 )
                 .setThumbnail(listing.getThumbnail())
                 .setFooter(
@@ -93,7 +95,7 @@ public class PageableTrademeListing extends CyclicalPageableEmbed<String> {
                 null
         );
     }
-    
+
     @Override
     public void displayItem(EmbedBuilder builder, int currentIndex, String item) {
         builder.setImage(item);
