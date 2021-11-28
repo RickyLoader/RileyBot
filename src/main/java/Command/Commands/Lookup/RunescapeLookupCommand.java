@@ -40,7 +40,6 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
 
     public enum ARGUMENT {
         VIRTUAL("Display virtual levels for skills above the max level."),
-        SHOW_BOXES("Debug - fill image containers with random colours"),
         ACHIEVEMENTS(
                 "Fetch and display player achievements from the Wise Old Man tracker."
                         + " Some account types may not be supported."
@@ -67,8 +66,11 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
         RUNEMETRICS("Fetch and display player quest completions from RuneMetrics."),
         BOSS_BACKGROUNDS("Add boss lair backgrounds to the boss section of the image."),
         BOSSES(
-                "View player bosses in a pageable message," +
-                        " arguments that don't alter the boss section of the image won't do anything."
+                "View all player boss stats,"
+                        + " arguments that don't alter the boss section of the image won't do anything."
+        ),
+        SHOW_UNRANKED_BOSSES(
+                "Show unranked bosses. Only applicable when viewing all bosses."
         );
 
         private final String description;
@@ -93,16 +95,16 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
 
         /**
          * Get the value of the argument. By default this is the lower case name of the enum, but may be different.
-         * E.g SHOW_BOXES -> "showboxes"
+         * E.g BOSS_BACKGROUNDS -> "bossbg"
          *
          * @return Argument value
          */
         public String getValue() {
             switch(this) {
-                case SHOW_BOXES:
-                    return "showboxes";
                 case BOSS_BACKGROUNDS:
                     return "bossbg";
+                case SHOW_UNRANKED_BOSSES:
+                    return "-u";
                 case XP_TRACKER:
                     return "xptracker";
                 case SKILL_XP:
@@ -205,6 +207,18 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
                     .replaceAll(",", "")
                     .trim();
 
+            // No rank provided
+            if(rankText.isEmpty()) {
+                channel.sendMessage(
+                        member.getAsMention()
+                                + " Include a rank or keyword after the `#`. "
+                                + "Try: `#" + new Random().nextInt(10000) + "`"
+                                + ", `#" + LOWEST_RANK + "`"
+                                + ", or `#" + RANDOM_RANK + "`"
+                ).queue();
+                return;
+            }
+
             int rank;
 
             // Get a random rank between 1 & the current lowest rank
@@ -301,7 +315,9 @@ public abstract class RunescapeLookupCommand<S extends PlayerStats, H extends Hi
         for(String arg : args) {
             if(ARGUMENT.isArgument(arg)) {
                 ARGUMENT argument = ARGUMENT.fromValue(arg);
-                activatedArguments.add(argument);
+                if(acceptableArguments.contains(argument)) {
+                    activatedArguments.add(argument);
+                }
             }
             else if(ACCOUNT.isAccountType(arg)) {
                 accountType = ACCOUNT.fromName(arg);

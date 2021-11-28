@@ -305,7 +305,7 @@ public class RS3Hiscores extends Hiscores<RS3PlayerStats> {
     }
 
     @Override
-    protected RS3PlayerStats parseStats(HiscoresApiResponse statsResponse, ImageLoadingMessage... loadingMessage) {
+    protected RS3PlayerStats parseStats(HiscoresApiResponse statsResponse, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         final String[] statsCsv = statsResponse.getStatsCsv();
         final Skill[] skills = parseSkills(statsCsv);
 
@@ -366,8 +366,8 @@ public class RS3Hiscores extends Hiscores<RS3PlayerStats> {
     }
 
     @Override
-    protected @Nullable RS3PlayerStats locatePlayerStats(String name, ImageLoadingMessage... loadingMessage) {
-        RS3PlayerStats normalAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.NORMAL);
+    protected @Nullable RS3PlayerStats locatePlayerStats(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
+        RS3PlayerStats normalAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.NORMAL, args);
 
         // Player doesn't exist
         if(normalAccount == null) {
@@ -375,7 +375,7 @@ public class RS3Hiscores extends Hiscores<RS3PlayerStats> {
         }
 
         updateLoadingMessage(UPDATE, "Player exists, checking ironman hiscores", loadingMessage);
-        RS3PlayerStats ironAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.IRON);
+        RS3PlayerStats ironAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.IRON, args);
 
         if(ironAccount == null) {
             updateLoadingMessage(COMPLETE, "Player is a normal account!", loadingMessage);
@@ -388,7 +388,7 @@ public class RS3Hiscores extends Hiscores<RS3PlayerStats> {
         }
 
         updateLoadingMessage(UPDATE, "Player is an Ironman, checking Hardcore Ironman hiscores", loadingMessage);
-        RS3PlayerStats hardcoreAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.HARDCORE);
+        RS3PlayerStats hardcoreAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.HARDCORE, args);
 
         if(hardcoreAccount != null) {
             final HCIMStatus hcimStatus = hardcoreAccount.getHcimStatus();

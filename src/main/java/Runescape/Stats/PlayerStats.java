@@ -248,7 +248,7 @@ public abstract class PlayerStats {
         }
 
         final Skill highestProgress = skills[skills.length - 1];
-        return skills[0].getProgressUntilNextLevel() == highestProgress.getProgressUntilNextLevel()
+        return skills[0].getProgressUntilNextLevel() == highestProgress.getProgressUntilNextLevel() && skills.length > 1
                 ? null
                 : highestProgress;
     }

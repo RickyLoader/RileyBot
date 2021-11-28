@@ -30,11 +30,36 @@ public class BossManager {
                     getNameById(id),
                     getShortNameById(id),
                     getKillQualifierById(id),
+                    getMinimumKillsById(id),
                     resourceHandler.getImageResource(getIconImagePathById(id)),
                     resourceHandler.getImageResource(getFullImagePathById(id)),
                     resourceHandler.getImageResource(getBackgroundImagePathById(id))
             );
             bosses.put(id, boss);
+        }
+    }
+
+    /**
+     * Get the minimum kills required to be ranked in a boss from the given boss ID.
+     *
+     * @param id Boss ID
+     * @return Minimum kills required to be ranked in the boss
+     */
+    private int getMinimumKillsById(BOSS_ID id) {
+        switch(id) {
+            case TZKAL_ZUK:
+            case MIMIC:
+                return 1;
+            case SKOTIZO:
+            case CHAMBERS_OF_XERIC_CHALLENGE_MODE:
+            case HESPORI:
+            case OBOR:
+            case BRYOPHYTA:
+            case TZTOK_JAD:
+            case THE_CORRUPTED_GAUNTLET:
+                return 5;
+            default:
+                return 50;
         }
     }
 
@@ -121,7 +146,7 @@ public class BossManager {
                 SARACHNIS,
                 SCORPIA,
                 SKOTIZO,
-                TEMPORASS,
+                TEMPOROSS,
                 THE_GAUNTLET,
                 THE_CORRUPTED_GAUNTLET,
                 THEATRE_OF_BLOOD,

@@ -233,7 +233,7 @@ public abstract class PageableEmbed<T> {
             int pageStart = index;
 
             // Page is either bound length or remainder of items in list
-            int pageEnd = pageStart + Math.min(bound, (items.size() - pageStart));
+            int pageEnd = Math.min(items.size(), pageStart + bound);
 
             displayPageItems(embedBuilder, items.subList(pageStart, pageEnd), pageStart);
             return embedBuilder.build();

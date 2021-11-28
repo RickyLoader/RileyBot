@@ -149,8 +149,8 @@ public abstract class Hiscores<S extends PlayerStats> {
      */
     private @Nullable S fetchPlayerStats(String name, PlayerStats.ACCOUNT accountType, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         final S stats = accountType == PlayerStats.ACCOUNT.LOCATE
-                ? locatePlayerStats(name, loadingMessage)
-                : getAccountTypeStats(name, accountType, loadingMessage);
+                ? locatePlayerStats(name, args, loadingMessage)
+                : getAccountTypeStats(name, accountType, args, loadingMessage);
 
         // Issue retrieving stats
         if(stats == null) {
@@ -247,20 +247,22 @@ public abstract class Hiscores<S extends PlayerStats> {
      * Parse the given hiscores API CSV in to player stats.
      *
      * @param statsResponse  Hiscores API stats response
+     * @param args           Hiscores arguments
      * @param loadingMessage Optional loading message
      * @return Player stats
      */
-    protected abstract S parseStats(HiscoresApiResponse statsResponse, ImageLoadingMessage... loadingMessage);
+    protected abstract S parseStats(HiscoresApiResponse statsResponse, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage);
 
     /**
      * Get the stats of a player without knowing their account type.
      * Update and complete the loading stage of "Checking account type" if a loading message is provided.
      *
      * @param name           Player name
+     * @param args           Hiscores arguments
      * @param loadingMessage Optional loading message
      * @return Player stats or null
      */
-    protected abstract @Nullable S locatePlayerStats(String name, ImageLoadingMessage... loadingMessage);
+    protected abstract @Nullable S locatePlayerStats(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage);
 
     /**
      * Get the stats of a player for the given account type.
@@ -268,11 +270,12 @@ public abstract class Hiscores<S extends PlayerStats> {
      *
      * @param name           Player name
      * @param accountType    Account type
+     * @param args           Hiscores arguments
      * @param loadingMessage Optional loading message
      * @return Player stats or null
      */
     @Nullable
-    protected S getAccountTypeStats(String name, PlayerStats.ACCOUNT accountType, ImageLoadingMessage... loadingMessage) {
+    protected S getAccountTypeStats(String name, PlayerStats.ACCOUNT accountType, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         final HiscoresApiResponse statsResponse = getHiscoresApiResponse(name, accountType);
 
         // Issue retrieving stats
@@ -282,7 +285,7 @@ public abstract class Hiscores<S extends PlayerStats> {
 
         // Optionally complete the loading stage of "Checking [account type] stats".
         completeLoadingMessageStage(loadingMessage);
-        return parseStats(statsResponse, loadingMessage);
+        return parseStats(statsResponse, args, loadingMessage);
     }
 
 

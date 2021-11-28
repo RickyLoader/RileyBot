@@ -28,6 +28,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
+import static Command.Commands.Lookup.RunescapeLookupCommand.ARGUMENT.BOSSES;
+import static Command.Commands.Lookup.RunescapeLookupCommand.ARGUMENT.SHOW_UNRANKED_BOSSES;
 import static Runescape.Hiscores.Hiscores.LOADING_UPDATE_TYPE.*;
 import static Runescape.OSRS.League.LeagueTier.LEAGUE_POINTS_RANK_INDEX;
 import static Runescape.Stats.Skill.SKILL_NAME.*;
@@ -303,9 +305,9 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
     }
 
     @Override
-    protected @Nullable OSRSPlayerStats locatePlayerStats(String name, ImageLoadingMessage... loadingMessage) {
+    protected @Nullable OSRSPlayerStats locatePlayerStats(String name, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         updateLoadingMessage(UPDATE, "Checking name exists...", loadingMessage);
-        OSRSPlayerStats normalAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.NORMAL);
+        OSRSPlayerStats normalAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.NORMAL, args);
 
         // Player doesn't exist
         if(normalAccount == null) {
@@ -313,7 +315,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
         }
 
         updateLoadingMessage(UPDATE, "Player exists, checking ironman hiscores", loadingMessage);
-        OSRSPlayerStats ironAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.IRON);
+        OSRSPlayerStats ironAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.IRON, args);
 
         // Player does not appear on the ironman hiscores, only possible if they are a normal account
         if(ironAccount == null) {
@@ -332,7 +334,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
          * They may be an ultimate ironman, hardcore ironman, or normal ironman, have to check all of them.
          */
         updateLoadingMessage(UPDATE, "Player is an Ironman, checking Hardcore Ironman hiscores", loadingMessage);
-        OSRSPlayerStats hardcoreAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.HARDCORE);
+        OSRSPlayerStats hardcoreAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.HARDCORE, args);
 
         // Player appears on the hardcore ironman hiscores, may be dead
         if(hardcoreAccount != null) {
@@ -352,7 +354,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
         }
 
         updateLoadingMessage(UPDATE, "Player is not hardcore, checking Ultimate Ironman hiscores", loadingMessage);
-        OSRSPlayerStats ultimateAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.ULTIMATE);
+        OSRSPlayerStats ultimateAccount = getAccountTypeStats(name, PlayerStats.ACCOUNT.ULTIMATE, args);
 
         // Player appears on the ultimate ironman hiscores
         if(ultimateAccount != null) {
@@ -377,18 +379,18 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
     }
 
     @Override
-    protected OSRSPlayerStats parseStats(HiscoresApiResponse statsResponse, ImageLoadingMessage... loadingMessage) {
+    protected OSRSPlayerStats parseStats(HiscoresApiResponse statsResponse, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         final String[] statsCsv = statsResponse.getStatsCsv();
 
         switch(statsResponse.getAccountType()) {
 
             // Fetch extra data required to build seasonal league stats
             case LEAGUE:
-                return parseLeagueStats(statsResponse, loadingMessage);
+                return parseLeagueStats(statsResponse, args, loadingMessage);
 
             // Check if the player has died and create hardcore ironman stats
             case HARDCORE:
-                return parseHardcoreStats(statsResponse);
+                return parseHardcoreStats(statsResponse, args);
 
             // Nothing more required
             default:
@@ -403,7 +405,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
                         skills,
                         parseClueScrolls(statsCsv),
                         parseTotalLevel(statsCsv, skills),
-                        parseBossStats(statsCsv),
+                        parseBossStats(statsCsv, args),
                         parseLmsInfo(statsCsv),
                         statsResponse.getAccountType()
                 );
@@ -415,9 +417,10 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
      * Make a further request to find out if the player has died (lost their hardcore status).
      *
      * @param statsResponse Hardcore ironman hiscores API stats response
+     * @param args          Hiscores arguments
      * @return Hardcore ironman player stats
      */
-    private OSRSHardcorePlayerStats parseHardcoreStats(HiscoresApiResponse statsResponse) {
+    private OSRSHardcorePlayerStats parseHardcoreStats(HiscoresApiResponse statsResponse, HashSet<RunescapeLookupCommand.ARGUMENT> args) {
         final String[] statsCsv = statsResponse.getStatsCsv();
 
         final Skill[] skills = parseSkills(
@@ -432,7 +435,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
                 skills,
                 parseClueScrolls(statsCsv),
                 parseTotalLevel(statsCsv, skills),
-                parseBossStats(statsCsv),
+                parseBossStats(statsCsv, args),
                 parseLmsInfo(statsCsv),
                 isHardcoreDead(statsResponse.getName())
         );
@@ -465,10 +468,11 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
      * Complete the league loading stages if a loading message is provided.
      *
      * @param statsResponse  League hiscores API stats response
+     * @param args           Hiscores arguments
      * @param loadingMessage Optional loading message
      * @return League player stats
      */
-    private OSRSLeaguePlayerStats parseLeagueStats(HiscoresApiResponse statsResponse, ImageLoadingMessage... loadingMessage) {
+    private OSRSLeaguePlayerStats parseLeagueStats(HiscoresApiResponse statsResponse, HashSet<RunescapeLookupCommand.ARGUMENT> args, ImageLoadingMessage... loadingMessage) {
         final String[] statsCsv = statsResponse.getStatsCsv();
         final int leaguePoints = Integer.parseInt(statsCsv[LeagueTier.LEAGUE_POINTS_INDEX]);
         final long rank = Long.parseLong(statsCsv[LEAGUE_POINTS_RANK_INDEX]);
@@ -517,7 +521,7 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
                 skills,
                 parseClueScrolls(statsCsv),
                 parseTotalLevel(statsCsv, skills),
-                parseBossStats(statsCsv),
+                parseBossStats(statsCsv, args),
                 parseLmsInfo(statsCsv),
                 leagueTier,
                 relicTiers,
@@ -721,29 +725,35 @@ public class OSRSHiscores extends Hiscores<OSRSPlayerStats> {
      * Build a sorted list of player boss kill data
      * Sort in descending order of kill count
      *
-     * @param csv csv from API
+     * @param csv  csv from API
+     * @param args Hiscores arguments
      * @return Sorted list of player boss kill data
      */
-    private List<BossStats> parseBossStats(String[] csv) {
+    private List<BossStats> parseBossStats(String[] csv, HashSet<RunescapeLookupCommand.ARGUMENT> args) {
         String[] stats = Arrays.copyOfRange(csv, BossStats.BOSS_START_INDEX, BossStats.BOSS_END_INDEX);
-        List<BossStats> bossStats = new ArrayList<>();
+        List<BossStats> bossStatsList = new ArrayList<>();
 
         int i = 0;
         for(Boss.BOSS_ID bossId : bossIds) {
-            int kills = Integer.parseInt(stats[i + 1]);
-            if(kills > RankedMetric.UNRANKED) {
-                bossStats.add(
-                        new BossStats(
-                                bossManager.getBossById(bossId),
-                                Integer.parseInt(stats[i]),
-                                kills
-                        )
-                );
+            BossStats bossStats = new BossStats(
+                    bossManager.getBossById(bossId),
+                    Integer.parseInt(stats[i]),
+                    Integer.parseInt(stats[i + 1])
+            );
+
+            // Ignore unranked bosses unless specified
+            if(bossStats.isRanked() || args.contains(SHOW_UNRANKED_BOSSES) && args.contains(BOSSES)) {
+                bossStatsList.add(bossStats);
             }
+
             i += 2;
         }
+
         // Sort in descending order of kills
-        Collections.sort(bossStats);
-        return bossStats;
+        bossStatsList.sort(
+                Comparator.comparingInt(BossStats::getKills).reversed()
+                        .thenComparing(BossStats::getRank)
+        );
+        return bossStatsList;
     }
 }

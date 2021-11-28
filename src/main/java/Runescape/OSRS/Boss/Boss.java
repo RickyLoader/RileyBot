@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 public class Boss {
     private final BOSS_ID id;
     private final String name, shortName, qualifier;
+    private final int minimumKills;
     private final BufferedImage iconImage, fullImage, backgroundImage;
     static final String
             CHAMBERS_OF_XERIC_FILENAME = "CHAMBERS_OF_XERIC.png",
@@ -49,7 +50,7 @@ public class Boss {
         SARACHNIS,
         SCORPIA,
         SKOTIZO,
-        TEMPORASS,
+        TEMPOROSS,
         THE_GAUNTLET,
         THE_CORRUPTED_GAUNTLET,
         THEATRE_OF_BLOOD,
@@ -88,18 +89,29 @@ public class Boss {
      * @param name            Name of boss - e.g "Commander Zilyana"
      * @param shortName       Short name of boss  - e.g "Zilyana"
      * @param qualifier       Kill qualifier - e.g "kill" or "clear"
+     * @param minimumKills    Minimum kills required to be ranked for the boss
      * @param iconImage       Small icon image of boss
      * @param fullImage       Full sized image of boss
      * @param backgroundImage Background image related to the boss - e.g God Wars Dungeon for a God Wars boss
      */
-    public Boss(BOSS_ID id, String name, String shortName, String qualifier, @Nullable BufferedImage iconImage, @Nullable BufferedImage fullImage, @Nullable BufferedImage backgroundImage) {
+    public Boss(BOSS_ID id, String name, String shortName, String qualifier, int minimumKills, @Nullable BufferedImage iconImage, @Nullable BufferedImage fullImage, @Nullable BufferedImage backgroundImage) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
         this.qualifier = qualifier;
+        this.minimumKills = minimumKills;
         this.iconImage = iconImage;
         this.fullImage = fullImage;
         this.backgroundImage = backgroundImage;
+    }
+
+    /**
+     * Get the minimum kills required to be ranked for the boss
+     *
+     * @return Minimum required kills
+     */
+    public int getMinimumKills() {
+        return minimumKills;
     }
 
     /**
