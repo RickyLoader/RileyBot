@@ -1,5 +1,7 @@
 package Steam;
 
+import java.text.NumberFormat;
+
 /**
  * Steam store price
  */
@@ -42,6 +44,6 @@ public class Price {
      * @return Formatted price
      */
     public String getPriceFormatted() {
-        return "$" + price + " (" + currency + ")";
+        return NumberFormat.getCurrencyInstance().format(price) + " (" + currency + ")";
     }
 }

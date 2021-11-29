@@ -1,6 +1,5 @@
 package Bot;
 
-import Audio.DiscordAudioPlayer;
 import Command.Commands.*;
 import Command.Commands.Audio.*;
 import Command.Commands.COD.CWCountdownCommand;
@@ -17,12 +16,10 @@ import Command.Commands.Runescape.TrailblazerCommand;
 import Command.Commands.Variable.*;
 import Command.Structure.*;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Hold a list of commands and handle incoming text input to check for command triggers
@@ -30,7 +27,6 @@ import java.util.HashMap;
 public class DiscordCommandManager {
     private final ArrayList<DiscordCommand> commands, viewableCommands;
     private final ArrayList<OnReadyDiscordCommand> onReadyCommands;
-    private final HashMap<Guild, DiscordAudioPlayer> audioPlayers = new HashMap<>();
     public EmoteHelper emoteHelper;
 
     /**
@@ -87,10 +83,6 @@ public class DiscordCommandManager {
      * @param c Command to be added
      */
     private void addCommand(DiscordCommand c) {
-        if(commands.contains(c)) {
-            System.out.println("Duplicate command: " + c.getHelpName());
-            return;
-        }
         commands.add(c);
         if(!c.isSecret()) {
             viewableCommands.add(c);
@@ -110,12 +102,7 @@ public class DiscordCommandManager {
         if(command == null || event.getAuthor().isBot() && !command.acceptsBotInput()) {
             return;
         }
-        DiscordAudioPlayer player = audioPlayers.get(event.getGuild());
-        if(player == null) {
-            player = new DiscordAudioPlayer();
-            audioPlayers.put(event.getGuild(), player);
-        }
-        command.execute(new CommandContext(event, viewableCommands, player, emoteHelper));
+        command.execute(new CommandContext(event, viewableCommands, emoteHelper));
     }
 
     /**
@@ -134,8 +121,6 @@ public class DiscordCommandManager {
         addCommand(new OSRSLookupCommand());
         addCommand(new GhostCommand());
         addCommand(new SawCommand());
-        addCommand(new TTSCommand());
-        addCommand(new SurvivorCommand());
         addCommand(new PlayYoutubeCommand());
         addCommand(new MakeAChoiceCommand());
         addCommand(new InviteCommand());
@@ -189,23 +174,30 @@ public class DiscordCommandManager {
         addCommand(new RSPlayerCountCommand());
         addCommand(new DictionaryCommand());
         addCommand(new AlphaVapeCommand());
-        addCommand(new IMDBMovieCommand());
-        addCommand(new BrewTrackerCommand());
-        addCommand(new TMDBMovieCommand());
-        addCommand(new RottenTomatoesMovieCommand());
-        addCommand(new OSRSLendingCommand());
         addCommand(new WhipPriceCommand());
         addCommand(new MinecraftServerCommand());
         addCommand(new NewsCommand());
         addCommand(new TikTokCommand());
         addCommand(new R34Command());
-        addCommand(new OlympicsCommand());
         addCommand(new InstagramCommand());
         addCommand(new CovidCommand());
+        addCommand(new ValorantLookupCommand());
+        addCommand(new DinosaurCommand());
+        addCommand(new TTSCommand());
+        addCommand(new PBTechCommand());
+        addCommand(new PCPartPickerCommand());
+        addCommand(new StarCitizenCommand());
+
         /* TODO
             addCommand(new FacebookCommand());
+            addCommand(new OlympicsCommand());
+            addCommand(new OSRSLendingCommand());
             addCommand(new TeamTreesGuessingCommand());
             addCommand(new NASACommand());
+            addCommand(new IMDBMovieCommand());
+            addCommand(new BrewTrackerCommand());
+            addCommand(new TMDBMovieCommand());
+            addCommand(new RottenTomatoesMovieCommand());
          */
     }
 
