@@ -11,7 +11,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -195,22 +194,26 @@ public class EmbedHelper {
             InputStream is = connection.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             int uploadLimit = getFileSizeLimit(guild);
-
             byte[] buffer = new byte[uploadLimit];
             int bytesIn;
             while((bytesIn = is.read(buffer)) != -1) {
                 if((os.size() / 1000) > uploadLimit) {
                     is.close();
                     os.close();
-                    throw new IOException("Video too large!");
+                    throw new Exception("Video too large!");
                 }
                 os.write(buffer, 0, bytesIn);
             }
             is.close();
             os.close();
-            return os.toByteArray();
+
+            byte[] video = os.toByteArray();
+            if(video.length == 0) {
+                throw new Exception("Failed to download video!");
+            }
+            return video;
         }
-        catch(IOException e) {
+        catch(Exception e) {
             return null;
         }
     }
@@ -259,7 +262,7 @@ public class EmbedHelper {
         try {
             URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("User-Agent", USER_AGENT);
-            return downloadVideo(new URL(url).openConnection(), guild);
+            return downloadVideo(connection, guild);
         }
         catch(Exception e) {
             return null;

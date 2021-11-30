@@ -2,6 +2,7 @@ package Reddit;
 
 import COD.Assets.Ratio;
 import Command.Commands.GIFCommand;
+import Command.Structure.EmbedHelper;
 import Network.ImgurManager;
 import Network.NetworkRequest;
 import Network.NetworkResponse;
@@ -385,24 +386,33 @@ public class Reddit {
 
     /**
      * Reddit videos have the video & audio tracks served separately, attempt to
-     * use the https://viddit.red/ website to get a download URL for the combined tracks.
+     * use the https://redditsave.com website to get a download URL for the combined tracks.
      *
      * @param postUrl URL to the Reddit video post
      * @return Video download URL or null (if there is an error acquiring the download URL)
      */
     @Nullable
     private String getVideoDownloadUrl(String postUrl) {
-        String url = "https://viddit.red/?url=" + postUrl;
         try {
             return Jsoup
-                    .connect(url)
+                    .connect(getRedditSaveUrl(postUrl))
                     .get()
-                    .getElementById("dlbutton")
+                    .selectFirst(".downloadbutton")
                     .absUrl("href");
         }
         catch(Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Get the URL required to view the details of a video on the https://redditsave.com website.
+     *
+     * @param postUrl URL to Reddit video post
+     * @return URL to view video details on redditsave
+     */
+    public static String getRedditSaveUrl(String postUrl) {
+        return "https://redditsave.com/info?url=" + EmbedHelper.urlEncode(postUrl);
     }
 
     /**
@@ -568,7 +578,7 @@ public class Reddit {
                         .getJSONArray(optionsKey);
 
                 // Add votes to options
-                for(int i = 0;i<updatedPollOptionsData.length();i++){
+                for(int i = 0; i < updatedPollOptionsData.length(); i++) {
                     final JSONObject optionData = updatedPollOptionsData.getJSONObject(i);
                     options.get(optionData.getString(ID_KEY)).updateVotes(optionData.getInt("voteCount"));
                 }

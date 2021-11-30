@@ -179,9 +179,16 @@ public class RedditCommand extends OnReadyDiscordCommand {
                         context.getGuild()
                 );
 
-                // Send URL to video if download fails
-                if(video == null) {
-                    channel.sendMessage(videoPostContent.getNoAudioUrl()).queue();
+                // Failed download
+                if(video == null || video.length == 0) {
+                    Boolean audioStatus = videoPostContent.getAudioStatus();
+
+                    // If the video had sound (or might have sound) re-send the post URL & allow Discord to embed
+                    channel.sendMessage(
+                            audioStatus == null || audioStatus
+                                    ? url
+                                    : videoPostContent.getNoAudioUrl() // Otherwise send no audio URL for Discord to embed
+                    ).queue();
                     return;
                 }
 
@@ -275,11 +282,11 @@ public class RedditCommand extends OnReadyDiscordCommand {
             else if(audioStatus) {
                 videoNote = "This post **did** have audio, ";
 
-                // The download URL for video+audio may not have been retrieved for whatever reason (viddit may be down)
+                // The download URL for video+audio may not have been retrieved for whatever reason (redditsave may be down)
                 videoNote += videoPostContent.hasDownloadUrl()
-                        ? "if the video below does not, it was too big to download!"
+                        ? "i'll hand it over to Discord if it's too big to download!"
                         : "but I was unable to get a download URL for it, blame "
-                        + EmbedHelper.embedURL("viddet", "https://viddit.red/") + "!";
+                        + EmbedHelper.embedURL("redditsave", Reddit.getRedditSaveUrl(post.getUrl())) + "!";
             }
             else {
                 videoNote = "This post **did not** have any audio!";
