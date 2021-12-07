@@ -9,6 +9,7 @@ import COD.Match.LoadoutWeapon;
 import Command.Structure.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONArray;
@@ -22,9 +23,11 @@ public class MWRandomCommand extends DiscordCommand {
     private final ArrayList<String> words;
     private final HashSet<String> excludedWeaponIds;
     private final Random rand;
+    private static final String TRIGGER = "mwrandom";
+    private static final int MAX_ATTACHMENTS = 5;
 
     public MWRandomCommand() {
-        super("mwrandom", "Generate a random Modern Warfare loadout!");
+        super(TRIGGER, "Generate a random Modern Warfare loadout!", TRIGGER + "\n" + TRIGGER + " [#]");
         this.words = readWords();
         this.excludedWeaponIds = new HashSet<>(
                 Arrays.asList(
@@ -47,8 +50,12 @@ public class MWRandomCommand extends DiscordCommand {
         Member member = context.getMember();
         channel.sendTyping().queue();
 
+        int goalAttachments = toInteger(
+                context.getLowerCaseMessage().replaceFirst(getTrigger(), "").trim()
+        );
+
         String loadoutName = generateLoadoutName();
-        Loadout loadout = generateRandomLoadout();
+        Loadout loadout = goalAttachments > 0 ? generateRandomLoadout(goalAttachments) : generateRandomLoadout();
         byte[] loadoutImage = buildLoadoutImage(loadout, loadoutName, member);
         String imageName = System.currentTimeMillis() + ".png";
         channel.sendMessage(
@@ -121,16 +128,20 @@ public class MWRandomCommand extends DiscordCommand {
                 .setThumbnail("https://i.imgur.com/x9ziS9u.png")
                 .setColor(EmbedHelper.FIRE_ORANGE)
                 .setImage("attachment://" + imageName)
-                .setFooter("Try: " + getTrigger(), "https://i.imgur.com/rNkulfS.png")
+                .setFooter(
+                        "Try: " + getHelpName().replace("\n", " | "),
+                        "https://i.imgur.com/rNkulfS.png"
+                )
                 .build();
     }
 
     /**
      * Generate a random loadout
      *
+     * @param goalAttachments Optional number of attachments to aim for on each weapon (not guaranteed)
      * @return Random loadout
      */
-    private Loadout generateRandomLoadout() {
+    private Loadout generateRandomLoadout(Integer... goalAttachments) {
         Perk bluePerk = getRandomPerk(Perk.CATEGORY.BLUE);
         Perk redPerk = getRandomPerk(Perk.CATEGORY.RED);
         Perk yellowPerk = getRandomPerk(Perk.CATEGORY.YELLOW);
@@ -139,8 +150,8 @@ public class MWRandomCommand extends DiscordCommand {
         Weapon primary = getRandomWeapon(Weapon.TYPE.PRIMARY, null);
         Weapon secondary = getRandomWeapon(overkill ? Weapon.TYPE.PRIMARY : Weapon.TYPE.SECONDARY, primary);
         return new Loadout.LoadoutBuilder()
-                .setPrimaryWeapon(getLoadoutWeapon(primary))
-                .setSecondaryWeapon(getLoadoutWeapon(secondary))
+                .setPrimaryWeapon(getLoadoutWeapon(primary, goalAttachments))
+                .setSecondaryWeapon(getLoadoutWeapon(secondary, goalAttachments))
                 .setTacticalEquipment((TacticalWeapon) getRandomWeapon(Weapon.TYPE.TACTICAL, null))
                 .setLethalEquipment(getRandomWeapon(Weapon.TYPE.LETHAL, null))
                 .setPerks(
@@ -202,19 +213,23 @@ public class MWRandomCommand extends DiscordCommand {
 
     /**
      * Create a loadout weapon from the given weapon.
-     * Add 1 - 5 random attachments (if the weapon has equipable attachments)
+     * If {@code goalAttachments} is provided, aim to add this many random attachments
+     * (may not be possible as some attachments block other categories).
+     * Otherwise, add 1 - {@link MWRandomCommand#MAX_ATTACHMENTS} random attachments.
      *
-     * @param weapon Weapon to create loadout weapon from
+     * @param weapon          Weapon to create loadout weapon from
+     * @param goalAttachments Optional number of attachments to aim for on each weapon (not guaranteed)
      * @return Loadout weapon
      */
-    private LoadoutWeapon getLoadoutWeapon(Weapon weapon) {
+    private LoadoutWeapon getLoadoutWeapon(Weapon weapon, Integer... goalAttachments) {
         if(!weapon.hasEquipableAttachments()) {
             return new LoadoutWeapon(weapon, new ArrayList<>(), 0);
         }
         ArrayList<Attachment.CATEGORY> availableCategories = new ArrayList<>(
                 Arrays.asList(weapon.getAttachmentCategories())
         );
-        int toEquip = rand.nextInt(5) + 1;
+
+        final int toEquip = goalAttachments.length > 0 ? goalAttachments[0] : rand.nextInt(MAX_ATTACHMENTS) + 1;
         HashMap<Attachment.CATEGORY, Attachment> equipped = new HashMap<>();
 
         while(equipped.size() < toEquip && !availableCategories.isEmpty()) {
@@ -250,5 +265,10 @@ public class MWRandomCommand extends DiscordCommand {
                 .filter(weapon -> !weapon.equals(exclude) && !excludedWeaponIds.contains(weapon.getCodename()))
                 .toArray(Weapon[]::new);
         return categoryWeapons[rand.nextInt(categoryWeapons.length)];
+    }
+
+    @Override
+    public boolean matches(String query, Message message) {
+        return query.startsWith(getTrigger());
     }
 }
