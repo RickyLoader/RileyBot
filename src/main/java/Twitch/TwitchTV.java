@@ -20,8 +20,10 @@ import java.util.stream.Collectors;
  */
 public class TwitchTV {
     public static final String
-            TWITCH_URL = "https://www.twitch.tv/",
-            STREAMER_URL_REGEX = TWITCH_URL + "(\\w)+/?(\\?.+)?",
+            TWITCH_DOMAIN = "twitch.tv",
+            TWITCH_URL = "https://www." + TWITCH_DOMAIN + "/",
+            TWITCH_URL_REGEX = "https://(www|m)." + TWITCH_DOMAIN + "/",
+            STREAMER_URL_REGEX = TWITCH_URL_REGEX + "(\\w)+/?(\\?.+)?",
             TWITCH_LOGO = "https://i.imgur.com/w1zOkVd.png";
 
     private final static String

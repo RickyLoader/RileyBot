@@ -47,7 +47,7 @@ public class TTVLookupCommand extends LookupCommand {
 
         // https://www.twitch.tv/dave -> dave
         final String name = streamerUrl
-                .replace(TwitchTV.TWITCH_URL, "")
+                .replaceFirst(TwitchTV.TWITCH_URL_REGEX, "")
                 .replace("/", "")
                 .split("\\?")[0]
                 .trim();
